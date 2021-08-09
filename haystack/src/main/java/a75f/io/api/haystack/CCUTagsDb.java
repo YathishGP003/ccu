@@ -732,8 +732,8 @@ public class CCUTagsDb extends HServer {
                 .add("dis", f.getDisplayName())
                 .add("floor", HMarker.VAL)
                 .add("siteRef", f.getSiteRef())
-                .add("orientation",0.0)
-                .add("floorNum",0.0);
+                .add("orientation", 0.0)
+                .add("floorNum", 0.0);
 
         for (String m : f.getMarkers()) {
             b.add(m);
@@ -749,8 +749,8 @@ public class CCUTagsDb extends HServer {
                 .add("dis", f.getDisplayName())
                 .add("floor", HMarker.VAL)
                 .add("siteRef", f.getSiteRef())
-                .add("orientation",f.getOrientation())
-                .add("floorNum",f.getFloorNum());
+                .add("orientation", f.getOrientation())
+                .add("floorNum", f.getFloorNum());
 
         for (String m : f.getMarkers()) {
             b.add(m);

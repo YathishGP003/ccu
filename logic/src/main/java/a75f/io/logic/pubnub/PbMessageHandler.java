@@ -59,7 +59,6 @@ public class PbMessageHandler
                     //We do understand the consequences of doing this.
                     //But the system could still continue to work in standalone mode controlling the hvac system
                     //even if there are failures in handling a pubnub message.
-                    e.printStackTrace();
                     CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to handle pubnub !", e);
                 }
             }

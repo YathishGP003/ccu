@@ -1,68 +1,29 @@
- - Merged PR 1634: Remove humidifier point, fan status fix and make occStatus point interpolated
- - Resolve merge conflicts
- - Remove humidifier point, fan status fix and make occStatus point interpolated
- - Merged PR 1627: Daikin IE profile
- - Merged PR 1633: Dcwb algo fix
- - Remove humidifier point, fan status fix and make occStatus point interpolated
- - Merged PR 1607: OTP generation for adding/replacing CCU
- - Pulling out Shared pref related code from CCUHsApi to PreferanceUtil
- - Dcwb algo fix
- - Merge master
- - Handle fanSpeed based on staticPressure point
- - Skip sending ccu activation message when IE profile is configured
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
- - Merged PR 1506: OAO damper opened for Economization, DCV Ventilation & Limited by MAT
- - Fixes for QA observations
- - Added code to persist OTP in shared pref
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
- - Email restriction if otp is not sent to email when generated.
- - Merged PR 1553: BPOS UI Implementation
- - Added test support
- - Fanspeed related changes
- - Handled the null pointer exception when no oao is paired in migration task
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
- - otp generation
- - zone pririty with normal as default
- - Merged PR 1582: 7755 :CCU : In zone page UI current temp should be added again with offset as device is sending the calculated values to CCU.
- - Update occupancy calculation for DaikinIE
- - Update 'PUT' request content type and added delay between write/reads
- - Updated the cur temp
- - Add eth network interface and ip route
- - Merge branch 'master' into story/samjith/daikin_ie_profile
- - Update fanSpeed point when multizone mode changed
- - BPOS UI
- - Fan speed UI and points added
- - to enable dcv added another check to see if co2 is more than threshold
- - to enable dcv added another check to see if co2 is more than threshold
- - otp generation
- - Fixed DCV available point's value
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
- - Initial screen of otp generation
- - Initial screen of otp generation
- - UI Implementation
- - Fixed QA issues
- - Merge branch 'master' into story/samjith/daikin_ie_profile
- - WIP
- - Added migration for oao damper opened reason
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
- - Added migration for oao damper opened reason
- - Added migration for oao damper opened reason
- - Free cooling points for OAO- MAT and DCV. Also mogration job to include these points for previously paired OAOs.
- - Connection timeout for IE
- - Merged PR 1459: Implemented Daikin IE profile UI
- - Merge branch 'master' into story/samjith/daikin_ie_profile
- - Enabled the Ip edit option for testing
- - Updating Daikin UI for existing profile
- - WIP
- - Updating Daikin UI for existing profile
- - Merge branch 'story/samjith/daikin_ie_profile' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/daikin_ie_profile
- - refactor
- - Merge branch 'master' into story/samjith/daikin_ie_profile
- - Merge master
- - change tags
- - Implement fetch messages
- - Fix request formatting issue, handle IE url update and many other small things
- - Update functions kotlin implementation
- - add macAddress point and update tags
+ - Merged PR 1666: Enable SSL for Daikin IE interaction.
+ - Merged PR 1668: Reconfiguration of Daikin IE System profile
+ - Merged PR 1263: CCU_Expired vacation points are listing in site table viewer
+ - Merged PR 1667: Fix for duplicate static pressure point
+ - Implement chain validation
+ - Merged PR 1648: Displaying OTP in about page
+ - Merged PR 1518: Customer Invisible alert Issue
+ - Merge branch 'story/samjith/daikin_ie_profile' into story/samjith/daikin_ie_security
+ - Displaying OTP in about page
+ - Replaced with Lambda function
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/CCU_7677_Alert_CUSTOMER_INVISIBLE_issue
+ - Merge branch 'story/samjith/daikin_ie_profile' into story/samjith/daikin_ie_reconfig
+ - Fix for duplicate static pressure point
+ - Update certficate from daikin
+ - IE profile reconfig
+ - Change URL to ssl and fix certificate read issue
+ - Merge branch 'master' into story/samjith/daikin_ie_security
+ - Merge branch 'master' into story/samjith/daikin_ie_security
+ - Add certificate
+ - Showing only customer visible alerts in CCU
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/6714/Expired_vacation_points
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/6714/Expired_vacation_points
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/6714/Expired_vacation_points
+ - Incompatible Zone Pairing Options will be greyed out.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.

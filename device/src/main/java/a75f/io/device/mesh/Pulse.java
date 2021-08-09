@@ -159,7 +159,7 @@ public class Pulse
 						if (isMATDamperConfigured(logPoint, nodeAddr, "secondary", hayStack)) {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat2");
 							hayStack.writeHisValById(logPoint.get("id").toString(),
-							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get());
+							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
 						} else {
 							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 							isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
@@ -211,7 +211,7 @@ public class Pulse
 						if (isMATDamperConfigured(logPoint, nodeAddr, "primary", hayStack)) {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat1");
 							hayStack.writeHisValById(logPoint.get("id").toString(),
-							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get());
+							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
 						} else {
 							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 							double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());

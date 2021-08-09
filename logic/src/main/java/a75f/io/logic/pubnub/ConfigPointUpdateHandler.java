@@ -13,21 +13,25 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.tuners.TunerUtil;
 
+/**
+ * Handles remote config updates specific to System profile.
+ */
 class ConfigPointUpdateHandler {
     
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint "+msgObject.toString());
-        if (configPoint.getMarkers().contains(Tags.ENABLED)) {
+        if (configPoint.getMarkers().contains(Tags.IE)) {
+            updateIEConfig(msgObject, configPoint, hayStack);
+        }else if (configPoint.getMarkers().contains(Tags.ENABLED)) {
             updateConfigEnabled(msgObject, configPoint, hayStack);
         } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )
             || configPoint.getMarkers().contains(Tags.HUMIDIFIER)) {
             updateConfigAssociation(msgObject, configPoint, hayStack);
-        } else if (configPoint.getMarkers().contains(Tags.ADDRESS)) {
-            updateIEAddress(msgObject, configPoint, hayStack);
         }
     }
     
@@ -35,6 +39,21 @@ class ConfigPointUpdateHandler {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigEnabled "+configPoint.getDisplayName());
         writePointFromJson(configPoint.getId(), msgObject, hayStack);
         updateConditioningMode();
+    }
+    
+    private static void updateIEConfig(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateIEConfig "+configPoint.getDisplayName());
+        VavIERtu systemProfile =  (VavIERtu) L.ccu().systemProfile;
+        double val = msgObject.get("val").getAsDouble();
+        if (configPoint.getMarkers().contains(Tags.MULTI_ZONE)) {
+            systemProfile.handleMultiZoneEnable(val);
+        } else {
+            String userIntent = getUserIntentType(configPoint);
+            if (userIntent != null) {
+                systemProfile.setConfigEnabled(userIntent, val);
+            }
+        }
+        writePointFromJson(configPoint.getId(), msgObject, hayStack);
     }
     
     private static void updateConfigAssociation(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -116,6 +135,17 @@ class ConfigPointUpdateHandler {
             return Tags.RELAY6;
         } if (configPoint.getMarkers().contains(Tags.RELAY7)) {
             return Tags.RELAY7;
+        }
+        return null;
+    }
+    
+    private static String getUserIntentType(Point configPoint) {
+        if (configPoint.getMarkers().contains(Tags.COOLING)) {
+            return Tags.COOLING;
+        } else if (configPoint.getMarkers().contains(Tags.HEATING)) {
+            return Tags.HEATING;
+        } else if (configPoint.getMarkers().contains(Tags.FAN)) {
+            return Tags.FAN;
         }
         return null;
     }

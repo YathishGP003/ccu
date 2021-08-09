@@ -39,7 +39,7 @@ class IEDeviceHandler {
             !::serviceBaseUrl.isInitialized ||
             serviceBaseUrl != ieEquipUrl) {
             serviceBaseUrl = ieEquipUrl
-            ieService = IEServiceGenerator.instance.createService("http://$serviceBaseUrl:8080")
+            ieService = IEServiceGenerator.instance.createService("https://$serviceBaseUrl:8080")
         }
 
         ieService?.let {

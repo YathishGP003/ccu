@@ -1719,6 +1719,15 @@ public class CCUHsApi
         return schedules;
     }
 
+    public ArrayList<Schedule> getAllVacationSchedules() {
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        HGrid scheduleHGrid = tagsDb.readAll("schedule and vacation");
+        for (int i = 0; i < scheduleHGrid.numRows(); i++) {
+            schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
+        }
+        return schedules;
+    }
+
     public void addSchedule(String localId, HDict scheduleDict)
     {
         tagsDb.addHDict(localId, scheduleDict);

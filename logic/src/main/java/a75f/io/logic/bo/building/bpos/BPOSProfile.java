@@ -147,7 +147,7 @@ public class BPOSProfile extends ZoneProfile {
         if (!occupied && isAutoforceoccupiedenabled &&
                 occupancyvalue != (double) Occupancy.AUTOAWAY.ordinal()) {
             if (occDetPoint > 0)
-                CCUHsApi.getInstance().writeHisValById(occupancy.get("id").toString(),
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancy.get("id").toString(),
                         (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
 
             /*check if its already in forced occupy or check if its in auto force occupy

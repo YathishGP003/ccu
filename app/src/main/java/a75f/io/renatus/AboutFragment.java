@@ -304,7 +304,7 @@ public class AboutFragment extends Fragment {
                     otpValue.setText(errorMessage);
                 }
             };
-            ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching new OTP");
+            ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching new Passcode");
             new OtpManager().postOTPRefresh(tvSiteId.getText().toString(), otpResponseCallBack);
         });
     }
@@ -337,7 +337,7 @@ public class AboutFragment extends Fragment {
                 otpValue.setText(errorMessage);
             }
         };
-        ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching OTP");
+        ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching Passcode");
         new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack, false);
     }
 

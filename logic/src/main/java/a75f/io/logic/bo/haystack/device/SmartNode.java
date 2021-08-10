@@ -34,6 +34,7 @@ public class SmartNode
     public RawPoint currentTemp;
     public RawPoint desiredTemp;
     public RawPoint rssi;
+    private RawPoint firmWareVersion;
     
     public String deviceRef;
     public String siteRef;
@@ -218,6 +219,18 @@ public class SmartNode
                               .build();
 
         rssi = HeartBeat.getHeartBeatRawPoint(smartNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
+
+        firmWareVersion = new RawPoint.Builder()
+                .setDisplayName("firmwareVersion-" + smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("firmwareVersion")
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.RSSI.toString())
+                .setTz(tz)
+                .build();
     }
     
     public void addSensor(Port p, String pointRef) {
@@ -333,6 +346,7 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
         CCUHsApi.getInstance().addPoint(rssi);
+        CCUHsApi.getInstance().addPoint(firmWareVersion);
     }
     
     public static void updatePhysicalPointType(int addr, String port, String type) {

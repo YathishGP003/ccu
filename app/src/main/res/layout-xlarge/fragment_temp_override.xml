@@ -34,16 +34,9 @@
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="80dp"
+                    android:layout_marginStart="@dimen/margin_100"
                     android:text="@string/title_input_value"
                     android:layout_weight="1"/>
-
-                <!--<TextView
-                    style="@style/text_appearance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="80dp"
-                    android:text="@string/title_input_value" />-->
 
                 <TextView
                     style="@style/text_appearance"
@@ -57,7 +50,7 @@
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="80dp"
+                    android:layout_marginStart="@dimen/margin_100"
                     android:text="@string/title_override_value"
                     android:layout_weight="1"/>
             </TableRow>

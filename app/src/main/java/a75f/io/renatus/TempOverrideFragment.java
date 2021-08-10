@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.util.ZoneSorter;
 import butterknife.ButterKnife;
 
@@ -105,20 +106,15 @@ public class TempOverrideFragment extends Fragment {
         Collections.reverse(equipsRef);
 
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
-        //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
         for (Map m : Zonedevices) {
-            //Log.e("InsideTempOverrideFrag","value_m- "+m);
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \"" + m.get("id") + "\"");
             ArrayList tunerList = new ArrayList();
             ArrayList newTunerList = new ArrayList();
-
-            String profileName =  L.ccu().systemProfile.getProfileType().toString();
             for (Map t : tuners) {
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
-                    Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
                     if (NewexpandedListText.startsWith("Analog")) {
                         tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("relay")) {
@@ -252,8 +248,11 @@ public class TempOverrideFragment extends Fragment {
             for (int i = 0; i < expandableListTitle.size(); i++) {
                 if (!expandableListTitle.get(i).equals("CM-device")) {
                     int nodeAddress = Integer.parseInt(expandableListTitle.get(i).substring(3));
-                    ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
-                    zoneNodesList.add(zoneSorter);
+                    ZoneProfile profile = L.getProfile(Short.parseShort(String.valueOf(nodeAddress)));
+                    if (!profile.getProfileType().toString().equals("EMR") && !profile.getProfileType().toString().contains("MODBUS")) {
+                        ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
+                        zoneNodesList.add(zoneSorter);
+                    }
                 }
             }
             Collections.sort(zoneNodesList, new Comparator<ZoneSorter>() {
@@ -296,14 +295,12 @@ public class TempOverrideFragment extends Fragment {
     }
 
     public double getConfigEnabled(String config) {
-        //Log.e("InsideTempOverrideExpandableListAdapter","config- "+config);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
         if (configPoint.isEmpty()){
             return 0.0;
         }
         else{
-            //Log.e("InsideTempOverrideExpandableListAdapter","configPoint- "+configPoint);
             return hayStack.readPointPriorityVal(configPoint.get("id").toString());
         }
 

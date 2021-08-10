@@ -674,10 +674,10 @@
     <string name="title_generate_otp">Generate OTP</string>
 
     <!--Temperature override Screen-->
-    <string name="title_io_parameters">I/O \nParameters</string>
-    <string name="title_input_value">Input Value</string>
-    <string name="title_calculated_output">Calculated Output \nValue</string>
-    <string name="title_override_value">Override Value</string>
+    <string name="title_io_parameters">I/O\nParameters</string>
+    <string name="title_input_value">Input\nValue</string>
+    <string name="title_calculated_output">Calculated Output\n\t\t\t\tValue</string>
+    <string name="title_override_value">Override\nValue</string>
 
     <string name="txt_alert_delete_schedule">Are you sure you want to delete the current schedule?</string>
     <string name="txt_proceed">PROCEED</string>

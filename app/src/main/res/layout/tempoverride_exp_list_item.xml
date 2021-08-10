@@ -73,16 +73,14 @@
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="80dp"
             android:layout_weight="1"/>
         <TextView
             android:id="@+id/txt_calculated_output"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_20"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/margin_20"/>
+            android:layout_marginStart="@dimen/margin_100"
+            android:layout_weight="1"/>
 
         <!--<TextView
             android:id="@+id/spinner_override_value"

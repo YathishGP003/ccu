@@ -1,7 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
-          package="a75f.io.bo">
-
-
-
+          package="a75f.io.device">
 </manifest>

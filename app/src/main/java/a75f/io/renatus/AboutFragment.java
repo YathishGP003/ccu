@@ -240,7 +240,12 @@ public class AboutFragment extends Fragment {
             }
             @Override
             public void onFinish() {
-                otpTimer.setText("OTP has expired. Please refresh to generate a new.");
+                if(isFromAboutPage){
+                    otpTimer.setText("");
+                }
+                else{
+                    otpTimer.setText("Passcode has expired. Please refresh to generate a new.");
+                }
             }
         };
     }

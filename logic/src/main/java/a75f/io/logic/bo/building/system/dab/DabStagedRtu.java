@@ -317,7 +317,8 @@ public class DabStagedRtu extends DabSystemProfile
     private HashSet<Integer> getRelayMappingForStage(Stage stage) {
         HashSet<Integer> relaySet= new HashSet<>();
         for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            if (stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
+            if (getConfigEnabled("relay" + relayCount) > 0
+                            && stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
                 relaySet.add(relayCount);
             }
         }
@@ -788,9 +789,11 @@ public class DabStagedRtu extends DabSystemProfile
                         timeZone).build();
                 }
             } else if (val == DEHUMIDIFIER.ordinal()) {
-                if (CCUHsApi.getInstance().read("point and system and cmd and dehumidifier" ).isEmpty())
-                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(timeZone).build();
+                if (CCUHsApi.getInstance().read("point and system and cmd and dehumidifier" ).isEmpty()) {
+                    newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(
+                        equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(
+                        timeZone).build();
+                }
             }
             
             if(oldPoint != null && oldPoint.getId() != null) {

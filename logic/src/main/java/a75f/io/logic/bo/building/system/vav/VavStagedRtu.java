@@ -397,7 +397,8 @@ public class VavStagedRtu extends VavSystemProfile
     private HashSet<Integer> getRelayMappingForStage(Stage stage) {
         HashSet<Integer> relaySet= new HashSet<>();
         for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            if (stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
+            if (getConfigEnabled("relay" + relayCount) > 0 &&
+                                stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
                 relaySet.add(relayCount);
             }
         }

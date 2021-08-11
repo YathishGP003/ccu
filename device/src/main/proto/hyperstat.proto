@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-
 package a75f.io.device;
 
 option java_package = "a75f.io.device";
@@ -10,8 +9,8 @@ enum HyperStatRequestType_e {
   HYPERSTAT_REQUEST_TYPE_UNKNOWN = 0; // default for unsupported decrypt, open-enums
   HYPERSTAT_REQUEST_TYPE_SETTINGS = 1; // standard device settings
   HYPERSTAT_REQUEST_TYPE_CONTROLS = 2; // standard device controls
-  HYPERSTAT_REQUEST_TYPE_P1P2_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
-  HYPERSTAT_REQUEST_TYPE_P1P2_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
+  HYPERSTAT_REQUEST_TYPE_IDU_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
+  HYPERSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
 }
 
 message HyperStatRequestMessage_t {
@@ -24,7 +23,7 @@ enum HyperStatTemperatureMode_e {
   HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
 }
 message HyperStatSettingsMessage_t {
-  string roomName = 1 ;//[max_size = 20];
+  string roomName = 1; //[(nanopb).max_size = 20];
   int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
   int32 minHeatingUserTemp = 3; // Minimum temperature the user can set in degrees F (default 67)
   int32 maxCoolingUserTemp = 4; // Maximum temperature the user can set in degrees F (default 77)
@@ -112,7 +111,7 @@ message HyperStatRegularUpdateMessage_t {
   int32 externalAnalogVoltageInput2 = 8; // External voltage sense in millivolts
   int32 externalThermistorInput1 = 9; // External resistance sense in tens of ohms
   int32 externalThermistorInput2 = 10; // External resistance sense in tens of ohms
-  repeated SensorReadingPb_t sensorReadings = 11 ;//[(nanopb).max_count = 6]; // List of type-value sensor readings
+  repeated SensorReadingPb_t sensorReadings = 11;// [(nanopb).max_count = 6]; // List of type-value sensor readings
   bool occupantDetected = 12; // 0 is no, 1 is yes
 }
 
@@ -123,55 +122,73 @@ message HyperStatLocalControlsOverrideMessage_t {
   HyperStatConditioningMode_e conditioningMode = 4;
 }
 
-message HyperStatP1P2ControlsMessage_t {
+message HyperStatIduControlsMessage_t {
   int32 operationMode = 1;
-  int32 setTemperature = 2;
-  int32 fanSpeed = 3;
-  int32 airflowDirection = 4;
-  int32 coolHeatOptionRight = 5;
+  int32 fanSpeed = 2;
+  int32 airflowDirection = 3;
+  sint32 heatingSetTemperature = 4;
+  sint32 coolingSetTemperature = 5;
+  int32 humiditySetpoint = 6;
+  int32 masterController = 7;
 }
 
-message HyperStatP1P2StatusMessage_t {
-  int32 rcOpManipulation = 1; // Restrict the R/C manipulation by the superior device via the indoor unit. (0- Permitted , 1 - Prohibited)
-  int32 rcStopManipulation = 2;
-  int32 rcTempSettingManipulation = 3;
-  int32 rcTempConditioningManipulation = 4;
-  int32 rcAirflowDirectionSettingManipulation = 5;
-  int32 rcFanSpeedSettingManipulation = 6;
-  int32 operatingStatus = 7; //0- stop, 1- start
-  int32 setOperationMode = 8; // 0: ventilation, 1: heating, 2: cooling, 3: auto, 4-6: reserved, 7: dry, 8 and more: reserved
-  int32 operatingMode = 9;
-  int32 coolingSetTempIntegral = 10;
-  int32 coolingSetTempDecimal = 11;
-  int32 coolingAirflowDirection = 12;//Position 0-4, Swing - 7 (5&6 reserved)
-  int32 coolingFan1Speed = 13; //0-5
-  sint32 heatingSetTempIntegral = 14;
-  int32 heatingSetTempDecimal = 15;
-  int32 heatingAirflowDirection = 16; //Position 0-4, Swing - 7 (5&6 reserved)
-  int32 heatingFan1Speed = 17; //0-5
-  int32 autoModeTempConditioningAvailable = 18; // Auto mode supported or note.
-  int32 ccdConnected = 19; //Central Control device connected to IDU or not
-  int32 rcControlCode = 20;
-  int32 iduSign = 21; //IDU filter status.
-  repeated int32 thData = 22 ;//[(nanopb).max_count = 6]; //Temp reading from 6 thermistors. 1st byte is the integral and second is the decimal part.
+//message HyperStatIduStatusMessage_t {
+//  int32 indoorUnitState = 1; // Reflects the state of an indoor unit connected to the Hyperstat
+//  int32 supportFanSpeedAuto = 2;
+//  int32 supportFanSpeedControlLevels = 3;
+//  int32 supportAirflowDirection = 4;
+//  int32 supportAirflowDirectionAuto = 5;
+//  int32 setOperationMode = 6;
+//  int32 masterOperationMode = 7;
+//  int32 fanSpeed = 8;
+//  int32 airflowDirection = 9;
+//  int32 coolHeatRight = 10;
+//  sint32 setTemperature = 11;
+//  int32 filterStatus = 12;
+//  int32 groupAddress = 13;
+//  int32 errorType = 14;
+//  int32 errorCode = 15;
+//  int32 testOperation = 16;
+//  int32 telecoCheck = 17;
+//  int32 iduTemperature = 18;
+//  repeated int32 thData = 19 [(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
+//}
+
+message HyperStatIduStatusMessage_t {
+  int32 indoorUnitState = 1; // Reflects the state of an indoor unit connected to the Hyperstat
+  int32 supportBitfield = 2;
+  int32 supportFanSpeedControlLevels = 3;
+  int32 setOperationMode = 4;
+  int32 masterOperationMode = 5;
+  int32 fanSpeed = 6;
+  int32 airflowDirection = 7;
+  int32 coolHeatRight = 8;
+  sint32 setTemperature = 9;
+  int32 filterStatus = 10;
+  int32 groupAddress = 11;
+  int32 errorStatus = 12;
+  int32 diagnosticStatus = 13;
+  int32 iduTemperature = 14;
+  repeated int32 thData = 15;// [(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
 }
 
 message HyperStatCcuDatabaseSeedMessage_t {
-  bytes encryptionKey = 1 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
-  bytes serializedSettingsData = 2 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
-  bytes serializedControlsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes encryptionKey = 1;// [(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
 }
+
 
 message HyperStatCmToCcuSerializedMessage_t {
   uint32 address = 1; // The (16-bit) mesh address of a device
   int32 cmLqi = 2; // LQI of this received data packet @ CM
   int32 cmRssi = 3; // RSSI of this received data packet @ CM
   int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 5 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 5;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }
 
 message HyperStatCcuToCmSerializedMessage_t {
-  uint32 address = 1; // The (16-bit) mesh address of a device
+  uint32 address = 1; // The (16-bit) mesh address of a device  
   int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 3;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }

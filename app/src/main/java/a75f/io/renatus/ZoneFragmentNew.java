@@ -11,8 +11,11 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.vrv.VrvUtilKt;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -555,7 +558,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         profileType.contains(profileSSE) ||
                                         profileType.contains(profileSmartStat) ||
                                         profileType.contains(profileTempInfluence) ||
-                                        profileType.contains(profileDualDuct)) {
+                                        profileType.contains(profileDualDuct) ||
+                                        profileType.contains(ProfileType.HYPERSTAT_VRV.name())) {
                                     tempModule = true;
                                     Log.e(LOG_TAG + "RoomData", "Load SmartNode ProfileType:" + profileType);
                                 }
@@ -1114,6 +1118,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
+    
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
+                                HashMap vrvPoints = VrvUtilKt.getEquipPointsForView(p.getId(), CCUHsApi.getInstance());
+                                Log.i("PointsValue", "Vrv Points:" + vrvPoints.toString());
+                                HyperStatVrvZoneViewKt.loadView(vrvPoints, inflater, linearLayoutZonePoints,
+                                                                updatedEquipId,
+                                                                p.getGroup());
+                            }
                         }
                     }
                 }
@@ -1201,16 +1213,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
-
-       /* if (vacationStatus.equals("Active Vacation"))
-        {
-            vacationImageButton.setVisibility(View.VISIBLE);
-        } else
-        {
-            vacationImageButton.setVisibility(View.GONE);
-        }*/
-
-
+        
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -2821,33 +2824,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
     }
-
-    public static double getPointVal(String id) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        for (String marker : p.getMarkers()) {
-            if (marker.equals("writable")) {
-                ArrayList values = hayStack.readPoint(id);
-                if (values != null && values.size() > 0) {
-                    for (int l = 1; l <= values.size(); l++) {
-                        HashMap valMap = ((HashMap) values.get(l - 1));
-                        //System.out.println(valMap);
-                        if ((valMap != null) && (valMap.get("val") != null)) {
-                            return Double.parseDouble(valMap.get("val").toString());
-                        }
-                    }
-                }
-            }
-        }
-
-        for (String marker : p.getMarkers()) {
-            if (marker.equals("his")) {
-                return hayStack.readHisValById(p.getId());
-            }
-        }
-        return 0;
-    }
-
+    
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {
@@ -2897,16 +2874,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             StandaloneScheduler.setZoneDataInterface(this);
         }
         weatherUpdateHandler = new Handler();
-        weatherUpdate = new Runnable() {
-            @Override
-            public void run() {
-                if (weatherUpdateHandler != null && getActivity() != null) {
-                    if (weather_data.getVisibility() == View.VISIBLE) {
-                        Log.e("weather", "update");
-                        UpdateWeatherData();
-                    }
-                    weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
+        weatherUpdate = () -> {
+            if (weatherUpdateHandler != null && getActivity() != null) {
+                if (weather_data.getVisibility() == View.VISIBLE) {
+                    Log.e("weather", "update");
+                    UpdateWeatherData();
                 }
+                weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
             }
         };
 
@@ -2969,7 +2943,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int endWidth = (int) (width * 1.35);
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
-        //imageView.setPadding(20 ,20,20,20);
     }
 
     public void ScaleImageToBig(int height, int width, ImageView imageView) {
@@ -2981,16 +2954,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void showWeather() {
-        //if (isWeatherWidget) {
         weather_data.setVisibility(View.VISIBLE);
-        //mod = 3;
-        //weather_appear.setVisibility(View.GONE);
-        //weather_data.startAnimation(inleft);
         TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(), 0, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
-        //}
     }
 
     public void hideWeather() {
@@ -3119,7 +3087,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if(equips.size() > 0) {
                 boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
                 View statusView  = zoneStatus.get(zoneName);
-                HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+                if (statusView != null) {
+                    HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+                }
             }
         }
 

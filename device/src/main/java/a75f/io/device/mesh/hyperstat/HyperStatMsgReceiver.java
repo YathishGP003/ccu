@@ -15,7 +15,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
-import a75f.io.device.HyperStat.HyperStatP1P2StatusMessage_t;
+import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
@@ -75,9 +75,9 @@ public class HyperStatMsgReceiver {
                         HyperStatLocalControlsOverrideMessage_t.parseFrom(messageArray);
                 handleOverrideMessage(overrideMessage, address, hayStack);
             } else if (messageType == MessageType.HYPERSTAT_P1P2_STATUS_MESSAGE) {
-                HyperStatP1P2StatusMessage_t p1p2Status =
-                    HyperStatP1P2StatusMessage_t.parseFrom(messageArray);
-                HyperStatP1P2MessageHandler.handleP1P2StatusMessage(p1p2Status, address, hayStack);
+                HyperStatIduStatusMessage_t p1p2Status =
+                    HyperStatIduStatusMessage_t.parseFrom(messageArray);
+                HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
             }
             
         } catch (InvalidProtocolBufferException e) {

@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
@@ -123,6 +125,33 @@ public class HyperStatMessageSender {
                                                                    messageHash)) {
                 CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
                                            " was already sent, returning , type "+msgType);
+                return;
+            }
+        }
+        
+        writeMessageBytesToUsb(address, msgType, message.toByteArray());
+    }
+    
+    public static void sendIduControlMessage(int address, String equipRef, CCUHsApi hayStack) {
+        HyperStat.HyperStatIduControlsMessage_t controls = HyperStatIduMessageHandler.getIduControlMessage(address, hayStack);
+        
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
+        }
+    
+        writeIduControlMessage(controls, address, MessageType.HYPERSTAT_CONTROLS_MESSAGE, true);
+    }
+    
+    public static void writeIduControlMessage(HyperStat.HyperStatIduControlsMessage_t message, int address,
+                                              MessageType msgType, boolean checkDuplicate) {
+        
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
+        if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName(),
+                                                                   messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
+                                           " was already sent for "+address+": returning , type "+msgType);
                 return;
             }
         }

@@ -112,7 +112,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
             disposables.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
                     ProgressDialogUtils.showProgressDialog(
-                        activity, "Saving VRV System Configuration"
+                        activity, "Saving VRV Profile Configuration"
                     )
                 },
                 {

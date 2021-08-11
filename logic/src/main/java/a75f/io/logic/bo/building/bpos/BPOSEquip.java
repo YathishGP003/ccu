@@ -338,6 +338,22 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
 
 
+        Point equipScheduleStatus = new Point.Builder()
+                .setDisplayName(siteDis+"-BPOS-"+mNodeAddr+"-equipScheduleStatus")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("scheduleStatus").addMarker("logical").addMarker("bpos").addMarker("zone")
+                .addMarker("writable").addMarker("his")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz)
+                .setKind(Kind.STRING)
+                .build();
+        String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
+
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis
                 , mEquipRef,
                 siteRef, roomRef, floorRef, mNodeAddr, "bpos", tz, false));
@@ -360,8 +376,7 @@ public class BPOSEquip {
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
         setHumidity(0);
-
-        // setScheduleStatus("");
+        setScheduleStatus("");
 
 
         CCUHsApi.getInstance().syncEntityTree();

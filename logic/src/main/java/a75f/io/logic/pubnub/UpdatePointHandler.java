@@ -75,11 +75,7 @@ public class UpdatePointHandler
         }
 
 
-        if (HSUtil.isBPOSConfig(pointUid, CCUHsApi.getInstance())) {
-            BPOSConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updatePoints(localPoint);
-            return;
-        }
+
 
         /* Only the config changes require profile specific handling.
          * DesiredTemp or Schedule type updates are handled using generic implementation below.
@@ -109,6 +105,7 @@ public class UpdatePointHandler
         } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
         }
+
     }
     
     /**

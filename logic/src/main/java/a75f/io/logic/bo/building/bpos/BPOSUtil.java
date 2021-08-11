@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.bpos;
 
 import android.util.Log;
-
 import java.util.HashMap;
-
 import a75f.io.api.haystack.CCUHsApi;
 
 /*
@@ -12,16 +10,13 @@ import a75f.io.api.haystack.CCUHsApi;
 
 public class BPOSUtil {
 
+    private static String LOG_TAG = "BPOSUtil";
+
     public static HashMap getbposPoints(String equipID) {
-
         HashMap points = new HashMap();
-
-
         points.put("Profile", "Temperature Influencing");
-
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
                 "message and equipRef == \"" + equipID + "\"");
-
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
                 "and sensor " +
                 "and equipRef == \"" + equipID + "\"");
@@ -39,7 +34,6 @@ public class BPOSUtil {
         }
         points.put("humidity", String.valueOf(humidity));
         points.put("forceoccupied", forceoccupied);
-
         return points;
     }
 }

@@ -1,8 +1,13 @@
 package a75f.io.renatus.hyperstat.vrv
 
+import a75f.io.logic.L
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.RxjavaUtil
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +16,6 @@ import android.widget.*
 import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.energy_pro_dis_item.view.*
-import kotlinx.android.synthetic.main.fragment_cpu_config.view.*
 
 class HyperStatVrvFragment : BaseDialogFragment() {
 
@@ -49,7 +52,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // register with view model
-        viewModel.initData(requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR) as Integer,
+
+        viewModel.initData(requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR),
                         requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME),
                         requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME))
         return inflater.inflate(R.layout.fragment_hyperstat_vrv_config, container, false)
@@ -105,7 +109,22 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         humidityMinSp.setOnItemSelected { position -> viewModel.humidityMinSelected(position) }
         humidityMaxSp.setOnItemSelected { position -> viewModel.humidityMaxSelected(position) }
         setButton.setOnClickListener {
-            closeAllBaseDialogFragments()
+            disposables.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                {
+                    ProgressDialogUtils.showProgressDialog(
+                        activity, "Saving VRV System Configuration"
+                    )
+                },
+                {
+                    viewModel.saveProfile()
+                    L.saveCCUState()
+                },
+                {
+                    ProgressDialogUtils.hideProgressDialog()
+                    closeAllBaseDialogFragments()
+                    requireActivity().sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                }
+            ))
         }
     }
 

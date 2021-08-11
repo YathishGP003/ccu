@@ -14,7 +14,7 @@ class VrvProfile : ZoneProfile() {
     lateinit var vrvEquip: VrvEquip
 
     fun createVrvEquip(hayStack : CCUHsApi,
-                              addr : Integer,
+                              addr : Short,
                               config : VrvProfileConfiguration,
                               roomRef: String,
                               floorRef: String
@@ -24,7 +24,7 @@ class VrvProfile : ZoneProfile() {
     }
 
     fun addEquip(hayStack : CCUHsApi,
-                        addr : Integer
+                        addr : Short
                         ) {
         vrvEquip = VrvEquip(hayStack, addr)
     }
@@ -40,10 +40,10 @@ class VrvProfile : ZoneProfile() {
         return vrvEquip.getProfileConfiguration() as T
     }
 
-    override fun getNodeAddresses(): Set<Short?>? {
+    override fun getNodeAddresses(): Set<Short?> {
         return object : HashSet<Short?>() {
             init {
-                add(vrvEquip.nodeAddr as Short)
+                add(vrvEquip.nodeAddr)
             }
         }
     }

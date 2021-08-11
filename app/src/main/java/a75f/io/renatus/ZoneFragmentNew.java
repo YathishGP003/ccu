@@ -2994,22 +2994,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void hideWeather() {
-        //if (isWeatherWidget) {
-        //mod = 4;
-        //weather_appear.setVisibility(View.VISIBLE);
         TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
-        //recyclerView.startAnimation(animate);
-        //recyclerView.startAnimation(in);
-        //gridlayout.startAnimation(in);
         tableLayout.startAnimation(in);
-        //tableLayout.setVisibility(View.VISIBLE);
         weather_data.setVisibility(View.GONE);
-        //weather_data.setVisibility(View.VISIBLE);
-
-        //}
     }
 
     public boolean isWeatherShown() {
@@ -3023,38 +3013,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setScheduleType(String id, ScheduleType schedule, ArrayList<HashMap> zoneMap) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
-                CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
-                Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
-                if (zoneMap.size() > 1) {
-                    for (int i = 0; i < zoneMap.size(); i++) {
-                        Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-                        String scheduleTypeId = getScheduleTypeId(equip.getId());
-                        CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
-                        CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double) schedule.ordinal());
-                    }
-                } else
-                    CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(p);
-            }
+        Thread thread = new Thread(() -> {
+            CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
+            CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
+            Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+            if (zoneMap.size() > 1) {
+                for (int i = 0; i < zoneMap.size(); i++) {
+                    Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+                    String scheduleTypeId = getScheduleTypeId(equip.getId());
+                    CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
+                    CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double) schedule.ordinal());
+                }
+            } else
+                CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
+            ScheduleProcessJob.handleScheduleTypeUpdate(p);
         });
         thread.start();
-        /*new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
 
 

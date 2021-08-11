@@ -7,7 +7,7 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 
 class VrvEquip(hsApi : CCUHsApi,
-               addr: Integer) {
+               addr: Short) {
 
     val hayStack = hsApi
     val nodeAddr = addr
@@ -22,6 +22,7 @@ class VrvEquip(hsApi : CCUHsApi,
 
         val vrvEquip = Equip.Builder().setHashMap(hayStack.read("equip and group == \"$nodeAddr\""))
             .build()
+        checkNotNull(vrvEquip)
 
         createUserIntentPoints(vrvEquip, roomRef, floorRef)
         createSensorPoints(vrvEquip, roomRef, floorRef)

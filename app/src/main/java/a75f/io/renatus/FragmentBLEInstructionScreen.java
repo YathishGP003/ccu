@@ -358,7 +358,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else {
                 Log.d("FragBleInstrScrn","Hyperstat VRV profile. device scan");
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_FOUR_PIPE_FCU);
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_VRV);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

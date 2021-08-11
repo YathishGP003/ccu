@@ -8,7 +8,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
-import org.apache.commons.beanutils.converters.IntegerConverter
 import kotlin.math.round
 
 class HyperStatVrvViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,24 +24,26 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     val oneTimeActions: PublishSubject<OneTimeUiActions> = PublishSubject.create()
 
     var vrvProfile : VrvProfile? = null
-    lateinit var nodeAddr : Integer
+    private var nodeAddr : Short = 0
     lateinit var roomRef : String
     lateinit var floorRef : String
     private val currentState: VrvViewState
         get() = viewState.value
 
 
-    fun initData(addr : Integer, room : String, floor : String) {
+    fun initData(addr: Short, room: String, floor: String) {
         nodeAddr = addr
         roomRef = room
         floorRef = floor
-        vrvProfile = L.getProfile(addr.toShort()) as VrvProfile
+        vrvProfile = L.getProfile(addr)?.let {
+            it as VrvProfile
+        }?:null
         viewState.onNext(getInitialViewState())
     }
 
     private fun getInitialViewState(): VrvViewState {
         return vrvProfile?.let {
-                        val config : VrvProfileConfiguration = it.getProfileConfiguration(nodeAddr.toShort())
+                        val config : VrvProfileConfiguration = it.getProfileConfiguration(nodeAddr)
                         VrvViewState(
                             config.temperatureOffset.toInt(),
                             config.minHumiditySp.toInt(),
@@ -54,14 +55,15 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                         )
     }
 
-    public fun saveProfile() {
+    fun saveProfile() {
         vrvProfile?.let {
             it.updateEquip(VrvProfileConfiguration(currentState.tempOffsetPosition.toDouble(),
                             currentState.humidityMinPosition.toDouble(),
                             currentState.humidityMaxPosition.toDouble()))
         }?: run {
-            VrvProfile().createVrvEquip(
-                CCUHsApi.getInstance(), nodeAddr as Integer,
+            vrvProfile = VrvProfile()
+            vrvProfile!!.createVrvEquip(
+                CCUHsApi.getInstance(), nodeAddr,
                 VrvProfileConfiguration(
                     currentState.tempOffsetPosition.toDouble(),
                     currentState.humidityMinPosition.toDouble(),
@@ -70,6 +72,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 roomRef,
                 floorRef
             )
+            L.ccu().zoneProfiles.add(vrvProfile)
         }
     }
 

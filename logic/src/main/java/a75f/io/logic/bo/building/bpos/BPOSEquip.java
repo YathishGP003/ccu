@@ -133,7 +133,7 @@ public class BPOSEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("bpos")
                 .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur")
-                .addMarker("logical").addMarker("writable")
+                .addMarker("logical").addMarker("writable").addMarker("mode")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("off,on")
                 .setTz(tz)

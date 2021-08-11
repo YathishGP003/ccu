@@ -320,7 +320,6 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         stageStatus[stage.ordinal()] = (int) relayState;
                         setStageStatus(stage, relayState);
-                        ControlMote.setRelayState("relay" + relay, relayState);
                         CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Down : "+stage);
                     }
                 }
@@ -339,7 +338,6 @@ public class VavStagedRtu extends VavSystemProfile
                         stageUpTimerCounter = (int) getStageUpTimeMinutes();
                         stageStatus[stage.ordinal()] = (int) relayState;
                         setStageStatus(stage, relayState);
-                        ControlMote.setRelayState("relay" + relay, relayState);
                         CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Up "+stage);
                     }
                 }
@@ -355,13 +353,11 @@ public class VavStagedRtu extends VavSystemProfile
         
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
             stageStatus[stageIndex] = tempStatus[stageIndex];
-            HashSet<Integer> relaySet = getRelayMappingForStage(Stage.values()[stageIndex]);
-            for (Integer relay : relaySet) {
-                ControlMote.setRelayState("relay" + relay, stageStatus[stageIndex]);
-            }
             Stage stage = Stage.values()[stageIndex];
             setStageStatus(stage, tempStatus[stage.ordinal()]);
         }
+        
+        updateRelays();
     }
     
     
@@ -626,6 +622,35 @@ public class VavStagedRtu extends VavSystemProfile
             }
         }
         return false;
+    }
+    
+    private double getStageStatus(Stage stage) {
+        if (stage.getValue() <= COOLING_5.getValue()) {
+            return getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
+        } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {
+            return getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
+        } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
+            return getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
+        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
+            return getCmdSignal("humidifier");
+        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
+            return getCmdSignal("dehumidifier");
+        }
+        return 0;
+    }
+    
+    private void updateRelays() {
+        for (int relayCount = 1; relayCount <= 7; relayCount++) {
+            Double newState = 0.0;
+            if (getConfigEnabled("relay" + relayCount) > 0) {
+                Stage mappedStage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
+                newState = getStageStatus(mappedStage);
+            }
+            Double curState = ControlMote.getRelayState("relay"+relayCount);
+            if (newState.intValue() != curState.intValue()) {
+                ControlMote.setRelayState("relay" + relayCount, newState);
+            }
+        }
     }
     
     @Override

@@ -135,7 +135,8 @@ public class BPOSEquip {
                 .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur")
                 .addMarker("logical").addMarker("writable").addMarker("mode")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setEnums("off,on")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied," +
+                        "vacation,occupancysensing,autoforceoccupied,autoaway")
                 .setTz(tz)
                 .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
@@ -185,7 +186,8 @@ public class BPOSEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
-                .addMarker("forced").addMarker("occupied").addMarker("auto").addMarker("his")
+                .addMarker("forced").addMarker("occupied").addMarker("auto")
+                .addMarker("his").addMarker("enabled")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("on,off")
                 .setTz(tz)
@@ -203,7 +205,8 @@ public class BPOSEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
-                .addMarker("forced").addMarker("away").addMarker("auto").addMarker("his")
+                .addMarker("forced").addMarker("away").addMarker("auto")
+                .addMarker("his").addMarker("enabled")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("on,off")
                 .setTz(tz)
@@ -212,7 +215,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeDefaultValById(autoforceawayId, config.getautoAway() ? 1.0 :
                 0.0);
         CCUHsApi.getInstance().writeHisValById(autoforceawayId,
-                config.getautoforceOccupied() ? 1.0 : 0.0);
+                config.getautoAway() ? 1.0 : 0.0);
 
         Point equipScheduleType = new Point.Builder()
                 .setDisplayName(equipDis + "-scheduleType")

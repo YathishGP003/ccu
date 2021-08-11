@@ -295,7 +295,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
-        ||(equip.getMarkers().contains("sense"))  ) {
+        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos") ) {
 
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
@@ -1631,7 +1631,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
-                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")
+                         || q.getMarkers().contains("bpos")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

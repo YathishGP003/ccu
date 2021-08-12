@@ -31,6 +31,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
@@ -144,9 +146,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }else if (expandedListText.startsWith("Th")) {
                     String thermistorMapped = getZoneMapping("Thermistor"+expandedListText.substring(2,3), listPosition, convertView);
                     //String listTitle = (String) getGroup(listPosition);
-                    if ((int)getConfigNumVal("enable and th"+expandedListText.substring(2,3),Integer.parseInt(getGroup(listPosition).toString().substring(3))) == 1)
+                    /*if ((int)getConfigNumVal("enable and th"+expandedListText.substring(2,3),Integer.parseInt(getGroup(listPosition).toString().substring(3))) == 1)
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n(Not Used)");
+                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n(Not Used)");*/
+                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
                     expandedListTextVal.setText("" + value+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_thermistor.setVisibility(View.VISIBLE);
                 }else if (expandedListText.startsWith(siteName)) {
@@ -439,6 +442,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         String listTitle = (String) getGroup(listPosition);
         HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
         String profile = equipGroup.get("profile").toString();
+        Log.e("InsideTempOverrideExpandableListAdapter","profile- "+profile);
 
         switch (profile){
             case "SSE":
@@ -590,6 +594,19 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 break;
             case "DUAL_DUCT":
                 if (pointname.equals("Thermistor1"))
+                    return "Discharge Airflow\n 10K sensor";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply Air sensor";
+                break;
+            case "HYPERSTAT_SENSE":
+                Log.e("InsideTempOverrideExpandableListAdapter","pointname- "+pointname);
+                /*mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(mNodeAddress);
+                mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);*/
+                if (pointname.equals("Analog1In"))
+                    return "Generic 0-10";
+                else if (pointname.equals("Analog2In"))
+                    return "Generic 0-10";
+                else if (pointname.equals("Thermistor1"))
                     return "Discharge Airflow\n 10K sensor";
                 else if (pointname.equals("Thermistor2"))
                     return "Supply Air sensor";

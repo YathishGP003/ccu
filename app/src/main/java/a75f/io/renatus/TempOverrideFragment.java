@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,6 @@ import java.util.TreeMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;

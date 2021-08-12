@@ -4,7 +4,6 @@ package a75f.io.renatus;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +30,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -442,7 +443,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         String listTitle = (String) getGroup(listPosition);
         HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
         String profile = equipGroup.get("profile").toString();
-        Log.e("InsideTempOverrideExpandableListAdapter","profile- "+profile);
 
         switch (profile){
             case "SSE":
@@ -467,7 +467,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Not Used";
                 break;
             case "VAV_SERIES_FAN":
-
                 if (pointname.equals("Analog-out2"))
                     return "Modulating Reheat";
                 else if (pointname.equals("Analog-out1"))
@@ -593,23 +592,55 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Airflow temper\n-ature sensor";
                 break;
             case "DUAL_DUCT":
+                DualDuctProfile mDualDuctProfile = (DualDuctProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+                DualDuctProfileConfiguration mProfileConfig = (DualDuctProfileConfiguration) mDualDuctProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
                 if (pointname.equals("Thermistor1"))
-                    return "Discharge Airflow\n 10K sensor";
+                    return "Discharge Airflow\n Temp";
                 else if (pointname.equals("Thermistor2"))
-                    return "Supply Air sensor";
+                    if (mProfileConfig.getThermistor2Config() == 0)
+                        return "Cooling Supply\nAir Temp";
+                    else return "Heating Supply\nAir Temp";
+                else if (pointname.equals("Analog-out1")) {
+                    int analogPos = mProfileConfig.getAnalogOut1Config();
+                    if (analogPos == 0)
+                        return "Not Used";
+                    if (analogPos == 1)
+                        return "Composite Damper\nActuator";
+                    if (analogPos == 2)
+                        return "Cooling Damper\nActuator";
+                    if (analogPos == 3)
+                        return "Heating Damper\nActuator";
+                }else if (pointname.equals("Analog-out2")) {
+                    int analogPos = mProfileConfig.getAnalogOut2Config();
+                    if (analogPos == 0)
+                        return "Not Used";
+                    if (analogPos == 1)
+                        return "Composite Damper\nActuator";
+                    if (analogPos == 2)
+                        return "Cooling Damper\nActuator";
+                    if (analogPos == 3)
+                        return "Heating Damper\nActuator";
+                }
                 break;
             case "HYPERSTAT_SENSE":
-                Log.e("InsideTempOverrideExpandableListAdapter","pointname- "+pointname);
-                /*mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(mNodeAddress);
-                mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);*/
+                HyperStatSenseProfile mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+                HyperStatSenseConfiguration mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+                ArrayList<String> analogArr = new ArrayList<>();
+                for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
+                    analogArr.add(r.sensorName + " " + r.engineeringUnit);
+                }
+                ArrayList<String> thArr = new ArrayList<>();
+                for (Thermistor m : Thermistor.getThermistorList()) {
+                    thArr.add(m.sensorName + " " + m.engineeringUnit);
+                }
                 if (pointname.equals("Analog1In"))
-                    return "Generic 0-10";
+                    return analogArr.get(mHSSenseConfig.analog1Sensor);
                 else if (pointname.equals("Analog2In"))
-                    return "Generic 0-10";
+                    return analogArr.get(mHSSenseConfig.analog2Sensor);
                 else if (pointname.equals("Thermistor1"))
-                    return "Discharge Airflow\n 10K sensor";
+                    return thArr.get(mHSSenseConfig.th1Sensor);
                 else if (pointname.equals("Thermistor2"))
-                    return "Supply Air sensor";
+                    return thArr.get(mHSSenseConfig.th2Sensor);
                 break;
         }
         return "Not Used";

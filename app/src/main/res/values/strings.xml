@@ -944,4 +944,13 @@
 
     <string name="vrv_label_humidity_min">HumiditySPMin (%)</string>
     <string name="vrv_label_humidity_max">HumiditySPMax (%)</string>
+    <string name="vrv_label_master_controller">Master Controller :</string>
+
+    <string-array name="vrv_master_op_modes">
+        <item >OFF</item>
+        <item >FAN</item>
+        <item >HEAT</item>
+        <item >COOL</item>
+        <item >AUTO</item>
+    </string-array>
 </resources>

@@ -22,6 +22,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
     lateinit var tempOffset : NumberPicker
     lateinit var humidityMinSp : Spinner
     lateinit var humidityMaxSp : Spinner
+    lateinit var masterControllerSp : Spinner
     lateinit var setButton : Button
 
 

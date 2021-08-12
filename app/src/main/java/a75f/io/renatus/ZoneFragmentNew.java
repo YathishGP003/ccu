@@ -1123,7 +1123,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HashMap vrvPoints = VrvUtilKt.getEquipPointsForView(p.getId(), CCUHsApi.getInstance());
                                 Log.i("PointsValue", "Vrv Points:" + vrvPoints.toString());
                                 HyperStatVrvZoneViewKt.loadView(vrvPoints, inflater, linearLayoutZonePoints,
-                                                                updatedEquipId,
+                                                                updatedEquipId, CCUHsApi.getInstance(), getActivity(),
                                                                 p.getGroup());
                             }
                         }

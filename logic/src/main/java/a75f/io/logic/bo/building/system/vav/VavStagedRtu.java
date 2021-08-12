@@ -284,6 +284,13 @@ public class VavStagedRtu extends VavSystemProfile
     
     }
     
+    /**
+     * Each of the 7 relays could be mapped to any of the 17 logical stages ( Cooling1-5, Heating1-5,Fan1-5,
+     * Humidifier, dehumidifier.
+     * Only one logical point is maintained even if more than one stage is mapped to multiple relays.
+     * We first determine status of logical stages here and then change the physical relay state based on that.
+     * @param epidemicState
+     */
     private void updateRelayStatus(EpidemicState epidemicState) {
         
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
@@ -324,6 +331,13 @@ public class VavStagedRtu extends VavSystemProfile
                     }
                 }
             }
+            //There are no mapped & enabled relays for this stage. Deactivate it if currently active.
+            if (relaySet.isEmpty()) {
+                Double stageState = getStageStatus(stage);
+                if (stageState.intValue() > 0) {
+                    setStageStatus(stage, 0);
+                }
+            }
         }
         
         //Handle stage up transitions
@@ -332,14 +346,22 @@ public class VavStagedRtu extends VavSystemProfile
             HashSet<Integer> relaySet = getRelayMappingForStage(stage);
             CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
             for (Integer relay : relaySet) {
+                double curRelayState = ControlMote.getRelayState("relay" + relay);
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
-                    if (stageStatus[stage.ordinal()] == 0 && relayState > 0) {
+                    if (curRelayState == 0 && relayState > 0) {
                         stageUpTimerCounter = (int) getStageUpTimeMinutes();
                         stageStatus[stage.ordinal()] = (int) relayState;
                         setStageStatus(stage, relayState);
                         CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Up "+stage);
                     }
+                }
+            }
+            //There are no mapped & enabled relays for this stage. Deactivate it if currently active.
+            if (relaySet.isEmpty()) {
+                Double stageState = getStageStatus(stage);
+                if (stageState.intValue() > 0) {
+                    setStageStatus(stage, 0);
                 }
             }
         }

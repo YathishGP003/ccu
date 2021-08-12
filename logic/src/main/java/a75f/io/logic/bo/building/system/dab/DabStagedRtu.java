@@ -205,6 +205,13 @@ public class DabStagedRtu extends DabSystemProfile
         
     }
     
+    /**
+     * Each of the 7 relays could be mapped to any of the 17 logical stages ( Cooling1-5, Heating1-5,Fan1-5,
+     * Humidifier, dehumidifier.
+     * Only one logical point is maintained even if more than one stage is mapped to multiple relays.
+     * We first determine status of logical stages here and then change the physical relay state based on that.
+     * @param epidemicState
+     */
     private void updateRelayStatus(EpidemicState epidemicState) {
         
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
@@ -244,6 +251,13 @@ public class DabStagedRtu extends DabSystemProfile
                     }
                 }
             }
+            //There are no mapped & enabled relays for this stage. Deactivate it if currently active.
+            if (relaySet.isEmpty()) {
+                Double stageState = getStageStatus(stage);
+                if (stageState.intValue() > 0) {
+                    setStageStatus(stage, 0);
+                }
+            }
         }
     
         //Handle stage up transitions
@@ -251,9 +265,10 @@ public class DabStagedRtu extends DabSystemProfile
             Stage stage = Stage.values()[stageIndex];
             HashSet<Integer> relaySet = getRelayMappingForStage(stage);
             for (Integer relay : relaySet) {
+                double curRelayState = ControlMote.getRelayState("relay" + relay);
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
-                    if (stageStatus[stage.ordinal()] == 0 && relayState > 0) {
+                    if (curRelayState == 0 && relayState > 0) {
                         stageUpTimerCounter = (int) getStageUpTimeMinutes();
                         stageStatus[stage.ordinal()] = (int) relayState;
                         setStageStatus(stage, relayState);
@@ -261,10 +276,17 @@ public class DabStagedRtu extends DabSystemProfile
                     }
                 }
             }
+            //There are no mapped & enabled relays for this stage. Deactivate it if currently active.
+            if (relaySet.isEmpty()) {
+                Double stageState = getStageStatus(stage);
+                if (stageState.intValue() > 0) {
+                    setStageStatus(stage, 0);
+                }
+            }
         }
     
         //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
-        // even if the loopOp is 0
+        //even if the loopOp is 0
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fanStatus;
@@ -274,7 +296,6 @@ public class DabStagedRtu extends DabSystemProfile
             stageStatus[stageIndex] = tempStatus[stageIndex];
             Stage stage = Stage.values()[stageIndex];
             setStageStatus(stage, tempStatus[stage.ordinal()]);
-            
         }
         
         updateRelays();

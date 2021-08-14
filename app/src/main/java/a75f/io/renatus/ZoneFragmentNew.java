@@ -9,20 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.plc.PlcProfile;
-import a75f.io.logic.bo.building.vrv.VrvUtilKt;
-import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -73,34 +59,39 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
-
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import androidx.annotation.Nullable;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
@@ -285,11 +276,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
     }
-
+    
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
         if (getActivity() != null) {
             int i;
-            String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+            String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             for (i = 0; i < zoneStatusArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) zoneStatusArrayList.get(i).getTag();
@@ -685,7 +676,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
-        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId[0]);
+        String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
         //Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 
@@ -1120,9 +1111,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
     
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
-                                HashMap vrvPoints = VrvUtilKt.getEquipPointsForView(p.getId(), CCUHsApi.getInstance());
-                                Log.i("PointsValue", "Vrv Points:" + vrvPoints.toString());
-                                HyperStatVrvZoneViewKt.loadView(vrvPoints, inflater, linearLayoutZonePoints,
+                                HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
                                                                 updatedEquipId, CCUHsApi.getInstance(), getActivity(),
                                                                 p.getGroup());
                             }
@@ -1167,7 +1156,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
-        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
         Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 

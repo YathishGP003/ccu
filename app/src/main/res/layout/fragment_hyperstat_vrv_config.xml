@@ -107,7 +107,8 @@
         android:text="@string/vrv_label_master_controller"
         android:textAppearance="@style/text_appearance"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
     <Spinner
         android:id="@+id/masterControllerSp"
@@ -139,8 +140,7 @@
         android:textColor="?orange_75f"
         android:textSize="19.5dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
 
 

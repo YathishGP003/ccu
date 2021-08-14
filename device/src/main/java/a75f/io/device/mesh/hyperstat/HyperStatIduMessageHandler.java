@@ -23,11 +23,12 @@ class HyperStatIduMessageHandler {
         setMasterOperationMode(iduStatus.getMasterOperationMode(), nodeAddress, hayStack);
         setErrorStatus(iduStatus.getErrorStatus(), nodeAddress, hayStack);
         setIduState(iduStatus.getIndoorUnitState(), nodeAddress, hayStack);
-        setFanSpeedControl(iduStatus.getSupportFanSpeedControlLevels(), nodeAddress, hayStack);
         setIduFilterStatus(iduStatus.getFilterStatus(), nodeAddress, hayStack);
         setIduDiagnosticStatus(iduStatus.getDiagnosticStatus(), nodeAddress, hayStack);
         setIduTemp(iduStatus.getIduTemperature(), nodeAddress, hayStack);
         setCapabilities(iduStatus.getSupportBitfield(), nodeAddress, hayStack);
+        setFanSpeedControlLevelCapability(iduStatus.getSupportFanSpeedControlLevels(), nodeAddress, hayStack);
+        setGroupAddress(iduStatus.getGroupAddress(), nodeAddress, hayStack);
     }
     
     private static void setOperationMode( int opMode, int address, CCUHsApi hayStack) {
@@ -92,13 +93,6 @@ class HyperStatIduMessageHandler {
         }
     }
     
-    private static void setFanSpeedControl(int fanSpeedControl, int address, CCUHsApi hayStack) {
-        if (fanSpeedControl != hayStack.readHisValByQuery("fanSpeedControl and group == \""+address+"\"")) {
-            hayStack.writeHisValByQuery("fanSpeedControl and group == \"" + address + "\"",
-                                        (double) fanSpeedControl);
-        }
-    }
-    
     private static void setIduFilterStatus(int filterStatus, int address, CCUHsApi hayStack) {
         if (filterStatus != hayStack.readHisValByQuery("idu and filterStatus and group == \""+address+"\"")) {
             hayStack.writeHisValByQuery("idu and filterStatus and group == \""+address+"\"", (double)filterStatus);
@@ -114,6 +108,12 @@ class HyperStatIduMessageHandler {
     private static void setIduTemp(int iduTemp, int address, CCUHsApi hayStack) {
         if (iduTemp != hayStack.readHisValByQuery("idu and temp and group == \""+address+"\"")) {
             hayStack.writeHisValByQuery("idu and temp and group == \""+address+"\"", (double)iduTemp);
+        }
+    }
+    
+    private static void setGroupAddress(int grpAddr, int address, CCUHsApi hayStack) {
+        if (grpAddr != hayStack.readHisValByQuery("groupAddress and group == \""+address+"\"")) {
+            hayStack.writeHisValByQuery("groupAddress and group == \""+address+"\"", (double)grpAddr);
         }
     }
     
@@ -148,6 +148,15 @@ class HyperStatIduMessageHandler {
         }
     }
     
+    private static void setFanSpeedControlLevelCapability(int fanSpeedControl, int address, CCUHsApi hayStack) {
+        if (fanSpeedControl != hayStack.readHisValByQuery("capability and fanSpeed and controlLevel and group == \""+address+
+                                                          "\"")) {
+            hayStack.writeHisValByQuery("capability and fanSpeed and controlLevel and group == \""+address+
+                                        "\"", (double)fanSpeedControl);
+        }
+    }
+    
+    
     public static HyperStatIduControlsMessage_t getIduControlMessage(int address, CCUHsApi hayStack) {
         return HyperStatIduControlsMessage_t.newBuilder()
                                    .setOperationMode(getOperationMode(address, hayStack))
@@ -156,6 +165,7 @@ class HyperStatIduMessageHandler {
                                    .setHeatingSetTemperature(getHeatingDesiredTemp(address, hayStack))
                                    .setCoolingSetTemperature(getCoolingDesiredTemp(address, hayStack))
                                    .setMasterController(getMasterController(address, hayStack))
+                                   .setHumiditySetpoint(getHumiditySp(address, hayStack))
                                    .build();
     }
     
@@ -166,11 +176,20 @@ class HyperStatIduMessageHandler {
     }
     
     private static int getAirflowDirection(int address, CCUHsApi hayStack) {
-        return hayStack.readPointPriorityValByQuery("airflow and direction and group == \""+address+"\"").intValue();
+        return hayStack.readPointPriorityValByQuery("userIntent and airflowDirection and group == \""+address+
+                                                    "\"").intValue();
     }
     
     private static int getCoolHeatRight(int address, CCUHsApi hayStack) {
         return hayStack.readHisValByQuery("coolHeatRight and group == \""+address+"\"").intValue();
+    }
+    
+    private static int getHumiditySp(int address, CCUHsApi hayStack) {
+        double minHumidity =
+            hayStack.readHisValByQuery("config and humidity and min and group == \""+address+"\"").intValue();
+        double maxHumidity =
+            hayStack.readHisValByQuery("config and humidity and min and group == \""+address+"\"").intValue();
+        return (int)(minHumidity + maxHumidity)/2;
     }
     
     private static int getFanSpeed(int address, CCUHsApi hayStack) {
@@ -178,7 +197,7 @@ class HyperStatIduMessageHandler {
     }
     
     private static int getMasterController(int address, CCUHsApi hayStack) {
-        return hayStack.readDefaultVal("masterController and group == \""+address+"\"").intValue();
+        return hayStack.readDefaultVal("config and mode and masterController and group == \""+address+"\"").intValue();
     }
     
     private static int getHeatingDesiredTemp(int address, CCUHsApi hayStack) {

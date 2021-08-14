@@ -49,7 +49,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                             config.minHumiditySp.toInt(),
                             config.maxHumiditySp.toInt())
                         } ?:VrvViewState(
-                        tempOffsetPosition = tempOffsetIndexFromValue(-9.9f),
+                        tempOffsetPosition = tempOffsetIndexFromValue(0f),
                         humidityMinPosition = 0,
                         humidityMaxPosition = 100
                         )

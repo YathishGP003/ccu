@@ -71,9 +71,6 @@ public class AddtoExisting extends Fragment {
 
     ImageView            imageGoback;
 
-    //TextInputLayout mTextInputSiteId;
-    //EditText             mSiteId;
-
     TextInputLayout mTextInputEmail;
     EditText             mSiteEmailId;
 
@@ -136,9 +133,6 @@ public class AddtoExisting extends Fragment {
 
             imageGoback = rootView.findViewById(R.id.imageGoback);
 
-            //mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
-            //mSiteId = rootView.findViewById(R.id.editSiteID);
-
             mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
             mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
@@ -149,8 +143,6 @@ public class AddtoExisting extends Fragment {
             mNext2 = rootView.findViewById(R.id.buttonNext2);
 
             mProgressDialog = rootView.findViewById(R.id.progressbar);
-
-            //mTextInputSiteId.setHintEnabled(false);
             mTextInputEmail.setHintEnabled(false);
             mTextInputPass.setHintEnabled(false);
 
@@ -213,7 +205,6 @@ public class AddtoExisting extends Fragment {
                     EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
                     EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
                     if (!validateEditText(mandotaryIds)) {
-                        //String siteId = StringUtils.trim(mSiteId.getText().toString());
                         String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
                         OTPValidation(OTP);
                     } else
@@ -262,12 +253,10 @@ public class AddtoExisting extends Fragment {
                     if (jsonObject.getString("valid") == "true"){
                         JSONObject siteCode = jsonObject.getJSONObject("siteCode");
                         Toast toast = new Toast(getApplicationContext());
-                        //toast.setMargin(50,50);
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
                         toast.setView(toastLayout);
                         toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
-                        //saveExistingSite(siteId);
                         loadExistingSite(siteCode.getString("siteId"));
                     }else{
                         Toast toast = new Toast(getApplicationContext());

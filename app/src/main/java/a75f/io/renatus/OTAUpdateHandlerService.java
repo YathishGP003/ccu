@@ -31,7 +31,7 @@ public class OTAUpdateHandlerService extends Service {
             passIntent.putExtras(intent);
 
             startService(passIntent);
-
+            Log.i(Globals.TAG, "mOtaUpdateEventReceiver rec : "+(intent.getAction()));
             // Handle special timer-specific events
             switch(intent.getAction()) {
                 case Globals.IntentActions.OTA_UPDATE_START:
@@ -96,6 +96,8 @@ public class OTAUpdateHandlerService extends Service {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
+                    Log.i(Globals.TAG, "[TIMER] Update will time out in " +
+                            Math.ceil(millisUntilFinished / 1000) + "s");
                     Log.d(TAG, "[TIMER] Update will time out in " +
                             Math.ceil(millisUntilFinished / 1000) + "s");
                 }

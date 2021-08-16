@@ -3,6 +3,7 @@ package a75f.io.device.mesh;
 import android.os.Build;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import org.javolution.io.Struct;
 
@@ -154,13 +155,16 @@ public class LSerial
             } else if (isHyperStatMessage(messageType) ) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
-            
+            Log.i(Globals.TAG, "sendBroadcast : LSERIAL_MESSAGE");
+            Log.i(Globals.TAG, "sendBroadcast : messageType "+messageType);
+            Log.i(Globals.TAG, "sendBroadcast : data  "+data);
             // Pass event to external handlers
             Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);
             eventIntent.putExtra("eventBytes", data);
 
             context.sendBroadcast(eventIntent);
+            Log.i(Globals.TAG, "handleSerialEvent: ");
             //context.startService(eventIntent);
         }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
             byte[] data = event.getBytes();
@@ -361,6 +365,7 @@ public class LSerial
         }
 
         LogdStructAsJson(struct);
+        Log.i(Globals.TAG, "sendSerialToCM function writing data to  usb port " );
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

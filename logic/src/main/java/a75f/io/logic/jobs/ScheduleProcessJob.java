@@ -3,12 +3,15 @@ package a75f.io.logic.jobs;
 import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
-
 import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -209,13 +212,29 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 }
 
                 updateEquipScheduleStatus(equip);
-
             }
 
         }
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
+
+        try {
+            deleteExpiredVacation();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*This method will delete expired vacation from the internal portal as well, done by Aniket*/
+    private static void deleteExpiredVacation() throws ParseException {
+        ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        for (int i=0; i<getAllVacationSchedules.size(); i++){
+            if (getAllVacationSchedules.get(i).getEndDate().getMillis() < System.currentTimeMillis()){
+                CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
+            }
+        }
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
     public static void processZoneEquipSchedule(Equip equip){
@@ -248,7 +267,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
+
+        /*ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        Log.e("InsideScheduleProcess","getAllVacationSchedules1- "+getAllVacationSchedules);*/
     }
+
+
     private static Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
     {
 

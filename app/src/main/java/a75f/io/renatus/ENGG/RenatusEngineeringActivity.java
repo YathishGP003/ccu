@@ -16,14 +16,14 @@ import a75f.io.renatus.util.CCUUtils;
 public class RenatusEngineeringActivity extends AppCompatActivity
 {
 	private EngineeringPagerAdapter mEnggPagerAdapter;
-	
+
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	private ViewPager mViewPager;
-	
+
 	private TabLayout mTabLayout;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -33,25 +33,20 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 
 		mEnggPagerAdapter = new EngineeringPagerAdapter(getSupportFragmentManager());
 		mViewPager = (ViewPager) findViewById(R.id.container);
-		
+
 		mTabLayout = (TabLayout) findViewById(R.id.tabs);
 		mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-		
+
 		mViewPager.setAdapter(mEnggPagerAdapter);
-		mTabLayout.post(new Runnable() {
-			@Override
-			public void run() {
-				mTabLayout.setupWithViewPager(mViewPager, true);
-			}
-		});
+		mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 		configLogo();
 	}
-	
+
 	@Override
 	public void onStart() {
 		super.onStart();
 	}
-	
+
 	@Override
 	public void onStop() {
 		super.onStop();

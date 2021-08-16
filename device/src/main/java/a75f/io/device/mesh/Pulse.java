@@ -35,6 +35,7 @@ import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.sensors.Sensor;
@@ -812,11 +813,15 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
+		Log.d(Globals.TAG,
+				"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 
 			String str = "addr:"+address;
 			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
+		Log.d(Globals.TAG," init :  " +str);
+		Log.d(Globals.TAG,"snRebootIndicationMsgs.rebootCause.get() : "+snRebootIndicationMsgs.rebootCause.get());
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
 					str+= ", cause:"+"POWER_ON_RESET";
@@ -843,10 +848,15 @@ public class Pulse
 					str+= ", cause:"+"UNDEFINED";
 					break;
 			}
-		    str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get().name();
-			str += ", device:"+ snRebootIndicationMsgs.smartNodeDeviceId;
-			str += ", serialnumber:"+ snRebootIndicationMsgs.smartNodeSerialNumber;
-
+			try {
+				str += ", device type:" + snRebootIndicationMsgs.smartNodeDeviceType.get().name();
+				str += ", device:" + snRebootIndicationMsgs.smartNodeDeviceId;
+				str += ", serialnumber:" + snRebootIndicationMsgs.smartNodeSerialNumber;
+			}catch (Exception e){
+				Log.i(Globals.TAG," Exception "+e.getMessage());
+				e.printStackTrace();
+			}
+			Log.i(Globals.TAG,"Device reboot info alert is sending with  : "+str);
 			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){

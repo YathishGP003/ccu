@@ -172,14 +172,6 @@ public class AboutFragment extends Fragment {
         emailOTP(emailId, otpEmail, alertDialog);
     }
 
-    @OnClick(R.id.ll_secondCCU)
-    public void goToInstallType(){
-        Intent intent = new Intent(getActivity(), FreshRegistration.class);
-        intent.putExtra("viewpager_position",6);
-        intent.putExtra("isAboutFragment","yes");
-        startActivity(intent);
-    }
-
     private void constructOTPValidationTime(String otpCreatedTime, TextView otpTimer) throws ParseException {
         Date otpGeneratedDate;
         SimpleDateFormat utcDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

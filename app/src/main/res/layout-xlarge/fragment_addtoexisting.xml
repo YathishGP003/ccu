@@ -25,18 +25,18 @@
             app:tint="?orange_75f" />
 
         <TextView
-            android:id="@+id/textCreateNewSite"
+            android:id="@+id/textAddCCU"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="260dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/installaddccu"
             android:textAllCaps="true"
             android:textColor="?orange_75f"
             android:textSize="33.5sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
 
@@ -63,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Please enter your verification code (Generated from CCU/Portal)"
+                android:text="Please enter your Building Passcode (Generated from CCU/Portal)"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"

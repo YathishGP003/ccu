@@ -64,6 +64,7 @@ public class RegisterGatherCCUDetails extends Activity {
     String addressBandSelected = "1000";
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
+    HashMap site;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,15 +83,13 @@ public class RegisterGatherCCUDetails extends Activity {
         mCCUNameET = findViewById(R.id.ccu_name_et);
         mCreateNewCCU = findViewById(R.id.create_new);
 
-        HashMap site = CCUHsApi.getInstance().read("site");
+        site = CCUHsApi.getInstance().read("site");
         String ccuFmEmail = site.get("fmEmail") != null ? site.get("fmEmail").toString() : "";
         String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
         mInstallerEmailET.setText(ccuInstallerEmail);
         mManagerEmailET.setText(ccuFmEmail);
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
         mInstallerEmailET.setEnabled(ccuInstallerEmail.isEmpty());
-
-        Log.e("InsideRegisterGattherCCU","- "+site.get("dis"));
 
         for (int addr = 1000; addr <= 10900; addr+=100)
         {
@@ -299,9 +298,9 @@ public class RegisterGatherCCUDetails extends Activity {
                 AlertDialog.Builder builder
                         = new AlertDialog
                         .Builder(RegisterGatherCCUDetails.this);
-
+                //site = CCUHsApi.getInstance().read("site");
                 // Set the message show for the Alert time
-                builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site");
+                builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site"+site.get("dis"));
 
                 // Set Alert Title
                 builder.setTitle("ADD CCU");

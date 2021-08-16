@@ -9,8 +9,8 @@ import retrofit2.http.Path;
  */
 
 public interface ApiInterface {
-    @GET("api/v1/siteCode/site/{siteId}/code/{code}/validate")
-    Call<ResponseBody> ValidateOTP(@Path("siteId") String siteId,
-                                  @Path("code") String code);
+    //@GET("api/v1/siteCode/site/{siteId}/code/{code}/validate")
+    @GET("api/v1/siteCode/{code}/validate")
+    Call<ResponseBody> ValidateOTP(@Path("code") String code);
 
 }

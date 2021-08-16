@@ -119,9 +119,6 @@ public class AddtoExisting extends Fragment {
         }
     }
 
-    HRef siteId;
-    String site_Id;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -130,11 +127,6 @@ public class AddtoExisting extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
         try {
-            siteId = CCUHsApi.getInstance().getSiteIdRef();
-            site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
-            Log.e("InsideAddtoExist", "siteId-onCreateView " + siteId);
-            Log.e("InsideAddtoExist", "site_Id-onCreateView " + site_Id);
-
             //Creating the LayoutInflater instance
             LayoutInflater li = getLayoutInflater();
             toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
@@ -221,25 +213,9 @@ public class AddtoExisting extends Fragment {
                     EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
                     EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
                     if (!validateEditText(mandotaryIds)) {
-                        Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
                         //String siteId = StringUtils.trim(mSiteId.getText().toString());
                         String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
-                        try {
-                        /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
-                            //loadExistingSite(siteId);
-                            Log.e("InsideAddtoExist", "OTP- " + OTP);
-                            Log.e("InsideAddtoExist", "siteId- " + siteId);
-                            if (!site_Id.equals(null))
-                                OTPValidation(site_Id, OTP);
-                            else {
-                                Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (Exception e) {
-                            Log.e("InsideAddtoExist", "Exception- " + e);
-                            Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
-                            //OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
-                        }
+                        OTPValidation(OTP);
                     } else
                         Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
                 }
@@ -265,7 +241,7 @@ public class AddtoExisting extends Fragment {
         return rootView;
     }
 
-    private void OTPValidation(String siteId, String OTPCode) {
+    private void OTPValidation(String OTPCode) {
         ApiInterface apiInterface= null;
         try {
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
@@ -274,22 +250,17 @@ public class AddtoExisting extends Fragment {
         } catch (KeyManagementException e) {
             e.printStackTrace();
         }
-        Call<ResponseBody> signInCall = apiInterface.ValidateOTP(siteId,OTPCode);
+        Call<ResponseBody> signInCall = apiInterface.ValidateOTP(OTPCode);
         ApiClient.getApiResponse(signInCall, new ApiClient.ApiCallBack() {
             @Override
             public void Success(Response<ResponseBody> response) throws IOException {
                 //progressLoader.DismissProgress();
                 String responseData= response.body().string();
-                Log.e("InsideAddtoExist","Api URL- "+response.raw().request().url().toString());
-                Log.e("InsideAddtoExist","responseData_Success- "+responseData);
+                //Log.e("InsideAddtoExist","responseData_Success- "+responseData);
                 try {
                     JSONObject jsonObject=new JSONObject(responseData);
-                    Log.e("InsideAddtoExist","isValid- "+jsonObject.getString("valid"));
-                    //JSONObject dataObj=jsonObject.getJSONObject("data");
                     if (jsonObject.getString("valid") == "true"){
-                        //Getting the View object as defined in the customtoast.xml file
-
-                        //Toast toast=Toast.makeText(getApplicationContext(),"Success! Your verification code is correct.",Toast.LENGTH_SHORT);
+                        JSONObject siteCode = jsonObject.getJSONObject("siteCode");
                         Toast toast = new Toast(getApplicationContext());
                         //toast.setMargin(50,50);
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -297,7 +268,7 @@ public class AddtoExisting extends Fragment {
                         toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
                         //saveExistingSite(siteId);
-                        loadExistingSite(siteId);
+                        loadExistingSite(siteCode.getString("siteId"));
                     }else{
                         Toast toast = new Toast(getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -315,9 +286,7 @@ public class AddtoExisting extends Fragment {
             @Override
             public void Failure(Response<ResponseBody> response) throws IOException
             {
-                /*progressLoader.DismissProgress();
-                commonUtils.toastShort(response.toString(),getApplicationContext());*/
-                Log.e("InsideAddtoExist","responseData_Fail- "+response);
+                Toast.makeText(mContext, "Request Failed...Please talk to technical team", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -325,7 +294,7 @@ public class AddtoExisting extends Fragment {
             {
                /* progressLoader.DismissProgress();
                 commonUtils.toastShort(t.toString(),getApplicationContext());*/
-                Log.e("InsideAddtoExist","responseData_Error- "+t.getMessage().toString());
+                Toast.makeText(mContext, "Error...Please check Internet connection", Toast.LENGTH_SHORT).show();
 
             }
         });

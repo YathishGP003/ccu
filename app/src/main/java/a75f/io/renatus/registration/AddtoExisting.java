@@ -119,8 +119,6 @@ public class AddtoExisting extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
         try {
@@ -177,9 +175,6 @@ public class AddtoExisting extends Fragment {
             imageGoback.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
-                    //((FreshRegistration) getActivity()).selectItem(1);
-                    //((FreshRegistration) getActivity()).selectItem(22);
-                    //getFragmentManager().popBackStack();
                     Intent intent = new Intent(getActivity(), RenatusLandingActivity.class);
                     startActivity(intent);
                 }
@@ -188,7 +183,6 @@ public class AddtoExisting extends Fragment {
             mNext1.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
-                    //mNext1.setEnabled(false);
                     int[] mandotaryIds = new int[]
                             {
                                     R.id.otp_edit_text1,

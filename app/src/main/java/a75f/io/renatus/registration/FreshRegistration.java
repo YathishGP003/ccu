@@ -87,7 +87,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     };
 
     FrameLayout container;
-    String isFromAboutFrag = "no";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +117,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             position = extras.getInt("viewpager_position");
-            isFromAboutFrag = extras.getString("isAboutFragment");
         }
 
 
@@ -130,10 +128,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             public void onClick(View v) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-
-                if (isFromAboutFrag.equals("yes")){
-                    selectItem(22);
-                }
                 // TODO Auto-generated method stub
                 if (currentFragment instanceof WifiFragment) {
                     selectItem(1);

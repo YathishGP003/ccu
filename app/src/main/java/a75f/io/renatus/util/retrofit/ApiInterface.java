@@ -5,12 +5,11 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 /**
- * Created by ptbr-1167 on 4/10/17.
+ * Created by Aniket on 19/07/21.
  */
 
 public interface ApiInterface {
-    //@GET("api/v1/siteCode/site/{siteId}/code/{code}/validate")
-    @GET("api/v1/siteCode/{code}/validate")
+    @GET("siteCode/{code}/validate")
     Call<ResponseBody> ValidateOTP(@Path("code") String code);
 
 }

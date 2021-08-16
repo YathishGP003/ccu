@@ -1,35 +1,23 @@
 package a75f.io.renatus.util.retrofit;
-
-
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * Created by Aniket on 19/07/21.
+ */
 
 public class ApiClient
 {
-
-    //public static final String BASE_URL = "https://caretaker-75f-service-dev.azurewebsites.net/";
     private static Retrofit retrofit = null;
 
     public interface ApiCallBack {
@@ -44,11 +32,6 @@ public class ApiClient
                     .readTimeout(1, TimeUnit.MINUTES)
                     .connectTimeout(1, TimeUnit.MINUTES)
                     .build();
-            /*retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(okHttpClient)
-                    .build();*/
             RenatusServicesUrls urls = RenatusServicesEnvironment.getInstance().getUrls();
 
             retrofit = new Retrofit.Builder()

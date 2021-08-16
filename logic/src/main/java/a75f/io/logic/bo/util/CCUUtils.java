@@ -61,8 +61,7 @@ public class CCUUtils
         else {
             device = hayStack.read("device and addr == \"" + address + "\"");
         }
-        if (device != null && device.size() > 0)
-        {
+        if (!device.isEmpty()) {
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
             HashMap firmwarePoint =
                     hayStack.read("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");

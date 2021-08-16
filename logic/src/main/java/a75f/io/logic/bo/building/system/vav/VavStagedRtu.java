@@ -304,13 +304,15 @@ public class VavStagedRtu extends VavSystemProfile
         if (stageDownTimerCounter > 0) {
             stageDownTimerCounter--;
         }
-        
+    
         for (int relayCount = 1; relayCount <= 7; relayCount++) {
             Stage stage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
-            tempStatus[stage.ordinal()] = (int)getNewRelayState(relayCount, epidemicState, relayDeactHysteresis,
-                                                                systemMode, stage);;
+            int stageStatus = (int)getNewRelayState(relayCount, epidemicState, relayDeactHysteresis,
+                                                    systemMode, stage);
+            tempStatus[stage.ordinal()] = tempStatus[stage.ordinal()] | stageStatus;
         }
-        
+    
+    
         //Handle stage down transitions
         for (int stageIndex = HEATING_5.ordinal(); stageIndex >= COOLING_1.ordinal(); stageIndex-- ) {
             Stage stage = Stage.values()[stageIndex];

@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
@@ -219,18 +220,8 @@ public class SmartNode
                               .build();
 
         rssi = HeartBeat.getHeartBeatRawPoint(smartNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
-
-        firmWareVersion = new RawPoint.Builder()
-                .setDisplayName("firmwareVersion-" + smartNodeAddress)
-                .setDeviceRef(deviceRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("firmwareVersion")
-                .addMarker("sensor").addMarker("his")
-                .setPort(Port.RSSI.toString())
-                .setTz(tz)
-                .build();
+        firmWareVersion = FirmwareVersion.getFirmwareVersion(smartNodeAddress, deviceRef, siteRef, floorRef, roomRef,
+                tz);
     }
     
     public void addSensor(Port p, String pointRef) {

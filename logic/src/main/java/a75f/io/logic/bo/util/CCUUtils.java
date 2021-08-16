@@ -51,4 +51,23 @@ public class CCUUtils
         HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
         return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
     }
+
+    public static void writeFirmwareVersion(String firmwareVersion, short address, boolean isCMReboot){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap device;
+        if(isCMReboot){
+            device = CCUHsApi.getInstance().read("device and cm");
+        }
+        else {
+            device = hayStack.read("device and addr == \"" + address + "\"");
+        }
+        if (device != null && device.size() > 0)
+        {
+            Device deviceInfo = new Device.Builder().setHashMap(device).build();
+            HashMap firmwarePoint =
+                    hayStack.read("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
+        }
+
+    }
 }

@@ -159,7 +159,7 @@ public class BPOSTuners {
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("forcedOccupiedTimer").addMarker("sp")
+                .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
                 .setUnit("m")
                 .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
@@ -174,7 +174,7 @@ public class BPOSTuners {
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("autoAwayZoneTimer").addMarker("sp")
+                .addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
                 .setUnit("m")
                 .setMinVal("1").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
@@ -189,7 +189,7 @@ public class BPOSTuners {
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("autoAwayZoneSetbackTemp").addMarker("sp")
+                .addMarker("auto").addMarker("away").addMarker("temp").addMarker("sp").addMarker("setback")
                 .setUnit("F")
                 .setMinVal("1").setMaxVal("2").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
@@ -367,14 +367,15 @@ public class BPOSTuners {
                 .setFloorRef(floorRef)
                 .setEquipRef(equipdis).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("forcedOccupiedTimer").addMarker("sp").addMarker("zone")
+                .addMarker("sp").addMarker("zone").addMarker("forced").addMarker("occupied").addMarker("time")
                 .setUnit("m")
                 .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String forcedOccupiedTimerid = hayStack.addPoint(forcedOccupiedTimer);
-        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,120.0, 0);
-        hayStack.writeHisValById(forcedOccupiedTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
+        BuildingTunerUtil.updateTunerLevels(forcedOccupiedTimerid, roomRef, hayStack);
+        //hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,120.0, 0);
+        hayStack.writeHisValById(forcedOccupiedTimerid, HSUtil.getPriorityVal(forcedOccupiedTimerid));
 
 
         Point autoAwayZoneTimer = new Point.Builder()
@@ -384,14 +385,15 @@ public class BPOSTuners {
                 .setFloorRef(floorRef)
                 .setEquipRef(equipdis).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("autoAwayZoneTimer").addMarker("sp").addMarker("zone")
+                .addMarker("sp").addMarker("zone").addMarker("auto").addMarker("away").addMarker("time")
                 .setUnit("m")
                 .setMinVal("1").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String autoAwayZoneTimerid = hayStack.addPoint(autoAwayZoneTimer);
-        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,30.0, 0);
-        hayStack.writeHisValById(autoAwayZoneTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
+        BuildingTunerUtil.updateTunerLevels(autoAwayZoneTimerid, roomRef, hayStack);
+       // hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,30.0, 0);
+        hayStack.writeHisValById(autoAwayZoneTimerid, HSUtil.getPriorityVal(autoAwayZoneTimerid));
 
 
         Point autoAwayZoneSetbackTemp = new Point.Builder()
@@ -400,15 +402,18 @@ public class BPOSTuners {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .setEquipRef(equipdis).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("autoAwayZoneSetbackTemp").addMarker("sp").addMarker("zone")
+                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("his").addMarker("sp")
+                .addMarker("auto").addMarker("away").addMarker("temp")
+                .addMarker("setback").addMarker("zone")
                 .setUnit("F")
                 .setMinVal("1").setMaxVal("2").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String autoAwayZoneSetbackTempid = hayStack.addPoint(autoAwayZoneSetbackTemp);
-        hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,2.0, 0);
-        hayStack.writeHisValById(autoAwayZoneSetbackTempid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
+        BuildingTunerUtil.updateTunerLevels(autoAwayZoneSetbackTempid, roomRef, hayStack);
+       // hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,2.0, 0);
+        hayStack.writeHisValById(autoAwayZoneSetbackTempid, HSUtil.getPriorityVal(autoAwayZoneSetbackTempid));
 
     }
 

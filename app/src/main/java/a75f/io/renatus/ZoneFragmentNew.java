@@ -3479,7 +3479,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
         textViewLabel1.setText("Humidity: ");
-        textViewValue1.setText(point.get("humidity").toString());
+        textViewValue1.setText(point.get("humidity").toString() + "%");
 
 
         double occupied = (double) point.get("forceoccupied");

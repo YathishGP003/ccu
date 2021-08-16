@@ -168,7 +168,7 @@ public class BPOSEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
-                .addMarker("temperature").addMarker("offset").addMarker("his")
+                .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -198,8 +198,8 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(autoforceoccupiedId,
                 config.getautoforceOccupied() ? 1.0 : 0.0);
 
-        Point autoforceaway = new Point.Builder()
-                .setDisplayName(equipDis + "-autoforceaway")
+        Point autoaway = new Point.Builder()
+                .setDisplayName(equipDis + "-autoaway")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -211,10 +211,10 @@ public class BPOSEquip {
                 .setEnums("on,off")
                 .setTz(tz)
                 .build();
-        String autoforceawayId = CCUHsApi.getInstance().addPoint(autoforceaway);
-        CCUHsApi.getInstance().writeDefaultValById(autoforceawayId, config.getautoAway() ? 1.0 :
+        String autoawayId = CCUHsApi.getInstance().addPoint(autoaway);
+        CCUHsApi.getInstance().writeDefaultValById(autoawayId, config.getautoAway() ? 1.0 :
                 0.0);
-        CCUHsApi.getInstance().writeHisValById(autoforceawayId,
+        CCUHsApi.getInstance().writeHisValById(autoawayId,
                 config.getautoAway() ? 1.0 : 0.0);
 
         Point equipScheduleType = new Point.Builder()

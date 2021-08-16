@@ -496,4 +496,8 @@ public class Globals {
     public void setSiteAlreadyCreated(boolean siteAlreadyCreated) {
         _siteAlreadyCreated = siteAlreadyCreated;
     }
+
+    // While testing OTA service we've added logs
+    // After verification we may remove this later
+    public static final String TAG = "DEV_DEBUG";
 }

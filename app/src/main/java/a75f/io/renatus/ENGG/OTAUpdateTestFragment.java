@@ -13,6 +13,10 @@ import android.widget.Spinner;
 
 import org.javolution.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
 import butterknife.BindView;
@@ -62,9 +66,11 @@ public class OTAUpdateTestFragment extends Fragment {
         String cmdLevel = otaTestLevelSelect.getSelectedItem().toString();
 
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_MESSAGE);
-        otaIntent.putExtra("lwMeshAddress", lwMeshAddress);
+
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + lwMeshAddress + "\"");
+        otaIntent.putExtra("id", equipMap.get("id").toString().replace("@",""));
         otaIntent.putExtra("firmwareVersion", firmwareInfo);
-        otaIntent.putExtra("cmdLevel", cmdLevel);
+        otaIntent.putExtra("cmdLevel", "equip");
 
         activity.sendBroadcast(otaIntent);
     }

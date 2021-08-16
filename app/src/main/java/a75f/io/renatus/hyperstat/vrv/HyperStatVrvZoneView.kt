@@ -1,6 +1,7 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.vrv.VrvAirflowDirection
 import a75f.io.logic.bo.building.vrv.VrvFanSpeed
 import a75f.io.logic.bo.building.vrv.VrvMasterController
@@ -144,12 +145,17 @@ private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
     }
 
     opModeSpinner.adapter = adapter
+
+    val curSelection = hayStack.readDefaultVal("userIntent and operation and mode and equipRef == \"$equipId\"")
+    if (curSelection <= opModeList.size - 1) {
+        opModeSpinner.setSelection(curSelection.toInt(), false)
+    }
     opModeSpinner.onItemSelectedListener = object :
         AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>,
                                     view: View, position: Int, id: Long) {
-            hayStack.writeDefaultVal("userIntent and operation and mode", position.toDouble())
-            hayStack.writeHisValByQuery("userIntent and operation and mode", position.toDouble())
+            hayStack.writeDefaultVal("userIntent and operation and mode and equipRef == \"$equipId\"", position.toDouble())
+            hayStack.writeHisValByQuery("userIntent and operation and mode and equipRef == \"$equipId\"", position.toDouble())
 
         }
 
@@ -215,12 +221,17 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
     }
 
     airflowSpinner.adapter = adapter
+    val curSelection = hayStack.readDefaultVal("userIntent and airflowDirection and equipRef == \"$equipId\"")
+    if (curSelection <= airflowDirList.size - 1) {
+        airflowSpinner.setSelection(curSelection.toInt(), false)
+    }
+
     airflowSpinner.onItemSelectedListener = object :
         AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>,
                                     view: View, position: Int, id: Long) {
-            hayStack.writeDefaultVal("userIntent and airflowDirection", position.toDouble())
-            hayStack.writeHisValByQuery("userIntent and airflowDirection", position.toDouble())
+            hayStack.writeDefaultVal("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
+            hayStack.writeHisValByQuery("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
 
         }
 
@@ -293,6 +304,12 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
     }
 
     fanSpeedSp.adapter = adapter
+    val curSelection = hayStack.readDefaultVal("userIntent and fanSpeed and equipRef == \"$equipId\"")
+    var curFanSpeed = VrvFanSpeed.values()[curSelection.toInt()]
+    if (fanSpeedList.indexOf(curFanSpeed.name) <= fanSpeedList.size-1) {
+        fanSpeedSp.setSelection(fanSpeedList.indexOf(curFanSpeed.name), false)
+    }
+
     fanSpeedSp.onItemSelectedListener = object :
         AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>,
@@ -371,6 +388,10 @@ private fun setUpMasterControllerSpinner(masterControllerSp : Spinner,
     }
 
     masterControllerSp.adapter = adapter
+    val curSelection = hayStack.readDefaultVal("userIntent and masterController and mode and equipRef == \"$equipId\"")
+    if (curSelection <= masterControllerList.size - 1) {
+        masterControllerSp.setSelection(curSelection.toInt(), false)
+    }
     masterControllerSp.onItemSelectedListener = object :
         AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>,

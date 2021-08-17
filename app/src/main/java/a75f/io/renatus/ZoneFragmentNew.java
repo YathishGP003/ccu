@@ -2,8 +2,11 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -77,28 +80,33 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
-
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import androidx.annotation.Nullable;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
@@ -235,6 +243,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 selectFloor(position);
             }
         });
+
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
+                WeatherDataDownloadService.getWeatherData();
+                if (weatherUpdateHandler != null)
+                    weatherUpdateHandler.post(weatherUpdate);
+            }
+        }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
     }
 
     public void refreshScreen(String id)
@@ -1116,11 +1133,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HashMap dualDuctPoints = DualDuctUtil.getEquipPointsForView(p.getId());
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                            }
-                            if (p.getProfile().startsWith("BPOS")) {
-                                HashMap bposPoint = BPOSUtil.getbposPoints(p.getId());
-                                Log.i("PointsValue", "DualDuct Points:" + bposPoint.toString());
-                                loadBPOSPointsUI(bposPoint, inflater, linearLayoutZonePoints, p.getGroup());
                             }
                         }
                     }

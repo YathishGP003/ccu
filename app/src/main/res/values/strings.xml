@@ -671,7 +671,7 @@
     <string name="title_edit">EDIT</string>
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
-    <string name="title_generate_otp">Generate OTP</string>
+    <string name="title_generate_passcode">Generate Passcode</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>

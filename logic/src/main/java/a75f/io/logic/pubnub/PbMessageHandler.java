@@ -100,11 +100,14 @@ public class PbMessageHandler
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         Log.i(Globals.TAG, " cmd : " + cmd);
         switch (cmd) {
+            case FloorUpdateHandler.CMD:
+               FloorUpdateHandler.updateFloor(msg);
+                break;
             case UpdatePointHandler.CMD:
                 UpdatePointHandler.handleMessage(msg);
                 break;
             case SiteSyncHandler.CMD:
-                SiteSyncHandler.handleMessage(msg);
+                SiteSyncHandler.handleMessage(msg, context);
                 break;
             case UpdateScheduleHandler.CMD:
                 UpdateScheduleHandler.handleMessage(msg);

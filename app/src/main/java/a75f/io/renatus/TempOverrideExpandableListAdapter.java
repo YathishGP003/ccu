@@ -4,6 +4,7 @@ package a75f.io.renatus;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -103,7 +104,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
                     expandedListText.startsWith(siteName)) {
                 String equipId = idMap.get(expandedListText);
-                double value = getPointVal(idMap.get(expandedListText));
+                Log.e("InsideTempOverrideExpandableListAdapter","equipId- "+equipId);
+                double value = getPointVal(equipId);
+                Log.e("InsideTempOverrideExpandableListAdapter","value- "+value);
+                //double value = getPointVal(idMap.get(expandedListText));
                 unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
                 if (Objects.nonNull(unit)) {
                     if (unit.toString().equals("mV"))

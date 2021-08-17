@@ -228,7 +228,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 super.onPostExecute(hGrid);
                 hideProgressDialog();
                 if (hGrid == null || hGrid.isEmpty() || hGrid.isErr()) {
-                    Toast.makeText(RegisterGatherCCUDetails.this, "No CCUs available, please create one", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(RegisterGatherCCUDetails.this, "No CCUs available, please create one", Toast.LENGTH_SHORT).show();
                 } else {
                     mCCUS = hGrid;
                     showCCUButton();

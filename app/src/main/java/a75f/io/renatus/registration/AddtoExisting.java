@@ -308,6 +308,7 @@ public class AddtoExisting extends Fragment {
                             mEt3.requestFocus();
                         } else if (one.length() == 0) {
                             mEt1.requestFocus();
+                            mNext1.setVisibility(View.INVISIBLE);
                         }
                         break;
                     case R.id.otp_edit_text3:
@@ -315,6 +316,7 @@ public class AddtoExisting extends Fragment {
                             mEt4.requestFocus();
                         } else if (one.length() == 0) {
                             mEt2.requestFocus();
+                            mNext1.setVisibility(View.INVISIBLE);
                         }
                         break;
                     case R.id.otp_edit_text4:
@@ -322,6 +324,7 @@ public class AddtoExisting extends Fragment {
                             mEt5.requestFocus();
                         } else if (one.length() == 0) {
                             mEt3.requestFocus();
+                            mNext1.setVisibility(View.INVISIBLE);
                         }
                         break;
                     case R.id.otp_edit_text5:
@@ -329,14 +332,17 @@ public class AddtoExisting extends Fragment {
                             mEt6.requestFocus();
                         } else if (one.length() == 0) {
                             mEt4.requestFocus();
+                            mNext1.setVisibility(View.INVISIBLE);
                         }
                         break;
                     case R.id.otp_edit_text6:
                         if (one.length() == 1) {
                             InputMethodManager inputManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                             inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                            mNext1.setVisibility(View.VISIBLE);
                         } else if (one.length() == 0) {
                             mEt5.requestFocus();
+                            mNext1.setVisibility(View.INVISIBLE);
                         }
                         break;
                 }
@@ -518,7 +524,10 @@ public class AddtoExisting extends Fragment {
         });
 
         builder.setTitle("Site");
+        builder.setTitle("ADD CCU");
         builder.setMessage("Registering for site ID " + siteId);
+        /*HashMap site = CCUHsApi.getInstance().read("site");
+        builder.setMessage("Are you sure you want to add a new CCU to site " +site.get("dis"));*/
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -572,12 +581,7 @@ public class AddtoExisting extends Fragment {
                 String siteId = strings[0];
                 boolean retVal = false;
                 if (StringUtils.isNotBlank(siteId)) {
-                    try{
-                        retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-                    }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
+                    retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
                     Globals.getInstance().setSiteAlreadyCreated(true);
                     CCUHsApi.getInstance().setPrimaryCcu(false);
                     L.ccu().systemProfile = new DefaultSystem();

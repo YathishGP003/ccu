@@ -189,7 +189,7 @@ public class BPOSEquip {
                 .addMarker("forced").addMarker("occupied").addMarker("auto")
                 .addMarker("his").addMarker("enabled").setHisInterpolate("cov")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setEnums("on,off")
+                .setEnums("off,on")
                 .setTz(tz)
                 .build();
         String autoforceoccupiedId = CCUHsApi.getInstance().addPoint(autoforceoccupied);
@@ -208,7 +208,7 @@ public class BPOSEquip {
                 .addMarker("forced").addMarker("away").addMarker("auto").setHisInterpolate("cov")
                 .addMarker("his").addMarker("enabled")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setEnums("on,off")
+                .setEnums("off,on")
                 .setTz(tz)
                 .build();
         String autoawayId = CCUHsApi.getInstance().addPoint(autoaway);

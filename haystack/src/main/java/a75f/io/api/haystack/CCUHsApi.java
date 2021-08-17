@@ -304,12 +304,27 @@ public class CCUHsApi
     {
         tagsDb.updateSite(s, id);
         entitySyncHandler.requestSiteSync();
+        updateLocationDataForWeatherUpdate(s);
     }
     
     //Local site entity may be updated on pubnub notification which does not need to be synced back.
     public void updateSiteLocal(Site s, String id)
     {
         tagsDb.updateSite(s, id);
+        updateLocationDataForWeatherUpdate(s);
+    }
+    
+    private void updateLocationDataForWeatherUpdate(Site updatedSite) {
+    
+        SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
+        spPrefsEditor.putString("country", updatedSite.getGeoCountry());
+    
+        //Reset lat & lng so that WeatherService regenerates it using updated address.
+        spPrefsEditor.putFloat("lat", 0);
+        spPrefsEditor.putFloat("lng", 0);
+    
+        spPrefsEditor.commit();
     }
 
     public void updateEquip(Equip q, String id)
@@ -1482,6 +1497,15 @@ public class CCUHsApi
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         if (ccu.size() > 0) {
             return ccu.get("dis").toString();
+        } else {
+            return null;
+        }
+    }
+    
+    public @Nullable Site getSite() {
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (!site.isEmpty()) {
+            return new Site.Builder().setHashMap(site).build();
         } else {
             return null;
         }

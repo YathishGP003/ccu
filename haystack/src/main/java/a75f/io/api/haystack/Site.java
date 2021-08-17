@@ -255,4 +255,30 @@ public class Site extends Entity
         }
 
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Site site = (Site) obj;
+        if (displayName.equals(site.displayName) &&
+            geoCity.equals(site.geoCity) &&
+            geoState.equals(site.geoState) &&
+            geoAddr.equals(site.geoAddr) &&
+            geoCountry.equals(site.geoCountry) &&
+            geoPostalCode.equals(site.geoPostalCode) &&
+            tz.equals(site.tz) &&
+            organization.equals(site.organization) &&
+            installerEmail.equals(site.installerEmail) &&
+            fcManagerEmail.equals(site.fcManagerEmail)) {
+            return true;
+        }
+        return false;
+    }
 }

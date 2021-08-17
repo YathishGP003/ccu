@@ -81,7 +81,6 @@ public class BuildingTuners
         TITuners.addDefaultTiTuners(hayStack, siteRef, equipRef, equipDis, tz);
         DualDuctTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,false);
-        BPOSTuners.addDefaultBPOSTuners(hayStack, siteRef, equipRef, equipDis, tz);
         checkForTunerMigration();
     }
 

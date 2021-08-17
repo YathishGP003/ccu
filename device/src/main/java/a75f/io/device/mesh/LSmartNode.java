@@ -321,6 +321,11 @@ public class LSmartNode
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
+                    
+                    //Mapping not required during override.
+                    if (Globals.getInstance().isTemproryOverrideMode()) {
+                        mappedVal = (short)logicalVal;
+                    }
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
 

@@ -28,6 +28,7 @@ import a75f.io.device.serial.SmartStatControls_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.device.serial.SmartStatSettings_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -229,9 +230,14 @@ public class LSmartStat {
                     Log.d("LSmartStat", "getCtrlMsgs=" + p.getDisplayName() + "," + p.getPointRef() + "," + logicalOpPoint.get("id") + "," + p.getType());
                     if (logicalOpPoint.get("id") != null) {
                         double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                        short mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
-
+                        short mappedVal;
+                        //Mapping not required during override.
+                        if (Globals.getInstance().isTemproryOverrideMode()) {
+                            mappedVal = (short)hayStack.readHisValById(opPoint.get("id").toString()).intValue();
+                        } else {
+                            mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
+                            hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                        }
                         LSmartStat.getSmartStatPort(controls, p.getPort()).set(mappedVal);
                     }
 

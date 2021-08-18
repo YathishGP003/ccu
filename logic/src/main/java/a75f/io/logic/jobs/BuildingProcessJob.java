@@ -55,10 +55,6 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         L.pingCloudServer();
         
         DiagEquip.getInstance().updatePoints();
-        if (Globals.getInstance().isTemproryOverrideMode()) {
-            CCUHsApi.getInstance().syncHisData();
-            return;
-        }
 
         try {
             //TODO Crash here causing issues in Analytics portal #RENATUS-396 kumar
@@ -80,7 +76,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double) EpidemicState.OFF.ordinal());
             }
 
-            if (!Globals.getInstance().isTestMode()) {
+            if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemproryOverrideMode()) {
                 L.ccu().systemProfile.doSystemControl();
             }
 

@@ -50,9 +50,6 @@ public class FirmwareVersionPointMigration {
                         site.getId(), deviceInfo.getFloorRef(), deviceInfo.getRoomRef(), site.getTz()));
 
             }
-
-
         }
-
     }
 }

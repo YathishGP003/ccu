@@ -794,8 +794,10 @@ public class Pulse
 		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
 
+			String firmwareVersion = wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
+			CCUUtils.writeFirmwareVersion(firmwareVersion, address, true);
 			String str = "addr:"+address;
-			str+= ", master_fw_ver:"+wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
+			str+= ", master_fw_ver:"+firmwareVersion;
 			switch (wrmOrCMReootMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
 					str+= ", cause:"+"POWER_ON_RESET";
@@ -834,11 +836,14 @@ public class Pulse
 				"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
-
+		String firmwareVersion =
+				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
+		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
 			String str = "addr:"+address;
 			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		Log.d(Globals.TAG," init :  " +str);
 		Log.d(Globals.TAG,"snRebootIndicationMsgs.rebootCause.get() : "+snRebootIndicationMsgs.rebootCause.get());
+			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
 					str+= ", cause:"+"POWER_ON_RESET";

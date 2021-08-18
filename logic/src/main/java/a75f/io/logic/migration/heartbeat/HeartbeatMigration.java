@@ -1,7 +1,5 @@
-package a75f.io.logic.heartbeat;
+package a75f.io.logic.migration.heartbeat;
 
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +7,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.util.PreferenceUtil;

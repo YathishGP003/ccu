@@ -30,11 +30,11 @@ public class FirmwareVersionPointMigration {
     private void upgradeEquipsWithFirmwareVersionPoints(CCUHsApi hayStack){
         String[] deviceTypes = {"smartnode", "smartstat", "hyperstat", "cm"};
         for(String deviceType : deviceTypes){
-            addFirmwareVersionToEquip(deviceType, hayStack);
+            addFirmwareVersionToDevice(deviceType, hayStack);
         }
     }
 
-    private void addFirmwareVersionToEquip(String deviceType, CCUHsApi hayStack){
+    private void addFirmwareVersionToDevice(String deviceType, CCUHsApi hayStack){
         ArrayList<HashMap> deviceList= hayStack.readAll("device and "+deviceType);
         for(HashMap device : deviceList){
             Device deviceInfo = new Device.Builder().setHashMap(device).build();

@@ -662,6 +662,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
             hayStack.writeHisValById(logicalPoint.toString(), val);
         }
+        Object devicePoint = hayStack.readMapById(id).get("deviceRef");
+        Log.e("InsideTempOverrideExpandableListAdapter","hayStack- "+hayStack.readMapById(id));
+        Log.e("InsideTempOverrideExpandableListAdapter","logicalPoint- "+logicalPoint);
+        Log.e("InsideTempOverrideExpandableListAdapter","devicePoint- "+devicePoint);
+        /*if (Objects.nonNull(devicePoint)){
+            hayStack.writeHisValById(devicePoint.toString(), val);
+        }*/
     }
 
     @Override

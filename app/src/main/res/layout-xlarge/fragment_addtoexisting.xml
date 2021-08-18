@@ -182,7 +182,7 @@
                 android:text="@string/button_next"
                 android:textColor="?orange_75f"
                 android:textSize="24sp"
-                android:visibility="invisible"/>
+                android:enabled="false"/>
 
             <ProgressBar
                 android:id="@+id/progressbar"

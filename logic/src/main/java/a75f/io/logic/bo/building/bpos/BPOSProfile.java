@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.BPOSTuners;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -98,8 +99,9 @@ public class BPOSProfile extends ZoneProfile {
         HashMap occupancy = CCUHsApi.getInstance().read("point and occupancy and sensor and " +
                 "equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
-                " sensor and " +
-                "equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+                " sensor and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        HashMap occDethashmap = CCUHsApi.getInstance().read("point and occupancy and " +
+                "detection and his and equipRef== \"" + mBPOSEquip.mEquipRef + "\"");
         double zonedynamicpriority =
                 DabSystemController.getInstance().getEquipDynamicPriority(zoneCoolingLoad != 0 ?
                         zoneCoolingLoad : zoneHeatingLoad, mBPOSEquip.mEquipRef);
@@ -153,16 +155,11 @@ public class BPOSProfile extends ZoneProfile {
             /*check if its already in forced occupy or check if its in auto force occupy
             if(occupancyvalue != (double) Occupancy.FORCEDOCCUPIED.ordinal() ||
                    occupancyvalue != (double) Occupancy.AUTOFORCEOCCUPIED.ordinal()){}
-
-                   This case is commented as of now
-
-             */
+                    This case is commented as of now*/
 
             //check the timer
             HisItem hisItem = CCUHsApi.getInstance().curRead(occupancy.get("id").toString());
             Date  lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
-
-
             long th = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipFromZone(String.valueOf(mBPOSEquip.mNodeAddr)));
             if (th > 0) {
                 DateTime et = new DateTime(th);
@@ -180,18 +177,27 @@ public class BPOSProfile extends ZoneProfile {
                                 "desired and average and sp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
                         updateDesiredtemp(dt);
                     }
-
                 }
-
-
             }
         }
         if (occupied && isAutoawayenabled && occupancyvalue != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
             //if the oocupantnotdetected for autoAwayTimer
             // then enter autoaway
             if (occDetPoint <= 0) {
-                CCUHsApi.getInstance().writeDefaultValById(occupancy.get("id").toString(),
-                        (double) Occupancy.AUTOAWAY.ordinal());
+                //check if there was no detection from past autoawaytimer
+                HisItem hisItem = CCUHsApi.getInstance().curRead(occDethashmap.get("id").toString());
+                Date  lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
+                DateTime et = new DateTime(lastupdatedtime);
+                int min = et.getMinuteOfHour();
+                // read autoawaytimer tuner
+                double cdb = StandaloneTunerUtil.readTunerValByQuery("auto and away and time and " +
+                        "equipRef == \"" + mBPOSEquip + "\"");
+                if (min >= cdb) {
+                    CCUHsApi.getInstance().writeDefaultValById(occupancy.get("id").toString(),
+                            (double) Occupancy.AUTOAWAY.ordinal());
+
+
+                }
             }
         }
 

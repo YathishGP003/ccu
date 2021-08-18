@@ -74,6 +74,13 @@ class TunerMigration {
         valueObjMap.put("co2TimeInterval", new ValueObj("0.0", "10", "1.0"));
         valueObjMap.put("staticPressureSPTrim", new ValueObj("-0.5", "-0.01", "0.01"));
         valueObjMap.put("valveActuationStartDamperPosDuringSysHeating", new ValueObj("1.0", "100", "5"));
+        valueObjMap.put("coolingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("heatingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("temperatureProportionalRange", new ValueObj("0", "10", "1"));
+        valueObjMap.put("temperatureIntegralTime", new ValueObj("1", "60", "1"));
+        valueObjMap.put("proportionalKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("integralKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("autoAwayZoneSetbackTemp", new ValueObj("1", "2", "1"));
         return valueObjMap;
     }
 }

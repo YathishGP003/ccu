@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
@@ -38,6 +39,7 @@ public class HyperStatDevice {
     public RawPoint currentTemp;
     public RawPoint desiredTemp;
     public RawPoint rssi;
+    private RawPoint firmWareVersion;
     
     public String deviceRef;
     public String siteRef;
@@ -191,6 +193,8 @@ public class HyperStatDevice {
                           .setTz(tz)
                           .build();
         rssi = HeartBeat.getHeartBeatRawPoint(hyperStatNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
+        firmWareVersion = FirmwareVersion.getFirmwareVersion(hyperStatNodeAddress, deviceRef, siteRef, floorRef, roomRef,
+                tz);
     }
     
     private RawPoint createRelayPoint(Port relayPort, String name) {
@@ -349,6 +353,7 @@ public class HyperStatDevice {
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
         CCUHsApi.getInstance().addPoint(rssi);
+        CCUHsApi.getInstance().addPoint(firmWareVersion);
     }
 
     public void addSensor(Port p, String pointRef) {

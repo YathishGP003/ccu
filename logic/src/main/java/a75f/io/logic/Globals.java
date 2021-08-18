@@ -49,11 +49,12 @@ import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.heartbeat.HeartbeatMigration;
+import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
-import a75f.io.logic.oao.OAODamperOpenReasonMigration;
+import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
@@ -207,6 +208,12 @@ public class Globals {
         }
     }
 
+    private void firmwareVersionPointMigration(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            FirmwareVersionPointMigration.initFirmwareVersionPointMigration();
+        }
+    }
+
     private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
@@ -235,6 +242,7 @@ public class Globals {
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
                 OAODamperOpenReasonMigration(site);
+                firmwareVersionPointMigration(site);
                 CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             

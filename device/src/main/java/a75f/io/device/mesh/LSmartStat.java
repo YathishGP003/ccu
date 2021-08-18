@@ -233,7 +233,7 @@ public class LSmartStat {
                         short mappedVal;
                         //Mapping not required during override.
                         if (Globals.getInstance().isTemproryOverrideMode()) {
-                            mappedVal = (short)logicalVal;
+                            mappedVal = (short)hayStack.readHisValById(opPoint.get("id").toString()).intValue();
                         } else {
                             mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
                             hayStack.writeHisValById(p.getId(), (double) mappedVal);

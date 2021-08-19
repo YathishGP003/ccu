@@ -20,9 +20,8 @@ public class BPOSUtil {
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
                 "and sensor " +
                 "and equipRef == \"" + equipID + "\"");
-        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and " +
-                "sensor and " +
-                "equipRef == \"" + equipID + "\"");
+        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
+                " sensor and equipRef == \"" + equipID + "\"");
 
         Log.d("BPOSUtil", "equipStatusPoint =" + equipStatusPoint +
                 "humidity =" + humidity + "forceoccupied" + forceoccupied);

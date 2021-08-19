@@ -49,6 +49,9 @@ public class VAVScheduler {
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+        double autoAwaysetback = TunerUtil.readTunerValByQuery("auto and away and setback", equip.getId());
+        double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
+                " sensor and equipRef == \"" + equip.getId() + "\"");
         
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
@@ -67,9 +70,13 @@ public class VAVScheduler {
 
             setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
 
-            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() /*|| occ.isForcedOccupied()*/ || (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy.FORCEDOCCUPIED)*/) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() /*|| occ.isForcedOccupied()*/
+                    || (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy.FORCEDOCCUPIED)*/) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
             setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+
+            if(equip.getMarkers().contains("bpos")  &&  occupancyvalue == Occupancy.AUTOAWAY.ordinal() )
+                setDesiredTemp(equip, autoAwaysetback, "",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
         }
 
         return occ;

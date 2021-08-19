@@ -3510,18 +3510,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             textViewValue2.setText("YES");
         }else if(occupied == (double)Occupancy.AUTOFORCEOCCUPIED.ordinal()){
             textViewLabel2.setText("Temporary Hold(AUTO): ");
-            textViewValue2.setText("YES");
+            textViewValue2.setText("Yes");
         }else{
             textViewLabel2.setText("Temporary Hold: ");
-            textViewValue2.setText("NO");
+            textViewValue2.setText("No");
         }
-
-
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-       // viewPointRow2.setPadding(0, 0, 0, 40);
-       // linearLayoutZonePoints.addView(viewPointRow2);
+
     }
 
 }

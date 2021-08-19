@@ -227,7 +227,7 @@ public class BPOSTuners {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
                 .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp").addMarker("zone")
-                .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();

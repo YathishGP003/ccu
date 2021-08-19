@@ -300,7 +300,7 @@ public class RegisterGatherCCUDetails extends Activity {
                         .Builder(RegisterGatherCCUDetails.this);
                 //site = CCUHsApi.getInstance().read("site");
                 // Set the message show for the Alert time
-                builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site"+site.get("dis"));
+                builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site "+site.get("dis"));
 
                 // Set Alert Title
                 builder.setTitle("ADD CCU");

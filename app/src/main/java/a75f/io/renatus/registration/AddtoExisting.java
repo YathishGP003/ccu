@@ -202,7 +202,7 @@ public class AddtoExisting extends Fragment {
                         String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
                         OTPValidation(OTP);
                     } else
-                        Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -568,7 +568,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving site...");
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving site...This may take upto 5~10 mins");
             }
 
             @Override

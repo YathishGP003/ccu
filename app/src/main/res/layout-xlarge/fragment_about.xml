@@ -210,7 +210,6 @@
                 app:srcCompat="@drawable/icon_arrowright" />
 
         </LinearLayout>
-
     </LinearLayout>
 
 </RelativeLayout>

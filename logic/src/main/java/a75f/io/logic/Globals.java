@@ -97,6 +97,7 @@ public class Globals {
     private boolean testHarness = true;
 
     private boolean _siteAlreadyCreated;
+    private boolean isTempOverride = false;
 
     private Long curPubNubMsgTimeToken;
     private Globals() {
@@ -127,7 +128,7 @@ public class Globals {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
     }
-    
+
     public boolean isTestMode()
     {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

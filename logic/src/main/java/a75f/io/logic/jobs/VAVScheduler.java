@@ -76,7 +76,7 @@ public class VAVScheduler {
             setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
 
             if(equip.getMarkers().contains("bpos")  &&  occupancyvalue == Occupancy.AUTOAWAY.ordinal() )
-                setDesiredTemp(equip, autoAwaysetback, "",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+                setDesiredTemp(equip, autoAwaysetback, "bpos",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
         }
 
         return occ;

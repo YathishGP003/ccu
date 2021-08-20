@@ -89,7 +89,6 @@ public class Pulse
 	}
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
-		Log.d("BPOSProfile", "regularSNUpdate ++" );
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
 		int rssi = smartNodeRegularUpdateMessage_t.update.rssi.get();
 		if (!mDeviceLowSignalAlert.containsKey(nodeAddr)) {
@@ -220,9 +219,7 @@ public class Pulse
 			}
 			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-			Log.d("BPOSProfile", "sensorReadings = " +sensorReadings);
 			if (sensorReadings.length > 0) {
-				Log.d("BPOSProfile", "handleSensorEvents before call");
 				handleSensorEvents(sensorReadings, nodeAddr ,deviceInfo);
 			}
 
@@ -247,13 +244,12 @@ public class Pulse
 	}
 	
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
-		Log.d("BPOSProfile", " In handleSensorEvents ++" );
+		Log.d("Pulse", " In handleSensorEvents ++" );
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
 		boolean hasSensorOccupancy = false;
 
 		for (SmartNodeSensorReading_t r : sensorReadings) {
-			Log.d("BPOSProfile", " In handleSensorEvents for" );
 			DLog.LogdStructAsJson(r);
 			SensorType t = SensorType.values()[r.sensorType.get()];
 			Port p = t.getSensorPort();
@@ -268,7 +264,6 @@ public class Pulse
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
-			Log.d("BPOSProfile", " In handleSensorEvents t = "+t );
 			switch (t) {
 				case HUMIDITY:
 					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
@@ -283,7 +278,6 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
 					break;
 				case OCCUPANCY:
-					Log.d("BPOSProfile", "case occupancy");
 					hasSensorOccupancy = true;
 					updateBPOSOccupancyStatus(sp,val,addr,device);
 					break;
@@ -1087,7 +1081,6 @@ public class Pulse
 
 
 	private static void handleSmartStatSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr, Device device, double occupancyDetected) {
-		Log.d("BPOSProfile", " In handleSmartStatSensorEvents" );
 		SmartStat node = new SmartStat(addr);
 		int emVal = 0;
 		boolean hasSensorOccupancy = false;
@@ -1153,18 +1146,14 @@ public class Pulse
 	}
 
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
-		Log.d("BPOSProfile", " In updateBPOSOccupancyStatus val = "+val );
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
-		Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  curOccuStatus =" + curOccuStatus );
-		if((curOccuStatus != val) ) { //only if occupancy enabled
+		if((curOccuStatus != val) ) {
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if ((occDetPoint != null) && (occDetPoint.size() > 0)){
-				Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  in if "  );
 				CCUHsApi.getInstance().writeHisValById(occDetPoint.get("id").toString(),val);
 				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
 						" and his and equipRef == \"" + device.getEquipRef() + "\"");
-				Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  in if read value = " + occDetPoint2  );
 			}
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);

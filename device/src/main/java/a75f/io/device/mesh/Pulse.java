@@ -1154,19 +1154,18 @@ public class Pulse
 
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
 		Log.d("BPOSProfile", " In updateBPOSOccupancyStatus val = "+val );
-		//double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config  and enable and occupancy and group == \""+addr+"\"");
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  curOccuStatus =" + curOccuStatus );
-		//if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
+		if((curOccuStatus != val) ) { //only if occupancy enabled
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if ((occDetPoint != null) && (occDetPoint.size() > 0)){
 				Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  in if "  );
 				CCUHsApi.getInstance().writeHisValById(occDetPoint.get("id").toString(),val);
-				double occDetPoint2 = CCUHsApi.getInstance().readHisValById("point and occupancy and detection" +
+				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
 						" and his and equipRef == \"" + device.getEquipRef() + "\"");
 				Log.d("BPOSProfile", " In updateBPOSOccupancyStatus  in if read value = " + occDetPoint2  );
-			//}
+			}
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
 		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);

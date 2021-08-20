@@ -171,19 +171,18 @@ public class BPOSProfile extends ZoneProfile {
                         "\"");
                 updateDesiredtemp(dt);
             } else {
-            /*check if its already in forced occupy or check if its in auto force occupy
-            if(occupancyvalue != (double) Occupancy.FORCEDOCCUPIED.ordinal() ||
-                   occupancyvalue != (double) Occupancy.AUTOFORCEOCCUPIED.ordinal()){}
-                    This case is commented as of now*/
+            //check if its already in forced occupy or check if its in auto force occupy
+               // If device is already in autoforceoccupied do nothing
 
+
+                // If the device is in forced occupied.
                 //check the timer
                 HisItem hisItem = CCUHsApi.getInstance().curRead(occupancy.get("id").toString());
                 Date lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
                 long th =
                         ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipFromZone(String.valueOf(mBPOSEquip.mNodeAddr)));
                 Log.d("BPOSProfile", " th  = " + th);
-                //if (th > 0)
-                if (true) {
+                if (th > 0) {
                     Log.d("BPOSProfile", " th > 0");
 
                     DateTime et = new DateTime(th);
@@ -218,6 +217,8 @@ public class BPOSProfile extends ZoneProfile {
                 }
             }
         }
+
+        //Auto away handled
         if (occupied && isAutoawayenabled && occupancyvalue != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
             //if the oocupantnotdetected for autoAwayTimer
             // then enter autoaway

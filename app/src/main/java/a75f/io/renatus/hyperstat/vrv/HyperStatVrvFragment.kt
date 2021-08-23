@@ -1,13 +1,17 @@
 package a75f.io.renatus.hyperstat.vrv
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
+import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -67,6 +71,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
             tempOffset = findViewById(R.id.temperatureOffset)
             humidityMinSp = findViewById(R.id.humidityMinSp)
             humidityMaxSp = findViewById(R.id.humidityMaxSp)
+            masterControllerSp = findViewById(R.id.masterControllerSp)
             setButton = findViewById(R.id.setBtn)
         }
 
@@ -101,6 +106,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         )
         humidityMinSp.adapter = adapterHumidity
         humidityMaxSp.adapter = adapterHumidity
+
+        setUpMasterControllerSpinner()
     }
 
     private fun setUpViewListeners() {
@@ -109,6 +116,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         }
         humidityMinSp.setOnItemSelected { position -> viewModel.humidityMinSelected(position) }
         humidityMaxSp.setOnItemSelected { position -> viewModel.humidityMaxSelected(position) }
+        masterControllerSp.setOnItemSelected { position -> viewModel.masterControllerModeSelected(position) }
         setButton.setOnClickListener {
             disposables.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
@@ -133,19 +141,67 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         tempOffset.value = viewState.tempOffsetPosition
         humidityMinSp.setSelection(viewState.humidityMinPosition)
         humidityMaxSp.setSelection(viewState.humidityMaxPosition)
+        masterControllerSp.setSelection(viewState.masterControllerMode)
     }
 
     private fun handleError(error: Throwable) {
         //showErrorDialog(error::class.java.simpleName + " : " + error.localizedMessage)
     }
 
-    // Extenstion method to kotlinize and pretty up our code above
+    // Extension method to kotlinize and pretty up our code above
     private fun Spinner.setOnItemSelected(onItemSelected: (position: Int) -> Unit) {
         onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 onItemSelected.invoke(position)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {  } // no implementation
+        }
+    }
+
+    private fun setUpMasterControllerSpinner() {
+
+        val coolHeatRight = viewModel.viewState.value.coolHeatRight;
+        val masterControllerList : MutableList<String> = arrayListOf()
+
+        VrvMasterController.values().forEach { mode ->
+            masterControllerList.add(mode.toString())
+        }
+
+        if (coolHeatRight == 0) {
+            masterControllerSp.isEnabled = false
+        }
+
+        val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
+            activity,
+            R.layout.spinner_zone_item,
+            masterControllerList
+        ){
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val view:TextView = super.getDropDownView(
+                    position,
+                    convertView,
+                    parent
+                ) as TextView
+
+                if (!canEnableMasterControllerMode(coolHeatRight, VrvMasterController.values()[position])) {
+                    view.setTextColor(Color.LTGRAY)
+                }
+                return view
+            }
+
+            override fun isEnabled(position: Int): Boolean {
+                return canEnableMasterControllerMode(coolHeatRight, VrvMasterController.values()[position])
+            }
+        }
+
+        masterControllerSp.adapter = adapter
+        val curSelection = viewModel.viewState.value.masterControllerMode
+        if (curSelection <= masterControllerList.size - 1) {
+            masterControllerSp.setSelection(curSelection, false)
         }
     }
 }

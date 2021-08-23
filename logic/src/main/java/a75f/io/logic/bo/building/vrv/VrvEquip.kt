@@ -5,6 +5,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import a75f.io.logic.tuners.VrvTuners
 
 class VrvEquip(hsApi : CCUHsApi,
                addr: Short) {
@@ -29,6 +30,8 @@ class VrvEquip(hsApi : CCUHsApi,
         createStatusPoints(vrvEquip, roomRef, floorRef)
         createConfigPoints(config, vrvEquip, roomRef, floorRef)
         createIduStatusPoints(vrvEquip, roomRef, floorRef)
+        VrvTuners.addEquipVrvTuners(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
+                            vrvEquip.id, roomRef, floorRef, vrvEquip.tz)
         hayStack.syncEntityWithPointWrite()
     }
 
@@ -371,7 +374,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setTz(equip.tz)
             .build()
         val masterControllerModeId = hayStack.addPoint(masterControllerMode)
-        hayStack.writeDefaultValById(masterControllerModeId, 0.0)
+        hayStack.writeDefaultValById(masterControllerModeId, config.masterControllerMode)
 
     }
 
@@ -573,7 +576,8 @@ class VrvEquip(hsApi : CCUHsApi,
         return VrvProfileConfiguration(
             getConfigNumVal("temperature and offset"),
             getConfigNumVal("min and humidity and sp"),
-            getConfigNumVal("max and humidity and sp")
+            getConfigNumVal("max and humidity and sp"),
+            getConfigNumVal("masterController and mode and sp")
         )
     }
 
@@ -581,6 +585,7 @@ class VrvEquip(hsApi : CCUHsApi,
         setConfigNumVal("temperature and offset", config.temperatureOffset)
         setConfigNumVal("min and humidity and sp", config.minHumiditySp)
         setConfigNumVal("max and humidity and sp", config.maxHumiditySp)
+        setConfigNumVal("masterController and mode and sp", config.masterControllerMode)
 
     }
 

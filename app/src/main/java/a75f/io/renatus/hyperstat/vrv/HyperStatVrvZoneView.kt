@@ -1,10 +1,8 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.vrv.VrvAirflowDirection
 import a75f.io.logic.bo.building.vrv.VrvFanSpeed
-import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.logic.bo.building.vrv.VrvOperationMode
 import a75f.io.renatus.R
 import a75f.io.renatus.util.HeartBeatUtil
@@ -33,8 +31,6 @@ fun loadView(inflater : LayoutInflater,
 
     layout.addView(masterOperationMode)
 
-
-
     val viewTitle: View = inflater.inflate(R.layout.zones_item_title, null)
     val textViewTitle = viewTitle.findViewById<TextView>(R.id.textProfile)
     val textViewModule = viewTitle.findViewById<TextView>(R.id.module_status)
@@ -42,34 +38,37 @@ fun loadView(inflater : LayoutInflater,
     HeartBeatUtil.moduleStatus(textViewModule, nodeAddress)
     layout.addView(viewTitle)
 
+    val viewStatus = inflater.inflate(R.layout.zones_item_status, null)
+    val textViewStatus = viewStatus.findViewById<TextView>(R.id.text_status)
+    val textViewStatusTitle = viewStatus.findViewById<TextView>(R.id.inner_status_title)
+    val textViewUpdatedTime = viewStatus.findViewById<TextView>(R.id.last_updated_status)
+    textViewUpdatedTime.text = HeartBeatUtil.getLastUpdatedTime(nodeAddress)
+    textViewStatusTitle.visibility = View.GONE
+    textViewStatus.visibility = View.GONE
+    layout.addView(viewStatus)
+
     val viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null)
     viewPointRow1.findViewById<TextView>(R.id.text_point1label).text = "Operation Mode : "
     viewPointRow1.findViewById<TextView>(R.id.text_point2label).text = "Fan Speed : "
-
     val opModeSp = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue1)
     val fanSpeedSp = viewPointRow1.findViewById<Spinner>(R.id.spinnerValue2)
     layout.addView(viewPointRow1)
 
-    val viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null)
+    val viewPointRow2 = inflater.inflate(R.layout.zone_item_type4, null)
     viewPointRow2.findViewById<TextView>(R.id.text_point1label).text = "Airflow Direction : "
-    viewPointRow2.findViewById<TextView>(R.id.text_point2label).text = "Master Controller : "
+    viewPointRow2.findViewById<TextView>(R.id.text_point2label).text = "Humidity : "
 
     val airflowDirSp = viewPointRow2.findViewById<Spinner>(R.id.spinnerValue1)
-    val masterControlSp = viewPointRow2.findViewById<Spinner>(R.id.spinnerValue2)
-    layout.addView(viewPointRow2)
-
-    val humidityView: View = inflater.inflate(R.layout.zone_item_single_eletement_row, null)
-    humidityView.findViewById<TextView>(R.id.text_label).text = "Humidity : "
-    val humidityVal: TextView = humidityView.findViewById(R.id.text_value)
+    val humidityVal: TextView = viewPointRow2.findViewById(R.id.text_point2value)
     humidityVal.text = hayStack.readHisValByQuery("point and humidity and sensor " +
-            "and equipRef == \"$equipId\"").toInt().toString()+"% RH" //TODO
+            "and equipRef == \"$equipId\"").toInt().toString()+"% RH"
 
-    layout.addView(humidityView)
+    layout.addView(viewPointRow2)
 
     setUpOperationModeSpinner(opModeSp, equipId, hayStack, context)
     setUpFanSpeedSpinner(fanSpeedSp, equipId, hayStack, context)
     setUpAirflowDirectionSpinner(airflowDirSp, equipId, hayStack, context)
-    setUpMasterControllerSpinner(masterControlSp, equipId, hayStack, context)
+    //setUpMasterControllerSpinner(masterControlSp, equipId, hayStack, context)
 
 }
 
@@ -268,7 +267,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
             fanSpeedList.add(VrvFanSpeed.High.name)
         }
     }
-    if (fanSpeedControlLevel.toInt() > 0) {
+    if (fanSpeedControlLevel.toInt() > 1) {
         fanSpeedList.add(VrvFanSpeed.Auto.name)
     }
 
@@ -325,86 +324,6 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
     }
 }
 
-private fun canEnableMasterControllerMode(cooHeatRight : Int,  mode : VrvMasterController) :
-                    Boolean {
-
-    return when {
-        cooHeatRight == 0 -> {
-            false
-        }
-        cooHeatRight == 1 && mode == VrvMasterController.MASTER -> {
-            false
-        }
-        cooHeatRight == 2 && mode == VrvMasterController.NOT_MASTER -> {
-            false
-        }
-        else -> true
-    }
-}
-
-private fun setUpMasterControllerSpinner(masterControllerSp : Spinner,
-                                         equipId: String,
-                                         hayStack: CCUHsApi,
-                                         context : Activity) {
-
-    val coolHeatRight = hayStack.readHisValByQuery("point and coolHeatRight " +
-            "and equipRef == \"$equipId\"")
-
-    val masterControllerList : MutableList<String> = arrayListOf()
-
-    VrvMasterController.values().forEach { mode ->
-        masterControllerList.add(mode.name)
-    }
-
-    if (coolHeatRight.toInt() == 0) {
-        masterControllerSp.isEnabled = false
-    }
-
-    val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
-        context,
-        R.layout.spinner_zone_item,
-        masterControllerList
-    ){
-        override fun getDropDownView(
-            position: Int,
-            convertView: View?,
-            parent: ViewGroup
-        ): View {
-            val view:TextView = super.getDropDownView(
-                position,
-                convertView,
-                parent
-            ) as TextView
-
-            if (!canEnableMasterControllerMode(coolHeatRight.toInt(), VrvMasterController.values()[position])) {
-                view.setTextColor(Color.LTGRAY)
-            }
-            return view
-        }
-
-        override fun isEnabled(position: Int): Boolean {
-            return canEnableMasterControllerMode(coolHeatRight.toInt(), VrvMasterController.values()[position])
-        }
-    }
-
-    masterControllerSp.adapter = adapter
-    val curSelection = hayStack.readDefaultVal("userIntent and masterController and mode and equipRef == \"$equipId\"")
-    if (curSelection <= masterControllerList.size - 1) {
-        masterControllerSp.setSelection(curSelection.toInt(), false)
-    }
-    masterControllerSp.onItemSelectedListener = object :
-        AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(parent: AdapterView<*>,
-                                    view: View, position: Int, id: Long) {
-            hayStack.writeDefaultVal("point and masterController and mode " +
-                                                    "and equipRef == \"$equipId\"", position.toDouble())
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>) {
-            // write code to perform some action
-        }
-    }
-}
 
 
 

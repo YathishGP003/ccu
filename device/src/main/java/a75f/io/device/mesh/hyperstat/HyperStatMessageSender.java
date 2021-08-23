@@ -132,7 +132,7 @@ public class HyperStatMessageSender {
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
     
-    public static void sendIduControlMessage(int address, String equipRef, CCUHsApi hayStack) {
+    public static void sendIduControlMessage(int address, CCUHsApi hayStack) {
         HyperStat.HyperStatIduControlsMessage_t controls = HyperStatIduMessageHandler.getIduControlMessage(address, hayStack);
         
         if (DLog.isLoggingEnabled()) {

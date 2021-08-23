@@ -139,19 +139,28 @@ public class MeshNetwork extends DeviceNetwork
                                                                       .read("equip and group ==\""+d.getAddr()+ "\"")).build();
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
-                                                              "SEEDS ====================="+zone.getId());
+                                                              "SEEDS ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                                                            d.getEquipRef(), hyperStatProfile, false);
                                 } else if (equip.getMarkers().contains("vrv") ){
-                                
+    
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "Settings ===================== "+d.getAddr());
+                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
+                                                                               Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                    
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "IDU Controls ===================== "+d.getAddr());
+                                    HyperStatMessageSender.sendIduControlMessage(Integer.parseInt(d.getAddr()),
+                                                                                 CCUHsApi.getInstance());
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "Settings =====================");
+                                                               "Settings ===================== ");
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
                                                                                Integer.parseInt(d.getAddr()), d.getEquipRef());
     
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "Controls =====================");
+                                                               "Controls ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
                                 }
                                 

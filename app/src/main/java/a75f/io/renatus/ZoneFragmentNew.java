@@ -1354,6 +1354,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
+                HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
+                                                updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
+                                                p.getGroup());
+            }
         }
     }
 

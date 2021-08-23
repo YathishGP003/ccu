@@ -2,6 +2,7 @@ package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.logic.bo.building.vrv.VrvProfile
 import a75f.io.logic.bo.building.vrv.VrvProfileConfiguration
 import android.app.Application
@@ -42,32 +43,42 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun getInitialViewState(): VrvViewState {
-        return vrvProfile?.let {
-                        val config : VrvProfileConfiguration = it.getProfileConfiguration(nodeAddr)
-                        VrvViewState(
-                            config.temperatureOffset.toInt(),
-                            config.minHumiditySp.toInt(),
-                            config.maxHumiditySp.toInt())
-                        } ?:VrvViewState(
-                        tempOffsetPosition = tempOffsetIndexFromValue(0f),
-                        humidityMinPosition = 0,
-                        humidityMaxPosition = 100
-                        )
+        if (vrvProfile != null) {
+            val config : VrvProfileConfiguration = vrvProfile!!.getProfileConfiguration(nodeAddr)
+            return VrvViewState(
+                config.temperatureOffset.toInt(),
+                config.minHumiditySp.toInt(),
+                config.maxHumiditySp.toInt(),
+                config.masterControllerMode.toInt(),
+                CCUHsApi.getInstance().readHisValByQuery("point and coolHeatRight " +
+                        "and group == \"$nodeAddr\"").toInt())
+        } else {
+            return VrvViewState(
+                tempOffsetPosition = tempOffsetIndexFromValue(0f),
+                humidityMinPosition = 0,
+                humidityMaxPosition = 100,
+                masterControllerMode = 0,
+                coolHeatRight = 0
+            )
+        }
     }
 
     fun saveProfile() {
         vrvProfile?.let {
-            it.updateEquip(VrvProfileConfiguration(currentState.tempOffsetPosition.toDouble(),
+            it.updateEquip(VrvProfileConfiguration(
+                            tempOffsetSpinnerValues()[currentState.tempOffsetPosition]!!.toDouble(),
                             currentState.humidityMinPosition.toDouble(),
-                            currentState.humidityMaxPosition.toDouble()))
+                            currentState.humidityMaxPosition.toDouble(),
+                            currentState.masterControllerMode.toDouble()))
         }?: run {
             vrvProfile = VrvProfile()
             vrvProfile!!.createVrvEquip(
                 CCUHsApi.getInstance(), nodeAddr,
                 VrvProfileConfiguration(
-                    currentState.tempOffsetPosition.toDouble(),
+                    tempOffsetSpinnerValues()[currentState.tempOffsetPosition]!!.toDouble(),
                     currentState.humidityMinPosition.toDouble(),
                     currentState.humidityMaxPosition.toDouble(),
+                    currentState.masterControllerMode.toDouble()
                 ),
                 roomRef,
                 floorRef
@@ -97,6 +108,11 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     fun humidityMaxSelected(newVal: Int) {
         viewState.onNext(currentState.copy(
             humidityMaxPosition = newVal)
+        )
+    }
+    fun masterControllerModeSelected(newVal: Int) {
+        viewState.onNext(currentState.copy(
+            masterControllerMode = newVal)
         )
     }
 
@@ -134,10 +150,30 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
 
 
 }
+
+fun canEnableMasterControllerMode(cooHeatRight : Int,  mode : VrvMasterController) :
+        Boolean {
+
+    return when {
+        cooHeatRight == 0 -> {
+            false
+        }
+        cooHeatRight == 1 && mode == VrvMasterController.MASTER -> {
+            false
+        }
+        cooHeatRight == 2 && mode == VrvMasterController.NOT_MASTER -> {
+            false
+        }
+        else -> true
+    }
+}
+
 data class VrvViewState(
     val tempOffsetPosition: Int,
     val humidityMinPosition: Int,
-    val humidityMaxPosition: Int
+    val humidityMaxPosition: Int,
+    val masterControllerMode : Int,
+    val coolHeatRight : Int
 )
 
 data class OneTimeUiActions(

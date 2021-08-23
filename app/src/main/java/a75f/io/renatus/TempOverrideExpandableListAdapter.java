@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
@@ -104,9 +105,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
                     expandedListText.startsWith(siteName)) {
                 String equipId = idMap.get(expandedListText);
-                Log.e("InsideTempOverrideExpandableListAdapter","equipId- "+equipId);
                 double value = getPointVal(equipId);
-                Log.e("InsideTempOverrideExpandableListAdapter","value- "+value);
                 //double value = getPointVal(idMap.get(expandedListText));
                 unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
                 if (Objects.nonNull(unit)) {
@@ -118,94 +117,103 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 if (expandedListText.startsWith("Analog1In")) {
                     String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
-                    if (!analogIn1Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n("+analogIn1Mapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                    expandedListTextVal.setText("" + value+" V");
+                    if (!analogIn1Mapped.equals(""))
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
+                    else
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                    expandedListTextVal.setText("" + value + " V");
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog1Out")) {
                     String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
-                    if (!analogOut1Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n("+analogOut1Mapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
-                    txt_calculated_output.setText("" + value+" V");
+                    if (!analogOut1Mapped.equals(""))
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
+                    else
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
+                    txt_calculated_output.setText("" + value + " V");
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog2In")) {
                     String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
-                    if (!analogIn2Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n("+analogIn2Mapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
-                    expandedListTextVal.setText("" + value+" V");
+                    if (!analogIn2Mapped.equals(""))
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
+                    else
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
+                    expandedListTextVal.setText("" + value + " V");
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog2Out")) {
                     String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
-                    if(!analogOut2Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2"+"\n("+analogOut2Mapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
+                    if (!analogOut2Mapped.equals(""))
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
+                    else
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
 
-                    txt_calculated_output.setText("" + value+" V");
+                    txt_calculated_output.setText("" + value + " V");
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("relay")) {
-                    String relayMapped = getZoneMapping("relay"+expandedListText.substring(5, 6), listPosition, convertView);
+                    String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
                     if (!relayMapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6)+"\n("+relayMapped+")");
-                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
-                    txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)),1.0) == 0 ? "ON" : "OFF");
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
+                    else
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
+                    txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                     spinner_relay.setVisibility(View.VISIBLE);
-                }else if (expandedListText.startsWith("Th")) {
-                    String thermistorMapped = getZoneMapping("Thermistor"+expandedListText.substring(2,3), listPosition, convertView);
+                } else if (expandedListText.startsWith("Th")) {
+                    String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                     //String listTitle = (String) getGroup(listPosition);
                     /*if ((int)getConfigNumVal("enable and th"+expandedListText.substring(2,3),Integer.parseInt(getGroup(listPosition).toString().substring(3))) == 1)
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
                     else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n(Not Used)");*/
-                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
-                    expandedListTextVal.setText("" + value+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
+                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
+                    expandedListTextVal.setText("" + value + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_thermistor.setVisibility(View.VISIBLE);
-                }else if (expandedListText.startsWith(siteName)) {
-                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length()+1, expandedListText.length()));
+                } else if (expandedListText.startsWith(siteName)) {
+                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length() + 1, expandedListText.length()));
                     if (NewexpandedListText.startsWith("CM-analog1In")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                        expandedListTextVal.setText("" + value+" V");
+                        expandedListTextVal.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
                         if (getConfigEnabled("analog1") > 0) {
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
-                        }
-                        else
+                        } else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Used)");
-                        txt_calculated_output.setText("" + value+" V");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2In")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
-                        expandedListTextVal.setText("" + value+" V");
+                        expandedListTextVal.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2Out")) {
                         if (getConfigEnabled("analog2") > 0)
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Used)");
-                        txt_calculated_output.setText("" + value+" V");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
                         if (getConfigEnabled("analog3") > 0)
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
-                        else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
-                        txt_calculated_output.setText("" + value+" V");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                    }else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                    } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
                         if (getConfigEnabled("analog4") > 0)
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
-                        else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
-                        txt_calculated_output.setText("" + value+" V");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                    }
-                    else if (NewexpandedListText.startsWith("relay")) {
-                        String relayPos = (expandedListText.substring(siteName.length()+6, siteName.length()+7));
-                        if(getConfigEnabled("relay"+relayPos) > 0) {
-                            String relayMapped = getRelayMapping("relay"+relayPos, convertView);
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos +"\n("+relayMapped+")");
-                        }
-                        else{
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos+"\n(Not Used)");
+                    } else if (NewexpandedListText.startsWith("relay")) {
+                        String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
+                        if (getConfigEnabled("relay" + relayPos) > 0) {
+                            String relayMapped = getRelayMapping("relay" + relayPos, convertView);
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                        } else {
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Used)");
                             Object valueToDelete = getChild(listPosition, expandedListPosition);
                             expandableListDetail.remove(valueToDelete);
-                        }txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
+                        }
+                        txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                         spinner_relay.setVisibility(View.VISIBLE);
                     }/*else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
@@ -214,6 +222,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     }*/
                 }
                 expandedListTextView.setText(NewexpandedListText);
+                notifyDataSetChanged();
             }
 
             ArrayList<String> targetVal = new ArrayList<String>();
@@ -381,7 +390,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             expandedListPosition);
                     String selectedSpinnerItem = spinner_thermistor.getSelectedItem().toString();
                     int index=selectedSpinnerItem.lastIndexOf("Ohm");
-                    setPointVal(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
+                    //setPointVal(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
+                    setPointValForThermistor(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
                     idMap.put(idMap.get(tunerName), selectedSpinnerItem.substring(0,index-1));
 
                 }
@@ -655,20 +665,27 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
-            hayStack.writeHisValById(logicalPoint.toString(), val);
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
+                hayStack.writeHisValById(logicalPoint.toString(), val);
+            }
+            Object devicePoint = hayStack.readMapById(id).get("deviceRef");
         }
-        Object devicePoint = hayStack.readMapById(id).get("deviceRef");
-        Log.e("InsideTempOverrideExpandableListAdapter","hayStack- "+hayStack.readMapById(id));
-        Log.e("InsideTempOverrideExpandableListAdapter","logicalPoint- "+logicalPoint);
-        Log.e("InsideTempOverrideExpandableListAdapter","devicePoint- "+devicePoint);
-        /*if (Objects.nonNull(devicePoint)){
-            hayStack.writeHisValById(devicePoint.toString(), val);
-        }*/
+    }
+
+    public void setPointValForThermistor(String id, double val) {
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
+            }
+        }
     }
 
     @Override

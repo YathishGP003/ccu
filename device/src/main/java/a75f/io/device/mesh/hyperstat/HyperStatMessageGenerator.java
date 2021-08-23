@@ -99,8 +99,8 @@ public class HyperStatMessageGenerator {
                           int mappedVal;
     
                           if (Globals.getInstance().isTemproryOverrideMode()) {
-                              //mappedVal = (short)hayStack.readHisValById(rawPoint.getId()).intValue();
-                              mappedVal = (short)logicalVal;
+                              mappedVal = (short)hayStack.readHisValById(rawPoint.getId()).intValue();
+                              //mappedVal = (short)logicalVal;
                           } else {
                               mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                                                ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)

@@ -136,13 +136,12 @@ public class Globals {
     public void setTemproryOverrideMode(boolean isTemproryOverrideMode){
         isTempOverride = isTemproryOverrideMode;
     }
-    
+
     public boolean isTestMode()
     {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                       .getBoolean("test_mode", false);
     }
-
     public void setTestMode(boolean isTestMode) {
         Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .edit().putBoolean("test_mode", isTestMode).apply();

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -266,14 +267,11 @@ public class TempOverrideFragment extends Fragment {
             sortedExpandableListTitle.add(0,"CM-device");
             expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, sortedExpandableListTitle, expandableListDetail, pointMap, getActivity(), siteName, equipsRef);
             expandableListView.setAdapter(expandableListAdapter);
+            expandableListAdapter.notifyDataSetChanged();
 
             expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
                 @Override
                 public void onGroupExpand(int groupPosition) {
-                    // This is breaking HaystackExplorer for me since the second time we grab data here, the order
-                    // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
-                    // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
-                    // updateAllData();
                     for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
                         if (g != groupPosition) {
                             expandableListView.collapseGroup(g);
@@ -285,7 +283,6 @@ public class TempOverrideFragment extends Fragment {
                         expandableListView.collapseGroup(lastExpandedPosition);
                     }
                     lastExpandedPosition = groupPosition;
-
 
                 }
             });

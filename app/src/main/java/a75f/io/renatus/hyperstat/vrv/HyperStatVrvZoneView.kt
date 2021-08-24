@@ -20,16 +20,22 @@ fun loadView(inflater : LayoutInflater,
              context: Activity,
              nodeAddress : String) {
 
-    val masterOperationMode: View = inflater.inflate(R.layout.zone_item_type3, null)
-    val masterOpModeLabel: TextView = masterOperationMode.findViewById(R.id.text_label)
-    val masterOpModeVal: TextView = masterOperationMode.findViewById(R.id.text_value)
-    masterOpModeLabel.text = "Master Operation Mode : "
+    val masterControllerMode = hayStack.readDefaultVal("config and masterController and mode and " +
+                                            "equipRef == \"$equipId\"")
 
-    val masterOpMode= hayStack.readHisValByQuery("point and master and operation and mode " +
-            "and equipRef == \"$equipId\"")
-    masterOpModeVal.text = VrvOperationMode.values()[masterOpMode.toInt()].toString()
+    if (masterControllerMode.toInt() == 0) {
+        val masterOperationMode: View = inflater.inflate(R.layout.zone_item_type3, null)
+        val masterOpModeLabel: TextView = masterOperationMode.findViewById(R.id.text_label)
+        val masterOpModeVal: TextView = masterOperationMode.findViewById(R.id.text_value)
+        masterOpModeLabel.text = "Master Operation Mode : "
 
-    layout.addView(masterOperationMode)
+        val masterOpMode = hayStack.readHisValByQuery(
+            "point and master and operation and mode and equipRef == \"$equipId\""
+        )
+        masterOpModeVal.text = VrvOperationMode.values()[masterOpMode.toInt()].toString()
+
+        layout.addView(masterOperationMode)
+    }
 
     val viewTitle: View = inflater.inflate(R.layout.zones_item_title, null)
     val textViewTitle = viewTitle.findViewById<TextView>(R.id.textProfile)
@@ -145,7 +151,7 @@ private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
 
     opModeSpinner.adapter = adapter
 
-    val curSelection = hayStack.readDefaultVal("userIntent and operation and mode and equipRef == \"$equipId\"")
+    val curSelection = hayStack.readPointPriorityValByQuery("userIntent and operation and mode and equipRef == \"$equipId\"")
     if (curSelection <= opModeList.size - 1) {
         opModeSpinner.setSelection(curSelection.toInt(), false)
     }
@@ -220,7 +226,7 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
     }
 
     airflowSpinner.adapter = adapter
-    val curSelection = hayStack.readDefaultVal("userIntent and airflowDirection and equipRef == \"$equipId\"")
+    val curSelection = hayStack.readPointPriorityValByQuery("userIntent and airflowDirection and equipRef == \"$equipId\"")
     if (curSelection <= airflowDirList.size - 1) {
         airflowSpinner.setSelection(curSelection.toInt(), false)
     }
@@ -303,7 +309,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
     }
 
     fanSpeedSp.adapter = adapter
-    val curSelection = hayStack.readDefaultVal("userIntent and fanSpeed and equipRef == \"$equipId\"")
+    val curSelection = hayStack.readPointPriorityValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"")
     var curFanSpeed = VrvFanSpeed.values()[curSelection.toInt()]
     if (fanSpeedList.indexOf(curFanSpeed.name) <= fanSpeedList.size-1) {
         fanSpeedSp.setSelection(fanSpeedList.indexOf(curFanSpeed.name), false)

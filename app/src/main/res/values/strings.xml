@@ -953,4 +953,7 @@
         <item >COOL</item>
         <item >AUTO</item>
     </string-array>
+
+    <string name="vrv_master_uninit_text">(Master Setting may not be executed,
+        please re-check back post communication is established)</string>
 </resources>

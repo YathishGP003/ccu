@@ -1,15 +1,15 @@
 package a75f.io.renatus.hyperstat.vrv
 
-import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -28,6 +28,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
     lateinit var humidityMaxSp : Spinner
     lateinit var masterControllerSp : Spinner
     lateinit var setButton : Button
+    lateinit var masterControlUnInitText : TextView
 
 
     private val disposables = CompositeDisposable()           // All of our Rx subscriptions, for easy management.
@@ -73,8 +74,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
             humidityMaxSp = findViewById(R.id.humidityMaxSp)
             masterControllerSp = findViewById(R.id.masterControllerSp)
             setButton = findViewById(R.id.setBtn)
+            masterControlUnInitText = findViewById(R.id.masterControlUnInitText)
         }
-
 
         setUpSpinners()
         setUpViewListeners()
@@ -135,6 +136,10 @@ class HyperStatVrvFragment : BaseDialogFragment() {
                 }
             ))
         }
+
+        CCUUiUtil.setSpinnerDropDownColor(humidityMinSp, context)
+        CCUUiUtil.setSpinnerDropDownColor(humidityMaxSp, context)
+        CCUUiUtil.setSpinnerDropDownColor(masterControllerSp, context)
     }
 
     private fun updateUI(viewState: VrvViewState) {
@@ -142,6 +147,9 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         humidityMinSp.setSelection(viewState.humidityMinPosition)
         humidityMaxSp.setSelection(viewState.humidityMaxPosition)
         masterControllerSp.setSelection(viewState.masterControllerMode)
+        if (viewState.iduConnectionStatus == IduConnectionStatus.Connected.ordinal) {
+            masterControlUnInitText.visibility = View.GONE
+        }
     }
 
     private fun handleError(error: Throwable) {

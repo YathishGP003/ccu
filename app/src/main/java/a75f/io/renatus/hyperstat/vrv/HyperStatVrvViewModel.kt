@@ -1,6 +1,7 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.logic.bo.building.vrv.VrvProfile
@@ -46,11 +47,13 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
         if (vrvProfile != null) {
             val config : VrvProfileConfiguration = vrvProfile!!.getProfileConfiguration(nodeAddr)
             return VrvViewState(
-                config.temperatureOffset.toInt(),
+                tempOffsetIndexFromValue(config.temperatureOffset.toFloat()),
                 config.minHumiditySp.toInt(),
                 config.maxHumiditySp.toInt(),
                 config.masterControllerMode.toInt(),
                 CCUHsApi.getInstance().readHisValByQuery("point and coolHeatRight " +
+                        "and group == \"$nodeAddr\"").toInt(),
+                CCUHsApi.getInstance().readHisValByQuery("point and idu and connectionStatus " +
                         "and group == \"$nodeAddr\"").toInt())
         } else {
             return VrvViewState(
@@ -58,7 +61,8 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 humidityMinPosition = 0,
                 humidityMaxPosition = 100,
                 masterControllerMode = 0,
-                coolHeatRight = 0
+                coolHeatRight = 0,
+                0,
             )
         }
     }
@@ -120,7 +124,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
             = offsetSpinnerValues(TEMP_OFFSET_LIMIT_MAX, TEMP_OFFSET_LIMIT_MIN, TEMP_OFFSET_INC)
 
     fun humiditySpinnerValues(): Array<String?>
-            = offsetSpinnerValues(HUMIDITY_LIMIT_MAX, HUMIDITY_LIMIT_MIN, HUMIDITY_INC, true, "%")
+            = offsetSpinnerValues(HUMIDITY_LIMIT_MAX, HUMIDITY_LIMIT_MIN, HUMIDITY_INC, true, "")
 
 
     private fun offsetSpinnerValues(
@@ -173,9 +177,14 @@ data class VrvViewState(
     val humidityMinPosition: Int,
     val humidityMaxPosition: Int,
     val masterControllerMode : Int,
-    val coolHeatRight : Int
+    val coolHeatRight : Int,
+    val iduConnectionStatus :Int
 )
 
 data class OneTimeUiActions(
     val errorMessage: String? = null
 )
+
+enum class IduConnectionStatus{
+    NotConnected, Initilizing, Connected
+}

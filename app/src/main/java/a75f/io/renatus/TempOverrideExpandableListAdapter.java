@@ -3,7 +3,9 @@ package a75f.io.renatus;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -79,7 +81,25 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent)
     {
+        if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
+            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
+            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString("equipID&Val",null);
+            String[] parts = sharedPrefData.split("-value-");
+            String id = parts[0];
+            String value = parts[1];
+            setPointVal(id, Double.valueOf(value));
+            setPointValForThermistor(id,Double.valueOf(value));
+        }
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
+        String equipId = idMap.get(expandedListText);
+        double value = getPointVal(equipId);
+
+        if (Globals.getInstance().gettempOverCount() < 1){
+            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+            edit.putString("equipID&Val",equipId+"-value-"+value);
+            edit.commit();
+        }
+
         String NewexpandedListText = expandedListText;
         Object unit = null;
         if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat"))) {
@@ -104,8 +124,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog1Out") ||
                     expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
                     expandedListText.startsWith(siteName)) {
-                String equipId = idMap.get(expandedListText);
-                double value = getPointVal(equipId);
                 //double value = getPointVal(idMap.get(expandedListText));
                 unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
                 if (Objects.nonNull(unit)) {
@@ -322,12 +340,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             spinner_thermistor.invalidate();
 
             Object finalUnit = unit;
+            spinner_override_value.setSelection(0,false);
             spinner_override_value.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
                 {
                     Globals.getInstance().setTemproryOverrideMode(true);
+                    Globals.getInstance().incrementTempOverCount();
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
                     String selectedSpinnerItem = spinner_override_value.getSelectedItem().toString();
@@ -362,12 +382,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
+            spinner_relay.setSelection(0,false);
             spinner_relay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
                 {
                     Globals.getInstance().setTemproryOverrideMode(true);
+                    Globals.getInstance().incrementTempOverCount();
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
                     setPointVal(idMap.get(tunerName), Double.parseDouble(String.valueOf(spinner_relay.getSelectedItemId())));
@@ -380,12 +402,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
+            spinner_thermistor.setSelection(0,false);
             spinner_thermistor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
                 {
                     Globals.getInstance().setTemproryOverrideMode(true);
+                    Globals.getInstance().incrementTempOverCount();
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
                     String selectedSpinnerItem = spinner_thermistor.getSelectedItem().toString();
@@ -665,26 +689,22 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        if (val != 0.0){
-            CCUHsApi hayStack = CCUHsApi.getInstance();
-            hayStack.writeHisValById(id, val);
-            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-            if (Objects.nonNull(logicalPoint)) {
-                //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
-                hayStack.writeHisValById(logicalPoint.toString(), val);
-            }
-            Object devicePoint = hayStack.readMapById(id).get("deviceRef");
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writeHisValById(id, val);
+        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+        if (Objects.nonNull(logicalPoint)) {
+            //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
+            hayStack.writeHisValById(logicalPoint.toString(), val);
         }
+        Object devicePoint = hayStack.readMapById(id).get("deviceRef");
     }
 
     public void setPointValForThermistor(String id, double val) {
-        if (val != 0.0){
-            CCUHsApi hayStack = CCUHsApi.getInstance();
-            hayStack.writeHisValById(id, val);
-            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-            if (Objects.nonNull(logicalPoint)) {
-                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
-            }
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writeHisValById(id, val);
+        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+        if (Objects.nonNull(logicalPoint)) {
+            hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
         }
     }
 

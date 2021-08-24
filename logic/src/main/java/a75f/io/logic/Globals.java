@@ -98,6 +98,7 @@ public class Globals {
 
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
+    private int tempOverCount = 0;
 
     private Long curPubNubMsgTimeToken;
     private Globals() {
@@ -135,6 +136,14 @@ public class Globals {
 
     public void setTemproryOverrideMode(boolean isTemproryOverrideMode){
         isTempOverride = isTemproryOverrideMode;
+    }
+
+    public int gettempOverCount(){
+        return tempOverCount;
+    }
+
+    public void incrementTempOverCount(){
+        tempOverCount++;
     }
 
     public boolean isTestMode()

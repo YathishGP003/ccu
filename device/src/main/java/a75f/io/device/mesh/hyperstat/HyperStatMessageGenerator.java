@@ -68,7 +68,7 @@ public class HyperStatMessageGenerator {
                                                                                                                "and limit and min"))
                                             .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
                                                                                                                "and limit and max"))
-                                            .setTemperatureOffset((int) DeviceHSUtil.getTempOffset(address))
+                                            .setTemperatureOffset((int) (10 * DeviceHSUtil.getTempOffset(address)))
                                             .build();
         CcuLog.i(L.TAG_CCU_SERIAL, "Offset "+DeviceHSUtil.getTempOffset(address));
         return settings;

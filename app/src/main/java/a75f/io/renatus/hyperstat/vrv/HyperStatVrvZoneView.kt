@@ -103,7 +103,7 @@ private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
                                         equipId: String,
                                         hayStack: CCUHsApi,
                                         context : Activity) {
-    val masterControllerMode = hayStack.readHisValByQuery("point and masterController and mode " +
+    val masterControllerMode = hayStack.readDefaultVal("point and masterController and mode " +
                                                 "and equipRef == \"$equipId\"")
 
     val masterOperationMode = hayStack.readHisValByQuery("point and master and operation and mode " +

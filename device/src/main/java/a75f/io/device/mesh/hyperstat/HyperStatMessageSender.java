@@ -139,7 +139,7 @@ public class HyperStatMessageSender {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
         }
     
-        writeIduControlMessage(controls, address, MessageType.HYPERSTAT_CONTROLS_MESSAGE, true);
+        writeIduControlMessage(controls, address, MessageType.HYPERSTAT_IDU_CONTROLS_MESSAGE, true);
     }
     
     public static void writeIduControlMessage(HyperStat.HyperStatIduControlsMessage_t message, int address,

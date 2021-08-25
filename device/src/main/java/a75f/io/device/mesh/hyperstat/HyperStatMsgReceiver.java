@@ -74,7 +74,7 @@ public class HyperStatMsgReceiver {
                 HyperStatLocalControlsOverrideMessage_t overrideMessage =
                         HyperStatLocalControlsOverrideMessage_t.parseFrom(messageArray);
                 handleOverrideMessage(overrideMessage, address, hayStack);
-            } else if (messageType == MessageType.HYPERSTAT_P1P2_STATUS_MESSAGE) {
+            } else if (messageType == MessageType.HYPERSTAT_IDU_STATUS_MESSAGE) {
                 HyperStatIduStatusMessage_t p1p2Status =
                     HyperStatIduStatusMessage_t.parseFrom(messageArray);
                 HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);

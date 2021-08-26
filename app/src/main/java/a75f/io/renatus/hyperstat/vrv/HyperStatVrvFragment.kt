@@ -139,7 +139,6 @@ class HyperStatVrvFragment : BaseDialogFragment() {
 
         CCUUiUtil.setSpinnerDropDownColor(humidityMinSp, context)
         CCUUiUtil.setSpinnerDropDownColor(humidityMaxSp, context)
-        CCUUiUtil.setSpinnerDropDownColor(masterControllerSp, context)
     }
 
     private fun updateUI(viewState: VrvViewState) {
@@ -177,6 +176,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
 
         if (coolHeatRight == 0) {
             masterControllerSp.isEnabled = false
+        } else {
+            CCUUiUtil.setSpinnerDropDownColor(masterControllerSp, context)
         }
 
         val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(

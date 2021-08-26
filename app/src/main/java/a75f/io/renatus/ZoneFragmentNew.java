@@ -3507,7 +3507,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double occupied = (double) point.get("forceoccupied");
         if(occupied == (double)Occupancy.FORCEDOCCUPIED.ordinal()){
             textViewLabel2.setText("Temporary Hold: ");
-            textViewValue2.setText("YES");
+            textViewValue2.setText("Yes");
         }else if(occupied == (double)Occupancy.AUTOFORCEOCCUPIED.ordinal()){
             textViewLabel2.setText("Temporary Hold(AUTO): ");
             textViewValue2.setText("Yes");

@@ -47,6 +47,7 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.Occupancy.AUTOFORCEOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
@@ -404,7 +405,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
-            if(curOccupancyMode == FORCEDOCCUPIED) {
+            if(curOccupancyMode == FORCEDOCCUPIED || curOccupancyMode == AUTOFORCEOCCUPIED) {
                 long th = getTemporaryHoldExpiry(equip);
                 if (th > 0) {
                     DateTime et = new DateTime(th);
@@ -1305,7 +1306,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         cachedOccupied.setForcedOccupied(false);
                         cachedOccupied.setPreconditioning(false);
                         clearTempOverrides(equip.getId());
-                    } else {
+                    } else if (prevStatus == AUTOFORCEOCCUPIED){
+                        c = AUTOFORCEOCCUPIED;
+                    }else {
                         c = FORCEDOCCUPIED;
                     }
                 } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {

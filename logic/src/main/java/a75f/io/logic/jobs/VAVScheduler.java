@@ -62,6 +62,17 @@ public class VAVScheduler {
         else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
             occ.setForcedOccupied(true);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
+
+            if(equip.getMarkers().contains("bpos")  &&  occupancyvalue == Occupancy.AUTOAWAY.ordinal() ){
+
+
+                double heatt = heatingDeadBand - autoAwaysetback;
+                double coolt =  coolingDeadBand + autoAwaysetback;
+
+                setDesiredTemp(equip, heatt, "heating",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+                setDesiredTemp(equip, coolt, "cooling",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+            }else{
+
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
@@ -75,8 +86,8 @@ public class VAVScheduler {
             setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
             setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
 
-            if(equip.getMarkers().contains("bpos")  &&  occupancyvalue == Occupancy.AUTOAWAY.ordinal() )
-                setDesiredTemp(equip, autoAwaysetback, "bpos",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+          }
+
         }
 
         return occ;

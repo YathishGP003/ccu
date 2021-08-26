@@ -125,16 +125,13 @@ public class BPOSEquip {
 
 
         Point occupancy = new Point.Builder()
-                .setDisplayName(equipDis + "-occupancy")
-                .setEquipRef(mEquipRef)
+                .setDisplayName(equipDis + "-" + "occupancy")
                 .setSiteRef(siteRef)
+                .setEquipRef(mEquipRef)
                 .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
                 .addMarker("zone").addMarker("bpos")
-                .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur")
-                .addMarker("logical").addMarker("writable").addMarker("mode")
-                .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied," +
                         "vacation,occupancysensing,autoforceoccupied,autoaway")
                 .setTz(tz)
@@ -142,6 +139,37 @@ public class BPOSEquip {
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeDefaultValById(occupancyId, 0.0);
         CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
+
+
+        Point occupancySensor = new Point.Builder()
+                .setDisplayName(equipDis + "-occupancySensor")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("zone").addMarker("bpos").addMarker("occupancy").addMarker("sensor")
+                .addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
+                .setEnums("off,on")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz)
+                .build();
+        String occupancySensorid = CCUHsApi.getInstance().addPoint(occupancySensor);
+        CCUHsApi.getInstance().writeHisValById(occupancySensorid, 0.0);
+
+
+        Point occupancyDetection = new Point.Builder()
+                .setDisplayName(equipDis+"-occupancyDetection")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("occupancy").addMarker("detection").addMarker("bpos").addMarker("his").addMarker("zone")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+        CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
 
         Point zonePriority = new Point.Builder()
                 .setDisplayName(equipDis + "-zonePriority")
@@ -216,6 +244,8 @@ public class BPOSEquip {
                 0.0);
         CCUHsApi.getInstance().writeHisValById(autoawayId,
                 config.getautoAway() ? 1.0 : 0.0);
+
+
 
         Point equipScheduleType = new Point.Builder()
                 .setDisplayName(equipDis + "-scheduleType")
@@ -322,20 +352,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
 
 
-        Point occupancyDetection = new Point.Builder()
-                .setDisplayName(equipDis + "-occupancyDetection")
-                .setEquipRef(mEquipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("occupancy").addMarker("detection").addMarker("bpos")
-                .addMarker("his").addMarker("zone").addMarker("writable")
-                .setGroup(String.valueOf(mNodeAddr))
-                .setEnums("false,true")
-                .setTz(tz)
-                .build();
-        String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-        CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+
 
 
         Point equipScheduleStatus = new Point.Builder()
@@ -366,7 +383,7 @@ public class BPOSEquip {
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
         device.addSensor(Port.SENSOR_RH, humidityId);
-        device.addSensor(Port.SENSOR_OCCUPANCY, occupancyId);
+        device.addSensor(Port.SENSOR_OCCUPANCY, occupancySensorid);
 
 
         device.addPointsToDb();

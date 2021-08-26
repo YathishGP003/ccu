@@ -1151,7 +1151,7 @@ public class Pulse
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if ((occDetPoint != null) && (occDetPoint.size() > 0)){
-				CCUHsApi.getInstance().writeHisValById(occDetPoint.get("id").toString(),val);
+				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
 				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
 						" and his and equipRef == \"" + device.getEquipRef() + "\"");
 			}

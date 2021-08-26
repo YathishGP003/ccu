@@ -163,38 +163,6 @@ public class BPOSTuners {
         hayStack.writeHisValById(iTimeoutId, TunerConstants.DEFAULT_INTEGRAL_TIMEOUT);
 
 
-        Point forcedOccupiedTimer = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"forcedOccupiedTimer")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
-                .addMarker("his")
-                .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
-                .setUnit("m")
-                .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String forcedOccupiedTimerid = hayStack.addPoint(forcedOccupiedTimer);
-        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.DEFAULT_VAL_LEVEL,120.0     , 0);
-        hayStack.writeHisValById(forcedOccupiedTimerid,120.0 );
-
-
-        Point autoAwayZoneTimer = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"autoAwayZoneTimer")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
-                .addMarker("his")
-                .addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
-                .setUnit("m")
-                .setMinVal("1").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String autoAwayZoneTimerid = hayStack.addPoint(autoAwayZoneTimer);
-        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.DEFAULT_VAL_LEVEL,30.0, 0);
-        hayStack.writeHisValById(autoAwayZoneTimerid, TunerConstants.DEFAULT_INTEGRAL_TIMEOUT);
-
-
         Point autoAwayZoneSetbackTemp = new Point.Builder()
                 .setDisplayName(equipDis+"-BPOS-"+"autoAwayZoneSetbackTemp")
                 .setSiteRef(siteRef)
@@ -218,42 +186,6 @@ public class BPOSTuners {
         Log.d("CCU", "addEquipTuners for " + equipdis);
 
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
-
-        Point forcedOccupiedTimer = new Point.Builder()
-                .setDisplayName(equipdis+"-"+"forcedOccupiedTimer")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipref)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp").addMarker("zone")
-                .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String forcedOccupiedTimerid = hayStack.addPoint(forcedOccupiedTimer);
-        BuildingTunerUtil.updateTunerLevels(forcedOccupiedTimerid, roomRef, hayStack);
-        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.DEFAULT_VAL_LEVEL,120.0, 0);
-        hayStack.writeHisValById(forcedOccupiedTimerid, HSUtil.getPriorityVal(forcedOccupiedTimerid));
-
-
-        Point autoAwayZoneTimer = new Point.Builder()
-                .setDisplayName(equipdis+"-"+"autoAwayZoneTimer")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipref)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("auto").addMarker("away").addMarker("time").addMarker("sp").addMarker("zone")
-                .setMinVal("1").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String autoAwayZoneTimerid = hayStack.addPoint(autoAwayZoneTimer);
-        BuildingTunerUtil.updateTunerLevels(autoAwayZoneTimerid, roomRef, hayStack);
-        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.DEFAULT_VAL_LEVEL,30.0, 0);
-        hayStack.writeHisValById(autoAwayZoneTimerid, HSUtil.getPriorityVal(autoAwayZoneTimerid));
-
 
         Point autoAwayZoneSetbackTemp = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"autoAwayZoneSetbackTemp")

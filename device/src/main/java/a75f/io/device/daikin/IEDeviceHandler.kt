@@ -75,6 +75,10 @@ class IEDeviceHandler {
                 fiveMinCounter = 0;
             }
             fiveMinCounter++
+
+            fetchEffDATSetpoint(it, hayStack)
+            fetchEffDAT(it, hayStack)
+            fetchSFCapFbk(it, hayStack)
         }
     }
 
@@ -270,6 +274,49 @@ class IEDeviceHandler {
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching occStatus", error) }
             )
     }
+
+    private fun fetchEffDATSetpoint(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_EFF_DAT_SETPOINT)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and effDATSetpoint",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching effDATSetpoint", error) }
+            )
+    }
+
+    private fun fetchEffDAT(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_DAT_VAL)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and dischargeAirTemp",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching dischargeAirTemp", error) }
+            )
+    }
+
+    private fun fetchSFCapFbk(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_SF_CAPACITY_FEEDBACK)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and sFCapFbk",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching sFCapFbk", error) }
+            )
+    }
+
 
     private fun writeToIEDevice(service: IEService, pointType : String, pointName : String, msg : String)  {
         service.writePoint(

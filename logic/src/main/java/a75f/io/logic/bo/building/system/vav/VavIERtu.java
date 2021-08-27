@@ -392,6 +392,39 @@ public class VavIERtu extends VavSystemProfile
                                 .build();
         String occStatId = CCUHsApi.getInstance().addPoint(occStatus);
         hayStack.writeHisValById(occStatId, 1.0);//Initialized with unoccupied
+    
+        Point EffDATSetpoint = new Point.Builder()
+                              .setDisplayName(equipDis+"-"+"effDATSetpoint")
+                              .setSiteRef(siteRef)
+                              .setEquipRef(equipRef)
+                              .addMarker("system").addMarker("effDATSetpoint").addMarker("ie")
+                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setTz(tz)
+                              .build();
+        String EffDATSetpointId = CCUHsApi.getInstance().addPoint(occStatus);
+        hayStack.writeHisValById(EffDATSetpointId, 0.0);
+    
+        Point dischargeAirTemp = new Point.Builder()
+                              .setDisplayName(equipDis+"-"+"dischargeAirTemp")
+                              .setSiteRef(siteRef)
+                              .setEquipRef(equipRef)
+                              .addMarker("system").addMarker("dischargeAirTemp").addMarker("ie")
+                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setTz(tz)
+                              .build();
+        String dischargeAirTempId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
+        hayStack.writeHisValById(dischargeAirTempId, 0.0);
+    
+        Point SFCapFbk = new Point.Builder()
+                              .setDisplayName(equipDis+"-"+"sFCapFbk")
+                              .setSiteRef(siteRef)
+                              .setEquipRef(equipRef)
+                              .addMarker("system").addMarker("sFCapFbk").addMarker("ie")
+                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setTz(tz)
+                              .build();
+        String SFCapFbkId = CCUHsApi.getInstance().addPoint(SFCapFbk);
+        hayStack.writeHisValById(SFCapFbkId, 0.0);
     }
     
     private void addConfigPoints(String equipref) {

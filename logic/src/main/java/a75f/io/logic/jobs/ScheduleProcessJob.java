@@ -1303,8 +1303,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if(cachedOccupied != null) {
                 if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
                     c = AUTOAWAY;
-                }
-                if (cachedOccupied != null && cachedOccupied.isOccupied()) {
+                } else if (cachedOccupied != null && cachedOccupied.isOccupied()) {
                     cachedOccupied.setForcedOccupied(false);
                     cachedOccupied.setPreconditioning(false);
                     c = OCCUPIED;

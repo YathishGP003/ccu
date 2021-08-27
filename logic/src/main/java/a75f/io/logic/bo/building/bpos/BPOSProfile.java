@@ -34,6 +34,7 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
@@ -109,7 +110,6 @@ public class BPOSProfile extends ZoneProfile {
         Log.d("BPOSProfile", "id  = " + occupancy.get("id"));
         if (occupancy.get("id") == null) Log.d("BPOSProfile", "id is null" + occupancy.get("id"));
 
-        // point read 2 quesry point id
         double occupancyvalue =
                 CCUHsApi.getInstance().readHisValById(occupancy.get("id").toString());
 
@@ -132,7 +132,6 @@ public class BPOSProfile extends ZoneProfile {
                 + "isAutoawayenabled = " + isAutoawayenabled
                 + "occupancyvalue = " + occupancyvalue
                 + "occDetPoint = " + occDetPoint);
-
 
         if (roomTemp > setTempCooling) {
             //Zone is in Cooling
@@ -226,7 +225,7 @@ public class BPOSProfile extends ZoneProfile {
                         "sensor and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
 
         HashMap occupancymode = CCUHsApi.getInstance().read(
-                "point and occupancy and sensor and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+                "point and occupancy and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
 
 
         Occupied occuStatus =
@@ -383,7 +382,7 @@ public class BPOSProfile extends ZoneProfile {
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
         HashMap occupancymode = CCUHsApi.getInstance().read(
-                "point and occupancy and sensor and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+                "point and occupancy  and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         double occupancyModeval = CCUHsApi.getInstance().readHisValByQuery(
                 "point and  bpos and occupancy  and his and " +
                         "mode and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
@@ -413,11 +412,12 @@ public class BPOSProfile extends ZoneProfile {
                 Log.d("BPOSProfile", "  auto away case -  min = " + min + " autoawaytime ="
                         + autoawaytime);
 
-                if (min >= autoawaytime) {
+                if (min >= autoawaytime && occupancyModeval != (double) Occupancy.AUTOAWAY.ordinal()) {
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.AUTOAWAY.ordinal());
                 }
             } else {
+                if(occupancysensor)
                 CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                         (double) Occupancy.OCCUPIED.ordinal());
             }

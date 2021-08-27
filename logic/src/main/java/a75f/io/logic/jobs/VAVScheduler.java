@@ -51,7 +51,7 @@ public class VAVScheduler {
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
         double autoAwaysetback = TunerUtil.readTunerValByQuery("auto and away and setback", equip.getId());
         double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
-                " sensor and equipRef == \"" + equip.getId() + "\"");
+                " mode and equipRef == \"" + equip.getId() + "\"");
         
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
@@ -64,8 +64,8 @@ public class VAVScheduler {
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
 
             if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
-                double heatt = heatingDeadBand - autoAwaysetback;
-                double coolt = coolingDeadBand + autoAwaysetback;
+                double heatt = occ.getHeatingVal()  - autoAwaysetback;
+                double coolt = occ.getCoolingVal()  + autoAwaysetback;
 
                 setDesiredTemp(equip, heatt, "heating",
                         occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);

@@ -44,7 +44,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun getInitialViewState(): VrvViewState {
-        if (vrvProfile != null) {
+        vrvProfile?.let {
             val config : VrvProfileConfiguration = vrvProfile!!.getProfileConfiguration(nodeAddr)
             return VrvViewState(
                 tempOffsetIndexFromValue(config.temperatureOffset.toFloat()),
@@ -55,7 +55,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                         "and group == \"$nodeAddr\"").toInt(),
                 CCUHsApi.getInstance().readHisValByQuery("point and idu and connectionStatus " +
                         "and group == \"$nodeAddr\"").toInt())
-        } else {
+        } ?: run {
             return VrvViewState(
                 tempOffsetPosition = tempOffsetIndexFromValue(0f),
                 humidityMinPosition = 0,

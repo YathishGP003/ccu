@@ -7,6 +7,9 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.HyperStat.HyperStatIduControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
+import a75f.io.device.mesh.DLog;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 /**
  * Handle IDU specific message for HyperStat VRV Variant.
@@ -15,7 +18,9 @@ class HyperStatIduMessageHandler {
     
     public static void handleIduStatusMessage(HyperStatIduStatusMessage_t iduStatus,
                                                int nodeAddress, CCUHsApi hayStack) {
-        
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, iduStatus.toString());
+        }
         setOperationMode(iduStatus.getSetOperationMode(), nodeAddress, hayStack);
         setFanSpeed(iduStatus.getFanSpeed(), nodeAddress, hayStack);
         setAirflowDirection(iduStatus.getAirflowDirection(), nodeAddress, hayStack);

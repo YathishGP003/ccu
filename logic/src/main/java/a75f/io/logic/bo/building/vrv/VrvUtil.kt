@@ -18,7 +18,7 @@ enum class VrvOperationMode {
     }
 }
 enum class VrvFanSpeed {
-    Auto, Low, Medium, High
+    Low, Medium, High, Auto
 }
 
 enum class VrvAirflowDirection {

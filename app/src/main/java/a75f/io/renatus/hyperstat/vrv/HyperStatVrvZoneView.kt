@@ -259,10 +259,6 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
 
     val fanSpeedList : MutableList<String> = arrayListOf()
 
-    if (fanSpeedControlLevel.toInt() > 1) {
-        fanSpeedList.add(VrvFanSpeed.Auto.name)
-    }
-
     when {
         fanSpeedControlLevel.toInt() == 1 -> {
             fanSpeedList.add(VrvFanSpeed.High.name)
@@ -278,6 +274,9 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
         }
     }
 
+    if (fanSpeedControlLevel.toInt() > 1) {
+        fanSpeedList.add(VrvFanSpeed.Auto.name)
+    }
 
     val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
         context,

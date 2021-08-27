@@ -148,7 +148,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("zone").addMarker("fanSpeed").addMarker("vrv")
             .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
             .setGroup(nodeAddr.toString())
-            .setEnums("Auto,Low,Medium,High")
+            .setEnums("Low,Medium,High,Auto")
             .setTz(equip.tz)
             .build()
         val fanSpeedId = hayStack.addPoint(fanSpeed)

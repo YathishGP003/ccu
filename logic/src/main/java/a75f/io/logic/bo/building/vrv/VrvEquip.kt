@@ -370,7 +370,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("config").addMarker("vrv").addMarker("writable").addMarker("zone")
             .addMarker("masterController").addMarker("mode").addMarker("sp")
             .setGroup(nodeAddr.toString())
-            .setUnit("\u00B0F")
+            .setEnums("Not-Master,Master")
             .setTz(equip.tz)
             .build()
         val masterControllerModeId = hayStack.addPoint(masterControllerMode)

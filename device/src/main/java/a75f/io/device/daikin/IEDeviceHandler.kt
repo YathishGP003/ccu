@@ -11,8 +11,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class IEDeviceHandler {
 
     private var currentCondMode = NetApplicMode.UnInit
-    private var staticPressureSp : Double = -1.0
-    private var fanSpeedSp : Double = -1.0
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
     private var fiveMinCounter = 0
 
@@ -136,34 +134,26 @@ class IEDeviceHandler {
     }
 
     /**
-     * Update fanLoop only when multizone configuration or dspSp or fanLoopOp changes.
+     * Update fanSpeed every minute
      */
     private fun updateFanControl(service : IEService, hayStack: CCUHsApi, systemProfile: VavIERtu) {
 
         if (isMultiZoneEnabled(hayStack)) {
-            val updatedStaticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
-            if (updatedStaticPressureSp != staticPressureSp) {
-                writeToIEDevice(
-                    service,
-                    IE_POINT_TYPE_AV,
-                    IE_POINT_NAME_DSP_SETPOINT,
-                    IE_MSG_BODY.format(updatedStaticPressureSp)
-                )
-                staticPressureSp = updatedStaticPressureSp
-                fanSpeedSp = -1.0
-            }
+            val staticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_DSP_SETPOINT,
+                IE_MSG_BODY.format(staticPressureSp)
+            )
         } else {
             val fanSpeed = getFanSpeedTarget(systemProfile)
-            if (fanSpeedSp != fanSpeed) {
-                writeToIEDevice(
-                    service,
-                    IE_POINT_TYPE_AV,
-                    IE_POINT_NAME_FAN_SPEED_CONTROL,
-                    IE_MSG_BODY.format(fanSpeed)
-                )
-                fanSpeedSp = fanSpeed
-                staticPressureSp = -1.0
-            }
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_FAN_SPEED_CONTROL,
+                IE_MSG_BODY.format(fanSpeed)
+            )
         }
     }
 

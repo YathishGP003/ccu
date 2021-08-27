@@ -393,7 +393,7 @@ public class VavIERtu extends VavSystemProfile
         String occStatId = CCUHsApi.getInstance().addPoint(occStatus);
         hayStack.writeHisValById(occStatId, 1.0);//Initialized with unoccupied
     
-        Point EffDATSetpoint = new Point.Builder()
+        Point effDATSetpoint = new Point.Builder()
                               .setDisplayName(equipDis+"-"+"effDATSetpoint")
                               .setSiteRef(siteRef)
                               .setEquipRef(equipRef)
@@ -401,8 +401,8 @@ public class VavIERtu extends VavSystemProfile
                               .addMarker("sp").addMarker("his").setHisInterpolate("cov")
                               .setTz(tz)
                               .build();
-        String EffDATSetpointId = CCUHsApi.getInstance().addPoint(occStatus);
-        hayStack.writeHisValById(EffDATSetpointId, 0.0);
+        String effDATSetpointId = CCUHsApi.getInstance().addPoint(effDATSetpoint);
+        hayStack.writeHisValById(effDATSetpointId, 0.0);
     
         Point dischargeAirTemp = new Point.Builder()
                               .setDisplayName(equipDis+"-"+"dischargeAirTemp")

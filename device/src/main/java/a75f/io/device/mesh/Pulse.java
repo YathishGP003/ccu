@@ -264,7 +264,6 @@ public class Pulse
 			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
 	}
 
-	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
 		Log.d("Pulse", " In handleSensorEvents ++" );
 		SmartNode node = new SmartNode(addr);
@@ -1174,7 +1173,7 @@ public class Pulse
 
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
-		if((curOccuStatus != val) ) {
+		if((val == 1) ) {
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if ((occDetPoint != null) && (occDetPoint.size() > 0)){

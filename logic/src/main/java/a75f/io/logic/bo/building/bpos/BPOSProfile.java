@@ -89,7 +89,7 @@ public class BPOSProfile extends ZoneProfile {
 
         if (isAutoforceoccupiedenabled) runAutoForceOccupyOperation(mBPOSEquip.mEquipRef);
 
-       // if (isAutoawayenabled) runAutoAwayOperation(mBPOSEquip.mEquipRef)
+        if (isAutoawayenabled) runAutoAwayOperation();
 
         double zoneCurTemp = mBPOSEquip.getCurrentTemp();
         double desiredTempCooling =
@@ -214,8 +214,6 @@ public class BPOSProfile extends ZoneProfile {
     }
 
 
-
-
     private void runAutoForceOccupyOperation(String equipRef) {
         boolean occupantDetected = CCUHsApi.getInstance().readHisValByQuery(
                 "point and  bpos and occupancy and detection and his and equipRef  " +
@@ -223,22 +221,26 @@ public class BPOSProfile extends ZoneProfile {
         double occupancyModeval = CCUHsApi.getInstance().readHisValByQuery(
                 "point and  bpos and occupancy  and his and " +
                         "mode and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
+        boolean occupancysensor = CCUHsApi.getInstance().readHisValByQuery(
+                "point and  bpos and occupancy  and his and " +
+                        "sensor and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
 
         HashMap occupancymode = CCUHsApi.getInstance().read(
                 "point and occupancy and sensor and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
-        HashMap ocupancyDetection = CCUHsApi.getInstance().read(
-                "point and  bpos and occupancy and detection and his and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
 
-        Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
+
+        Occupied occuStatus =
+                ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
 
         if ((!occuStatus.isOccupied() || occuStatus.getVacation() != null)
                 && occupancyModeval != Occupancy.AUTOAWAY.ordinal()
         ) {
 
-            long temporaryHoldTime = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(mBPOSEquip.mEquipRef));
+            long temporaryHoldTime =
+                    ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(mBPOSEquip.mEquipRef));
             long differenceInMinutes = findDifference(temporaryHoldTime, true);
 
-            if (occupantDetected) {
+            if (occupancysensor) {
                 // If we are not is in force occupy then fall into force occupy
                 if (occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
 
@@ -253,17 +255,11 @@ public class BPOSProfile extends ZoneProfile {
                     Log.i(Globals.TAG, "We are already in force occupy");
                     // We are already in force occupy
 
-                     HisItem occupancyHistory = CCUHsApi.getInstance().curRead(ocupancyDetection.get("id").toString());
-
-                    if (occupancyHistory == null) {
-                        Log.i(Globals.TAG, "occupancy History Does not exist..");
-                    }
-                    Date lastUpdatedTime= new Date(String.valueOf(occupancyHistory));
-
                     // If the last
                     int quickPeriod = 30;
                     if (differenceInMinutes < quickPeriod) {
-                        Log.i(Globals.TAG, "Occupant Detected time is less than 30 min so extending the time");
+                        Log.i(Globals.TAG, "Occupant Detected time is less than 30 min so " +
+                                "extending the time");
                         double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
                         updateDesiredtemp(desiredAvgTemp);
                     } else {
@@ -293,22 +289,28 @@ public class BPOSProfile extends ZoneProfile {
     }
 
 
-    private long findDifference( Long expirytime,  Boolean isCurrentGreater) {
+    private long findDifference(Long expirytime, Boolean isCurrentGreater) {
         Date expiryTime = new Date(expirytime);
-        Date currentTime =new    Date(System.currentTimeMillis());
-        long diff = (isCurrentGreater ? (expiryTime.getTime() - currentTime.getTime()) : (currentTime.getTime() - expiryTime.getTime()));
+        Date currentTime = new Date(System.currentTimeMillis());
+        long diff = (isCurrentGreater ? (expiryTime.getTime() - currentTime.getTime()) :
+                (currentTime.getTime() - expiryTime.getTime()));
         return ((diff / 1000) / 60);
     }
 
     private void resetForceOccupy() {
         Log.i(Globals.TAG, "Resetting the resetForceOccupy: ");
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
-                "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"",0.0);
+                "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"", 0.0);
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
-                "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"",(double)Occupancy.UNOCCUPIED.ordinal());
+                "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
+                (double) Occupancy.UNOCCUPIED.ordinal());
 
-        HashMap coolDT =CCUHsApi.getInstance().read("point and desired and cooling and equipref == \"" + mBPOSEquip.mEquipRef + "\"");;
-        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and equipref == \"" + mBPOSEquip.mEquipRef + "\"");;
+        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and equipref " +
+                "== \"" + mBPOSEquip.mEquipRef + "\"");
+        ;
+        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and equipref " +
+                "== \"" + mBPOSEquip.mEquipRef + "\"");
+        ;
         ScheduleProcessJob.clearOverrides(heatDT.get("id").toString());
         ScheduleProcessJob.clearOverrides(coolDT.get("id").toString());
     }
@@ -371,7 +373,55 @@ public class BPOSProfile extends ZoneProfile {
         ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint)
                         .build(), new Point.Builder().setHashMap(heatinDtPoint).build(),
                 new Point.Builder().
-                        setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp, dt);
+                        setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp
+                , dt);
+
+    }
+
+    private void runAutoAwayOperation() {
+        String zoneId = HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef);
+        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        boolean occupied = (occ == null ? false : occ.isOccupied());
+        HashMap occupancymode = CCUHsApi.getInstance().read(
+                "point and occupancy and sensor and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        double occupancyModeval = CCUHsApi.getInstance().readHisValByQuery(
+                "point and  bpos and occupancy  and his and " +
+                        "mode and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
+        boolean occupancysensor = CCUHsApi.getInstance().readHisValByQuery(
+                "point and  bpos and occupancy  and his and " +
+                        "sensor and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
+        HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                "point and  bpos and occupancy and detection and his and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
+
+        if (occupied  && occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
+            Log.d("BPOSProfile", "  auto away handle");
+            //if the oocupantnotdetected for autoAwayTimer
+            // then enter autoaway
+            if (!occupancysensor) {
+                Log.d("BPOSProfile", "  auto away case -  occDetPoint <= 0");
+                //check if there was no detection from past autoawaytimer
+                HisItem hisItem =
+                        CCUHsApi.getInstance().curRead(ocupancyDetection.get("id").toString());
+                Date lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
+                DateTime et = new DateTime(lastupdatedtime);
+                int min = et.getMinuteOfHour();
+                // read autoawaytimer tuner
+                double autoawaytime = TunerUtil.readTunerValByQuery(" point and tuner and auto " +
+                        "and away and " +
+                        "time ", mBPOSEquip.mEquipRef);
+
+                Log.d("BPOSProfile", "  auto away case -  min = " + min + " autoawaytime ="
+                        + autoawaytime);
+
+                if (min >= autoawaytime) {
+                    CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                            (double) Occupancy.AUTOAWAY.ordinal());
+                }
+            } else {
+                CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                        (double) Occupancy.OCCUPIED.ordinal());
+            }
+        }
 
     }
 

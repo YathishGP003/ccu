@@ -215,7 +215,7 @@ public class BPOSProfile extends ZoneProfile {
 
     private void runAutoForceOccupyOperation(String equipRef) {
         boolean occupantDetected = CCUHsApi.getInstance().readHisValByQuery(
-                "point and  bpos and occupancy and detection and his and equipRef  " +
+                "point and occupancy and detection and his and equipRef  " +
                         "== \"" + mBPOSEquip.mEquipRef + "\"") > 0;
         double occupancyModeval = CCUHsApi.getInstance().readHisValByQuery(
                 "point and  bpos and occupancy  and his and " +
@@ -415,6 +415,8 @@ public class BPOSProfile extends ZoneProfile {
                 if (min >= autoawaytime && occupancyModeval != (double) Occupancy.AUTOAWAY.ordinal()) {
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.AUTOAWAY.ordinal());
+                    CCUHsApi.getInstance().writeHisValById(ocupancyDetection.get("id").toString(),
+                            0.0);
                 }
             } else {
                 if(occupancysensor)

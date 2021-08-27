@@ -50,7 +50,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     private HyperStatSenseVM mHyperStatSenseVM;
     private HyperStatSenseProfile mHSSenseProfile;
     HyperStatSenseConfiguration mHSSenseConfig;
-    static final int TEMP_OFFSET_LIMIT = 100;
+    static int TEMPERATURE_OFFSET = 100;
 
     short mNodeAddress;
     String mRoomName;
@@ -133,18 +133,17 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
 
         /** Setting temperature offset limit */
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
-        for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
-            nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
+        String[] nums = offsetSpinnerValues(10,-10,0.1,true,"");
+
         mTemperatureOffset.setDisplayedValues(nums);
         mTemperatureOffset.setMinValue(0);
-        mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
-        mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        mTemperatureOffset.setMaxValue(nums.length -1);
         mTemperatureOffset.setWrapSelectorWheel(false);
+        mTemperatureOffset.setValue(TEMPERATURE_OFFSET);
         if (mHSSenseProfile != null) {
             CcuLog.d(L.TAG_CCU_UI, "Get HyperStat SenseConfig: ");
             mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);
-            mTemperatureOffset.setValue((int) (mHSSenseConfig.temperatureOffset + TEMP_OFFSET_LIMIT));
+            mTemperatureOffset.setValue((offsetIndexFromValue(-10,0.1,mHSSenseConfig.temperatureOffset)));
 
 
             mThermostat1Sp.setSelection(mHSSenseConfig.th1Sensor);
@@ -183,6 +182,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         });*/
 
     }
+
 
 
     @OnCheckedChanged({R.id.th1, R.id.th2, R.id.anlg1, R.id.anlg2})
@@ -237,7 +237,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     private void setupSenseProfile() {
 
         HyperStatSenseConfiguration hssense = new HyperStatSenseConfiguration();
-        hssense.temperatureOffset = mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        hssense.temperatureOffset = offsetFromIndex(-10,0.1,mTemperatureOffset.getValue() );
         hssense.isTh1Enable = mTherm1toggle.isChecked();
         hssense.isTh2Enable = mTherm2toggle.isChecked();
         hssense.isAnalog1Enable = mAnalog1toggle.isChecked();
@@ -293,5 +293,31 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         }
     }
 
+
+    private String[] offsetSpinnerValues(int max,int min, double inc,boolean displayAsInt, String suffix){
+        int range = max - min;
+        int  count = (int) (range / inc) + 1;
+        int offsetFromZeroCount =(int) (min / inc);
+        String[] nums = new String[count];
+        for (int nNum = 0  ;  nNum<count ;nNum++) {
+            double rawValue = (float)(nNum + offsetFromZeroCount) * inc;
+            if (displayAsInt) {
+                nums[nNum] = String.format("%.1f", rawValue) + suffix;
+            } else {
+                nums[nNum] = String.format("%.1f", rawValue) + suffix;
+            }
+        }
+        return nums;
+    }
+
+    private double offsetFromIndex(int min, double inc, int index) {
+        double offsetFromZeroCount = (min / inc);
+        return Double.parseDouble(String.format("%.2f", (double)(index + offsetFromZeroCount) * inc));
+    }
+
+    private int offsetIndexFromValue(int min, double inc, double offset) {
+        int offsetFromZeroCount = (int)(min / inc);
+        return (int)(offset / inc) - offsetFromZeroCount;
+    }
 
 }

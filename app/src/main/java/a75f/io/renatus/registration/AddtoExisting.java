@@ -5,21 +5,28 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
+
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,6 +36,11 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HRef;
+
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
@@ -36,8 +48,16 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
+import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.retrofit.ApiClient;
+import a75f.io.renatus.util.retrofit.ApiInterface;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 public class AddtoExisting extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -51,9 +71,6 @@ public class AddtoExisting extends Fragment {
 
     ImageView            imageGoback;
 
-    TextInputLayout mTextInputSiteId;
-    EditText             mSiteId;
-
     TextInputLayout mTextInputEmail;
     EditText             mSiteEmailId;
 
@@ -66,7 +83,8 @@ public class AddtoExisting extends Fragment {
 
     ProgressBar mProgressDialog;
     Prefs prefs;
-
+    EditText mEt1, mEt2, mEt3, mEt4, mEt5, mEt6;
+    View toastLayout, toast_Fail;
     public AddtoExisting() {
         // Required empty public constructor
     }
@@ -88,7 +106,6 @@ public class AddtoExisting extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,92 +119,231 @@ public class AddtoExisting extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
-        mContext = getContext().getApplicationContext();
+        try {
+            //Creating the LayoutInflater instance
+            LayoutInflater li = getLayoutInflater();
+            toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
+            toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
 
-        imageGoback = rootView.findViewById(R.id.imageGoback);
+            mContext = getContext().getApplicationContext();
 
-        mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
-        mSiteId = rootView.findViewById(R.id.editSiteID);
+            imageGoback = rootView.findViewById(R.id.imageGoback);
 
-        mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
-        mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
+            mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
+            mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
-        mTextInputPass = rootView.findViewById(R.id.textInputPassword);
-        mPassword = rootView.findViewById(R.id.editFacilityPass);
+            mTextInputPass = rootView.findViewById(R.id.textInputPassword);
+            mPassword = rootView.findViewById(R.id.editFacilityPass);
 
-        mNext1 = rootView.findViewById(R.id.buttonNext1);
-        mNext2 = rootView.findViewById(R.id.buttonNext2);
+            mNext1 = rootView.findViewById(R.id.buttonNext1);
+            mNext2 = rootView.findViewById(R.id.buttonNext2);
 
-        mProgressDialog = rootView.findViewById(R.id.progressbar);
-
-        mTextInputSiteId.setHintEnabled(false);
-        mTextInputEmail.setHintEnabled(false);
-        mTextInputPass.setHintEnabled(false);
-
-
-        mTextInputSiteId.setErrorEnabled(true);
-        mTextInputEmail.setErrorEnabled(true);
-        mTextInputPass.setErrorEnabled(true);
-
-        mTextInputSiteId.setError("");
-        mTextInputEmail.setError("");
-        mTextInputPass.setError("");
+            mProgressDialog = rootView.findViewById(R.id.progressbar);
+            mTextInputEmail.setHintEnabled(false);
+            mTextInputPass.setHintEnabled(false);
 
 
+            //mTextInputSiteId.setErrorEnabled(true);
+            mTextInputEmail.setErrorEnabled(true);
+            mTextInputPass.setErrorEnabled(true);
 
-        mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
-        mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
-        mPassword.addTextChangedListener(new EditTextWatcher(mPassword));
-
-
-
-        imageGoback.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                ((FreshRegistration)getActivity()).selectItem(1);
-            }
-        });
+            //mTextInputSiteId.setError("");
+            mTextInputEmail.setError("");
+            mTextInputPass.setError("");
 
 
-        mNext1.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mNext1.setEnabled(false);
-                int[] mandotaryIds = new int []
-                        {
-                                R.id.editSiteID
-                        };
-                if(!validateEditText(mandotaryIds))
-                {
-                    String siteId = StringUtils.trim(mSiteId.getText().toString());
-                    siteId = StringUtils.prependIfMissing(siteId, "@");
-                    loadExistingSite(siteId);
+            //mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
+            mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
+            mPassword.addTextChangedListener(new EditTextWatcher(mPassword));
+
+            mEt1 = rootView.findViewById(R.id.otp_edit_text1);
+            mEt2 = rootView.findViewById(R.id.otp_edit_text2);
+            mEt3 = rootView.findViewById(R.id.otp_edit_text3);
+            mEt4 = rootView.findViewById(R.id.otp_edit_text4);
+            mEt5 = rootView.findViewById(R.id.otp_edit_text5);
+            mEt6 = rootView.findViewById(R.id.otp_edit_text6);
+
+            addTextWatcher(mEt1);
+            addTextWatcher(mEt2);
+            addTextWatcher(mEt3);
+            addTextWatcher(mEt4);
+            addTextWatcher(mEt5);
+            addTextWatcher(mEt6);
+
+            imageGoback.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    Intent intent = new Intent(getActivity(), RenatusLandingActivity.class);
+                    startActivity(intent);
                 }
-            }
-        });
+            });
 
-        mNext2.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                int[] mandotaryIds = new int []
-                        {
-                                R.id.editFacilityEmail,
-                                R.id.editFacilityPass
-                        };
-                if(!validateEditText(mandotaryIds))
-                {
-                    goTonext();
+            mNext1.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    int[] mandotaryIds = new int[]
+                            {
+                                    R.id.otp_edit_text1,
+                                    R.id.otp_edit_text2,
+                                    R.id.otp_edit_text3,
+                                    R.id.otp_edit_text4,
+                                    R.id.otp_edit_text5,
+                                    R.id.otp_edit_text6
+                            };
+                    EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
+                    EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
+                    EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
+                    EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
+                    EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
+                    EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
+                    if (!validateEditText(mandotaryIds)) {
+                        String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
+                        OTPValidation(OTP);
+                    } else
+                        Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+
+            mNext2.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    int[] mandotaryIds = new int[]
+                            {
+                                    R.id.editFacilityEmail,
+                                    R.id.editFacilityPass
+                            };
+                    if (!validateEditText(mandotaryIds)) {
+                        goTonext();
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         return rootView;
     }
 
+    private void OTPValidation(String OTPCode) {
+        ApiInterface apiInterface= null;
+        try {
+            apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+        Call<ResponseBody> signInCall = apiInterface.ValidateOTP(OTPCode);
+        ApiClient.getApiResponse(signInCall, new ApiClient.ApiCallBack() {
+            @Override
+            public void Success(Response<ResponseBody> response) throws IOException {
+                //progressLoader.DismissProgress();
+                String responseData= response.body().string();
+                //Log.e("InsideAddtoExist","responseData_Success- "+responseData);
+                try {
+                    JSONObject jsonObject=new JSONObject(responseData);
+                    if (jsonObject.getString("valid") == "true"){
+                        JSONObject siteCode = jsonObject.getJSONObject("siteCode");
+                        Toast toast = new Toast(getApplicationContext());
+                        toast.setGravity(Gravity.BOTTOM, 50, 50);
+                        toast.setView(toastLayout);
+                        toast.setDuration(Toast.LENGTH_LONG);
+                        toast.show();
+                        loadExistingSite(siteCode.getString("siteId"));
+                    }else{
+                        Toast toast = new Toast(getApplicationContext());
+                        toast.setGravity(Gravity.BOTTOM, 50, 50);
+                        toast.setView(toast_Fail);
+                        toast.setDuration(Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    //commonUtils.toastShort(e.toString(),getApplicationContext());
+                }
+
+            }
+
+            @Override
+            public void Failure(Response<ResponseBody> response) throws IOException
+            {
+                Toast.makeText(mContext, "Request Failed...Please talk to technical team", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void Error(Throwable t)
+            {
+               /* progressLoader.DismissProgress();
+                commonUtils.toastShort(t.toString(),getApplicationContext());*/
+                Toast.makeText(mContext, "Error...Please check Internet connection", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
+    private void addTextWatcher(final EditText one) {
+        one.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                switch (one.getId()) {
+                    case R.id.otp_edit_text1:
+                        if (one.length() == 1) {
+                            mEt2.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text2:
+                        if (one.length() == 1) {
+                            mEt3.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt1.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text3:
+                        if (one.length() == 1) {
+                            mEt4.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt2.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text4:
+                        if (one.length() == 1) {
+                            mEt5.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt3.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text5:
+                        if (one.length() == 1) {
+                            mEt6.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt4.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text6:
+                        if (one.length() == 1) {
+                            InputMethodManager inputManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                            mNext1.setEnabled(true);
+                        } else if (one.length() == 0) {
+                            mEt5.requestFocus();
+                        }
+                        break;
+                }
+            }
+        });
+    }
 
 
     private class EditTextWatcher implements TextWatcher {
@@ -202,16 +358,16 @@ public class AddtoExisting extends Fragment {
 
         public void afterTextChanged(Editable editable) {
             switch(view.getId()){
-                case R.id.editSiteID:
+                /*case R.id.editSiteID:
                     if(mSiteId.getText().length() > 0) {
-                        mTextInputSiteId.setErrorEnabled(true);
-                        mTextInputSiteId.setError(getString(R.string.input_siteid));
+                        //mTextInputSiteId.setErrorEnabled(true);
+                        //mTextInputSiteId.setError(getString(R.string.input_siteid));
                         mSiteId.setError(null);
                     }else {
-                        mTextInputSiteId.setError("");
-                        mTextInputSiteId.setErrorEnabled(true);
+                        //mTextInputSiteId.setError("");
+                        //mTextInputSiteId.setErrorEnabled(true);
                         mSiteId.setError(null);
-                    }
+                    }*/
                 case R.id.editFacilityEmail:
                     if(mSiteEmailId.getText().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
@@ -350,6 +506,7 @@ public class AddtoExisting extends Fragment {
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 saveExistingSite(siteId);
+                //navigateToCCUScreen();
                 Toast.makeText(getActivity(), "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
 
             }
@@ -362,7 +519,10 @@ public class AddtoExisting extends Fragment {
         });
 
         builder.setTitle("Site");
+        builder.setTitle("ADD CCU");
         builder.setMessage("Registering for site ID " + siteId);
+        /*HashMap site = CCUHsApi.getInstance().read("site");
+        builder.setMessage("Are you sure you want to add a new CCU to site " +site.get("dis"));*/
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -408,7 +568,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving site...");
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving site...This may take upto 5~10 mins");
             }
 
             @Override

@@ -40,6 +40,7 @@ import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.renatus.AboutFragment;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -127,7 +128,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             public void onClick(View v) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-
                 // TODO Auto-generated method stub
                 if (currentFragment instanceof WifiFragment) {
                     selectItem(1);
@@ -1188,6 +1188,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.bottomMargin = 24;
             paramsPager.rightMargin = 101;
             container.setLayoutParams(paramsPager);
+        }
+        if (position == 22) {
+
+            Intent intent = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+            startActivity(intent);
         }
     }
 

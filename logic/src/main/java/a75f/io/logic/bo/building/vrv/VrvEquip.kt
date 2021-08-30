@@ -131,7 +131,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("zone").addMarker("operation").addMarker("mode").addMarker("vrv")
             .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
             .setGroup(nodeAddr.toString())
-            .setEnums("Off,Fan,Heat,Cool,Auto")
+            .setEnums("Off,Fan,Heating,Cooling,Auto")
             .setTz(equip.tz)
             .build()
         val operationModeId = hayStack.addPoint(operationMode)

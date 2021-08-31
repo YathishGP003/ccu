@@ -395,7 +395,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         if(curOccupancyMode == AUTOAWAY){
-            return "AUTOAWAY";
+            return String.format("In Autoaway");
         }
 
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
@@ -411,7 +411,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
-            if(curOccupancyMode == FORCEDOCCUPIED || curOccupancyMode == AUTOFORCEOCCUPIED) {
+            if(curOccupancyMode == AUTOFORCEOCCUPIED) {
+                long th = getTemporaryHoldExpiry(equip);
+                if (th > 0) {
+                    DateTime et = new DateTime(th);
+                    int min = et.getMinuteOfHour();
+                    return String.format("In Temporary Hold(AUTO) | till %s", et.getHourOfDay() + ":" + (min < 10 ? "0" + min : min));
+                }
+            }
+            else if(curOccupancyMode == FORCEDOCCUPIED ) {
                 long th = getTemporaryHoldExpiry(equip);
                 if (th > 0) {
                     DateTime et = new DateTime(th);

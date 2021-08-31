@@ -16,6 +16,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.tuners.TunerUtil;
@@ -49,7 +50,6 @@ public class VAVScheduler {
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
-        double autoAwaysetback = TunerUtil.readTunerValByQuery("auto and away and setback", equip.getId());
         double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
                 " mode and equipRef == \"" + equip.getId() + "\"");
         
@@ -64,13 +64,15 @@ public class VAVScheduler {
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
 
             if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
-                double heatt = occ.getHeatingVal()  - autoAwaysetback;
-                double coolt = occ.getCoolingVal()  + autoAwaysetback;
+                Log.d("BPOSProfile", "in bpos vav: ");
+                double heatt = occ.getHeatingVal()  - setback;
+                double coolt = occ.getCoolingVal()  + setback;
 
                 setDesiredTemp(equip, heatt, "heating",
                         occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
                 setDesiredTemp(equip, coolt, "cooling",
                         occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+
             } else {
 
                 double avgTemp = (occ.getCoolingVal() + occ.getHeatingVal()) / 2.0;

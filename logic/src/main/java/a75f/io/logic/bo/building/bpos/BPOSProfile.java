@@ -214,9 +214,6 @@ public class BPOSProfile extends ZoneProfile {
 
 
     private void runAutoForceOccupyOperation(String equipRef) {
-        boolean occupantDetected = CCUHsApi.getInstance().readHisValByQuery(
-                "point and occupancy and detection and his and equipRef  " +
-                        "== \"" + mBPOSEquip.mEquipRef + "\"") > 0;
         double occupancyModeval = CCUHsApi.getInstance().readHisValByQuery(
                 "point and  bpos and occupancy  and his and " +
                         "mode and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
@@ -230,6 +227,10 @@ public class BPOSProfile extends ZoneProfile {
 
         Occupied occuStatus =
                 ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
+
+        Log.d("BPOSProfile", "occupied = " + occuStatus
+                + "occupancyModeval = " + occupancyModeval
+                + "occupancysensor = " + occupancysensor);
 
         if ((!occuStatus.isOccupied() || occuStatus.getVacation() != null)
                 && occupancyModeval != Occupancy.AUTOAWAY.ordinal()
@@ -265,23 +266,18 @@ public class BPOSProfile extends ZoneProfile {
                         // Wait for less then 30 then update based on the condition
                         Log.i(Globals.TAG, "No action state waiting for time expiry");
                     }
-
                 }
-
             } else {
-                Log.i(
-                        Globals.TAG,
-                        "Occupant not detected in unoccupied mode"
-                );
+                Log.d("BPOSProfile", "Occupant not detected in unoccupied mode");
                 if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal() && differenceInMinutes <= 0) {
                     resetForceOccupy();
                 }
             }
         } else {
             // Reset everything if there was force occupied condition
-            Log.i(Globals.TAG, "We are back to occupied");
+            Log.d("BPOSProfile", "We are back to occupied");
             if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
-                Log.i(Globals.TAG, "Move to to occupied status");
+                Log.d("BPOSProfile", "Move to to occupied status");
                 resetForceOccupy();
             }
         }
@@ -301,7 +297,7 @@ public class BPOSProfile extends ZoneProfile {
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
                 "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"", 0.0);
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
-                "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
+                        "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
                 (double) Occupancy.UNOCCUPIED.ordinal());
 
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and equipref " +
@@ -392,7 +388,7 @@ public class BPOSProfile extends ZoneProfile {
         HashMap ocupancyDetection = CCUHsApi.getInstance().read(
                 "point and  bpos and occupancy and detection and his and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"");
 
-        if (occupied  && occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
+        if (occupied && occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
             Log.d("BPOSProfile", "  auto away handle");
             //if the oocupantnotdetected for autoAwayTimer
             // then enter autoaway
@@ -401,16 +397,18 @@ public class BPOSProfile extends ZoneProfile {
                 //check if there was no detection from past autoawaytimer
                 HisItem hisItem =
                         CCUHsApi.getInstance().curRead(ocupancyDetection.get("id").toString());
-                Date lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
+                long lastupdatedtime = (hisItem == null) ? null : hisItem.getDate().getTime();
                 DateTime et = new DateTime(lastupdatedtime);
-                int min = et.getMinuteOfHour();
+
+
+                long min = findDifference(lastupdatedtime, false);
                 // read autoawaytimer tuner
                 double autoawaytime = TunerUtil.readTunerValByQuery(" point and tuner and auto " +
                         "and away and " +
                         "time ", mBPOSEquip.mEquipRef);
 
                 Log.d("BPOSProfile", "  auto away case -  min = " + min + " autoawaytime ="
-                        + autoawaytime);
+                        + autoawaytime + "lastupdatedtime" + lastupdatedtime);
 
                 if (min >= autoawaytime && occupancyModeval != (double) Occupancy.AUTOAWAY.ordinal()) {
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
@@ -419,11 +417,14 @@ public class BPOSProfile extends ZoneProfile {
                             0.0);
                 }
             } else {
-                if(occupancysensor)
-                CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
-                        (double) Occupancy.OCCUPIED.ordinal());
+                if (occupancysensor)
+                    CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                            (double) Occupancy.OCCUPIED.ordinal());
             }
         }
+        if (!occupied)
+            CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                    (double) Occupancy.UNOCCUPIED.ordinal());
 
     }
 

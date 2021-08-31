@@ -3475,8 +3475,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
-        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow1 = inflater.inflate(R.layout.bpos_zone_ui, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);

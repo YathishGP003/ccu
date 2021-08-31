@@ -60,8 +60,8 @@ class TunerMigration {
         valueObjMap.put("snHeatingAirflowTemp", new ValueObj("65", "150", "1.0"));
         valueObjMap.put("snCoolingAirflowTemp", new ValueObj("35", "75", "1.0"));
         valueObjMap.put("zoneDeadTime", new ValueObj("1.0", "300", "1.0"));
-        valueObjMap.put("forcedOccupiedTime", new ValueObj("30", "300", "1.0"));
-        valueObjMap.put("autoAwayTime", new ValueObj("40", "300", "1.0"));
+        valueObjMap.put("forcedOccupiedTime", new ValueObj("0", "300", "1.0"));
+        valueObjMap.put("autoAwayTime", new ValueObj("0", "300", "1.0"));
         valueObjMap.put("coolingDeadband", new ValueObj("0.0", "10", "0.5"));
         valueObjMap.put("heatingDeadband", new ValueObj("0.0", "10", "0.5"));
         valueObjMap.put("standaloneStage1Hysteresis", new ValueObj("0.0", "10", "0.5"));
@@ -80,7 +80,6 @@ class TunerMigration {
         valueObjMap.put("temperatureIntegralTime", new ValueObj("1", "60", "1"));
         valueObjMap.put("proportionalKFactor", new ValueObj("0.1", "1", "0.1"));
         valueObjMap.put("integralKFactor", new ValueObj("0.1", "1", "0.1"));
-        valueObjMap.put("autoAwayZoneSetbackTemp", new ValueObj("1", "2", "1"));
         return valueObjMap;
     }
 }

@@ -12,7 +12,7 @@
         style="?action_text_appearance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="VERIFICATION CODE" />
+        android:text="BUILDING PASSCODE" />
 
     <LinearLayout
         android:layout_width="match_parent"

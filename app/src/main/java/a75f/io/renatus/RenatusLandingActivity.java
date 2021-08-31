@@ -543,7 +543,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             if(apkName.startsWith("75f") || apkName.startsWith("75F"))
                 AppInstaller.getHandle().downloadHomeInstall(apkName);
-            else if(apkName.startsWith("RENATUS_CCU"))
+            else if(apkName.startsWith("RENATUS_CCU") || apkName.startsWith("DAIKIN_CCU"))
                 AppInstaller.getHandle().downloadCCUInstall(apkName);
         } else if (!commands.isEmpty() && commands.equals(RESTART_MODULE)) {
 

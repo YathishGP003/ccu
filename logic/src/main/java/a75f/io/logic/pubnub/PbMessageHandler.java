@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
 import static a75f.io.logic.pubnub.AlertMessageHandlers.*;
@@ -79,6 +80,7 @@ public class PbMessageHandler
     public void handlePunubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
         
         CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
+        CcuLog.d(Globals.TAG, "handlePunubMessage: " + receivedMessageObject.toString());
         Message message = messageHandler.obtainMessage();
         PbMessage pbMessage = new PbMessage();
         try {
@@ -96,12 +98,16 @@ public class PbMessageHandler
     
     private void handlePbMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
+        Log.i(Globals.TAG, " cmd : " + cmd);
         switch (cmd) {
+            case FloorUpdateHandler.CMD:
+               FloorUpdateHandler.updateFloor(msg);
+                break;
             case UpdatePointHandler.CMD:
                 UpdatePointHandler.handleMessage(msg);
                 break;
             case SiteSyncHandler.CMD:
-                SiteSyncHandler.handleMessage(msg);
+                SiteSyncHandler.handleMessage(msg, context);
                 break;
             case UpdateScheduleHandler.CMD:
                 UpdateScheduleHandler.handleMessage(msg);

@@ -2,8 +2,11 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -91,6 +94,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
@@ -228,6 +232,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 selectFloor(position);
             }
         });
+    
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
+                WeatherDataDownloadService.getWeatherData();
+                if (weatherUpdateHandler != null)
+                    weatherUpdateHandler.post(weatherUpdate);
+            }
+        }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
     }
 
     public void refreshScreen(String id)

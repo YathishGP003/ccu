@@ -2,6 +2,7 @@ package a75f.io.logic.pubnub;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
 
@@ -24,16 +25,19 @@ public class RemoteCommandUpdateHandler
     public static final String CM_RESET = "CM RESET";
     public static final String SAVE_CCU_LOGS = "save_ccu_logs";
     public static final String RESTART_MODULE = "restart_module";
+    public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     
     public static void handleMessage(JsonObject msgObject, Context context) {
         try {
+            Log.i(Globals.TAG, " Received Remote update Command");
+
             String cmdType = msgObject.get("remoteCmdType").getAsString();
             String cmdLevel = msgObject.get("level").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
-
+            Log.i(Globals.TAG, " PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
             switch (cmdLevel){
                 case "site":
                 case "system":
@@ -63,6 +67,8 @@ public class RemoteCommandUpdateHandler
                                 break;
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
+                            case OTA_UPDATE_HS:
+                                Log.i(Globals.TAG, " command received for "+cmdType);
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
@@ -85,6 +91,7 @@ public class RemoteCommandUpdateHandler
                     switch(cmdType){
                         case OTA_UPDATE_SD:
                         case OTA_UPDATE_ITM:
+                        case OTA_UPDATE_HS:
                             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

@@ -38,6 +38,10 @@ class IEDeviceHandler {
             serviceBaseUrl != ieEquipUrl) {
             serviceBaseUrl = ieEquipUrl
             ieService = IEServiceGenerator.instance.createService("https://$serviceBaseUrl:8080")
+
+            ieService?.let {
+                fetchGatewayId(ieService, hayStack)
+            }
         }
 
         ieService?.let {
@@ -77,6 +81,10 @@ class IEDeviceHandler {
             fetchEffDATSetpoint(it, hayStack)
             fetchEffDAT(it, hayStack)
             fetchSFCapFbk(it, hayStack)
+
+            if (getIEMacAddress(hayStack).isNullOrEmpty()) {
+                fetchGatewayId(ieService, hayStack)
+            }
         }
     }
 
@@ -304,6 +312,19 @@ class IEDeviceHandler {
                 }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching sFCapFbk", error) }
+            )
+    }
+
+    private fun fetchGatewayId(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readGatewayIdPoint()
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeDefaultVal(
+                        "system and point and ie and macAddress", it)
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching fetchGatewatId", error) }
             )
     }
 

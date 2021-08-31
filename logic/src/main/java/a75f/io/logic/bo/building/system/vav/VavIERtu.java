@@ -214,8 +214,11 @@ public class VavIERtu extends VavSystemProfile
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        
-        if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
+    
+        if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
+            systemFanLoopOp = VavSystemController.getInstance().getCoolingSignal();
+            
+        } else if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
             
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", getSystemEquipRef());
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");

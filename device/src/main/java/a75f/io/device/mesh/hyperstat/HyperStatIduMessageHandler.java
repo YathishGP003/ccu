@@ -74,6 +74,18 @@ class HyperStatIduMessageHandler {
         if (coolHeatRight != currCoolHeatRight) {
             hayStack.writeHisValByQuery("coolHeatRight and group == \""+address+ "\"",
                                         (double)coolHeatRight);
+            int masterControllerMode = getMasterController(address, hayStack);
+            
+            if (coolHeatRight == 0 && masterControllerMode != 0) {
+                //When coolHeatRight is A , reset masterControllerMode
+                setMasterController(address, 0, hayStack);
+            } else if (coolHeatRight == 1 && masterControllerMode != 1) {
+                //When coolHeatRight is C , reset masterControllerMode must be set to Master
+                setMasterController(address, 1, hayStack);
+            } else if (coolHeatRight == 2 && masterControllerMode != 0) {
+                //When coolHeatRight is C , reset masterControllerMode must be set to Not-Master
+                setMasterController(address, 0, hayStack);
+            }
         }
     }
     
@@ -205,11 +217,16 @@ class HyperStatIduMessageHandler {
         return hayStack.readDefaultVal("config and mode and masterController and group == \""+address+"\"").intValue();
     }
     
+    private static void setMasterController(int address, int masterControlMode, CCUHsApi hayStack) {
+        hayStack.writeDefaultVal("config and mode and masterController and group == \""+address+"\"",
+                                        (double)masterControlMode);
+    }
+    
     private static int getHeatingDesiredTemp(int address, CCUHsApi hayStack) {
-        return hayStack.readPointPriorityValByQuery("desired and temp and heating and group == \""+address+"\"").intValue();
+        return hayStack.readPointPriorityValByQuery("desired and temp and heating and group == \""+address+"\"").intValue() * 2;
     }
     
     private static int getCoolingDesiredTemp(int address, CCUHsApi hayStack) {
-        return hayStack.readPointPriorityValByQuery("desired and temp and cooling and group == \""+address+"\"").intValue();
+        return hayStack.readPointPriorityValByQuery("desired and temp and cooling and group == \""+address+"\"").intValue() * 2;
     }
 }

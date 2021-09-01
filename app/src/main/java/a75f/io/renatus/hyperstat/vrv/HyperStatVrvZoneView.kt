@@ -190,7 +190,9 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
     VrvAirflowDirection.values().forEach { mode ->
         if (mode != VrvAirflowDirection.Auto && airflowDirectionSupport.toInt() > 0) {
             airflowDirList.add(mode.name)
-        } else if (mode == VrvAirflowDirection.Auto && airflowDirectionAuto.toInt() > 0) {
+        } else if (mode == VrvAirflowDirection.Auto &&
+                    airflowDirectionAuto.toInt() > 0 &&
+                    airflowDirectionSupport.toInt() > 0) {
             airflowDirList.add(mode.name)
         }
     }

@@ -62,9 +62,9 @@ class HyperStatIduMessageHandler {
         int currAirflowDir = getAirflowDirection(address, hayStack);
         if (airflowDir != currAirflowDir) {
             //Generate Alert
-            hayStack.writeDefaultVal("userIntent and airflow and direction and group == \""+address+ "\"",
+            hayStack.writeDefaultVal("userIntent and airflowDirection and group == \""+address+ "\"",
                                      (double)airflowDir);
-            hayStack.writeHisValByQuery("userIntent and airflow and direction and group == \""+address+ "\"",
+            hayStack.writeHisValByQuery("userIntent and airflowDirection and group == \""+address+ "\"",
                                         (double)airflowDir);
         }
     }
@@ -205,7 +205,7 @@ class HyperStatIduMessageHandler {
         double minHumidity =
             hayStack.readHisValByQuery("config and humidity and min and group == \""+address+"\"").intValue();
         double maxHumidity =
-            hayStack.readHisValByQuery("config and humidity and min and group == \""+address+"\"").intValue();
+            hayStack.readHisValByQuery("config and humidity and max and group == \""+address+"\"").intValue();
         return (int)(minHumidity + maxHumidity)/2;
     }
     

@@ -58,7 +58,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
         } ?: run {
             return VrvViewState(
                 tempOffsetPosition = tempOffsetIndexFromValue(0f),
-                humidityMinPosition = 0,
+                humidityMinPosition = 20,
                 humidityMaxPosition = 100,
                 masterControllerMode = 0,
                 coolHeatRight = 0,

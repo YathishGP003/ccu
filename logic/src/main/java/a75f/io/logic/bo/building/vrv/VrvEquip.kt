@@ -567,7 +567,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setTz(equip.tz)
             .build()
         val fanSpeedControlLevelCapabilityId = hayStack.addPoint(fanSpeedControlLevelCapability)
-        hayStack.writeHisValById(fanSpeedControlLevelCapabilityId, 1.0)
+        hayStack.writeHisValById(fanSpeedControlLevelCapabilityId, 0.0)
 
     }
 

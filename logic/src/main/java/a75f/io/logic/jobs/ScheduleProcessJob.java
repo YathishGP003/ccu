@@ -1309,12 +1309,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String id = ((HashMap) occ.get(0)).get("id").toString();
             double occuStatus = CCUHsApi.getInstance().readHisValById(id);
             if(cachedOccupied != null) {
-                if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
-                    c = AUTOAWAY;
-                } else if (cachedOccupied != null && cachedOccupied.isOccupied()) {
-                    cachedOccupied.setForcedOccupied(false);
-                    cachedOccupied.setPreconditioning(false);
-                    c = OCCUPIED;
+                if (cachedOccupied.isOccupied()) {
+                    if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
+                        c = AUTOAWAY;
+                    }else {
+                        cachedOccupied.setForcedOccupied(false);
+                        cachedOccupied.setPreconditioning(false);
+                        c = OCCUPIED;
+                    }
                 } else if (getTemporaryHoldExpiry(equip) > 0) {
                     Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
                     if ((prevStatus == OCCUPIED)) {

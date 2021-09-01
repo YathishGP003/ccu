@@ -208,7 +208,7 @@ public class BPOSEquip {
                 (double) config.gettempOffset());
 
         Point autoforceoccupied = new Point.Builder()
-                .setDisplayName(equipDis + "-autoforceoccupied")
+                .setDisplayName(equipDis + "-enableautoforceoccupied")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -227,7 +227,7 @@ public class BPOSEquip {
                 config.getautoforceOccupied() ? 1.0 : 0.0);
 
         Point autoaway = new Point.Builder()
-                .setDisplayName(equipDis + "-autoaway")
+                .setDisplayName(equipDis + "-enableautoaway")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)

@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.VAVScheduler;
 import a75f.io.logic.tuners.BPOSTuners;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -87,10 +88,20 @@ public class BPOSProfile extends ZoneProfile {
                 "auto and forced and occupied and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
         boolean isAutoawayenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and away and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
+        HashMap occupancy = CCUHsApi.getInstance().read("point and occupancy and mode and " +
+                "equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        double occupancyvalue =
+                CCUHsApi.getInstance().readHisValById(occupancy.get("id").toString());
 
         if (isAutoforceoccupiedenabled) runAutoForceOccupyOperation(mBPOSEquip.mEquipRef);
+        else if (occupancyvalue == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
+            resetForceOccupy();
+        }
 
         if (isAutoawayenabled) runAutoAwayOperation();
+        else if (occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
+            resetForceOccupy();
+        }
 
         double zoneCurTemp = mBPOSEquip.getCurrentTemp();
         double desiredTempCooling =
@@ -105,13 +116,7 @@ public class BPOSProfile extends ZoneProfile {
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
 
-        HashMap occupancy = CCUHsApi.getInstance().read("point and occupancy and mode and " +
-                "equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
-        Log.d("BPOSProfile", "id  = " + occupancy.get("id"));
-        if (occupancy.get("id") == null) Log.d("BPOSProfile", "id is null" + occupancy.get("id"));
 
-        double occupancyvalue =
-                CCUHsApi.getInstance().readHisValById(occupancy.get("id").toString());
 
 
         HashMap occDethashmap = CCUHsApi.getInstance().read("point and occupancy and " +
@@ -302,10 +307,9 @@ public class BPOSProfile extends ZoneProfile {
 
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and equipref " +
                 "== \"" + mBPOSEquip.mEquipRef + "\"");
-        ;
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and equipref " +
                 "== \"" + mBPOSEquip.mEquipRef + "\"");
-        ;
+
         ScheduleProcessJob.clearOverrides(heatDT.get("id").toString());
         ScheduleProcessJob.clearOverrides(coolDT.get("id").toString());
     }
@@ -374,6 +378,9 @@ public class BPOSProfile extends ZoneProfile {
     }
 
     private void runAutoAwayOperation() {
+        HashMap equipMap =
+                CCUHsApi.getInstance().read("equip and group == \"" + mBPOSEquip.mNodeAddr + "\"");
+        Equip q = new Equip.Builder().setHashMap(equipMap).build();
         String zoneId = HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef);
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
@@ -411,6 +418,20 @@ public class BPOSProfile extends ZoneProfile {
                         + autoawaytime + "lastupdatedtime" + lastupdatedtime);
 
                 if (min >= autoawaytime && occupancyModeval != (double) Occupancy.AUTOAWAY.ordinal()) {
+                    HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and " +
+                            "desired and cooling and sp and equipRef == \"" + q.getId() + "\"");
+                    if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
+                        throw new IllegalArgumentException();
+                    }
+
+
+                    HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and " +
+                            "desired and heating and sp and equipRef == \"" + q.getId() + "\"");
+                    if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+                        throw new IllegalArgumentException();
+                    }
+                    ScheduleProcessJob.clearOverrides(coolingDtPoint.get("id").toString());
+                    ScheduleProcessJob.clearOverrides(heatinDtPoint.get("id").toString());
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.AUTOAWAY.ordinal());
                     CCUHsApi.getInstance().writeHisValById(ocupancyDetection.get("id").toString(),
@@ -422,10 +443,6 @@ public class BPOSProfile extends ZoneProfile {
                             (double) Occupancy.OCCUPIED.ordinal());
             }
         }
-        if (!occupied)
-            CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
-                    (double) Occupancy.UNOCCUPIED.ordinal());
-
     }
 
 }

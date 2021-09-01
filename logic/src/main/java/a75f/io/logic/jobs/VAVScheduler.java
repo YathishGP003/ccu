@@ -50,6 +50,7 @@ public class VAVScheduler {
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+        double autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback");
         double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
                 " mode and equipRef == \"" + equip.getId() + "\"");
         
@@ -71,8 +72,8 @@ public class VAVScheduler {
             Double coolingTemp;
             if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
                 Log.d("BPOSProfile", "in bpos vav: ");
-                heatingTemp = occ.getHeatingVal() - setback;
-                coolingTemp = occ.getCoolingVal() + setback;
+                heatingTemp = occ.getHeatingVal() - autoawaysetback;
+                coolingTemp = occ.getCoolingVal() + autoawaysetback;
             } else {
                 coolingTemp = (occ.isOccupied() || occ.isPreconditioning()/* || occ
                 .isForcedOccupied() */ || (systemOcc == Occupancy.PRECONDITIONING) /*||

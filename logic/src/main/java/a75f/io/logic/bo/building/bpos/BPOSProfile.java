@@ -423,8 +423,6 @@ public class BPOSProfile extends ZoneProfile {
                     if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
                         throw new IllegalArgumentException();
                     }
-
-
                     HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and " +
                             "desired and heating and sp and equipRef == \"" + q.getId() + "\"");
                     if (heatinDtPoint == null || heatinDtPoint.size() == 0) {

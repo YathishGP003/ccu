@@ -90,6 +90,7 @@ class HyperStatIduMessageHandler {
     }
     
     private static void setMasterOperationMode(int masterOpMode, int address, CCUHsApi hayStack) {
+        masterOpMode = masterOpMode + 1;//IDU sends opMode without 'Off' state, add an offset (1) to the received value.
         if (masterOpMode != hayStack.readHisValByQuery("master and operation and mode and group == \""+address+"\"")) {
             hayStack.writeHisValByQuery("master and operation and mode and group == \"" + address + "\"",
                                         (double) masterOpMode);
@@ -203,9 +204,9 @@ class HyperStatIduMessageHandler {
     
     private static int getHumiditySp(int address, CCUHsApi hayStack) {
         double minHumidity =
-            hayStack.readHisValByQuery("config and humidity and min and group == \""+address+"\"").intValue();
+            hayStack.readDefaultVal("config and humidity and min and group == \""+address+"\"").intValue();
         double maxHumidity =
-            hayStack.readHisValByQuery("config and humidity and max and group == \""+address+"\"").intValue();
+            hayStack.readDefaultVal("config and humidity and max and group == \""+address+"\"").intValue();
         return (int)(minHumidity + maxHumidity)/2;
     }
     

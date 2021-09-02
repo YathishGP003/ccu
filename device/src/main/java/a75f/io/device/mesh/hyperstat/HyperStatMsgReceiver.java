@@ -79,6 +79,10 @@ public class HyperStatMsgReceiver {
                     HyperStatIduStatusMessage_t.parseFrom(messageArray);
                 HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
             }
+    
+            if(currentTempInterface != null) {
+                currentTempInterface.refreshScreen(null);
+            }
             
         } catch (InvalidProtocolBufferException e) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
@@ -158,17 +162,21 @@ public class HyperStatMsgReceiver {
                                        HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
         hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRssi());
         hayStack.writeHisValueByIdWithoutCOV(point.getId(), (double)regularUpdateMessage.getRssi());
-        if(currentTempInterface != null) {
-            currentTempInterface.refreshScreen(null);
-        }
     }
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         
         hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRoomTemperature());
-        hayStack.writeHisValById(point.getId(),
-                                 Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
+        
+        double receivedRoomTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature());
+        double curRoomTemp = hayStack.readHisValById(point.getId());
+        if (curRoomTemp != receivedRoomTemp) {
+            hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
+            if (currentTempInterface != null) {
+                currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
+            }
+        }
     }
     
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {

@@ -131,7 +131,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("zone").addMarker("operation").addMarker("mode").addMarker("vrv")
             .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
             .setGroup(nodeAddr.toString())
-            .setEnums("Off,Fan,Heat,Cool,Auto")
+            .setEnums("Off,Fan,Heating,Cooling,Auto")
             .setTz(equip.tz)
             .build()
         val operationModeId = hayStack.addPoint(operationMode)
@@ -148,7 +148,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("zone").addMarker("fanSpeed").addMarker("vrv")
             .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
             .setGroup(nodeAddr.toString())
-            .setEnums("Auto,Low,Medium,High")
+            .setEnums("Low,Medium,High,Auto")
             .setTz(equip.tz)
             .build()
         val fanSpeedId = hayStack.addPoint(fanSpeed)
@@ -370,7 +370,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .addMarker("config").addMarker("vrv").addMarker("writable").addMarker("zone")
             .addMarker("masterController").addMarker("mode").addMarker("sp")
             .setGroup(nodeAddr.toString())
-            .setUnit("\u00B0F")
+            .setEnums("Not-Master,Master")
             .setTz(equip.tz)
             .build()
         val masterControllerModeId = hayStack.addPoint(masterControllerMode)
@@ -567,7 +567,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setTz(equip.tz)
             .build()
         val fanSpeedControlLevelCapabilityId = hayStack.addPoint(fanSpeedControlLevelCapability)
-        hayStack.writeHisValById(fanSpeedControlLevelCapabilityId, 1.0)
+        hayStack.writeHisValById(fanSpeedControlLevelCapabilityId, 0.0)
 
     }
 

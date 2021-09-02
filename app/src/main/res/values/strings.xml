@@ -671,7 +671,7 @@
     <string name="title_edit">EDIT</string>
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
-    <string name="title_generate_otp">Generate OTP</string>
+    <string name="title_generate_passcode">Generate Passcode</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>
@@ -936,12 +936,11 @@
     <string name="autoforceoccupied">Auto Force Occupied</string>
     <string name="autoaway">Auto Away</string>
     <string-array name="zone_priority_bpos">
-        <item >Normal</item>
-        <item >No Priority</item>
-        <item >Low</item>
-        <item >High</item>
+        <item>Normal</item>
+        <item>No Priority</item>
+        <item>Low</item>
+        <item>High</item>
     </string-array>
-
     <string name="vrv_label_humidity_min">HumiditySPMin (%)</string>
     <string name="vrv_label_humidity_max">HumiditySPMax (%)</string>
     <string name="vrv_label_master_controller">Master Controller :</string>
@@ -956,4 +955,10 @@
 
     <string name="vrv_master_uninit_text">(Master Setting may not be executed,
         please re-check back post communication is established)</string>
+    <string name="title_activity_register_second_c_c_u">RegisterSecondCCUActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>

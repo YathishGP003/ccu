@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
@@ -29,6 +30,7 @@ public class ControlMote
     public RawPoint th2In;
     public RawPoint currentTemp;
     public RawPoint rssi;
+    private RawPoint firmWareVersion;
     public String siteRef;
     public String floorRef;
     public String roomRef;
@@ -58,6 +60,7 @@ public class ControlMote
                            .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         createPoints();
+        addFirmwareVersionPoint();
     }
 	//For CCU as a zone part
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
@@ -108,7 +111,7 @@ public class ControlMote
     
         addCMInPortPoint("th1");
         addCMInPortPoint("th2");
-    
+
         setRelayState("relay1",0);
         setRelayState("relay2",0);
         setRelayState("relay3",0);
@@ -200,6 +203,8 @@ public class ControlMote
                 .build();
 
         rssi = HeartBeat.getHeartBeatRawPoint(smartNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
+        firmWareVersion = FirmwareVersion.getFirmwareVersion(smartNodeAddress, deviceRef, siteRef, floorRef, roomRef,
+                tz);
 
         th2In = new RawPoint.Builder()
                 .setDisplayName("Th2In-"+smartNodeAddress)
@@ -254,7 +259,18 @@ public class ControlMote
                          .build();
         CCUHsApi.getInstance().addPoint(p);
     }
-    
+
+    private void addFirmwareVersionPoint(){
+        HashMap firmwarePoint =
+                CCUHsApi.getInstance().read("point and physical and firmware and version and deviceRef == \"" + deviceRef + "\"");
+        if(!firmwarePoint.isEmpty()){
+            CcuLog.i(L.TAG_CCU_DEVICE, "Firmware Version Point Exists");
+            return;
+        }
+        firmWareVersion = FirmwareVersion.getFirmwareVersion(site.getDisplayName()+"-CM-"+"firmwareVersion",
+                deviceRef, siteRef, site.getTz());
+        CCUHsApi.getInstance().addPoint(firmWareVersion);
+    }
     
     public static double getAnalogOut(String analog)
     {
@@ -318,5 +334,6 @@ public class ControlMote
         CCUHsApi.getInstance().addPoint(th2In);
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(rssi);
+        CCUHsApi.getInstance().addPoint(firmWareVersion);
     }
 }

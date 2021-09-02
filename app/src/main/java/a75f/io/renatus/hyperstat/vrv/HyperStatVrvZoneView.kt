@@ -188,42 +188,17 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
     val airflowDirList : MutableList<String> = arrayListOf()
 
     VrvAirflowDirection.values().forEach { mode ->
-        airflowDirList.add(mode.name)
-    }
-
-    val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
-        context,
-        R.layout.spinner_zone_item,
-        airflowDirList
-    ){
-        override fun getDropDownView(
-            position: Int,
-            convertView: View?,
-            parent: ViewGroup
-        ): View {
-            val view:TextView = super.getDropDownView(
-                position,
-                convertView,
-                parent
-            ) as TextView
-
-            if (airflowDirectionSupport.toInt() == 0 ) {
-                view.setTextColor(Color.LTGRAY)
-            } else if (airflowDirectionAuto.toInt() == 0 && position == VrvAirflowDirection.Auto.ordinal) {
-                view.setTextColor(Color.LTGRAY)
-            }
-            return view
-        }
-
-        override fun isEnabled(position: Int): Boolean {
-            if (airflowDirectionSupport.toInt() == 0 ) {
-                return false;
-            } else if (airflowDirectionAuto.toInt() == 0 && position == VrvAirflowDirection.Auto.ordinal) {
-                return false;
-            }
-            return true
+        if (mode != VrvAirflowDirection.Auto && airflowDirectionSupport.toInt() > 0) {
+            airflowDirList.add(mode.name)
+        } else if (mode == VrvAirflowDirection.Auto &&
+                    airflowDirectionAuto.toInt() > 0 &&
+                    airflowDirectionSupport.toInt() > 0) {
+            airflowDirList.add(mode.name)
         }
     }
+    val adapter = ArrayAdapter(
+        context, R.layout.spinner_zone_item, airflowDirList
+    )
 
     airflowSpinner.adapter = adapter
     val curSelection = hayStack.readPointPriorityValByQuery("userIntent and airflowDirection and equipRef == \"$equipId\"")
@@ -260,53 +235,27 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
     val fanSpeedList : MutableList<String> = arrayListOf()
 
     when {
-        fanSpeedControlLevel.toInt() == 1 -> {
+        fanSpeedControlLevel.toInt() == 0 -> {
             fanSpeedList.add(VrvFanSpeed.High.name)
         }
-        fanSpeedControlLevel.toInt() == 2 -> {
+        fanSpeedControlLevel.toInt() == 1 -> {
             fanSpeedList.add(VrvFanSpeed.Low.name)
             fanSpeedList.add(VrvFanSpeed.High.name)
         }
-        fanSpeedControlLevel.toInt() >= 3 -> {
+        fanSpeedControlLevel.toInt() >= 2 -> {
             fanSpeedList.add(VrvFanSpeed.Low.name)
             fanSpeedList.add(VrvFanSpeed.Medium.name)
             fanSpeedList.add(VrvFanSpeed.High.name)
         }
     }
-    if (fanSpeedControlLevel.toInt() > 1) {
+
+    if (fanSpeedControlLevel.toInt() > 0 && fanSpeedAuto.toInt() > 0) {
         fanSpeedList.add(VrvFanSpeed.Auto.name)
     }
 
-
-    val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
-        context,
-        R.layout.spinner_zone_item,
-        fanSpeedList
-    ){
-        override fun getDropDownView(
-            position: Int,
-            convertView: View?,
-            parent: ViewGroup
-        ): View {
-            val view:TextView = super.getDropDownView(
-                position,
-                convertView,
-                parent
-            ) as TextView
-
-            if (position == fanSpeedList.size-1  && fanSpeedAuto.toInt() == 0) {
-                view.setTextColor(Color.LTGRAY)
-            }
-            return view
-        }
-
-        override fun isEnabled(position: Int): Boolean {
-            if (position == fanSpeedList.size-1 && fanSpeedAuto.toInt() == 0) {
-                return false
-            }
-            return true
-        }
-    }
+    val adapter = ArrayAdapter(
+        context, R.layout.spinner_zone_item, fanSpeedList
+    )
 
     fanSpeedSp.adapter = adapter
     val curSelection = hayStack.readPointPriorityValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"")
@@ -321,7 +270,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
                                     view: View, position: Int, id: Long) {
             val fanSpeed = VrvFanSpeed.values().find { it.name == fanSpeedList[position] }
             hayStack.writeDefaultVal("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed!!.ordinal.toDouble())
-            hayStack.writeHisValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed!!.ordinal.toDouble())
+            hayStack.writeHisValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed.ordinal.toDouble())
 
         }
         override fun onNothingSelected(parent: AdapterView<*>) {

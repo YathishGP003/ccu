@@ -34,6 +34,19 @@ public class PreferenceUtil {
         editor.putBoolean("heartbeatMigration", isMigrated);
         editor.apply();
     }
+
+    public static boolean isFirmwareVersionPointMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
+    }
+
+    public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("firmwareVersionPointMigration", isMigrated);
+        editor.apply();
+    }
+
     public static boolean isOAODamperOpenPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("OAODamperOpenPointsMigration",false);

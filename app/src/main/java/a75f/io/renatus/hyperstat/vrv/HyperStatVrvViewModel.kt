@@ -47,7 +47,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
         vrvProfile?.let {
             val config : VrvProfileConfiguration = vrvProfile!!.getProfileConfiguration(nodeAddr)
             return VrvViewState(
-                tempOffsetIndexFromValue(config.temperatureOffset.toFloat()),
+                config.temperatureOffset.toInt() + 100,
                 config.minHumiditySp.toInt(),
                 config.maxHumiditySp.toInt(),
                 config.masterControllerMode.toInt(),
@@ -58,7 +58,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
         } ?: run {
             return VrvViewState(
                 tempOffsetPosition = tempOffsetIndexFromValue(0f),
-                humidityMinPosition = 0,
+                humidityMinPosition = 20,
                 humidityMaxPosition = 100,
                 masterControllerMode = 0,
                 coolHeatRight = 0,
@@ -70,7 +70,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     fun saveProfile() {
         vrvProfile?.let {
             it.updateEquip(VrvProfileConfiguration(
-                            tempOffsetSpinnerValues()[currentState.tempOffsetPosition]!!.toDouble(),
+                            currentState.tempOffsetPosition.toDouble() - 100,
                             currentState.humidityMinPosition.toDouble(),
                             currentState.humidityMaxPosition.toDouble(),
                             currentState.masterControllerMode.toDouble()))
@@ -79,7 +79,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
             vrvProfile!!.createVrvEquip(
                 CCUHsApi.getInstance(), nodeAddr,
                 VrvProfileConfiguration(
-                    tempOffsetSpinnerValues()[currentState.tempOffsetPosition]!!.toDouble(),
+                    currentState.tempOffsetPosition.toDouble() - 100,
                     currentState.humidityMinPosition.toDouble(),
                     currentState.humidityMaxPosition.toDouble(),
                     currentState.masterControllerMode.toDouble()

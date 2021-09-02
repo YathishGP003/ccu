@@ -2,8 +2,6 @@ package a75f.io.device.mesh.hyperstat;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;

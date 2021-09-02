@@ -21,13 +21,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import a75f.io.logic.cloud.RenatusServicesEnvironment;
-import a75f.io.logic.cloud.RenatusServicesUrls;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.raygun.raygun4android.RaygunClient;
@@ -145,6 +140,7 @@ public abstract class UtilityApplication extends Application {
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, R.string.usb_permission_priv_app_msg, Toast.LENGTH_LONG).show();
                     break;
+                
             }
         }
     };

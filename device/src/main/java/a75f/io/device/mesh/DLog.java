@@ -96,7 +96,8 @@ public class DLog
 	
 	public static boolean isLoggingEnabled() {
   
-		return BuildConfig.BUILD_TYPE.equals("qa") ||
+		return BuildConfig.BUILD_TYPE.equals("staging") ||
+				BuildConfig.BUILD_TYPE.equals("qa") ||
 		       BuildConfig.BUILD_TYPE.equals("dev") ||
 		       BuildConfig.BUILD_TYPE.equals("local");
 	}

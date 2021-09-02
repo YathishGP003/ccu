@@ -59,6 +59,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
+import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -2879,6 +2880,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
+            HyperStatMsgReceiver.setCurrentTempInterface(this);
         }
         weatherUpdateHandler = new Handler();
         weatherUpdate = () -> {
@@ -2902,6 +2904,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ScheduleProcessJob.setScheduleDataInterface(null);
         ScheduleProcessJob.setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
+        HyperStatMsgReceiver.setCurrentTempInterface(null);
     }
 
     @Override
@@ -2913,6 +2916,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
+            HyperStatMsgReceiver.setCurrentTempInterface(this);
         } else {
 
             UpdatePointHandler.setZoneDataInterface(null);
@@ -2920,6 +2924,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(null);
             ScheduleProcessJob.setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
+            HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
     }
 

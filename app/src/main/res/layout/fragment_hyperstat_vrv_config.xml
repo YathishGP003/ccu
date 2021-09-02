@@ -143,8 +143,8 @@
 
     <TextView
         android:id="@+id/masterControlUnInitText"
-        android:layout_width="481dp"
-        android:layout_height="41dp"
+        android:layout_width="477dp"
+        android:layout_height="57dp"
         android:layout_marginStart="472dp"
         android:layout_marginTop="460dp"
         android:text="@string/vrv_master_uninit_text"

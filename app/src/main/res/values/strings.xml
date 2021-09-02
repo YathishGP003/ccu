@@ -953,8 +953,8 @@
         <item >AUTO</item>
     </string-array>
 
-    <string name="vrv_master_uninit_text">(Master Setting may not be executed,
-        please re-check back post communication is established)</string>
+    <string name="vrv_master_uninit_text">(Master Controller Selection will only be available post communication
+        is established with IDU and will depend on point CoolHeatRight)</string>
     <string name="title_activity_register_second_c_c_u">RegisterSecondCCUActivity</string>
     <!--
     This string is used for square devices and overridden by hello_world in

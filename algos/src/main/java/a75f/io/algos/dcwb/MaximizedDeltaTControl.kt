@@ -26,9 +26,9 @@ class MaximizedDeltaTControl {
             data.piLoop.dump()
             val chilledWaterTargetExitTemperature = data.averageDesiredCoolingTemp - data.chilledWaterExitTemperatureMargin
 
-            return if (data.outletWaterTemperature < chilledWaterTargetExitTemperature) {
-                data.piLoop.reset()
-                1.0
+            return if (data.outletWaterTemperature <= chilledWaterTargetExitTemperature) {
+                val loopOp = data.piLoop.getLoopOutput(data.outletWaterTemperature, chilledWaterTargetExitTemperature)
+                loopOp.coerceAtLeast(1.0)
             } else {
                 data.piLoop.getLoopOutput(data.outletWaterTemperature, chilledWaterTargetExitTemperature)
             }

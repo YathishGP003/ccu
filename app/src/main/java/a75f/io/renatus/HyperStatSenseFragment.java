@@ -237,7 +237,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     private void setupSenseProfile() {
 
         HyperStatSenseConfiguration hssense = new HyperStatSenseConfiguration();
-        hssense.temperatureOffset = offsetFromIndex(-10,0.1,mTemperatureOffset.getValue() );
+        hssense.temperatureOffset = offsetFromIndex(-10,0.1,mTemperatureOffset.getValue()) * 10;
         hssense.isTh1Enable = mTherm1toggle.isChecked();
         hssense.isTh2Enable = mTherm2toggle.isChecked();
         hssense.isAnalog1Enable = mAnalog1toggle.isChecked();

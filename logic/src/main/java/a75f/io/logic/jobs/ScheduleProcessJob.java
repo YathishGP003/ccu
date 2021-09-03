@@ -395,7 +395,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         if(curOccupancyMode == AUTOAWAY){
-            return String.format("In Autoaway");
+            return String.format("In Auto Away");
         }
 
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s

@@ -5,11 +5,13 @@ import android.webkit.HttpAuthHandler;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatIduControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.DLog;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 
 /**
  * Handle IDU specific message for HyperStat VRV Variant.
@@ -21,6 +23,26 @@ class HyperStatIduMessageHandler {
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, iduStatus.toString());
         }
+    
+        VrvControlMessageCache msgCache = VrvControlMessageCache.getInstance();
+        //Will be uncommented once response is implemented on firmware side.
+        /*if (msgCache.isControlsPendingResponse(nodeAddress)){
+            if (iduStatus.getResponseType() > 0 && !msgCache.isControlsPendingDelivery(nodeAddress)) {
+                msgCache.resetControlsPending(nodeAddress);
+                CcuLog.d(L.TAG_CCU_SERIAL, "resetControlsPending for "+nodeAddress);
+            } else {
+                CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for "+nodeAddress);
+                return;
+            }
+        }*/
+        
+        //Temporary solution till response is implemented
+        if (msgCache.isControlsPendingResponse(nodeAddress)) {
+            CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for " +
+                                       ""+nodeAddress+" timer "+msgCache.getControlsPendingTimer(nodeAddress));
+            return;
+        }
+        
         setOperationMode(iduStatus.getSetOperationMode(), nodeAddress, hayStack);
         setFanSpeed(iduStatus.getFanSpeed(), nodeAddress, hayStack);
         setAirflowDirection(iduStatus.getAirflowDirection(), nodeAddress, hayStack);

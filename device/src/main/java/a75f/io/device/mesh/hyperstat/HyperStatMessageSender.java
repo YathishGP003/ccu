@@ -17,6 +17,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_DATABASE_SEED_MESSAGE;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
@@ -138,6 +139,7 @@ public class HyperStatMessageSender {
         }
     
         writeIduControlMessage(controls, address, MessageType.HYPERSTAT_IDU_CONTROLS_MESSAGE, true);
+        VrvControlMessageCache.getInstance().updateControlsPending(address);
     }
     
     public static void writeIduControlMessage(HyperStat.HyperStatIduControlsMessage_t message, int address,

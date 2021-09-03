@@ -1,7 +1,9 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.hyperstat.HyperStatMessageCache
 import a75f.io.logic.bo.building.vrv.VrvAirflowDirection
+import a75f.io.logic.bo.building.vrv.VrvControlMessageCache
 import a75f.io.logic.bo.building.vrv.VrvFanSpeed
 import a75f.io.logic.bo.building.vrv.VrvOperationMode
 import a75f.io.renatus.R
@@ -71,9 +73,9 @@ fun loadView(inflater : LayoutInflater,
 
     layout.addView(viewPointRow2)
 
-    setUpOperationModeSpinner(opModeSp, equipId, hayStack, context)
-    setUpFanSpeedSpinner(fanSpeedSp, equipId, hayStack, context)
-    setUpAirflowDirectionSpinner(airflowDirSp, equipId, hayStack, context)
+    setUpOperationModeSpinner(opModeSp, equipId, hayStack, context, nodeAddress)
+    setUpFanSpeedSpinner(fanSpeedSp, equipId, hayStack, context, nodeAddress)
+    setUpAirflowDirectionSpinner(airflowDirSp, equipId, hayStack, context, nodeAddress)
     //setUpMasterControllerSpinner(masterControlSp, equipId, hayStack, context)
 
 }
@@ -102,7 +104,8 @@ fun canEnableOperation( masterControllerMode : Double,
 private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
                                         equipId: String,
                                         hayStack: CCUHsApi,
-                                        context : Activity) {
+                                        context : Activity,
+                                        nodeAddress: String) {
     val masterControllerMode = hayStack.readDefaultVal("point and masterController and mode " +
                                                 "and equipRef == \"$equipId\"")
 
@@ -161,7 +164,7 @@ private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
                                     view: View, position: Int, id: Long) {
             hayStack.writeDefaultVal("userIntent and operation and mode and equipRef == \"$equipId\"", position.toDouble())
             hayStack.writeHisValByQuery("userIntent and operation and mode and equipRef == \"$equipId\"", position.toDouble())
-
+            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt())
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
@@ -173,7 +176,8 @@ private fun setUpOperationModeSpinner(opModeSpinner : Spinner,
 private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
                                           equipId: String,
                                           hayStack: CCUHsApi,
-                                          context : Activity) {
+                                          context : Activity,
+                                          nodeAddress: String) {
 
     val airflowDirectionSupport = hayStack.readHisValByQuery("point and capability and airflowDirection and support " +
             "and equipRef == \"$equipId\"")
@@ -212,7 +216,7 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
                                     view: View, position: Int, id: Long) {
             hayStack.writeDefaultVal("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
             hayStack.writeHisValByQuery("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
-
+            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt());
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
@@ -224,7 +228,8 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
 private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
                                  equipId: String,
                                  hayStack: CCUHsApi,
-                                 context : Activity) {
+                                 context : Activity,
+                                 nodeAddress: String) {
 
     val fanSpeedControlLevel = hayStack.readHisValByQuery("point and capability and fanSpeed and controlLevel " +
             "and equipRef == \"$equipId\"")
@@ -271,7 +276,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
             val fanSpeed = VrvFanSpeed.values().find { it.name == fanSpeedList[position] }
             hayStack.writeDefaultVal("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed!!.ordinal.toDouble())
             hayStack.writeHisValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed.ordinal.toDouble())
-
+            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt());
         }
         override fun onNothingSelected(parent: AdapterView<*>) {
             // write code to perform some action

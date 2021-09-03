@@ -1,10 +1,12 @@
 package a75f.io.renatus;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +45,7 @@ public class TempOverrideFragment extends Fragment {
     TreeMap<String, String> pointMap = new TreeMap();
     HashMap<String, String> equipMap = new HashMap();
     int lastExpandedPosition;
+    String siteName;
 
     public TempOverrideFragment() {
 
@@ -79,6 +82,35 @@ public class TempOverrideFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Globals.getInstance().setTemproryOverrideMode(false);
+        Globals.getInstance().resetTempOverCount();
+
+        /*ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
+        for (Map m : Zonedevices) {
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \"" + m.get("id") + "\"");
+            ArrayList tunerList = new ArrayList();
+            ArrayList newTunerList = new ArrayList();
+            for (Map t : tuners) {
+                Log.e("InsideTempOverrideFrag", "t_value- " + t);
+                if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
+                        t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
+                        t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
+
+                    setPointVal(t.get("id").toString(), 0);
+                    //idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
+
+                }
+            }
+        }*/
+    }
+
+    public void setPointVal(String id, double val) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writeHisValById(id, val);
+        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+        if (Objects.nonNull(logicalPoint)) {
+            //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
+            hayStack.writeHisValById(logicalPoint.toString(), val);
+        }
     }
 
     @Override
@@ -88,7 +120,7 @@ public class TempOverrideFragment extends Fragment {
         expandableListView = view.findViewById(R.id.expandableListView);
         expandableListDetail = new TreeMap<>();
         expandableListDetail_CMDevice = new HashMap<>();
-        String siteName = CCUHsApi.getInstance().read("site").get("dis").toString();
+        siteName = CCUHsApi.getInstance().read("site").get("dis").toString();
 
         //ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and group");
@@ -110,6 +142,7 @@ public class TempOverrideFragment extends Fragment {
             ArrayList tunerList = new ArrayList();
             ArrayList newTunerList = new ArrayList();
             for (Map t : tuners) {
+                Log.e("InsideTempOverrideFrag","t_value- "+t);
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {

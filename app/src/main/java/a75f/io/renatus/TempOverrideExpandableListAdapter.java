@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -84,6 +85,91 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         String equipId = idMap.get(expandedListText);
         double value = getPointVal(equipId);
+        ArrayList<String> targetVal = new ArrayList<String>();
+        for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
+            targetVal.add(pos /100.0 +" V");
+        }
+        ArrayAdapter<String> targetValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, targetVal){
+            public View getView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getView(position, convertView, parent);
+
+                //((TextView) v).setTextSize(16);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+                ((TextView) v).setGravity(Gravity.CENTER);
+
+                return v;
+
+            }
+
+            public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getDropDownView(position, convertView,parent);
+
+                ((TextView) v).setGravity(Gravity.CENTER);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                return v;
+
+            }
+        };
+
+        ArrayList<String> relyVal = new ArrayList<String>();
+        relyVal.add("OFF");
+        relyVal.add("ON");
+        ArrayAdapter<String> relayValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, relyVal){
+            public View getView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getView(position, convertView, parent);
+
+                //((TextView) v).setTextSize(16);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+                ((TextView) v).setGravity(Gravity.CENTER);
+
+                return v;
+
+            }
+
+            public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getDropDownView(position, convertView,parent);
+
+                ((TextView) v).setGravity(Gravity.CENTER);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                return v;
+
+            }
+        };
+
+        ArrayList<String> thermistorVal = new ArrayList<String>();
+        for (int pos = (100*0); pos <= (100*100); pos+=(100)) {
+            thermistorVal.add(pos+" Ohm");
+        }
+        ArrayAdapter<String> thermistorAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, thermistorVal){
+            public View getView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getView(position, convertView, parent);
+
+                //((TextView) v).setTextSize(16);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+                ((TextView) v).setGravity(Gravity.CENTER);
+
+                return v;
+
+            }
+
+            public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                View v = super.getDropDownView(position, convertView,parent);
+
+                ((TextView) v).setGravity(Gravity.CENTER);
+                ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                return v;
+
+            }
+        };
 
         String NewexpandedListText = expandedListText;
         Object unit = null;
@@ -106,471 +192,419 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             Spinner spinner_thermistor = convertView
                     .findViewById(R.id.spinner_thermistor);
 
-            if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog1Out") ||
-                    expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
-                    expandedListText.startsWith(siteName)) {
-                //double value = getPointVal(idMap.get(expandedListText));
-                unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
-                if (Objects.nonNull(unit)) {
-                    if (unit.toString().equals("mV"))
-                        value = value * 0.001;
-                    else if (unit.toString().equals("dV"))
-                        value = value * 0.1;
-                }
+            if (Globals.getInstance().gettempOverCount() < 1){
+                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                edit.putString(expandedListText,equipId+"-value-"+value);
+                edit.commit();
 
-                if (expandedListText.startsWith("Analog1In")) {
-                    String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
-                    if (!analogIn1Mapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
-                    else
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                    expandedListTextVal.setText("" + value + " V");
-                    spinner_override_value.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
+                if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog1Out") ||
+                        expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
+                        expandedListText.startsWith(siteName)) {
+                    //double value = getPointVal(idMap.get(expandedListText));
+                    unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
+                    if (Objects.nonNull(unit)) {
+                        if (unit.toString().equals("mV"))
+                            value = value * 0.001;
+                        else if (unit.toString().equals("dV"))
+                            value = value * 0.1;
                     }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            String val = parts[1];
-                            setPointVal(id, Double.valueOf(val));
-                            idMap.put(id, val);
-                        }else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                    }
-                } else if (expandedListText.startsWith("Analog1Out")) {
-                    String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
-                    if (!analogOut1Mapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
-                    else
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
-                    txt_calculated_output.setText("" + value + " V");
-                    spinner_override_value.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
-                    }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            String val = parts[1];
-                            setPointVal(id, Double.valueOf(val));
-                            idMap.put(id, val);
-                        }
-                        else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        //setPointValForThermistor(id,Double.valueOf(value));
-                    }
-                } else if (expandedListText.startsWith("Analog2In")) {
-                    String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
-                    if (!analogIn2Mapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
-                    else
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
-                    expandedListTextVal.setText("" + value + " V");
-                    spinner_override_value.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
-                    }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            double val = Double.parseDouble(parts[1]);
-                            setPointVal(id, val);
-                            idMap.put(id, String.valueOf(val));
-                        }else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                    }
-                } else if (expandedListText.startsWith("Analog2Out")) {
-                    String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
-                    if (!analogOut2Mapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
-                    else
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
 
-                    txt_calculated_output.setText("" + value + " V");
-                    spinner_override_value.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
-                    }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            double val = Double.parseDouble(parts[1]);
-                            setPointVal(id, val);
-                            idMap.put(id, String.valueOf(val));
-                        }else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                    }
-                } else if (expandedListText.startsWith("relay")) {
-                    String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
-                    if (!relayMapped.equals(""))
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
-                    else
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
-                    txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
-                    spinner_relay.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
-                    }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            //Log.e("InsideTempOverrideExpandableListAdapter_relay", "sharedPrefData " + sharedPrefData);
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            double val = Double.parseDouble(parts[1]);
-                            /*Log.e("InsideTempOverrideExpandableListAdapter_relay", "id " + id);
-                            Log.e("InsideTempOverrideExpandableListAdapter_relay", "value " + val);
-                            Log.e("InsideTempOverrideExpandableListAdapter_relay", "name " + getChild(listPosition, expandedListPosition));*/
-                            setPointVal(id, val);
-                            idMap.put(id, String.valueOf(val));
-                        }else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                    }
-                } else if (expandedListText.startsWith("Th")) {
-                    String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
-                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
-                    expandedListTextVal.setText("" + value + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
-                    spinner_thermistor.setVisibility(View.VISIBLE);
-                    if (Globals.getInstance().gettempOverCount() < 1){
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putString(expandedListText,equipId+"-value-"+value);
-                        edit.commit();
-                    }
-                    else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                        //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                        String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                        if (sharedPrefData != null) {
-                            String[] parts = sharedPrefData.split("-value-");
-                            String id = parts[0];
-                            double val = Double.parseDouble(parts[1]);
-                            setPointValForThermistor(id, val);
-                            idMap.put(id, String.valueOf(val));
-                        }
-                        else{
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                    }
-                } else if (expandedListText.startsWith(siteName)) {
-                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length() + 1, expandedListText.length()));
-                    if (NewexpandedListText.startsWith("CM-analog1In")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                    if (expandedListText.startsWith("Analog1In")) {
+                        String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
+                        if (!analogIn1Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                        String strDouble = String.format("%.3f", value);
+                        //expandedListTextVal.setText("" + value + " V");
+                        expandedListTextVal.setText("" + strDouble + " V");
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        spinner_override_value.setSelection(0);
+                        spinner_override_value.setSelection(0,false);
+                    } else if (expandedListText.startsWith("Analog1Out")) {
+                        String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
+                        if (!analogOut1Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         expandedListTextVal.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                setPointValForThermistor(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }
-                            else {
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
-                            }
-                        }
-                    } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
-                        if (getConfigEnabled("analog1") > 0) {
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
-                        } else
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Used)");
-                        txt_calculated_output.setText("" + value + " V");
-                        spinner_override_value.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                setPointVal(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }
-                            else{
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
-                            }
-                        }
-                    }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
-                        if (getConfigEnabled("analog2") > 0)
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        spinner_override_value.setSelection(0);
+                        spinner_override_value.setSelection(0,false);
+                    } else if (expandedListText.startsWith("Analog2In")) {
+                        String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
+                        if (!analogIn2Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
                         else
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Used)");
-                        txt_calculated_output.setText("" + value + " V");
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
+                        String strDouble = String.format("%.3f", value);
+                        //expandedListTextVal.setText("" + value + " V");
+                        expandedListTextVal.setText("" + strDouble + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                setPointVal(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }else{
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
-                            }
-                        }
-                    } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                        if (getConfigEnabled("analog3") > 0)
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        spinner_override_value.setSelection(0);
+                        spinner_override_value.setSelection(0,false);
+                    } else if (expandedListText.startsWith("Analog2Out")) {
+                        String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
+                        if (!analogOut2Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
                         else
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
-                        txt_calculated_output.setText("" + value + " V");
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
+
+                        expandedListTextVal.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                setPointVal(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }
-                            else{
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
-                            }
-                        }
-                    } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                        if (getConfigEnabled("analog4") > 0)
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        spinner_override_value.setSelection(0);
+                        spinner_override_value.setSelection(0,false);
+                    } else if (expandedListText.startsWith("relay")) {
+                        String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
+                        if (!relayMapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
                         else
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
-                        txt_calculated_output.setText("" + value + " V");
-                        spinner_override_value.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                setPointVal(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }else{
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
-                            }
-                        }
-                    } else if (NewexpandedListText.startsWith("relay")) {
-                        String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
-                        if (getConfigEnabled("relay" + relayPos) > 0) {
-                            String relayMapped = getRelayMapping("relay" + relayPos, convertView);
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
-                        } else {
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Used)");
-                            Object valueToDelete = getChild(listPosition, expandedListPosition);
-                            expandableListDetail.remove(valueToDelete);
-                        }
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
                         txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                         spinner_relay.setVisibility(View.VISIBLE);
-                        if (Globals.getInstance().gettempOverCount() < 1){
-                            SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                            edit.putString(expandedListText,equipId+"-value-"+value);
-                            edit.commit();
-                        }
-                        else if (!Globals.getInstance().isTemproryOverrideMode() && Globals.getInstance().gettempOverCount()>0){
-                            //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
-                            String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
-                            if (sharedPrefData != null) {
-                                String[] parts = sharedPrefData.split("-value-");
-                                String id = parts[0];
-                                double val = Double.parseDouble(parts[1]);
-                                /*Log.e("InsideTempOverrideExpandableListAdapter", "id " + id);
-                                Log.e("InsideTempOverrideExpandableListAdapter", "value " + val);
-                                Log.e("InsideTempOverrideExpandableListAdapter", "name " + getChild(listPosition, expandedListPosition));*/
-                                setPointVal(id, val);
-                                idMap.put(id, String.valueOf(val));
-                            }else{
-                                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                                edit.putString(expandedListText,equipId+"-value-"+value);
-                                edit.commit();
+                        spinner_relay.setAdapter(relayValAdapter);
+                        spinner_relay.setSelection(0);
+                        spinner_relay.setSelection(0,false);
+                    } else if (expandedListText.startsWith("Th")) {
+                        String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
+                        expandedListTextVal.setText("" + value + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
+                        spinner_thermistor.setVisibility(View.VISIBLE);
+                        spinner_thermistor.setAdapter(thermistorAdapter);
+                        spinner_thermistor.setSelection(0);
+                        spinner_thermistor.setSelection(0,false);
+                    } else if (expandedListText.startsWith(siteName)) {
+                        value = value / 10;
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length() + 1, expandedListText.length()));
+                        if (NewexpandedListText.startsWith("CM-analog1In")) {
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                            expandedListTextVal.setText("" + value + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            spinner_override_value.setSelection(0);
+                            spinner_override_value.setSelection(0,false);
+                        } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
+                            if (getConfigEnabled("analog1") > 0) {
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                            } else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Used)");
+                            txt_calculated_output.setText("" + value + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            spinner_override_value.setSelection(0);
+                            spinner_override_value.setSelection(0,false);
+                        }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                            if (getConfigEnabled("analog2") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Used)");
+                            txt_calculated_output.setText("" + value + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            spinner_override_value.setSelection(0);
+                            spinner_override_value.setSelection(0,false);
+                        } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
+                            if (getConfigEnabled("analog3") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
+                            txt_calculated_output.setText("" + value + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            spinner_override_value.setSelection(0);
+                            spinner_override_value.setSelection(0,false);
+                        } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                            if (getConfigEnabled("analog4") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
+                            txt_calculated_output.setText("" + value + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            spinner_override_value.setSelection(0);
+                            spinner_override_value.setSelection(0,false);
+                        } else if (NewexpandedListText.startsWith("relay")) {
+                            String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
+                            if (getConfigEnabled("relay" + relayPos) > 0) {
+                                String relayMapped = getRelayMapping("relay" + relayPos, convertView);
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                            } else {
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Used)");
+                                Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                expandableListDetail.remove(valueToDelete);
                             }
-                        }
-                    }/*else if (NewexpandedListText.startsWith("CM-th")) {
+                            txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
+                            spinner_relay.setVisibility(View.VISIBLE);
+                            spinner_relay.setAdapter(relayValAdapter);
+                            spinner_relay.setSelection(0);
+                            spinner_relay.setSelection(0,false);
+                        }/*else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
                         expandedListTextVal.setText("" + value+" Ohm");
                         spinner_thermistor.setVisibility(View.VISIBLE);
                     }*/
+                    }
+                    expandedListTextView.setText(NewexpandedListText);
+                    notifyDataSetChanged();
                 }
-                expandedListTextView.setText(NewexpandedListText);
-                notifyDataSetChanged();
             }
+            else if (Globals.getInstance().gettempOverCount()>0){
+                String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(expandedListText,null);
+                if (sharedPrefData != null) {
+                    String[] parts = sharedPrefData.split("-value-");
+                    String id = parts[0];
+                    String value1 = parts[1];
+                    Double val = Double.valueOf(value1);
+                    setPointVal(id, val);
+                    idMap.put(id, value1);
+                if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog1Out") ||
+                        expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
+                        expandedListText.startsWith(siteName)) {
+                    //double value = getPointVal(idMap.get(expandedListText));
+                    unit = CCUHsApi.getInstance().readMapById(equipId).get("unit");
+                    if (Objects.nonNull(unit)) {
+                        if (unit.toString().equals("mV"))
+                            val = val * 0.001;
+                        else if (unit.toString().equals("dV"))
+                            val = val * 0.1;
+                    }
 
-            ArrayList<String> targetVal = new ArrayList<String>();
-            for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
-                targetVal.add(pos /100.0 +" V");
+                    if (expandedListText.startsWith("Analog1In")) {
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
+                        String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
+                        if (!analogIn1Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                        expandedListTextVal.setText("" + val + " V");
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                            spinner_override_value.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith("Analog1Out")) {
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
+                        String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
+                        if (!analogOut1Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
+                        txt_calculated_output.setText("" + val + " V");
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                            spinner_override_value.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith("Analog2In")) {
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
+                        String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
+                        if (!analogIn2Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
+                        expandedListTextVal.setText("" + val + " V");
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                            spinner_override_value.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith("Analog2Out")) {
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
+                        String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
+                        if (!analogOut2Mapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
+
+                        txt_calculated_output.setText("" + val + " V");
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(targetValAdapter);
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                            spinner_override_value.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith("relay")) {
+
+                        String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
+                        if (!relayMapped.equals(""))
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
+                        txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(value1)), 1.0) == 0 ? "ON" : "OFF");
+                        spinner_relay.setVisibility(View.VISIBLE);
+                        relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_relay.setAdapter(relayValAdapter);
+                        if (val != null) {
+                            int spinnerPosition = targetValAdapter.getPosition(String.valueOf(val));
+                            spinner_relay.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith("Th")) {
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(2, 3),null);
+                        Log.e("InsideTempOverrideExpandableListAdapter","thermistor_val- "+sharedPrefData1);
+                        String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
+                        expandedListTextVal.setText("" + val + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
+                        spinner_thermistor.setVisibility(View.VISIBLE);
+                        spinner_thermistor.setAdapter(thermistorAdapter);
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = thermistorAdapter.getPosition(sharedPrefData1);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_thermistor.getItemAtPosition(spinnerPosition));
+                            spinner_thermistor.setSelection(spinnerPosition);
+                        }
+                    } else if (expandedListText.startsWith(siteName)) {
+                        val = val / 10;
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length() + 1, expandedListText.length()));
+                        if (NewexpandedListText.startsWith("CM-analog1In")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
+                            expandedListTextVal.setText("" + val + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                                spinner_override_value.setSelection(spinnerPosition);
+                            }
+                        } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                            if (getConfigEnabled("analog1") > 0) {
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                            } else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Used)");
+                            txt_calculated_output.setText("" + val + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                                spinner_override_value.setSelection(spinnerPosition);
+                            }
+                        }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                            if (getConfigEnabled("analog2") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Used)");
+                            txt_calculated_output.setText("" + val + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                                spinner_override_value.setSelection(spinnerPosition);
+                            }
+                        } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                            if (getConfigEnabled("analog3") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
+                            txt_calculated_output.setText("" + val + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                                spinner_override_value.setSelection(spinnerPosition);
+                            }
+                        } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
+                            if (getConfigEnabled("analog4") > 0)
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                            else
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
+                            txt_calculated_output.setText("" + val + " V");
+                            spinner_override_value.setVisibility(View.VISIBLE);
+                            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_override_value.setAdapter(targetValAdapter);
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
+                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
+                                spinner_override_value.setSelection(spinnerPosition);
+                            }
+                        } else if (NewexpandedListText.startsWith("relay")) {
+                            String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
+                            if (getConfigEnabled("relay" + relayPos) > 0) {
+                                String relayMapped = getRelayMapping("relay" + relayPos, convertView);
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                            } else {
+                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Used)");
+                                Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                expandableListDetail.remove(valueToDelete);
+                            }
+                            txt_calculated_output.setText(""+val);
+                            spinner_relay.setVisibility(View.VISIBLE);
+                            spinner_relay.setVisibility(View.VISIBLE);
+                            relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner_relay.setAdapter(relayValAdapter);
+                            if (val != null) {
+                                int spinnerPosition = targetValAdapter.getPosition(String.valueOf(val));
+                                spinner_relay.setSelection(spinnerPosition);
+                            }
+                        }/*else if (NewexpandedListText.startsWith("CM-th")) {
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
+                        expandedListTextVal.setText("" + value+" Ohm");
+                        spinner_thermistor.setVisibility(View.VISIBLE);
+                    }*/
+                    }
+                    expandedListTextView.setText(NewexpandedListText);
+                    notifyDataSetChanged();
+                }
+                //setPointVal(idMap.get(getChild(listPosition, expandedListPosition)), 0.0);
+                }else{
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(expandedListText,equipId+"-value-"+value);
+                    edit.commit();
+                }
             }
-            ArrayAdapter<String> targetValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, targetVal){
-                public View getView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getView(position, convertView, parent);
-
-                    //((TextView) v).setTextSize(16);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-                    ((TextView) v).setGravity(Gravity.CENTER);
-
-                    return v;
-
-                }
-
-                public View getDropDownView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getDropDownView(position, convertView,parent);
-
-                    ((TextView) v).setGravity(Gravity.CENTER);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-
-                    return v;
-
-                }
-            };
 
             //targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner_override_value.setAdapter(targetValAdapter);
-            spinner_override_value.invalidate();
+            /*spinner_override_value.setAdapter(targetValAdapter);
+            spinner_override_value.invalidate();*/
 
-            ArrayList<String> relyVal = new ArrayList<String>();
-            relyVal.add("OFF");
-            relyVal.add("ON");
-            ArrayAdapter<String> relayValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, relyVal){
-                public View getView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getView(position, convertView, parent);
-
-                    //((TextView) v).setTextSize(16);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-                    ((TextView) v).setGravity(Gravity.CENTER);
-
-                    return v;
-
-                }
-
-                public View getDropDownView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getDropDownView(position, convertView,parent);
-
-                    ((TextView) v).setGravity(Gravity.CENTER);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-
-                    return v;
-
-                }
-            };
             //relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner_relay.setAdapter(relayValAdapter);
-            spinner_relay.invalidate();
+            /*spinner_relay.setAdapter(relayValAdapter);
+            spinner_relay.invalidate();*/
 
-            ArrayList<String> thermistorVal = new ArrayList<String>();
-            for (int pos = (100*0); pos <= (100*100); pos+=(100)) {
-                thermistorVal.add(pos+" Ohm");
-            }
-            ArrayAdapter<String> thermistorAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, thermistorVal){
-                public View getView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getView(position, convertView, parent);
-
-                    //((TextView) v).setTextSize(16);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-                    ((TextView) v).setGravity(Gravity.CENTER);
-
-                    return v;
-
-                }
-
-                public View getDropDownView(int position, View convertView,ViewGroup parent) {
-
-                    View v = super.getDropDownView(position, convertView,parent);
-
-                    ((TextView) v).setGravity(Gravity.CENTER);
-                    ((TextView) v).setTextAppearance(R.style.text_appearance);
-
-                    return v;
-
-                }
-            };
             //thermistorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner_thermistor.setAdapter(thermistorAdapter);
-            spinner_thermistor.invalidate();
+            /*spinner_thermistor.setAdapter(thermistorAdapter);
+            spinner_thermistor.invalidate();*/
 
             Object finalUnit = unit;
-            spinner_override_value.setSelection(0,false);
+            //spinner_override_value.setSelection(0,false);
             spinner_override_value.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
@@ -605,6 +639,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
                     }
 
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(equipId+expandedListText.substring(6),selectedSpinnerItem);
+                    edit.apply();
+
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView)
@@ -612,7 +650,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
-            spinner_relay.setSelection(0,false);
+            //spinner_relay.setSelection(0,false);
             spinner_relay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
@@ -632,7 +670,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
-            spinner_thermistor.setSelection(0,false);
+            //spinner_thermistor.setSelection(0,false);
             spinner_thermistor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
@@ -647,6 +685,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     //setPointVal(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
                     setPointValForThermistor(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
                     idMap.put(idMap.get(tunerName), selectedSpinnerItem.substring(0,index-1));
+
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(equipId+expandedListText.substring(2, 3),selectedSpinnerItem);
+                    edit.apply();
 
                 }
                 @Override
@@ -928,22 +970,25 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
-            hayStack.writeHisValById(logicalPoint.toString(), val);
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
+                hayStack.writeHisValById(logicalPoint.toString(), val);
+            }
         }
-        Object devicePoint = hayStack.readMapById(id).get("deviceRef");
     }
 
     public void setPointValForThermistor(String id, double val) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
+            }
         }
     }
 

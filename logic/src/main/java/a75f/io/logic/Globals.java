@@ -146,6 +146,10 @@ public class Globals {
         tempOverCount++;
     }
 
+    public void resetTempOverCount(){
+        tempOverCount = 0;
+    }
+
     public boolean isTestMode()
     {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

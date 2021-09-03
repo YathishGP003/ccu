@@ -868,7 +868,7 @@ public class VavIERtu extends VavSystemProfile
         String equipDis = systemEquip.get("dis").toString();
         String siteRef = systemEquip.get("siteRef").toString();
         String equipRef = systemEquip.get("id").toString();
-        String tz = systemEquip.get("tz").toString()
+        String tz = systemEquip.get("tz").toString();
         Point effDATSetpoint = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"effDATSetpoint")
                                    .setSiteRef(siteRef)

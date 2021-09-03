@@ -340,4 +340,42 @@ class IEDeviceHandler {
              { error -> CcuLog.e(L.TAG_CCU_DEVICE, "IE Write failed for $msg : $error.message" ) }
          )
     }
+
+    //For test Signals
+    fun sendDatClgSetpoint(coolingDat : Double) {
+        writeToIEDevice(
+            ieService,
+            IE_POINT_TYPE_AV,
+            IE_POINT_NAME_DAT_SETPOINT,
+            IE_MSG_BODY.format(fahrenheitToCelsius(coolingDat))
+        )
+    }
+
+    fun sendFanControl(fanSpeed : Double, hayStack: CCUHsApi, systemProfile: VavIERtu) {
+        if (isMultiZoneEnabled(hayStack)) {
+            writeToIEDevice(
+                ieService,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_DSP_SETPOINT,
+                IE_MSG_BODY.format(fanSpeed)
+            )
+        } else {
+            writeToIEDevice(
+                ieService,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_FAN_SPEED_CONTROL,
+                IE_MSG_BODY.format(fanSpeed)
+            )
+        }
+    }
+
+    fun sendBuildingHumidity(humiditySp : Double) {
+        writeToIEDevice(
+            ieService,
+            IE_POINT_TYPE_AV,
+            IE_POINT_NAME_HUMIDITY_SETPOINT,
+            IE_MSG_BODY.format(humiditySp)
+        )
+
+    }
 }

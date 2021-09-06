@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -64,17 +65,17 @@ public class TempOverrideFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
         ButterKnife.bind(this, rootView);
+        Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.landingActivity), R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
+        View snackbarView = snackbar.getView();
+        TextView snackTextView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+        snackbar.setAction("CLOSE", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        Snackbar.make(getActivity().findViewById(R.id.landingActivity), "Kindly be cautious of changes done to any system and zone level points." +
-                "This may impact building equipment operation and/or even damage building equipment.", Snackbar.LENGTH_INDEFINITE)
-                .setAction("CLOSE", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                })
-                .setActionTextColor(getResources().getColor(android.R.color.holo_red_light ))
-                .show();
+            }
+        });
+        snackTextView.setMaxLines(2);
+        snackbar.show();
 
         loadExistingZones();
         return rootView;

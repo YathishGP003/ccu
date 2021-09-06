@@ -12,6 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +50,7 @@ public class TempOverrideFragment extends Fragment {
     HashMap<String, String> equipMap = new HashMap();
     int lastExpandedPosition;
     String siteName;
-
+    private LinearLayout mRoot;
     public TempOverrideFragment() {
 
     }
@@ -61,6 +64,18 @@ public class TempOverrideFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
         ButterKnife.bind(this, rootView);
+
+        Snackbar.make(getActivity().findViewById(R.id.landingActivity), "Kindly be cautious of changes done to any system and zone level points." +
+                "This may impact building equipment operation and/or even damage building equipment.", Snackbar.LENGTH_INDEFINITE)
+                .setAction("CLOSE", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                })
+                .setActionTextColor(getResources().getColor(android.R.color.holo_red_light ))
+                .show();
+
         loadExistingZones();
         return rootView;
     }

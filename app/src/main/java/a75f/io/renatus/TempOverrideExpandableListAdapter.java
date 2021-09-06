@@ -215,7 +215,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                        String strDouble = String.format("%.3f", value);
+                        String strDouble = String.format("%.1f", value);
                         //expandedListTextVal.setText("" + value + " V");
                         expandedListTextVal.setText("" + strDouble + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
@@ -239,7 +239,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
-                        String strDouble = String.format("%.3f", value);
+                        String strDouble = String.format("%.1f", value);
                         //expandedListTextVal.setText("" + value + " V");
                         expandedListTextVal.setText("" + strDouble + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
@@ -359,8 +359,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     String id = parts[0];
                     String value1 = parts[1];
                     Double val = Double.valueOf(value1);
-                    setPointVal(id, val);
-                    idMap.put(id, value1);
                 if (expandedListText.startsWith("Analog1In") || expandedListText.startsWith("Analog1Out") ||
                         expandedListText.startsWith("Analog2In") || expandedListText.startsWith("Analog2Out") || expandedListText.startsWith("relay") || expandedListText.startsWith("Th") ||
                         expandedListText.startsWith(siteName)) {
@@ -374,26 +372,27 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     }
 
                     if (expandedListText.startsWith("Analog1In")) {
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
-                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
                         String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
                         if (!analogIn1Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1\n(" + analogIn1Mapped + ")");
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                        expandedListTextVal.setText("" + val + " V");
+                        String strDouble = String.format("%.1f", val);
+                        expandedListTextVal.setText("" + strDouble + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                         targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_override_value.setAdapter(targetValAdapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith("Analog1Out")) {
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
-                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
                         String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
                         if (!analogOut1Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
@@ -405,13 +404,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_override_value.setAdapter(targetValAdapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith("Analog2In")) {
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
-                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
                         String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                         if (!analogIn2Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n(" + analogIn2Mapped + ")");
@@ -423,13 +421,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_override_value.setAdapter(targetValAdapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith("Analog2Out")) {
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
-                        Log.e("InsideTempOverrideExpandableListAdapter","analog_val- "+sharedPrefData1);
                         String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
                         if (!analogOut2Mapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2" + "\n(" + analogOut2Mapped + ")");
@@ -442,12 +439,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_override_value.setAdapter(targetValAdapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith("relay")) {
-
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
+                        String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(5, 6),null);
                         String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
                         if (!relayMapped.equals(""))
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6) + "\n(" + relayMapped + ")");
@@ -457,13 +454,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setVisibility(View.VISIBLE);
                         relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_relay.setAdapter(relayValAdapter);
-                        if (val != null) {
-                            int spinnerPosition = targetValAdapter.getPosition(String.valueOf(val));
+                        if (sharedPrefData1!= null) {
+                            int spinnerPosition = relayValAdapter.getPosition(sharedPrefData1);
                             spinner_relay.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith("Th")) {
+                        setPointValForThermistor(id, val);
+                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(2, 3),null);
-                        Log.e("InsideTempOverrideExpandableListAdapter","thermistor_val- "+sharedPrefData1);
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + val + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
@@ -471,24 +469,21 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_thermistor.setAdapter(thermistorAdapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = thermistorAdapter.getPosition(sharedPrefData1);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_thermistor.getItemAtPosition(spinnerPosition));
                             spinner_thermistor.setSelection(spinnerPosition);
                         }
                     } else if (expandedListText.startsWith(siteName)) {
-                        val = val / 10;
+                        setPointVal(id, val);
+                        idMap.put(id, value1);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length() + 1, expandedListText.length()));
                         if (NewexpandedListText.startsWith("CM-analog1In")) {
                             String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
-                            expandedListTextVal.setText("" + val + " V");
+                            expandedListTextVal.setText("" + val/10 + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_override_value.setAdapter(targetValAdapter);
                             if (sharedPrefData1!= null) {
                                 int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                                 spinner_override_value.setSelection(spinnerPosition);
                             }
                         } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
@@ -497,14 +492,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
                             } else
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Used)");
-                            txt_calculated_output.setText("" + val + " V");
+                            txt_calculated_output.setText("" + val/10 + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_override_value.setAdapter(targetValAdapter);
                             if (sharedPrefData1!= null) {
                                 int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                                 spinner_override_value.setSelection(spinnerPosition);
                             }
                         }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
@@ -513,14 +506,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
                             else
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Used)");
-                            txt_calculated_output.setText("" + val + " V");
+                            txt_calculated_output.setText("" + val/10 + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_override_value.setAdapter(targetValAdapter);
                             if (sharedPrefData1!= null) {
                                 int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                                 spinner_override_value.setSelection(spinnerPosition);
                             }
                         } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
@@ -529,14 +520,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
                             else
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Used)");
-                            txt_calculated_output.setText("" + val + " V");
+                            txt_calculated_output.setText("" + val/10 + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_override_value.setAdapter(targetValAdapter);
                             if (sharedPrefData1!= null) {
                                 int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                                 spinner_override_value.setSelection(spinnerPosition);
                             }
                         } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
@@ -545,17 +534,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
                             else
                                 NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Used)");
-                            txt_calculated_output.setText("" + val + " V");
+                            txt_calculated_output.setText("" + val/10 + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_override_value.setAdapter(targetValAdapter);
                             if (sharedPrefData1!= null) {
                                 int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerPosition- "+spinnerPosition);
-                                Log.e("InsideTempOverrideExpandableListAdapter","spinnerItem- "+spinner_override_value.getItemAtPosition(spinnerPosition));
                                 spinner_override_value.setSelection(spinnerPosition);
                             }
                         } else if (NewexpandedListText.startsWith("relay")) {
+                            String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(5, 6),null);
                             String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
                             if (getConfigEnabled("relay" + relayPos) > 0) {
                                 String relayMapped = getRelayMapping("relay" + relayPos, convertView);
@@ -565,13 +553,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 Object valueToDelete = getChild(listPosition, expandedListPosition);
                                 expandableListDetail.remove(valueToDelete);
                             }
-                            txt_calculated_output.setText(""+val);
+                            txt_calculated_output.setText(""+val/10);
                             spinner_relay.setVisibility(View.VISIBLE);
                             spinner_relay.setVisibility(View.VISIBLE);
                             relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinner_relay.setAdapter(relayValAdapter);
-                            if (val != null) {
-                                int spinnerPosition = targetValAdapter.getPosition(String.valueOf(val));
+                            if (sharedPrefData1!= null) {
+                                int spinnerPosition = relayValAdapter.getPosition(sharedPrefData1);
                                 spinner_relay.setSelection(spinnerPosition);
                             }
                         }/*else if (NewexpandedListText.startsWith("CM-th")) {
@@ -660,8 +648,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     Globals.getInstance().incrementTempOverCount();
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
+                    String selectedSpinnerItem = spinner_relay.getSelectedItem().toString();
                     setPointVal(idMap.get(tunerName), Double.parseDouble(String.valueOf(spinner_relay.getSelectedItemId())));
                     idMap.put(idMap.get(tunerName), spinner_relay.getSelectedItem().toString());
+
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(equipId+expandedListText.substring(5, 6),selectedSpinnerItem);
+                    edit.apply();
 
                 }
                 @Override

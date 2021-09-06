@@ -26,6 +26,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -35,8 +36,8 @@ import butterknife.ButterKnife;
 public class TempOverrideFragment extends Fragment {
     ArrayList<HashMap> openZoneMap;
 
-    ExpandableListView            expandableListView;
-    TempOverrideExpandableListAdapter         expandableListAdapter;
+    ExpandableListView expandableListView;
+    TempOverrideExpandableListAdapter expandableListAdapter;
     List<String> expandableListTitle;
     TreeMap<String, List<String>> expandableListDetail;
     HashMap<String, List<String>> expandableListDetail_CMDevice;
@@ -63,8 +64,10 @@ public class TempOverrideFragment extends Fragment {
         loadExistingZones();
         return rootView;
     }
+
     ArrayList<Floor> siteFloorList = new ArrayList<>();
     ArrayList<String> siteRoomList = new ArrayList<>();
+
     private void loadExistingZones() {
         siteFloorList.clear();
         siteRoomList.clear();
@@ -84,23 +87,28 @@ public class TempOverrideFragment extends Fragment {
         Globals.getInstance().setTemproryOverrideMode(false);
         Globals.getInstance().resetTempOverCount();
 
-        /*ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
+        ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
         for (Map m : Zonedevices) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \"" + m.get("id") + "\"");
-            ArrayList tunerList = new ArrayList();
-            ArrayList newTunerList = new ArrayList();
             for (Map t : tuners) {
-                Log.e("InsideTempOverrideFrag", "t_value- " + t);
-                if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
-                        t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
-                        t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
-
-                    setPointVal(t.get("id").toString(), 0);
-                    //idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
-
+                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                edit.putString(t.get("id").toString()+t.get("dis").toString().substring(6),null);
+                edit.putString(t.get("id").toString()+t.get("dis").toString().substring(2,3),null);
+                edit.putString(t.get("id").toString()+t.get("dis").toString().substring(5, 6),null);
+                edit.apply();
+                String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(t.get("dis").toString(), null);
+                //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);
+                if (sharedPrefData != null) {
+                    String[] parts = sharedPrefData.split("-value-");
+                    String id = parts[0];
+                    String value1 = parts[1];
+                    Double val = Double.valueOf(value1);
+                    if (t.get("dis").toString().startsWith("Th"))
+                        setPointValForThermistor(id, val);
+                    else setPointVal(id, val);
                 }
             }
-        }*/
+        }
     }
 
     public void setPointVal(String id, double val) {
@@ -110,6 +118,17 @@ public class TempOverrideFragment extends Fragment {
         if (Objects.nonNull(logicalPoint)) {
             //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
             hayStack.writeHisValById(logicalPoint.toString(), val);
+        }
+    }
+
+    public void setPointValForThermistor(String id, double val) {
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
+            }
         }
     }
 
@@ -142,7 +161,6 @@ public class TempOverrideFragment extends Fragment {
             ArrayList tunerList = new ArrayList();
             ArrayList newTunerList = new ArrayList();
             for (Map t : tuners) {
-                Log.e("InsideTempOverrideFrag","t_value- "+t);
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {

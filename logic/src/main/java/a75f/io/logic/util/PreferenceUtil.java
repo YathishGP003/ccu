@@ -58,16 +58,4 @@ public class PreferenceUtil {
         editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
         editor.apply();
     }
-    
-    public static int getOOMCounter() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getInt("OOMCounter",0);
-    }
-    
-    public static void setOOMCounter(int oomCount) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("OOMCounter", oomCount);
-        editor.apply();
-    }
 }

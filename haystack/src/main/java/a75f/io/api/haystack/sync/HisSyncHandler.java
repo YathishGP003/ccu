@@ -68,7 +68,7 @@ public class HisSyncHandler
 
                 if (entitySyncRequired) {
                     CcuLog.d(TAG,"doHisSync : entitySyncRequired");
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                     entitySyncRequired = false;
                 }
             }

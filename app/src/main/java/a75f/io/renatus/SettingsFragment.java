@@ -15,6 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import a75f.io.renatus.registration.CreateNewSite;
 import a75f.io.renatus.registration.InstallerOptions;
@@ -66,14 +69,12 @@ public class SettingsFragment extends Fragment {
 
         slidingPane = view.findViewById(R.id.sliding_pane);
         slidingPane.setSliderFadeColor(getResources().getColor(android.R.color.transparent));
-
         fragmentClass = CreateNewSite.class;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
@@ -92,6 +93,7 @@ public class SettingsFragment extends Fragment {
         SettingFragmentHandler = new Handler() {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
+                RenatusLandingActivity.snackbar.dismiss();
                 switch (msg.what) {
                     case 0: {
 
@@ -213,6 +215,7 @@ public class SettingsFragment extends Fragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+                            RenatusLandingActivity.snackbar.show();
                             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
@@ -258,17 +261,20 @@ public class SettingsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         isTransactionSafe = false;
+        RenatusLandingActivity.snackbar.dismiss();
     }
 
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        RenatusLandingActivity.snackbar.dismiss();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        RenatusLandingActivity.snackbar.dismiss();
     }
 
     @Override

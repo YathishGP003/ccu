@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
@@ -104,6 +106,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private CustomViewPager mViewPager;
     private TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
+    public static Snackbar snackbar;
 
 
     @Override
@@ -121,6 +124,17 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+
+            snackbar = Snackbar.make(findViewById(R.id.landingActivity), R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
+            View snackbarView = RenatusLandingActivity.snackbar.getView();
+            TextView snackTextView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+            RenatusLandingActivity.snackbar.setAction("CLOSE", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+            snackTextView.setMaxLines(2);
 
             floorMenu = findViewById(R.id.floorMenu);
             menuToggle = findViewById(R.id.menuToggle);
@@ -233,6 +247,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     public void setViewPager() {
+        snackbar.dismiss();
         menuToggle.setVisibility(View.GONE);
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
@@ -251,6 +266,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
+                snackbar.dismiss();
                 if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
@@ -292,6 +308,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
                 tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
+                snackbar.dismiss();
             }
 
             @SuppressLint("ResourceType")
@@ -324,6 +341,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks isOn the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        snackbar.dismiss();
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -341,6 +359,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onPause() {
         super.onPause();
+        snackbar.dismiss();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
     }
 

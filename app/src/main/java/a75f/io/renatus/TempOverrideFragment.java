@@ -52,6 +52,7 @@ public class TempOverrideFragment extends Fragment {
     int lastExpandedPosition;
     String siteName;
     private LinearLayout mRoot;
+    Snackbar snackbar;
     public TempOverrideFragment() {
 
     }
@@ -60,12 +61,14 @@ public class TempOverrideFragment extends Fragment {
         return new TempOverrideFragment();
     }
 
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
         ButterKnife.bind(this, rootView);
-        Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.landingActivity), R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
+        /*snackbar = Snackbar.make(getActivity().findViewById(R.id.landingActivity), R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
         View snackbarView = snackbar.getView();
         TextView snackTextView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
         snackbar.setAction("CLOSE", new View.OnClickListener() {
@@ -75,7 +78,7 @@ public class TempOverrideFragment extends Fragment {
             }
         });
         snackTextView.setMaxLines(2);
-        snackbar.show();
+        snackbar.show();*/
 
         loadExistingZones();
         return rootView;
@@ -97,11 +100,14 @@ public class TempOverrideFragment extends Fragment {
         }
     }
 
+
+
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         Globals.getInstance().setTemproryOverrideMode(false);
         Globals.getInstance().resetTempOverCount();
+        RenatusLandingActivity.snackbar.dismiss();
 
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
         for (Map m : Zonedevices) {

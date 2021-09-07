@@ -75,8 +75,9 @@ public class HisSyncHandler
         if (syncLock.tryLock()) {
             try {
                 sync();
-            }
-            finally {
+            } catch (Exception e) {
+                CcuLog.e(TAG,"HisSync Sync Failed ", e);
+            } finally {
                 syncLock.unlock();
             }
         } else {

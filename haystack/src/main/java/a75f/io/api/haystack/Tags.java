@@ -99,5 +99,6 @@ public class Tags
     public static final String SENSE = "sense";
     
     public static final String MULTI_ZONE = "multiZone";
+    public static final String VRV = "vrv";
 
 }

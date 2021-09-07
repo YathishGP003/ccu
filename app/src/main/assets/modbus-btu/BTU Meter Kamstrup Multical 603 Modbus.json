@@ -1,4 +1,4 @@
-{
+  {
   "modbusEquipId (_id)": "5f1f30ad29baef4f1d9a069",
   "name": "Kamstrup BTU 603",
   "description": "This document contains the configuration necessary to manage Cooling Energy Meter",

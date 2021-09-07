@@ -1492,20 +1492,23 @@ public class CCUHsApi
             return null;
         }
     }
+    
+    /**
+     * Get the Site entity.
+     * @return Site
+     */
+    public @Nullable Site getSite() {
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (!site.isEmpty()) {
+            return new Site.Builder().setHashMap(site).build();
+        }
+        return null;
+    }
 
     public @Nullable String getCcuName() {
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         if (ccu.size() > 0) {
             return ccu.get("dis").toString();
-        } else {
-            return null;
-        }
-    }
-    
-    public @Nullable Site getSite() {
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (!site.isEmpty()) {
-            return new Site.Builder().setHashMap(site).build();
         } else {
             return null;
         }

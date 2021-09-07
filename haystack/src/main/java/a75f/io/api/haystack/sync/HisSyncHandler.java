@@ -16,6 +16,7 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HStr;
 import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
+import org.projecthaystack.UnknownRecException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,8 +80,9 @@ public class HisSyncHandler
         if (syncLock.tryLock()) {
             try {
                 sync();
-            }
-            finally {
+            } catch (Exception e) {
+                CcuLog.e(TAG,"HisSync Sync Failed ", e);
+            } finally {
                 syncLock.unlock();
             }
         } else {
@@ -273,9 +275,13 @@ public class HisSyncHandler
                 @Override public void run() {
                     super.run();
                     CcuLog.d(TAG, "doPurge ->");
-                    ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
-                    for (HashMap<Object, Object> point : allHisPoints) {
-                        ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
+                    try {
+                        ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
+                        for (HashMap<Object, Object> point : allHisPoints) {
+                            ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
+                        }
+                    } catch (UnknownRecException e) {
+                        CcuLog.d(TAG, "doPurge -> Invalid attempt to delete his data for an unknown record");
                     }
                     CcuLog.d(TAG, "<- doPurge");
                 }

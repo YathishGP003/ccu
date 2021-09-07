@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Status : "
+            android:text="Status :"
             android:textAppearance="@style/title_normal">
         </TextView>
 
@@ -26,8 +26,8 @@
             android:id="@+id/schedule_status_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:textAppearance="@style/label_grey"
+            android:layout_marginBottom="10dp"
             android:text="In Setpoint, Changes to Energy Saving Range 67 - 78 at 6:00PM"></TextView>
     </LinearLayout>
 

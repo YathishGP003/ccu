@@ -78,7 +78,7 @@ public class RenatusApp extends UtilityApplication
 					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
 					Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
-						Process p = Runtime.getRuntime().exec("chmod 755 /system/xbin/su");
+						Process p = Runtime.getRuntime().exec("su");
 						InputStream es = p.getErrorStream();
 						DataOutputStream os = new DataOutputStream(p.getOutputStream());
 

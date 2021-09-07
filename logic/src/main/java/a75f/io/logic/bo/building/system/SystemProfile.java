@@ -166,9 +166,11 @@ public abstract class SystemProfile
 
         for (HashMap m : equips) {
             Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
+                || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
+                || q.getMarkers().contains("vrv")) {
                 q.setAhuRef(systemEquipId);
-            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("hyperstat")) {
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense")) {
                 q.setGatewayRef(systemEquipId);
             }else {
                 Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT).show();

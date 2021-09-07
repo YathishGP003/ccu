@@ -7,11 +7,8 @@ import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -295,9 +292,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
-        ||(equip.getMarkers().contains("sense"))  ) {
+        ||(equip.getMarkers().contains("sense") || equip.getMarkers().contains("vrv"))  ) {
 
-            VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
+            EquipScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
                    || equip.getMarkers().contains("emr")
                    || equip.getMarkers().contains("modbus")) {
@@ -444,6 +441,22 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             return statusString;
         }
+    }
+    
+    /**
+     * Public method that returns the zone status string.
+     * @param zoneId
+     * @param equipId
+     * @return
+     */
+    public static String getZoneStatusMessage(String zoneId, String equipId) {
+        HashMap equip = CCUHsApi.getInstance().readMapById(equipId);
+        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        if (equip.containsKey("vrv")) {
+            status += ", Group Address "+
+                      CCUHsApi.getInstance().readHisValByQuery("groupAddress and equipRef == \""+equipId+"\"").intValue();
+        }
+        return status;
     }
 
     public static double getSystemCoolingDesiredTemp(){
@@ -738,7 +751,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         {
             String id = ((HashMap) points.get(0)).get("id").toString();
             String hisZoneStatus = CCUHsApi.getInstance().readDefaultStrValById(id);
-            String currentZoneStatus = getZoneStatusString(equip.getRoomRef(), equip.getId());
+            String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);

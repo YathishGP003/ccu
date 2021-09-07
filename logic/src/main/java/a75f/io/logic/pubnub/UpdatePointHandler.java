@@ -21,6 +21,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class UpdatePointHandler
@@ -101,6 +102,10 @@ public class UpdatePointHandler
         
         } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
+        }
+        
+        if (localPoint.getMarkers().contains(Tags.VRV)) {
+            VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }
     }
     

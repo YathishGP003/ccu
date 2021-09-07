@@ -52,6 +52,7 @@ import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentVAVConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -435,6 +436,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case HYPERSTAT_SENSE:
                         showDialogFragment(HyperStatSenseFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_SENSE),
                                 HyperStatSenseFragment.ID);
+                    case HYPERSTAT_VRV:
+                        showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
                 }
                 
             }

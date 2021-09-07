@@ -1,9 +1,8 @@
 package a75f.io.renatus
 
-import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -14,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.Toast
-import java.util.ArrayList
 
 
 const val HYPERSTAT_PROFILE_SELECTION_ID = "HyperStatProfileSelection"
@@ -125,12 +123,22 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val zoneEquips   = HSUtil.getEquips(mRoomName).size;
       if (zoneEquips == 0) {
          showDialogFragment(
+            FragmentBLEInstructionScreen.getInstance(
+               mNodeAddress,
+               mRoomName,
+               mFloorName,
+               ProfileType.HYPERSTAT_VRV,
+               NodeType.HYPER_STAT
+            ), FragmentBLEInstructionScreen.ID
+         )
+
+         /*showDialogFragment(
             HyperStatVrvFragment.newInstance(
                mNodeAddress,
                mRoomName,
                mFloorName,
             ),HyperStatVrvFragment.ID
-         )
+         )*/
       }else{
          Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();
       }

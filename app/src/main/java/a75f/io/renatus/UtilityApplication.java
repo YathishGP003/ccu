@@ -80,10 +80,12 @@ import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.util.Prefs;
@@ -250,7 +252,34 @@ public abstract class UtilityApplication extends Application {
 
         RaygunClient.init(this);
         RaygunClient.setVersion(versionName());
-        RaygunClient.enableCrashReporting();
+        //RaygunClient.enableCrashReporting();
+    
+        if (BuildConfig.BUILD_TYPE.equals("staging") ||
+            BuildConfig.BUILD_TYPE.equals("prod") ) {
+            
+            Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+                RaygunClient.send(paramThrowable);
+                paramThrowable.printStackTrace();
+                if (paramThrowable instanceof OutOfMemoryError) {
+                    
+                    // Tablet may have had its RAM completely fragmented. Renatus APP is always in foreground and it
+                    // prevents Memory Compaction which usually helps with fragmentation.
+                    // Restarting the app may not be sufficient here for a recovery. Only solution here is to reboot the
+                    // tablet.
+                    //
+                    int oomCount = PreferenceUtil.getOOMCounter();
+                    if (paramThrowable.getMessage().contains("fragmentation") || oomCount >= 5 ) {
+                        PreferenceUtil.setOOMCounter(0);
+                        RenatusApp.rebootTablet();
+                    } else {
+                        PreferenceUtil.setOOMCounter(oomCount + 1);
+                        RenatusApp.closeApp();
+                    }
+                } else {
+                    RenatusApp.closeApp();
+                }
+            });
+        }
     }
 
     private String versionName() {

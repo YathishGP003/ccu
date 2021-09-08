@@ -1,2 +1,41 @@
- - Merged PR 1696: Support daikin apk upgrade
- - Support daikin apk upgrade
+ - Merged PR 1849: VRV Profile implementation
+ - Merged PR 1722: Relay mapping issues in staged system profiles
+ - Fix BLE pairing issue
+ - Merged PR 1847: Revert "Added permission for file"
+ - Revert "Added permission for file"
+ - Added permission for file
+ - Implement response-wait for controls
+ - Update current temp and proto file changes
+ - Merge branch 'master' into hyperstat_vrv
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Cur temp updates, humidit sepoint and opmode related fixes
+ - temp offset back to old logic
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Fix airflowDirection and humidity setpoint issues
+ - Change min value of fanSpeedControlLevel and minHumiditySp
+ - Fixes
+ - Merge master
+ - Update heat, cool enum names
+ - Change enum order for fanSpeed
+ - Change auto position for FanSpeed
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Temperature offset correction on  sense profile
+ - Log idu status message
+ - Update IDU message type
+ - VRV fixes
+ - QA observation fixes
+ - Retrieve user intent selection
+ - Merge branch 'Bug/samjith/8028_cooling_fan_status' into hyperstat_vrv
+ - Fix for fanstage1 not turned on : Single stage mapped to multiple relays getting reset
+ - Merge branch 'Bug/samjith/8028_cooling_fan_status' into hyperstat_vrv
+ - Zone view implementation
+ - Operation mode
+ - Merge branch 'master' into hyperstat_vrv Zone UI Idu specific protobuf message implementation
+ - Update stages that are mapped to disabled relays
+ - WIP
+ - Deactivate disabled relays
+ - Vrv profile and equip draft
+ - Make sure atleast one stage-logical-point exists for each mapped relay
+ - Only enabled relays to be activated
+ - Duplicate stage points
+ - VRV UI draft

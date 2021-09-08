@@ -15,6 +15,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
+import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
@@ -73,6 +74,14 @@ public class HyperStatMsgReceiver {
                 HyperStatLocalControlsOverrideMessage_t overrideMessage =
                         HyperStatLocalControlsOverrideMessage_t.parseFrom(messageArray);
                 handleOverrideMessage(overrideMessage, address, hayStack);
+            } else if (messageType == MessageType.HYPERSTAT_IDU_STATUS_MESSAGE) {
+                HyperStatIduStatusMessage_t p1p2Status =
+                    HyperStatIduStatusMessage_t.parseFrom(messageArray);
+                HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
+            }
+    
+            if(currentTempInterface != null) {
+                currentTempInterface.refreshScreen(null);
             }
             
         } catch (InvalidProtocolBufferException e) {
@@ -153,17 +162,21 @@ public class HyperStatMsgReceiver {
                                        HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
         hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRssi());
         hayStack.writeHisValueByIdWithoutCOV(point.getId(), (double)regularUpdateMessage.getRssi());
-        if(currentTempInterface != null) {
-            currentTempInterface.refreshScreen(null);
-        }
     }
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         
         hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRoomTemperature());
-        hayStack.writeHisValById(point.getId(),
-                                 Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
+        
+        double receivedRoomTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature());
+        double curRoomTemp = hayStack.readHisValById(point.getId());
+        if (curRoomTemp != receivedRoomTemp) {
+            hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
+            if (currentTempInterface != null) {
+                currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
+            }
+        }
     }
     
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {

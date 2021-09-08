@@ -12,7 +12,7 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
-import a75f.io.logic.Globals;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
@@ -66,9 +66,9 @@ public class HyperStatMessageGenerator {
                                                                                                                "and limit and max"))
                                             .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
                                                                                                                "and limit and min"))
-                                            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+                                            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
                                                                                                                "and limit and max"))
-                                            .setTemperatureOffset((int) DeviceHSUtil.getTempOffset(address))
+                                            .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
                                             .build();
         return settings;
     }
@@ -95,18 +95,10 @@ public class HyperStatMessageGenerator {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
                         .forEach( rawPoint -> {
                           double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                          
-                          int mappedVal;
     
-                          if (Globals.getInstance().isTemproryOverrideMode()) {
-                              mappedVal = (short)hayStack.readHisValById(rawPoint.getId()).intValue();
-                              //mappedVal = (short)logicalVal;
-                          } else {
-                              mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
+                          int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                                                ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
                                                : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                          }
-    
                           hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                           setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
                       });
@@ -120,7 +112,7 @@ public class HyperStatMessageGenerator {
     }
     
     private static double getDesiredTempHeating(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("desired and temp and heating and equipRef == \""+equipRef+"\"");
     }
     
     private static void setHyperStatPort(HyperStat.HyperStatControlsMessage_t.Builder controls,

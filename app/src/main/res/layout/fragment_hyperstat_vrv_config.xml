@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="368dp"
+        android:layout_marginTop="56dp"
+        android:fontFamily="@font/lato_bold"
+        android:text="DAIKIN VRV"
+        android:textAllCaps="true"
+        android:textColor="?orange_75f"
+        android:textSize="33.5dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textTempOffset"
+        android:layout_width="137dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="400dp"
+        android:layout_marginTop="136dp"
+        android:alpha="0.6"
+        android:fontFamily="@font/lato_regular"
+        android:text="@string/title_offset"
+        android:textColor="@color/black"
+        android:textSize="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <NumberPicker
+        android:id="@+id/temperatureOffset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="448dp"
+        android:layout_marginTop="172dp"
+        android:textColor="#202020"
+        android:textSize="30sp"
+        android:theme="?DefaultNumberPickerTheme"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="392dp"
+        android:fontFamily="@font/lato_regular"
+        android:text="@string/vrv_label_humidity_min"
+        android:textAppearance="@style/text_appearance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/humidityMinSp"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="284dp"
+        android:layout_marginTop="384dp"
+        android:fontFamily="@font/lato_regular"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/spinner_dropdown_item" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="504dp"
+        android:layout_marginTop="392dp"
+        android:fontFamily="@font/lato_regular"
+        android:text="@string/vrv_label_humidity_max"
+        android:textAppearance="@style/text_appearance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/humidityMaxSp"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="732dp"
+        android:layout_marginTop="384dp"
+        android:fontFamily="@font/lato_regular"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/spinner_dropdown_item" />
+
+    <TextView
+        android:id="@+id/masterControllerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="476dp"
+        android:fontFamily="@font/lato_regular"
+        android:text="@string/vrv_label_master_controller"
+        android:textAppearance="@style/text_appearance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/masterControllerSp"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:layout_width="200dp"
+        android:layout_height="54dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="268dp"
+        android:layout_marginTop="460dp"
+        android:fontFamily="@font/lato_regular"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/spinner_dropdown_item" />
+
+    <Button
+        android:id="@+id/setBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="868dp"
+        android:layout_marginTop="584dp"
+        android:background="@null"
+        android:button="@null"
+        android:fontFamily="@font/lato_regular"
+        android:padding="20dp"
+        android:text="@string/button_set"
+        android:textAllCaps="true"
+        android:textColor="?orange_75f"
+        android:textSize="19.5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/masterControlUnInitText"
+        android:layout_width="477dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="472dp"
+        android:layout_marginTop="460dp"
+        android:text="@string/vrv_master_uninit_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,12 +2,12 @@ package a75f.io.device.mesh.hyperstat;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
@@ -17,6 +17,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_DATABASE_SEED_MESSAGE;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
@@ -123,6 +124,34 @@ public class HyperStatMessageSender {
                                                                    messageHash)) {
                 CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
                                            " was already sent, returning , type "+msgType);
+                return;
+            }
+        }
+        
+        writeMessageBytesToUsb(address, msgType, message.toByteArray());
+    }
+    
+    public static void sendIduControlMessage(int address, CCUHsApi hayStack) {
+        HyperStat.HyperStatIduControlsMessage_t controls = HyperStatIduMessageHandler.getIduControlMessage(address, hayStack);
+        
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
+        }
+    
+        writeIduControlMessage(controls, address, MessageType.HYPERSTAT_IDU_CONTROLS_MESSAGE, true);
+        VrvControlMessageCache.getInstance().updateControlsPending(address);
+    }
+    
+    public static void writeIduControlMessage(HyperStat.HyperStatIduControlsMessage_t message, int address,
+                                              MessageType msgType, boolean checkDuplicate) {
+        
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
+        if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName(),
+                                                                   messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
+                                           " was already sent for "+address+": returning , type "+msgType);
                 return;
             }
         }

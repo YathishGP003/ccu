@@ -63,8 +63,6 @@ class IEDeviceHandler {
             Thread.sleep(100)
             updateDatClgSetpoint(it, systemProfile)
             Thread.sleep(100)
-            updateFanControl(it, hayStack, systemProfile)
-            Thread.sleep(100)
             updateHumidityControl(it, systemProfile)
             Thread.sleep(100)
             fetchAlarms(it, hayStack)

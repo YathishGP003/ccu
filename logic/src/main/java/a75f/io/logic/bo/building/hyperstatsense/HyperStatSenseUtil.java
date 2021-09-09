@@ -318,7 +318,7 @@ public class HyperStatSenseUtil {
             case 8:
                 shortDis = "Current Drawn[CT 0-10]";
                 shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
+                unit = "amps";
                 maxVal = "10";
                 minVal = "0";
                 incrementVal = "0.1";
@@ -327,7 +327,7 @@ public class HyperStatSenseUtil {
             case 9:
                 shortDis = "Current Drawn[CT 0-20]";
                 shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
+                unit = "amps";
                 maxVal = "20";
                 minVal = "0";
                 incrementVal = "0.1";
@@ -336,7 +336,7 @@ public class HyperStatSenseUtil {
             case 10:
                 shortDis = "Current Drawn[CT 0-50]";
                 shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
+                unit = "amps";
                 maxVal = "50";
                 minVal = "0";
                 incrementVal = "0.1";

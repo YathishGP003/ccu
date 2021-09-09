@@ -119,6 +119,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if (isVisibleToUser && scheduleScrollView != null){
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
+        if (isVisibleToUser) {
+            new Handler().post(() -> loadSchedule());
+        }
     }
 
     private ConstraintLayout mVacationLayout;
@@ -1136,6 +1139,5 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     @Override
     public void onResume() {
         super.onResume();
-        new Handler().postDelayed(() -> loadSchedule(),1500);
     }
 }

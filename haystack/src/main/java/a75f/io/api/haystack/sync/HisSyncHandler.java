@@ -34,7 +34,7 @@ public class HisSyncHandler
     private static final String SYNC_TYPE_EQUIP = "equip";
     private static final String SYNC_TYPE_DEVICE = "device";
     
-    private static final int HIS_ITEM_BATCH_SIZE = 1000;
+    private static final int HIS_ITEM_BATCH_SIZE = 500;
     
     CCUHsApi ccuHsApi;
     
@@ -73,6 +73,7 @@ public class HisSyncHandler
                 }
             }
         }
+        doPurge();
         CcuLog.d(TAG,"<- doHisSync");
     }
     
@@ -88,7 +89,7 @@ public class HisSyncHandler
         } else {
             CcuLog.d(TAG,"No need to start HisSync. Already in progress.");
         }
-        doPurge();
+        
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
@@ -154,9 +155,11 @@ public class HisSyncHandler
                         HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
                         hDictList.add(hDict);
                         hisItemsToSyncForDeviceOrEquip.add(hisItem);
-                        CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
+                        CcuLog.d(TAG,"Adding historized point value for point ID " + pointID + "; description of "
+                                     + pointDescription + "; value of " + pointValue + " for syncing.");
                     } else {
-                        CcuLog.e(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
+                        CcuLog.e(TAG, "Historized point value for point ID " + pointID + "; description of "
+                                      + pointDescription + " is null. Skipping.");
                     }
                 }
             } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !skipForcedHisWrites(pointToSync)) {

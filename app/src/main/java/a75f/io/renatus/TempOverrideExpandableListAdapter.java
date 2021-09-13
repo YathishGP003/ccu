@@ -977,10 +977,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     public void setPointValForThermistor(String id, double val) {
         if (val != 0.0){
             CCUHsApi hayStack = CCUHsApi.getInstance();
-            hayStack.writeHisValById(id, val);
+            hayStack.writeHisValById(id, val*10);
             Object logicalPoint = hayStack.readMapById(id).get("pointRef");
             if (Objects.nonNull(logicalPoint)) {
-                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val));
+                hayStack.writeHisValById(logicalPoint.toString(), ThermistorUtil.getThermistorValueToTemp(val*10));
             }
         }
     }

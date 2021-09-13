@@ -614,12 +614,12 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(ccuAlarmVolumeLevelId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("level").addMarker("sp")
+        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("level").addMarker("sp")
                 .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz).build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
-        HashMap cmHeartBeatIntervalPoint = hayStack.read("point and tuner and default and cm and heart and beat and interval");
+        HashMap cmHeartBeatIntervalPoint = hayStack.read("point and tuner and default and cm and heartbeat and interval");
         ArrayList<HashMap> cmHeartBeatIntervalArr = hayStack.readPoint(cmHeartBeatIntervalPoint.get("id").toString());
         for (HashMap valMap : cmHeartBeatIntervalArr)
         {
@@ -629,11 +629,11 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(cmHeartBeatIntervalId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
+        Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heartbeat").addMarker("sp")
                 .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
-        HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heart and beats and to and skip");
+        HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heartbeat");
         ArrayList<HashMap> heartBeatsToSkipArr = hayStack.readPoint(heartBeatsToSkipPoint.get("id").toString());
         for (HashMap valMap : heartBeatsToSkipArr)
         {

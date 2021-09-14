@@ -31,6 +31,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
@@ -631,6 +632,20 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     edit.putString(equipId+expandedListText.substring(6),selectedSpinnerItem);
                     edit.apply();
 
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                CCUHsApi.getInstance().syncHisData();
+                            } catch (Exception e) {
+                                //We do understand the consequences of doing this.
+                                //But the system could still continue to work in standalone mode controlling the hvac system
+                                //even if there are failures in data synchronization with backend.
+                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
+                            }
+                        }
+                    }.start();
+
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView)
@@ -656,11 +671,26 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     edit.putString(equipId+expandedListText.substring(5, 6),selectedSpinnerItem);
                     edit.apply();
 
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                CCUHsApi.getInstance().syncHisData();
+                            } catch (Exception e) {
+                                //We do understand the consequences of doing this.
+                                //But the system could still continue to work in standalone mode controlling the hvac system
+                                //even if there are failures in data synchronization with backend.
+                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
+                            }
+                        }
+                    }.start();
                 }
+
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView)
                 {
                 }
+
             });
 
             //spinner_thermistor.setSelection(0,false);
@@ -682,6 +712,21 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString(equipId+expandedListText.substring(2, 3),selectedSpinnerItem);
                     edit.apply();
+
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                CCUHsApi.getInstance().syncHisData();
+
+                            } catch (Exception e) {
+                                //We do understand the consequences of doing this.
+                                //But the system could still continue to work in standalone mode controlling the hvac system
+                                //even if there are failures in data synchronization with backend.
+                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
+                            }
+                        }
+                    }.start();
 
                 }
                 @Override

@@ -574,7 +574,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
                     CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
                 } else {
-                    CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0);
+                    CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0, reason);
                     CCUHsApi.getInstance().writeHisValById(id, val);
                 }
                 return null;

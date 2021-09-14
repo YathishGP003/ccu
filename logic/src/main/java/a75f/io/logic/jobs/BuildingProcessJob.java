@@ -86,8 +86,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 @Override
                 public void run() {
                     try {
-                        if (!Globals.getInstance().isTemproryOverrideMode())
-                            CCUHsApi.getInstance().syncHisData();
+                        CCUHsApi.getInstance().syncHisData();
                     } catch (Exception e) {
                         //We do understand the consequences of doing this.
                         //But the system could still continue to work in standalone mode controlling the hvac system

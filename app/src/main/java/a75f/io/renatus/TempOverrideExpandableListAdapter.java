@@ -229,7 +229,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(" + analogOut1Mapped + ")");
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
-                        expandedListTextVal.setText("" + value + " V");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                         spinner_override_value.setAdapter(targetValAdapter);
                         spinner_override_value.setSelection(0);
@@ -254,7 +254,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
 
-                        expandedListTextVal.setText("" + value + " V");
+                        txt_calculated_output.setText("" + value + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
                         spinner_override_value.setAdapter(targetValAdapter);
                         spinner_override_value.setSelection(0);
@@ -373,8 +373,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     }
 
                     if (expandedListText.startsWith("Analog1In")) {
-                        setPointVal(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
                         String analogIn1Mapped = getZoneMapping("Analog1In", listPosition, convertView);
                         if (!analogIn1Mapped.equals(""))
@@ -390,9 +388,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
+                        else{
+                            setPointVal(id, val);
+                            idMap.put(id, value1);
+                        }
                     } else if (expandedListText.startsWith("Analog1Out")) {
-                        setPointVal(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
                         String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
                         if (!analogOut1Mapped.equals(""))
@@ -407,9 +407,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
+                        else{
+                            setPointVal(id, val);
+                            idMap.put(id, value1);
+                        }
                     } else if (expandedListText.startsWith("Analog2In")) {
-                        setPointVal(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
                         String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                         if (!analogIn2Mapped.equals(""))
@@ -424,9 +426,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
+                        else{
+                            setPointVal(id, val);
+                            idMap.put(id, value1);
+                        }
                     } else if (expandedListText.startsWith("Analog2Out")) {
-                        setPointVal(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(6),null);
                         String analogOut2Mapped = getZoneMapping("Analog-out2", listPosition, convertView);
                         if (!analogOut2Mapped.equals(""))
@@ -442,9 +446,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
+                        else {
+                            setPointVal(id, val);
+                            idMap.put(id, value1);
+                        }
                     } else if (expandedListText.startsWith("relay")) {
-                        setPointVal(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(5, 6),null);
                         String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
                         if (!relayMapped.equals(""))
@@ -459,9 +465,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             int spinnerPosition = relayValAdapter.getPosition(sharedPrefData1);
                             spinner_relay.setSelection(spinnerPosition);
                         }
+                        else {
+                            setPointVal(id, val);
+                            idMap.put(id, value1);
+                        }
                     } else if (expandedListText.startsWith("Th")) {
-                        setPointValForThermistor(id, val);
-                        idMap.put(id, value1);
                         String sharedPrefData1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(equipId+expandedListText.substring(2, 3),null);
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
@@ -471,6 +479,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = thermistorAdapter.getPosition(sharedPrefData1);
                             spinner_thermistor.setSelection(spinnerPosition);
+                        }
+                        else{
+                            setPointValForThermistor(id, val);
+                            idMap.put(id, value1);
                         }
                     } else if (expandedListText.startsWith(siteName)) {
                         setPointVal(id, val);
@@ -632,20 +644,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     edit.putString(equipId+expandedListText.substring(6),selectedSpinnerItem);
                     edit.apply();
 
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                CCUHsApi.getInstance().syncHisData();
-                            } catch (Exception e) {
-                                //We do understand the consequences of doing this.
-                                //But the system could still continue to work in standalone mode controlling the hvac system
-                                //even if there are failures in data synchronization with backend.
-                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
-                            }
-                        }
-                    }.start();
-
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> adapterView)
@@ -670,20 +668,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString(equipId+expandedListText.substring(5, 6),selectedSpinnerItem);
                     edit.apply();
-
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                CCUHsApi.getInstance().syncHisData();
-                            } catch (Exception e) {
-                                //We do understand the consequences of doing this.
-                                //But the system could still continue to work in standalone mode controlling the hvac system
-                                //even if there are failures in data synchronization with backend.
-                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
-                            }
-                        }
-                    }.start();
                 }
 
                 @Override
@@ -712,21 +696,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
                     edit.putString(equipId+expandedListText.substring(2, 3),selectedSpinnerItem);
                     edit.apply();
-
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                CCUHsApi.getInstance().syncHisData();
-
-                            } catch (Exception e) {
-                                //We do understand the consequences of doing this.
-                                //But the system could still continue to work in standalone mode controlling the hvac system
-                                //even if there are failures in data synchronization with backend.
-                                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
-                            }
-                        }
-                    }.start();
 
                 }
                 @Override

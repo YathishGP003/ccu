@@ -553,7 +553,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 Object valueToDelete = getChild(listPosition, expandedListPosition);
                                 expandableListDetail.remove(valueToDelete);
                             }
-                            txt_calculated_output.setText(""+val/10);
+                            txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(value1)), 1.0) == 0 ? "ON" : "OFF");
                             spinner_relay.setVisibility(View.VISIBLE);
                             spinner_relay.setVisibility(View.VISIBLE);
                             relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

@@ -49,6 +49,7 @@ public class HttpUtil
         RequestBody body = RequestBody.create(params, ZINC);
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
                 .addHeader("Content-Length", "" + params.getBytes(StandardCharsets.UTF_8).length)
                 .addHeader("Content-Language", "en-US")
                 .addHeader("Authorization", " Bearer " + token)
@@ -108,6 +109,7 @@ public class HttpUtil
                     Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
                 }
 
+                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
                 connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
                 connection.setRequestProperty("Content-Language", "en-US");
                 connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
@@ -180,8 +182,8 @@ public class HttpUtil
                     connection = NetCipher.getHttpsURLConnection(url);
                 }
 
-                connection.setRequestProperty("Content-Type",
-                        "application/json");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
 
                 CcuLog.i("CCU_HS", Objects.toString(url.toString(),""));
                 CcuLog.i("CCU_HS", Objects.toString(urlParameters, ""));

@@ -71,12 +71,14 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
+import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
@@ -88,6 +90,7 @@ import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -243,7 +246,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 selectFloor(position);
             }
         });
-
+    
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
@@ -304,7 +307,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
         if (getActivity() != null) {
             int i;
-            String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+            String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             for (i = 0; i < zoneStatusArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) zoneStatusArrayList.get(i).getTag();
@@ -575,7 +578,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         profileType.contains(profileSmartStat) ||
                                         profileType.contains(profileTempInfluence) ||
                                         profileType.contains(profilebpos) ||
-                                        profileType.contains(profileDualDuct)) {
+                                        profileType.contains(profileDualDuct) ||
+                                        profileType.contains(ProfileType.HYPERSTAT_VRV.name())) {
                                     tempModule = true;
                                     Log.e(LOG_TAG + "RoomData", "Load SmartNode ProfileType:" + profileType);
                                 }
@@ -701,7 +705,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
-        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId[0]);
+        String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
         //Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 
@@ -1139,6 +1143,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 Log.i("PointsValue", "DualDuct Points:" + bpospoints.toString());
                                 loadBPOSPointsUI(bpospoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
+
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
+                                HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
+                                                                updatedEquipId, CCUHsApi.getInstance(), getActivity(),
+                                                                p.getGroup());
+                            }
                         }
                     }
                 }
@@ -1180,7 +1190,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
-        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        String status = ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
         Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 
@@ -1226,15 +1236,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
-
-       /* if (vacationStatus.equals("Active Vacation"))
-        {
-            vacationImageButton.setVisibility(View.VISIBLE);
-        } else
-        {
-            vacationImageButton.setVisibility(View.GONE);
-        }*/
-
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1391,6 +1392,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 HashMap bposPoints = BPOSUtil.getbposPoints(updatedEquip.getId());
                 Log.i("PointsValue", "DUAL_DUCT Points:" + bposPoints.toString());
                 loadBPOSPointsUI(bposPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
+                HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
+                                                updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
+                                                p.getGroup());
             }
         }
     }
@@ -2852,32 +2858,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     }
 
-    public static double getPointVal(String id) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        for (String marker : p.getMarkers()) {
-            if (marker.equals("writable")) {
-                ArrayList values = hayStack.readPoint(id);
-                if (values != null && values.size() > 0) {
-                    for (int l = 1; l <= values.size(); l++) {
-                        HashMap valMap = ((HashMap) values.get(l - 1));
-                        //System.out.println(valMap);
-                        if ((valMap != null) && (valMap.get("val") != null)) {
-                            return Double.parseDouble(valMap.get("val").toString());
-                        }
-                    }
-                }
-            }
-        }
-
-        for (String marker : p.getMarkers()) {
-            if (marker.equals("his")) {
-                return hayStack.readHisValById(p.getId());
-            }
-        }
-        return 0;
-    }
-
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {
@@ -2925,18 +2905,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
+            HyperStatMsgReceiver.setCurrentTempInterface(this);
         }
         weatherUpdateHandler = new Handler();
-        weatherUpdate = new Runnable() {
-            @Override
-            public void run() {
-                if (weatherUpdateHandler != null && getActivity() != null) {
-                    if (weather_data.getVisibility() == View.VISIBLE) {
-                        Log.e("weather", "update");
-                        UpdateWeatherData();
-                    }
-                    weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
+        weatherUpdate = () -> {
+            if (weatherUpdateHandler != null && getActivity() != null) {
+                if (weather_data.getVisibility() == View.VISIBLE) {
+                    Log.e("weather", "update");
+                    UpdateWeatherData();
                 }
+                weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
             }
         };
 
@@ -2951,6 +2929,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ScheduleProcessJob.setScheduleDataInterface(null);
         ScheduleProcessJob.setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
+        HyperStatMsgReceiver.setCurrentTempInterface(null);
     }
 
     @Override
@@ -2962,6 +2941,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
+            HyperStatMsgReceiver.setCurrentTempInterface(this);
         } else {
 
             UpdatePointHandler.setZoneDataInterface(null);
@@ -2969,6 +2949,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(null);
             ScheduleProcessJob.setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
+            HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
     }
 
@@ -2999,7 +2980,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int endWidth = (int) (width * 1.35);
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
-        //imageView.setPadding(20 ,20,20,20);
     }
 
     public void ScaleImageToBig(int height, int width, ImageView imageView) {
@@ -3011,35 +2991,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void showWeather() {
-        //if (isWeatherWidget) {
         weather_data.setVisibility(View.VISIBLE);
-        //mod = 3;
-        //weather_appear.setVisibility(View.GONE);
-        //weather_data.startAnimation(inleft);
         TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(), 0, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
-        //}
     }
 
     public void hideWeather() {
-        //if (isWeatherWidget) {
-        //mod = 4;
-        //weather_appear.setVisibility(View.VISIBLE);
         TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
-        //recyclerView.startAnimation(animate);
-        //recyclerView.startAnimation(in);
-        //gridlayout.startAnimation(in);
         tableLayout.startAnimation(in);
-        //tableLayout.setVisibility(View.VISIBLE);
         weather_data.setVisibility(View.GONE);
-        //weather_data.setVisibility(View.VISIBLE);
-
-        //}
     }
 
     public boolean isWeatherShown() {
@@ -3053,38 +3018,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setScheduleType(String id, ScheduleType schedule, ArrayList<HashMap> zoneMap) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
-                CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
-                Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
-                if (zoneMap.size() > 1) {
-                    for (int i = 0; i < zoneMap.size(); i++) {
-                        Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-                        String scheduleTypeId = getScheduleTypeId(equip.getId());
-                        CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
-                        CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double) schedule.ordinal());
-                    }
-                } else
-                    CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(p);
-            }
+        Thread thread = new Thread(() -> {
+            CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
+            CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
+            Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+            if (zoneMap.size() > 1) {
+                for (int i = 0; i < zoneMap.size(); i++) {
+                    Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+                    String scheduleTypeId = getScheduleTypeId(equip.getId());
+                    CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
+                    CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double) schedule.ordinal());
+                }
+            } else
+                CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
+            ScheduleProcessJob.handleScheduleTypeUpdate(p);
         });
         thread.start();
-        /*new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
 
 
@@ -3175,7 +3124,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if(equips.size() > 0) {
                 boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
                 View statusView  = zoneStatus.get(zoneName);
-                HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+                if (statusView != null) {
+                    HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+                }
             }
         }
 

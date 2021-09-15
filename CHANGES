@@ -1,85 +1,41 @@
- - Merged PR 1526: CCU: Registering a second CCU for existing site
- - Add CCU to existing site
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Merged PR 1724: Firmware version point for SS/SN/HS/CM
- - Merged PR 1679: Update MAT sensor readings to dat
- - Renamed the method as suggested
- - Renamed the method as suggested
- - Add CCU to Existing site
- - Add CCU to Existing site
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Merged PR 1690: FloorNum tag added to Floor.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/1314_firmware_version_point
- - Merged PR 1678: CCU: Lat, Long values changed from portals are not updated to weatherRef point & CCU doesn't consume the new Lat, Long values changed
- - Migration task for firmware version.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/1314_firmware_version_point
+ - Merged PR 1849: VRV Profile implementation
+ - Merged PR 1722: Relay mapping issues in staged system profiles
+ - Fix BLE pairing issue
+ - Merged PR 1847: Revert "Added permission for file"
+ - Revert "Added permission for file"
+ - Added permission for file
+ - Implement response-wait for controls
+ - Update current temp and proto file changes
+ - Merge branch 'master' into hyperstat_vrv
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Cur temp updates, humidit sepoint and opmode related fixes
+ - temp offset back to old logic
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Fix airflowDirection and humidity setpoint issues
+ - Change min value of fanSpeedControlLevel and minHumiditySp
+ - Fixes
+ - Merge master
+ - Update heat, cool enum names
+ - Change enum order for fanSpeed
+ - Change auto position for FanSpeed
+ - Merge branch 'hyperstat_vrv' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat_vrv
+ - Temperature offset correction on  sense profile
+ - Log idu status message
+ - Update IDU message type
+ - VRV fixes
+ - QA observation fixes
+ - Retrieve user intent selection
+ - Merge branch 'Bug/samjith/8028_cooling_fan_status' into hyperstat_vrv
+ - Fix for fanstage1 not turned on : Single stage mapped to multiple relays getting reset
+ - Merge branch 'Bug/samjith/8028_cooling_fan_status' into hyperstat_vrv
+ - Zone view implementation
+ - Operation mode
+ - Merge branch 'master' into hyperstat_vrv Zone UI Idu specific protobuf message implementation
+ - Update stages that are mapped to disabled relays
  - WIP
- - Add CCU to Existing site
- - Add CCU to Existing site
- - Add CCU to Existing site
- - Add CCU to Existing site
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Add CCU to Existing site
- - Merged PR 1587: Added OTA support for hyper-start device
- - OTA Logs related comment
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/1314_firmware_version_point
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/7862_floorNumTagForFloor
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - renaming OTP to passcode
- - renaming OTP to passcode
- - WIP
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Divide airflow temp by 10
- - Renamed the OTP GENERATION To BUILDING PASSCODE
- - removed unwanted import statement
- - Using primitive double instead of Double
- - Code beautification
- - FloorNum and orientation pubnub
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/7862_floorNumTagForFloor
- - WIP
- - Update MAT sensor readings to dat
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/7862_floorNumTagForFloor
- - Floor num reading from haystack cloud
- - Added extra logs and handled alert issue
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Fix for updating weatherwidget with site data change
- - Added Logs
- - floorNum tag added
- - Registering a second CCU
- - Logs for Complete update function
- - Added dev test logs completed OTA broadcast
- - Added dev test logs
- - Registering a second CCU
- - Updated message with device name
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Registering a second CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Registering a second CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Reverted back Unwanted changes
- - Reverted back Unwanted changes
- - Removed unwanted logs
- - Registering a second CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Reading the Device markers info instead of Equip markers
- - Added null check and module level OTA service handler part
- - Registering a second CCU
- - Registering a second CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Added Hyper state firmware update command for OTA Service
- - Removed dead code for Remote command broadcast
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Added Hyperstate firmware update removed command
- - added logs
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/6902_OTA_for_hyperstat
- - Merge branches 'master' and 'story/6365/Registering_A_Second_CCU' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6365/Registering_A_Second_CCU
- - Updated Hyperstat device type details
- - Adding Just logs to verify
- - Incompatible Zone Pairing Options will be greyed out.
- - WIP
- - Merge branch 'master' into Bug/samjith/6696_bug_site_latlong_update
- - Update location data on site update
- - Add littleEndian word order for PELTEK BTU meter
+ - Deactivate disabled relays
+ - Vrv profile and equip draft
+ - Make sure atleast one stage-logical-point exists for each mapped relay
+ - Only enabled relays to be activated
+ - Duplicate stage points
+ - VRV UI draft

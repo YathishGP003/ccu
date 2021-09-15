@@ -48,6 +48,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
+import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
@@ -421,6 +422,11 @@ public class Globals {
                             BPOSProfile bpos = new BPOSProfile();
                             bpos.addBPOSEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(bpos);
+                            break;
+                        case HYPERSTAT_VRV:
+                            VrvProfile vrv = new VrvProfile();
+                            vrv.addEquip(CCUHsApi.getInstance(), Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(vrv);
                             break;
                         case MODBUS_PAC:
                         case MODBUS_RRS:

@@ -90,6 +90,7 @@ public class LSerial
     }
 
     public void setResetSeedMessage(boolean bSeedMsg){
+        CcuLog.d(L.TAG_CCU_DEVICE,"setResetSeedMessage "+bSeedMsg);
         mSendSeedMsgs =bSeedMsg;
     }
     /***

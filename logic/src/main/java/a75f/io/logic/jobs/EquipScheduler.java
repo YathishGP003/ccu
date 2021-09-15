@@ -21,7 +21,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.tuners.TunerUtil;
 
-public class VAVScheduler {
+public class EquipScheduler {
 
     private static final int SCHEDULER_PRIORITY = 12;
 

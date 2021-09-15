@@ -520,7 +520,7 @@ public class HyperStatSenseEquip {
 
     public HyperStatSenseConfiguration getHyperStatSenseConfig() {
         HyperStatSenseConfiguration HSSConfig = new HyperStatSenseConfiguration();
-        HSSConfig.temperatureOffset = mHayStack.readDefaultVal("point and temperature and offset and equipRef == \"" + mEquipRef + "\"");
+        HSSConfig.temperatureOffset = mHayStack.readDefaultVal("point and temperature and offset and equipRef == \"" + mEquipRef + "\"")/10;
         HSSConfig.analog1Sensor = mHayStack.readDefaultVal("point and config and analog1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
         HSSConfig.analog2Sensor = mHayStack.readDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
         HSSConfig.th1Sensor = mHayStack.readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();

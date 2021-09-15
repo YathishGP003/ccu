@@ -107,6 +107,7 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
+        refreshSchedulesScreen();
     }
     
     public static void trimZoneSchedules(Schedule buildingSchedule)
@@ -192,7 +193,9 @@ public class UpdateScheduleHandler
                 CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
             }
         }
-        
+    }
+    
+    public static void refreshSchedulesScreen() {
         if (scheduleListener != null) {
             scheduleListener.refreshScreen();
         }

@@ -390,7 +390,7 @@ public class BPOSEquip {
         setCurrentTemp(0);
 
         setDesiredTempCooling(74.0);
-        setDesiredTemp(72.0);
+        //setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
         setHumidity(0);
         setScheduleStatus("");
@@ -488,7 +488,6 @@ public class BPOSEquip {
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        this.desiredTemp = desiredTemp;
     }
 
     public double getDesiredTempCooling() {

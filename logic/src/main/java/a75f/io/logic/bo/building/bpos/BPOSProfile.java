@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.bpos;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.joda.time.DateTime;
 
 import java.sql.Time;
@@ -47,17 +49,23 @@ public class BPOSProfile extends ZoneProfile {
 
 
     BPOSEquip mBPOSEquip;
+    public HashMap<Integer, BPOSEquip> mBposDeviceMap;
 
+    public BPOSProfile(){
+        mBposDeviceMap = new HashMap<>();
+    }
 
     public void addBPOSEquip(ProfileType type, int node, BPOSConfiguration config,
                              String floorRef, String roomRef) {
         mBPOSEquip = new BPOSEquip(type, node);
         mBPOSEquip.createEntities(config, floorRef, roomRef);
+        mBposDeviceMap.put(node,mBPOSEquip);
         mBPOSEquip.init();
     }
 
     public void addBPOSEquip(int node) {
         mBPOSEquip = new BPOSEquip(ProfileType.BPOS, node);
+        mBposDeviceMap.put(node,mBPOSEquip);
         mBPOSEquip.init();
     }
 
@@ -109,6 +117,7 @@ public class BPOSProfile extends ZoneProfile {
         double desiredTempHeating =
                 SystemTemperatureUtil.getDesiredTempHeating(mBPOSEquip.mEquipRef);
         double tempMidPoint = (desiredTempCooling + desiredTempHeating) / 2;
+        mBPOSEquip.setDesiredTemp(tempMidPoint);
         double zoneCoolingLoad = zoneCurTemp > tempMidPoint ? zoneCurTemp - desiredTempCooling : 0;
         double zoneHeatingLoad = zoneCurTemp < tempMidPoint ? desiredTempHeating - zoneCurTemp : 0;
 
@@ -203,6 +212,40 @@ public class BPOSProfile extends ZoneProfile {
     @Override
     public ProfileType getProfileType() {
         return ProfileType.BPOS;
+    }
+
+    @JsonIgnore
+    @Override
+    public double getDisplayCurrentTemp()
+    {
+        Log.d("Spoo","in get display");
+        return getAverageZoneTemp();
+    }
+
+    @Override
+    public double getCurrentTemp() {
+        for (Integer nodeAddress : mBposDeviceMap.keySet()) {
+            return mBposDeviceMap.get(nodeAddress).getCurrentTemp();
+        }
+        return 0.0;
+    }
+
+    @JsonIgnore
+    @Override
+    public double getAverageZoneTemp() {
+        Log.d("Spoo","in getAverageZoneTemp");
+        double tempTotal = 0;
+        int nodeCount = 0;
+        for (Integer nodeAddress : mBposDeviceMap.keySet()) {
+            if (mBposDeviceMap.get(nodeAddress) == null) {
+                continue;
+            }
+            if (mBposDeviceMap.get(Integer.valueOf(nodeAddress)).getCurrentTemp() > 0) {
+                tempTotal += mBposDeviceMap.get(Integer.valueOf(nodeAddress)).getCurrentTemp();
+                nodeCount++;
+            }
+        }
+        return nodeCount == 0 ? 0 : tempTotal / nodeCount;
     }
 
     @Override

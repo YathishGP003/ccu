@@ -125,8 +125,8 @@ public class VavSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and vav) or " +
-                                                                            "(equip and zone and ti) or" +
-                                                                   "(equip and zone and bpos ) "
+                                                                            "(equip and zone and ti) or " +
+                                                                   "(equip and zone and bpos) "
         );
 
         updateSystemTempHumidity(allEquips);

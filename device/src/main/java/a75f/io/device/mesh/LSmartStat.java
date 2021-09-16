@@ -211,7 +211,11 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
         settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
-        settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(),address));
+        if (!is2pfcuDevice(address)) {
+            settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(), address));
+        } else {
+            settings_t.otherBitMaps.enableExternal10kTempSensor.set((short)0);
+        }
         settings_t.otherBitMaps.enableBeaconing.set((short)0);
     }
     private static void fillSmartStatControls(SmartStatControls_t controls, String equipId, short node){
@@ -399,4 +403,10 @@ public class LSmartStat {
         double maxHeat =  TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max");
         return maxHeat+ deadband;
     }
+    
+    private static boolean is2pfcuDevice(int address) {
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \"" + address + "\"");
+        return device.containsKey("pipe2");
+    }
+    
 }

@@ -217,22 +217,12 @@ public class BPOSProfile extends ZoneProfile {
     @Override
     public double getDisplayCurrentTemp()
     {
-        Log.d("Spoo","in get display");
         return getAverageZoneTemp();
-    }
-
-    @Override
-    public double getCurrentTemp() {
-        for (Integer nodeAddress : mBposDeviceMap.keySet()) {
-            return mBposDeviceMap.get(nodeAddress).getCurrentTemp();
-        }
-        return 0.0;
     }
 
     @JsonIgnore
     @Override
     public double getAverageZoneTemp() {
-        Log.d("Spoo","in getAverageZoneTemp");
         double tempTotal = 0;
         int nodeCount = 0;
         for (Integer nodeAddress : mBposDeviceMap.keySet()) {

@@ -213,30 +213,6 @@ public class BPOSProfile extends ZoneProfile {
         return ProfileType.BPOS;
     }
 
-    @JsonIgnore
-    @Override
-    public double getDisplayCurrentTemp()
-    {
-        return getAverageZoneTemp();
-    }
-
-    @JsonIgnore
-    @Override
-    public double getAverageZoneTemp() {
-        double tempTotal = 0;
-        int nodeCount = 0;
-        for (Integer nodeAddress : mBposDeviceMap.keySet()) {
-            if (mBposDeviceMap.get(nodeAddress) == null) {
-                continue;
-            }
-            if (mBposDeviceMap.get(Integer.valueOf(nodeAddress)).getCurrentTemp() > 0) {
-                tempTotal += mBposDeviceMap.get(Integer.valueOf(nodeAddress)).getCurrentTemp();
-                nodeCount++;
-            }
-        }
-        return nodeCount == 0 ? 0 : tempTotal / nodeCount;
-    }
-
     @Override
     public BPOSConfiguration getProfileConfiguration(short address) {
         return mBPOSEquip.getbposconfiguration();

@@ -70,4 +70,16 @@ public class PreferenceUtil {
         editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
         editor.apply();
     }
+
+    public static boolean isHeartbeatTagMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("heartbeatMigrationAsDiag",false);
+    }
+
+    public static void setHeartbeatTagMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeatMigrationAsDiag", isMigrated);
+        editor.apply();
+    }
 }

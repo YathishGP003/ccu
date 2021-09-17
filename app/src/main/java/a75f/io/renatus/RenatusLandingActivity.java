@@ -47,6 +47,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.logtasks.UploadLogs;
@@ -519,8 +520,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                         Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                         if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
-                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0)
+                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
                                 AppInstaller.getHandle().install(null, false, true, true);
+                            } else {
+                                CcuLog.d("CCU_DOWNLOAD","Update command ignored, Invalid version downloaded");
+                                Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+                            }
                         }else if(downloadId == AppInstaller.getHandle().getHomeAppDownloadId()){
                             int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
                             if(homeAppVersion >= 1) {
@@ -534,8 +539,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             if(apkName.startsWith("75f") || apkName.startsWith("75F"))
                 AppInstaller.getHandle().downloadHomeInstall(apkName);
-            else if(apkName.startsWith("RENATUS_CCU") || apkName.startsWith("DAIKIN_CCU"))
-                AppInstaller.getHandle().downloadCCUInstall(apkName);
+            else if(apkName.startsWith("RENATUS_CCU") || apkName.startsWith("DAIKIN_CCU")) {
+                if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 3 * 60 * 1000) {
+                    Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
+                    AppInstaller.getHandle().downloadCCUInstall(apkName);
+                } else {
+                    CcuLog.d("CCU_DOWNLOAD","Update command ignored , previous update in progress "
+                                                    +Globals.getInstance().getCcuUpdateTriggerTimeToken());
+                }
+                
+            }
         } else if (!commands.isEmpty() && commands.equals(RESTART_MODULE)) {
 
             //TODO Send commands to SmartNode

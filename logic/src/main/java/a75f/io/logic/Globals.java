@@ -51,6 +51,7 @@ import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -193,6 +194,11 @@ public class Globals {
         }
     }
 
+    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatDiagMigration.initHeartbeatDiagMigration();
+        }
+    }
 
     private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
@@ -233,6 +239,7 @@ public class Globals {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
+                migrateHeartbeatDiagPointForEquips(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 CCUHsApi.getInstance().syncEntityTree();

@@ -35,6 +35,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isHeartbeatMigrationAsDiagDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("heartbeatMigrationAsDiag",false);
+    }
+
+    public static void setHeartbeatMigrationAsDiagStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeatMigrationAsDiag", isMigrated);
+        editor.apply();
+    }
+
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);

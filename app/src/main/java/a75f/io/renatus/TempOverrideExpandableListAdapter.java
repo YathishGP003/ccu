@@ -101,12 +101,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         }*/
 
         String listTitle = (String) getGroup(listPosition);
-        Log.e("InsideTempOverrideExpandableListAdapter","listTitle- "+listTitle);
         if (!listTitle.equals("CM-device")) {
             HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
-            Log.e("InsideTempOverrideExpandableListAdapter", "equipGroup- " + equipGroup);
             String profile = equipGroup.get("profile").toString();
-            Log.e("InsideTempOverrideExpandableListAdapter", "profile1- " + profile);
+            //Log.e("InsideTempOverrideExpandableListAdapter", "profile1- " + profile);
 
             if (profile.equals("VAV_REHEAT") || profile.equals("VAV_SERIES_FAN") || profile.equals("VAV_PARALLEL_FAN")) {
                 ArrayAdapter<String> damperTypesAdapter;
@@ -128,8 +126,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 reheatTypesAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, reheatTypes);
                 reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName);
-                Log.e("InsideTempOverrideExpandableListAdapter", "damperPosition- " + damperPosition);
-                Log.e("InsideTempOverrideExpandableListAdapter", "reheatPosition- " + reheatPosition);
                 if (damperPosition == 0) {
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
@@ -167,15 +163,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                     targetVal.add(pos / 100.0 + " V");
                 }
-            } else if (profile.equals("DAB") || profile.equals("DUAL_DUCT")) {
+            }
+            else if (profile.equals("DAB")) {
                 DabProfile mDabProfile = (DabProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
                 DabProfileConfiguration mProfileConfig = (DabProfileConfiguration) mDabProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
                 ;
                 int damper1Position = mProfileConfig.damper1Type;
                 int damper2Position = mProfileConfig.damper2Type;
-
-                Log.e("InsideTempOverrideExpandableListAdapter", "damperPosition- " + damper1Position);
-                Log.e("InsideTempOverrideExpandableListAdapter", "reheatPosition- " + damper2Position);
                 if (damper1Position == 0) {
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
@@ -212,6 +206,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                     targetVal.add(pos / 100.0 + " V");
+                }
+            }
+            else{
+                for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
+                    targetVal.add(pos /100.0 +" V");
+                }
+                for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
+                    analogOut1Val.add(pos /100.0 +" V");
+                }
+                for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
+                    analogOut2Val.add(pos /100.0 +" V");
                 }
             }
         }
@@ -368,10 +373,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     .findViewById(R.id.txt_calculated_output);
             Spinner spinner_override_value = convertView
                     .findViewById(R.id.spinner_override_value);
-            Spinner spinner_analog_out1 = convertView
-                    .findViewById(R.id.spinner_analog_out1);
-            Spinner spinner_analog_out2 = convertView
-                    .findViewById(R.id.spinner_analog_out2);
             Spinner spinner_relay = convertView
                     .findViewById(R.id.spinner_relay);
             Spinner spinner_thermistor = convertView
@@ -416,10 +417,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         txt_calculated_output.setText("" + value + " V");
 
-                        spinner_analog_out1.setVisibility(View.VISIBLE);
-                        spinner_analog_out1.setAdapter(analogOut1Adapter);
-                        spinner_analog_out1.setSelection(0);
-                        spinner_analog_out1.setSelection(0,false);
+                        spinner_override_value.setVisibility(View.VISIBLE);
+                        spinner_override_value.setAdapter(analogOut1Adapter);
+                        spinner_override_value.setSelection(0);
+                        spinner_override_value.setSelection(0,false);
                     } else if (expandedListText.startsWith("Analog2In")) {
                         String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                         if (!analogIn2Mapped.equals(""))
@@ -589,10 +590,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         txt_calculated_output.setText("" + val + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        spinner_override_value.setAdapter(targetValAdapter);
+                        analogOut1Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(analogOut1Adapter);
                         if (sharedPrefData1!= null) {
-                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            int spinnerPosition = analogOut1Adapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                         else{
@@ -628,10 +629,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                         txt_calculated_output.setText("" + val + " V");
                         spinner_override_value.setVisibility(View.VISIBLE);
-                        targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        spinner_override_value.setAdapter(targetValAdapter);
+                        analogOut2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinner_override_value.setAdapter(analogOut2Adapter);
                         if (sharedPrefData1!= null) {
-                            int spinnerPosition = targetValAdapter.getPosition(sharedPrefData1);
+                            int spinnerPosition = analogOut2Adapter.getPosition(sharedPrefData1);
                             spinner_override_value.setSelection(spinnerPosition);
                         }
                         else {
@@ -948,7 +949,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         String listTitle = (String) getGroup(listPosition);
         HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
         String profile = equipGroup.get("profile").toString();
-        Log.e("InsideTempOverrideExpandableListAdapter","profile- "+profile);
 
         switch (profile){
             case "SSE":
@@ -1267,7 +1267,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             return 0.0;
         }
         else{
-            //Log.e("InsideTempOverrideExpandableListAdapter","configPoint- "+configPoint);
             return hayStack.readPointPriorityVal(configPoint.get("id").toString());
         }
 

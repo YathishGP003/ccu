@@ -179,11 +179,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper1Position == 2) {
-                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper1Position == 3) {
-                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 }
@@ -196,11 +196,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper2Position == 2) {
-                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper2Position == 3) {
-                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 }

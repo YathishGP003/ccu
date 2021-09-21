@@ -249,13 +249,13 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
 
-        if (BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev")) {
+        if (BuildConfig.BUILD_TYPE.equals("local")
+            || BuildConfig.BUILD_TYPE.equals("dev")
+            || BuildConfig.BUILD_TYPE.equals("qa")) {
 
             crashButton.setVisibility(View.VISIBLE);
-            crashButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    throw new RuntimeException("Test Crash"); // Force a crash
-                }
+            crashButton.setOnClickListener(view1 -> {
+                throw new RuntimeException("Test Crash"); // Force a crash
             });
         }
 

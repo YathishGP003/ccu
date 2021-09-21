@@ -117,6 +117,8 @@ public class TempOverrideFragment extends Fragment {
                 edit.putString(t.get("id").toString()+t.get("dis").toString().substring(6),null);
                 edit.putString(t.get("id").toString()+t.get("dis").toString().substring(2,3),null);
                 edit.putString(t.get("id").toString()+t.get("dis").toString().substring(5, 6),null);
+                edit.putString("cat-analog1",null);
+                edit.putString("cat-analog2",null);
                 edit.apply();
                 String sharedPrefData = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString(t.get("dis").toString(), null);
                 //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);

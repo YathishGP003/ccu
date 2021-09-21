@@ -54,6 +54,8 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 
+import static a75f.io.device.mesh.DeviceUtil.scaleAnalog;
+import static a75f.io.device.mesh.LSmartNode.PULSE;
 import static a75f.io.renatus.TempOverrideFragment.getPointVal;
 
 public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter {
@@ -127,35 +129,59 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 int reheatPosition = reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName);
                 if (damperPosition == 0) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-0-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damperPosition == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-2-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damperPosition == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-0v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damperPosition == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-2v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 }
                 if (reheatPosition == 0) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-0-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (reheatPosition == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-2-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (reheatPosition == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-0v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (reheatPosition == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-2v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
@@ -171,35 +197,59 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 int damper1Position = mProfileConfig.damper1Type;
                 int damper2Position = mProfileConfig.damper2Type;
                 if (damper1Position == 0) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-0-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper1Position == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-2-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper1Position == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-2v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper1Position == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-0v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 }
                 if (damper2Position == 0) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-0-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper2Position == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-2-10v");
+                    edit.commit();
                     for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper2Position == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-2v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (damper2Position == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-0v");
+                    edit.commit();
                     for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
@@ -373,6 +423,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     .findViewById(R.id.txt_calculated_output);
             Spinner spinner_override_value = convertView
                     .findViewById(R.id.spinner_override_value);
+            Spinner spinner_analog_out1 = convertView
+                    .findViewById(R.id.spinner_analog_out1);
+            Spinner spinner_analog_out2 = convertView
+                    .findViewById(R.id.spinner_analog_out2);
             Spinner spinner_relay = convertView
                     .findViewById(R.id.spinner_relay);
             Spinner spinner_thermistor = convertView
@@ -417,10 +471,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         txt_calculated_output.setText("" + value + " V");
 
-                        spinner_override_value.setVisibility(View.VISIBLE);
-                        spinner_override_value.setAdapter(analogOut1Adapter);
-                        spinner_override_value.setSelection(0);
-                        spinner_override_value.setSelection(0,false);
+                        spinner_analog_out1.setVisibility(View.VISIBLE);
+                        spinner_analog_out1.setAdapter(analogOut1Adapter);
+                        spinner_analog_out1.setSelection(0);
+                        spinner_analog_out1.setSelection(0,false);
                     } else if (expandedListText.startsWith("Analog2In")) {
                         String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
                         if (!analogIn2Mapped.equals(""))
@@ -442,10 +496,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
 
                         txt_calculated_output.setText("" + value + " V");
-                        spinner_override_value.setVisibility(View.VISIBLE);
-                        spinner_override_value.setAdapter(analogOut2Adapter);
-                        spinner_override_value.setSelection(0);
-                        spinner_override_value.setSelection(0,false);
+                        spinner_analog_out2.setVisibility(View.VISIBLE);
+                        spinner_analog_out2.setAdapter(analogOut2Adapter);
+                        spinner_analog_out2.setSelection(0);
+                        spinner_analog_out2.setSelection(0,false);
                     } else if (expandedListText.startsWith("relay")) {
                         String relayMapped = getZoneMapping("relay" + expandedListText.substring(5, 6), listPosition, convertView);
                         if (!relayMapped.equals(""))
@@ -589,12 +643,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         else
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         txt_calculated_output.setText("" + val + " V");
-                        spinner_override_value.setVisibility(View.VISIBLE);
+                        spinner_analog_out1.setVisibility(View.VISIBLE);
                         analogOut1Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        spinner_override_value.setAdapter(analogOut1Adapter);
+                        spinner_analog_out1.setAdapter(analogOut1Adapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = analogOut1Adapter.getPosition(sharedPrefData1);
-                            spinner_override_value.setSelection(spinnerPosition);
+                            spinner_analog_out1.setSelection(spinnerPosition);
                         }
                         else{
                             setPointVal(id, val);
@@ -628,12 +682,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
 
                         txt_calculated_output.setText("" + val + " V");
-                        spinner_override_value.setVisibility(View.VISIBLE);
+                        spinner_analog_out2.setVisibility(View.VISIBLE);
                         analogOut2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        spinner_override_value.setAdapter(analogOut2Adapter);
+                        spinner_analog_out2.setAdapter(analogOut2Adapter);
                         if (sharedPrefData1!= null) {
                             int spinnerPosition = analogOut2Adapter.getPosition(sharedPrefData1);
-                            spinner_override_value.setSelection(spinnerPosition);
+                            spinner_analog_out2.setSelection(spinnerPosition);
                         }
                         else {
                             setPointVal(id, val);
@@ -839,6 +893,96 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 {
                 }
             });
+            spinner_analog_out1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
+                {
+                    short logicalValue = 0;
+                    Globals.getInstance().setTemproryOverrideMode(true);
+                    Globals.getInstance().incrementTempOverCount();
+                    String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
+                            expandedListPosition);
+                    String selectedSpinnerItem = spinner_analog_out1.getSelectedItem().toString();
+                    int index=selectedSpinnerItem.lastIndexOf("V");
+                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                    String sharedPrefData_analog1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString("cat-analog1", null);
+                    //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);
+                    if (sharedPrefData_analog1 != null) {
+                        String[] parts = sharedPrefData_analog1.split("-type-");
+                        String profile = parts[0];
+                        String type = parts[1];
+                        logicalValue = mapAnalogOut(type, (short)val);
+                        //Log.e("InsideTempOverrideExpandableListAdapter","logicalValue- "+logicalValue);
+
+                    }
+
+                    if (Objects.nonNull(finalUnit)){
+                        Double pointValue = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                        setPointValForAnalog(idMap.get(tunerName), (pointValue), logicalValue);
+                        idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
+                    }
+                    else{
+                        Double pointValue = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                        setPointValForAnalog(idMap.get(tunerName), (pointValue), logicalValue);
+                        idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
+                    }
+
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(equipId+expandedListText.substring(6),selectedSpinnerItem);
+                    edit.apply();
+
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView)
+                {
+                }
+            });
+            spinner_analog_out2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
+                {
+                    short logicalValue = 0;
+                    Globals.getInstance().setTemproryOverrideMode(true);
+                    Globals.getInstance().incrementTempOverCount();
+                    String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
+                            expandedListPosition);
+                    String selectedSpinnerItem = spinner_analog_out2.getSelectedItem().toString();
+                    int index=selectedSpinnerItem.lastIndexOf("V");
+                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                    String sharedPrefData_analog2 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString("cat-analog2", null);
+                    //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);
+                    if (sharedPrefData_analog2 != null) {
+                        String[] parts = sharedPrefData_analog2.split("-type-");
+                        String profile = parts[0];
+                        String type = parts[1];
+                        logicalValue = mapAnalogOut(type, (short)val);
+                        //Log.e("InsideTempOverrideExpandableListAdapter","logicalValue2- "+logicalValue);
+
+                    }
+
+                    if (Objects.nonNull(finalUnit)){
+                        Double pointValue = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                        setPointValForAnalog(idMap.get(tunerName), (pointValue), logicalValue);
+                        idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
+                    }
+                    else{
+                        Double pointValue = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                        setPointValForAnalog(idMap.get(tunerName), (pointValue), logicalValue);
+                        idMap.put(idMap.get(tunerName), String.valueOf(pointValue));
+                    }
+
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString(equipId+expandedListText.substring(6),selectedSpinnerItem);
+                    edit.apply();
+
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView)
+                {
+                }
+            });
 
             //spinner_relay.setSelection(0,false);
             spinner_relay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -899,6 +1043,39 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         }
 
         return convertView;
+    }
+
+    public static short mapAnalogOut(String type, short val) {
+        val = (short)Math.min(val, 100);
+        val = (short)Math.max(val, 0);
+        switch (type)
+        {
+            case "0-10v":
+            case PULSE:
+                return val;
+            case "10-0v":
+                return (short) (100 - val);
+            case "2-10v":
+                return (short) (20 + scaleAnalog(val, 80));
+            case "10-2v":
+                return (short) (100 - scaleAnalog(val, 80));
+            default:
+                String [] arrOfStr = type.split("-");
+                if (arrOfStr.length == 2)
+                {
+                    if (arrOfStr[1].contains("v")) {
+                        arrOfStr[1] = arrOfStr[1].replace("v", "");
+                    }
+                    int min = (int)Double.parseDouble(arrOfStr[0]);
+                    int max = (int)Double.parseDouble(arrOfStr[1]);
+                    if (max > min) {
+                        return (short) (min * 10 + (max - min ) * 10 * val/100);
+                    } else {
+                        return (short) (min * 10 - (min - max ) * 10 * val/100);
+                    }
+                }
+        }
+        return (short) 0;
     }
 
     private String getRelayMapping(String relayname, View convertView){
@@ -1179,6 +1356,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             if (Objects.nonNull(logicalPoint)) {
                 //hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
                 hayStack.writeHisValById(logicalPoint.toString(), val);
+            }
+        }
+    }
+
+    public void setPointValForAnalog(String id, double val, short logicalValue) {
+        if (val != 0.0){
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            hayStack.writeHisValById(id, val);
+            Object logicalPoint = hayStack.readMapById(id).get("pointRef");
+            if (Objects.nonNull(logicalPoint)) {
+                hayStack.writeHisValById(logicalPoint.toString(), Double.valueOf(logicalValue));
             }
         }
     }

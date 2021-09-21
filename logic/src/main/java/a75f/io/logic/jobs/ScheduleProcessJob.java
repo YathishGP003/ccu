@@ -99,6 +99,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     boolean watchdogMonitor = false;
+    
+    private volatile boolean isJobRunning = false;
 
     @Override
     public void bark() {
@@ -152,7 +154,17 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
 
         watchdogMonitor = false;
-
+        
+        if (isJobRunning) {
+            CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob <- Instance of job still running");
+            return;
+        }
+    
+        if (Globals.getInstance().isRecoveryModeActive()) {
+            CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob <- RecoveryMode");
+            return;
+        }
+        
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
             CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
@@ -165,6 +177,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return;
         }
         processSchedules();
+        isJobRunning = true;
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 

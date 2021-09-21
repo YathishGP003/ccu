@@ -1137,10 +1137,13 @@ public class CCUTagsDb extends HServer {
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .order(HisItem_.date);
-      List<HisItem>  hisItems = hisQuery.build().find();
-
-      if (hisItems.size() > 0){
-          hisBox.remove(hisItems);
-      }
+        List<HisItem>  hisItems = hisQuery.build().find();
+    
+        //Leave one hisItem to make sure his data is not empty if there was no more recent entries
+        if (hisItems.size() > 1)
+        {
+            hisItems.remove(hisItems.size() - 1);
+            hisBox.remove(hisItems);
+        }
     }
 }

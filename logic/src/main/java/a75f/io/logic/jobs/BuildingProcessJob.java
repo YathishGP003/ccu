@@ -25,6 +25,8 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 {
     boolean watchdogMonitor = false;
     
+    private volatile boolean isJobRunning = false;
+    
     @Override
     public void bark() {
         watchdogMonitor = true;
@@ -40,6 +42,18 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
         
         watchdogMonitor = false;
+        
+        if (isJobRunning) {
+            CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob <- Instance of Job still running");
+            return;
+        }
+        
+        isJobRunning = true;
+        
+        if (Globals.getInstance().isRecoveryModeActive()) {
+            CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob <- RecoveryMode");
+            return;
+        }
         
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
@@ -105,6 +119,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         }catch (Exception e){
             CcuLog.e(L.TAG_CCU_JOB,"BuildingProcessJob Failed ! ", e);
         }
+        isJobRunning = false;
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }
 }

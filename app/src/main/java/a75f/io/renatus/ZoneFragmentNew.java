@@ -2786,6 +2786,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
         TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
         TextView labelOffsetAir = viewPointRow2.findViewById(R.id.text_point1label);
+        LinearLayout lt_column2 = loopOpRow.findViewById(R.id.lt_column2);
         TextView label2 = viewPointRow2.findViewById(R.id.text_point2label);
 
         TextView textViewInputAir = viewPointRow1.findViewById(R.id.text_point1value);
@@ -2795,6 +2796,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         label2.setVisibility(View.GONE);
         value2.setVisibility(View.GONE);
+        lt_column2.setVisibility(View.GONE);
 
         textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(plcPoints.get("Status").toString());
@@ -2832,7 +2834,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
     }
-    
+
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {

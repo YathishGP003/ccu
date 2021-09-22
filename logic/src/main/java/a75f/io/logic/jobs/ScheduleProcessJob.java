@@ -1141,7 +1141,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
         double loopOutput =
             CCUHsApi.getInstance().readHisValByQuery("point and control and variable and equipRef == \""+equipID+"\"");
-    
+
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {
             String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
@@ -1156,7 +1156,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double inputVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Input Value",inputVal);
         }
-    
+
         plcPoints.put("LoopOutput",loopOutput);
 
         plcPoints.put("Offset Value",offsetValue);
@@ -1179,15 +1179,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (dynamicSetpoint > 0) {
             switch ((int) analog2sensorType) {
                 case 0:
-                    plcPoints.put("Dynamic Unit Type", "Voltage");
+                    plcPoints.put("Dynamic Unit Type", "Generic 0-10 Voltage");
                     plcPoints.put("Dynamic Unit", "V");
                     break;
                 case 1:
-                    plcPoints.put("Dynamic Unit Type", "Pressure");
+                    plcPoints.put("Dynamic Unit Type", "Pressure [0-2 in.]");
                     plcPoints.put("Dynamic Unit", "Inch WC");
                     break;
                 case 2:
-                    plcPoints.put("Dynamic Unit Type", "Pressure Differential");
+                    plcPoints.put("Dynamic Unit Type", "Pressure[0-0.25 in. Differential]");
                     plcPoints.put("Dynamic Unit", "Inch WC");
                     break;
                 case 3:
@@ -1211,9 +1211,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 8:
+                    plcPoints.put("Dynamic Unit Type", "Current Drawn[CT 0-10]");
+                    plcPoints.put("Dynamic Unit", "amps");
+                    break;
                 case 9:
+                    plcPoints.put("Dynamic Unit Type", "Current Drawn[CT 0-20]");
+                    plcPoints.put("Dynamic Unit", "amps");
+                    break;
                 case 10:
-                    plcPoints.put("Dynamic Unit Type", "Current Draw");
+                    plcPoints.put("Dynamic Unit Type", "Current Drawn[CT 0-50]");
                     plcPoints.put("Dynamic Unit", "amps");
                     break;
             }
@@ -1222,12 +1228,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         switch ((int) analog1sensorType) {
             case 0:
             case 1:
-                plcPoints.put("Unit Type", "Voltage");
+                plcPoints.put("Unit Type", "Generic 0-10 Voltage");
                 plcPoints.put("Unit", "V");
                 break;
             case 2:
+                plcPoints.put("Unit Type", "Pressure [0-2 in.]");
+                plcPoints.put("Unit", "Inch WC");
             case 3:
-                plcPoints.put("Unit Type", "Pressure");
+                plcPoints.put("Unit Type", "Pressure[0-0.25 in. Differential]");
                 plcPoints.put("Unit", "Inch WC");
                 break;
             case 4:
@@ -1239,21 +1247,27 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 plcPoints.put("Unit", "%");
                 break;
             case 6:
-                plcPoints.put("Unit Type", "CO2");
+                plcPoints.put("Unit Type", "CO2 Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 7:
-                plcPoints.put("Unit Type", "CO");
+                plcPoints.put("Unit Type", "CO Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 8:
-                plcPoints.put("Unit Type", "NO2");
+                plcPoints.put("Unit Type", "NO2 Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 9:
+                plcPoints.put("Unit Type", "Current Drawn[CT 0-10]");
+                plcPoints.put("Unit", "amps");
+                break;
             case 10:
+                plcPoints.put("Unit Type", "Current Drawn[CT 0-20]");
+                plcPoints.put("Unit", "amps");
+                break;
             case 11:
-                plcPoints.put("Unit Type", "Current Draw");
+                plcPoints.put("Unit Type", "Current Drawn[CT 0-50]");
                 plcPoints.put("Unit", "amps");
                 break;
             case 12:

@@ -102,8 +102,6 @@ public class Globals {
     private boolean isTempOverride = false;
 
     private Long curPubNubMsgTimeToken;
-    
-    private boolean recoveryModeActive = false;
     private Globals() {
     }
 
@@ -187,11 +185,7 @@ public class Globals {
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
 
-        if (recoveryModeActive) {
-            CCUHsApi.getInstance().deleteHistory();
-        } else {
-            importTunersAndScheduleJobs();
-        }
+        importTunersAndScheduleJobs();
     }
     
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -243,21 +237,12 @@ public class Globals {
             public void run()
             {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                
-                try {
-                HashMap equipMap = CCUHsApi.getInstance().readMapById("0b79f54aaa024c5b888f7c2286a9faa0");
-                CcuLog.d("CCU_UI","equipMap "+equipMap);
-                if (!equipMap.isEmpty()) {
-                    CCUHsApi.getInstance().deleteEntityTree(equipMap.get("id").toString());
-                }
-                } catch (Exception e) {
-                    CcuLog.d("CCU_UI","equipMap note found");
-                }
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
                 migrateHeartbeatDiagPointForEquips(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
+                CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
@@ -537,15 +522,4 @@ public class Globals {
     // While testing OTA service we've added logs
     // After verification we may remove this later
     public static final String TAG = "DEV_DEBUG";
-    
-    /**
-     * Recovery is used for clean up. When enabled system does nothing and tries to clean up all this his data.
-     * @return
-     */
-    public boolean isRecoveryModeActive() {
-        return recoveryModeActive;
-    }
-    public void setRecoveryModeActive(boolean recoveryModeActive) {
-        this.recoveryModeActive = recoveryModeActive;
-    }
 }

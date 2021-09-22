@@ -2,11 +2,6 @@ package a75f.io.api.haystack.sync;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Point;
-import a75f.io.logger.CcuLog;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -19,14 +14,15 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.logger.CcuLog;
 
 public class HisSyncHandler
 {

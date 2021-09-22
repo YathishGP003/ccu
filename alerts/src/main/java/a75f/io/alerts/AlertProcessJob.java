@@ -33,6 +33,11 @@ public class AlertProcessJob
     {
         CcuLog.d("CCU_ALERTS", "AlertProcessJob -> ");
         HashMap site = CCUHsApi.getInstance().read("site");
+    
+        CcuLog.d("CCU_ALERTS","logAlert");
+        CcuLog.d("CCU_ALERTS","ActiveAlerts : "+AlertManager.getInstance().getActiveAlerts().size());
+        CcuLog.d("CCU_ALERTS","AllAlerts : "+AlertManager.getInstance().getAllAlertsOldestFirst().size());
+        CcuLog.d("CCU_ALERTS","AllExternalAlerts "+AlertManager.getInstance().getAllAlertsNotInternal().size());
         
         if (site == null || site.size() == 0 || !CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.d("CCU_ALERTS","No Site Registered or CCU is not registered (" + CCUHsApi.getInstance().isCCURegistered() + ")" + " <-AlertProcessJob ");

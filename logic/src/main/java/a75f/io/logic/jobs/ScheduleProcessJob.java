@@ -10,6 +10,8 @@ import org.projecthaystack.HRef;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -100,7 +102,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     boolean watchdogMonitor = false;
     
-    private volatile boolean isJobRunning = false;
+    private Lock jobLock = new ReentrantLock();
 
     @Override
     public void bark() {
@@ -155,30 +157,27 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         watchdogMonitor = false;
         
-        if (isJobRunning) {
-            CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob <- Instance of job still running");
-            return;
-        }
+        if (jobLock.tryLock()) {
+            try {
+                HashMap site = CCUHsApi.getInstance().read("site");
+                if (site.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
     
-        if (Globals.getInstance().isRecoveryModeActive()) {
-            CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob <- RecoveryMode");
-            return;
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                if (ccu.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+                processSchedules();
+                CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
+            } catch (Exception e) {
+                CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
+            } finally {
+                jobLock.unlock();
+            }
         }
-        
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
-            return;
-        }
-
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (ccu.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
-            return;
-        }
-        processSchedules();
-        isJobRunning = true;
-        CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
     public static void processSchedules() {

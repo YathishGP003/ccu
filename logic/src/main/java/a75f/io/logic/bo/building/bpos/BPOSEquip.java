@@ -102,7 +102,7 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-        CCUHsApi.getInstance().writeDefaultValById(ctID, 0.0);
+       // CCUHsApi.getInstance().writeDefaultValById(ctID, 0.0);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
 
         Point humidity = new Point.Builder()
@@ -120,7 +120,7 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
-        CCUHsApi.getInstance().writeDefaultValById(humidityId, 0.0);
+      //  CCUHsApi.getInstance().writeDefaultValById(humidityId, 0.0);
         CCUHsApi.getInstance().writeHisValById(humidityId, 0.0);
 
 
@@ -204,8 +204,8 @@ public class BPOSEquip {
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId,
                 (double) config.gettempOffset());
-        CCUHsApi.getInstance().writeHisValById(temperatureOffsetId,
-                (double) config.gettempOffset());
+       // CCUHsApi.getInstance().writeHisValById(temperatureOffsetId,
+            //    (double) config.gettempOffset());
 
         Point autoforceoccupied = new Point.Builder()
                 .setDisplayName(equipDis + "-enableautoforceoccupied")
@@ -443,9 +443,8 @@ public class BPOSEquip {
 
 
     public double getCurrentTemp() {
-        currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor" +
-                " " +
-                "and current and group == \"" + mNodeAddr + "\"");
+        currentTemp = CCUHsApi.getInstance().readHisValByQuery(
+                "point and air and temp and sensor and current and group == \"" + mNodeAddr + "\"");
         return currentTemp;
     }
 

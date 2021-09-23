@@ -451,4 +451,11 @@ public class BPOSProfile extends ZoneProfile {
         }
     }
 
+    @Override
+    public Equip getEquip()
+    {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+mBPOSEquip.mNodeAddr+"\"");
+        return new Equip.Builder().setHashMap(equip).build();
+    }
+
 }

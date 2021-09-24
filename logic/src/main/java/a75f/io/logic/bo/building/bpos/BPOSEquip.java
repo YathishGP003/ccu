@@ -437,6 +437,10 @@ public class BPOSEquip {
                 config.getautoAway() ? 1.0 : 0.0);
         CCUHsApi.getInstance().writeDefaultValById(autooccupied.get("id").toString(),
                 config.getautoforceOccupied() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeHisValById(autoaway.get("id").toString(),
+                config.getautoAway() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeHisValById(autooccupied.get("id").toString(),
+                config.getautoforceOccupied() ? 1.0 : 0.0);
 
         CCUHsApi.getInstance().syncEntityTree();
     }

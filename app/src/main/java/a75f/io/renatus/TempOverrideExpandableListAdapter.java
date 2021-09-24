@@ -144,16 +144,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     }
                 } else if (damperPosition == 2) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                    edit.putString("cat-analog1",profile+"-type-10-0v");
+                    edit.putString("cat-analog1",profile+"-type-10-2v");
                     edit.commit();
-                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 } else if (damperPosition == 3) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                    edit.putString("cat-analog1",profile+"-type-10-2v");
+                    edit.putString("cat-analog1",profile+"-type-10-0v");
                     edit.commit();
-                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
                 }
@@ -173,16 +173,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     }
                 } else if (reheatPosition == 2) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                    edit.putString("cat-analog2",profile+"-type-10-0v");
+                    edit.putString("cat-analog2",profile+"-type-10-2v");
                     edit.commit();
-                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 } else if (reheatPosition == 3) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                    edit.putString("cat-analog2",profile+"-type-10-2v");
+                    edit.putString("cat-analog2",profile+"-type-10-0v");
                     edit.commit();
-                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut2Val.add(pos / 100.0 + " V");
                     }
                 }
@@ -905,14 +905,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             expandedListPosition);
                     String selectedSpinnerItem = spinner_analog_out1.getSelectedItem().toString();
                     int index=selectedSpinnerItem.lastIndexOf("V");
-                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1));
                     String sharedPrefData_analog1 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString("cat-analog1", null);
                     //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);
                     if (sharedPrefData_analog1 != null) {
                         String[] parts = sharedPrefData_analog1.split("-type-");
                         String profile = parts[0];
                         String type = parts[1];
-                        logicalValue = mapAnalogOut(type, (short)val);
+                        logicalValue = (short) mapAnalogOut(type, (float) val);
                         //Log.e("InsideTempOverrideExpandableListAdapter","logicalValue- "+logicalValue);
 
                     }
@@ -950,14 +950,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             expandedListPosition);
                     String selectedSpinnerItem = spinner_analog_out2.getSelectedItem().toString();
                     int index=selectedSpinnerItem.lastIndexOf("V");
-                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1))*10;
+                    double val = Double.parseDouble(selectedSpinnerItem.substring(0, index - 1));
                     String sharedPrefData_analog2 = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getString("cat-analog2", null);
-                    //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData);
+                    //Log.e("InsideTempOverrideFrag", "sharedPrefData- " + sharedPrefData_analog2);
                     if (sharedPrefData_analog2 != null) {
                         String[] parts = sharedPrefData_analog2.split("-type-");
                         String profile = parts[0];
                         String type = parts[1];
-                        logicalValue = mapAnalogOut(type, (short)val);
+                        logicalValue = (short) mapAnalogOut(type, (float) val);
                         //Log.e("InsideTempOverrideExpandableListAdapter","logicalValue2- "+logicalValue);
 
                     }
@@ -1045,20 +1045,23 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return convertView;
     }
 
-    public static short mapAnalogOut(String type, short val) {
-        val = (short)Math.min(val, 100);
-        val = (short)Math.max(val, 0);
+    public static float mapAnalogOut(String type, float val) {
+        /*val = (short)Math.min(val, 100);
+        val = (short)Math.max(val, 0);*/
         switch (type)
         {
             case "0-10v":
+                return ((val - 0) / (10 - 0)) * 100;
             case PULSE:
                 return val;
             case "10-0v":
-                return (short) (100 - val);
+                return ((val - 10) / (0 - 10)) * 100;
             case "2-10v":
-                return (short) (20 + scaleAnalog(val, 80));
+                return ((val - 2) / (10 - 2)) * 100;
             case "10-2v":
-                return (short) (100 - scaleAnalog(val, 80));
+                float num = ((val - 10) / (2 - 10)) * 100;
+                //Log.e("InsideTempOverrideExpandableListAdapter","num- "+num);
+                return num;
             default:
                 String [] arrOfStr = type.split("-");
                 if (arrOfStr.length == 2)

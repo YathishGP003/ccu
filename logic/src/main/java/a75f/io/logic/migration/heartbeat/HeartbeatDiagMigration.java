@@ -24,6 +24,7 @@ public class HeartbeatDiagMigration {
             Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration started ");
             upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
             PreferenceUtil.setHeartbeatMigrationAsDiagStatus(true);
+            Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration completed ");
         }
     }
 

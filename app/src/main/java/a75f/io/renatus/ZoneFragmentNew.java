@@ -246,7 +246,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     public void refreshScreen(String id)
     {
-        if(getActivity() != null) {
+        if(getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

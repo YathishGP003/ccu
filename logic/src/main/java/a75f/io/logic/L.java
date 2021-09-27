@@ -42,6 +42,7 @@ public class L
     public static final String TAG_CCU_WARN = "CCU_WARN";
     public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
+    public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
 
     public static Context app()
     {

@@ -57,6 +57,7 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
+import a75f.io.logic.pubnub.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
@@ -143,6 +144,10 @@ public class Globals {
     public boolean isWeatherTest() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("weather_test", false);
+    }
+    public boolean isAckdMessagingEnabled() {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("ackd_messaging_enabled", true);
     }
 
 
@@ -249,8 +254,13 @@ public class Globals {
                 {
                     if (!site.isEmpty()) {
                         if (CCUHsApi.getInstance().siteSynced()) {
-                            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteUID);
+                            String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+                            String ccuId = CCUHsApi.getInstance().getCcuId();
+                            String bearerToken = CCUHsApi.getInstance().getJwt();
+
+                            MessagingClient.getInstance().init(bearerToken, siteId, ccuId);
+
+                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteId);
                         }
                     }
                 }

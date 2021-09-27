@@ -1,7 +1,5 @@
 package a75f.io.logic.jobs;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -14,6 +12,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.pubnub.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -65,8 +64,13 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                 CCUHsApi.getInstance().syncEntityTree();
                 if (CCUHsApi.getInstance().siteSynced()) {
-                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteUID);
+                    String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+                    String ccuId = CCUHsApi.getInstance().getCcuId();
+                    String bearerToken = CCUHsApi.getInstance().getJwt();
+
+                    MessagingClient.getInstance().init(bearerToken, siteId, ccuId);
+
+                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
                 }
             }
     

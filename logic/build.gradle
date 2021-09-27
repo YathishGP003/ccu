@@ -59,6 +59,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
         }
         dev {
@@ -69,6 +70,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
         }
         qa {
@@ -78,6 +80,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-qa\"'
             minifyEnabled false
         }
@@ -88,6 +91,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-staging.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-staging\"'
             minifyEnabled false
         }
@@ -99,6 +103,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
@@ -111,6 +116,7 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-daikin-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-daikin-service.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-daikin-service.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-daikin-service.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
@@ -151,14 +157,31 @@ dependencies {
     implementation 'com.pubnub:pubnub-gson:4.35.0'
     api 'com.google.guava:guava:26.0-android'
     implementation project(':alerts')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.6'
 
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
+    implementation 'com.github.heremaps:oksse:0.9.0'
+//    implementation 'io.seventyfivef:messaging-api:0.2.2'
+    implementation name: 'messaging-api-0.3.1'
 
     testImplementation "io.mockk:mockk:1.10.2"
     testImplementation "com.google.truth:truth:1.1"
 }
 repositories {
     mavenCentral()
+    flatDir {
+        dirs '../../messaging/api/build/libs'
+    }
+    maven { url 'https://jitpack.io' }
+//    maven {
+//        url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
+//        name 'renatus'
+//        credentials {
+//            username "Azure DevOps Services"
+//            password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
+//        }
+//    }
 }

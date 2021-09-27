@@ -222,7 +222,8 @@ public class HisSyncHandler
     private boolean skipForcedHisWrites(HashMap pointToSync) {
         return pointToSync.containsKey("heartbeat")
                || pointToSync.containsKey("rssi")
-               || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"));
+               || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
+               || (pointToSync.containsKey("bpos") && pointToSync.containsKey("detection") && pointToSync.containsKey("occupancy"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

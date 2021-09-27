@@ -3,6 +3,7 @@ package a75f.io.logic.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class PreferenceUtil {
     private static Context context;
@@ -72,14 +73,16 @@ public class PreferenceUtil {
     }
 
     public static boolean isHeartbeatTagMigrationDone() {
+        Log.d("heartbeattag", "isHeartbeatTagMigrationDone");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("heartbeatMigrationAsDiag",false);
+        Log.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
+        return sharedPreferences.getBoolean("heartbeattagMigration",false);
     }
 
     public static void setHeartbeatTagMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("heartbeatMigrationAsDiag", isMigrated);
+        editor.putBoolean("heartbeattagMigration", isMigrated);
         editor.apply();
     }
 }

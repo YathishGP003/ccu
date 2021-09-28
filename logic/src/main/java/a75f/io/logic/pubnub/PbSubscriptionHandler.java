@@ -151,7 +151,7 @@ public class PbSubscriptionHandler {
             public void message(PubNub pubnub, PNMessageResult message) {
         
                 CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub message: " + message.toString());
-                PbMessageHandler.getInstance().handlePunubMessage(message.getMessage(), message.getTimetoken(),
+                PbMessageHandler.getInstance().handlePubnubMessage(message.getMessage(), message.getTimetoken(),
                                                                   appContext);
             }
     

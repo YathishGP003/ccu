@@ -176,5 +176,21 @@ public class ZoneTuners {
         String abnormalCurTempRiseTriggerId = hayStack.addPoint(abnormalCurTempRiseTrigger);
         BuildingTunerUtil.updateTunerLevels(abnormalCurTempRiseTriggerId, roomRef, hayStack);
         hayStack.writeHisValById(abnormalCurTempRiseTriggerId, HSUtil.getPriorityVal(abnormalCurTempRiseTriggerId));
+
+        Point autoAwaySetback   = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        BuildingTunerUtil.updateTunerLevels(abnormalCurTempRiseTriggerId, roomRef, hayStack);
+        hayStack.writeHisValById(autoAwaySetbackId, 2.0);
     }
 }

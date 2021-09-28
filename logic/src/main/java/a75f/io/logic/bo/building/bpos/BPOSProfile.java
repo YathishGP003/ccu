@@ -269,9 +269,9 @@ public class BPOSProfile extends ZoneProfile {
                     // We are already in force occupy
 
                     // If the last
-                    int quickPeriod = 30;
+                    int quickPeriod = 5;
                     if (differenceInMinutes < quickPeriod) {
-                        Log.i(Globals.TAG, "Occupant Detected time is less than 30 min so " +
+                        Log.i(Globals.TAG, "Occupant Detected time is less than 5 min so " +
                                 "extending the time");
                         double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
                         updateDesiredtemp(desiredAvgTemp);

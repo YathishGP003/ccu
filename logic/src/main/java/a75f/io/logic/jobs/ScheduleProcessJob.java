@@ -1176,8 +1176,20 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
+
+        HashMap inputDetails = CCUHsApi.getInstance().read(
+                "point and process and logical and variable and equipRef == \""+equipID+"\"");
+        HashMap targetDetails =
+                CCUHsApi.getInstance().read("point and target and pid and equipRef == \""+equipID+"\"");
+
+        plcPoints.put("Unit Type", inputDetails.get("shortDis"));
+        plcPoints.put("Unit",  inputDetails.get("unit"));
+        plcPoints.put("Dynamic Unit Type", targetDetails.get("shortDis"));
+        plcPoints.put("Dynamic Unit",  targetDetails.get("unit"));
         if (dynamicSetpoint > 0) {
-            switch ((int) analog2sensorType) {
+
+
+           /* switch ((int) analog2sensorType) {
                 case 0:
                     plcPoints.put("Dynamic Unit Type", "Generic 0-10 Voltage");
                     plcPoints.put("Dynamic Unit", "V");
@@ -1222,59 +1234,53 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit Type", "Current Drawn[CT 0-50]");
                     plcPoints.put("Dynamic Unit", "amps");
                     break;
-            }
+            }*/
         }
 
-        switch ((int) analog1sensorType) {
+      /*  switch ((int) analog1sensorType) {
             case 0:
             case 1:
-                plcPoints.put("Unit Type", "Generic 0-10 Voltage");
+                plcPoints.put("Unit Type", "Target Voltage");
                 plcPoints.put("Unit", "V");
                 break;
             case 2:
-                plcPoints.put("Unit Type", "Pressure [0-2 in.]");
+                plcPoints.put("Unit Type", "Target Pressure");
                 plcPoints.put("Unit", "Inch WC");
             case 3:
-                plcPoints.put("Unit Type", "Pressure[0-0.25 in. Differential]");
+                plcPoints.put("Unit Type", "Target Pressure Differential");
                 plcPoints.put("Unit", "Inch WC");
                 break;
             case 4:
-                plcPoints.put("Unit Type", "Airflow");
+                plcPoints.put("Unit Type", "Target Airflow");
                 plcPoints.put("Unit", "CFM");
                 break;
             case 5:
-                plcPoints.put("Unit Type", "Humidity");
+                plcPoints.put("Unit Type", "Target Humidity");
                 plcPoints.put("Unit", "%");
                 break;
             case 6:
-                plcPoints.put("Unit Type", "CO2 Level");
+                plcPoints.put("Unit Type", "Target CO2 Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 7:
-                plcPoints.put("Unit Type", "CO Level");
+                plcPoints.put("Unit Type", "Target CO Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 8:
-                plcPoints.put("Unit Type", "NO2 Level");
+                plcPoints.put("Unit Type", "Target NO2 Level");
                 plcPoints.put("Unit", "PPM");
                 break;
             case 9:
-                plcPoints.put("Unit Type", "Current Drawn[CT 0-10]");
-                plcPoints.put("Unit", "amps");
-                break;
             case 10:
-                plcPoints.put("Unit Type", "Current Drawn[CT 0-20]");
-                plcPoints.put("Unit", "amps");
-                break;
             case 11:
-                plcPoints.put("Unit Type", "Current Drawn[CT 0-50]");
+                plcPoints.put("Unit Type", "Target Current Draw");
                 plcPoints.put("Unit", "amps");
                 break;
             case 12:
-                plcPoints.put("Unit Type", "ION Density");
+                plcPoints.put("Unit Type", "Target Ion Density");
                 plcPoints.put("Unit", "ions/cc");
                 break;
-        }
+        }*/
 
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");

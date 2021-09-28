@@ -2809,9 +2809,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
 
-                labelTarget.setText("Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString() + " : ");
                 textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                labelOffsetAir.setText("Offset Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelOffsetAir.setText("Offset " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
                 textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 viewPointRow2.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
@@ -2821,8 +2821,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 linearLayoutZonePoints.addView(viewPointRow2);
 
             } else {
-                labelTarget.setText("Target " + plcPoints.get("Unit Type").toString().replace("Native-", "") + " : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Unit").toString());
+                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
+                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 viewPointRow1.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);

@@ -117,7 +117,10 @@ public class HeartbeatDiagMigration {
         List<HashMap> rssiPoints = hayStack.readAll("point and rssi and dis == \""+rssiDis+"\"");
         for(HashMap rssiPoint : rssiPoints){
             if(!heartbeatId.equals(rssiPoint.get("pointRef").toString())){
-                deleteRssiPointReferringNonDiagHeartbeatPoint(hayStack, nodeAddress);
+                String rssiId = rssiPoint.get("id").toString();
+                hayStack.deleteEntityTree(rssiId);
+                Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,
+                        "Dangling rssi point with id  "+ rssiId +" for the address "+nodeAddress +" is deleted");
             }
         }
     }

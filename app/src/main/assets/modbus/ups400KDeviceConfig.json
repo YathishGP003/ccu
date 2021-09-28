@@ -989,50 +989,6 @@
       ]
     },
     {
-      "registerAddress": 427,
-      "registerNumber": "30427",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7093",
-          "name": "Battery Temperature For Cabinet",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "temperature"
-            },
-            {
-              "tagName": "cabinet"
-            },
-            {
-              "tagName": "unit",
-              "value": "C"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "registerAddress": 428,
       "registerNumber": "30428",
       "registerType": "inputRegister",
@@ -4635,56 +4591,6 @@
             },
             {
               "tagName": "systemMMS"
-            },
-            {
-              "tagName": "overload"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 38,
-      "registerNumber": "10038",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7173",
-          "name": "Inverter Shutdown Overload",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "inverter"
-            },
-            {
-              "tagName": "shutdown"
             },
             {
               "tagName": "overload"

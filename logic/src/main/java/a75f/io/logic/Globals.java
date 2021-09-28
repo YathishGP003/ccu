@@ -254,13 +254,13 @@ public class Globals {
                 {
                     if (!site.isEmpty()) {
                         if (CCUHsApi.getInstance().siteSynced()) {
-                            String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
-                            String ccuId = CCUHsApi.getInstance().getCcuId();
-                            String bearerToken = CCUHsApi.getInstance().getJwt();
+//                            String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+//                            String ccuId = CCUHsApi.getInstance().getCcuId();
+//                            String bearerToken = CCUHsApi.getInstance().getJwt();
 
-                            MessagingClient.getInstance().init(bearerToken, siteId, ccuId);
+                            MessagingClient.getInstance().init();
 
-                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteId);
+//                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteId);
                         }
                     }
                 }

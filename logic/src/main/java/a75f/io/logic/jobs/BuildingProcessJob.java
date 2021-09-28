@@ -64,13 +64,13 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                 CCUHsApi.getInstance().syncEntityTree();
                 if (CCUHsApi.getInstance().siteSynced()) {
-                    String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    String ccuId = CCUHsApi.getInstance().getCcuId();
-                    String bearerToken = CCUHsApi.getInstance().getJwt();
+//                    String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+//                    String ccuId = CCUHsApi.getInstance().getCcuId();
+//                    String bearerToken = CCUHsApi.getInstance().getJwt();
 
-                    MessagingClient.getInstance().init(bearerToken, siteId, ccuId);
+                    MessagingClient.getInstance().init();
 
-                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
+//                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
                 }
             }
     

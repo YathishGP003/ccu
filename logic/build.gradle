@@ -164,24 +164,24 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 
     implementation 'com.github.heremaps:oksse:0.9.0'
-//    implementation 'io.seventyfivef:messaging-api:0.2.2'
-    implementation name: 'messaging-api-0.3.1'
+    implementation 'io.seventyfivef:messaging-api:0.5.0'
+//    implementation name: 'messaging-api-0.5.0'
 
     testImplementation "io.mockk:mockk:1.10.2"
     testImplementation "com.google.truth:truth:1.1"
 }
 repositories {
     mavenCentral()
-    flatDir {
-        dirs '../../messaging/api/build/libs'
-    }
-    maven { url 'https://jitpack.io' }
-//    maven {
-//        url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
-//        name 'renatus'
-//        credentials {
-//            username "Azure DevOps Services"
-//            password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
-//        }
+//    flatDir {
+//        dirs '../../messaging/api/build/libs'
 //    }
+    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
+        name 'renatus'
+        credentials {
+            username "Azure DevOps Services"
+            password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
+        }
+    }
 }

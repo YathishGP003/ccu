@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import a75f.io.logic.pubnub.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -214,6 +215,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             {
                 Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .edit().putBoolean("ackd_messaging", b).apply();
+
+                MessagingClient.getInstance().init();
             }
         });
         ackdMessagingBtn.setChecked(Globals.getInstance().isAckdMessagingEnabled());

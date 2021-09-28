@@ -61,7 +61,6 @@ public class PbSubscriptionHandler {
     }
     
     public void registerSite(Context appContext, String siteId) {
-        
         if (pbInstance != null) {
             pbInstance.destroy();
         }
@@ -74,6 +73,14 @@ public class PbSubscriptionHandler {
                   .execute();
         
         PbWatchdog.getInstance().startMonitoring(appContext, this);
+    }
+
+    public void close() {
+        if (pbInstance != null) {
+            pbInstance.destroy();
+        }
+
+        pbInstance = null;
     }
     
     private PNConfiguration getConfiguration(String siteId) {

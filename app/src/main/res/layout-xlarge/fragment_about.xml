@@ -207,7 +207,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:layout_weight="0.40"
-                app:srcCompat="@drawable/icon_arrowright" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         </LinearLayout>
     </LinearLayout>

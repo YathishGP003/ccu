@@ -1138,7 +1138,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
-                            if (p.getProfile().startsWith("BPOS")) {
+                            if (p.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
                                 HashMap bpospoints = BPOSUtil.getbposPoints(p.getId());
                                 Log.i("PointsValue", "BPOS Points:" + bpospoints.toString());
                                 loadBPOSPointsUI(bpospoints, inflater, linearLayoutZonePoints, p.getGroup());
@@ -1388,7 +1388,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
-            if (updatedEquip.getProfile().startsWith("BPOS")) {
+            if (updatedEquip.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
                 HashMap bposPoints = BPOSUtil.getbposPoints(updatedEquip.getId());
                 Log.i("PointsValue", "BPOS Points:" + bposPoints.toString());
                 loadBPOSPointsUI(bposPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());

@@ -265,7 +265,6 @@ public class Pulse
 	}
 
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
-		Log.d("Pulse", " In handleSensorEvents ++" );
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
 		boolean hasSensorOccupancy = false;
@@ -1176,7 +1175,7 @@ public class Pulse
 		if((val == 1) ) {
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
-			if ((occDetPoint != null) && (occDetPoint.size() > 0)){
+			if (!occDetPoint.isEmpty()){
 				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
 				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
 						" and his and equipRef == \"" + device.getEquipRef() + "\"");

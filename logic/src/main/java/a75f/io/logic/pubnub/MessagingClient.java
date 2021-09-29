@@ -8,10 +8,7 @@ import com.google.gson.JsonParser;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -26,7 +23,11 @@ import okhttp3.Response;
 public class MessagingClient {
     private static MessagingClient instance = null;
 
+    private MessagingService messagingService = null;
     private ServerSentEvent sse = null;
+
+    private String siteId = null;
+    private String ccuId = null;
 
     public static MessagingClient getInstance() {
         if (instance == null) {
@@ -63,8 +64,8 @@ public class MessagingClient {
 
         String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
 
-//        String subscribeUrl = String.format("%s/messages/acknowledgeable?channels=%s,%s&subscriberId=%s",
-        String subscribeUrl = String.format("%s/messages?channels=%s,%s&subscriberId=%s",
+        String subscribeUrl = String.format("%s/messages/acknowledgeable?channels=%s,%s&subscriberId=%s",
+//        String subscribeUrl = String.format("%s/messages?channels=%s,%s&subscriberId=%s",
                 messagingUrl,
                 BuildConfig.PUBNUB_GLOBAL_CHANNEL,
                 siteId.substring(1),
@@ -75,14 +76,77 @@ public class MessagingClient {
                 .header("Authorization", "Bearer " + bearerToken)
                 .build();
 
-        sse = new OkSse().newServerSentEvent(request, listener);
+//        sse = new OkSse().newServerSentEvent(request, listener);
+        sse = new OkSse().newServerSentEvent(request, new MessagingListener(siteId, ccuId));
         sse.setTimeout(1, TimeUnit.MINUTES);
+
+        this.siteId = siteId;
+        this.ccuId = ccuId;
+
+        messagingService = ServiceGenerator.getInstance().createService(messagingUrl, bearerToken);
     }
 
     private void closeMessagingConnection() {
         if (sse != null) {
             sse.close();
             sse = null;
+            messagingService = null;
+        }
+    }
+
+    private class MessagingListener implements ServerSentEvent.Listener {
+        private final String siteId;
+        private final String ccuId;
+
+        public MessagingListener(String siteId, String ccuId) {
+            super();
+            this.siteId = siteId;
+            this.ccuId = ccuId;
+        }
+
+        @Override
+        public void onOpen(ServerSentEvent sse, Response response) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Connection Opened");
+        }
+
+        @Override
+        public void onMessage(ServerSentEvent sse, String id, String event, String message) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, message);
+
+            JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
+            Long timetoken = payload.get("timetoken").getAsLong();
+            JsonElement messageContents = payload.getAsJsonObject().get("message");
+
+            PbMessageHandler.getInstance().handlePubnubMessage(messageContents, timetoken, Globals.getInstance().getApplicationContext());
+
+            messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(Collections.singletonList(timetoken.toString())));
+        }
+
+        @Override
+        public void onComment(ServerSentEvent sse, String comment) {
+            CcuLog.w(L.TAG_CCU_MESSAGING, "Received Unexpected Comment: " + comment);
+        }
+
+        @Override
+        public Request onPreRetry(ServerSentEvent sse, Request originalRequest) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, "Pre-Retry Fired");
+            return originalRequest;
+        }
+
+        @Override
+        public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
+            return true;
+        }
+
+        @Override
+        public boolean onRetryError(ServerSentEvent sse, Throwable throwable, Response response) {
+            CcuLog.w(L.TAG_CCU_MESSAGING, "SSE connection error. Attempting to reconnect");
+            return true;
+        }
+
+        @Override
+        public void onClosed(ServerSentEvent sse) {
+            CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Socket Closed");
         }
     }
 
@@ -96,11 +160,13 @@ public class MessagingClient {
         public void onMessage(ServerSentEvent sse, String id, String event, String message) {
             CcuLog.i(L.TAG_CCU_MESSAGING, message);
 
-            JsonElement payload = JsonParser.parseString(message);
-            Long timetoken = payload.getAsJsonObject().get("timetoken").getAsLong();
+            JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
+            Long timetoken = payload.get("timetoken").getAsLong();
             JsonElement messageContents = payload.getAsJsonObject().get("message");
 
             PbMessageHandler.getInstance().handlePubnubMessage(messageContents, timetoken, Globals.getInstance().getApplicationContext());
+
+            messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(Collections.singletonList(timetoken.toString())));
         }
 
         @Override

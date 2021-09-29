@@ -45,18 +45,22 @@ public class MessagingClient {
         String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
 
         if (!useMessagingApi) {
-            PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
             this.closeMessagingConnection();
+            PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
         } else {
             String ccuId = CCUHsApi.getInstance().getCcuId();
             String bearerToken = CCUHsApi.getInstance().getJwt();
 
-            this.openMessagingConnection(bearerToken, siteId, ccuId);
             PbSubscriptionHandler.getInstance().close();
+            this.openMessagingConnection(bearerToken, siteId, ccuId);
         }
     }
 
     private void openMessagingConnection(String bearerToken, String siteId, String ccuId) {
+        if (sse != null) {
+            return;
+        }
+
         String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
 
 //        String subscribeUrl = String.format("%s/messages/acknowledgeable?channels=%s,%s&subscriberId=%s",
@@ -90,7 +94,6 @@ public class MessagingClient {
 
         @Override
         public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-            CcuLog.i(L.TAG_CCU_MESSAGING, "Message Received!!!");
             CcuLog.i(L.TAG_CCU_MESSAGING, message);
 
             JsonElement payload = JsonParser.parseString(message);

@@ -214,7 +214,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
             {
                 Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                        .edit().putBoolean("ackd_messaging", b).apply();
+                        .edit().putBoolean("ackd_messaging_enabled", b).apply();
 
                 MessagingClient.getInstance().init();
             }

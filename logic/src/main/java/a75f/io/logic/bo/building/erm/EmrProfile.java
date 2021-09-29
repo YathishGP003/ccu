@@ -76,9 +76,6 @@ public class EmrProfile extends ZoneProfile
         int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
         if (timeDiffMins < 1) {
             double curRate = emrEquip.getHisVal("current and rate");
-
-            /*HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
-            double totalEm = (double) emPoints.get("Energy Reading");*/
             emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+curRate+"KW");
             return;
         }

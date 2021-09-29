@@ -111,7 +111,7 @@ message HyperStatRegularUpdateMessage_t {
   int32 externalAnalogVoltageInput2 = 8; // External voltage sense in millivolts
   int32 externalThermistorInput1 = 9; // External resistance sense in tens of ohms
   int32 externalThermistorInput2 = 10; // External resistance sense in tens of ohms
-  repeated SensorReadingPb_t sensorReadings = 11; //[(nanopb).max_count = 6]; // List of type-value sensor readings
+  repeated SensorReadingPb_t sensorReadings = 11 ;//[(nanopb).max_count = 6]; // List of type-value sensor readings
   bool occupantDetected = 12; // 0 is no, 1 is yes
 }
 
@@ -137,24 +137,25 @@ message HyperStatIduStatusMessage_t {
   int32 responseType = 2; // Indicates if IDU status message is being sent in response to an IDU controls message or periodically
   int32 supportBitfield = 3;
   int32 supportFanSpeedControlLevels = 4;
-  int32 setOperationMode = 5;
-  int32 masterOperationMode = 6;
-  int32 fanSpeed = 7;
-  int32 airflowDirection = 8;
-  int32 coolHeatRight = 9;
-  sint32 setTemperature = 10;
-  int32 filterStatus = 11;
-  int32 groupAddress = 12;
-  int32 errorStatus = 13;
-  int32 diagnosticStatus = 14;
-  int32 iduTemperature = 15;
-  repeated int32 thData = 16 ;//[(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
+  int32 operationMode = 5;
+  int32 setOperationMode = 6;
+  int32 masterOperationMode = 7;
+  int32 fanSpeed = 8;
+  int32 airflowDirection = 9;
+  int32 coolHeatRight = 10;
+  sint32 setTemperature = 11;
+  int32 filterStatus = 12;
+  int32 groupAddress = 13;
+  int32 errorStatus = 14;
+  int32 diagnosticStatus = 15;
+  int32 iduTemperature = 16;
+  repeated int32 thData = 17 ;//[(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
 }
 
 message HyperStatCcuDatabaseSeedMessage_t {
-  bytes encryptionKey = 1; //[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
-  bytes serializedSettingsData = 2; //[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
-  bytes serializedControlsData = 3; //[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes encryptionKey = 1 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
 }
 
 
@@ -163,11 +164,11 @@ message HyperStatCmToCcuSerializedMessage_t {
   int32 cmLqi = 2; // LQI of this received data packet @ CM
   int32 cmRssi = 3; // RSSI of this received data packet @ CM
   int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 5;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 5 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }
 
 message HyperStatCcuToCmSerializedMessage_t {
   uint32 address = 1; // The (16-bit) mesh address of a device
   int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }

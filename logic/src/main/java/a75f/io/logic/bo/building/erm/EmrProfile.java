@@ -13,7 +13,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class EmrProfile extends ZoneProfile
 {

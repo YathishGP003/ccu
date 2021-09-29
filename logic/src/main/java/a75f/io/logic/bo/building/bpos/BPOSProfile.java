@@ -289,6 +289,8 @@ public class BPOSProfile extends ZoneProfile {
         } else {
             // Reset everything if there was force occupied condition
             Log.d("BPOSProfile", "We are back to occupied");
+            Log.d("BPOSProfile", "Occupancy.AUTOFORCEOCCUPIED.ordinal() = "+Occupancy.AUTOFORCEOCCUPIED.ordinal());
+            Log.d("BPOSProfile", "occupancyModeval = "+occupancyModeval);
             if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
                 Log.d("BPOSProfile", "Move to to occupied status");
                 resetForceOccupy();

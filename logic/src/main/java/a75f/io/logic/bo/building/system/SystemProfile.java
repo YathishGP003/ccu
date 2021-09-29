@@ -686,28 +686,6 @@ public abstract class SystemProfile
             }
         }
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
-
-
-        Point autoAwaySetback = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "autoAwaySetback")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
-                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
-        HashMap autoAwaySetbackPoint = hayStack.read("point and tuner and default and auto and away and setback");
-        ArrayList<HashMap> autoAwaySetbackArr = hayStack.readPoint(autoAwaySetbackPoint.get("id").toString());
-        for (HashMap valMap : autoAwaySetbackArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(autoAwaySetbackId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(autoAwaySetbackId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
     }
 
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {

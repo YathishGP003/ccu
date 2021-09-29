@@ -73,7 +73,6 @@ public class PreferenceUtil {
     }
 
     public static boolean isHeartbeatTagMigrationDone() {
-        Log.d("heartbeattag", "isHeartbeatTagMigrationDone");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         Log.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
         return sharedPreferences.getBoolean("heartbeattagMigration",false);

@@ -202,9 +202,7 @@ public class Globals {
     }
 
     private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site){
-        Log.d("heartbeattag", "In migrateHeartbeatwithNewtags ");
         if (!site.isEmpty()) {
-            Log.d("heartbeattag", "In migrateHeartbeatwithNewtags++ ");
             HeartbeatTagMigration.initHeartbeatTagMigration();
         }
     }

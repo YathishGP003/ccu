@@ -13,6 +13,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class EmrProfile extends ZoneProfile
 {
@@ -58,7 +59,7 @@ public class EmrProfile extends ZoneProfile
     
     @Override
     public void updateZonePoints() {
-        HashMap emrPoint = CCUHsApi.getInstance().read("sensor and emr and equipRef and sp == \""+emrEquip.equipRef+"\"");
+        HashMap emrPoint = CCUHsApi.getInstance().read("sensor and emr and sp and equipRef == \""+emrEquip.equipRef+"\"");
         List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(emrPoint.get("id").toString(), 0 ,2);
         
         if (hisItems.size() < 2) {
@@ -75,6 +76,9 @@ public class EmrProfile extends ZoneProfile
         int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
         if (timeDiffMins < 1) {
             double curRate = emrEquip.getHisVal("current and rate");
+
+            /*HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
+            double totalEm = (double) emPoints.get("Energy Reading");*/
             emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+curRate+"KW");
             return;
         }

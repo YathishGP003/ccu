@@ -277,6 +277,12 @@ public class HSUtil
         return pointEntity.containsKey(Tags.BPOS);
     }
     
+    public static boolean isDamperReheatTypeConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.TYPE)
+               && (pointEntity.containsKey(Tags.DAMPER) || pointEntity.containsKey(Tags.REHEAT));
+    }
+    
     /**
      * Currently checks only FCU type. Will be made generic after other profies
      * support is handled.

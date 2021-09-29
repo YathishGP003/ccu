@@ -10,10 +10,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
-import static a75f.io.logic.pubnub.AlertMessageHandlers.*;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.CREATE_CUSTOM_ALERT_DEF_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.CREATE_PREDEFINED_ALERT_DEF_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.DELETE_CUSTOM_ALERT_DEF_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.DELETE_PREDEFINED_ALERT_DEF_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.DELETE_SITE_DEFS_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.REMOVE_ALERTS_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.REMOVE_ALERT_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.UPDATE_CUSTOM_ALERT_DEF_CMD;
+import static a75f.io.logic.pubnub.AlertMessageHandlers.UPDATE_PREDEFINED_ALERT_DEF_CMD;
 
 public class PbMessageHandler
 {
@@ -77,10 +84,9 @@ public class PbMessageHandler
         return instance;
     }
     
-    public void handlePunubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
+    public void handlePubnubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
         
-        CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
-        CcuLog.d(Globals.TAG, "handlePunubMessage: " + receivedMessageObject.toString());
+        CcuLog.d(L.TAG_CCU_PUBNUB, "handlePubnubMessage: " + receivedMessageObject.toString());
         Message message = messageHandler.obtainMessage();
         PbMessage pbMessage = new PbMessage();
         try {
@@ -98,7 +104,6 @@ public class PbMessageHandler
     
     private void handlePbMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
-        Log.i(Globals.TAG, " cmd : " + cmd);
         switch (cmd) {
             case FloorUpdateHandler.CMD:
                FloorUpdateHandler.updateFloor(msg);

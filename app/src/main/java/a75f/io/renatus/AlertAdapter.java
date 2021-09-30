@@ -69,7 +69,7 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
         }
         
         viewHolder.alertTitle.setText(alert.getmTitle());
-        viewHolder.alertImg.setImageResource(alert.isFixed()?R.drawable.ic_green_checkmark : getIcon(alert.mSeverity));
+        viewHolder.alertImg.setImageResource(alert.isFixed()?R.drawable.green_checkmark : getIcon(alert.mSeverity));
         
         return convertView;
     }

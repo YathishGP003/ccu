@@ -40,11 +40,8 @@ public class RemoveEntityHandler
                 String luid = "@" + guid;
                 if (CCUHsApi.getInstance().entitySynced(luid))
                 {
-                    HashMap removedEntity = CCUHsApi.getInstance().readMapById(luid);
-                    if (!removedEntity.isEmpty() && removedEntity.containsKey("schedule")){
-                        UpdateScheduleHandler.refreshSchedulesScreen();
-                    }
                     CCUHsApi.getInstance().removeEntity(luid);
+        
                 } else if(CCUHsApi.getInstance().getRemoveMapLUID(luid) != null) {
                     CCUHsApi.getInstance().removeId(CCUHsApi.getInstance().getRemoveMapLUID("@" + guid));
                 }

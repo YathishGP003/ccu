@@ -935,6 +935,7 @@
     <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
     <string name="autoforceoccupied">Auto Force Occupied</string>
     <string name="autoaway">Auto Away</string>
+    <string name="temproryOverride_Warningmessage">Kindly be cautious of changes done to any system and zone level points. This may impact building equipment operation and/or even damage building equipment(s) if not handled correctly.</string>
     <string-array name="zone_priority_bpos">
         <item>Normal</item>
         <item>No Priority</item>

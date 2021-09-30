@@ -55,7 +55,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");
                     return;
                 }
-    
+                
                 HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 if (ccu.isEmpty()) {
                     CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");

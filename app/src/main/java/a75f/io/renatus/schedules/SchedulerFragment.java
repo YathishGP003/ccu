@@ -1147,8 +1147,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public void onResume() {
         super.onResume();
         new Handler().postDelayed(() -> loadSchedule(),1500);
+        UpdateScheduleHandler.setBuildingScheduleListener(this);
     }
     
+    @Override
+    public void onPause() {
+        super.onPause();
+        UpdateScheduleHandler.setBuildingScheduleListener(null);
+    }
     public void refreshScreen() {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());

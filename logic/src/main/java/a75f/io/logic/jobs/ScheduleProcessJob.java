@@ -769,6 +769,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
+                if (zoneOccupancy == OCCUPIED) {
+                    HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                            "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                                    " \"" + equip.getId() + "\"");
+                    if (ocupancyDetection.get("id") != null) {
+                        double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(
+                                "id").toString());
+                        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection.get(
+                                "id").toString(),
+                                val);
+                    }
+                }
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());

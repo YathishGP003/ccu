@@ -50,6 +50,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.messaging.MessagingAckJob;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
@@ -57,7 +58,7 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.pubnub.MessagingClient;
+import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
@@ -92,6 +93,8 @@ public class Globals {
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
     
     AlertProcessJob mAlertProcessJob;
+
+    MessagingAckJob messagingAckJob;
 
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
@@ -257,13 +260,7 @@ public class Globals {
                 {
                     if (!site.isEmpty()) {
                         if (CCUHsApi.getInstance().siteSynced()) {
-//                            String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
-//                            String ccuId = CCUHsApi.getInstance().getCcuId();
-//                            String bearerToken = CCUHsApi.getInstance().getJwt();
-
                             MessagingClient.getInstance().init();
-
-//                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteId);
                         }
                     }
                 }
@@ -278,7 +275,13 @@ public class Globals {
 
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
-            
+
+                String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+                String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+                String bearerToken = CCUHsApi.getInstance().getJwt();
+                messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+                getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+
                 Watchdog.getInstance().addMonitor(mProcessJob);
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();

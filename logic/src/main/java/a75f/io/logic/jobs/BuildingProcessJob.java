@@ -14,7 +14,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.pubnub.MessagingClient;
+import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -68,13 +68,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                     CCUHsApi.getInstance().syncEntityTree();
                     if (CCUHsApi.getInstance().siteSynced()) {
-//                    String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
-//                    String ccuId = CCUHsApi.getInstance().getCcuId();
-//                    String bearerToken = CCUHsApi.getInstance().getJwt();
-
                         MessagingClient.getInstance().init();
-
-//                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
                     }
                 }
                 if (L.ccu().oaoProfile != null) {

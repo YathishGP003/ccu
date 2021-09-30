@@ -153,7 +153,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
 
-        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
+        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
 
         watchdogMonitor = false;
         
@@ -177,6 +177,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             } finally {
                 jobLock.unlock();
             }
+        } else {
+            CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob<- Job instance running ");
         }
     }
 

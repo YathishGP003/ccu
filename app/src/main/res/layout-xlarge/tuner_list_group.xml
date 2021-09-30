@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layoutDirection="ltr">
+
     <TextView
         android:id="@+id/listTitle"
         android:layout_width="match_parent"

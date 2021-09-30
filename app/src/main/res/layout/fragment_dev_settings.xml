@@ -279,7 +279,8 @@
                 android:layout_margin="@dimen/margin_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Crash App"/>
+                android:text="Crash App"
+                android:visibility="gone"/>
 
 
         </LinearLayout>

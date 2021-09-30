@@ -11,7 +11,7 @@ data class MaximizedDeltaTInput( val outletWaterTemperature : Double,
 
 
 /**
- * Implements algorith to control chillers based on Maximized Delta T approach.
+ * Implements algorithm to control chillers based on Maximized Delta T approach.
  * This is used for maximizing delta T with an exit temp that is as high as needed to give the comfort that
  * is needed. Throttle the valve to its minimum position (typically 1%) as long as exit water temperature
  * from the AHU (CHWR) is 4 F below the desired cooling temp. If exit temp is greater than that, we us PI
@@ -23,15 +23,10 @@ class MaximizedDeltaTControl {
         @JvmStatic
         fun getChilledWaterMaximizedDeltaTValveLoop(data: MaximizedDeltaTInput): Double {
             Log.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
-            data.piLoop.dump()
             val chilledWaterTargetExitTemperature = data.averageDesiredCoolingTemp - data.chilledWaterExitTemperatureMargin
-
-            return if (data.outletWaterTemperature < chilledWaterTargetExitTemperature) {
-                data.piLoop.reset()
-                1.0
-            } else {
-                data.piLoop.getLoopOutput(data.outletWaterTemperature, chilledWaterTargetExitTemperature)
-            }
+            val loopOp = data.piLoop.getLoopOutput(data.outletWaterTemperature, chilledWaterTargetExitTemperature)
+            data.piLoop.dump()
+            return loopOp.coerceAtLeast(1.0)
         }
     }
 }

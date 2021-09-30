@@ -13,8 +13,6 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-
-import a75f.io.logic.Globals;
 import androidx.annotation.WorkerThread;
 import android.util.Log;
 
@@ -247,7 +245,6 @@ public class AppInstaller
 
                     Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     RenatusApp.executeAsRoot(commands);
-                    Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }
             }
             else

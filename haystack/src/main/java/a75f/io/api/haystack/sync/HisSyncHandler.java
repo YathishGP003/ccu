@@ -14,9 +14,11 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import a75f.io.api.haystack.CCUHsApi;
@@ -29,6 +31,8 @@ public class HisSyncHandler
     private static final String TAG = "CCU_HS_SYNC";
     private static final String SYNC_TYPE_EQUIP = "equip";
     private static final String SYNC_TYPE_DEVICE = "device";
+    
+    private static final int HIS_ITEM_BATCH_SIZE = 500;
     
     CCUHsApi ccuHsApi;
     
@@ -62,7 +66,7 @@ public class HisSyncHandler
 
                 if (entitySyncRequired) {
                     CcuLog.d(TAG,"doHisSync : entitySyncRequired");
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                     entitySyncRequired = false;
                 }
             }
@@ -83,6 +87,7 @@ public class HisSyncHandler
         } else {
             CcuLog.d(TAG,"No need to start HisSync. Already in progress.");
         }
+        
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
@@ -128,19 +133,19 @@ public class HisSyncHandler
 
         for (HashMap pointToSync : pointList) {
 
-            List<HisItem> unsyncedHisItems = new ArrayList<>();
+            List<HisItem> unsyncedHisItems;
 
             String pointID = pointToSync.get("id").toString();
             String pointDescription = pointToSync.get("dis").toString();
             String pointGuid = CCUHsApi.getInstance().getGUID(pointID);
+            String pointTimezone = pointToSync.get("tz").toString();
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
             unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {
-
-                    String pointTimezone = pointToSync.get("tz").toString();
+                    
                     HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0) : HNum.make(hisItem.getVal());
                     long pointTimestamp = hisItem.getDateInMillis();
 
@@ -148,20 +153,19 @@ public class HisSyncHandler
                         HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
                         hDictList.add(hDict);
                         hisItemsToSyncForDeviceOrEquip.add(hisItem);
-                        CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
+                        CcuLog.d(TAG,"Adding historized point value for point ID " + pointID + "; description of "
+                                     + pointDescription + "; value of " + pointValue + " for syncing.");
                     } else {
-                        CcuLog.e(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
+                        CcuLog.e(TAG, "Historized point value for point ID " + pointID + "; description of "
+                                      + pointDescription + " is null. Skipping.");
                     }
                 }
             } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !skipForcedHisWrites(pointToSync)) {
 
                 HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
-
                 if (latestHisItemToReSync != null) {
-                    // TODO Matt Rudd - Feels a bit wrong to duplicate this code from the for loop for unsynced items, but I don't want to mutate objects or have a method just to set variables
                     latestHisItemToReSync.setDate(quarterHourSyncDateTimeForDeviceOrEquip);
-
-                    String pointTimezone = pointToSync.get("tz").toString();
+                    
                     HVal pointValue = isBooleanPoint ? HBool.make(latestHisItemToReSync.getVal() > 0) : HNum.make(latestHisItemToReSync.getVal());
                     long pointTimestamp = latestHisItemToReSync.getDateInMillis();
 
@@ -174,30 +178,40 @@ public class HisSyncHandler
                     CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis"));
                 }
             }
+            
+            if (hisItemsToSyncForDeviceOrEquip.size() > HIS_ITEM_BATCH_SIZE) {
+                doHisWrite(hDictList, syncType, deviceOrEquipGuid, hisItemsToSyncForDeviceOrEquip );
+                hisItemsToSyncForDeviceOrEquip = new ArrayList<>();
+                hDictList = new ArrayList<>();
+            }
         }
 
         if (!hDictList.isEmpty()) {
-            CcuLog.d(TAG,"Syncing a point list of size " + pointList.size());
-
-            HDict[] hDicts = hDictListToArray(hDictList);
-
-            HDict hisWriteMetadata = new HDictBuilder()
-                    .add("id", HRef.make(StringUtils.stripStart(deviceOrEquipGuid,"@")))
-                    .add(syncType)
-                    .toDict();
-
-            String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
-            if (response != null && !hisItemsToSyncForDeviceOrEquip.isEmpty()) {
-                try {
-                    ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
-                } catch (IllegalArgumentException e) {
-                    /* There is a corner case where this HisItem might have been removed from Objectbox since the
-                     * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
-                     * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
-                     * monitor how frequently this is happening or there is more to it than what we see now.
-                     */
-                    CcuLog.e(TAG, "Failed to update HisItem !", e);
-                }
+            doHisWrite(hDictList, syncType, deviceOrEquipGuid,hisItemsToSyncForDeviceOrEquip );
+        }
+    }
+    
+    private void doHisWrite(List<HDict> hDictList, String syncType, String deviceOrEquipGuid,
+                               List<HisItem> hisItemList) {
+        
+        HDict[] hDicts = hDictListToArray(hDictList);
+        
+        HDict hisWriteMetadata = new HDictBuilder()
+                                     .add("id", HRef.make(StringUtils.stripStart(deviceOrEquipGuid,"@")))
+                                     .add(syncType)
+                                     .toDict();
+        
+        String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
+        if (response != null && !hisItemList.isEmpty()) {
+            try {
+                ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
+            } catch (IllegalArgumentException e) {
+                /* There is a corner case where this HisItem might have been removed from Objectbox since the
+                 * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
+                 * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
+                 * monitor how frequently this is happening or there is more to it than what we see now.
+                 */
+                CcuLog.e(TAG, "Failed to update HisItem !", e);
             }
         }
     }

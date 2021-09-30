@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -246,7 +247,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     public void refreshScreen(String id)
     {
-        if(getActivity() != null) {
+        if(getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -2896,6 +2897,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         };
 
         weatherUpdate.run();
+        Globals.getInstance().setCcuReady(true);
     }
 
     @Override

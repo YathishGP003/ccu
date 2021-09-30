@@ -10,6 +10,8 @@ import org.projecthaystack.HRef;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -99,6 +101,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     boolean watchdogMonitor = false;
+    
+    private Lock jobLock = new ReentrantLock();
 
     @Override
     public void bark() {
@@ -152,20 +156,28 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
 
         watchdogMonitor = false;
-
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
-            return;
+        
+        if (jobLock.tryLock()) {
+            try {
+                HashMap site = CCUHsApi.getInstance().read("site");
+                if (site.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+    
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                if (ccu.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+                processSchedules();
+                CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
+            } catch (Exception e) {
+                CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
+            } finally {
+                jobLock.unlock();
+            }
         }
-
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (ccu.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
-            return;
-        }
-        processSchedules();
-        CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
     public static void processSchedules() {

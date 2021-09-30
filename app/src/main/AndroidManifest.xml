@@ -36,6 +36,7 @@
             android:supportsRtl="true"
             android:theme="@style/RenatusApp75FTheme"
             android:usesCleartextTraffic="true"
+            android:largeHeap="true"
             tools:replace="android:label">
 
         <service android:name=".bluetooth.BLEProvisionService"/>

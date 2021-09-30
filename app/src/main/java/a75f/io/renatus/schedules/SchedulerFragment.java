@@ -68,8 +68,7 @@ import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
-public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener,
-                                                                 BuildingScheduleListener {
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
@@ -1147,8 +1146,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public void onResume() {
         super.onResume();
         new Handler().postDelayed(() -> loadSchedule(),1500);
+        UpdateScheduleHandler.setBuildingScheduleListener(this);
     }
     
+    @Override
+    public void onPause() {
+        super.onPause();
+        UpdateScheduleHandler.setBuildingScheduleListener(null);
+    }
     public void refreshScreen() {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());

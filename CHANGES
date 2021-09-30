@@ -1,39 +1,146 @@
- - Merged PR 1900: Heartbeat point is made as diag point
- - Merged PR 1877: Added super user permission with chmod
- - Merged PR 1915: 8555 : Vacation Sync Issue
- - Merged PR 1903: Batched history sync
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into his_sync_batching
- - Merged PR 1914: Fix floor foor value loop when exitTemp irrespective of target
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into his_sync_batching
- - Fix : Vacation Sync
- - Merged PR 1889: 8485 : Vrv occupancy mode updated incorrectly
- - Merged PR 1868: Load schedule when fragment visibility changes
- - Merged PR 1873: Daikin IE - Refactor
- - Merged PR 1894: 2pfcu Th2 config fix
- - RSSI changed to Signed8, HeartBeat point is made as diag point and migration task for heartbeat diag point
- - RSSI changed to Signed8, HeartBeat point is made as diag point and migration task for heartbeat diag point
- - Merged PR 1874: Fixed Analog PI Points issue
- - 2pfcu Th2 config fix
- - Added super user permission with chmod
- - Fixed Analog PI Points issue
- - Fix schedules update issue
- - Merge branch 'master' into bug/samjith/7723_schedule_sync
- - Merged PR 1837: 7641-CCU : The unit for sensor type "CT 0-10 Amps" should be "amps" not "A"
- - Change batch size to 500
- - 8485 : Vrv occupancy mode updated incorrectly
- - Merged PR 1837: 7641-CCU : The unit for sensor type "CT 0-10 Amps" should be "amps" not "A"
- -  Remove duplicate fanSpeed write
- - Fix floor foor value loop when exitTemp irrespective of target
- - Restart app on force-close
- - Merge branch 'Bug/samjith/oom_fragmentation' into his_sync_batching
- - Merge branch 'master' into his_sync_batching
- - Merge branch 'master' into Bug/samjith/oom_fragmentation
- - gateway id fetch
- - Merge branch 'master' into story/samjith/daikin_ie_refactor
- - Fetch GatewayId - support
- - Unit has been changed
- - His sync batching
- - Single zone mode support
- - OOM Fix/Work around
- - Send fanSpeed every minute
- - New points added
+ - Merged PR 2070: Change string
+ - Change string
+ - Merged PR 2068: Master branch fixes
+ - Revert "Merged PR 1403: User Story- Temporary Overrides of System level and Zone level parameters"
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Revert "Merged PR 2046: Failing CCU OTA App Upgrades"
+ - Merged PR 2045: Sync Issue
+ - merge master
+ - Merged PR 1971: updated Analog sensor names as per the short dis
+ - Refactor the code
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8527_Pi_profile_shortdis_issue_
+ - Merged PR 1990: Bug 8121- CCU: Unit is missing at CM level for analog output points
+ - Merged PR 1403: User Story- Temporary Overrides of System level and Zone level parameters
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merged PR 2046: Failing CCU OTA App Upgrades
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into update_ccu_duplicate_fix
+ - Merged PR 1662: CCU: The units of energy meter are not displaying properly(Bug 7579)
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into update_ccu_duplicate_fix
+ - Merged PR 1882: System Profile loading crash
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8525_system_profile_loading_crash
+ - Merged PR 2010: Heartbeat migration as diag point with rssi point
+ - Merge branch 'master' into Bug/samjith/8439_sync_issue
+ - Merged PR 1980: Fix zone schedule sync issue
+ - CCU read implementation
+ - Merge branch 'update_ccu_duplicate_fix' into Bug/samjith/8439_sync_issue
+ - Update wait time to 5 mins
+ - Merged PR 1888: Fix: damper type reconfiguration is not used by physical layer
+ - Merged PR 2049: Updates to protofile
+ - Merge branch 'master' into update_ccu_duplicate_fix
+ - Fixed to delete dangling rssi point
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8525_system_profile_loading_crash
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8527_Pi_profile_shortdis_issue_
+ - Updated by reading short dis value for the points
+ - Merged PR 1878: 7858 - CCU: Duplicate Toggle button are present in MODBUS equipment
+ - Fix zone view crash
+ - Revert "WIP"
+ - WIP
+ - Update desired temp to multiples of 2
+ - heartbeat and rssi migration when heartbeat is made as diag point
+ - WIP
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Bug 8121- CCU: Unit is missing at CM level for analog output points
+ - Increase objectbox size limit to 5 GB
+ - updated Analog sensor names as per the short dis
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8525_system_profile_loading_crash
+ - Merged PR 1910: Daikin UI issue fixed
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/8525_system_profile_loading_crash
+ - Resolved Crash
+ - Temprory Overrides
+ - Humidity , OpMode and responseType changes
+ - Temprory Overrides-Final commit
+ - CCU job optimization if previous job has not finished
+ - Temprory Overrides-Final commit
+ - Temprory Overrides-Final commit
+ - Fix zone schedule sync issue
+ - Fix Zone schedule sync
+ - Avoid concurrent update processing
+ - Daikin UI issue fixed
+ - Merge branch 'master' into Bug/8344/damper_type_change_not_consumed
+ - Fix typo pubnub handling method name
+ - Temprory Overrides-Final commit
+ - Moved system profile name setting to on resume function
+ - Temprory Overrides
+ - Temprory Overrides
+ - removed repeated parameter
+ - Fix: damper type reconfiguration is not used by physical layer
+ - Temprory Overrides
+ - Temprory Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Merge branches 'master' and 'story/6666/CCU_Temporary_Overrides' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge
+ - -Avoid skipping algo during overrideMode -Change the device control message to use physical values from database instead of generating it from the logical value
+ - Temprory Overrides
+ - Merge branches 'master' and 'story/6666/CCU_Temporary_Overrides' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - -Avoid skipping algo during overrideMode -Change the device control message to use physical values from database instead of generating it from the logical value
+ - Add CCU to Existing site
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Temprory Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - CCU: The units of energy meter are not displaying properly(Bug 7579)
+ - Registering a second CCU
+ - Registering a second CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Registering a second CCU
+ - Registering a second CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Registering a second CCU
+ - Registering a second CCU
+ - Registering a second CCU
+ - Registering a second CCU
+ - Registering a second CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Registering a second CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Override Story
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Override Story
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Override Story
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Temprory Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branches 'master' and 'story/6666/CCU_Temporary_Overrides' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - Incompatible Zone Pairing Options will be greyed out.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branches 'master' and 'story/6666/CCU_Temporary_Overrides' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6666/CCU_Temporary_Overrides
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.

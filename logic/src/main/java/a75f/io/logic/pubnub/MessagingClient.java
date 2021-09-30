@@ -1,4 +1,4 @@
-package a75f.io.logic.pubnub;
+git package a75f.io.logic.pubnub;
 
 import android.content.Context;
 

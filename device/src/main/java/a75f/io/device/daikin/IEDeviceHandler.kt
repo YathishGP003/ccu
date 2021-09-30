@@ -11,8 +11,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class IEDeviceHandler {
 
     private var currentCondMode = NetApplicMode.UnInit
-    private var staticPressureSp : Double = -1.0
-    private var fanSpeedSp : Double = -1.0
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
     private var fiveMinCounter = 0
 
@@ -40,6 +38,10 @@ class IEDeviceHandler {
             serviceBaseUrl != ieEquipUrl) {
             serviceBaseUrl = ieEquipUrl
             ieService = IEServiceGenerator.instance.createService("https://$serviceBaseUrl:8080")
+
+            ieService?.let {
+                fetchGatewayId(ieService, hayStack)
+            }
         }
 
         ieService?.let {
@@ -61,8 +63,6 @@ class IEDeviceHandler {
             Thread.sleep(100)
             updateDatClgSetpoint(it, systemProfile)
             Thread.sleep(100)
-            updateFanControl(it, hayStack, systemProfile)
-            Thread.sleep(100)
             updateHumidityControl(it, systemProfile)
             Thread.sleep(100)
             fetchAlarms(it, hayStack)
@@ -75,6 +75,14 @@ class IEDeviceHandler {
                 fiveMinCounter = 0;
             }
             fiveMinCounter++
+
+            fetchEffDATSetpoint(it, hayStack)
+            fetchEffDAT(it, hayStack)
+            fetchSFCapFbk(it, hayStack)
+
+            if (getIEMacAddress(hayStack).isNullOrEmpty()) {
+                fetchGatewayId(ieService, hayStack)
+            }
         }
     }
 
@@ -132,34 +140,26 @@ class IEDeviceHandler {
     }
 
     /**
-     * Update fanLoop only when multizone configuration or dspSp or fanLoopOp changes.
+     * Update fanSpeed every minute
      */
     private fun updateFanControl(service : IEService, hayStack: CCUHsApi, systemProfile: VavIERtu) {
 
         if (isMultiZoneEnabled(hayStack)) {
-            val updatedStaticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
-            if (updatedStaticPressureSp != staticPressureSp) {
-                writeToIEDevice(
-                    service,
-                    IE_POINT_TYPE_AV,
-                    IE_POINT_NAME_DSP_SETPOINT,
-                    IE_MSG_BODY.format(updatedStaticPressureSp)
-                )
-                staticPressureSp = updatedStaticPressureSp
-                fanSpeedSp = -1.0
-            }
+            val staticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_DSP_SETPOINT,
+                IE_MSG_BODY.format(staticPressureSp)
+            )
         } else {
             val fanSpeed = getFanSpeedTarget(systemProfile)
-            if (fanSpeedSp != fanSpeed) {
-                writeToIEDevice(
-                    service,
-                    IE_POINT_TYPE_AV,
-                    IE_POINT_NAME_FAN_SPEED_CONTROL,
-                    IE_MSG_BODY.format(fanSpeed)
-                )
-                fanSpeedSp = fanSpeed
-                staticPressureSp = -1.0
-            }
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_FAN_SPEED_CONTROL,
+                IE_MSG_BODY.format(fanSpeed)
+            )
         }
     }
 
@@ -271,6 +271,62 @@ class IEDeviceHandler {
             )
     }
 
+    private fun fetchEffDATSetpoint(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_EFF_DAT_SETPOINT)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and effDATSetpoint",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching effDATSetpoint", error) }
+            )
+    }
+
+    private fun fetchEffDAT(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_DAT_VAL)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and dischargeAirTemp",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching dischargeAirTemp", error) }
+            )
+    }
+
+    private fun fetchSFCapFbk(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_SF_CAPACITY_FEEDBACK)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeHisValByQuery(
+                        "system and point and ie and sFCapFbk",
+                        it.toDouble())
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching sFCapFbk", error) }
+            )
+    }
+
+    private fun fetchGatewayId(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readGatewayIdPoint()
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response -> response?.result?.let {
+                    hayStack.writeDefaultVal(
+                        "system and point and ie and macAddress", it)
+                }
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching fetchGatewatId", error) }
+            )
+    }
+
+
     private fun writeToIEDevice(service: IEService, pointType : String, pointName : String, msg : String)  {
         service.writePoint(
             pointType,
@@ -281,5 +337,43 @@ class IEDeviceHandler {
              { CcuLog.e(L.TAG_CCU_DEVICE, "IE Write Completed")},
              { error -> CcuLog.e(L.TAG_CCU_DEVICE, "IE Write failed for $msg : $error.message" ) }
          )
+    }
+
+    //For test Signals
+    fun sendDatClgSetpoint(coolingDat : Double) {
+        writeToIEDevice(
+            ieService,
+            IE_POINT_TYPE_AV,
+            IE_POINT_NAME_DAT_SETPOINT,
+            IE_MSG_BODY.format(fahrenheitToCelsius(coolingDat))
+        )
+    }
+
+    fun sendFanControl(fanSpeed : Double, hayStack: CCUHsApi, systemProfile: VavIERtu) {
+        if (isMultiZoneEnabled(hayStack)) {
+            writeToIEDevice(
+                ieService,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_DSP_SETPOINT,
+                IE_MSG_BODY.format(fanSpeed)
+            )
+        } else {
+            writeToIEDevice(
+                ieService,
+                IE_POINT_TYPE_AV,
+                IE_POINT_NAME_FAN_SPEED_CONTROL,
+                IE_MSG_BODY.format(fanSpeed)
+            )
+        }
+    }
+
+    fun sendBuildingHumidity(humiditySp : Double) {
+        writeToIEDevice(
+            ieService,
+            IE_POINT_TYPE_AV,
+            IE_POINT_NAME_HUMIDITY_SETPOINT,
+            IE_MSG_BODY.format(humiditySp)
+        )
+
     }
 }

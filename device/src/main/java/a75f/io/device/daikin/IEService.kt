@@ -28,6 +28,11 @@ interface IEService {
         @Path("pointName") pointName: String
     ): Single<Results>
 
+    @Headers(value = ["Accept: application/xml",
+        "Content-type:text/plain"])
+    @GET("/BN/ISDevice/Device/Gateway_ID")
+    fun readGatewayIdPoint(): Single<Results>
+
 }
 //TODO- Exact response structure from Daikin IE is unknown now. This will be changed after field trials.
 

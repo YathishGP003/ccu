@@ -80,10 +80,12 @@ import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.util.Prefs;
@@ -251,6 +253,15 @@ public abstract class UtilityApplication extends Application {
         RaygunClient.init(this);
         RaygunClient.setVersion(versionName());
         RaygunClient.enableCrashReporting();
+    
+        if (BuildConfig.BUILD_TYPE.equals("staging") ||
+            BuildConfig.BUILD_TYPE.equals("prod") ) {
+            Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+                RaygunClient.send(paramThrowable);
+                paramThrowable.printStackTrace();
+                RenatusApp.closeApp();
+            });
+        }
     }
 
     private String versionName() {

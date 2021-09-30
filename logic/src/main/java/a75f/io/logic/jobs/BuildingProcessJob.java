@@ -100,20 +100,20 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     private void handleSync() {
-        
+
         new Thread() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 try {
                     CCUHsApi.getInstance().syncHisData();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     //This is bad. But the system could still continue to work in standalone mode controlling
                     //the hvac system even if there are failures in data synchronization with backend.
                     CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
                 }
             }
         }.start();
-        
+
         DateTime now = new DateTime();
         boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
         if (timeForEntitySync) {

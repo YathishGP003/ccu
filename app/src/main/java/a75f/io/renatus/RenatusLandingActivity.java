@@ -10,17 +10,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabItem;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
@@ -38,8 +27,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+
 import java.util.HashMap;
+
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -67,6 +61,13 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
@@ -74,7 +75,6 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
-
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -106,7 +106,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private CustomViewPager mViewPager;
     private TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
-    public static Snackbar snackbar;
 
 
     @Override
@@ -124,17 +123,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
-
-            snackbar = Snackbar.make(findViewById(R.id.landingActivity), R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
-            View snackbarView = RenatusLandingActivity.snackbar.getView();
-            TextView snackTextView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
-            RenatusLandingActivity.snackbar.setAction("CLOSE", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
-            snackTextView.setMaxLines(2);
 
             floorMenu = findViewById(R.id.floorMenu);
             menuToggle = findViewById(R.id.menuToggle);
@@ -219,27 +207,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
 
                     if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
-
-                        ZoneFragmentNew zoneFragmentTemp = (ZoneFragmentNew) mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-
                         DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
                         LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
                         try {
-                            //zoneFragmentTemp.mDrawerLayout.openDrawer(zoneFragmentTemp.drawer_screen);
                             mDrawerLayout.openDrawer(drawer_screen);
-                            //mDrawerLayout.setBackgroundDrawable(draw);
                         } catch (Exception e) {
                             e.printStackTrace();
                             if (mDrawerLayout != null && !mDrawerLayout.isShown()) {
                                 mDrawerLayout.openDrawer(drawer_screen);
-                                //mDrawerLayout.setBackgroundDrawable(draw);
                             }
-                           /* if (zoneFragmentTemp.mDrawerLayout != null && !zoneFragmentTemp.mDrawerLayout.isShown()) {
-                                zoneFragmentTemp.mDrawerLayout.openDrawer(zoneFragmentTemp.drawer_screen);
-                            }*/
                         }
-                        //ZoneFragmentTemp fragment = (ZoneFragmentTemp) getSupportFragmentManager().findFragmentById(R.id.container);
-                        //fragment.openFloor();
                     }
                 }
             });
@@ -247,7 +224,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     public void setViewPager() {
-        snackbar.dismiss();
         menuToggle.setVisibility(View.GONE);
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
@@ -266,7 +242,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
-                snackbar.dismiss();
                 if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
@@ -308,7 +283,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
                 tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
-                snackbar.dismiss();
             }
 
             @SuppressLint("ResourceType")
@@ -341,7 +315,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks isOn the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        snackbar.dismiss();
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -359,7 +332,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onPause() {
         super.onPause();
-        snackbar.dismiss();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
     }
 

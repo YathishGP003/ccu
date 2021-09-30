@@ -210,7 +210,6 @@
                 app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         </LinearLayout>
-
     </LinearLayout>
 
 </RelativeLayout>

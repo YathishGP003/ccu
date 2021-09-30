@@ -51,6 +51,7 @@ import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -99,7 +100,6 @@ public class Globals {
 
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
-    private int tempOverCount = 0;
 
     private static long ccuUpdateTriggerTimeToken;
 
@@ -132,26 +132,6 @@ public class Globals {
     public boolean isSimulation() {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
-    }
-
-    public boolean isTemproryOverrideMode(){
-        return isTempOverride;
-    }
-
-    public void setTemproryOverrideMode(boolean isTemproryOverrideMode){
-        isTempOverride = isTemproryOverrideMode;
-    }
-
-    public int gettempOverCount(){
-        return tempOverCount;
-    }
-
-    public void incrementTempOverCount(){
-        tempOverCount++;
-    }
-
-    public void resetTempOverCount(){
-        tempOverCount = 0;
     }
 
     public boolean isTestMode()
@@ -217,6 +197,11 @@ public class Globals {
         }
     }
 
+    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatDiagMigration.initHeartbeatDiagMigration();
+        }
+    }
 
     private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
@@ -257,6 +242,7 @@ public class Globals {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
+                migrateHeartbeatDiagPointForEquips(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 CCUHsApi.getInstance().syncEntityTree();

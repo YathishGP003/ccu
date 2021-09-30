@@ -122,141 +122,139 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
-			if (Globals.getInstance().isTemproryOverrideMode()) {
-				return;
-			}
-				ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
-				boolean isSse = false;
-				String logicalCurTempPoint = "";
-				double curTempVal = 0.0;
-				double th2TempVal = 0.0;
-				boolean isTh2Enabled = false;
-				for (HashMap phyPoint : phyPoints) {
-					if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
-						continue;
-					}
-					HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
-					if (logPoint.isEmpty()) {
-						CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for " + phyPoint.get("dis"));
-						continue;
-					}
-					Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
-					isSse = logPointInfo.getMarkers().contains("sse");
-					double val = 0;
-					switch (Port.valueOf(phyPoint.get("port").toString())) {
-						case RSSI:
-							hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double) rssi);
-							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double) rssi);
-							if (currentTempInterface != null) {
-								currentTempInterface.refreshScreen(null);
-							}
-							break;
-						case SENSOR_RT:
-							val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
-							curTempVal = getRoomTempConversion(val);
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							logicalCurTempPoint = logPoint.get("id").toString();
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+			boolean isSse = false;
+			String logicalCurTempPoint = "";
+			double curTempVal = 0.0;
+			double th2TempVal = 0.0;
+			boolean isTh2Enabled = false;
+			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
+					continue;
+				}
+				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
+				isSse = logPointInfo.getMarkers().contains("sse");
+				double val = 0;
+				switch (Port.valueOf(phyPoint.get("port").toString())){
+					case RSSI:
+						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						if(currentTempInterface != null) {
+							currentTempInterface.refreshScreen(null);
+						}
+						break;
+					case SENSOR_RT:
+						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
+						curTempVal = getRoomTempConversion(val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						logicalCurTempPoint =  logPoint.get("id").toString();
 
-							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
-							break;
-						case TH2_IN:
-							if (isMATDamperConfigured(logPoint, nodeAddr, "secondary", hayStack)) {
-								CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat2");
-								hayStack.writeHisValById(logPoint.get("id").toString(),
-										(double) smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get() / 10);
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
+						break;
+					case TH2_IN:
+						if (isMATDamperConfigured(logPoint, nodeAddr, "secondary", hayStack)) {
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat2");
+							hayStack.writeHisValById(logPoint.get("id").toString(),
+							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
+						} else {
+							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
+							isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
+							if (isTh2Enabled && isSse) {
+								th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 							} else {
-								val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
-								isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
-								if (isTh2Enabled && isSse) {
-									th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-									th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
-								} else {
-									double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
-									double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-									curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
-									hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-									if ((oldEntTempVal != curEntTempVal) && !isSse)
-										hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
-								}
-								CcuLog.d(L.TAG_CCU_DEVICE,
-										"regularSmartNodeUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," +
-												logicalCurTempPoint + "," + isTh2Enabled + "," + logPointInfo.getMarkers().toString());
+								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
+								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+								curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
+								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+								if ((oldEntTempVal != curEntTempVal) && !isSse)
+									hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
 							}
-							break;
-						case ANALOG_IN_ONE:
-							val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
-							double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-							double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							if (oldDisAnalogVal != curDisAnalogVal) {
-								hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "regularSmartNodeUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," +
+							         logicalCurTempPoint + "," + isTh2Enabled + "," + logPointInfo.getMarkers().toString());
+						}
+						break;
+					case ANALOG_IN_ONE:
+						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						if (oldDisAnalogVal != curDisAnalogVal) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
+							if (currentTempInterface != null) {
+								currentTempInterface.updateSensorValue(nodeAddr);
+							}
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : analog1In " + curDisAnalogVal +" " +oldDisAnalogVal);
+						break;
+					case ANALOG_IN_TWO:
+						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
+						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						if (oldDynamicVar != dynamicVar) {
+							if (logPointInfo.getMarkers().contains("pid")) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
 								if (currentTempInterface != null) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
-							}
-							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : analog1In " + curDisAnalogVal + " " + oldDisAnalogVal);
-							break;
-						case ANALOG_IN_TWO:
-							val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
+							} else
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar);
+						}
+						break;
+					case TH1_IN:
+						if (isMATDamperConfigured(logPoint, nodeAddr, "primary", hayStack)) {
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat1");
+							hayStack.writeHisValById(logPoint.get("id").toString(),
+							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
+						} else {
+							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
+							double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
+							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
-							double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
-							if (oldDynamicVar != dynamicVar) {
-								if (logPointInfo.getMarkers().contains("pid")) {
-									hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
-									if (currentTempInterface != null) {
-										currentTempInterface.updateSensorValue(nodeAddr);
-									}
-								} else
-									hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar);
-							}
-							break;
-						case TH1_IN:
-							if (isMATDamperConfigured(logPoint, nodeAddr, "primary", hayStack)) {
-								CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat1");
-								hayStack.writeHisValById(logPoint.get("id").toString(),
-										(double) smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get() / 10);
-							} else {
-								val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
-								double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
-								double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-								curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
-								hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-								if (oldDisTempVal != curDisTempVal) {
-									hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
-									if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
-										currentTempInterface.updateSensorValue(nodeAddr);
-									}
+							if (oldDisTempVal != curDisTempVal) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
+								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
+									currentTempInterface.updateSensorValue(nodeAddr);
 								}
-								CcuLog.d(L.TAG_CCU_DEVICE,
-										"regularSmartNodeUpdate : Thermistor1 " + curDisTempVal + "," + oldDisTempVal +
-												"," + logPointInfo.getMarkers().toString() + "," + logPoint.get("id").toString());
 							}
-							break;
-					}
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "regularSmartNodeUpdate : Thermistor1 " + curDisTempVal + "," + oldDisTempVal +
+							         "," + logPointInfo.getMarkers().toString() + "," + logPoint.get("id").toString());
+						}
+						break;
 				}
+			}
+			
+			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+			if (sensorReadings.length > 0) {
+				handleSensorEvents(sensorReadings, nodeAddr);
+			}
 
-				SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-				if (sensorReadings.length > 0) {
-					handleSensorEvents(sensorReadings, nodeAddr);
+			//Write Current temp point based on th2 enabled or not
+			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
+				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
+				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
-
-				//Write Current temp point based on th2 enabled or not
-				if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
-					double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
-					hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-					if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
-						currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
-					}
-				} else if (!logicalCurTempPoint.isEmpty()) {
-					double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
-					hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-					if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
-						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
-					}
+			}
+			else if(!logicalCurTempPoint.isEmpty()){
+				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
+				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
+				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 				}
+			}
 		}
 	}
 	
@@ -643,6 +641,7 @@ public class Pulse
 			}
 		}
 	}
+
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
 	{

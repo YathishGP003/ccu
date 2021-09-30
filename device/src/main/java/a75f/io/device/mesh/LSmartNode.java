@@ -26,7 +26,6 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -139,8 +138,7 @@ public class LSmartNode
                             } else {
                                 mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                             }
-                            if (!Globals.getInstance().isTemproryOverrideMode())
-                                hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                            hayStack.writeHisValById(p.getId(), (double) mappedVal);
                             
                             if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                                 mappedVal |= 0x80;
@@ -310,8 +308,7 @@ public class LSmartNode
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
-                    if (!Globals.getInstance().isTemproryOverrideMode())
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                    hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
@@ -320,12 +317,6 @@ public class LSmartNode
                     if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
-                    }
-                    
-                    //Mapping not required during override.
-                    if (Globals.getInstance().isTemproryOverrideMode()) {
-                        //mappedVal = (short)hayStack.readHisValById(opPoint.get("id").toString()).intValue();;
-                        mappedVal = (short)logicalVal;
                     }
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);

@@ -248,16 +248,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void refreshScreen(String id)
     {
         if(getActivity() != null && isAdded()) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(zoneOpen) {
-                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
-                                tableLayout.invalidate();
-                            }
-                            refreshZoneHeartBeat();
-                        }
-                    });
+            getActivity().runOnUiThread(() -> {
+                if(zoneOpen) {
+                    updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                    tableLayout.invalidate();
+                }
+            });
+            refreshZoneHeartBeat(id);
         }
     }
 
@@ -3092,23 +3089,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     HashMap<String, View> zoneStatus = new HashMap<>();
-    private void refreshZoneHeartBeat(){
-        if((floorList.size() == 0) || mFloorListAdapter == null){
-            return;
-        }
-        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-        for (Map zone : zones) {
-            String zoneName = zone.get("dis").toString();
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+zone.get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-            if(equips.size() > 0) {
-                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
-                View statusView  = zoneStatus.get(zoneName);
+    private void refreshZoneHeartBeat(String nodeAddress){
+        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+nodeAddress+"\"");
+        if (!equip.isEmpty()) {
+            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
+            ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
+                                                                             +zone.get("id")+ "\"");
+            if(equipsInZone.size() > 0) {
+                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equipsInZone);
+                View statusView  = zoneStatus.get(zone.get("dis").toString());
                 if (statusView != null) {
-                    HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+                    getActivity().runOnUiThread(() -> HeartBeatUtil.zoneStatus(statusView, isZoneAlive));
                 }
             }
         }
-
+    
     }
 
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {

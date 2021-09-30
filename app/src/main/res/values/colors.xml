@@ -19,6 +19,7 @@
     <color name="text_secondary">#D9000000</color>
     <!--<color name="orange">#a0D77B64</color>-->
     <color name="orange_multi">#ececec</color>
+    <color name="orange_75f">#E24301</color>
     <color name="dark_gray">#1a1a1a</color>
     <color name="PerceivedComfort">#C9CC84</color>
     <color name="ComfortIndex">#C8C8C8</color>
@@ -86,6 +87,5 @@
     <color name="tuner_bg_grey">#F9F9F9</color>
     <color name="tuner_divider">#F9F9F9</color>
     <color name="tuner_header_bg">#EBECED</color>
-    <color name="warning_red">#ff0f0f</color>
 
 </resources>

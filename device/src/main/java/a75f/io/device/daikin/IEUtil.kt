@@ -48,9 +48,6 @@ fun getHumidityTarget() : Double {
     return TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")
 }
 
-fun getIEMacAddress(hayStack : CCUHsApi) : String {
-    return hayStack.readDefaultStrVal("system and point and ie and macAddress")
-}
 /**
  * Daikin IE requires to tbe set 'occupied' if 75F system is occupied
  * or when there is conditioning during 'unoccupied' time.

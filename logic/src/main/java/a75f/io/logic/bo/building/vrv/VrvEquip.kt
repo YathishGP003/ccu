@@ -241,6 +241,7 @@ class VrvEquip(hsApi : CCUHsApi,
         device.currentTemp.enabled = true
 
         device.addSensor(Port.SENSOR_RH, humidityId)
+        device.addSensor(Port.SENSOR_OCCUPANCY, occupancyId)
         device.rssi.pointRef = heartBeatId
         device.rssi.enabled = true
         device.addPointsToDb()

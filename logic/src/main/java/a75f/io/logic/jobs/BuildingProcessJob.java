@@ -69,17 +69,17 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteUID);
                 }
             }
-    
+
             if (L.ccu().oaoProfile != null) {
                 L.ccu().oaoProfile.doOAO();
-            }else {
-                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+            } else {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double) EpidemicState.OFF.ordinal());
             }
 
-            if (!Globals.getInstance().isTestMode()){
+            if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemproryOverrideMode()) {
                 L.ccu().systemProfile.doSystemControl();
             }
-            
+
             L.saveCCUState();
 
             new Thread() {
@@ -95,16 +95,17 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     }
                 }
             }.start();
-    
+
             DateTime now = new DateTime();
             boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
             if (timeForEntitySync) {
                 CCUHsApi.getInstance().scheduleSync();
             }
-            
-        }catch (Exception e){
-            CcuLog.e(L.TAG_CCU_JOB,"BuildingProcessJob Failed ! ", e);
+
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
         }
+
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }
 }

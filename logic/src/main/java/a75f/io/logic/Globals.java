@@ -101,7 +101,8 @@ public class Globals {
     private boolean isTempOverride = false;
     private int tempOverCount = 0;
 
-    private Long curPubNubMsgTimeToken;
+    private static long ccuUpdateTriggerTimeToken;
+    
     private Globals() {
     }
 
@@ -536,4 +537,12 @@ public class Globals {
     // While testing OTA service we've added logs
     // After verification we may remove this later
     public static final String TAG = "DEV_DEBUG";
+    
+    public void setCcuUpdateTriggerTimeToken(long time) {
+        ccuUpdateTriggerTimeToken = time;
+    }
+    
+    public long getCcuUpdateTriggerTimeToken() {
+        return ccuUpdateTriggerTimeToken;
+    }
 }

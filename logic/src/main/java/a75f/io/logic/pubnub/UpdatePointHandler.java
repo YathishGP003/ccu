@@ -85,6 +85,11 @@ public class UpdatePointHandler
             updateUI(localPoint);
             return;
         }
+    
+        if (HSUtil.isDamperReheatTypeConfig(pointUid, hayStack)) {
+            DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
+            return;
+        }
         
         if (CCUHsApi.getInstance().entitySynced(pointUid))
         {

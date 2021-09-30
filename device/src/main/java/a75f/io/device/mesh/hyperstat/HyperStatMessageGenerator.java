@@ -87,8 +87,8 @@ public class HyperStatMessageGenerator {
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
         
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 10);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 10);
+        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 2);
+        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 2);
         controls.setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO) ;//TODO
         controls.setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO);
         

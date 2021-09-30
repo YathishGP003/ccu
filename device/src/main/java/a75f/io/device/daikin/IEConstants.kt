@@ -4,7 +4,6 @@ const val IE_POINT_TYPE_MI = "MI"
 const val IE_POINT_TYPE_MV = "MV"
 const val IE_POINT_TYPE_AV = "AV"
 const val IE_POINT_TYPE_SY = "SY"
-const val IE_POINT_TYPE_AI = "AI"
 
 const val IE_POINT_NAME_OCCUPANCY = "OccMode"
 const val IE_POINT_NAME_CONDITIONING_MODE = "NetApplicMode"
@@ -20,9 +19,6 @@ const val IE_POINT_NAME_ALARM_WARN = "ActiveWarnEnu"
 const val IE_POINT_NAME_ALARM_PROB = "ActiveProbEnu"
 const val IE_POINT_NAME_ALARM_FAULT = "ActiveFaultEnu"
 const val IE_POINT_NAME_OCCUPANCY_STATUS = "OccStatus"
-const val IE_POINT_NAME_EFF_DAT_SETPOINT = "EffDATSetpoint"
-const val IE_POINT_NAME_DAT_VAL = "DAT"
-const val IE_POINT_NAME_SF_CAPACITY_FEEDBACK = "SFCapFbk"
 
 const val IE_MSG_BODY = "<requests><request>%f</request></requests>"
 

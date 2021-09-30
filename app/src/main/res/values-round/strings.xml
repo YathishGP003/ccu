@@ -1,0 +1,4 @@
+<resources>
+    <string name="hello_world">Hello Round World!</string>
+    <string name="temproryOverrideWarningmessage">Kindly be cautious of changes done to any system and zone level points.\" +                 \"This may impact building equipment operation and/or even damage building equipment.</string>
+</resources>

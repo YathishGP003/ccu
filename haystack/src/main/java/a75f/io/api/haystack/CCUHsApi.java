@@ -1956,6 +1956,7 @@ public class CCUHsApi
         }
         for (Map m : points)
         {
+            CcuLog.d("CCU_HS"," deleteHistory for point "+m.get("id"));
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
         }
     }

@@ -6,7 +6,6 @@ package a75f.io.logic.bo.building.system.vav;
 
 import android.content.Intent;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -112,7 +111,6 @@ public class VavIERtu extends VavSystemProfile
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());
-                addNewIEPointsForUpgrade(equip, hayStack);
                 return;
             }
         }
@@ -154,10 +152,7 @@ public class VavIERtu extends VavSystemProfile
         updateOutsideWeatherParams();
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         
-        if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
-            systemCoolingLoopOp = VavSystemController.getInstance().getCoolingSignal();
-        } else if (VavSystemController.getInstance().getSystemState() == COOLING &&
-                   (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
+        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
@@ -214,11 +209,8 @@ public class VavIERtu extends VavSystemProfile
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-    
-        if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
-            systemFanLoopOp = VavSystemController.getInstance().getCoolingSignal();
-            
-        } else if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
+        
+        if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
             
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", getSystemEquipRef());
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -400,39 +392,6 @@ public class VavIERtu extends VavSystemProfile
                                 .build();
         String occStatId = CCUHsApi.getInstance().addPoint(occStatus);
         hayStack.writeHisValById(occStatId, 1.0);//Initialized with unoccupied
-    
-        Point effDATSetpoint = new Point.Builder()
-                              .setDisplayName(equipDis+"-"+"effDATSetpoint")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef)
-                              .addMarker("system").addMarker("effDATSetpoint").addMarker("ie")
-                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                              .setTz(tz)
-                              .build();
-        String effDATSetpointId = CCUHsApi.getInstance().addPoint(effDATSetpoint);
-        hayStack.writeHisValById(effDATSetpointId, 0.0);
-    
-        Point dischargeAirTemp = new Point.Builder()
-                              .setDisplayName(equipDis+"-"+"dischargeAirTemp")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef)
-                              .addMarker("system").addMarker("dischargeAirTemp").addMarker("ie")
-                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                              .setTz(tz)
-                              .build();
-        String dischargeAirTempId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
-        hayStack.writeHisValById(dischargeAirTempId, 0.0);
-    
-        Point SFCapFbk = new Point.Builder()
-                              .setDisplayName(equipDis+"-"+"sFCapFbk")
-                              .setSiteRef(siteRef)
-                              .setEquipRef(equipRef)
-                              .addMarker("system").addMarker("sFCapFbk").addMarker("ie")
-                              .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                              .setTz(tz)
-                              .build();
-        String SFCapFbkId = CCUHsApi.getInstance().addPoint(SFCapFbk);
-        hayStack.writeHisValById(SFCapFbkId, 0.0);
     }
     
     private void addConfigPoints(String equipref) {
@@ -840,66 +799,4 @@ public class VavIERtu extends VavSystemProfile
         }
     }
     
-    private boolean isSingleZoneTIMode(CCUHsApi hayStack) {
-        ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and zone and vav");
-        if (!vavEquips.isEmpty()) {
-            return false;
-        }
-    
-        ArrayList<HashMap<Object, Object>> tiEquips = CCUHsApi
-                                                           .getInstance()
-                                                           .readAllEntities("(equip and zone and ti) or" +
-                                                                            "(equip and zone and bpos )"
-                                                           );
-        if (!tiEquips.isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-    
-    //This could be removed once all the CCUs are upgraded to version 1.579 or later.
-    private void addNewIEPointsForUpgrade(HashMap systemEquip, CCUHsApi hayStack) {
-        
-        
-        HashMap effDatPoint = hayStack.read("point and system and effDATSetpoint and ie");
-        if (!effDatPoint.isEmpty()) {
-            return;
-        }
-        String equipDis = systemEquip.get("dis").toString();
-        String siteRef = systemEquip.get("siteRef").toString();
-        String equipRef = systemEquip.get("id").toString();
-        String tz = systemEquip.get("tz").toString();
-        Point effDATSetpoint = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"effDATSetpoint")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("system").addMarker("effDATSetpoint").addMarker("ie")
-                                   .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                                   .setTz(tz)
-                                   .build();
-        String effDATSetpointId = CCUHsApi.getInstance().addPoint(effDATSetpoint);
-        hayStack.writeHisValById(effDATSetpointId, 0.0);
-    
-        Point dischargeAirTemp = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"dischargeAirTemp")
-                                     .setSiteRef(siteRef)
-                                     .setEquipRef(equipRef)
-                                     .addMarker("system").addMarker("dischargeAirTemp").addMarker("ie")
-                                     .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                                     .setTz(tz)
-                                     .build();
-        String dischargeAirTempId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
-        hayStack.writeHisValById(dischargeAirTempId, 0.0);
-    
-        Point SFCapFbk = new Point.Builder()
-                             .setDisplayName(equipDis+"-"+"sFCapFbk")
-                             .setSiteRef(siteRef)
-                             .setEquipRef(equipRef)
-                             .addMarker("system").addMarker("sFCapFbk").addMarker("ie")
-                             .addMarker("sp").addMarker("his").setHisInterpolate("cov")
-                             .setTz(tz)
-                             .build();
-        String SFCapFbkId = CCUHsApi.getInstance().addPoint(SFCapFbk);
-        hayStack.writeHisValById(SFCapFbkId, 0.0);
-    }
 }

@@ -28,6 +28,7 @@ import a75f.io.device.serial.SmartStatControls_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.device.serial.SmartStatSettings_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -211,11 +212,7 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
         settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
-        if (!is2pfcuDevice(address)) {
-            settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(), address));
-        } else {
-            settings_t.otherBitMaps.enableExternal10kTempSensor.set((short)0);
-        }
+        settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(),address));
         settings_t.otherBitMaps.enableBeaconing.set((short)0);
     }
     private static void fillSmartStatControls(SmartStatControls_t controls, String equipId, short node){
@@ -233,9 +230,15 @@ public class LSmartStat {
                     Log.d("LSmartStat", "getCtrlMsgs=" + p.getDisplayName() + "," + p.getPointRef() + "," + logicalOpPoint.get("id") + "," + p.getType());
                     if (logicalOpPoint.get("id") != null) {
                         double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                        short mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
-
+                        short mappedVal;
+                        //Mapping not required during override.
+                        if (Globals.getInstance().isTemproryOverrideMode()) {
+                            mappedVal = (short)hayStack.readHisValById(opPoint.get("id").toString()).intValue();
+                            //mappedVal = (short)logicalVal;
+                        } else {
+                            mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
+                            hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                        }
                         LSmartStat.getSmartStatPort(controls, p.getPort()).set(mappedVal);
                     }
 
@@ -403,10 +406,4 @@ public class LSmartStat {
         double maxHeat =  TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max");
         return maxHeat+ deadband;
     }
-    
-    private static boolean is2pfcuDevice(int address) {
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \"" + address + "\"");
-        return device.containsKey("pipe2");
-    }
-    
 }

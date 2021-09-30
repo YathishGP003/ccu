@@ -1057,14 +1057,16 @@ public class CCUTagsDb extends HServer {
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
+        CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId);
         List<HisItem> hisItems = hisQuery.build().find();
+
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
         for (HisItem hisItem : hisItems) {
             if  (hisItem != null) {
                 validHisItems.add(hisItem);
             }
         }
-        CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId+" size: "+validHisItems.size());
+
         return validHisItems;
     }
     

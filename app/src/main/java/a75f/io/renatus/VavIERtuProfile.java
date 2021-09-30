@@ -1,7 +1,13 @@
 package a75f.io.renatus;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.renatus.util.RxjavaUtil;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.view.LayoutInflater;
@@ -13,6 +19,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,7 +29,7 @@ import android.widget.ToggleButton;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.device.daikin.IEDeviceHandler;
+import a75f.io.device.daikin.DaikinIE;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -32,10 +39,6 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -414,18 +417,19 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             case R.id.analog1RTUTest:
             case R.id.analog3RTUTest:
                 checkTestMode();
-                IEDeviceHandler.getInstance().sendDatClgSetpoint(val);
+                DaikinIE.sendCoolingDATAutoControl(val);
                 break;
             case R.id.analog2RTUTest:
                 checkTestMode();
-                IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance(), systemProfile);
+                DaikinIE.sendStaticPressure(val);
                 break;
             case R.id.humidificationTest:
                 checkTestMode();
-                IEDeviceHandler.getInstance().sendBuildingHumidity(val);
+                DaikinIE.sendHumidityInput(val);
                 break;
             case R.id.oaMinTest:
                 checkTestMode();
+                DaikinIE.sendOAMinPos(val);
                 break;
         }
     }

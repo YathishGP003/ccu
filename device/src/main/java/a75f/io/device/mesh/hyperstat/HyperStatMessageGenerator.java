@@ -13,6 +13,7 @@ import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
@@ -86,8 +87,8 @@ public class HyperStatMessageGenerator {
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
         
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 10);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 10);
+        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 2);
+        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 2);
         controls.setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO) ;//TODO
         controls.setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO);
         
@@ -96,9 +97,18 @@ public class HyperStatMessageGenerator {
                         .forEach( rawPoint -> {
                           double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
     
-                          int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
+                          /*int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                                                ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                               : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                                               : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));*/
+                            int mappedVal;
+
+                            if (Globals.getInstance().isTemproryOverrideMode()) {
+                                mappedVal = (short)logicalVal;
+                            } else {
+                                mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
+                                        ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                                        : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                            }
                           hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                           setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
                       });

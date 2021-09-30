@@ -30,7 +30,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 public class UpdateScheduleHandler
 {
     public static final String CMD = "updateSchedule";
-    private static BuildingScheduleListener scheduleListener = null;
     
     public static void handleMessage(JsonObject msgObject)
     {
@@ -107,7 +106,6 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
-        refreshSchedulesScreen();
     }
     
     public static void trimZoneSchedules(Schedule buildingSchedule)
@@ -193,15 +191,5 @@ public class UpdateScheduleHandler
                 CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
             }
         }
-    }
-    
-    public static void refreshSchedulesScreen() {
-        if (scheduleListener != null) {
-            scheduleListener.refreshScreen();
-        }
-    }
-    
-    public static void setBuildingScheduleListener(BuildingScheduleListener listener) {
-        scheduleListener = listener;
     }
 }

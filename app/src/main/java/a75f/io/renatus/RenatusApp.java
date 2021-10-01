@@ -78,7 +78,7 @@ public class RenatusApp extends UtilityApplication
 					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
 					Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
-						Process p = Runtime.getRuntime().exec("chmod 755 /system/xbin/su");
+						Process p = Runtime.getRuntime().exec("su");
 						InputStream es = p.getErrorStream();
 						DataOutputStream os = new DataOutputStream(p.getOutputStream());
 
@@ -111,6 +111,7 @@ public class RenatusApp extends UtilityApplication
 		});
 		thread.start();
 	}
+
 	public static void setIntentToRestartCCU() {
 		Intent intent = new Intent(getAppContext(), SplashActivity.class);
 		PendingIntent pending = PendingIntent.getActivity(getAppContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);

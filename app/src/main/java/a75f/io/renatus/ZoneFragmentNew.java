@@ -254,7 +254,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     tableLayout.invalidate();
                 }
             });
-            refreshZoneHeartBeat(id);
+        }
+    }
+    
+    HashMap<String, View> zoneStatus = new HashMap<>();
+    
+    public void refreshHeartBeatStatus(String id) {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+id+"\"");
+        if (!equip.isEmpty()) {
+            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
+            ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
+                                                                             +zone.get("id")+ "\"");
+            if(equipsInZone.size() > 0) {
+                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equipsInZone);
+                View statusView  = zoneStatus.get(zone.get("dis").toString());
+                if (statusView != null) {
+                    getActivity().runOnUiThread(() -> HeartBeatUtil.zoneStatus(statusView, isZoneAlive));
+                }
+            }
         }
     }
 
@@ -3087,25 +3104,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private String getScheduleTypeId(String equipId) {
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
-
-    HashMap<String, View> zoneStatus = new HashMap<>();
-    private void refreshZoneHeartBeat(String nodeAddress){
-        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+nodeAddress+"\"");
-        if (!equip.isEmpty()) {
-            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
-            ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
-                                                                             +zone.get("id")+ "\"");
-            if(equipsInZone.size() > 0) {
-                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equipsInZone);
-                View statusView  = zoneStatus.get(zone.get("dis").toString());
-                if (statusView != null) {
-                    getActivity().runOnUiThread(() -> HeartBeatUtil.zoneStatus(statusView, isZoneAlive));
-                }
-            }
-        }
     
-    }
-
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);

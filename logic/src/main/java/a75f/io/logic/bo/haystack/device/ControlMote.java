@@ -238,6 +238,7 @@ public class ControlMote
                           .setSiteRef(site.getId())
                           .addMarker(port).addMarker("his").addMarker("system").addMarker("out")
                           .setTz(site.getTz())
+                          .setUnit("dV")
                           .build();
         CCUHsApi.getInstance().addPoint(p);
     }

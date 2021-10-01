@@ -10,6 +10,8 @@ import org.projecthaystack.HRef;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -101,6 +103,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     boolean watchdogMonitor = false;
+    
+    private Lock jobLock = new ReentrantLock();
 
     @Override
     public void bark() {
@@ -151,23 +155,33 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
 
-        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
+        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
 
         watchdogMonitor = false;
-
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
-            return;
+        
+        if (jobLock.tryLock()) {
+            try {
+                HashMap site = CCUHsApi.getInstance().read("site");
+                if (site.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+    
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                if (ccu.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+                processSchedules();
+                CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
+            } catch (Exception e) {
+                CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
+            } finally {
+                jobLock.unlock();
+            }
+        } else {
+            CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob<- Job instance running ");
         }
-
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (ccu.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
-            return;
-        }
-        processSchedules();
-        CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
     public static void processSchedules() {
@@ -1203,91 +1217,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
-        if (dynamicSetpoint > 0) {
-            switch ((int) analog2sensorType) {
-                case 0:
-                    plcPoints.put("Dynamic Unit Type", "Voltage");
-                    plcPoints.put("Dynamic Unit", "V");
-                    break;
-                case 1:
-                    plcPoints.put("Dynamic Unit Type", "Pressure");
-                    plcPoints.put("Dynamic Unit", "Inch WC");
-                    break;
-                case 2:
-                    plcPoints.put("Dynamic Unit Type", "Pressure Differential");
-                    plcPoints.put("Dynamic Unit", "Inch WC");
-                    break;
-                case 3:
-                    plcPoints.put("Dynamic Unit Type", "Airflow");
-                    plcPoints.put("Dynamic Unit", "CFM");
-                    break;
-                case 4:
-                    plcPoints.put("Dynamic Unit Type", "Humidity");
-                    plcPoints.put("Dynamic Unit", "%");
-                    break;
-                case 5:
-                    plcPoints.put("Dynamic Unit Type", "CO2 Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 6:
-                    plcPoints.put("Dynamic Unit Type", "CO Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 7:
-                    plcPoints.put("Dynamic Unit Type", "NO2 Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 8:
-                case 9:
-                case 10:
-                    plcPoints.put("Dynamic Unit Type", "Current Draw");
-                    plcPoints.put("Dynamic Unit", "amps");
-                    break;
-            }
-        }
 
-        switch ((int) analog1sensorType) {
-            case 0:
-            case 1:
-                plcPoints.put("Unit Type", "Voltage");
-                plcPoints.put("Unit", "V");
-                break;
-            case 2:
-            case 3:
-                plcPoints.put("Unit Type", "Pressure");
-                plcPoints.put("Unit", "Inch WC");
-                break;
-            case 4:
-                plcPoints.put("Unit Type", "Airflow");
-                plcPoints.put("Unit", "CFM");
-                break;
-            case 5:
-                plcPoints.put("Unit Type", "Humidity");
-                plcPoints.put("Unit", "%");
-                break;
-            case 6:
-                plcPoints.put("Unit Type", "CO2");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 7:
-                plcPoints.put("Unit Type", "CO");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 8:
-                plcPoints.put("Unit Type", "NO2");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 9:
-            case 10:
-            case 11:
-                plcPoints.put("Unit Type", "Current Draw");
-                plcPoints.put("Unit", "amps");
-                break;
-            case 12:
-                plcPoints.put("Unit Type", "ION Density");
-                plcPoints.put("Unit", "ions/cc");
-                break;
-        }
+        HashMap inputDetails = CCUHsApi.getInstance().read(
+                "point and process and logical and variable and equipRef == \""+equipID+"\"");
+        HashMap targetDetails =
+                CCUHsApi.getInstance().read("point and target and pid and equipRef == \""+equipID+"\"");
+
+        plcPoints.put("Unit Type", inputDetails.get("shortDis"));
+        plcPoints.put("Unit",  inputDetails.get("unit"));
+        plcPoints.put("Dynamic Unit Type", targetDetails.get("shortDis"));
+        plcPoints.put("Dynamic Unit",  targetDetails.get("unit"));
 
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");

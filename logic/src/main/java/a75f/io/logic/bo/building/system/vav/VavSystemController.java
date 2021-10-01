@@ -948,9 +948,13 @@ public class VavSystemController extends SystemController
         
         Short nodeAddr = Short.parseShort(equipMap.get("group").toString());
         ZoneProfile profile = L.getProfile(nodeAddr);
-        CcuLog.d(L.TAG_CCU_SYSTEM,
-                 " isDamperOverrideActive "+equipMap.get("dis")+" : "+profile.isDamperOverrideActive());
-        return profile.isDamperOverrideActive();
+        if (profile != null) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " isDamperOverrideActive " + equipMap.get("dis") + " : " + profile.isDamperOverrideActive());
+            return profile.isDamperOverrideActive();
+        } else {
+            CcuLog.d(L.TAG_CCU_SYSTEM," isDamperOverrideActive : Profile null for "+equipMap.get("dis"));
+            return false;
+        }
     }
     
     @Override

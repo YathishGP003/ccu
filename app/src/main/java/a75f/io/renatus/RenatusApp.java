@@ -111,7 +111,6 @@ public class RenatusApp extends UtilityApplication
 		});
 		thread.start();
 	}
-
 	public static void setIntentToRestartCCU() {
 		Intent intent = new Intent(getAppContext(), SplashActivity.class);
 		PendingIntent pending = PendingIntent.getActivity(getAppContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);

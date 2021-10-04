@@ -33,7 +33,7 @@ public class MessagingAckJob {
      * Messaging API
      */
     public void doJob() {
-        CcuLog.i(L.TAG_CCU_MESSAGING, "Doing Ack Job");
+        CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
 
         Map<String, Set<String>> channelsToMessageIds = MessagingClient.getInstance().pollMessageIdsToAck();
         if (channelsToMessageIds.isEmpty()) {
@@ -45,7 +45,7 @@ public class MessagingAckJob {
                             .subscribe(
                                     response -> {
                                         if (response.isSuccessful()) {
-                                            CcuLog.i(L.TAG_CCU_MESSAGING, "ACK Succeeded - " + messageIds);
+                                            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Succeeded - " + messageIds);
                                         } else {
                                             CcuLog.w(L.TAG_CCU_MESSAGING, "ACK FAILED - " + messageIds + " ERR: " + response.code());
                                         }

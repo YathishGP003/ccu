@@ -1,1 +1,5 @@
- - Merge conflict: Reinsert update fix to master
+ - Merged PR 2079: Removed chmod permission
+ - Remove chmod permission
+ - Remove chmod permission
+ - Merged PR 2076: UI performance issue- hearbeat
+ - UI performance issue- hearbeat

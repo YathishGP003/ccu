@@ -151,6 +151,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
 	public void updateSensorValue(short nodeAddress){}
+	public void refreshHeartBeatStatus(String id){}
 	@Override
 	public void onResume() {
 		super.onResume();

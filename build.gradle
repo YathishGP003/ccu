@@ -11,14 +11,6 @@ buildscript {
         jcenter()
         mavenCentral()
         google()
-        maven {
-            url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
-            name 'renatus'
-            credentials {
-                username "Azure DevOps Services"
-                password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
-            }
-        }
         maven { url 'https://maven.fabric.io/public' }
         dependencies {
             classpath 'com.android.tools.build:gradle:4.1.2'
@@ -46,14 +38,6 @@ buildscript {
                 dirs '../libs'
             }
             maven { url 'https://maven.fabric.io/public' }
-            maven {
-                url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
-                name 'renatus'
-                credentials {
-                    username "Azure DevOps Services"
-                    password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
-                }
-            }
         }
     }
 

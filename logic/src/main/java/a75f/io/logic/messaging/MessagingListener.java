@@ -24,7 +24,7 @@ public  class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-        CcuLog.i(L.TAG_CCU_MESSAGING, message);
+        CcuLog.d(L.TAG_CCU_MESSAGING, message);
 
         JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
         Long timetoken = payload.get("timetoken").getAsLong();
@@ -43,7 +43,7 @@ public  class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public Request onPreRetry(ServerSentEvent sse, Request originalRequest) {
-        CcuLog.i(L.TAG_CCU_MESSAGING, "Pre-Retry Fired");
+        CcuLog.w(L.TAG_CCU_MESSAGING, "Pre-Retry Triggered");
         return originalRequest;
     }
 

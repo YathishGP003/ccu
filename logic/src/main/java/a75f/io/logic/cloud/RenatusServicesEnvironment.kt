@@ -85,7 +85,7 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + HAYSTACK_EXT,
             HTTP + baseIp + ALERTS_EXT,
             HTTP + baseIp + FILESTORAGE_EXT,
-              HTTP + baseIp + MESSAGING_EXT
+            HTTP + baseIp + MESSAGING_EXT
          )
       }
 

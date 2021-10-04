@@ -28,6 +28,10 @@ public class MessagingAckJob {
         };
     }
 
+    /**
+     * Fetches all processed message Ids and sends a bulk acknowledgement request to the
+     * Messaging API
+     */
     public void doJob() {
         CcuLog.i(L.TAG_CCU_MESSAGING, "Doing Ack Job");
 

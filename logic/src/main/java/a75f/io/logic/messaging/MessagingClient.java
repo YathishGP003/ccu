@@ -65,7 +65,7 @@ public class MessagingClient {
 
     /**
      * A thread-safe mechanism for the MessagingAckJob to dequeue all processed message Ids
-     * and send a bulk acknowledgement request out to the Messaging API
+     * and send a bulk acknowledgement request out to the Messaging API every 60 seconds
      */
     public Map<String, Set<String>> pollMessageIdsToAck() {
         List<MessageToAck> polledMessages = new ArrayList<>();

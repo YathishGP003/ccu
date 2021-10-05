@@ -271,8 +271,8 @@ public class HyperStatMsgReceiver {
                                          CCUHsApi hayStack) {
         HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
                                                +hsEquip.getId()+ "\"");
-        double coolingDesiredTemp = (double)message.getSetTempCooling();
-        double heatingDesiredTemp = (double)message.getSetTempHeating();
+        double coolingDesiredTemp = (double)message.getSetTempCooling()/2;
+        double heatingDesiredTemp = (double)message.getSetTempHeating()/2;
         double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
         
         if (!coolingDtPoint.isEmpty()) {

@@ -202,7 +202,6 @@ class HyperStatIduMessageHandler {
                                    .setHeatingSetTemperature(getHeatingDesiredTemp(address, hayStack))
                                    .setCoolingSetTemperature(getCoolingDesiredTemp(address, hayStack))
                                    .setMasterController(getMasterController(address, hayStack))
-                                   .setHumiditySetpoint(getHumiditySp(address, hayStack))
                                    .build();
     }
     
@@ -219,14 +218,6 @@ class HyperStatIduMessageHandler {
     
     private static int getCoolHeatRight(int address, CCUHsApi hayStack) {
         return hayStack.readHisValByQuery("coolHeatRight and group == \""+address+"\"").intValue();
-    }
-    
-    private static int getHumiditySp(int address, CCUHsApi hayStack) {
-        double minHumidity =
-            hayStack.readDefaultVal("config and humidity and min and group == \""+address+"\"").intValue();
-        double maxHumidity =
-            hayStack.readDefaultVal("config and humidity and max and group == \""+address+"\"").intValue();
-        return (int)(minHumidity + maxHumidity)/2;
     }
     
     private static int getFanSpeed(int address, CCUHsApi hayStack) {

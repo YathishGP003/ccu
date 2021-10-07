@@ -64,7 +64,7 @@ public class HyperStatMessageGenerator {
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
-            .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB)
+            .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
         return settings;
     }

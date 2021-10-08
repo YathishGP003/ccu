@@ -6,10 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -72,6 +77,9 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
 
     @OnClick(R.id.rl_bpostempinf)
     public void Onclicktempinf() {
+        if (checkForSingleModule()){
+            return;
+        }
         showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
                 mFloorName, ProfileType.BPOS),
                 FragmentBPOSTempInfConfiguration.ID);
@@ -92,5 +100,18 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
         }
+    }
+
+
+    private boolean checkForSingleModule(){
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+        for (Equip equip: zoneEquips) {
+            if (!equip.getProfile().contains("BPOS")) {
+                Toast.makeText(getActivity(), "Unpair all Modules and try", Toast.LENGTH_LONG).show();
+                closeAllBaseDialogFragments();
+                return true;
+            }
+        }
+        return false;
     }
 }

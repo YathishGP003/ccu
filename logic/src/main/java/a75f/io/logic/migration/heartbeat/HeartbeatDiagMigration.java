@@ -130,9 +130,12 @@ public class HeartbeatDiagMigration {
     }
 
     private void deleteNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
-        hayStack.deleteEntityTree( hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"").get("id").toString());
-
+        HashMap heartbeatPoint = hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"");
+        if(heartbeatPoint.size() > 0){
+            hayStack.deleteEntityTree(heartbeatPoint.get("id").toString());
+        }
     }
+
     private boolean isRssiPointMoreThanOne(CCUHsApi hayStack, String nodeAddress){
         String rssiDis = "rssi-"+nodeAddress;
         return hayStack.readAll("point and rssi and dis == \""+rssiDis+"\"").size() > 1;
@@ -140,7 +143,10 @@ public class HeartbeatDiagMigration {
 
     private void deleteRssiPointReferringNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
         String rssiDis = "rssi-"+nodeAddress;
-        hayStack.deleteEntityTree(hayStack.read("point and rssi and dis == \""+rssiDis+"\"").get("id").toString());
+        HashMap rssiHeartbeatPoint = hayStack.read("point and rssi and dis == \""+rssiDis+"\"");
+        if(rssiHeartbeatPoint.size() > 0){
+            hayStack.deleteEntityTree(rssiHeartbeatPoint.get("id").toString());
+        }
     }
 
     private void addRssiPointToDevice(CCUHsApi hayStack, String profile, String nodeAddress, String timeZone,

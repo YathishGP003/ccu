@@ -72,6 +72,7 @@ public class BPOSProfile extends ZoneProfile {
                            String roomRef) {
         mBPOSEquip.update(type, node, config, floorRef, roomRef);
         mBPOSEquip.init();
+        updateOccupancyDetPoint();
     }
 
     @Override
@@ -460,4 +461,23 @@ public class BPOSProfile extends ZoneProfile {
         return new Equip.Builder().setHashMap(equip).build();
     }
 
+
+    private void updateOccupancyDetPoint(){
+        boolean isAutoawayenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
+                "auto and forced and away and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
+        Occupied occuStatus =
+                ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef ));
+        if(isAutoawayenabled && occuStatus.isOccupied()){
+            HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                    "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                            " \"" + mBPOSEquip.mEquipRef  + "\"");
+            if (ocupancyDetection.get("id") != null) {
+                double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(
+                        "id").toString());
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection.get(
+                        "id").toString(),
+                        val);
+            }
+        }
+    }
 }

@@ -11,6 +11,7 @@ enum HyperStatRequestType_e {
   HYPERSTAT_REQUEST_TYPE_CONTROLS = 2; // standard device controls
   HYPERSTAT_REQUEST_TYPE_IDU_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
   HYPERSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
+  HYPERSTAT_REQUEST_TYPE_SETTINGS_2 = 5; // standard device settings 2
 }
 
 message HyperStatRequestMessage_t {
@@ -22,8 +23,64 @@ enum HyperStatTemperatureMode_e {
   HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB = 1;
   HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
 }
+
+enum HyperStatProfiles_t {
+  HYPERSTAT_PROFILE_NONE = 0;
+  HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT = 1;
+  HYPERSTAT_PROFILE_HEAT_PUMP_UNIT = 2;
+  HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT = 3;
+  HYPERSTAT_PROFILE_4_PIPE_FANCOIL_UNIT = 4;
+  HYPERSTAT_PROFILE_VRV = 5;
+  HYPERSTAT_PROFILE_SENSE = 6;
+}
+
+enum HyperstatAnalogInMapping_t {
+  HYPERSTAT_AIN_CURRENT_0_10 = 0;
+  HYPERSTAT_AIN_CURRENT_0_20 = 1;
+  HYPERSTAT_AIN_CURRENT_0_50 = 2;
+  HYPERSTAT_AIN_KEYCARD = 3;
+  HYPERSTAT_AIN_DOORWINDOW = 4;
+}
+
+message HyperstatRelay_t {
+  bool relay1Enable = 1;
+  uint32 relay1Mapping = 2;
+  bool relay2Enable = 3;
+  uint32 relay2Mapping = 4;
+  bool relay3Enable = 5;
+  uint32 relay3Mapping = 6;
+  bool relay4Enable = 7;
+  uint32 relay4Mapping = 8;
+  bool relay5Enable = 9;
+  uint32 relay5Mapping = 10;
+  bool relay6Enable = 11;
+  uint32 relay6Mapping = 12;
+}
+
+message HyperstatAnalogOut_t {
+  bool analogOut1Enable = 1;
+  uint32 analogOut1Mapping = 2; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut1AtMinSetting = 3; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut1AtMaxSetting = 4; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+  bool analogOut2Enable = 5;
+  uint32 analogOut2Mapping = 6; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut2AtMinSetting =7; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut2AtMaxSetting = 8; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+  bool analogOut3Enable = 9;
+  uint32 analogOut3Mapping = 10; // Mapping to cooling stage, heating stage etc depending on connection to hyperstat relay
+  int32 analogOut3AtMinSetting = 11; // Voltage at which the cooler/damper/fan is at minimum position(1/10 V)
+  int32 analogOut3AtMaxSetting = 12; // Voltage at which the cooler/damper/fan is at maximum position(1/10 V)
+}
+
+message HyperstatAnalogIn_t {
+  bool analogIn1Enable = 1;
+  HyperstatAnalogInMapping_t analogIn1Mapping = 2; // Map to keycard, door sensor etc
+  bool analogIn2Enable = 3;
+  HyperstatAnalogInMapping_t analogIn2Mapping = 4; // Map to keycard, door sensor etc
+}
+
 message HyperStatSettingsMessage_t {
-  string roomName = 1 ;//[(nanopb).max_size = 20];
+  string roomName = 1;// [(nanopb).max_size = 20];
   int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
   int32 minHeatingUserTemp = 3; // Minimum temperature the user can set in degrees F (default 67)
   int32 maxCoolingUserTemp = 4; // Maximum temperature the user can set in degrees F (default 77)
@@ -42,6 +99,26 @@ message HyperStatSettingsMessage_t {
   bool showCentigrade = 17; // 0: show Fahrenheit, 1: show Celsius
   bool enableExternal10kTemperatureSensor =18; // 1 if the external sensor is enabled
   bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
+  uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
+  uint32 humidityMaxSetpoint = 21; // Maximum humidity setpont 0-100% in which Hyperstat will set system to Dehumidity/Dry if humidity level is greater than
+}
+
+message HyperStatSettingsMessage2_t {
+  HyperStatProfiles_t profile = 1;  // Current profile to be executed on Hyperstat
+  bool enableForceOccupied = 2;
+  bool enableAutoAway = 3;
+  HyperstatRelay_t hyperstatRelayConfig = 4;
+  bool thermistor1Enable = 5;
+  bool thermistor2Enable = 6;
+  HyperstatAnalogOut_t HyperstatAnalogOutConfig = 7;
+  HyperstatAnalogIn_t HyperstatAnalogInConfig = 8;
+  uint32 zoneCO2DamperOpeningRate = 9; // Same as system/ 10 (%/100ppm)
+  uint32 zoneCO2Threshold = 10; // Same as system/800 (ppm)
+  uint32 zoneCO2Target = 11; // Same as system/1000 (ppm)
+  uint32 proportionalConstant = 12; // default 50 - k constants for Proportional in 1/100
+  uint32 integralConstant = 13; // default 50 - k constant for Integral in 1/100
+  uint32 proportionalTemperatureRange = 14; // default 15 - temp range in 1/10 deg that the proportional control will apply
+  uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
 }
 
 enum HyperStatFanSpeed_e {
@@ -111,7 +188,7 @@ message HyperStatRegularUpdateMessage_t {
   int32 externalAnalogVoltageInput2 = 8; // External voltage sense in millivolts
   int32 externalThermistorInput1 = 9; // External resistance sense in tens of ohms
   int32 externalThermistorInput2 = 10; // External resistance sense in tens of ohms
-  repeated SensorReadingPb_t sensorReadings = 11 ;//[(nanopb).max_count = 6]; // List of type-value sensor readings
+  repeated SensorReadingPb_t sensorReadings = 11;// [(nanopb).max_count = 6]; // List of type-value sensor readings
   bool occupantDetected = 12; // 0 is no, 1 is yes
 }
 
@@ -128,8 +205,7 @@ message HyperStatIduControlsMessage_t {
   int32 airflowDirection = 3;
   sint32 heatingSetTemperature = 4;
   sint32 coolingSetTemperature = 5;
-  int32 humiditySetpoint = 6;
-  int32 masterController = 7;
+  int32 masterController = 6;
 }
 
 message HyperStatIduStatusMessage_t {
@@ -149,13 +225,14 @@ message HyperStatIduStatusMessage_t {
   int32 errorStatus = 14;
   int32 diagnosticStatus = 15;
   int32 iduTemperature = 16;
-  repeated int32 thData = 17 ;//[(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
+  repeated int32 thData = 17;// [(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
 }
 
 message HyperStatCcuDatabaseSeedMessage_t {
-  bytes encryptionKey = 1 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
-  bytes serializedSettingsData = 2 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
-  bytes serializedControlsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes encryptionKey = 1;// [(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes serializedSettings2Data = 4;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS2_MESSAGE
 }
 
 
@@ -164,11 +241,11 @@ message HyperStatCmToCcuSerializedMessage_t {
   int32 cmLqi = 2; // LQI of this received data packet @ CM
   int32 cmRssi = 3; // RSSI of this received data packet @ CM
   int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 5 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 5;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }
 
 message HyperStatCcuToCmSerializedMessage_t {
   uint32 address = 1; // The (16-bit) mesh address of a device
   int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }

@@ -306,18 +306,11 @@ public class FloorPlanFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        saveData();
     }
 
     @Override public void onStop() {
         super.onStop();
         floorListActionMenuListener.dispose();
-    }
-
-    public void saveData() {
-        //Save
-        L.saveCCUState();
-
     }
 
     // callback from FloorListActionMenuListener

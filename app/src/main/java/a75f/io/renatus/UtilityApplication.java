@@ -350,7 +350,9 @@ public abstract class UtilityApplication extends Application {
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event) {
-        LSerial.handleSerialEvent(this, event);
+        if (Globals.getInstance().isCcuReady()) {
+            LSerial.handleSerialEvent(this, event);
+        }
     }
 
     static class Listener extends DeviceEventAdapter {

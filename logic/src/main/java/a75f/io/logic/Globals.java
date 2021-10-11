@@ -101,7 +101,10 @@ public class Globals {
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
 
-    private Long curPubNubMsgTimeToken;
+    private static long ccuUpdateTriggerTimeToken;
+
+    private volatile boolean isCcuReady = false;
+
     private Globals() {
     }
 
@@ -522,4 +525,19 @@ public class Globals {
     // While testing OTA service we've added logs
     // After verification we may remove this later
     public static final String TAG = "DEV_DEBUG";
+    
+    public void setCcuUpdateTriggerTimeToken(long time) {
+        ccuUpdateTriggerTimeToken = time;
+    }
+    
+    public long getCcuUpdateTriggerTimeToken() {
+        return ccuUpdateTriggerTimeToken;
+    }
+
+    public boolean isCcuReady() {
+        return isCcuReady;
+    }
+    public void setCcuReady(boolean ccuReady) {
+        isCcuReady = ccuReady;
+    }
 }

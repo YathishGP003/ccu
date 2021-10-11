@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -246,17 +247,31 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     public void refreshScreen(String id)
     {
-        if(getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(zoneOpen) {
-                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
-                                tableLayout.invalidate();
-                            }
-                            refreshZoneHeartBeat();
-                        }
-                    });
+        if(getActivity() != null && isAdded()) {
+            getActivity().runOnUiThread(() -> {
+                if(zoneOpen) {
+                    updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                    tableLayout.invalidate();
+                }
+            });
+        }
+    }
+    
+    HashMap<String, View> zoneStatus = new HashMap<>();
+    
+    public void refreshHeartBeatStatus(String id) {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+id+"\"");
+        if (!equip.isEmpty()) {
+            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
+            ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
+                                                                             +zone.get("id")+ "\"");
+            if(equipsInZone.size() > 0) {
+                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equipsInZone);
+                View statusView  = zoneStatus.get(zone.get("dis").toString());
+                if (statusView != null) {
+                    getActivity().runOnUiThread(() -> HeartBeatUtil.zoneStatus(statusView, isZoneAlive));
+                }
+            }
         }
     }
 
@@ -2786,6 +2801,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
         TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
         TextView labelOffsetAir = viewPointRow2.findViewById(R.id.text_point1label);
+        LinearLayout lt_column2 = loopOpRow.findViewById(R.id.lt_column2);
         TextView label2 = viewPointRow2.findViewById(R.id.text_point2label);
 
         TextView textViewInputAir = viewPointRow1.findViewById(R.id.text_point1value);
@@ -2795,6 +2811,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         label2.setVisibility(View.GONE);
         value2.setVisibility(View.GONE);
+        lt_column2.setVisibility(View.GONE);
 
         textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(plcPoints.get("Status").toString());
@@ -2807,9 +2824,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
 
-                labelTarget.setText("Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString() + " : ");
                 textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                labelOffsetAir.setText("Offset Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelOffsetAir.setText("Offset " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
                 textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 viewPointRow2.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
@@ -2819,8 +2836,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 linearLayoutZonePoints.addView(viewPointRow2);
 
             } else {
-                labelTarget.setText("Target " + plcPoints.get("Unit Type").toString().replace("Native-", "") + " : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Unit").toString());
+                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
+                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 viewPointRow1.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);
@@ -2832,7 +2849,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
     }
-    
+
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {
@@ -2894,6 +2911,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         };
 
         weatherUpdate.run();
+        Globals.getInstance().setCcuReady(true);
     }
 
     @Override
@@ -3086,27 +3104,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private String getScheduleTypeId(String equipId) {
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
-
-    HashMap<String, View> zoneStatus = new HashMap<>();
-    private void refreshZoneHeartBeat(){
-        if((floorList.size() == 0) || mFloorListAdapter == null){
-            return;
-        }
-        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-        for (Map zone : zones) {
-            String zoneName = zone.get("dis").toString();
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+zone.get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-            if(equips.size() > 0) {
-                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
-                View statusView  = zoneStatus.get(zoneName);
-                if (statusView != null) {
-                    HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
-                }
-            }
-        }
-
-    }
-
+    
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);

@@ -1,0 +1,184 @@
+package a75f.io.api.haystack.sync;
+
+import android.content.Context;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
+public class SyncManager {
+    
+    public static final String TAG = "CCU_HS_SyncManager";
+    
+    public static final long SYNC_SCHEDULE_INTERVAL_MILLIS = 30000;
+    
+    public static final String SYNC_WORK_TAG = "SYNC_WORK";
+    public static final String POINT_WRITE_WORK_TAG = "SYNC_WORK";
+    
+    Timer     mSyncTimer     = new Timer();
+    TimerTask mSyncTimerTask = null;
+    
+    Context appContext;
+    
+    public SyncManager(Context context) {
+        appContext = context;
+    }
+    
+    public void syncEntities() {
+    
+        CcuLog.d(TAG, "syncEntities");
+        if (mSyncTimerTask != null) {
+            mSyncTimerTask.cancel();
+            mSyncTimerTask = null;
+        }
+        
+        if (SyncStatusService.getInstance(appContext).isSyncNotRequired()) {
+            return;
+        }
+        
+        if (isMigrationRequired()) {
+            CcuLog.d(TAG, "Migration Required");
+            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                                                                ExistingWorkPolicy.KEEP,
+                                                                getMigrationWorkRequest())
+                                                .then(getSyncWorkRequest())
+                                                .then(getPointWriteWorkRequest())
+                                                .enqueue();
+        } else {
+            CcuLog.d(TAG, "Migration not Required");
+            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                                                                ExistingWorkPolicy.KEEP,
+                                                                getSyncWorkRequest())
+                                                .enqueue();
+        }
+    }
+    
+    public void syncPointArray() {
+    
+    
+        if (isMigrationRequired()) {
+            WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
+                                                                ExistingWorkPolicy.KEEP,
+                                                                getMigrationWorkRequest())
+                                                .then(getPointWriteWorkRequest())
+                                                .enqueue();
+        } else {
+            WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
+                                                                ExistingWorkPolicy.KEEP,
+                                                                getSyncWorkRequest())
+                                                .enqueue();
+        }
+    
+    }
+    
+    public void syncEntitiesWithPointWrite() {
+        CcuLog.d(TAG, "syncEntitiesWithPointWrite");
+        
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
+            return;
+        }
+        
+        syncEntities();
+        syncPointArray();
+    }
+    
+    
+    
+    private Constraints getSyncConstraints() {
+        return new Constraints.Builder()
+                   .setRequiredNetworkType(NetworkType.CONNECTED)
+                   .build();
+    }
+    
+    private OneTimeWorkRequest getMigrationWorkRequest() {
+        
+        return new OneTimeWorkRequest.Builder(MigrationWorker.class)
+                   .setConstraints(getSyncConstraints())
+                   .setBackoffCriteria(
+                       BackoffPolicy.LINEAR,
+                       OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                       TimeUnit.MILLISECONDS)
+                   .addTag(SYNC_WORK_TAG)
+                   .build();
+        
+    }
+    
+    private OneTimeWorkRequest getSyncWorkRequest() {
+        
+        return new OneTimeWorkRequest.Builder(SyncWorker.class)
+                                        .setConstraints(getSyncConstraints())
+                                        /*.setBackoffCriteria(
+                                            BackoffPolicy.LINEAR,
+                                            OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                                            TimeUnit.MILLISECONDS)*/
+                                        .addTag(SYNC_WORK_TAG)
+                                        .build();
+        
+    }
+    
+    private OneTimeWorkRequest getPointWriteWorkRequest() {
+        return new OneTimeWorkRequest.Builder(PointWriteWorker.class)
+                                        .setConstraints(getSyncConstraints())
+                                        /*.setBackoffCriteria(
+                                            BackoffPolicy.LINEAR,
+                                            OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                                            TimeUnit.MILLISECONDS)*/
+                                        .addTag(POINT_WRITE_WORK_TAG)
+                                        .build();
+    }
+    
+    
+    
+    private boolean isMigrationRequired() {
+        boolean migration = false;
+        if (CCUHsApi.getInstance().getIdMap().size() > 0) {
+            migration = true;
+        }
+        if (CCUHsApi.getInstance().getUpdateIdMap().size() > 0) {
+            migration = true;
+        }
+        if (CCUHsApi.getInstance().getRemoveIdMap().size() > 0) {
+            migration = true;
+        }
+        return migration;
+    }
+    
+    public void scheduleSync() {
+        if (mSyncTimerTask != null) {
+            return;
+        }
+        
+        mSyncTimerTask = new TimerTask() {
+            public void run() {
+                CcuLog.i(TAG, "Entity Sync Scheduled");
+                syncEntities();
+                mSyncTimerTask = null;
+            }
+        };
+        mSyncTimer.schedule(mSyncTimerTask, SYNC_SCHEDULE_INTERVAL_MILLIS);
+    }
+    
+    /*@Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onSyncEvent(SyncEvent event) {
+        CcuLog.i(TAG, "onSyncEvent : "+event.getSyncStatus());
+        if (event.getSyncStatus() == SyncEvent.SyncStatus.FAILED ||
+                                event.getSyncStatus() == SyncEvent.SyncStatus.COMPLETED) {
+            EventBus.getDefault().unregister(this);
+        }
+        
+        if (event.getSyncStatus() == SyncEvent.SyncStatus.FAILED) {
+            scheduleSync();
+        }
+        
+    }*/
+}

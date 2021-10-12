@@ -91,7 +91,7 @@ public class ConventionalPackageUnitUtil {
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
         adjustCPUFanMode(equip,hayStack);
         adjustConditioningMode(equip, hayStack);
     }
@@ -149,7 +149,7 @@ public class ConventionalPackageUnitUtil {
                 manageRelay6AssociatedPoints(configVal, equip);
             }
         }
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
     }
     
     public static void manageRelay6AssociatedPoints(double configVal, Equip equip ) {

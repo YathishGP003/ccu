@@ -88,7 +88,7 @@ public class SingleStageEquipUtil {
                 
         }
         SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_ONE.name(), configVal > 0 ? true : false );
-        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
     
     /**
@@ -107,7 +107,7 @@ public class SingleStageEquipUtil {
             String fanStageId = createFanStagePoint(equip);
             SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.RELAY_TWO.name(), fanStageId);
         }
-        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
     
     public static void updateRelay2Config(int configVal, Point configPoint) {
@@ -133,7 +133,7 @@ public class SingleStageEquipUtil {
                 CCUHsApi.getInstance().deleteEntity(fanPt.get("id").toString());
         }
         SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_TWO.name(), configVal > 0 ? true : false );
-        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
     
     public static void updateThermistorConfig(int configVal, Point configPoint) {

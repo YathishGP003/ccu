@@ -96,13 +96,15 @@ public class HisSyncHandler
 
         for (HashMap equipToSync : equipsToSync) {
             String equipId = equipToSync.get("id").toString();
-            String equipGuid = CCUHsApi.getInstance().getGUID(equipId);
+            if (!CCUHsApi.getInstance().hasEntitySynced(equipId)) {
+               continue;
+            }
             List<HashMap> allPointsForEquip = ccuHsApi.readAll("point and his and equipRef == \""+ equipId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForEquip.size() + " equip points");
             List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForEquip);
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " equip points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
-                syncPoints(equipGuid, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
+                syncPoints(equipId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
             }
         }
     }
@@ -113,13 +115,15 @@ public class HisSyncHandler
 
         for (HashMap deviceToSync : devicesToSync) {
             String deviceId = deviceToSync.get("id").toString();
-            String deviceGuid = CCUHsApi.getInstance().getGUID(deviceId);
+            if (!CCUHsApi.getInstance().hasEntitySynced(deviceId)) {
+                continue;
+            }
             List<HashMap> allPointsForDevice = ccuHsApi.readAll("point and his and deviceRef == \""+ deviceId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForDevice.size() + " device points");
             List<HashMap> pointsToSyncForDevice = getEntitiesWithGuidForSyncing(allPointsForDevice);
             CcuLog.d(TAG,"Found " + pointsToSyncForDevice.size() + " device points that have a GUID for syncing");
             if (!pointsToSyncForDevice.isEmpty()) {
-                syncPoints(deviceGuid, pointsToSyncForDevice, timeForQuarterHourSync, SYNC_TYPE_DEVICE);
+                syncPoints(deviceId, pointsToSyncForDevice, timeForQuarterHourSync, SYNC_TYPE_DEVICE);
             }
         }
     }
@@ -133,11 +137,10 @@ public class HisSyncHandler
 
         for (HashMap pointToSync : pointList) {
 
-            List<HisItem> unsyncedHisItems;
-
             String pointID = pointToSync.get("id").toString();
+            List<HisItem> unsyncedHisItems;
             String pointDescription = pointToSync.get("dis").toString();
-            String pointGuid = CCUHsApi.getInstance().getGUID(pointID);
+            
             String pointTimezone = pointToSync.get("tz").toString();
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
@@ -150,7 +153,7 @@ public class HisSyncHandler
                     long pointTimestamp = hisItem.getDateInMillis();
 
                     if (!StringUtils.equals("NaN", pointValue.toString())) {
-                        HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
+                        HDict hDict = buildHDict(pointID, pointTimezone, pointValue, pointTimestamp);
                         hDictList.add(hDict);
                         hisItemsToSyncForDeviceOrEquip.add(hisItem);
                         CcuLog.d(TAG,"Adding historized point value for point ID " + pointID + "; description of "
@@ -169,10 +172,10 @@ public class HisSyncHandler
                     HVal pointValue = isBooleanPoint ? HBool.make(latestHisItemToReSync.getVal() > 0) : HNum.make(latestHisItemToReSync.getVal());
                     long pointTimestamp = latestHisItemToReSync.getDateInMillis();
 
-                    HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
+                    HDict hDict = buildHDict(pointID, pointTimezone, pointValue, pointTimestamp);
                     hDictList.add(hDict);
                     CcuLog.d(TAG,
-                             "There are no unsynced historized items for point GUID " + pointGuid +  "-" +pointToSync.get("dis")+
+                             "There are no unsynced historized items for point " + pointID +  "-" +pointToSync.get("dis")+
                                             " :resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
                 } else {
                     CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis"));
@@ -256,7 +259,7 @@ public class HisSyncHandler
         List<HashMap> entitiesWithGuid = new ArrayList<>();
 
         for (HashMap entity : entityList) {
-            if (CCUHsApi.getInstance().getGUID(entity.get("id").toString()) != null) {
+            if (CCUHsApi.getInstance().hasEntitySynced(entity.get("id").toString())) {
                 entitiesWithGuid.add(entity);
             } else if (!entitySyncRequired) {
                 entitySyncRequired = true;

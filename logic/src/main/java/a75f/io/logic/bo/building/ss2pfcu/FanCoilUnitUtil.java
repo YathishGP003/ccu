@@ -95,7 +95,7 @@ public class FanCoilUnitUtil {
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
         
         /**
          * Relay selection changes might impact available FanModes and conditioning modes.

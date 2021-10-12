@@ -136,7 +136,7 @@ public class HeatPumpPackageUnitUtil {
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
         adjustHPUFanMode(equip,hayStack);
         adjustConditioningMode(equip, hayStack);
     }
@@ -154,7 +154,7 @@ public class HeatPumpPackageUnitUtil {
                 manageRelay5AssociatedPoints(configVal, equip);
             }
         }
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
     }
     
     public static void manageRelay5AssociatedPoints(double configVal, Equip equip ) {
@@ -195,7 +195,7 @@ public class HeatPumpPackageUnitUtil {
                 manageRelay6AssociatedPoints(configVal, equip);
             }
         }
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
     }
     
     public static void manageRelay6AssociatedPoints(double configVal, Equip equip ) {

@@ -158,7 +158,7 @@ public class AlertProcessor
                 }
                 for (int i=0; i < pointList.size(); i++) {
                     String pointId = pointList.get(i);
-                    String equipId = haystack.getGUID(StringUtils.prependIfMissing(equipList.get(i), "@"));
+                    String equipId = StringUtils.prependIfMissing(equipList.get(i), "@");
                     evalString = evalString + "\nThis EquipId: " + equipId;
                     if (equipId != null) {
                         equipId = StringUtils.stripStart(equipId, "@");

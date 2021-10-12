@@ -41,9 +41,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.sync.EntityParser;
-import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.SyncManager;
+import a75f.io.api.haystack.sync.SyncStatusService;
 import a75f.io.api.haystack.util.Migrations;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
@@ -62,8 +63,7 @@ public class CCUHsApi
 
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
-
-    public EntitySyncHandler entitySyncHandler;
+    
     public HisSyncHandler    hisSyncHandler;
 
     public boolean testHarnessEnabled = false;
@@ -75,6 +75,9 @@ public class CCUHsApi
     
     HRef tempWeatherRef = null;
     HRef humidityWeatherRef = null;
+    
+    private SyncStatusService syncStatusService;
+    private SyncManager       syncManager;
 
     public static CCUHsApi getInstance()
     {
@@ -98,8 +101,12 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(PreferenceManager.getDefaultSharedPreferences(context));
+        
         hisSyncHandler = new HisSyncHandler(this);
+    
+        syncStatusService = SyncStatusService.getInstance(context);
+        syncManager = new SyncManager(context);
+        
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
     }
 
@@ -133,7 +140,6 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(null);   // null prefs.
         hisSyncHandler = new HisSyncHandler(this);
     }
 
@@ -194,6 +200,7 @@ public class CCUHsApi
 
     public synchronized void saveTagsData() {
         saveTagsData(false);
+        syncStatusService.saveSyncStatus();
     }
 
     /**
@@ -204,12 +211,15 @@ public class CCUHsApi
      */
     public synchronized void saveTagsData(boolean immediate)
     {
+        syncStatusService.saveSyncStatus();
         tagsDb.saveTags(immediate);
     }
 
     public String addSite(Site s)
     {
-        return tagsDb.addSite(s);
+        String siteId = tagsDb.addSite(s);
+        syncStatusService.addUnSyncedEntity("@"+siteId);//TODO -use toCode
+        return siteId;
     }
 
     /** For adding site originating from server. Supply the id originating from server, rather
@@ -220,7 +230,9 @@ public class CCUHsApi
 
     public String addEquip(Equip q)
     {
-        return tagsDb.addEquip(q);
+        String equipId = tagsDb.addEquip(q);
+        syncStatusService.addUnSyncedEntity(equipId);
+        return equipId;
     }
 
     /** For adding an equip originating from server, e.g. import tuners */
@@ -230,7 +242,9 @@ public class CCUHsApi
 
     public String addPoint(Point p)
     {
-        return tagsDb.addPoint(p);
+        String pointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     /** For adding an point originating from server, e.g. import tuners */
@@ -240,7 +254,9 @@ public class CCUHsApi
 
     public String addPoint(RawPoint p)
     {
-        return tagsDb.addPoint(p);
+        String rawPointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(rawPointId);
+        return rawPointId;
     }
 
     public String addRemotePoint(RawPoint p, String id) {
@@ -264,7 +280,9 @@ public class CCUHsApi
 
     public String addDevice(Device d)
     {
-        return tagsDb.addDevice(d);
+        String deviceId = tagsDb.addDevice(d);
+        syncStatusService.addUnSyncedEntity(deviceId);
+        return deviceId;
     }
 
     // From EntityPullHandler
@@ -275,14 +293,21 @@ public class CCUHsApi
     public void updateDevice(Device d, String id)
     {
         tagsDb.updateDevice(d, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
+        }
+        
+        /*tagsDb.updateDevice(d, id);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, id);
-        }
+        }*/
     }
     public String addFloor(Floor f)
     {
-        return tagsDb.addFloor(f);
+        String floorId = tagsDb.addFloor(f);
+        syncStatusService.addUnSyncedEntity(floorId);
+        return floorId;
     }
 
     // From EntityPullHandler
@@ -292,7 +317,9 @@ public class CCUHsApi
 
     public String addZone(Zone z)
     {
-        return tagsDb.addZone(z);
+        String zoneId = tagsDb.addZone(z);
+        syncStatusService.addUnSyncedEntity(zoneId);
+        return zoneId;
     }
 
     // From EntityPullHandler
@@ -302,8 +329,12 @@ public class CCUHsApi
 
     public void updateSite(Site s, String id)
     {
+        /*tagsDb.updateSite(s, id);
+        entitySyncHandler.requestSiteSync();*/
         tagsDb.updateSite(s, id);
-        entitySyncHandler.requestSiteSync();
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
+        }
         updateLocationDataForWeatherUpdate(s);
     }
     
@@ -330,45 +361,40 @@ public class CCUHsApi
     public void updateEquip(Equip q, String id)
     {
         tagsDb.updateEquip(q, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
     
     public void updatePoint(RawPoint r, String id)
     {
         tagsDb.updatePoint(r, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updatePoint(Point point, String id)
     {
         tagsDb.updatePoint(point, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updateFloor(Floor r, String id)
     {
         tagsDb.updateFloor(r, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updateZone(Zone z, String id)
     {
         tagsDb.updateZone(z, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
@@ -886,10 +912,11 @@ public class CCUHsApi
     public void deleteEntity(String id) {
         CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        if (tagsDb.idMap.get(id) != null) {
+        /*if (tagsDb.idMap.get(id) != null) {
             tagsDb.removeIdMap.put(id, id);
             tagsDb.idMap.remove(id);
-        }
+        }*/
+        syncStatusService.addDeletedEntity(id);
     }
 
     public void deleteEntityLocally(String id) {
@@ -1092,61 +1119,30 @@ public class CCUHsApi
             @Override
             public void run()
             {
-                if (!testHarnessEnabled)
-                {
-                    if (!entitySyncHandler.isSyncProgress())
-                    {
-                        entitySyncHandler.sync();
-                    }
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip Entity Sync");
-                }
+                //Check if sync session is already in progress
+                syncManager.syncEntities();
             }
         }.start();
     }
-    public void syncPointEntityTree()
-    {
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                if (!testHarnessEnabled)
-                {
-
-                        entitySyncHandler.syncPointEntity();
-
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip PointEntity Sync");
-                }
-            }
-        }.start();
-    }
+    
     public void syncEntityWithPointWrite() {
-        new Thread()
-        {
+        new Thread() {
             @Override
-            public void run()
-            {
-                if (!testHarnessEnabled && !entitySyncHandler.isSyncProgress())
-                {
-                    entitySyncHandler.doSyncWithWrite();
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip Entity Sync");
-                }
+            public void run() {
+                syncManager.syncEntitiesWithPointWrite();
             }
         }.start();
     }
     
     //Force-writes local entities to the backend.
     public void forceSync() {
-        tagsDb.idMap.clear();
+        /*tagsDb.idMap.clear();
         tagsDb.saveTags();
         tagsDb.init(context);
-        syncEntityWithPointWrite();
+        syncEntityWithPointWrite();*/
+    
+        syncStatusService.clearSyncStatus();
+        syncManager.syncEntitiesWithPointWrite();
     }
 
     //Reset CCU - Force-writes local entities to the backend.
@@ -1215,16 +1211,12 @@ public class CCUHsApi
     }
     
     public void scheduleSync() {
-        entitySyncHandler.scheduleSync();
+        //entitySyncHandler.scheduleSync();
+        syncManager.scheduleSync();
     }
 
-    public void syncHisData()
-    {
-        if (!entitySyncHandler.isSyncProgress()) {
-            hisSyncHandler.syncData();
-        } else {
-            Log.d("CCU_HS", "EntitySync in progress : Skip HisSync");
-        }
+    public void syncHisData() {
+        hisSyncHandler.syncData();
     }
 
     public boolean syncExistingSite(String siteId) {
@@ -2267,5 +2259,51 @@ public class CCUHsApi
             }
         }
         return rowList;
+    }
+    
+    public boolean hasEntitySynced(String id) {
+        return syncStatusService.hasEntitySynced(id);
+    }
+    
+    public boolean isEligibleForSync(String id) {
+        return syncStatusService.isEligibleForSync(id);
+    }
+    
+    public void setEntitySynced(String id) {
+        syncStatusService.setEntitySynced(id);
+    }
+    
+    public void addEntity(HDict entity) {
+        HRef id = (HRef) entity.get(Tags.ID);
+        tagsDb.tagsMap.put(id.toVal(), entity);
+    }
+    
+    public ConcurrentHashMap<String, String> getIdMap() {
+        return tagsDb.idMap;
+    }
+    
+    public ConcurrentHashMap<String, String> getUpdateIdMap() {
+        return tagsDb.updateIdMap;
+    }
+    
+    public ConcurrentHashMap<String, String> getRemoveIdMap() {
+        return tagsDb.removeIdMap;
+    }
+    
+    public SyncStatusService getSyncStatusService() {
+        return syncStatusService;
+    }
+    
+    public HGrid readGrid(String query) {
+        HGrid grid = null;
+        try
+        {
+            grid = hsClient.readAll(query);
+        }
+        catch (UnknownRecException e)
+        {
+            e.printStackTrace();
+        }
+        return grid;
     }
 }

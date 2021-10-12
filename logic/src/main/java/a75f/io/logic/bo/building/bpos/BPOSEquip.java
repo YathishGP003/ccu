@@ -134,6 +134,7 @@ public class BPOSEquip {
                 .addMarker("zone").addMarker("bpos")
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied," +
                         "vacation,occupancysensing,autoforceoccupied,autoaway")
+                .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);

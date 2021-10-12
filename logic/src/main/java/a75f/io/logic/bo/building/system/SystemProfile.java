@@ -173,7 +173,9 @@ public abstract class SystemProfile
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense")) {
                 q.setGatewayRef(systemEquipId);
             }else {
-                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not " +
+                 //       "updated for " + q.getDisplayName(), Toast.LENGTH_SHORT).show();
+                Log.i(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }

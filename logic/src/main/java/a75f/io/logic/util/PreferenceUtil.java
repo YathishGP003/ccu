@@ -38,13 +38,13 @@ public class PreferenceUtil {
 
     public static boolean isHeartbeatMigrationAsDiagDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("heartbeatMigrationAsDiag",false);
+        return sharedPreferences.getBoolean("heartbeatMigrationAsDiagWithRssi",false);
     }
 
     public static void setHeartbeatMigrationAsDiagStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("heartbeatMigrationAsDiag", isMigrated);
+        editor.putBoolean("heartbeatMigrationAsDiagWithRssi", isMigrated);
         editor.apply();
     }
 

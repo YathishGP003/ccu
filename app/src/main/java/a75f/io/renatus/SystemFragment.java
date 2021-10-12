@@ -151,12 +151,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
 	public void updateSensorValue(short nodeAddress){}
+	public void refreshHeartBeatStatus(String id){}
 	@Override
 	public void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		checkForOao();
 		fetchPoints();
+		profileTitle.setText(L.ccu().systemProfile.getProfileName());
 
 		if(getUserVisibleHint()) {
             fetchPoints();
@@ -359,11 +360,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				setUserIntentBackground("desired and ci",5 - seekBar.getProgress());
 			}
 		});
-		
-		profileTitle.setText(L.ccu().systemProfile.getProfileName());
-		
+
+
 		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
-		
+
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
 		{

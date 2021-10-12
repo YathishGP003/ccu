@@ -75,7 +75,9 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
     private static final String TAG_CCU_HS = "CCU_HS";
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
-
+    
+    private static final long MAX_DB_SIZE_IN_KB = 5 * 1024 * 1024;
+    
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
 
@@ -142,7 +144,10 @@ public class CCUTagsDb extends HServer {
         {
             boxStore.close();
         }
-        boxStore = MyObjectBox.builder().androidContext(appContext).build();
+        boxStore = MyObjectBox.builder()
+                              .androidContext(appContext)
+                              .maxSizeInKByte(MAX_DB_SIZE_IN_KB)
+                              .build();
         hisBox = boxStore.boxFor(HisItem.class);
 
         if (tagsString == null) {
@@ -1120,8 +1125,9 @@ public class CCUTagsDb extends HServer {
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
+                //.or()
+                //.equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);
-        
         //Leave one hisItem to make sure his data is not empty if there was no more recent entries
         List<HisItem>  hisItems = hisQuery.build().find();
         if (hisItems.size() > 1)
@@ -1130,17 +1136,20 @@ public class CCUTagsDb extends HServer {
             hisBox.remove(hisItems);
         }
     }
-
+    
     public void removeAllHisItems(HRef id) {
         HDict entity = readById(id);
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .order(HisItem_.date);
-      List<HisItem>  hisItems = hisQuery.build().find();
-
-      if (hisItems.size() > 0){
-          hisBox.remove(hisItems);
-      }
+        List<HisItem>  hisItems = hisQuery.build().find();
+    
+        //Leave one hisItem to make sure his data is not empty if there was no more recent entries
+        if (hisItems.size() > 1)
+        {
+            hisItems.remove(hisItems.size() - 1);
+            hisBox.remove(hisItems);
+        }
     }
 }

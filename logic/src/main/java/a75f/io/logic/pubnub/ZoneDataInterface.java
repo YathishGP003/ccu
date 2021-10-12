@@ -7,5 +7,6 @@ public interface ZoneDataInterface {
     void refreshScreenbySchedule(String nodeAddress, String EquipId, String zoneId);
     void refreshDesiredTemp(String nodeAddress, String coolDesiredTemp, String heatDesiredTemp);
     void updateSensorValue(short nodeAddress);
+    void refreshHeartBeatStatus(String id);
 }
 

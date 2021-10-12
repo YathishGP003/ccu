@@ -61,7 +61,6 @@ public class HeartbeatTagMigration {
             Point updatePoint = new Point.Builder().setHashMap(item).removeMarker("heart").removeMarker("beat").addMarker("heartbeat").build();
             CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + updatePoint.getDisplayName() + "," + updatePoint.getMarkers().toString() + "," + item.get("id").toString() + "," + updatePoint.getId());
             CCUHsApi.getInstance().updatePoint(updatePoint,item.get("id").toString());
-            CCUHsApi.getInstance().scheduleSync();
         }
 
         for (HashMap item:updateHBSPointList) {
@@ -70,8 +69,8 @@ public class HeartbeatTagMigration {
                     .addMarker("heartbeat").build();
             CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + updatePoint.getDisplayName() + "," + updatePoint.getMarkers().toString() + "," + item.get("id").toString() + "," + updatePoint.getId());
             CCUHsApi.getInstance().updatePoint(updatePoint,item.get("id").toString());
-            CCUHsApi.getInstance().scheduleSync();
         }
+        CCUHsApi.getInstance().scheduleSync();
 
     }
 }

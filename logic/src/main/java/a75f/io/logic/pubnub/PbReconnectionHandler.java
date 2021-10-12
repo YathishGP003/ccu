@@ -47,7 +47,7 @@ class PbReconnectionHandler {
                                 .subscribeOn(Schedulers.io())
                                 .filter(msg -> msg.getTimetoken() > pbLastTimeToken)
                                 .subscribe(msg -> {
-                                    PbMessageHandler.getInstance().handlePunubMessage(msg.getEntry(),
+                                    PbMessageHandler.getInstance().handlePubnubMessage(msg.getEntry(),
                                                                                       msg.getTimetoken(),
                                                                          appContext);
                                 }, throwable -> {

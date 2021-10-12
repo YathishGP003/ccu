@@ -29,6 +29,7 @@ public class HyperStatMessageGenerator {
     
     /**
      * Generates seed message for a node from haystack data.
+     *
      * @param zone
      * @param address
      * @param equipRef
@@ -36,87 +37,75 @@ public class HyperStatMessageGenerator {
      * @return
      */
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
-        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t
-                                               .newBuilder()
-                                               .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
-                                               .setSerializedSettingsData(getSettingsMessage(zone, address, equipRef).toByteString())
-                                               .setSerializedControlsData(getControlMessage(address, equipRef).toByteString())
-                                               .build();
-        
+        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder().setEncryptionKey(
+            ByteString.copyFrom(L.getEncryptionKey())).setSerializedSettingsData(getSettingsMessage(zone, address, equipRef).toByteString()).setSerializedControlsData(
+            getControlMessage(address, equipRef).toByteString()).build();
         return seed;
     }
     
     /**
      * Generate settings message for a node from haystack data.
+     *
      * @param zone
      * @param address
      * @param equipRef
      * @return
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
-        
         //TODO - Proto file does not define profile bitmap, enabledRelay.
         HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
-                                            .setRoomName(zone)
-                                            .setHeatingDeadBand((int) StandaloneTunerUtil.getStandaloneHeatingDeadband(equipRef))
-                                            .setCoolingDeadBand((int)StandaloneTunerUtil.getStandaloneCoolingDeadband(equipRef))
-                                            .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                               "and limit and min"))
-                                            .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                               "and limit and max"))
-                                            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
-                                                                                                               "and limit and min"))
-                                            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
-                                                                                                               "and limit and max"))
-                                            .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
-                                            .build();
+            .setRoomName(zone)
+            .setHeatingDeadBand((int) StandaloneTunerUtil.getStandaloneHeatingDeadband(equipRef))
+            .setCoolingDeadBand((int) StandaloneTunerUtil.getStandaloneCoolingDeadband(equipRef))
+            .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and min"))
+            .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max"))
+            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and min"))
+            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max"))
+            .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
+            .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
+            .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
+            .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
+            .build();
         return settings;
     }
     
     /**
      * Generate control message for a node from haystack data.
+     *
      * @param address
      * @param equipRef
      * @return
      */
     public static HyperStatControlsMessage_t getControlMessage(int address, String equipRef) {
-        
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
-        
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 10);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 10);
-        controls.setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO) ;//TODO
+        controls.setSetTempCooling((int) getDesiredTempCooling(equipRef) * 2);
+        controls.setSetTempHeating((int) getDesiredTempHeating(equipRef) * 2);
+        controls.setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO);//TODO
         controls.setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO);
-        
         if (!device.isEmpty()) {
-            DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
-                        .forEach( rawPoint -> {
-                          double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-    
-                          int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
-                                               ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                               : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                          hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                          setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
-                      });
+            DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
+                double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
+                int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort()) ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                                     : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
+                setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
+            });
         }
-        
         return controls.build();
     }
     
     private static double getDesiredTempCooling(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \"" + equipRef + "\"");
     }
     
     private static double getDesiredTempHeating(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("desired and temp and heating and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("desired and temp and heating and equipRef == \"" + equipRef +
+                                                     "\"");
     }
     
-    private static void setHyperStatPort(HyperStat.HyperStatControlsMessage_t.Builder controls,
-                                         Port port, boolean val) {
+    private static void setHyperStatPort(HyperStat.HyperStatControlsMessage_t.Builder controls, Port port, boolean val) {
         if (port == RELAY_ONE) {
             controls.setRelay1(val);
         } else if (port == RELAY_TWO) {
@@ -130,5 +119,13 @@ public class HyperStatMessageGenerator {
         } else if (port == RELAY_SIX) {
             controls.setRelay6(val);
         }
+    }
+    
+    private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
+        return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
+    }
+    
+    private static int getHumidityMaxSp(int address, CCUHsApi hayStack) {
+        return hayStack.readDefaultVal("config and humidity and max and group == \"" + address + "\"").intValue();
     }
 }

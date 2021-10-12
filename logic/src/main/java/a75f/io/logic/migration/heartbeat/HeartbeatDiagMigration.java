@@ -24,6 +24,7 @@ public class HeartbeatDiagMigration {
             Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration started ");
             upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
             PreferenceUtil.setHeartbeatMigrationAsDiagStatus(true);
+            Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration completed ");
         }
     }
 
@@ -60,11 +61,16 @@ public class HeartbeatDiagMigration {
             String equipDisplayName = modbusEquip.getDisplayName();
             if(!isHeartbeatDiagCreated(hayStack, slaveId)) {
                 deleteNonDiagHeartbeatPoint(hayStack, slaveId);
+                deleteRssiPointReferringNonDiagHeartbeatPoint(hayStack, slaveId);
                 hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplayName, modbusEquip.getId(),
                         modbusEquip.getSiteRef(), modbusEquip.getRoomRef(), modbusEquip.getFloorRef(),
                         Integer.parseInt(slaveId), "modbus", ProfileType.valueOf(modbusEquip.getProfile()),
                         modbusEquip.getTz()));
                 Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag point added for modbus with the address "+slaveId);
+            }
+            else if(isHeartbeatDiagCreated(hayStack, slaveId) && isRssiPointMoreThanOne(hayStack, slaveId)){
+                deleteDanglingRssiPoint(hayStack, slaveId);
+
             }
         });
     }
@@ -81,6 +87,7 @@ public class HeartbeatDiagMigration {
             String equipDisplay = equipDis+nodeAddress;
             if(!isHeartbeatDiagCreated(hayStack, nodeAddress)){
                 deleteNonDiagHeartbeatPoint(hayStack, nodeAddress);
+                deleteRssiPointReferringNonDiagHeartbeatPoint(hayStack, nodeAddress);
                 String heartBeatId = "";
                 if(isStandAlone){
                     heartBeatId = hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplay, equip.getId(), equip.getSiteRef(),
@@ -96,7 +103,26 @@ public class HeartbeatDiagMigration {
                         "heartbeat diag point added for "+ profile +" with the address  "+nodeAddress);
                 addRssiPointToDevice(hayStack, profile, nodeAddress, equip.getTz(), heartBeatId);
             }
+            else if(isHeartbeatDiagCreated(hayStack, nodeAddress) && isRssiPointMoreThanOne(hayStack, nodeAddress)){
+                deleteDanglingRssiPoint(hayStack, nodeAddress);
+
+            }
         });
+    }
+
+    private void deleteDanglingRssiPoint(CCUHsApi hayStack, String nodeAddress){
+        String heartbeatId =
+                hayStack.read("point and heartbeat and diag and group == \""+nodeAddress+"\"").get("id").toString();
+        String rssiDis = "rssi-"+nodeAddress;
+        List<HashMap> rssiPoints = hayStack.readAll("point and rssi and dis == \""+rssiDis+"\"");
+        for(HashMap rssiPoint : rssiPoints){
+            if(!heartbeatId.equals(rssiPoint.get("pointRef").toString())){
+                String rssiId = rssiPoint.get("id").toString();
+                hayStack.deleteEntityTree(rssiId);
+                Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,
+                        "Dangling rssi point with id  "+ rssiId +" for the address "+nodeAddress +" is deleted");
+            }
+        }
     }
 
     private boolean isHeartbeatDiagCreated(CCUHsApi hayStack, String nodeAddress){
@@ -104,7 +130,23 @@ public class HeartbeatDiagMigration {
     }
 
     private void deleteNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
-        hayStack.deleteEntityTree( hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"").get("id").toString());
+        HashMap heartbeatPoint = hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"");
+        if(heartbeatPoint.size() > 0){
+            hayStack.deleteEntityTree(heartbeatPoint.get("id").toString());
+        }
+    }
+
+    private boolean isRssiPointMoreThanOne(CCUHsApi hayStack, String nodeAddress){
+        String rssiDis = "rssi-"+nodeAddress;
+        return hayStack.readAll("point and rssi and dis == \""+rssiDis+"\"").size() > 1;
+    }
+
+    private void deleteRssiPointReferringNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
+        String rssiDis = "rssi-"+nodeAddress;
+        HashMap rssiHeartbeatPoint = hayStack.read("point and rssi and dis == \""+rssiDis+"\"");
+        if(rssiHeartbeatPoint.size() > 0){
+            hayStack.deleteEntityTree(rssiHeartbeatPoint.get("id").toString());
+        }
     }
 
     private void addRssiPointToDevice(CCUHsApi hayStack, String profile, String nodeAddress, String timeZone,

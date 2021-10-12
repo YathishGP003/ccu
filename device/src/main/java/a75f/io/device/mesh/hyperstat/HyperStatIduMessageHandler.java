@@ -1,11 +1,8 @@
 package a75f.io.device.mesh.hyperstat;
 
-import android.webkit.HttpAuthHandler;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatIduControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.DLog;
@@ -25,8 +22,8 @@ class HyperStatIduMessageHandler {
         }
     
         VrvControlMessageCache msgCache = VrvControlMessageCache.getInstance();
-        //Will be uncommented once response is implemented on firmware side.
-        /*if (msgCache.isControlsPendingResponse(nodeAddress)){
+        
+        if (msgCache.isControlsPendingResponse(nodeAddress)){
             if (iduStatus.getResponseType() > 0 && !msgCache.isControlsPendingDelivery(nodeAddress)) {
                 msgCache.resetControlsPending(nodeAddress);
                 CcuLog.d(L.TAG_CCU_SERIAL, "resetControlsPending for "+nodeAddress);
@@ -34,16 +31,16 @@ class HyperStatIduMessageHandler {
                 CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for "+nodeAddress);
                 return;
             }
-        }*/
+        }
         
         //Temporary solution till response is implemented
-        if (msgCache.isControlsPendingResponse(nodeAddress)) {
+        /*if (msgCache.isControlsPendingResponse(nodeAddress)) {
             CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for " +
                                        ""+nodeAddress+" timer "+msgCache.getControlsPendingTimer(nodeAddress));
             return;
-        }
+        }*/
         
-        setOperationMode(iduStatus.getSetOperationMode(), nodeAddress, hayStack);
+        setOperationMode(iduStatus.getOperationMode(), nodeAddress, hayStack);
         setFanSpeed(iduStatus.getFanSpeed(), nodeAddress, hayStack);
         setAirflowDirection(iduStatus.getAirflowDirection(), nodeAddress, hayStack);
         setCoolHeatRight(iduStatus.getCoolHeatRight(), nodeAddress, hayStack);
@@ -205,7 +202,6 @@ class HyperStatIduMessageHandler {
                                    .setHeatingSetTemperature(getHeatingDesiredTemp(address, hayStack))
                                    .setCoolingSetTemperature(getCoolingDesiredTemp(address, hayStack))
                                    .setMasterController(getMasterController(address, hayStack))
-                                   .setHumiditySetpoint(getHumiditySp(address, hayStack))
                                    .build();
     }
     
@@ -222,14 +218,6 @@ class HyperStatIduMessageHandler {
     
     private static int getCoolHeatRight(int address, CCUHsApi hayStack) {
         return hayStack.readHisValByQuery("coolHeatRight and group == \""+address+"\"").intValue();
-    }
-    
-    private static int getHumiditySp(int address, CCUHsApi hayStack) {
-        double minHumidity =
-            hayStack.readDefaultVal("config and humidity and min and group == \""+address+"\"").intValue();
-        double maxHumidity =
-            hayStack.readDefaultVal("config and humidity and max and group == \""+address+"\"").intValue();
-        return (int)(minHumidity + maxHumidity)/2;
     }
     
     private static int getFanSpeed(int address, CCUHsApi hayStack) {

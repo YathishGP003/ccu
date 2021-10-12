@@ -58,7 +58,7 @@ public class EmrProfile extends ZoneProfile
     
     @Override
     public void updateZonePoints() {
-        HashMap emrPoint = CCUHsApi.getInstance().read("sensor and emr and equipRef == \""+emrEquip.equipRef+"\"");
+        HashMap emrPoint = CCUHsApi.getInstance().read("sensor and emr and sp and equipRef == \""+emrEquip.equipRef+"\"");
         List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(emrPoint.get("id").toString(), 0 ,2);
         
         if (hisItems.size() < 2) {

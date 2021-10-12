@@ -580,6 +580,7 @@ public class HClient extends HProj
             c.setRequestProperty("api-key", apiKey);
           }
           c.setConnectTimeout(30000);
+          c.setReadTimeout(30000);
           c.connect();
 
           // post expression

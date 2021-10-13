@@ -19,6 +19,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -31,6 +32,8 @@ import static a75f.io.device.mesh.MeshUtil.sendStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.logic.L.ccu;
+
+import android.util.Log;
 
 /**
  * Created by samjithsadasivan on 9/19/18.

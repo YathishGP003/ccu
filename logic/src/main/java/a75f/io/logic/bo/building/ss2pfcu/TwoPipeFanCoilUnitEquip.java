@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.util.RxTask;
 
 public class TwoPipeFanCoilUnitEquip {
     int nodeAddr;
@@ -79,9 +80,15 @@ public class TwoPipeFanCoilUnitEquip {
         b.addMarker(profile);
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-
-        StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef,siteDis+"-2PFCU-"+nodeAddr, equipRef
-                                                                                        , room, floor, tz);
+    
+        RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
+                                                                            siteRef,
+                                                                            siteDis+"-2PFCU-"+nodeAddr,
+                                                                            equipRef,
+                                                                            room,
+                                                                            floor,
+                                                                            tz));
+        
         StandAloneTuners.addTwoPipeFanEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef, siteDis + "-2PFCU-" + nodeAddr,
                                                             equipRef, room, floor, tz);
 
@@ -101,7 +108,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-        CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ctID, 0.0);
 
         Point humidity = new Point.Builder()
                 .setDisplayName(equipDis+"-humidity")
@@ -116,7 +123,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
-        CCUHsApi.getInstance().writeHisValById(humidityId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(humidityId, 0.0);
 
         Point co2 = new Point.Builder()
                 .setDisplayName(equipDis+"-co2")
@@ -131,7 +138,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
-        CCUHsApi.getInstance().writeHisValById(co2Id, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(co2Id, 0.0);
 
         Point voc = new Point.Builder()
                 .setDisplayName(equipDis+"-voc")
@@ -146,7 +153,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
-        CCUHsApi.getInstance().writeHisValById(vocId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(vocId, 0.0);
 
         Point sound = new Point.Builder()
                 .setDisplayName(equipDis+"-sound")
@@ -313,7 +320,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .build();
 
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
-        CCUHsApi.getInstance().writeHisValById(datID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(datID, 0.0);
 
         Point eatPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-supplyWaterTempSensorTh2")
@@ -328,7 +335,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(eatID, 0.0);
 
         Point fanMedium = new Point.Builder()
                 .setDisplayName(equipDis+"-fanMedium")
@@ -368,7 +375,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
-        CCUHsApi.getInstance().writeHisValById(r4ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r4ID, 0.0);
 
         Point waterValve = new Point.Builder()
                 .setDisplayName(equipDis+"-waterValve")
@@ -382,7 +389,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String r6ID = CCUHsApi.getInstance().addPoint(waterValve);
-        CCUHsApi.getInstance().writeHisValById(r6ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r6ID, 0.0);
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanLow")
@@ -419,7 +426,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
                 .setDisplayName(equipDis+"-equipStatusMessage")
@@ -462,7 +469,7 @@ public class TwoPipeFanCoilUnitEquip {
                 siteRef, room, floor, nodeAddr, profile, tz ));
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
 
         //Create Physical points and map
@@ -507,10 +514,7 @@ public class TwoPipeFanCoilUnitEquip {
         double coolingVal = 74.0;
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
-        setCurrentTemp(0);
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
+        
         setScheduleStatus("");
         setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
@@ -536,7 +540,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
@@ -596,7 +600,7 @@ public class TwoPipeFanCoilUnitEquip {
                     .setTz(tz)
                     .build();
             String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyDetectionId, 0.0);
         }
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
@@ -946,7 +950,7 @@ public class TwoPipeFanCoilUnitEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
 
@@ -977,7 +981,7 @@ public class TwoPipeFanCoilUnitEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
 
     public double getDesiredTempHeating()
@@ -1007,7 +1011,7 @@ public class TwoPipeFanCoilUnitEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
 
     public void setConfigNumVal(String tags,double val) {

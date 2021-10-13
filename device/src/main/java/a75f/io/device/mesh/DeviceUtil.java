@@ -7,7 +7,10 @@ import a75f.io.logic.bo.building.definitions.Port;
 public class DeviceUtil {
     
     public static boolean isAnalog(String port) {
-        return Arrays.stream(Port.values()).anyMatch(port::equals);
+       return (port.equals(Port.ANALOG_OUT_ONE.name())
+               ||port.equals(Port.ANALOG_OUT_TWO.name())
+               ||port.equals(Port.ANALOG_OUT_THREE.name())
+               ||port.equals(Port.ANALOG_OUT_FOUR.name()));
     }
     
     public static short mapAnalogOut(String type, short val) {
@@ -22,6 +25,21 @@ public class DeviceUtil {
                 return (short) (20 + scaleAnalog(val, 80));
             case "10-2v":
                 return (short) (100 - scaleAnalog(val, 80));
+            default:
+            String [] arrOfStr = type.split("-");
+            if (arrOfStr.length == 2)
+            {
+                if (arrOfStr[1].contains("v")) {
+                    arrOfStr[1] = arrOfStr[1].replace("v", "");
+                }
+                int min = (int)Double.parseDouble(arrOfStr[0]);
+                int max = (int)Double.parseDouble(arrOfStr[1]);
+                if (max > min) {
+                    return (short) (min * 10 + (max - min ) * 10 * val/100);
+                } else {
+                    return (short) (min * 10 - (min - max ) * 10 * val/100);
+                }
+            }
         }
         return (short) 0;
     }

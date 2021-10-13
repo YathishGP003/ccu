@@ -4,6 +4,8 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -127,6 +129,8 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+        CcuLog.i("UI_PROFILING", "VavHybridRtuProfile.onViewCreated");
+    
         prefs = new Prefs(getContext().getApplicationContext());
         if (getUserVisibleHint()) {
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
@@ -229,6 +233,8 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             }
         });
         setSpinnerDropDownIcon();
+        CcuLog.i("UI_PROFILING", "VavHybridRtuProfile.onViewCreated Done");
+    
     }
 
     private void goTonext() {

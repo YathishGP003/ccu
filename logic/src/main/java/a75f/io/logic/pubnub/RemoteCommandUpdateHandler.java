@@ -68,7 +68,6 @@ public class RemoteCommandUpdateHandler
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
                             case OTA_UPDATE_HS:
-                                Log.i(Globals.TAG, " command received for "+cmdType);
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

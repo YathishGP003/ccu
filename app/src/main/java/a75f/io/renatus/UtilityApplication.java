@@ -204,6 +204,8 @@ public abstract class UtilityApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate");
+    
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         // initialize crash reports as early as possible
@@ -246,10 +248,13 @@ public abstract class UtilityApplication extends Application {
         mNetworkReceiver = new NetworkChangeReceiver();
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
+        CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
+    
     }
 
     private void initializeCrashReporting() {
-
+        CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
+    
         RaygunClient.init(this);
         RaygunClient.setVersion(versionName());
         RaygunClient.enableCrashReporting();
@@ -262,6 +267,8 @@ public abstract class UtilityApplication extends Application {
                 RenatusApp.closeApp();
             });
         }
+        CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");
+    
     }
 
     private String versionName() {

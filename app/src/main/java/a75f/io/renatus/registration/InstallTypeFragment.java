@@ -159,7 +159,6 @@ public class InstallTypeFragment extends Fragment {
 
             prefs.setBoolean("CCU_SETUP",false);
             prefs.setBoolean("PROFILE_SETUP",false);
-            CCUHsApi.getInstance().saveTagsData();
             CCUHsApi.getInstance().syncEntityTree();
             L.saveCCUState();
         }

@@ -64,7 +64,7 @@
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="200dp"
                         android:layout_height="60dp"
-                        android:entries="@array/zone_priority_bpos"
+                        android:entries="@array/zone_priority"
                         android:layout_marginTop="-23dp"
                         android:layout_marginLeft="260dp"
                         android:layout_marginBottom="40dp"

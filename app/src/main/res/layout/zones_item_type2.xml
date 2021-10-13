@@ -4,10 +4,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:weightSum="2"
-        xmlns:tools="http://schemas.android.com/tools">
+     >
 
         <LinearLayout
             android:id="@+id/lt_column1"
@@ -15,8 +12,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginLeft="56dp"
-            android:layout_marginTop="20dp">
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="18dp">
             <TextView
                 android:id="@+id/text_point1label"
                 android:layout_width="wrap_content"
@@ -39,7 +36,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="18dp">
             <TextView
                 android:id="@+id/text_point2label"
                 android:layout_width="wrap_content"

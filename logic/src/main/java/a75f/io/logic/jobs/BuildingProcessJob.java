@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
 /**
@@ -60,7 +61,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
                     return;
                 }
-
+                BuildingTunerCache.getInstance().updateTuners();
                 DiagEquip.getInstance().updatePoints();
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     profile.updateZonePoints();
@@ -81,8 +82,6 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 if (!Globals.getInstance().isTestMode()) {
                     L.ccu().systemProfile.doSystemControl();
                 }
-                L.saveCCUState();
-
                 handleSync();
 
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
@@ -114,6 +113,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         DateTime now = new DateTime();
         boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
         if (timeForEntitySync) {
+            L.saveCCUState();
             CCUHsApi.getInstance().scheduleSync();
         }
     }

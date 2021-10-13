@@ -193,7 +193,6 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-
     <style name="label_orange_title_75f" parent="@android:style/TextAppearance">
         <item name="android:textSize">33.5sp</item>
         <item name="android:textColor">@color/renatus_75f_primary</item>
@@ -506,18 +505,6 @@
         <item name="android:spinnerMode">dropdown</item>
     </style>
 
-  <!--  &lt;!&ndash; Changes the spinner drop down item radio button style &ndash;&gt;
-    <style name="DropDownItemSpinnerTheme" parent="android:Widget.DropDownItem.Spinner">
-        <item name="android:checkMark">@drawable/btn_radio_holo_light</item>
-    </style>
-
-    <style name="ListViewSpinnerTheme" parent="android:Widget.ListView">
-        <item name="android:listSelector">@drawable/list_selector_holo_light</item>
-    </style>
-
-    <style name="ListViewSpinnerTheme.White" parent="android:Widget.ListView.White">
-        <item name="android:listSelector">@drawable/list_selector_holo_light</item>
-    </style>-->
 
     <style name="SpinnerItemTheme"
         parent="android:TextAppearance.Widget.TextView.SpinnerItem">
@@ -528,4 +515,154 @@
         <item name="android:background"> @drawable/ic_arrow_down</item>
     </style>
 
+    <style name="toggle_label" parent="text_toggleappearance">
+        <item name="android:textColor">@color/dark_text</item>
+    </style>
+
+    <style name="text_lite_header" parent="@android:style/TextAppearance">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:textColor">@color/grey_select</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="Title_HyperStat">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_marginTop">32dp</item>
+        <item name="android:layout_marginBottom">40dp</item>
+        <item name="android:textAppearance">?label_orange_title</item>
+    </style>
+
+    <style name="TableHeaderTextView_HyperStat">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textAppearance">@style/text_lite_header</item>
+
+    </style>
+
+    <style name="ScrollView_HyperStat">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">105.5dp</item>
+        <item name="android:layout_marginStart">30dp</item>
+        <item name="android:layout_marginEnd">30dp</item>
+    </style>
+
+    <style name="TableRow_HyperStat">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_marginTop">19dp</item>
+    </style>
+
+    <style name="TableToggleButtonWrapper">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="TableBasicItemWrapper">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_marginStart">34dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="TableSpinner" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:layout_width">196dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="ToggleButton_HyperStat">
+        <item name="android:layout_width">46dp</item>
+        <item name="android:layout_height">27dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@drawable/toggle_selector</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:checked">false</item>
+        <item name="android:textOff"> </item>
+        <item name="android:textOn"> </item>
+    </style>
+
+    <style name="OnOffButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@drawable/toggle_testselector</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:checked">false</item>
+        <item name="android:textAppearance">@style/text_toggleappearance</item>
+        <item name="android:textColor">@drawable/toggle_textselector</item>
+        <item name="android:textOff">OFF</item>
+        <item name="android:textOn">ON</item>
+
+    </style>
+
+    <style name="ToggleLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginStart">15dp</item>
+        <item name="android:textAppearance">@style/text_appearance</item>
+    </style>
+
+    <style name="DamperPositionLabel_HyperStat">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:textAppearance">@style/label_values</item>
+        <item name="android:textColor">@drawable/label_textselector</item>
+    </style>
+
+    <style name="DamperPositionSpinner_HyperStat" parent="Widget.AppCompat.Spinner">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">start|top</item>
+        <item name="android:layout_marginStart">102dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:dropDownWidth">match_parent</item>
+    </style>
+
+    <style name="FanPositionLabel_HyperStat">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:textAppearance">@style/label_values</item>
+        <item name="android:textColor">@drawable/label_textselector</item>
+    </style>
+    <style name="FanPositionSpinner_HyperStat" parent="Widget.AppCompat.Spinner">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">end|top</item>
+        <item name="android:dropDownWidth">match_parent</item>
+    </style>
+    <style name="Damper_HyperStat" parent="Widget.AppCompat.Spinner">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1.5</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">end|top</item>
+        <item name="android:dropDownWidth">match_parent</item>
+    </style>
 </resources>

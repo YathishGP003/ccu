@@ -1137,7 +1137,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         emPoints.put("Profile","Energy Meter");
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
         ArrayList currentRate = CCUHsApi.getInstance().readAll("point and emr and rate and equipRef == \""+equipID+"\"");
-        double energyReading = CCUHsApi.getInstance().readHisValByQuery("point and emr and sensor and equipRef == \""+equipID+"\"");
+        double energyReading = CCUHsApi.getInstance().readHisValByQuery("point and emr and sensor and sp and equipRef == \""+equipID+"\"");
 
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {

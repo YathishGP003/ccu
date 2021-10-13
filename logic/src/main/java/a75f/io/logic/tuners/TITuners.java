@@ -7,9 +7,11 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -164,6 +166,9 @@ public class TITuners {
         Log.d("CCU", "addEquipTiTuners for " + equipdis);
         //addEquipZoneTuners(equipdis, equipref, roomRef, floorRef);
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
+    
+        List<HisItem> hisItems = new ArrayList<>();
+        
         Point zonePrioritySpread = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                        .setSiteRef(siteRef)
@@ -177,7 +182,7 @@ public class TITuners {
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
-        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
+        hisItems.add(HSUtil.getHisItemForWritable(zonePrioritySpreadId));
         
         Point zonePriorityMultiplier = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
@@ -192,7 +197,7 @@ public class TITuners {
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
+        hisItems.add(HSUtil.getHisItemForWritable(zonePriorityMultiplierId));
         
         Point coolingDb = new Point.Builder()
                               .setDisplayName(equipdis+"-"+"coolingDeadband")
@@ -208,7 +213,7 @@ public class TITuners {
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
         BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
-        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
+        hisItems.add(HSUtil.getHisItemForWritable(coolingDbId));
         
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -223,7 +228,7 @@ public class TITuners {
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
+        hisItems.add(HSUtil.getHisItemForWritable(coolingDbMultiplierId));
         
         Point heatingDb = new Point.Builder()
                               .setDisplayName(equipdis+"-"+"heatingDeadband")
@@ -239,7 +244,7 @@ public class TITuners {
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
         BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
-        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
+        hisItems.add(HSUtil.getHisItemForWritable(heatingDbId));
         
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
@@ -254,7 +259,7 @@ public class TITuners {
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(heatingDbMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
+        hisItems.add(HSUtil.getHisItemForWritable(heatingDbMultiplierId));
         
         Point propGain = new Point.Builder()
                              .setDisplayName(equipdis+"-"+"proportionalKFactor")
@@ -269,7 +274,7 @@ public class TITuners {
                              .build();
         String pgainId = hayStack.addPoint(propGain);
         BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
-        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
+        hisItems.add(HSUtil.getHisItemForWritable(pgainId));
         
         Point integralGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -284,7 +289,7 @@ public class TITuners {
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
         BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
-        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+        hisItems.add(HSUtil.getHisItemForWritable(igainId));
         
         Point propSpread = new Point.Builder()
                                .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
@@ -299,7 +304,7 @@ public class TITuners {
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);
-        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
+        hisItems.add(HSUtil.getHisItemForWritable(pSpreadId));
         
         Point integralTimeout = new Point.Builder()
                                     .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
@@ -315,8 +320,8 @@ public class TITuners {
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
-        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
-        
-        
+        hisItems.add(HSUtil.getHisItemForWritable(iTimeoutId));
+    
+        hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 }

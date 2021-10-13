@@ -182,7 +182,7 @@ public class DiagEquip
         Point appVersion = new Point.Builder()
                 .setDisplayName(equipDis+"-appVersion")
                 .setEquipRef(equipRef)
-                .setSiteRef(siteRef).setHisInterpolate("cov")
+                .setSiteRef(siteRef)
                 .addMarker("diag").addMarker("app").addMarker("version").addMarker("writable")
                 .setUnit("")
                 .setTz(tz)

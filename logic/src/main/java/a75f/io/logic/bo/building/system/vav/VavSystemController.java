@@ -25,6 +25,7 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
@@ -559,10 +560,10 @@ public class VavSystemController extends SystemController
     }
     public boolean isCMTempDead(double cmTemp) {
 
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
 
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         return !(cmTemp > (buildingLimitMax + tempDeadLeeway)) && !(cmTemp < (buildingLimitMin - tempDeadLeeway));
     }
 

@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -67,10 +68,10 @@ public class CazProfile extends ZoneProfile {
     @Override
     public boolean isZoneDead() {
 
-        double buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
 
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + cazEquip.getCurrentTemp() + " buildingLimitMax:" + buildingLimitMax + " tempDead:" + tempDeadLeeway);
         CcuLog.d(L.TAG_CCU_ZONE, " roomTemp : " + cazEquip.getCurrentTemp() + " buildingLimitMin:" + buildingLimitMin + " tempDead:" + tempDeadLeeway);
         if (cazEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)

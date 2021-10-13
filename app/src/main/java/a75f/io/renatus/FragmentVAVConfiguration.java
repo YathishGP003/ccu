@@ -6,6 +6,9 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import android.util.Log;
@@ -398,6 +401,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                     protected Void doInBackground( final String ... params ) {
                         setupVavZoneProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().syncEntityTree();
                         return null;
                     }
                 
@@ -406,7 +410,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        RxjavaUtil.executeBackground(() -> LSerial.getInstance()
+                                   .sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef));
+                        
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             

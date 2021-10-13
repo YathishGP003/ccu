@@ -14,17 +14,17 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
-
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class HisSyncHandler
 {
@@ -60,8 +60,16 @@ public class HisSyncHandler
 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                     CcuLog.d(TAG,"Processing sync for equips and devices");
+                    //Device sync is initiated concurrently on Rx thread
+                    Observable.fromCallable(() -> {
+                                syncHistorizedDevicePoints(timeForQuarterHourSync);
+                                return true;
+                                })
+                              .subscribeOn(Schedulers.io())
+                              .subscribe();
+                    
+                    //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
                     syncHistorizedEquipPoints(timeForQuarterHourSync);
-                    syncHistorizedDevicePoints(timeForQuarterHourSync);
                 }
 
                 if (entitySyncRequired) {

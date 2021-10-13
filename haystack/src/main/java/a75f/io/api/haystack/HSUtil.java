@@ -7,6 +7,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -355,5 +356,10 @@ public class HSUtil
         markers.remove(Tags.SP);
         markers.remove(Tags.SYSTEM);
         return markers;
+    }
+    
+    public static HisItem getHisItemForWritable(String id) {
+        return new HisItem(id, new Date(System.currentTimeMillis()),
+                    HSUtil.getPriorityVal(id) );
     }
 }

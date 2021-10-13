@@ -816,8 +816,6 @@ public class CreateNewSite extends Fragment {
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         L.ccu().systemProfile = new DefaultSystem();
-        ccuHsApi.saveTagsData();
-
         prefs.setString("SITE_ID", localSiteId);
         return localSiteId;
     }

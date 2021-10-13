@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -98,6 +99,12 @@ public abstract class ZoneProfile extends Schedulable
             mInterface.refreshView();
     }
     
+    /**
+     * TODO - Refactor.
+     * Currently this is repeated it all the Zone profile's. It should be replaced by a single common implementation
+     * here.
+     * @return
+     */
     public boolean isZoneDead() {
         return false;
     }
@@ -143,8 +150,8 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     public boolean buildingLimitMinBreached() {
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
     
         double currentTemp = getCurrentTemp();
         if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway)) {
@@ -154,8 +161,8 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     public boolean buildingLimitMaxBreached() {
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
     
         double currentTemp = getCurrentTemp();
         if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway)) {

@@ -14,6 +14,7 @@ import android.os.Looper;
 
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Point;
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -324,9 +325,13 @@ public class FloorPlanFragment extends Fragment {
 
     // callback from FloorListActionMenuListener
     public void refreshScreen() {
+        CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen");
+    
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, new FloorComparator());
         updateFloors();
+        CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen Done");
+    
     }
 
 
@@ -361,21 +366,16 @@ public class FloorPlanFragment extends Fragment {
         roomList = HSUtil.getZones(getSelectedFloor().getId());
         Collections.sort(roomList, new ZoneComparator());
         updateRooms(roomList);
-
     }
-
-
-    //
+    
     private void enableRoomBtn() {
         addZonelt.setVisibility(View.VISIBLE);
         addRoomBtn.setVisibility(View.VISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
     }
-
-
+    
     private void updateRooms(ArrayList<Zone> zones) {
         mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
-        //mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.id.textData,zones);
         roomListView.setAdapter(mRoomListAdapter);
         enableRoomBtn();
         if (mRoomListAdapter.getCount() > 0) {
@@ -383,17 +383,13 @@ public class FloorPlanFragment extends Fragment {
             enableModueButton();
         } else {
             if (mModuleListAdapter != null) {
-				/*mModuleListAdapter = new DataArrayAdapter<Short>(this.getActivity(), R
-						                                                                     .layout.listviewitem, new Short[]{});
-				moduleListView.setAdapter(mModuleListAdapter);*/
                 mModuleListAdapter.clear();
 
             }
             disableModuButton();
         }
     }
-
-
+    
     @SuppressLint("StaticFieldLeak")
     public void getBuildingFloorsZones(String enableKeyboard) {
         loadExistingZones();
@@ -593,8 +589,6 @@ public class FloorPlanFragment extends Fragment {
         ArrayList<Equip> zoneEquips = HSUtil.getEquips(zone.getId());
         if (zoneEquips != null && (zoneEquips.size() > 0)) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
-            //mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.id.textData,createAddressList(zoneEquips));
-
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

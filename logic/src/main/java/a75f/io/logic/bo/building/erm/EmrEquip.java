@@ -66,7 +66,7 @@ public class EmrEquip
                                           .setTz(tz)
                                           .build();
         String emrReadingId  = hayStack.addPoint(emrReading );
-        hayStack.writeHisValById(emrReadingId, 0.0);
+        hayStack.writeHisValueByIdWithoutCOV(emrReadingId, 0.0);
     
         Point currentRate  = new Point.Builder()
                                     .setDisplayName(equipDis+"-currentRate")
@@ -110,7 +110,7 @@ public class EmrEquip
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "emr", tz, false));

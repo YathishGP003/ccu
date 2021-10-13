@@ -1,0 +1,322 @@
+package a75f.io.logic.jobs
+
+import a75f.io.api.haystack.*
+import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.Occupancy
+import a75f.io.logic.bo.building.ZoneState
+import a75f.io.logic.bo.building.ZoneTempState
+import a75f.io.logic.bo.building.hvac.Stage
+import a75f.io.logic.pubnub.ZoneDataInterface
+import a75f.io.logic.tuners.StandaloneTunerUtil
+import a75f.io.logic.tuners.TunerConstants
+import a75f.io.logic.tuners.TunerUtil
+import android.os.AsyncTask
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import org.projecthaystack.HNum
+import org.projecthaystack.HRef
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.set
+
+/**
+ * Created by Manjunath K on 11-08-2021.
+ */
+class HyperStatScheduler {
+
+    companion object {
+
+        private val configurationDisposable = CompositeDisposable()
+        var zoneDataInterface: ZoneDataInterface? = null
+
+        var hyperstatStatus: HashMap<String, String> = HashMap()
+
+        fun getHyperstatStatusString(equipRef: String?): String? {
+            return if (hyperstatStatus.size > 0 && hyperstatStatus.containsKey(equipRef))
+                hyperstatStatus[equipRef] else "OFF"
+        }
+
+        fun updateHyperstatStatus(
+            equipId: String,
+            state: ZoneState,
+            portStages: HashMap<String, Int>,
+            temperatureState: ZoneTempState
+        ) {
+            var status: String
+            status = when (temperatureState) {
+                ZoneTempState.RF_DEAD -> "RF Signal dead "
+                ZoneTempState.TEMP_DEAD -> "Zone Temp Dead "
+                ZoneTempState.EMERGENCY -> "Emergency "
+                ZoneTempState.NONE -> ""
+                ZoneTempState.FAN_OP_MODE_OFF -> "OFF "
+            }
+
+            if (portStages.containsKey(Stage.COOLING_1.displayName)
+                && portStages.containsKey(Stage.COOLING_2.displayName)
+                && portStages.containsKey(Stage.COOLING_3.displayName)
+            ) {
+                status += "Cooling 1,2&3 ON "
+            } else if (portStages.containsKey(Stage.COOLING_1.displayName)
+                && portStages.containsKey(Stage.COOLING_2.displayName)
+            ) {
+                status += "Cooling 1&2 ON "
+            } else if (portStages.containsKey(Stage.COOLING_1.displayName)
+                && portStages.containsKey(Stage.COOLING_3.displayName)
+            ) {
+                status += "Cooling 1&3 ON "
+            } else if (portStages.containsKey(Stage.COOLING_2.displayName)
+                && portStages.containsKey(Stage.COOLING_3.displayName)
+            ) {
+                status += "Cooling 2&3 ON "
+            } else if (portStages.containsKey(Stage.COOLING_1.displayName)) {
+                status += "Cooling 1 ON "
+            } else if (portStages.containsKey(Stage.COOLING_2.displayName)) {
+                status += "Cooling 2 ON "
+            } else if (portStages.containsKey(Stage.COOLING_3.displayName)) {
+                status += "Cooling 3 ON "
+            }
+            if (portStages.containsKey(Stage.HEATING_1.displayName)
+                && portStages.containsKey(Stage.HEATING_2.displayName)
+                && portStages.containsKey(Stage.HEATING_3.displayName)
+            ) {
+                status += "Heating 1,2&3 ON "
+            } else if (portStages.containsKey(Stage.HEATING_1.displayName)
+                && portStages.containsKey(Stage.HEATING_2.displayName)
+            ) {
+                status += "Heating 1&2 ON "
+            } else if (portStages.containsKey(Stage.HEATING_1.displayName)
+                && portStages.containsKey(Stage.HEATING_3.displayName)
+            ) {
+                status += "Heating 1&3 ON "
+            } else if (portStages.containsKey(Stage.HEATING_2.displayName)
+                && portStages.containsKey(Stage.HEATING_3.displayName)
+            ) {
+                status += "Heating 2&3 ON "
+            } else if (portStages.containsKey(Stage.HEATING_1.displayName)) {
+                status += "Heating 1 ON "
+            } else if (portStages.containsKey(Stage.HEATING_2.displayName)) {
+                status += "Heating 2 ON "
+            } else if (portStages.containsKey(Stage.HEATING_3.displayName)) {
+                status += "Heating 3 ON "
+            }
+
+            if (temperatureState != ZoneTempState.FAN_OP_MODE_OFF && temperatureState != ZoneTempState.TEMP_DEAD) {
+                if (status == "OFF " && portStages.size > 0) status = ""
+
+                if (portStages.containsKey(Stage.FAN_1.displayName)
+                    && portStages.containsKey(Stage.FAN_2.displayName)
+                    && portStages.containsKey(Stage.FAN_3.displayName)
+                ) {
+                    status += "Fan 1,2&3 ON "
+                } else if (portStages.containsKey(Stage.FAN_1.displayName)
+                    && portStages.containsKey(Stage.FAN_2.displayName)
+                ) {
+                    status += "Fan 1&2 ON "
+                } else if (portStages.containsKey(Stage.FAN_1.displayName)
+                    && portStages.containsKey(Stage.FAN_3.displayName)
+                ) {
+                    status += "Fan 1&3 ON "
+                } else if (portStages.containsKey(Stage.FAN_2.displayName)
+                    && portStages.containsKey(Stage.FAN_3.displayName)
+                ) {
+                    status += "Fan 2&3 ON "
+                } else if (portStages.containsKey(Stage.FAN_1.displayName)) {
+                    status += "Fan 1 ON "
+                } else if (portStages.containsKey(Stage.FAN_2.displayName)) {
+                    status += "Fan 2 ON "
+                } else if (portStages.containsKey(Stage.FAN_3.displayName)) {
+                    status += "Fan 3 ON "
+                }
+
+            }
+            /*
+            val curState = CCUHsApi.getInstance()
+                .readHisValByQuery("point and temp and operating and mode and his and equipRef == \"$equipId\"")
+            if (curState != state.ordinal.toDouble()) CCUHsApi.getInstance().writeHisValByQuery(
+                "point and temp and operating and mode and his and equipRef == \"$equipId\"",
+                state.ordinal.toDouble()
+            )*/
+            if (getHyperstatStatusString(equipId) != status) {
+                if (hyperstatStatus.containsKey(equipId)) hyperstatStatus.remove(
+                    equipId
+                )
+                hyperstatStatus[equipId] = status
+                if (status.isEmpty()) status = " OFF "
+                updateHyperstateEquipStatus(equipId, status, state)
+            }
+        }
+
+        fun processEquip(equip: Equip, equipSchedule: Schedule, vacation: Schedule?){
+            val occ = equipSchedule.currentValues
+
+
+            //When schedule is deleted
+
+            if (occ == null) {
+                ScheduleProcessJob.occupiedHashMap.remove(equip.roomRef)
+                return
+            }
+            if (vacation != null) occ.isOccupied = false
+            occ.vacation = vacation
+
+            val haystack = CCUHsApi.getInstance()
+
+            val occupancyStatus = haystack.readHisValByQuery(
+                "point and occupancy and mode and equipRef == \"${equip.id}\""
+            )
+
+            val heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery(
+                "heating and deadband and base and not multiplier", equip.id
+            )
+
+            val coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery(
+                "cooling and deadband and base and not multiplier", equip.id
+            )
+
+            val setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.id)
+            val curOccupancy = Occupancy.values()[occupancyStatus.toInt()]
+            val autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback")
+            val currentOperatingMode = haystack.readHisValByQuery(
+                "point and hyperstat and occupancy and mode and his and equipRef == \"${equip.id}\""
+            )
+
+            occ.unoccupiedZoneSetback = setback
+            occ.heatingDeadBand = heatingDeadBand
+            occ.coolingDeadBand = coolingDeadBand
+
+
+            if (curOccupancy == Occupancy.PRECONDITIONING)
+                occ.isPreconditioning = true
+            else if (curOccupancy == Occupancy.FORCEDOCCUPIED)
+                occ.isForcedOccupied = true
+
+            CcuLog.d(
+                "ZoneScheduler", "Equip: " + equip.displayName + ","
+                        + occ.isPreconditioning + "," + occ.isForcedOccupied + "," + equip.id
+            )
+
+            if (ScheduleProcessJob.putOccupiedModeCache(equip.roomRef, occ)) {
+
+
+                val mode = haystack.readHisValByQuery(
+                    "point and hyperstat and occupancy " +
+                            "and mode and his and equipRef == \"${equip.id}\""
+                ).toInt()
+
+                val avgTemp = (occ.coolingVal + occ.heatingVal) / 2.0
+
+                var coolingTemp = if (occ.isOccupied || occ.isPreconditioning)
+                    occ.coolingVal
+                else
+                    occ.coolingVal + occ.unoccupiedZoneSetback
+
+                var heatingTemp = if (occ.isOccupied || occ.isPreconditioning)
+                    occ.heatingVal
+                else
+                    occ.heatingVal - occ.unoccupiedZoneSetback
+
+                Log.i("DEV_DEBUG","autoAwaySetbackTemp $autoawaysetback");
+                Log.i("DEV_DEBUG","${occ.coolingVal} ${occ.heatingVal} $setback");
+                if (equip.markers.contains("cpu") && currentOperatingMode == Occupancy.AUTOAWAY.ordinal.toDouble()){
+                    coolingTemp =  occ.coolingVal + autoawaysetback
+                    heatingTemp =  occ.heatingVal - autoawaysetback
+                    Log.i("DEV_DEBUG", "processEquip After coolingTemp: $coolingTemp heatingTemp $heatingTemp")
+                }
+
+                setDesiredTemp(equip, coolingTemp, "cooling", occ.isForcedOccupied)
+                setDesiredTemp(equip, heatingTemp, "heating", occ.isForcedOccupied)
+                setDesiredTemp(equip, avgTemp, "average", occ.isForcedOccupied)
+
+            }
+        }
+
+        private fun updateHyperstateEquipStatus(equipId: String, status: String?, state: ZoneState?) {
+            CCUHsApi.getInstance().writeDefaultVal(
+                "point and status and message and writable and equipRef == \"$equipId\"", status
+            )
+            zoneDataInterface?.refreshScreen("")
+        }
+
+
+        fun setDesiredTemp(equip: Equip, desiredTemp: Double?, flag: String, isForcedOccupied: Boolean) {
+
+            val points: ArrayList<*>? = CCUHsApi.getInstance().readAll(
+                "point and air and temp and " + flag + " and desired and sp and equipRef  ==  \"${equip.id}\""
+            )
+            if (points == null || points.size == 0) {
+                return  //Equip might have been deleted.
+            }
+            val id = (points[0] as java.util.HashMap<*, *>)["id"].toString()
+            if (isForcedOccupied) {
+                CcuLog.d(L.TAG_CCU_SCHEDULER, flag + "FC DesiredTemp not changed : Skip PointWrite=")
+                return
+            } else if (HSUtil.getPriorityLevelVal(id, 8) == desiredTemp) {
+                CcuLog.d(L.TAG_CCU_SCHEDULER, flag + "DesiredTemp not changed : Skip PointWrite")
+                return
+            }
+            try {
+                CCUHsApi.getInstance().pointWrite(
+                    HRef.make(id.replace("@", "")),
+                    8,
+                    "Scheduler",
+                    if (desiredTemp != null) HNum.make(desiredTemp) else HNum.make(0),
+                    HNum.make(0)
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
+            }, 100)
+        }
+
+
+        fun updateHyperstatUIPoints(equipRef: String, command: String, value: Double) {
+
+            val haystack: CCUHsApi = CCUHsApi.getInstance()
+
+            class PointUpdateTask : AsyncTask<Void?, Void?, Void?>() {
+                override fun doInBackground(vararg void: Void?): Void? {
+
+                    // On progress of execution
+                    Log.i(L.TAG_CCU_HSCPU, "On progress update Hyperstat UI Points: ")
+                    val currentData = haystack.read(
+                        "point and hyperstat and $command and equipRef == \"$equipRef\""
+                    )
+                    if (currentData?.get("id") != null) {
+
+                        val id: String = currentData["id"].toString()
+                        val pointDetails = Point.Builder().setHashMap(haystack.readMapById(id)).build()
+
+                        if(pointDetails.markers.contains("writable")){
+                            haystack.pointWriteForCcuUser(
+                                HRef.copy(id),
+                                TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                HNum.make(value),
+                                HNum.make(0)
+                            )
+                        }
+                        if(pointDetails.markers.contains("his")){
+                            haystack.writeHisValById(id, value)
+                        }
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, " update Hyperstat UI Points work done")
+                    return null
+                }
+
+                override fun onPostExecute(result: Void?) {
+                    super.onPostExecute(result)
+                    zoneDataInterface?.refreshScreen("")
+                    configurationDisposable.dispose()
+                }
+            }
+            PointUpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        }
+
+
+    }
+}

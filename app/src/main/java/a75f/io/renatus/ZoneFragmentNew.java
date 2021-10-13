@@ -76,15 +76,19 @@ import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.bpos.BPOSUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.hyperstat.comman.FanModeCacheStorage;
+import a75f.io.logic.bo.building.hyperstat.comman.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.comman.SettingsKt;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
+import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -101,6 +105,7 @@ import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.RelayUtil;
 import a75f.io.renatus.util.SeekArc;
 import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -235,12 +240,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem, floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
-
+        
         zoneLoadTextView = view.findViewById(R.id.zoneLoadTextView);
         zoneLoadTextView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
-
+        
         loadGrid(parentRootView);
-
+        
         if (floorList != null && floorList.size() > 0) {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
@@ -611,7 +616,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(profileTempInfluence) ||
                             profileType.contains(profileDualDuct) ||
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
-                             profileType.contains(profilebpos)) {
+                            profileType.contains(profilebpos)||
+                            profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())
+                    ) {
                         tempModule = true;
                     }
                     if (profileType.contains(profileEM) || profileType.contains(profilePLC)
@@ -1147,6 +1154,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                                                 updatedEquipId, CCUHsApi.getInstance(), getActivity(),
                                                                 p.getGroup());
                             }
+
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
+                                HashMap cpuEquipPoints = ScheduleProcessJob.getHyperstatCPUEquipPoints(p);
+                                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
+                                loadHyperstatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup());
+                                //isCPUloaded = true;
+                            }
                         }
                     }
                 }
@@ -1387,6 +1401,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 HashMap bposPoints = BPOSUtil.getbposPoints(updatedEquip.getId());
                 Log.i("PointsValue", "BPOS Points:" + bposPoints.toString());
                 loadBPOSPointsUI(bposPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
+                HashMap cpuEquipPoints = ScheduleProcessJob.getHyperstatCPUEquipPoints(updatedEquip);
+                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
+                loadHyperstatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup());
+
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
                 HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
@@ -2941,6 +2961,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ScheduleProcessJob.setScheduleDataInterface(null);
         ScheduleProcessJob.setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
+        HyperStatScheduler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
     }
 
@@ -2953,6 +2974,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
+            HyperStatScheduler.Companion.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
         } else {
 
@@ -2961,6 +2983,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             ScheduleProcessJob.setScheduleDataInterface(null);
             ScheduleProcessJob.setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
+            HyperStatScheduler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
     }
@@ -3461,6 +3484,258 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
 
+    }
+
+
+    public void loadHyperstatCpuProfile(HashMap cpuEquipPoints, LayoutInflater inflater,
+                                        LinearLayout linearLayoutZonePoints,
+                                        String equipId, String nodeAddress) {
+
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
+
+        setTitleStatusConfig(viewTitle,viewStatus,nodeAddress,
+                cpuEquipPoints.get(HSZoneStatus.STATUS.name()).toString());
+
+        setUpConditionFanConfig(viewPointRow1,cpuEquipPoints,equipId);
+
+        setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
+
+        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+        textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow2);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        linearLayoutZonePoints.addView(viewDischarge);
+
+
+    }
+
+
+
+    private void setTitleStatusConfig(View viewTitle,View viewStatus, String nodeAddress, String status ){
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        textViewTitle.setText(SettingsKt.PROFILE + " - (" + nodeAddress + ")");
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        textViewStatus.setText(status);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+    }
+
+
+    private void setUpConditionFanConfig(View viewPointRow1, HashMap cpuEquipPoints , String equipId){
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        textViewLabel1.setText("Conditioning Mode : ");
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        textViewLabel2.setText("Fan Mode : ");
+        Spinner conditioningModeSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner fanModeSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
+        CCUUiUtil.setSpinnerDropDownColor(conditioningModeSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(fanModeSpinner,getContext());
+
+        int conditionMode = 0;
+        int fanMode = 0;
+        try {
+            conditionMode = (int) ((double)cpuEquipPoints.get(HSZoneStatus.CONDITIONING_MODE.name()));
+            fanMode = (int) ((double)cpuEquipPoints.get(HSZoneStatus.FAN_MODE.name()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+
+        if (cpuEquipPoints.containsKey(HSZoneStatus.CONDITIONING_ENABLED.name())) {
+            if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Cool Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
+                        R.layout.spinner_zone_item);
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1;
+                }
+            } else if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Heat Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
+                        R.layout.spinner_zone_item);
+                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1;
+                }
+            }
+            if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Off")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conditionMode = 0;
+            }
+
+        }
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        conditioningModeSpinner.setAdapter(conModeAdapter);
+        conditioningModeSpinner.setSelection(conditionMode, false);
+
+
+        int fanSpinnerSelectionValues =
+                RelayUtil.getFanOptionByLevel((Integer)cpuEquipPoints.get(HSZoneStatus.FAN_LEVEL.name()));
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(),fanSpinnerSelectionValues, R.layout.spinner_zone_item);
+
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        fanModeSpinner.setAdapter(fanModeAdapter);
+        fanModeSpinner.setSelection(fanMode, false);
+
+        setSpinnerListenerForHyperstat(conditioningModeSpinner,HSZoneStatus.CONDITIONING_MODE,equipId,conditionMode);
+        setSpinnerListenerForHyperstat(fanModeSpinner,HSZoneStatus.FAN_MODE,equipId,fanMode);
+
+    }
+
+    private void setUpHumidifierDeHumidifier(View viewPointRow2,HashMap cpuEquipPoints,  String equipId){
+
+        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+        TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
+
+        Spinner humiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue1);
+        Spinner dehumiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue2);
+
+        ArrayList<String> arrayHumdityTargetList = new ArrayList<>();
+        for (int pos = 1; pos <= 100; pos++)
+            arrayHumdityTargetList.add(pos+"%");
+        ArrayAdapter<String> humiditytargetadapter = new ArrayAdapter<>(
+                getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
+        humiditytargetadapter.setDropDownViewResource(R.layout.spinner_item_grey);
+
+        if(cpuEquipPoints.containsKey(HSZoneStatus.TARGET_HUMIDITY.name())){
+            textViewLabel3.setText("Target Humidity :");
+
+            humiditySpinner.setAdapter(humiditytargetadapter);
+            double targetHumidity = (double) cpuEquipPoints.get(HSZoneStatus.TARGET_HUMIDITY.name());
+            humiditySpinner.setSelection((int) targetHumidity - 1, false);
+
+            humiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    handleHumidityMode((int)targetHumidity,position,equipId);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+
+        }else{
+            (viewPointRow2.findViewById(R.id.lt_column1)).setVisibility(View.GONE);
+        }
+        if(cpuEquipPoints.containsKey(HSZoneStatus.TARGET_DEHUMIDIFY.name())){
+            textViewLabel4.setText("Target Dehumidity :");
+            dehumiditySpinner.setAdapter(humiditytargetadapter);
+            double targetDeHumidity = (double) cpuEquipPoints.get(HSZoneStatus.TARGET_DEHUMIDIFY.name());
+            dehumiditySpinner.setSelection((int) targetDeHumidity - 1, false);
+          /*  setSpinnerListenerForHyperstat(
+                    dehumiditySpinner,HSZoneStatus.TARGET_DEHUMIDIFY,equipId,(int) targetDeHumidity);*/
+            dehumiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    handleDeHumidityMode((int)targetDeHumidity,position,equipId);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            if((viewPointRow2.findViewById(R.id.lt_column1)).getVisibility() == (View.GONE)){
+                textViewLabel4.setPadding(52,0,0,0);
+            }
+
+        }else{
+            (viewPointRow2.findViewById(R.id.lt_column2)).setVisibility(View.GONE);
+        }
+    }
+
+    private void setSpinnerListenerForHyperstat(View view, HSZoneStatus spinnerType,String equipId,
+                                                int previousPosition){
+        AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (spinnerType){
+                    case CONDITIONING_MODE : handleConditionMode(previousPosition,position,equipId); break;
+                    case FAN_MODE : handleFanMode(previousPosition,position,equipId); break;
+                    case TARGET_HUMIDITY : handleHumidityMode(previousPosition,position,equipId);break;
+                    case TARGET_DEHUMIDIFY : handleDeHumidityMode(previousPosition,position,equipId);break;
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        };
+        ((Spinner)view).setOnItemSelectedListener(onItemSelectedListener);
+    }
+
+    private void handleConditionMode(int previousPosition,int selectedPosition, String equipId){
+        if (isCPUFromPubNub) {
+            if (previousPosition != selectedPosition) {
+                HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
+                        "temp and conditioning and mode and cpu", selectedPosition);
+            }
+        } else {
+            HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
+                    "temp and conditioning and mode and cpu", selectedPosition);
+
+        }
+    }
+
+    private void handleFanMode(int previousPosition, int selectedPosition, String equipId){
+        if (isCPUFromPubNub) {
+            if (previousPosition != selectedPosition) {
+                updateFanMode(equipId,selectedPosition);
+            }
+            isCPUFromPubNub = false;
+        } else {
+            updateFanMode(equipId,selectedPosition);
+        }
+    }
+
+    // Save the fan mode in cache
+    private void updateFanMode(String equipId,int selectedPosition){
+
+        FanModeCacheStorage cacheStorage = new FanModeCacheStorage();
+        HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                equipId, "fan and operation and mode and cpu", selectedPosition);
+
+        if ((selectedPosition != 0) && (selectedPosition % 3 == 0))
+            cacheStorage.saveFanModeInCache(equipId,selectedPosition);
+        else
+            cacheStorage.removeFanModeFromCache(equipId);
+    }
+
+    private void handleHumidityMode(int targetHumidity,int selectedPosition, String equipId){
+        if (isHPUFromPubNub) {
+            if (targetHumidity != (selectedPosition + 1)) {
+                HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                        equipId, "target and humidifier and cpu", selectedPosition + 1);
+            }
+        }else{
+            HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                    equipId, "target and humidifier and cpu", selectedPosition + 1);
+        }
+    }
+
+    private void handleDeHumidityMode(int targetDeHumidity,int selectedPosition, String equipId){
+        if (isHPUFromPubNub) {
+            if (targetDeHumidity != (selectedPosition + 1)) {
+                HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                        equipId, "target and dehumidifier and cpu", selectedPosition + 1);
+            }
+        }else{
+            HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                    equipId, "target and dehumidifier and cpu", selectedPosition + 1);
+        }
     }
 
 }

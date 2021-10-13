@@ -565,7 +565,8 @@ public class VavEquip
                                     .addMarker("vav").addMarker(fanMarker).addMarker("occupancy").addMarker("mode")
                                     .addMarker("zone").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
+                                            "occupancysensing,autoforceoccupy,autoaway")
                                     .setTz(tz)
                                     .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);

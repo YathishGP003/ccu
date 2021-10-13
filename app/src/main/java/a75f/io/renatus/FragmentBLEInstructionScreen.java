@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import androidx.annotation.Nullable;
@@ -73,7 +74,6 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         fds.setArguments(args);
         return fds;
     }
-
 
     @Optional
     @OnClick(R.id.imageGoback)
@@ -345,6 +345,19 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        HyperStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
+                                ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
+                        HyperStatCpuFragment.ID);
+            }
+            else {
+                Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
     
     
@@ -387,6 +400,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             title.setText(getText(R.string.title_pairss));
             pairinginstruct.setImageResource(R.drawable.pairinginstruct);
+        }
+        else if (mNodeType == NodeType.HYPER_STAT) {
+            title.setText(R.string.title_pairhss);
+            pairinginstruct.setImageResource(R.drawable.sensepairscreen);
         }
     }
     

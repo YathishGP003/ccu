@@ -112,7 +112,7 @@ public class HyperStatDevice {
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef)
                         .addMarker("sensor").addMarker("his")
-                        .addMarker("mV")
+                        .setUnit("mV")
                         .setTz(tz)
                         .build();
         
@@ -199,7 +199,7 @@ public class HyperStatDevice {
     
     private RawPoint createRelayPoint(Port relayPort, String name) {
         return new RawPoint.Builder()
-                            .setDisplayName(hyperStatNodeAddress+"-"+name)
+                            .setDisplayName(name+"-"+hyperStatNodeAddress)
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setRoomRef(roomRef)
@@ -213,14 +213,15 @@ public class HyperStatDevice {
     
     private RawPoint createAnalogOutPoint(Port analogPort, String name) {
         return new RawPoint.Builder()
-                   .setDisplayName(hyperStatNodeAddress+"-"+name)
+                   .setDisplayName(name+"-"+hyperStatNodeAddress)
                    .setDeviceRef(deviceRef)
                    .setSiteRef(siteRef)
                    .setRoomRef(roomRef)
                    .setFloorRef(floorRef)
                    .setPort(analogPort.toString())
-                   .setType(OutputRelayActuatorType.NormallyOpen.displayName)
+                   .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                    .addMarker("cmd").addMarker("his")
+                   .setUnit("dV")
                    .setTz(tz)
                    .build();
     }

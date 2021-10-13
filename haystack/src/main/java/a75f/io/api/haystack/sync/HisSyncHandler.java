@@ -229,7 +229,9 @@ public class HisSyncHandler
         return pointToSync.containsKey("heartbeat")
                || pointToSync.containsKey("rssi")
                || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
-               || (pointToSync.containsKey("bpos") && pointToSync.containsKey("detection") && pointToSync.containsKey("occupancy"));
+               || (pointToSync.containsKey("bpos") && pointToSync.containsKey("detection") && pointToSync.containsKey("occupancy"))
+                || (pointToSync.containsKey("hyperstat") && pointToSync.containsKey("cpu")
+                    && pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

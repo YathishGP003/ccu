@@ -80,6 +80,15 @@ class TunerMigration {
         valueObjMap.put("temperatureIntegralTime", new ValueObj("1", "60", "1"));
         valueObjMap.put("proportionalKFactor", new ValueObj("0.1", "1", "0.1"));
         valueObjMap.put("integralKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneCoolingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("standaloneHeatingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("standaloneTemperatureProportionalRange", new ValueObj("0", "10", "1"));
+        valueObjMap.put("standaloneTemperatureIntegralTime", new ValueObj("1", "60", "1"));
+        valueObjMap.put("standaloneProportionalKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneIntegralKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneRelayActivationHysteresis", new ValueObj("0", "100", "1"));
+        valueObjMap.put("standaloneAnalogFanSpeedMultiplier", new ValueObj("0.1", "3.0", "0.1"));
+        valueObjMap.put("standaloneHumidityHysteresis", new ValueObj("0", "100", "1"));
         return valueObjMap;
     }
 }

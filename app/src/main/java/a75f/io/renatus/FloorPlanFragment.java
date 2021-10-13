@@ -16,6 +16,8 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.HyperStatCpuViewModel;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
@@ -1502,6 +1504,12 @@ public class FloorPlanFragment extends Fragment {
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddr)
                         , zone.getId(), floor.getId()), HyperStatSenseFragment.ID);
+                    break;
+
+                case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
+                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddr)
+                            , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
+                            HyperStatSenseFragment.ID);
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

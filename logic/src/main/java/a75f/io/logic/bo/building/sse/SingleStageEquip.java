@@ -273,7 +273,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("sse")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

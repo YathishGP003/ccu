@@ -271,7 +271,7 @@ public class CazEquip
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
                 .addMarker("ti").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

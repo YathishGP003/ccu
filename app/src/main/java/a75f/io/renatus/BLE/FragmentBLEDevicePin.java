@@ -52,6 +52,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
+import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -433,6 +434,12 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 HyperStatSenseFragment.ID);
                     case HYPERSTAT_VRV:
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
+                        break;
+                    case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
+                        showDialogFragment(HyperStatCpuFragment.newInstance(mPairingAddress,mName,mFloorName,
+                                mNodeType,ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
+                                HyperStatCpuFragment.ID);
+                        break;
                 }
                 
             }

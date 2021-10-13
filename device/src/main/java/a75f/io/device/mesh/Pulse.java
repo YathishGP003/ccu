@@ -259,7 +259,7 @@ public class Pulse
 		}
 		CcuLog.i(L.TAG_CCU_DEVICE, nodeAddr+" : regularSNUpdate timeMS "+(System.currentTimeMillis()-time));
 	}
-	
+
 	private static boolean isMATDamperConfigured(HashMap logicalPoint, Short nodeAddr, String primary,
 	                                             CCUHsApi hayStack) {
 		return logicalPoint.containsKey(Tags.DAB) && hayStack.readDefaultVal(
@@ -838,8 +838,6 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
-		Log.d(Globals.TAG,
-				"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 		String firmwareVersion =
@@ -847,8 +845,6 @@ public class Pulse
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
 			String str = "addr:"+address;
 			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
-		Log.d(Globals.TAG," init :  " +str);
-		Log.d(Globals.TAG,"snRebootIndicationMsgs.rebootCause.get() : "+snRebootIndicationMsgs.rebootCause.get());
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
@@ -881,10 +877,8 @@ public class Pulse
 				str += ", device:" + snRebootIndicationMsgs.smartNodeDeviceId;
 				str += ", serialnumber:" + snRebootIndicationMsgs.smartNodeSerialNumber;
 			}catch (Exception e){
-				Log.i(Globals.TAG," Exception "+e.getMessage());
 				e.printStackTrace();
 			}
-			Log.i(Globals.TAG,"Device reboot info alert is sending with  : "+str);
 			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){

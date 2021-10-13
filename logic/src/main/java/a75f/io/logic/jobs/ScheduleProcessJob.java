@@ -34,6 +34,11 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil;
+import a75f.io.logic.bo.building.hyperstat.comman.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -308,7 +313,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
-        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos") || equip.getMarkers().contains("vrv") ) {
+        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos")
+        ||(equip.getMarkers().contains("sense") || equip.getMarkers().contains("vrv"))  ) {
 
             EquipScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
@@ -324,6 +330,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if( !equip.getMarkers().contains("system") && (equip.getMarkers().contains("standalone") || equip.getMarkers().contains("sse")))
         {
             StandaloneScheduler.processEquip(equip,equipSchedule,vacation);
+        }
+
+        if( !equip.getMarkers().contains("system") && (equip.getMarkers().contains("hyperstat")))
+        {
+            HyperStatScheduler.Companion.processEquip(equip,equipSchedule,vacation);
         }
     }
 
@@ -422,8 +433,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
+            long th = getTemporaryHoldExpiry(equip);
             if(curOccupancyMode == AUTOFORCEOCCUPIED) {
-                long th = getTemporaryHoldExpiry(equip);
+
                 if (th > 0) {
                     DateTime et = new DateTime(th);
                     int min = et.getMinuteOfHour();
@@ -431,7 +443,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
             else if(curOccupancyMode == FORCEDOCCUPIED ) {
-                long th = getTemporaryHoldExpiry(equip);
                 if (th > 0) {
                     DateTime et = new DateTime(th);
                     int min = et.getMinuteOfHour();
@@ -471,7 +482,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return statusString;
         }
     }
-
+    
     /**
      * Public method that returns the zone status string.
      * @param zoneId
@@ -794,6 +805,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                                 "id").toString(),
                                 val);
                     }
+                    HashMap ocupancyDetectionHscpu = CCUHsApi.getInstance().read(
+                            "point and hyperstat and cpu and occupancy and detection and his and equipRef  ==" +
+                                    " \"" + equip.getId() + "\"");
+                    if (ocupancyDetectionHscpu.size()> 0) {
+                        double val = CCUHsApi.getInstance().readHisValById(ocupancyDetectionHscpu.get(
+                                "id").toString());
+                        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetectionHscpu.get(
+                                "id").toString(),
+                                val);
+                    }
+
+
                 }
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
                 if(scheduleDataInterface !=null){
@@ -1069,6 +1092,75 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             cpuPoints.put("fanEnabled","No Fan");
         return cpuPoints;
     }
+    public static HashMap<String,Object> getHyperstatCPUEquipPoints(Equip equipDetails) {
+
+        String  profileName ="cpu";
+        // All the result points
+        HashMap<String,Object> cpuPoints = new HashMap<>();
+
+        // Get points util ref
+        HSHaystackUtil hsHaystackUtil = new HSHaystackUtil(
+                profileName,equipDetails.getId(), CCUHsApi.getInstance()
+        );
+
+        // Get Existing Configuration
+        HyperStatCpuConfiguration config = HyperStatCpuEquip.Companion.getHyperstatEquipRef(
+                Short.parseShort(equipDetails.getGroup())).getConfiguration();
+
+        String equipLiveStatus = hsHaystackUtil.getEquipLiveStatus();
+        if(equipLiveStatus!=null)
+            cpuPoints.put(HSZoneStatus.STATUS.name(),equipLiveStatus);
+        else
+            cpuPoints.put(HSZoneStatus.STATUS.name(),"OFF");
+
+
+        double fanOpModePoint = hsHaystackUtil.readPointPriorityVal("zone and fan and mode and operation");
+        cpuPoints.put(HSZoneStatus.FAN_MODE.name(),fanOpModePoint);
+
+        double conditionModePoint = hsHaystackUtil.readPointPriorityVal(
+                "zone and temp and mode and conditioning");
+        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),conditionModePoint);
+
+
+        double dischargePoint = hsHaystackUtil.readHisVal(
+                "zone and sensor and discharge and air and temp and his");
+        cpuPoints.put(HSZoneStatus.DISCHARGE_AIRFLOW.name(), dischargePoint + " \u2109");
+
+
+        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier(config)){
+            double  targetHumidity = hsHaystackUtil.readPointPriorityVal("target and humidifier and his");
+            cpuPoints.put(HSZoneStatus.TARGET_HUMIDITY.name(),targetHumidity);
+        }
+        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToDeHumidifier(config)){
+            double  targetDeHumidity = hsHaystackUtil.readPointPriorityVal("target and dehumidifier and his");
+            cpuPoints.put(HSZoneStatus.TARGET_DEHUMIDIFY.name(),targetDeHumidity);
+        }
+
+        int fanLevel = HyperStatAssociationUtil.Companion.getSelectedFanLevel(config);
+        cpuPoints.put(HSZoneStatus.FAN_LEVEL.name(),fanLevel);
+
+        // Add conditioning status
+        String status = "Off";
+
+        if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)) {
+            status ="Both";
+        }
+        else if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+         && !HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
+            status = "Cool Only";
+        }else if(!HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
+            status = "Heat Only";
+        }
+        cpuPoints.put(HSZoneStatus.CONDITIONING_ENABLED.name(),status);
+
+        cpuPoints.forEach((s, o) -> Log.i(L.TAG_CCU_HSCPU, "Config "+s+ " : "+o));
+        return cpuPoints;
+    }
+
+
+
 
     public static HashMap getHPUEquipPoints(String equipID) {
         HashMap hpuPoints = new HashMap();
@@ -1306,7 +1398,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                             clearTempOverrides(equip.getId());
                     } else {
                         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-                        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
+                        boolean isZoneHasStandaloneEquip =
+                                (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") ||
+                                        equip.getMarkers().contains("hyperstat")  );
                         
                         //Standalone zones could operate in preconditioning with system being OFF.
                         if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {

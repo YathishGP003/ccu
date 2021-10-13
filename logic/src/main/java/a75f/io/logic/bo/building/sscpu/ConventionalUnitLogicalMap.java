@@ -566,7 +566,7 @@ public class ConventionalUnitLogicalMap {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);

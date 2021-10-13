@@ -540,7 +540,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);

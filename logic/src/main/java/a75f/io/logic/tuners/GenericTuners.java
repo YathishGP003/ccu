@@ -100,8 +100,9 @@ class GenericTuners {
                                            .setTz(tz)
                                            .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
-        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
-        hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writeHisValById(unoccupiedZoneSetbackId,TunerConstants.ZONE_UNOCCUPIED_SETBACK);
     
         Point heatingUserLimitMin  = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"heatingUserLimitMin")

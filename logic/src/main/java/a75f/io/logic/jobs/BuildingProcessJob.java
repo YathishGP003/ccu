@@ -66,9 +66,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     profile.updateZonePoints();
                 }
-                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed() && !MessagingClient.getInstance().isSubscribed()) {
                     CCUHsApi.getInstance().syncEntityTree();
-                    if (CCUHsApi.getInstance().siteSynced()) {
+                    if (CCUHsApi.getInstance().isCCURegistered()) {
                         MessagingClient.getInstance().init();
                     }
                 }

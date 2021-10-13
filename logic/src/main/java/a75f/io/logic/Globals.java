@@ -277,12 +277,6 @@ public class Globals {
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
 
-                String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
-                String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
-                String bearerToken = CCUHsApi.getInstance().getJwt();
-                messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
-                getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
-
                 Watchdog.getInstance().addMonitor(mProcessJob);
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
@@ -294,6 +288,17 @@ public class Globals {
         
         if (isTestMode()) {
             setTestMode(false);
+        }
+    }
+
+    public void scheduleMessagingAckJob() {
+        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
+            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+            String bearerToken = CCUHsApi.getInstance().getJwt();
+
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 

@@ -26,7 +26,7 @@ public class MessagingClient {
 
     private ServerSentEvent sse = null;
 
-    private PriorityBlockingQueue<MessageToAck> messagesToAck = new PriorityBlockingQueue<>();
+    private final PriorityBlockingQueue<MessageToAck> messagesToAck = new PriorityBlockingQueue<>();
 
     public static MessagingClient getInstance() {
         if (instance == null) {
@@ -52,8 +52,14 @@ public class MessagingClient {
             String bearerToken = CCUHsApi.getInstance().getJwt();
 
             PbSubscriptionHandler.getInstance().close();
+
             this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
+            Globals.getInstance().scheduleMessagingAckJob();
         }
+    }
+
+    public boolean isSubscribed() {
+        return sse != null;
     }
 
     public void queueMessageIdToAck(JsonObject message) {

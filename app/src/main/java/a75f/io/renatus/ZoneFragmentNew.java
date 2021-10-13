@@ -596,18 +596,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 String profileDualDuct = "DUAL_DUCT";
                 String profileModBus = "MODBUS";
                 String profileHyperStatSense = "HYPERSTAT_SENSE";
-                            String profileVAV = "VAV";
-                            String profileDAB = "DAB";
-                            String profileSSE = "SSE";
-                            String profileSmartStat = "SMARTSTAT";
-                            String profileEM = "EMR";
-                            String profilePLC = "PLC";
-                            String profileTempMonitor = "TEMP_MONITOR";
-                            String profileTempInfluence = "TEMP_INFLUENCE";
-                            String profileDualDuct = "DUAL_DUCT";
-                            String profileModBus = "MODBUS";
-                            String profileHyperStatSense = "HYPERSTAT_SENSE";
-                            String profilebpos = "BPOS";
+                String profilebpos = "BPOS";
 
                 boolean tempModule = false;
                 boolean nontempModule = false;
@@ -621,7 +610,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(profileSmartStat) ||
                             profileType.contains(profileTempInfluence) ||
                             profileType.contains(profileDualDuct) ||
-                            profileType.contains(ProfileType.HYPERSTAT_VRV.name())) {
+                            profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
+                             profileType.contains(profilebpos)) {
                         tempModule = true;
                     }
                     if (profileType.contains(profileEM) || profileType.contains(profilePLC)
@@ -634,34 +624,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 if (profileType.contains(profileHyperStatSense)) {
                     viewSenseZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);
                 }
-                            boolean tempModule = false;
-                            boolean nontempModule = false;
-                            for (HashMap equipTypes : equipZones) {
-                                profileType = equipTypes.get("profile").toString();
-                                Log.e(LOG_TAG + "RoomData", "ProfileType:" + profileType);
-                                if (!profileType.contains(profileModBus) &&
-                                        profileType.contains(profileVAV) ||
-                                        profileType.contains(profileDAB) ||
-                                        profileType.contains(profileSSE) ||
-                                        profileType.contains(profileSmartStat) ||
-                                        profileType.contains(profileTempInfluence) ||
-                                        profileType.contains(profilebpos) ||
-                                        profileType.contains(profileDualDuct) ||
-                                        profileType.contains(ProfileType.HYPERSTAT_VRV.name())) {
-                                    tempModule = true;
-                                    Log.e(LOG_TAG + "RoomData", "Load SmartNode ProfileType:" + profileType);
-                                }
-                                if (profileType.contains(profileEM) || profileType.contains(profilePLC)
-                                        || profileType.contains(profileTempMonitor)
-                                        || profileType.contains(profileTempInfluence)
-                                        || profileType.contains(profileModBus)) {
-                                    nontempModule = true;
-                                    Log.e(LOG_TAG + "RoomData", "Load SmartStat ProfileType:" + profileType);
-                                }
-                            }
-                            if (profileType.contains(profileHyperStatSense)) {
-                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
-                            }
 
                 if (tempModule) {
                     viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, gridPosition, tablerowLayout, isZoneAlive);

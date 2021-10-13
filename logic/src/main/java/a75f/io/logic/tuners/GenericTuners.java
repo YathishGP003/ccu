@@ -252,6 +252,20 @@ class GenericTuners {
         String perDegreeHumidityFactorId = hayStack.addPoint(perDegreeHumidityFactor);
         hayStack.writePointForCcuUser(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,10.0, 0);
         hayStack.writeHisValById(perDegreeHumidityFactorId, 10.0);
+
+        Point autoAwaySetback   = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
+        hayStack.writeHisValById(autoAwaySetbackId, 2.0);
     
     }
 }

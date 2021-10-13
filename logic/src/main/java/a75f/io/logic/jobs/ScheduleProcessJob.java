@@ -46,6 +46,8 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.Occupancy.AUTOFORCEOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
@@ -306,7 +308,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
-        ||(equip.getMarkers().contains("sense") || equip.getMarkers().contains("vrv"))  ) {
+        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos") || equip.getMarkers().contains("vrv") ) {
 
             EquipScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
@@ -402,6 +404,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             return "In Preconditioning";
         }
+
+        if(curOccupancyMode == AUTOAWAY){
+            return String.format("In Auto Away");
+        }
+
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(curOccupancyMode == OCCUPIED)
         {
@@ -415,7 +422,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
-            if(curOccupancyMode == FORCEDOCCUPIED) {
+            if(curOccupancyMode == AUTOFORCEOCCUPIED) {
+                long th = getTemporaryHoldExpiry(equip);
+                if (th > 0) {
+                    DateTime et = new DateTime(th);
+                    int min = et.getMinuteOfHour();
+                    return String.format("In Temporary Hold(AUTO) | till %s", et.getHourOfDay() + ":" + (min < 10 ? "0" + min : min));
+                }
+            }
+            else if(curOccupancyMode == FORCEDOCCUPIED ) {
                 long th = getTemporaryHoldExpiry(equip);
                 if (th > 0) {
                     DateTime et = new DateTime(th);
@@ -456,7 +471,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return statusString;
         }
     }
-    
+
     /**
      * Public method that returns the zone status string.
      * @param zoneId
@@ -768,6 +783,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
+                if (zoneOccupancy == OCCUPIED) {
+                    HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                            "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                                    " \"" + equip.getId() + "\"");
+                    if (ocupancyDetection.get("id") != null) {
+                        double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(
+                                "id").toString());
+                        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection.get(
+                                "id").toString(),
+                                val);
+                    }
+                }
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
@@ -1241,10 +1268,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String id = ((HashMap) occ.get(0)).get("id").toString();
             double occuStatus = CCUHsApi.getInstance().readHisValById(id);
             if(cachedOccupied != null) {
-                if (cachedOccupied != null && cachedOccupied.isOccupied()) {
-                    cachedOccupied.setForcedOccupied(false);
-                    cachedOccupied.setPreconditioning(false);
-                    c = OCCUPIED;
+                if (cachedOccupied.isOccupied()) {
+                    if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
+                        c = AUTOAWAY;
+                    }else {
+                        cachedOccupied.setForcedOccupied(false);
+                        cachedOccupied.setPreconditioning(false);
+                        c = OCCUPIED;
+                    }
                 } else if (getTemporaryHoldExpiry(equip) > 0) {
                     Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
                     if ((prevStatus == OCCUPIED)) {
@@ -1252,7 +1283,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         cachedOccupied.setForcedOccupied(false);
                         cachedOccupied.setPreconditioning(false);
                         clearTempOverrides(equip.getId());
-                    } else {
+                    } else if (prevStatus == AUTOFORCEOCCUPIED){
+                        c = AUTOFORCEOCCUPIED;
+                    }else {
                         c = FORCEDOCCUPIED;
                     }
                 } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
@@ -1578,7 +1611,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
-                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")
+                         || q.getMarkers().contains("bpos")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

@@ -124,5 +124,6 @@ public class BuildingTuners
         AlertTuners.addDefaultAlertTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TemperatureLimitTuners.addDefaultTempLimitTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        BPOSTuners.addDefaultBPOSTuners(hayStack, siteRef, equipRef, equipDis, tz);
     }
 }

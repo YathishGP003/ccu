@@ -16,6 +16,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.tuners.TunerUtil;
@@ -49,6 +50,9 @@ public class EquipScheduler {
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
+        double autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback");
+        double occupancyvalue = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
+                " mode and equipRef == \"" + equip.getId() + "\"");
         
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
@@ -59,24 +63,46 @@ public class EquipScheduler {
         else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
             occ.setForcedOccupied(true);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
-            double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
-            double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
+
+            double avgTemp = (occ.getCoolingVal() + occ.getHeatingVal()) / 2.0;
+            double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = (occ.isOccupied() || occ.isPreconditioning()/* || occ.isForcedOccupied() */|| (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy.FORCEDOCCUPIED)*/) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
+            Double heatingTemp;
+            Double coolingTemp;
+            if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
+                Log.d("BPOSProfile", "in bpos vav: ");
+                heatingTemp = occ.getHeatingVal() - autoawaysetback;
+                coolingTemp = occ.getCoolingVal() + autoawaysetback;
+            } else {
+                coolingTemp = (occ.isOccupied() || occ.isPreconditioning()/* || occ
+                .isForcedOccupied() */ || (systemOcc == Occupancy.PRECONDITIONING) /*||
+                (systemOcc == Occupancy.FORCEDOCCUPIED)*/) ? occ.getCoolingVal() :
+                        (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
 
-            setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+                heatingTemp = (occ.isOccupied() || occ.isPreconditioning() /*|| occ
+                .isForcedOccupied()*/
+                        || (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy
+                        .FORCEDOCCUPIED)*/) ? occ.getHeatingVal() :
+                        (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            }
 
-            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() /*|| occ.isForcedOccupied()*/ || (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy.FORCEDOCCUPIED)*/) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
-            setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
-            setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+            setDesiredTemp(equip, coolingTemp, "cooling",
+                    occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+            setDesiredTemp(equip, heatingTemp, "heating",
+                    occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+            setDesiredTemp(equip, avgTemp, "average",
+                    occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
+
         }
+
 
         return occ;
     }
 
 
-    public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag,boolean isForcedOccupied) {
+    public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag,
+                                      boolean isForcedOccupied) {
         CcuLog.d(L.TAG_CCU_SCHEDULER, "ZoneSchedule Equip: " + equip.getDisplayName() + " Temp: " + desiredTemp + " Flag: " + flag+","+isForcedOccupied);
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
         if (points == null || points.size() == 0) {

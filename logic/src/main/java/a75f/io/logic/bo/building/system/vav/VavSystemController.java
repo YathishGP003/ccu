@@ -126,7 +126,8 @@ public class VavSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and vav) or " +
-                                                                            "(equip and zone and ti)"
+                                                                            "(equip and zone and ti) or " +
+                                                                   "(equip and zone and bpos)"
         );
 
         updateSystemTempHumidity(allEquips);
@@ -681,7 +682,7 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips)
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti")) {
+            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                     "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );

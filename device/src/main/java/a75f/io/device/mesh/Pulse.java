@@ -236,7 +236,7 @@ public class Pulse
 			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
-				handleSensorEvents(sensorReadings, nodeAddr);
+				handleSensorEvents(sensorReadings, nodeAddr ,deviceInfo);
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -265,11 +265,12 @@ public class Pulse
 		return logicalPoint.containsKey(Tags.DAB) && hayStack.readDefaultVal(
 			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
 	}
-	
-	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
+
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
-		
+		boolean hasSensorOccupancy = false;
+
 		for (SmartNodeSensorReading_t r : sensorReadings) {
 			DLog.LogdStructAsJson(r);
 			SensorType t = SensorType.values()[r.sensorType.get()];
@@ -299,6 +300,9 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
 					break;
 				case OCCUPANCY:
+					hasSensorOccupancy = true;
+					updateBPOSOccupancyStatus(sp,val,addr,device);
+					break;
 				case ILLUMINANCE:
 				case CO2:
 				case CO:
@@ -1167,6 +1171,22 @@ public class Pulse
 		}
 
 	}
+
+	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
+		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
+		if((val == 1) ) {
+			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
+					" \"" + device.getEquipRef() + "\"");
+			if (!occDetPoint.isEmpty()){
+				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
+				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
+						" and his and equipRef == \"" + device.getEquipRef() + "\"");
+			}
+		}
+		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
+	}
+
 
 	private static void updateOccupancyStatus(RawPoint sp, double val,Device device, short addr){
 

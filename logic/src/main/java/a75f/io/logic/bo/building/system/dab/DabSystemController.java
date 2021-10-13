@@ -122,7 +122,8 @@ public class DabSystemController extends SystemController
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and dab) or " +
                                                                             "(equip and zone and dualDuct) or " +
-                                                                            "(equip and zone and ti)"
+                                                                            "(equip and zone and ti) or "+
+                                                                   "(equip and zone and bpos)"
         );
     
         updateSystemTempHumidity(allEquips);
@@ -675,11 +676,11 @@ public class DabSystemController extends SystemController
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
-                                                                    equip.getMarkers().contains("ti")) {
-                double tempVal = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and " +
-                                                             "equipRef == \"" + equipMap.get("id") + "\""
+                    equip.getMarkers().contains("bpos") || equip.getMarkers().contains("ti")) {
+                double tempVal = CCUHsApi.getInstance().readHisValByQuery(
+                        "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti");
+                hasTi = hasTi || equip.getMarkers().contains("ti") ;
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;

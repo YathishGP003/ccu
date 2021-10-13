@@ -19,19 +19,31 @@ import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
+import a75f.io.device.mesh.LSerial;
+import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.ThermistorUtil;
+import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil;
+import a75f.io.logic.bo.building.hyperstat.comman.PossibleConditioningMode;
+import a75f.io.logic.bo.building.hyperstat.comman.PossibleFanMode;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+
+import android.util.Log;
 
 public class HyperStatMsgReceiver {
     
@@ -111,11 +123,12 @@ public class HyperStatMsgReceiver {
     
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
-    
+
         writeDesiredTemp(message, hsEquip, hayStack);
-        //TODO
-        //Update fanMode and conditioning mode once profile is ready.
-        //Send Ack
+        boolean isModeUpdated =  updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
+        boolean isFanUpdated = updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
+        if(isModeUpdated && isFanUpdated)
+            sendAcknowledge(nodeAddress);
     }
     
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
@@ -180,13 +193,51 @@ public class HyperStatMsgReceiver {
     }
     
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
-        double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+
         hayStack.writeHisValById(rawPoint.getId(), val);
+        /**
+         *  For door window sensor and keycard sensor no need to calculate the Resistance conversion
+         *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
+         *  we are applying the required logic according to the sensor and saving into logical point
+         *  for door window sensor 1.0 means door is closed when the Resistance is less than 10000 else it is open
+         *  for Keycard sensor 1.0 means key is present (Occupant exist) when the Resistance is less than 10000 else
+         *  key is removed occupant is not exist
+         */
+        // Collect the sensor position
+        int index = (int)Double.parseDouble(rawPoint.getType());
+        Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Thermistor input :"+val);
+        if(index == 12 || index == 13){
+            hayStack.writeHisValById(point.getId(),((val*10) >= 10000)? 0.0 : 1.0);
+            Log.d(L.TAG_CCU_DEVICE, "Index : "+index +" Sensor Thermistor input : "+(((val*10) >= 10000)? 0.0 : 1.0));
+            return;
+        }
+
+        double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
         hayStack.writeHisValById(point.getId(), CCUUtils.roundToOneDecimal(thInputVal));
+
+        Log.d(L.TAG_CCU_DEVICE, "Sensor input : Thermistor type " + rawPoint.getType() + " val " + thInputVal);
+
     }
     
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
         hayStack.writeHisValById(rawPoint.getId(), val);
+
+        /**
+         *  For door window sensor and keycard sensor no need to calculate the voltage conversion
+         *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
+         *  we are applying the required logic according to the sensor and saving into logical point
+         *  for door window sensor 0.0 means door is closed when the voltage is less than 2.0 else it is open ie. 1.0
+         *  for Key card sensor 0.0 means key is present (Occupant exist) when the voltage is less than 2.0 else
+         *  key is removed occupant is not exist 1.0
+         */
+
+        int index = (int)Double.parseDouble(rawPoint.getType());
+        if(index == 12 || index == 13){
+            double voltageReceived = val/1000;
+            Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Analog input :"+voltageReceived);
+            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 0.0 : 1.0);
+            return;
+        }
         hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
     }
     
@@ -198,6 +249,7 @@ public class HyperStatMsgReceiver {
 
     private static void writeOccupancyVal(RawPoint rawPoint, Point point, HyperStatRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
+        Log.i(L.TAG_CCU_DEVICE, "OccupantDetected : "+regularUpdateMessage.getOccupantDetected());
         hayStack.writeHisValById(rawPoint.getId(), regularUpdateMessage.getOccupantDetected()?1.0:0);
         hayStack.writeHisValById(point.getId(), regularUpdateMessage.getOccupantDetected()?1.0:0);
     }
@@ -307,4 +359,94 @@ public class HyperStatMsgReceiver {
 
     public static void setCurrentTempInterface(ZoneDataInterface in) {
         currentTempInterface = in; }
+
+
+    public static boolean updateConditioningMode(String equipId, double mode, int nodeAddress){
+        PossibleConditioningMode possibleMode =
+                HSHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
+        int conditioningMode;
+        if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO.ordinal()){
+            if(possibleMode != PossibleConditioningMode.BOTH)
+            {
+                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode ");
+                return false;
+            }
+
+            conditioningMode = StandaloneConditioningMode.AUTO.ordinal();
+        }else if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_HEATING.ordinal()){
+            if(possibleMode == PossibleConditioningMode.COOLONLY)
+            {
+                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode");
+                return false;
+            }
+            conditioningMode = StandaloneConditioningMode.HEAT_ONLY.ordinal();
+        }else if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_COOLING.ordinal()){
+            if(possibleMode == PossibleConditioningMode.HEATONLY)
+            {
+                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode");
+                return false;
+            }
+            conditioningMode = StandaloneConditioningMode.COOL_ONLY.ordinal();
+        }else{
+            conditioningMode = StandaloneConditioningMode.OFF.ordinal();
+        }
+        HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
+                "temp and conditioning and mode and cpu", conditioningMode);
+        return true;
+    }
+
+    public static boolean updateFanMode(String equipId, int mode, int nodeAddress){
+        PossibleFanMode possibleMode =
+                HSHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
+        int fanMode = getLogicalFanMode(possibleMode,mode);
+        if(fanMode!= -1) {
+            HyperStatScheduler.Companion.updateHyperstatUIPoints(
+                    equipId, "fan and operation and mode and cpu", fanMode);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private static void sendAcknowledge(int address){
+        Log.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement");
+        if (!LSerial.getInstance().isConnected()) {
+            CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
+            return;
+        }
+        CcuToCmOverUsbDeviceTempAckMessage_t msg = new CcuToCmOverUsbDeviceTempAckMessage_t();
+        msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SET_TEMPERATURE_ACK);
+        msg.smartNodeAddress.set(address);
+        MeshUtil.sendStructToCM(msg);
+    }
+
+
+    private static int getLogicalFanMode(PossibleFanMode mode,int selectedMode){
+        switch (mode){
+            case LOW:
+            case HIGH:
+            case MED:
+            case LOW_MED:
+            case LOW_MED_HIGH:
+                return StandaloneFanStage.values()[selectedMode].ordinal();
+            case LOW_HIGH:
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal()){
+                    return StandaloneFanStage.values()[selectedMode].ordinal();
+                }else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal()){
+                    return StandaloneFanStage.values()[selectedMode+3].ordinal();
+                }else{
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+            case MED_HIGH:
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal()){
+                    return StandaloneFanStage.values()[selectedMode+3].ordinal();
+                }else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal()){
+                    return StandaloneFanStage.values()[selectedMode+6].ordinal();
+                }else{
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+        }
+        return -1;
+    }
+
 }

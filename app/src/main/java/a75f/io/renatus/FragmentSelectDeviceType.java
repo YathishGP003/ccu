@@ -2,6 +2,8 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
+
+import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -202,8 +204,6 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
-        //mZone = L.findZoneByName(mFloorName, mRoomName);
-        //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
 
         return view;
     }
@@ -268,6 +268,10 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         return ID;
     }
 
+    /**
+     * any modbus paired the ask the user to unpair the modules
+     * @return
+     */
     private boolean isModbusPaired() {
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
         for (Equip equip: zoneEquips) {

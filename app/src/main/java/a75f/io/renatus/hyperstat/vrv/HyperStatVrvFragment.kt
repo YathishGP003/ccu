@@ -59,9 +59,10 @@ class HyperStatVrvFragment : BaseDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // register with view model
 
-        viewModel.initData(requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR),
-                        requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME),
-                        requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME))
+        val addr = requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
+        val room = requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME)!!
+        val floor = requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
+        viewModel.initData(addr, room, floor)
         return inflater.inflate(R.layout.fragment_hyperstat_vrv_config, container, false)
     }
 
@@ -181,7 +182,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         }
 
         val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
-            activity,
+            requireActivity()!!,
             R.layout.spinner_zone_item,
             masterControllerList
         ){

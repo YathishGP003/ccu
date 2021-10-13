@@ -7,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.L;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
@@ -29,8 +30,8 @@ public abstract class SystemController
     public abstract double getAverageSystemTemperature();
     
     public boolean buildingLimitMinBreached(String equipType) {
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> equips = hayStack.readAll("equip and zone and "+equipType);
@@ -47,8 +48,8 @@ public abstract class SystemController
     }
     
     public boolean buildingLimitMaxBreached(String equipType) {
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> equips = hayStack.readAll("equip and zone and "+equipType);

@@ -112,6 +112,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate");
         prefs = new Prefs(this);
         CCUUiUtil.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
@@ -222,6 +223,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 }
             });
         }
+        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate Completed");
     }
 
     public void setViewPager() {

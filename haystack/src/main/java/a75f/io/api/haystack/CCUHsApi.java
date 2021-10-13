@@ -218,7 +218,8 @@ public class CCUHsApi
     public String addSite(Site s)
     {
         String siteId = tagsDb.addSite(s);
-        syncStatusService.addUnSyncedEntity("@"+siteId);//TODO -use toCode
+        Log.i("CCU_HS"," add Site "+siteId);
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(siteId, "@"));
         return siteId;
     }
 
@@ -666,7 +667,7 @@ public class CCUHsApi
                 HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
-                return null;
+                return 0.0;
             }
         }else return 0.0;
     }
@@ -680,7 +681,7 @@ public class CCUHsApi
             return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
         } else
         {
-            return null;
+            return 0.0;
         }
     }
     
@@ -856,23 +857,44 @@ public class CCUHsApi
             return item == null ? 0 : item.getVal();
         }
     }
-
-    public synchronized void writeHisValById(String id, Double val)
+    
+    /**
+     * Write history value only if the new value is different from current value.
+     * @param id
+     * @param val
+     */
+    public void writeHisValById(String id, Double val)
     {
+        //long time = System.currentTimeMillis();
         HisItem item = curRead(id);
         Double prevVal = item == null ? 0 : item.getVal();
         if((item == null)|| (!item.initialized) || !prevVal.equals(val))
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-       
+        //CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
     }
-
-    public synchronized void writeHisValueByIdWithoutCOV(String id, Double val)
+    
+    /**
+     * Writes values without checking the current value.
+     * This shall be used all the time while initializing a new point thats just created.
+     * @param id
+     * @param val
+     */
+    public void writeHisValueByIdWithoutCOV(String id, Double val)
     {
-        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-
+        tagsDb.putHisItem(id, val);
+    }
+    
+    /**
+     * Writes a list of hisItems.
+     * This shall be used all the time while initializing a new point thats just created.
+     * @param hisItems
+     */
+    public void writeHisValueByIdWithoutCOV(List<HisItem> hisItems)
+    {
+        tagsDb.putHisItems(hisItems);
     }
 
-    public synchronized void writeHisValByQuery(String query, Double val)
+    public void writeHisValByQuery(String query, Double val)
     {
         if (CACHED_HIS_QUERY)
         {
@@ -1034,6 +1056,10 @@ public class CCUHsApi
             {
                 deleteWritableArray(entity.get("id").toString());
             }
+            if (entity.get("his") != null)
+            {
+                tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
+            }
             deleteEntity(entity.get("id").toString());
         }
     }
@@ -1059,8 +1085,11 @@ public class CCUHsApi
             // This has not caused a crash yet, to my knowledge.  Leave in to fail fast here.
             throw new IllegalArgumentException("remoteId not equal to id in set synced");
         }
-
-        tagsDb.idMap.put(id, remoteId);
+    
+    
+        Log.i("CCU_HS", "Set entity synced id: "+id+" remoteId: "+remoteId);
+        syncStatusService.setEntitySynced(remoteId);
+        //tagsDb.idMap.put(id, remoteId);
     }
 
     /**
@@ -1075,7 +1104,8 @@ public class CCUHsApi
     }
 
     public boolean entitySynced(String id) {
-        return tagsDb.idMap.get(id) != null;
+        return syncStatusService.hasEntitySynced(id);
+        //return tagsDb.idMap.get(id) != null;
     }
 
     public boolean entityExists(String id) {
@@ -1543,6 +1573,7 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
         return localId;
     }
 
@@ -1570,11 +1601,12 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
-        if (tagsDb.idMap.get(id) != null)
+        /*if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, id);
-        }
-       CCUHsApi.getInstance().syncEntityTree();
+        }*/
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
 
@@ -1602,10 +1634,11 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
-        if (tagsDb.idMap.get(id) != null)
+        /*if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, id);
-        }
+        }*/
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -1645,10 +1678,11 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
     
-        if (tagsDb.idMap.get(id) != null)
+        /*if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, id);
-        }
+        }*/
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
     }
 
@@ -1757,10 +1791,11 @@ public class CCUHsApi
         addSchedule(localId, scheduleDict);
         
         Log.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
-        if (tagsDb.idMap.get("@" +localId) != null)
+        /*if (tagsDb.idMap.get("@" +localId) != null)
         {
             tagsDb.updateIdMap.put("@" + localId, "@" + localId);
-        }
+        }*/
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
     
     public void updateSchedule(Schedule schedule)
@@ -1768,10 +1803,11 @@ public class CCUHsApi
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
 
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
-        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
+        /*if (tagsDb.idMap.get("@" +schedule.getId()) != null)
         {
             tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }
+        }*/
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
     
     public void updateZoneSchedule(Schedule schedule, String zoneId)
@@ -1780,10 +1816,11 @@ public class CCUHsApi
         addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
-        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
+        /*if (tagsDb.idMap.get("@" +schedule.getId()) != null)
         {
             tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }
+        }*/
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
     
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {

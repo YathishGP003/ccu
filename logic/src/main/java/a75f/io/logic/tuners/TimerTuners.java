@@ -29,13 +29,13 @@ class TimerTuners {
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                   .addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
-                                  .setMinVal("40").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                                  .setMinVal("0").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                                   .setUnit("m")
                                   .setTz(tz)
                                   .build();
         String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
-        hayStack.writePointForCcuUser(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_AUTO_AWAY_TIME, 0);
-        hayStack.writeHisValById(autoAwayTimeId, TunerConstants.ZONE_AUTO_AWAY_TIME);
+        hayStack.writePointForCcuUser(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 30.0, 0);
+        hayStack.writeHisValById(autoAwayTimeId, 30.0);
     
         Point forcedOccupiedTime  = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"forcedOccupiedTime")
@@ -43,7 +43,7 @@ class TimerTuners {
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                         .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
-                                        .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                                        .setMinVal("0").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                                         .setUnit("m")
                                         .setTz(tz)
                                         .build();

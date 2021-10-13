@@ -13,6 +13,8 @@ import java.text.DecimalFormatSymbols;
 import java.util.*;
 import org.projecthaystack.*;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * HZincWriter is used to write grids in the Zinc format
  *
@@ -57,6 +59,18 @@ public class HZincWriter extends HGridWriter
     StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 16);
     HZincWriter w = new HZincWriter(out);
     w.version = version;
+    w.writeGrid(grid);
+    return out.toString();
+  }
+  
+  public static String tagsGridToString(HGrid grid)
+  {
+    CcuLog.i("_PROFILING", "tagsGridToString Cols: " + grid.numCols() +
+                              " Rows: " + grid.numRows() +
+                              " Size: " + (grid.numCols()*grid.numRows()*2));
+    StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 2);
+    HZincWriter w = new HZincWriter(out);
+    w.version = 3;//Hard coding for custom use.
     w.writeGrid(grid);
     return out.toString();
   }

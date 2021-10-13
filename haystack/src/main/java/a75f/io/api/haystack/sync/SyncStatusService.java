@@ -151,15 +151,15 @@ public class SyncStatusService {
     
     public HGridIterator getUnSyncedData() {
     
-        HGrid unsyncedGridData = CCUHsApi.getInstance()
+        /*HGrid unsyncedGridData = CCUHsApi.getInstance()
                                             .hsClient
-                                            .readByIds(getHRefArrayFromStringList(unsyncedIdList));
+                                            .readByIds(getHRefArrayFromStringList(unsyncedIdList));*/
     
         //TODO- Entities currently have refs stored as strings which the backend does not allow.
         //Changing refs across app has a larger scope. So as part of ID Migration , just changing the HStr refs to
         //HRef before sending them. This is should bs removed to use above code once it is done.
         
-        /*ArrayList<HDict> unsyncedDictList = new ArrayList<>();
+        ArrayList<HDict> unsyncedDictList = new ArrayList<>();
         
         for (String id : unsyncedIdList) {
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
@@ -168,7 +168,7 @@ public class SyncStatusService {
             updateRefs(entity, builder);
             unsyncedDictList.add(builder.toDict());
         }
-        HGrid unsyncedGridData = HGridBuilder.dictsToGrid(unsyncedDictList.toArray(new HDict[0]));*/
+        HGrid unsyncedGridData = HGridBuilder.dictsToGrid(unsyncedDictList.toArray(new HDict[0]));
         
         CcuLog.d("CCU_HS_Sync", " Unsynced Data :\n" + HZincWriter.gridToString(unsyncedGridData));
         return new HGridIterator(unsyncedGridData);
@@ -176,11 +176,11 @@ public class SyncStatusService {
     
     public HGridIterator getUpdatedData() {
         
-        HGrid updatedGridData = CCUHsApi.getInstance()
+        /*HGrid updatedGridData = CCUHsApi.getInstance()
                                         .hsClient
-                                        .readByIds(getHRefArrayFromStringList(updatedIdList));
+                                        .readByIds(getHRefArrayFromStringList(updatedIdList));*/
     
-        /*ArrayList<HDict> updatedDictList = new ArrayList<>();
+        ArrayList<HDict> updatedDictList = new ArrayList<>();
     
         for (String id : updatedIdList) {
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
@@ -189,7 +189,7 @@ public class SyncStatusService {
             updateRefs(entity, builder);
             updatedDictList.add(builder.toDict());
         }
-        HGrid updatedGridData = HGridBuilder.dictsToGrid(updatedDictList.toArray(new HDict[0]));*/
+        HGrid updatedGridData = HGridBuilder.dictsToGrid(updatedDictList.toArray(new HDict[0]));
         CcuLog.d("CCU_HS_Sync", " Updated Data :\n" + HZincWriter.gridToString(updatedGridData));
         return new HGridIterator(updatedGridData);
     }

@@ -243,7 +243,6 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         setButton.setOnClickListener(v -> {
 
             setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
 
             compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     ()->{

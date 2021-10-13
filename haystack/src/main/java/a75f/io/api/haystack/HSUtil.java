@@ -7,6 +7,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -271,6 +272,11 @@ public class HSUtil
         return pointEntity.containsKey(Tags.SENSE)
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
+
+    public static boolean isBPOSConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.BPOS);
+    }
     
     public static boolean isDamperReheatTypeConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
@@ -350,5 +356,10 @@ public class HSUtil
         markers.remove(Tags.SP);
         markers.remove(Tags.SYSTEM);
         return markers;
+    }
+    
+    public static HisItem getHisItemForWritable(String id) {
+        return new HisItem(id, new Date(System.currentTimeMillis()),
+                    HSUtil.getPriorityVal(id) );
     }
 }

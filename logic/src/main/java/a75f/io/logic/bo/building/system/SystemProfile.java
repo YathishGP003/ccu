@@ -170,7 +170,7 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
                 || q.getMarkers().contains("vrv")) {
                 q.setAhuRef(systemEquipId);
-            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense")) {
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
                 q.setGatewayRef(systemEquipId);
             }else {
                 //Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not " +
@@ -740,7 +740,8 @@ public abstract class SystemProfile
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
-        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing").setTz(tz).build();
+        Point systemOccupancy =
+                new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway").setTz(tz).build();
         String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
         CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
         Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();

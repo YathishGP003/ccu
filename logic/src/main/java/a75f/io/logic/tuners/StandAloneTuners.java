@@ -5,9 +5,11 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 
 public class StandAloneTuners {
@@ -292,7 +294,8 @@ public class StandAloneTuners {
     
     public static void addEquipZoneStandaloneTuners(CCUHsApi hayStack, String siteRef, String equipdis,
                                                     String equipref, String roomRef, String floorRef, String tz) {
-
+    
+        List<HisItem> hisItems = new ArrayList<>();
         Point saHeatingDeadBand = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"standaloneHeatingDeadband")
                                       .setSiteRef(siteRef)
@@ -307,7 +310,7 @@ public class StandAloneTuners {
                                       .build();
         String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
         BuildingTunerUtil.updateTunerLevels(saHeatingDeadBandId, roomRef, hayStack);
-        hayStack.writeHisValById(saHeatingDeadBandId, HSUtil.getPriorityVal(saHeatingDeadBandId));
+        hisItems.add(HSUtil.getHisItemForWritable(saHeatingDeadBandId));
 
         Point saCoolingDeadBand = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"standaloneCoolingDeadband")
@@ -323,7 +326,7 @@ public class StandAloneTuners {
                                       .build();
         String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
         BuildingTunerUtil.updateTunerLevels(saCoolingDeadBandId, roomRef, hayStack);
-        hayStack.writeHisValById(saCoolingDeadBandId, HSUtil.getPriorityVal(saCoolingDeadBandId));
+        hisItems.add(HSUtil.getHisItemForWritable(saCoolingDeadBandId));
 
         Point saStage1Hysteresis = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"standaloneStage1Hysteresis")
@@ -339,7 +342,7 @@ public class StandAloneTuners {
                                        .build();
         String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);
         BuildingTunerUtil.updateTunerLevels(saStage1HysteresisId, roomRef, hayStack);
-        hayStack.writeHisValById(saStage1HysteresisId, HSUtil.getPriorityVal(saStage1HysteresisId));
+        hisItems.add(HSUtil.getHisItemForWritable(saStage1HysteresisId));
 
         Point standaloneCoolingPreconditioningRate = new Point.Builder()
                                                          .setDisplayName(equipdis+"-"+"standaloneCoolingPreconditioningRate")
@@ -355,8 +358,8 @@ public class StandAloneTuners {
                                                          .build();
         String standaloneCoolingPreconditioningRateId = hayStack.addPoint(standaloneCoolingPreconditioningRate);
         BuildingTunerUtil.updateTunerLevels(standaloneCoolingPreconditioningRateId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneCoolingPreconditioningRateId, HSUtil.getPriorityVal(standaloneCoolingPreconditioningRateId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneCoolingPreconditioningRateId));
+        
         Point standaloneHeatingPreconditioningRate = new Point.Builder()
                                                          .setDisplayName(equipdis+"-"+"standaloneHeatingPreconditioningRate")
                                                          .setSiteRef(siteRef)
@@ -371,8 +374,8 @@ public class StandAloneTuners {
                                                          .build();
         String standaloneHeatingPreconditioningRateId = hayStack.addPoint(standaloneHeatingPreconditioningRate);
         BuildingTunerUtil.updateTunerLevels(standaloneHeatingPreconditioningRateId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneHeatingPreconditioningRateId, HSUtil.getPriorityVal(standaloneHeatingPreconditioningRateId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneHeatingPreconditioningRateId));
+        
         Point standaloneCoolingAirflowTempLowerOffset = new Point.Builder()
                                                             .setDisplayName(equipdis+"-"+"standaloneCoolingAirflowTempLowerOffset")
                                                             .setSiteRef(siteRef)
@@ -387,8 +390,8 @@ public class StandAloneTuners {
                                                             .build();
         String standaloneCoolingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempLowerOffset);
         BuildingTunerUtil.updateTunerLevels(standaloneCoolingAirflowTempLowerOffsetId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneCoolingAirflowTempLowerOffsetId, HSUtil.getPriorityVal(standaloneCoolingAirflowTempLowerOffsetId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneCoolingAirflowTempLowerOffsetId));
+        
         Point standaloneCoolingAirflowTempUpperOffset = new Point.Builder()
                                                             .setDisplayName(equipdis+"-"+"standaloneCoolingAirflowTempUpperOffset")
                                                             .setSiteRef(siteRef)
@@ -403,8 +406,8 @@ public class StandAloneTuners {
                                                             .build();
         String standaloneCoolingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempUpperOffset);
         BuildingTunerUtil.updateTunerLevels(standaloneCoolingAirflowTempUpperOffsetId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneCoolingAirflowTempUpperOffsetId, HSUtil.getPriorityVal(standaloneCoolingAirflowTempUpperOffsetId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneCoolingAirflowTempUpperOffsetId));
+        
         Point standaloneHeatingAirflowTempLowerOffset = new Point.Builder()
                                                             .setDisplayName(equipdis+"-"+"standaloneHeatingAirflowTempLowerOffset")
                                                             .setSiteRef(siteRef)
@@ -419,8 +422,8 @@ public class StandAloneTuners {
                                                             .build();
         String standaloneHeatingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempLowerOffset);
         BuildingTunerUtil.updateTunerLevels(standaloneHeatingAirflowTempLowerOffsetId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneHeatingAirflowTempLowerOffsetId, HSUtil.getPriorityVal(standaloneHeatingAirflowTempLowerOffsetId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneHeatingAirflowTempLowerOffsetId));
+        
         Point standaloneHeatingAirflowTempUpperOffset = new Point.Builder()
                                                             .setDisplayName(equipdis+"-"+"standaloneHeatingAirflowTempUpperOffset")
                                                             .setSiteRef(siteRef)
@@ -435,8 +438,8 @@ public class StandAloneTuners {
                                                             .build();
         String standaloneHeatingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempUpperOffset);
         BuildingTunerUtil.updateTunerLevels(standaloneHeatingAirflowTempUpperOffsetId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneHeatingAirflowTempUpperOffsetId, HSUtil.getPriorityVal(standaloneHeatingAirflowTempUpperOffsetId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneHeatingAirflowTempUpperOffsetId));
+        
         Point standaloneAirflowSampleWaitTime = new Point.Builder()
                                                     .setDisplayName(equipdis+"-"+"standaloneAirflowSampleWaitTime")
                                                     .setSiteRef(siteRef)
@@ -451,8 +454,7 @@ public class StandAloneTuners {
                                                     .build();
         String standaloneAirflowSampleWaitTimeId = hayStack.addPoint(standaloneAirflowSampleWaitTime);
         BuildingTunerUtil.updateTunerLevels(standaloneAirflowSampleWaitTimeId, roomRef, hayStack);
-        hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, HSUtil.getPriorityVal(standaloneAirflowSampleWaitTimeId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(standaloneAirflowSampleWaitTimeId));
 
         Point zoneCO2Target  = new Point.Builder()
                                    .setDisplayName(equipdis+"-"+"standaloneCO2Target")
@@ -468,7 +470,7 @@ public class StandAloneTuners {
                                    .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
         BuildingTunerUtil.updateTunerLevels(zoneCO2TargetId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneCO2TargetId));
 
         Point zoneCO2Threshold  = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"standaloneCO2Threshold")
@@ -484,7 +486,7 @@ public class StandAloneTuners {
                                       .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
         BuildingTunerUtil.updateTunerLevels(zoneCO2ThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneCO2ThresholdId));
 
         Point zoneVOCTarget  = new Point.Builder()
                                    .setDisplayName(equipdis+"-"+"standaloneVOCTarget")
@@ -500,7 +502,7 @@ public class StandAloneTuners {
                                    .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
         BuildingTunerUtil.updateTunerLevels(zoneVOCTargetId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneVOCTargetId));
     
         Point zoneVOCThreshold  = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"standaloneVOCThreshold")
@@ -516,7 +518,9 @@ public class StandAloneTuners {
                                       .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
+    
+        hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     
     public static void addTwoPipeFanEquipStandaloneTuners(CCUHsApi hayStack, String siteRef, String equipDis,
@@ -536,7 +540,7 @@ public class StandAloneTuners {
                                            .build();
         String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
         BuildingTunerUtil.updateTunerLevels(sa2PfcHeatingThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(sa2PfcHeatingThresholdId, HSUtil.getPriorityVal(sa2PfcHeatingThresholdId));
+        hayStack.writeHisValueByIdWithoutCOV(sa2PfcHeatingThresholdId, HSUtil.getPriorityVal(sa2PfcHeatingThresholdId));
     
         Point sa2PfcCoolingThreshold = new Point.Builder()
                                            .setDisplayName(equipDis+"-2PipeFancoilCoolingThreshold")
@@ -552,7 +556,7 @@ public class StandAloneTuners {
                                            .build();
         String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
         BuildingTunerUtil.updateTunerLevels(sa2PfcCoolingThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(sa2PfcCoolingThresholdId, HSUtil.getPriorityVal(sa2PfcCoolingThresholdId));
+        hayStack.writeHisValueByIdWithoutCOV(sa2PfcCoolingThresholdId, HSUtil.getPriorityVal(sa2PfcCoolingThresholdId));
     }
     
     public static void addEquipStandaloneTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,

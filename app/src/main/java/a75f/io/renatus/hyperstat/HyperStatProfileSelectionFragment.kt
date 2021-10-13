@@ -1,4 +1,4 @@
-package a75f.io.renatus
+package a75f.io.renatus.hyperstat
 
 import a75f.io.api.haystack.HSUtil
 import a75f.io.logger.CcuLog
@@ -7,6 +7,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment
+import a75f.io.renatus.FragmentBLEInstructionScreen
+import a75f.io.renatus.HyperStatSensePairScreen
+import a75f.io.renatus.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,8 +32,6 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       get() = requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME)!!
    private val mFloorName: String
       get() = requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
-
-
 
    companion object {
 
@@ -69,7 +70,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
 
    private fun setupOnClickListeners(view: View) {
 
-      // todo: replace with view binding after (ticket #)
+
       val goBack = view.findViewById<View>(R.id.goBackImage)
       val cpuCell = view.findViewById<View>(R.id.cpuCell)
       val hpuCell = view.findViewById<View>(R.id.hpuCell)
@@ -79,32 +80,24 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val senseCell = view.findViewById<View>(R.id.hypersenseCell)
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
-      cpuCell.setOnClickListener { showCPUConfigFragment()
-
-         // NOTE: once we are ready to pair hyperstats (and not just rely on biskit), we open a BLEInstructionScreen like from the other fragments:
-         /* showDialogFragment(
-               FragmentBLEInstructionScreen.getInstance(
-                  mNodeAddress,
-                  mRoomName,
-                  mFloorName,
-                  ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,
-                  NodeType.HYPER_STAT
-               ), FragmentBLEInstructionScreen.ID
-            ) */
-      }
+      cpuCell.setOnClickListener { showCPUConfigFragment() }
       senseCell.setOnClickListener{ showSenseconfigFragment() }
       vrvCell.setOnClickListener{ showVrvConfigFragment() }
    }
 
    private fun showCPUConfigFragment() {
-      CcuLog.i("CCU_", "TC: showCPUConfigFragment");
       showDialogFragment(
-         HyperstatCpuFragment(), HyperstatCpuFragment.ID
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,
+            NodeType.HYPER_STAT
+         ), FragmentBLEInstructionScreen.ID
       )
    }
 
    private fun showSenseconfigFragment() {
-      CcuLog.i("CCU_", " showSenseconfigFragment");
       val zoneEquips   = HSUtil.getEquips(mRoomName).size;
       if (zoneEquips == 0) {
          showDialogFragment(

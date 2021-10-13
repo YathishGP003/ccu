@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -88,10 +89,10 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public boolean isZoneDead() {
         
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
         
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
         return dualDuctEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway) ||
                dualDuctEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway);
     }

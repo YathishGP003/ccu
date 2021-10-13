@@ -100,11 +100,10 @@ public class Globals {
 
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
-
+    
     private static long ccuUpdateTriggerTimeToken;
-
     private volatile boolean isCcuReady = false;
-
+    
     private Globals() {
     }
 
@@ -533,7 +532,7 @@ public class Globals {
     public long getCcuUpdateTriggerTimeToken() {
         return ccuUpdateTriggerTimeToken;
     }
-
+    
     public boolean isCcuReady() {
         return isCcuReady;
     }

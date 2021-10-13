@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
@@ -155,10 +156,10 @@ public abstract class VavProfile extends ZoneProfile
     @Override
     public boolean isZoneDead() {
     
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
     
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
     
         for (short node : vavDeviceMap.keySet())
         {

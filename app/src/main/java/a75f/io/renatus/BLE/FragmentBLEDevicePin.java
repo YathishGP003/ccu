@@ -23,6 +23,17 @@ import org.javolution.annotations.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.device.ble.BLERoomName;
+import a75f.io.device.ble.GattAttributes;
+import a75f.io.device.ble.GattPin;
+import a75f.io.device.ble.StructShort;
+import a75f.io.device.serial.SerialConsts;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.ByteArrayUtils;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.DialogOAOProfile;
 import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
@@ -30,28 +41,16 @@ import a75f.io.renatus.FragmentCPUConfiguration;
 import a75f.io.renatus.FragmentDABConfiguration;
 import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.FragmentEMRConfiguration;
+import a75f.io.renatus.FragmentHMPConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.FragmentPLCConfiguration;
+import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
+import a75f.io.renatus.FragmentVAVConfiguration;
 import a75f.io.renatus.HyperStatSenseFragment;
+import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
-import a75f.io.device.ble.BLERoomName;
-import a75f.io.device.ble.GattAttributes;
-import a75f.io.device.ble.GattPin;
-import a75f.io.device.ble.StructShort;
-import a75f.io.logic.bo.building.NodeType;
-import a75f.io.device.serial.SerialConsts;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.util.ByteArrayUtils;
-import a75f.io.logic.L;
-import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.FragmentHMPConfiguration;
-import a75f.io.renatus.FragmentSSEConfiguration;
-import a75f.io.renatus.FragmentVAVConfiguration;
-import a75f.io.renatus.R;
-import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -380,10 +379,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                 removeDialogFragment(FragmentDeviceScan.ID);
                 removeDialogFragment(FragmentBLEDevicePin.ID);
                 switch (mProfileType) {
-                    case LIGHT:
-                        showDialogFragment(LightingZoneProfileFragment
-                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), LightingZoneProfileFragment.ID);
-                        break;
                     case SSE:
                         showDialogFragment(FragmentSSEConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName,mProfileType), FragmentSSEConfiguration.ID);

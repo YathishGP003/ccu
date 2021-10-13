@@ -7,16 +7,20 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
+import a75f.io.logic.util.RxTask;
 
 public class ZoneTuners {
     
     public static void addZoneTunersForEquip(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                              String roomRef, String floorRef, String tz ) {
         Log.d("CCU", "addZoneTunersForEquip for " + equipdis);
+        List<HisItem> hisItems = new ArrayList<>();
         Point unoccupiedZoneSetback = new Point.Builder()
                                           .setDisplayName(equipdis+"-"+"unoccupiedZoneSetback")
                                           .setSiteRef(siteRef)
@@ -31,7 +35,7 @@ public class ZoneTuners {
                                           .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
         BuildingTunerUtil.updateTunerLevels(unoccupiedZoneSetbackId, roomRef, hayStack);
-        hayStack.writeHisValById(unoccupiedZoneSetbackId, HSUtil.getPriorityVal(unoccupiedZoneSetbackId));
+        hisItems.add(HSUtil.getHisItemForWritable(unoccupiedZoneSetbackId));
 
         Point zoneDeadTime = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"zoneDeadTime")
@@ -47,7 +51,7 @@ public class ZoneTuners {
                                  .build();
         String zoneDeadTimeId = hayStack.addPoint(zoneDeadTime);
         BuildingTunerUtil.updateTunerLevels(zoneDeadTimeId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneDeadTimeId, HSUtil.getPriorityVal(zoneDeadTimeId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneDeadTimeId));
 
         Point autoAwayTime = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"autoAwayTime")
@@ -63,7 +67,7 @@ public class ZoneTuners {
                                  .build();
         String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
         BuildingTunerUtil.updateTunerLevels(autoAwayTimeId, roomRef, hayStack);
-        hayStack.writeHisValById(autoAwayTimeId, HSUtil.getPriorityVal(autoAwayTimeId));
+        hisItems.add(HSUtil.getHisItemForWritable(autoAwayTimeId));
 
         Point forcedOccupiedTime = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"forcedOccupiedTime")
@@ -79,7 +83,7 @@ public class ZoneTuners {
                                        .build();
         String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
         BuildingTunerUtil.updateTunerLevels(forcedOccupiedTimeId, roomRef, hayStack);
-        hayStack.writeHisValById(forcedOccupiedTimeId, HSUtil.getPriorityVal(forcedOccupiedTimeId));
+        hisItems.add(HSUtil.getHisItemForWritable(forcedOccupiedTimeId));
 
         Point adrCoolingDeadband = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"adrCoolingDeadband")
@@ -95,7 +99,7 @@ public class ZoneTuners {
                                        .build();
         String adrCoolingDeadbandId = hayStack.addPoint(adrCoolingDeadband);
         BuildingTunerUtil.updateTunerLevels(adrCoolingDeadbandId, roomRef, hayStack);
-        hayStack.writeHisValById(adrCoolingDeadbandId, HSUtil.getPriorityVal(adrCoolingDeadbandId));
+        hisItems.add(HSUtil.getHisItemForWritable(adrCoolingDeadbandId));
 
         Point adrHeatingDeadband = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"adrHeatingDeadband")
@@ -111,7 +115,7 @@ public class ZoneTuners {
                                        .build();
         String adrHeatingDeadbandId = hayStack.addPoint(adrHeatingDeadband);
         BuildingTunerUtil.updateTunerLevels(adrHeatingDeadbandId, roomRef, hayStack);
-        hayStack.writeHisValById(adrHeatingDeadbandId, HSUtil.getPriorityVal(adrHeatingDeadbandId));
+        hisItems.add(HSUtil.getHisItemForWritable(adrHeatingDeadbandId));
 
         Point snCoolingAirflowTemp = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"snCoolingAirflowTemp")
@@ -127,7 +131,7 @@ public class ZoneTuners {
                                          .build();
         String snCoolingAirflowTempId = hayStack.addPoint(snCoolingAirflowTemp);
         BuildingTunerUtil.updateTunerLevels(snCoolingAirflowTempId, roomRef, hayStack);
-        hayStack.writeHisValById(snCoolingAirflowTempId, HSUtil.getPriorityVal(snCoolingAirflowTempId));
+        hisItems.add(HSUtil.getHisItemForWritable(snCoolingAirflowTempId));
 
         Point snHeatingAirflowTemp = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"snHeatingAirflowTemp")
@@ -143,7 +147,7 @@ public class ZoneTuners {
                                          .build();
         String snHeatingAirflowTempId = hayStack.addPoint(snHeatingAirflowTemp);
         BuildingTunerUtil.updateTunerLevels(snHeatingAirflowTempId, roomRef, hayStack);
-        hayStack.writeHisValById(snHeatingAirflowTempId, HSUtil.getPriorityVal(snHeatingAirflowTempId));
+        hisItems.add(HSUtil.getHisItemForWritable(snHeatingAirflowTempId));
 
         Point constantTempAlertTime = new Point.Builder()
                                           .setDisplayName(equipdis+"-"+"constantTempAlertTime")
@@ -159,7 +163,7 @@ public class ZoneTuners {
                                           .build();
         String constantTempAlertTimeId = hayStack.addPoint(constantTempAlertTime);
         BuildingTunerUtil.updateTunerLevels(constantTempAlertTimeId, roomRef, hayStack);
-        hayStack.writeHisValById(constantTempAlertTimeId, HSUtil.getPriorityVal(constantTempAlertTimeId));
+        hisItems.add(HSUtil.getHisItemForWritable(constantTempAlertTimeId));
 
         Point abnormalCurTempRiseTrigger = new Point.Builder()
                                                .setDisplayName(equipdis+"-"+"abnormalCurTempRiseTrigger")
@@ -175,6 +179,7 @@ public class ZoneTuners {
                                                .build();
         String abnormalCurTempRiseTriggerId = hayStack.addPoint(abnormalCurTempRiseTrigger);
         BuildingTunerUtil.updateTunerLevels(abnormalCurTempRiseTriggerId, roomRef, hayStack);
-        hayStack.writeHisValById(abnormalCurTempRiseTriggerId, HSUtil.getPriorityVal(abnormalCurTempRiseTriggerId));
+        hisItems.add(HSUtil.getHisItemForWritable(abnormalCurTempRiseTriggerId));
+        hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 }

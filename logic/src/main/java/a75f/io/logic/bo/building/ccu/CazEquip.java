@@ -21,6 +21,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TITuners;
+import a75f.io.logic.util.RxTask;
 
 /**
  * Created by Anilkumar on 8/19/19.
@@ -72,8 +73,14 @@ public class CazEquip
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        TITuners.addEquipTiTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-TI-" + nodeAddr, equipRef, roomRef,
-                                   floorRef, tz);
+    
+        RxTask.executeAsync(() -> TITuners.addEquipTiTuners( CCUHsApi.getInstance(),
+                                                             siteRef,
+                                                             siteDis + "-TI-" + nodeAddr,
+                                                             equipRef,
+                                                             roomRef,
+                                                             floorRef,
+                                                             tz));
         createCcuConfigPoints(config, equipRef);
 
         Point currentTemp = new Point.Builder()
@@ -207,7 +214,7 @@ public class CazEquip
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
         Point dischargeAirTemp1 = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-thermistor1")
@@ -223,7 +230,7 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
-        CCUHsApi.getInstance().writeHisValById(dat1Id, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(dat1Id, 0.0);
 
 
         Point eatPoint = new Point.Builder()
@@ -240,7 +247,7 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(eatID, 0.0);
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
             .setDisplayName(equipDis+"-zoneDynamicPriority")
@@ -254,7 +261,7 @@ public class CazEquip
             .setTz(tz)
             .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zoneDynamicPriorityPointID, 10.0);
 
         Point occupancy = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-occupancy")
@@ -269,7 +276,7 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
-        CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "ti", tz, false));
@@ -326,7 +333,7 @@ public class CazEquip
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
         CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)config.getPriority().ordinal());
-        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double)config.getPriority().ordinal());
 
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")

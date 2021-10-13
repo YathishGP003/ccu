@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.util.RxTask;
 
 public class ConventionalUnitLogicalMap {
 
@@ -77,8 +78,14 @@ public class ConventionalUnitLogicalMap {
             b.addMarker("cpu");
             profile = "cpu";
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-CPU-" + nodeAddr,
-                                                   equipRef, room, floor, tz);
+    
+        RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
+                                                                            siteRef,
+                                                                            siteDis + "-CPU-" + nodeAddr,
+                                                                            equipRef,
+                                                                            room,
+                                                                            floor,
+                                                                            tz));
 
         createConventionalConfigPoints(config, equipRef,floor,room);
 
@@ -96,7 +103,8 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ctID, 0.0);
+        
         Point humidity = new Point.Builder()
                 .setDisplayName(equipDis+"-humidity")
                 .setEquipRef(equipRef)
@@ -110,6 +118,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(humidityId, 0.0);
 
         Point co2 = new Point.Builder()
                 .setDisplayName(equipDis+"-co2")
@@ -124,6 +133,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(co2Id, 0.0);
 
         Point voc = new Point.Builder()
                 .setDisplayName(equipDis+"-voc")
@@ -138,6 +148,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(vocId, 0.0);
 
         Point occSensing = new Point.Builder()
                 .setDisplayName(equipDis+"-occupancySensor")
@@ -306,7 +317,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
 
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
-        CCUHsApi.getInstance().writeHisValById(datID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(datID, 0.0);
 
         Point eatPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-external10kTempSensorTh2")
@@ -334,7 +345,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r1ID = CCUHsApi.getInstance().addPoint(coolingStage1);
-        CCUHsApi.getInstance().writeHisValById(r1ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r1ID, 0.0);
 
         Point coolingStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-coolingStage2")
@@ -348,7 +359,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r2ID = CCUHsApi.getInstance().addPoint(coolingStage2);
-        CCUHsApi.getInstance().writeHisValById(r2ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r2ID, 0.0);
 
         Point heatingStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-heatingStage1")
@@ -362,7 +373,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
-        CCUHsApi.getInstance().writeHisValById(r4ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r4ID, 0.0);
 
         Point heatingStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-heatingStage2")
@@ -376,7 +387,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r5ID = CCUHsApi.getInstance().addPoint(heatingStage2);
-        CCUHsApi.getInstance().writeHisValById(r5ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r5ID, 0.0);
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage1")
@@ -390,7 +401,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r3ID = CCUHsApi.getInstance().addPoint(fanStage1);
-        CCUHsApi.getInstance().writeHisValById(r3ID, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r3ID, 0.0);
 
 		Point equipStatus = new Point.Builder()
                   .setDisplayName(equipDis+"-equipStatus")
@@ -404,7 +415,7 @@ public class ConventionalUnitLogicalMap {
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipStatusId, 0.0);
 		
  		Point equipStatusMessage = new Point.Builder()
                                     .setDisplayName(equipDis+"-equipStatusMessage")
@@ -445,7 +456,7 @@ public class ConventionalUnitLogicalMap {
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "cpu", tz));
@@ -496,7 +507,7 @@ public class ConventionalUnitLogicalMap {
                         .setTz(tz)
                         .build();
                 String r6ID = CCUHsApi.getInstance().addPoint(fanStage2pt);
-                CCUHsApi.getInstance().writeHisValById(r6ID, 0.0);
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r6ID, 0.0);
                 device.relay6.setPointRef(r6ID);
                 break;
             case HUMIDIFIER:
@@ -507,7 +518,7 @@ public class ConventionalUnitLogicalMap {
                         .setTz(tz)
                         .build();
                 String r6HumidID = CCUHsApi.getInstance().addPoint(humidifier);
-                CCUHsApi.getInstance().writeHisValById(r6HumidID, 0.0);
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r6HumidID, 0.0);
                 device.relay6.setPointRef(r6HumidID);
                 break;
             case DE_HUMIDIFIER:
@@ -518,7 +529,7 @@ public class ConventionalUnitLogicalMap {
                         .setTz(tz)
                         .build();
                 String r6DeHumidID = CCUHsApi.getInstance().addPoint(dehumidifier);
-                CCUHsApi.getInstance().writeHisValById(r6DeHumidID, 0.0);
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(r6DeHumidID, 0.0);
                 device.relay6.setPointRef(r6DeHumidID);
                 break;
             default:
@@ -530,10 +541,6 @@ public class ConventionalUnitLogicalMap {
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
         //Initialize write array for points, otherwise a read before write will throw exception
-        setCurrentTemp(0);
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
 		setScheduleStatus("");
 		setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
@@ -982,7 +989,7 @@ public class ConventionalUnitLogicalMap {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
 
@@ -1014,7 +1021,7 @@ public class ConventionalUnitLogicalMap {
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
 
     public double getDesiredTempHeating()
@@ -1045,7 +1052,7 @@ public class ConventionalUnitLogicalMap {
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
     
     public double getDischargeTemp()

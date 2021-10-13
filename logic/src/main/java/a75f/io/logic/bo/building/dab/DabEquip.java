@@ -4,7 +4,9 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.GenericPIController;
@@ -12,6 +14,7 @@ import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -32,6 +35,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxTask;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -115,9 +119,17 @@ public class DabEquip
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        DabTuners.addEquipDabTuners( hayStack, siteRef, siteDis + "-DAB-" + nodeAddr, equipRef, roomRef, floorRef, tz);
+    
+        RxTask.executeAsync(() -> DabTuners.addEquipDabTuners( hayStack,
+                                                               siteRef,
+                                                               equipDis,
+                                                               equipRef,
+                                                               roomRef,
+                                                               floorRef,
+                                                               tz));
         createDabConfigPoints(config, equipRef);
     
+        List<HisItem> hisItems = new ArrayList<>();
         Point damper1Pos = new Point.Builder()
                                   .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper1Pos")
                                   .setEquipRef(equipRef)
@@ -131,6 +143,7 @@ public class DabEquip
                                   .setTz(tz)
                                   .build();
         String dpID = CCUHsApi.getInstance().addPoint(damper1Pos);
+        hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
     
         Point damper2Pos = new Point.Builder()
                                   .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper2Pos")
@@ -144,8 +157,8 @@ public class DabEquip
                                   .setUnit("%")
                                   .setTz(tz)
                                   .build();
-        String dp1ID = CCUHsApi.getInstance().addPoint(damper2Pos);
-        
+        String dp2ID = CCUHsApi.getInstance().addPoint(damper2Pos);
+        hisItems.add(new HisItem(dp2ID, new Date(System.currentTimeMillis()), 0.0));
     
         Point normalizedDamper1Pos = new Point.Builder()
                                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamper1Pos")
@@ -189,6 +202,7 @@ public class DabEquip
                                     .setTz(tz)
                                     .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
+        hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
     
         Point humidity = new Point.Builder()
                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-humidity")
@@ -204,6 +218,7 @@ public class DabEquip
                                  .setTz(tz)
                                  .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+        hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
     
         Point co2 = new Point.Builder()
                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-co2")
@@ -219,6 +234,7 @@ public class DabEquip
                             .setTz(tz)
                             .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
+        hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point voc = new Point.Builder()
                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-voc")
@@ -234,6 +250,7 @@ public class DabEquip
                             .setTz(tz)
                             .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
+        hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
     
         Point desiredTemp = new Point.Builder()
                                     .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-desiredTemp")
@@ -292,7 +309,7 @@ public class DabEquip
                                     .setTz(tz)
                                     .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
+        hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 0.0));
     
         Point equipStatusMessage = new Point.Builder()
                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatusMessage")
@@ -332,7 +349,7 @@ public class DabEquip
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), 0.0));
     
         Point dischargeAirTemp1 = new Point.Builder()
                                     .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp1")
@@ -347,7 +364,7 @@ public class DabEquip
                                     .setTz(tz)
                                     .build();
         String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
-        CCUHsApi.getInstance().writeHisValById(dat1Id, 0.0);
+        hisItems.add(new HisItem(dat1Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point dischargeAirTemp2 = new Point.Builder()
                                        .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp2")
@@ -362,7 +379,7 @@ public class DabEquip
                                        .setTz(tz)
                                        .build();
         String dat2Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp2);
-        CCUHsApi.getInstance().writeHisValById(dat2Id, 0.0);
+        hisItems.add(new HisItem(dat2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point occupancy = new Point.Builder()
                                   .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-occupancy")
@@ -376,7 +393,8 @@ public class DabEquip
                                   .setTz(tz)
                                   .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
-        CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
+        hisItems.add(new HisItem(occupancyId, new Date(System.currentTimeMillis()), 0.0));
+        
         Point zoneDynamicPriorityPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-zoneDynamicPriority")
                 .setEquipRef(equipRef)
@@ -389,7 +407,8 @@ public class DabEquip
                 .setTz(tz)
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
+        hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
+        
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
@@ -424,18 +443,12 @@ public class DabEquip
         device.addSensor(Port.SENSOR_VOC, vocId);
         
         device.addPointsToDb();
-    
         
-        setCurrentTemp(0);
-        setDamperPos(0, "primary");
-        setDamperPos(0, "secondary");
         setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
-        setDesiredTempHeating(70.0);
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
+    
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
     
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -542,7 +555,7 @@ public class DabEquip
                                                .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
         
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
@@ -556,7 +569,7 @@ public class DabEquip
                                          .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
         CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
         
         Point enableIAQControl = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableIAQControl")
@@ -570,7 +583,7 @@ public class DabEquip
                                          .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
         
         Point zonePriority = new Point.Builder()
                                      .setDisplayName(equipDis+"-zonePriority")
@@ -584,7 +597,7 @@ public class DabEquip
                                      .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
         CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)config.getPriority().ordinal());
-        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double)config.getPriority().ordinal());
         
         Point temperatureOffset = new Point.Builder()
                                           .setDisplayName(equipDis+"-temperatureOffset")
@@ -597,7 +610,7 @@ public class DabEquip
                                           .setTz(tz)
                                           .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, (double)config.temperaturOffset);
         
         Point damperMinCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-minCoolingDamperPos")
@@ -611,7 +624,7 @@ public class DabEquip
                                          .build();
         String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
-        CCUHsApi.getInstance().writeHisValById(damperMinCoolingId, (double)config.minDamperCooling);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
         
         Point damperMaxCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxCoolingDamperPos")
@@ -625,7 +638,7 @@ public class DabEquip
                                          .build();
         String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
-        CCUHsApi.getInstance().writeHisValById(damperMaxCoolingId, (double)config.maxDamperCooling);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
         
         
         Point damperMinHeating = new Point.Builder()
@@ -640,7 +653,7 @@ public class DabEquip
                                          .build();
         String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
-        CCUHsApi.getInstance().writeHisValById(damperMinHeatingId, (double)config.minDamperHeating);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
         
         Point damperMaxHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
@@ -654,7 +667,7 @@ public class DabEquip
                                          .build();
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
-        CCUHsApi.getInstance().writeHisValById(damperMaxHeatingId, (double) config.maxDamperHeating);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
     }
     
     public DabProfileConfiguration getProfileConfiguration() {

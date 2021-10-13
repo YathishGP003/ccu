@@ -25,6 +25,7 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
+import a75f.io.logic.util.RxTask;
 
 public class SingleStageEquip {
 
@@ -71,10 +72,14 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-
-        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-SSE-" + nodeAddr,
-                                                   equipRef, roomRef, floorRef
-            , tz);
+    
+        RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(),
+                                                                       siteRef,
+                                                                       siteDis + "-SSE-" + nodeAddr,
+                                                                       equipRef,
+                                                                       roomRef,
+                                                                       floorRef
+                                                                        , tz));
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-currentTemp")
@@ -89,6 +94,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ctID, 0.0);
 
         Point humidity = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-humidity")
@@ -103,6 +109,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(humidityId, 0.0);
 
         Point co2 = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-co2")
@@ -117,6 +124,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(co2Id, 0.0);
 
         Point voc = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-voc")
@@ -131,6 +139,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(vocId, 0.0);
 
         Point desiredTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-desiredTemp")
@@ -226,7 +235,7 @@ public class SingleStageEquip {
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
         Point dischargeAirTemp1 = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-airflowTempSensorTh1")
@@ -241,7 +250,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
-        CCUHsApi.getInstance().writeHisValById(dat1Id, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(dat1Id, 0.0);
 
         Point eatPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-external10kTempSensorTh2")
@@ -292,15 +301,10 @@ public class SingleStageEquip {
         device.addSensor(Port.SENSOR_VOC, vocId);
         device.addPointsToDb();
 
-
-        setCurrentTemp(0);
+        
         setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
-        setDesiredTempHeating(70.0);
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
     
         createSSEConfigPoints(config, equipRef,floorRef,roomRef);
         
@@ -551,7 +555,7 @@ public class SingleStageEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
 
@@ -582,7 +586,7 @@ public class SingleStageEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
 
     public double getDesiredTempHeating()
@@ -612,7 +616,7 @@ public class SingleStageEquip {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
     public double getDischargeTemp()
     {

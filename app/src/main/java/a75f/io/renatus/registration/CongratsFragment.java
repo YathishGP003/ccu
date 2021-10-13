@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import a75f.io.logic.tuners.BuildingTunerCache;
 import androidx.fragment.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -144,8 +146,8 @@ public class CongratsFragment extends Fragment {
         }
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip eqp = new Equip.Builder().setHashMap(tuner).build();
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
         HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user");
         HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user");
         HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user");

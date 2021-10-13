@@ -59,6 +59,8 @@ public class AlertsFragment extends Fragment
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
+		CcuLog.i("UI_PROFILING","AlertsFragment.onViewCreated");
+		
 		listView= view.findViewById(R.id.alertList);
 		alertList=new ArrayList<>();
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -117,6 +119,8 @@ public class AlertsFragment extends Fragment
 			alert.show();
 			return true;
 		});
+		CcuLog.i("UI_PROFILING","AlertsFragment.onViewCreated Done");
+		
 	}
 	
 	String getFormattedDate(long millis) {

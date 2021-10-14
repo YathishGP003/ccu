@@ -1329,7 +1329,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         double pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
         double pointbuildingMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
-        double pointbuildingMax = BuildingTunerCache.getInstance().getBuildingLimitMin();
+        double pointbuildingMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double pointcoolUL = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();
         double pointheatUL = BuildingTunerCache.getInstance().getMaxHeatingUserLimit();
         double pointcoolLL = BuildingTunerCache.getInstance().getMinCoolingUserLimit();

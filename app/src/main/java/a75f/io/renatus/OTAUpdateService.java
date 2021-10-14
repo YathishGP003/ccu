@@ -292,7 +292,7 @@ public class OTAUpdateService extends IntentService {
         if(mLwMeshAddresses == null) {
             mLwMeshAddresses = new ArrayList<>();
         }
-
+        mLwMeshAddresses.clear();
         //determine how many devices are going to be updated
         switch(updateLevel) {
             case "site":

@@ -432,6 +432,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case HYPERSTAT_SENSE:
                         showDialogFragment(HyperStatSenseFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_SENSE),
                                 HyperStatSenseFragment.ID);
+                        break;
                     case HYPERSTAT_VRV:
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
                         break;

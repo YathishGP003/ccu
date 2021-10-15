@@ -33,7 +33,14 @@ public class SyncManager {
         appContext = context;
     }
     
-    public void syncEntities() {
+    /**
+     * Fires a sync work.
+     * When workPolicyKeep is true ,sync work is kept in queue and retried until it is successful
+     * with linearly increasing back-off delay. Meanwhile if anther work is scheduled with the same policy , it is
+     * ignored.
+     * When workPolicyKeep is false, any previous sync work in queue is removed and a new work is scheduled immediately.
+     */
+    public void syncEntities(boolean workPolicyKeep) {
     
         CcuLog.d(TAG, "syncEntities");
         if (mSyncTimerTask != null) {
@@ -48,16 +55,16 @@ public class SyncManager {
         if (isMigrationRequired()) {
             CcuLog.d(TAG, "Migration Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.KEEP,
-                                                                getMigrationWorkRequest())
+                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
+                                                getMigrationWorkRequest())
                                                 .then(getSyncWorkRequest())
                                                 .then(getPointWriteWorkRequest())
                                                 .enqueue();
         } else {
             CcuLog.d(TAG, "Migration not Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
-                                                                ExistingWorkPolicy.KEEP,
-                                                                getSyncWorkRequest())
+                                                workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
+                                                getSyncWorkRequest())
                                                 .enqueue();
         }
     }
@@ -67,13 +74,13 @@ public class SyncManager {
     
         if (isMigrationRequired()) {
             WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
-                                                                ExistingWorkPolicy.KEEP,
+                                                                ExistingWorkPolicy.REPLACE,
                                                                 getMigrationWorkRequest())
                                                 .then(getPointWriteWorkRequest())
                                                 .enqueue();
         } else {
             WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
-                                                                ExistingWorkPolicy.KEEP,
+                                                                ExistingWorkPolicy.REPLACE,
                                                                 getSyncWorkRequest())
                                                 .enqueue();
         }
@@ -88,7 +95,7 @@ public class SyncManager {
             return;
         }
         
-        syncEntities();
+        syncEntities(false);
         syncPointArray();
     }
     
@@ -117,10 +124,10 @@ public class SyncManager {
         
         return new OneTimeWorkRequest.Builder(SyncWorker.class)
                                         .setConstraints(getSyncConstraints())
-                                        /*.setBackoffCriteria(
+                                        .setBackoffCriteria(
                                             BackoffPolicy.LINEAR,
                                             OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                                            TimeUnit.MILLISECONDS)*/
+                                            TimeUnit.MILLISECONDS)
                                         .addTag(SYNC_WORK_TAG)
                                         .build();
         
@@ -129,10 +136,10 @@ public class SyncManager {
     private OneTimeWorkRequest getPointWriteWorkRequest() {
         return new OneTimeWorkRequest.Builder(PointWriteWorker.class)
                                         .setConstraints(getSyncConstraints())
-                                        /*.setBackoffCriteria(
+                                        .setBackoffCriteria(
                                             BackoffPolicy.LINEAR,
                                             OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                                            TimeUnit.MILLISECONDS)*/
+                                            TimeUnit.MILLISECONDS)
                                         .addTag(POINT_WRITE_WORK_TAG)
                                         .build();
     }
@@ -161,7 +168,7 @@ public class SyncManager {
         mSyncTimerTask = new TimerTask() {
             public void run() {
                 CcuLog.i(TAG, "Entity Sync Scheduled");
-                syncEntities();
+                syncEntities(true);
                 mSyncTimerTask = null;
             }
         };

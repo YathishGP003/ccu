@@ -215,11 +215,9 @@ public class SyncStatusService {
     
     public boolean updateRefs(HDict entity, HDictBuilder builder) {
         Iterator<String> iterator = refTypes.iterator();
-        while(iterator.hasNext())
-        {
+        while(iterator.hasNext()) {
             String hRef = iterator.next();
-            if (entity.has(hRef) && !entity.get(hRef).toString().equals("SYSTEM"))
-            {
+            if (entity.has(hRef) && !entity.get(hRef).toString().equals("SYSTEM")) {
                 builder.add(hRef, HRef.copy(entity.get(hRef).toString()));
             }
         }

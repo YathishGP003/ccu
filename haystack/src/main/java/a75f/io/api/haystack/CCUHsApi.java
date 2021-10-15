@@ -1150,7 +1150,7 @@ public class CCUHsApi
             public void run()
             {
                 //Check if sync session is already in progress
-                syncManager.syncEntities();
+                syncManager.syncEntities(true);
             }
         }.start();
     }

@@ -45,7 +45,7 @@ public class SyncWorker extends Worker {
     @Override
     public Result doWork() {
     
-        CcuLog.i(TAG, " doWork ");
+        CcuLog.i(TAG, " doSyncWork ");
         
         if (!siteHandler.doSync()) {
             CcuLog.e(TAG, "Site sync failed");
@@ -76,7 +76,7 @@ public class SyncWorker extends Worker {
             CcuLog.e(TAG, "Deleted entity sync failed");
             return Result.retry();
         }
-        CcuLog.i(TAG, " doWork success");
+        CcuLog.i(TAG, " doSyncWork success");
         return Result.success();
     }
     

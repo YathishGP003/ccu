@@ -49,13 +49,13 @@ public class ControlMote
             return;
         }
         site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
-        
+        siteRef = site.getId();
         Device d = new Device.Builder()
                            .setDisplayName("CM-device")
                            .addMarker("network")
                            .addMarker("cm")
                            .addMarker("his")
-                           .setSiteRef(site.getId())
+                           .setSiteRef(siteRef)
                            .setEquipRef(systemEquipRef)
                            .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);

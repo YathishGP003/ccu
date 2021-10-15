@@ -549,7 +549,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						if(L.ccu().systemProfile instanceof VavIERtu){
 							IEGatewayDetail.setVisibility(View.VISIBLE);
 							IEGatewayOccupancyStatus.setText(getOccStatus());
-							GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
+							GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
 						}
 					}
 				}

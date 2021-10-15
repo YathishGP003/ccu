@@ -48,9 +48,6 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         L.pingCloudServer();
         
-        if (true) {
-            return;
-        }
         if (jobLock.tryLock()) {
             
             try {

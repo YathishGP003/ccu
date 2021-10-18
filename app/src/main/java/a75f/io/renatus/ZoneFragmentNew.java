@@ -549,17 +549,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 gridPosition = 0;
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     for (int m = 0; m < roomList.size(); m++) {
-                        loadZone(rootView, tablerowLayout, roomList.get(m));
+                        try {
+                            loadZone(rootView, tablerowLayout, roomList.get(m));
+                        } catch (Exception e) {
+                            CcuLog.e(LOG_TAG, "Loading Zone failed");
+                            e.printStackTrace();
+                        }
                     }
-                    Globals.getInstance().setCcuReady(true);
-                    setListeners();
-                    zoneLoadTextView.setVisibility(View.GONE);
+                    setCcuReady();
                 }, 100);
+            } else {
+                setCcuReady();
             }
         } else {
-            zoneLoadTextView.setVisibility(View.GONE);
+            setCcuReady();
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.loadGrid Done");
+    }
+    
+    private void setCcuReady() {
+        Globals.getInstance().setCcuReady(true);
+        setListeners();
+        zoneLoadTextView.setVisibility(View.GONE);
     }
 
 

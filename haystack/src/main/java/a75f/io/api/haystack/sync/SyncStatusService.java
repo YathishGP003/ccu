@@ -30,9 +30,9 @@ public class SyncStatusService {
     Context applicationContext;
     private SharedPreferences preferences;
     
-    private ArrayList<String> unsyncedIdList = new ArrayList<>();
-    private ArrayList<String> updatedIdList = new ArrayList<>();
-    private ArrayList<String> deletedIdList = new ArrayList<>();
+    private List<String> unsyncedIdList = new ArrayList<>();
+    private List<String> updatedIdList = new ArrayList<>();
+    private List<String> deletedIdList = new ArrayList<>();
     
     private static SyncStatusService instance = null;
     
@@ -98,6 +98,10 @@ public class SyncStatusService {
     
     public void addDeletedEntity(String id) {
         deletedIdList.add(id);
+        
+        //Remove the entity from unsynced/updated list in case it is present.
+        unsyncedIdList.remove(id);
+        updatedIdList.remove(id);
     }
     
     public void setUnSyncedEntitySynced(String id) {
@@ -113,15 +117,11 @@ public class SyncStatusService {
     }
     
     public void setEntitySynced(String id) {
-        //TODO - Handle the case where an entity exists in both unsynced and updated lists
-        if (unsyncedIdList.contains(id)) {
-            unsyncedIdList.remove(id);
-        } else if (updatedIdList.contains(id)) {
-            updatedIdList.remove(id);
-        } else if (deletedIdList.contains(id)) {
-            deletedIdList.remove(id);
-        }
+        unsyncedIdList.remove(id);
+        updatedIdList.remove(id);
+        deletedIdList.remove(id);
     }
+    
     /**
      *  Check if entity was ever synced
      */
@@ -163,6 +163,10 @@ public class SyncStatusService {
         
         for (String id : unsyncedIdList) {
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
+            if (entity == null) {
+                CcuLog.e("CCU_HS_SyncHandler","Invalid entity for sync "+id);
+                continue;
+            }
             HDictBuilder builder = new HDictBuilder();
             builder.add(entity);
             updateRefs(entity, builder);
@@ -200,15 +204,15 @@ public class SyncStatusService {
                       .toArray(HRef[]::new);
     }
     
-    public ArrayList<String> getDeletedData() {
+    public List<String> getDeletedData() {
         return deletedIdList;
     }
     
-    private ArrayList<String> getListString(String key) {
+    private List<String> getListString(String key) {
         return new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString(key, ""), "‚‗‚")));
     }
     
-    private void putListString(String key, ArrayList<String> stringList) {
+    private void putListString(String key, List<String> stringList) {
         String[] stringArr = stringList.toArray(new String[0]);
         preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).apply();
     }

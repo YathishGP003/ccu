@@ -1070,25 +1070,15 @@ public class CCUHsApi
      *
      * The method is historical, it used to be. putIdMap(luid, guid);
      */
-    public void setSynced(String id, String remoteId)  {
+    public void setSynced(String id)  {
 
         if (id == null || id.isEmpty()) {
             Log.e("CCU_HS", "id null or empty in set synced");
             return;
         }
-        if (remoteId == null || remoteId.isEmpty()) {
-            Log.d("CCU_HS", "remote Id null or empty in set synced.  Not setting synced.");
-            return;
-        }
-
-        if (! id.equals(remoteId)) {
-            // This has not caused a crash yet, to my knowledge.  Leave in to fail fast here.
-            throw new IllegalArgumentException("remoteId not equal to id in set synced");
-        }
-    
-    
-        Log.i("CCU_HS", "Set entity synced id: "+id+" remoteId: "+remoteId);
-        syncStatusService.setEntitySynced(remoteId);
+        
+        Log.i("CCU_HS", "Set entity synced id: "+id);
+        syncStatusService.setEntitySynced(id);
         //tagsDb.idMap.put(id, remoteId);
     }
 
@@ -1144,33 +1134,16 @@ public class CCUHsApi
 
     public void syncEntityTree()
     {
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                //Check if sync session is already in progress
-                syncManager.syncEntities(true);
-            }
-        }.start();
+        //TODO : Check if sync session is already in progress
+        syncManager.syncEntities(true);
     }
     
     public void syncEntityWithPointWrite() {
-        new Thread() {
-            @Override
-            public void run() {
-                syncManager.syncEntitiesWithPointWrite();
-            }
-        }.start();
+        syncManager.syncEntitiesWithPointWrite();
     }
     
     //Force-writes local entities to the backend.
     public void forceSync() {
-        /*tagsDb.idMap.clear();
-        tagsDb.saveTags();
-        tagsDb.init(context);
-        syncEntityWithPointWrite();*/
-    
         syncStatusService.clearSyncStatus();
         syncManager.syncEntitiesWithPointWrite();
     }
@@ -1241,7 +1214,6 @@ public class CCUHsApi
     }
     
     public void scheduleSync() {
-        //entitySyncHandler.scheduleSync();
         syncManager.scheduleSync();
     }
 
@@ -1369,7 +1341,7 @@ public class CCUHsApi
                     String guid = buildingSchedule.getId();
                     buildingSchedule.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                     CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
-                    CCUHsApi.getInstance().setSynced("@" + guid, "@" + guid);
+                    CCUHsApi.getInstance().setSynced("@" + guid);
                 }
             } catch (UnknownRecException e) {
                 e.printStackTrace();
@@ -1418,7 +1390,7 @@ public class CCUHsApi
                     q.setFloorRef("@SYSTEM");
                     q.setRoomRef("@SYSTEM");
                     equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                    hsApi.setSynced(equipLuid, q.getId());
+                    hsApi.setSynced(equipLuid);
                 }
                 //Points
                 for (Point p : points)
@@ -1432,7 +1404,7 @@ public class CCUHsApi
                             p.setRoomRef("@SYSTEM");
                             p.setEquipRef(equipLuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
-                            hsApi.setSynced(pointLuid, p.getId());
+                            hsApi.setSynced(pointLuid);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -1600,11 +1572,7 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-
-        /*if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }*/
+        
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -1633,11 +1601,7 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-
-        /*if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }*/
+        
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
         CCUHsApi.getInstance().syncEntityTree();
@@ -1677,11 +1641,7 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-    
-        /*if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }*/
+        
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
     }
@@ -1784,47 +1744,34 @@ public class CCUHsApi
     public void addSchedule(String localId, HDict scheduleDict)
     {
         tagsDb.addHDict(localId, scheduleDict);
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
     
     public void updateSchedule(String localId, HDict scheduleDict)
     {
-        addSchedule(localId, scheduleDict);
+        tagsDb.addHDict(localId, scheduleDict);
         
         Log.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
-        /*if (tagsDb.idMap.get("@" +localId) != null)
-        {
-            tagsDb.updateIdMap.put("@" + localId, "@" + localId);
-        }*/
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
     
     public void updateSchedule(Schedule schedule)
     {
-        addSchedule(schedule.getId(), schedule.getScheduleHDict());
-
+        tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
+        
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
-        /*if (tagsDb.idMap.get("@" +schedule.getId()) != null)
-        {
-            tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }*/
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
     
     public void updateZoneSchedule(Schedule schedule, String zoneId)
     {
-        
-        addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
-        
+        tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
-        /*if (tagsDb.idMap.get("@" +schedule.getId()) != null)
-        {
-            tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }*/
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
     
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
-        addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
+        tagsDb.addHDict(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
         Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
     
@@ -2087,7 +2034,7 @@ public class CCUHsApi
                             JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
                             String ccuGuid = ccuRegistrationResponseJson.getString("id");
                             String token = ccuRegistrationResponseJson.getString("token");
-                            CCUHsApi.getInstance().setSynced(ccuLuid, ccuGuid);
+                            CCUHsApi.getInstance().setSynced(ccuLuid);
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
@@ -2304,6 +2251,11 @@ public class CCUHsApi
     
     public boolean isEligibleForSync(String id) {
         return syncStatusService.isEligibleForSync(id);
+    }
+    
+    public boolean isEntityExisting(String id) {
+        HashMap entity = readMapById(id);
+        return !entity.isEmpty();
     }
     
     public void setEntitySynced(String id) {

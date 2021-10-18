@@ -41,7 +41,7 @@ public class PointWriteWorker extends Worker {
     @NonNull @Override
     public Result doWork() {
         
-        CcuLog.i(TAG, "doWork");
+        CcuLog.i(TAG, "doWork : PointWriteWorker");
         
         if (!sendPointArrays()) {
             return Result.retry();

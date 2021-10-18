@@ -929,11 +929,10 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                            if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
                                         StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
-                                        StringUtils.prependIfMissing(floor.getId(), "@"));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
                             }
 
                             //move zones and modules under new floor
@@ -1016,11 +1015,10 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                            if (! CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
                                         StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
-                                        StringUtils.prependIfMissing(floor.getId(), "@"));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
                             }
                             refreshScreen();
 

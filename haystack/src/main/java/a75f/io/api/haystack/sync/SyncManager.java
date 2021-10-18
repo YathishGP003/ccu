@@ -49,6 +49,7 @@ public class SyncManager {
         }
         
         if (SyncStatusService.getInstance(appContext).isSyncNotRequired()) {
+            CcuLog.d(TAG, "<- syncEntities : No pending items to sync");
             return;
         }
         
@@ -70,18 +71,19 @@ public class SyncManager {
     }
     
     public void syncPointArray() {
-    
-    
+        
         if (isMigrationRequired()) {
+            CcuLog.d(TAG, "syncPointArray : Migration required");
             WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
                                                                 ExistingWorkPolicy.REPLACE,
                                                                 getMigrationWorkRequest())
                                                 .then(getPointWriteWorkRequest())
                                                 .enqueue();
         } else {
+            CcuLog.d(TAG, "syncPointArray : Migration not required");
             WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
                                                                 ExistingWorkPolicy.REPLACE,
-                                                                getSyncWorkRequest())
+                                                                getPointWriteWorkRequest())
                                                 .enqueue();
         }
     
@@ -168,7 +170,7 @@ public class SyncManager {
         mSyncTimerTask = new TimerTask() {
             public void run() {
                 CcuLog.i(TAG, "Entity Sync Scheduled");
-                syncEntities(true);
+                syncEntities(false);
                 mSyncTimerTask = null;
             }
         };

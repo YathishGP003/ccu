@@ -1,3 +1,1 @@
- - Merged PR 2158: Resolved Zone arc issue
- - Merged PR 2128: VRV Pairing screen issue
- - Merged PR 2129: Clearing the OTA requested device list if still list contains them.
+ - Merged PR 2169: BLE pairing crash

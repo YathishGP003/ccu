@@ -218,6 +218,13 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     @OnClick(R.id.ble_dialog_done_button)
     void done()
     {
+        if (mGattPin == null) {
+            Toast.makeText(FragmentBLEDevicePin.this
+                               .getActivity(), "BLE module disconnected. Please try again!", Toast.LENGTH_LONG)
+                 .show();
+            dismiss();
+            return;
+        }
         if (!mPinEntered)
         {
             if (bleDialogEnterPinEdittext.getText() == null ||
@@ -432,6 +439,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case HYPERSTAT_SENSE:
                         showDialogFragment(HyperStatSenseFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_SENSE),
                                 HyperStatSenseFragment.ID);
+                        break;
                     case HYPERSTAT_VRV:
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
                         break;

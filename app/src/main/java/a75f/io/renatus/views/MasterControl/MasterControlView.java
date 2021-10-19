@@ -39,6 +39,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
@@ -547,7 +548,7 @@ public class MasterControlView extends LinearLayout {
                     CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTemperatureLowerLimit);
                 }
-
+                BuildingTunerCache.getInstance().updateTuners();
                 return null;
             }
 

@@ -37,7 +37,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+        CcuLog.i("UI_PROFILING", "SplashActivity.onCreate");
+    
         setContentView(R.layout.splash);
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
@@ -97,6 +98,8 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         };
+        CcuLog.i("UI_PROFILING", "SplashActivity.onCreate Done");
+    
     }
     
     @Override

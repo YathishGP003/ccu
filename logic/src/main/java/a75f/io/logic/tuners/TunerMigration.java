@@ -60,8 +60,8 @@ class TunerMigration {
         valueObjMap.put("snHeatingAirflowTemp", new ValueObj("65", "150", "1.0"));
         valueObjMap.put("snCoolingAirflowTemp", new ValueObj("35", "75", "1.0"));
         valueObjMap.put("zoneDeadTime", new ValueObj("1.0", "300", "1.0"));
-        valueObjMap.put("forcedOccupiedTime", new ValueObj("30", "300", "1.0"));
-        valueObjMap.put("autoAwayTime", new ValueObj("40", "300", "1.0"));
+        valueObjMap.put("forcedOccupiedTime", new ValueObj("0", "300", "1.0"));
+        valueObjMap.put("autoAwayTime", new ValueObj("0", "300", "1.0"));
         valueObjMap.put("coolingDeadband", new ValueObj("0.0", "10", "0.5"));
         valueObjMap.put("heatingDeadband", new ValueObj("0.0", "10", "0.5"));
         valueObjMap.put("standaloneStage1Hysteresis", new ValueObj("0.0", "10", "0.5"));
@@ -74,6 +74,21 @@ class TunerMigration {
         valueObjMap.put("co2TimeInterval", new ValueObj("0.0", "10", "1.0"));
         valueObjMap.put("staticPressureSPTrim", new ValueObj("-0.5", "-0.01", "0.01"));
         valueObjMap.put("valveActuationStartDamperPosDuringSysHeating", new ValueObj("1.0", "100", "5"));
+        valueObjMap.put("coolingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("heatingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("temperatureProportionalRange", new ValueObj("0", "10", "1"));
+        valueObjMap.put("temperatureIntegralTime", new ValueObj("1", "60", "1"));
+        valueObjMap.put("proportionalKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("integralKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneCoolingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("standaloneHeatingDeadbandMultiplier", new ValueObj("0.5", "5", "0.1"));
+        valueObjMap.put("standaloneTemperatureProportionalRange", new ValueObj("0", "10", "1"));
+        valueObjMap.put("standaloneTemperatureIntegralTime", new ValueObj("1", "60", "1"));
+        valueObjMap.put("standaloneProportionalKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneIntegralKFactor", new ValueObj("0.1", "1", "0.1"));
+        valueObjMap.put("standaloneRelayActivationHysteresis", new ValueObj("0", "100", "1"));
+        valueObjMap.put("standaloneAnalogFanSpeedMultiplier", new ValueObj("0.1", "3.0", "0.1"));
+        valueObjMap.put("standaloneHumidityHysteresis", new ValueObj("0", "100", "1"));
         return valueObjMap;
     }
 }

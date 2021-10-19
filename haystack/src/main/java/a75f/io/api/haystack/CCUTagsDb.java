@@ -61,6 +61,8 @@ import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
 import io.objectbox.query.QueryBuilder;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
 /**
  * Created by samjithsadasivan on 8/31/18.
  */
@@ -194,7 +196,7 @@ public class CCUTagsDb extends HServer {
                 }
             }
             CcuLog.d("CCU_HS", "Match check: " + matchCount + " match out of " + idMap.size());
-
+            
         }
     }
 
@@ -278,6 +280,7 @@ public class CCUTagsDb extends HServer {
     @SuppressLint("ApplySharedPref")
     public void saveTags(boolean persistImmediate) {
 
+        CcuLog.i("CCU_PROFILING","saveTags");
         SharedPreferences.Editor sharedPrefsEditor = appContext.getSharedPreferences(
                 PREFS_TAGS_DB, Context.MODE_PRIVATE).edit();
 
@@ -286,15 +289,14 @@ public class CCUTagsDb extends HServer {
                 .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .create();
-
-        tagsString = HZincWriter.gridToString(getGridTagsMap());
+        
+        tagsString = HZincWriter.tagsGridToString(getGridTagsMap());
         sharedPrefsEditor.putString(PREFS_TAGS_MAP, tagsString);
-
         Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();
         waString = gson.toJson(writeArrays, waType);
         sharedPrefsEditor.putString(PREFS_TAGS_WA, waString);
-
+        
         idMapString = gson.toJson(idMap);
         sharedPrefsEditor.putString(PREFS_ID_MAP, idMapString);
 
@@ -309,6 +311,7 @@ public class CCUTagsDb extends HServer {
         } else {
             sharedPrefsEditor.apply();
         }
+        CcuLog.i("CCU_PROFILING","saveTags Done");
     }
 
     private HGrid getGridTagsMap() {
@@ -1074,7 +1077,7 @@ public class CCUTagsDb extends HServer {
     }
     
     public HisItem getLastHisItem(HRef id) {
-        
+        //long time = System.currentTimeMillis();
         HisItem retVal = HisItemCache.getInstance().get(id.toString());
         if (retVal == null) {
             retVal = hisBox.query().equal(HisItem_.rec, id.toString())
@@ -1084,9 +1087,46 @@ public class CCUTagsDb extends HServer {
                 HisItemCache.getInstance().add(id.toString(), retVal);
             }
         }
+        //CcuLog.d(TAG_CCU_HS, "getLastHisItem "+id+" : timeMS: "+(System.currentTimeMillis() - time));
         return retVal;
     }
-
+    
+    public void putHisItem(String id, Double val) {
+        HisItem hisItem = new HisItem();
+        hisItem.setDate(new Date(System.currentTimeMillis()));
+        hisItem.setRec(id);
+        hisItem.setVal(val);
+        hisBox.put(hisItem);
+        HisItemCache.getInstance().add(id, hisItem);
+        CcuLog.d(TAG_CCU_HS, "Write historized value to local DB for point ID " + id + "; value "  + val);
+    }
+    
+    public void addHisItemToCache(String id) {
+        if (id == null || id.isEmpty()) {
+            return;
+        }
+        HisItem retVal = HisItemCache.getInstance().get(id);
+        if (retVal != null) {
+            return;
+        }
+        HisItem hisItem = hisBox.query()
+                               .equal(HisItem_.rec, id)
+                               .orderDesc(HisItem_.date)
+                               .build()
+                               .findFirst();
+    
+        if (hisItem != null) {
+            HisItemCache.getInstance().add(id, hisItem);
+        }
+    }
+    
+    public void putHisItems(List<HisItem> hisItemList) {
+        hisBox.put(hisItemList);
+        hisItemList.forEach(entry -> {
+            HisItemCache.getInstance().add(entry.getRec(), entry);
+        });
+    }
+    
     public void updateHisItemSynced(List<HisItem> hisItems) {
         for (HisItem item : hisItems) {
             item.setSyncStatus(true);
@@ -1125,8 +1165,8 @@ public class CCUTagsDb extends HServer {
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
-                //.or()
-                //.equal(HisItem_.syncStatus, true)
+                .or()
+                .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);
         //Leave one hisItem to make sure his data is not empty if there was no more recent entries
         List<HisItem>  hisItems = hisQuery.build().find();
@@ -1151,5 +1191,15 @@ public class CCUTagsDb extends HServer {
             hisItems.remove(hisItems.size() - 1);
             hisBox.remove(hisItems);
         }
+    }
+    
+    public void clearHistory(HRef id) {
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        List<HisItem>  hisItems = hisQuery.build().find();
+        hisBox.remove(hisItems);
     }
 }

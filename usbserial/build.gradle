@@ -55,5 +55,5 @@ dependencies {
     implementation project(path: ':modbus4j')
     testImplementation 'junit:junit:4.13.1'
     implementation 'org.greenrobot:eventbus:3.0.0'
-
+    implementation project(':haystack')
 }

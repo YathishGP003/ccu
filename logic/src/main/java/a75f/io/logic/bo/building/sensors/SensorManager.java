@@ -145,7 +145,26 @@ public class SensorManager {
         
         return nativeSensors;
     }
-    
+
+    /**
+     * @return existing sensor details along with keycard and door window sensor at last position
+     * Following function adds additional Keycard and door window sensor to existing external sensor list
+     * Some of the profile are using these external sensors list while configuring the profile and the important
+     * thing is when any of the Thermistor or Analog inputs are mapped to following sensor we will bind (type) that
+     * input with position of the sensor in the external sensor list. ie Index of the particular Sensor in the
+     * external sensor list. reference  a75f.io.logic.bo.building.sensors.SensorManager#getExternalSensorList() .
+     * When we receive the data for particular sensor we will identify the type of the sensor by checking with index
+     * which is present in the type of the sensor. Some of the profile won't allow the keycard and door window
+     * sensors. So we have created following function which can be used to access where door window and keycard sensors
+     * are suppose to use. Ex Hyperstat CPU profile has these two sensor usage
+     */
+    public List<Sensor> getAdditionalWithExternalSensorList() {
+
+        List<Sensor> externalSensors = new ArrayList<>(getExternalSensorList());
+        externalSensors.add(new Sensor("Key Card Sensor","",0,10,0,1,1));
+        externalSensors.add(new Sensor("Door Window Sensor","ohms",0,10,0,10000,100));
+        return externalSensors;
+    }
     
     public List<Sensor> getExternalSensorList() {
         if (externalSensors != null) {

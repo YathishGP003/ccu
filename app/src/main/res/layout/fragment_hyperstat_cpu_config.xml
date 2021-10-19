@@ -1,0 +1,787 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog"
+    android:elevation="12dp">
+
+    <!-- Title -->
+    <TextView
+        style="@style/Title_HyperStat"
+        android:text="@string/conventional_package_unit" />
+
+    <!-- All the content -->
+    <ScrollView style="@style/ScrollView_HyperStat">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Temp offset widget  -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/temperature_offset"
+                android:textAppearance="@style/text_lite_header" />
+
+
+            <NumberPicker
+                android:id="@+id/temperatureOffset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:theme="?DefaultNumberPickerTheme" />
+
+            <!-- Two switches: force occupy, auto away -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="46dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_force_occupy"
+                    android:textAppearance="@style/text_label" />
+
+                <ToggleButton
+                    android:id="@+id/toggleForceOccupied"
+                    style="@style/ToggleButton_HyperStat"
+                    android:layout_marginStart="32dp"
+                    tools:checked="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="115dp"
+                    android:text="@string/enable_auto_away"
+                    android:textAppearance="@style/text_label" />
+
+                <ToggleButton
+                    android:id="@+id/toggleAutoAway"
+                    style="@style/ToggleButton_HyperStat"
+                    android:layout_marginStart="32dp" />
+            </LinearLayout>
+
+            <!-- The main block -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- The big schematic graphic.  W & H match graphic, margins are to poistion it just right  -->
+                <ImageView
+                    android:layout_width="240dp"
+                    android:layout_height="850dp"
+                    android:layout_marginStart="34dp"
+                    android:layout_marginTop="72dp"
+                    android:src="@drawable/input_hyperstat_cpu"
+                    tools:ignore="ContentDescription" />
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="16dp"
+                    android:stretchColumns="0">
+
+                    <!-- Table header -->
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp">
+
+                        <TextView
+                            style="@style/TableHeaderTextView_HyperStat"
+                            android:text="@string/title_enable" />
+
+                        <TextView
+                            style="@style/TableHeaderTextView_HyperStat"
+                            android:text="@string/title_mapping" />
+
+                        <TextView
+                            style="@style/TableHeaderTextView_HyperStat"
+                            android:text="@string/title_testsignal" />
+                    </TableRow>
+
+                    <!-- Relay 1 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay1"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay1" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay1Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay1Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!-- Relay 2 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay2"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay2" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay2Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay2Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!-- Relay 3 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay3"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay3" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay3Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay3Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <!-- Relay 4 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay4"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay4" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay4Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay4Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <!-- Relay 5 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay5"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay5" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay5Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay5Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <!-- Relay 6 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay6"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/relay6" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/relay6Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/relay6Test"
+                                style="@style/OnOffButton" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!-- Analog-out 1 -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="17dp">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleAnalog1"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/analog1" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog1Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_analog_out_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog1TestSpinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="120dp"
+                                android:entries="@array/hyperstat_analog_out_test_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <!-- Analog-out 2 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleAnalog2"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/analog2" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog2Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_analog_out_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog2TestSpinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="120dp"
+                                android:entries="@array/hyperstat_analog_out_test_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <!-- Analog-out 3 -->
+                    <TableRow style="@style/TableRow_HyperStat">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/toggleAnalog3"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/analog3" />
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog3Spinner"
+                                style="@style/TableSpinner"
+                                android:entries="@array/hyperstat_analog_out_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+
+                        </LinearLayout>
+
+                        <LinearLayout style="@style/TableBasicItemWrapper">
+
+                            <Spinner
+                                android:id="@+id/analog3TestSpinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="120dp"
+                                android:entries="@array/hyperstat_analog_out_test_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!--  Airflow Toggle   -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="27dp">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/airflowTempToggle"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/label_airflowtemp" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!--  Door/Window Toggle   -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="30dp">
+
+                        <LinearLayout style="@style/TableToggleButtonWrapper">
+
+                            <ToggleButton
+                                android:id="@+id/doorWindowEnableToggle"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/door_window_sensor" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <!--  Analog-in1 -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="61dp">
+
+                        <LinearLayout
+                            style="@style/TableToggleButtonWrapper"
+                            android:layout_weight="1.0">
+
+                            <ToggleButton
+                                android:id="@+id/toggle_analog_in1"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:singleLine="true"
+                                android:text="@string/analogin_1" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            style="@style/TableBasicItemWrapper"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:layout_weight="0.7"
+                            android:gravity="start">
+
+                            <Spinner
+                                android:id="@+id/analog1_in_spinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="wrap_content"
+                                android:entries="@array/hyperstat_analog_in_selector_ai1"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+
+                    </TableRow>
+
+                    <!--  Analog-in2 -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            style="@style/TableToggleButtonWrapper"
+                            android:layout_weight="1.0">
+
+                            <ToggleButton
+                                android:id="@+id/toggle_analog_in2"
+                                style="@style/ToggleButton_HyperStat" />
+
+                            <!--todo: this text is a smidge too long and wraps -->
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/analogin_2" />
+                        </LinearLayout>
+
+                        <!-- The layout weight of 0.9 is to provide the layout above enough space for "Analog-in 2" without wrapping -->
+                        <LinearLayout
+                            style="@style/TableBasicItemWrapper"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:layout_weight="0.7"
+                            android:gravity="start">
+
+                            <Spinner
+                                android:id="@+id/analog2_in_spinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="wrap_content"
+                                android:entries="@array/hyperstat_analog_in_selector_ai2"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                </TableLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/ao1ConfigLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginEnd="48dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/ao1MinDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_analog_out_1_at_max_damper" />
+
+                <Spinner
+                    android:id="@+id/ao1MinDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_toEndOf="@+id/ao1MinDamperLabel"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/ao1MaxDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_gravity="end"
+                    android:layout_marginStart="14dp"
+                    android:layout_toStartOf="@+id/ao1MaxDamperSpinner"
+                    android:text="@string/hyperstat_analog_out_1_at_max_damper" />
+
+                <Spinner
+                    android:id="@+id/ao1MaxDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="top"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/ao2MinDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/ao1MinDamperLabel"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_analog_out_2_at_min_damper" />
+
+                <Spinner
+                    android:id="@+id/ao2MinDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/ao1MinDamperLabel"
+                    android:layout_toEndOf="@+id/ao2MinDamperLabel"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/ao2MaxDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/ao1MinDamperLabel"
+                    android:layout_gravity="end"
+                    android:layout_marginStart="14dp"
+                    android:layout_toStartOf="@+id/ao2MaxDamperSpinner"
+                    android:text="@string/hyperstat_analog_out_2_at_max_damper" />
+
+                <Spinner
+                    android:id="@+id/ao2MaxDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/ao1MinDamperLabel"
+                    android:layout_alignParentEnd="true"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/ao3MinDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/ao2MinDamperLabel"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_analog_out_3_at_min_damper" />
+
+                <Spinner
+                    android:id="@+id/ao3MinDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/ao2MinDamperLabel"
+                    android:layout_toEndOf="@+id/ao2MinDamperLabel"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/ao3MaxDamperLabel"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/ao2MinDamperLabel"
+                    android:layout_gravity="end"
+                    android:layout_marginStart="14dp"
+                    android:layout_toStartOf="@+id/ao3MaxDamperSpinner"
+                    android:text="@string/hyperstat_analog_out_3_at_max_damper" />
+
+                <Spinner
+                    android:id="@+id/ao3MaxDamperSpinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/ao2MinDamperLabel"
+                    android:layout_alignParentEnd="true"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/ao1FanConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="48dp"
+                >
+
+                <TextView
+                    android:id="@+id/ao1AtLowFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out1_at_low_fan" />
+
+                <Spinner
+                    android:id="@+id/ao1AtFanLowSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao1AtMediumFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out1_at_medium_fan" />
+
+                <Spinner
+                    android:id="@+id/ao1AtFanMediumSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao1AtHighFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out1_at_high_fan" />
+
+                <Spinner
+                    android:id="@+id/ao1AtFanHighSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ao2FanConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp"
+                >
+
+                <TextView
+                    android:id="@+id/ao2AtLowFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out2_at_low_fan" />
+
+                <Spinner
+                    android:id="@+id/ao2AtFanLowSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao2AtMediumFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out2_at_medium_fan" />
+
+                <Spinner
+                    android:id="@+id/ao2AtFanMediumSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao2AtHighFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out2_at_high_fan" />
+
+                <Spinner
+                    android:id="@+id/ao2AtFanHighSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ao3FanConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp">
+
+                <TextView
+                    android:id="@+id/ao3AtLowFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out3_at_low_fan" />
+
+                <Spinner
+                    android:id="@+id/ao3AtFanLowSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao3AtMediumFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out3_at_medium_fan" />
+
+                <Spinner
+                    android:id="@+id/ao3AtFanMediumSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+                <TextView
+                    android:id="@+id/ao3AtHighFanLabel"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/hyperstat_analog_out3_at_high_fan" />
+
+                <Spinner
+                    android:id="@+id/ao3AtFanHighSpinner"
+                    style="@style/FanPositionSpinner_HyperStat" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/dcvCo2Config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginEnd="48dp">
+
+                <TextView
+                    android:id="@+id/zoneCO2DamperOpeningRate"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/zoneCO2DamperOpeningRate" />
+
+                <Spinner
+                    android:id="@+id/zoneCO2DamperOpeningRateSpinner"
+                    style="@style/Damper_HyperStat" />
+
+                <TextView
+                    android:id="@+id/zoneCO2Threshold"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/zoneCO2Threshold" />
+
+                <Spinner
+                    android:id="@+id/zoneCO2ThresholdSpinner"
+                    style="@style/Damper_HyperStat" />
+
+                <TextView
+                    android:id="@+id/zoneCO2Target"
+                    style="@style/FanPositionLabel_HyperStat"
+                    android:text="@string/zoneCO2Target" />
+
+                <Spinner
+                    android:id="@+id/zoneCO2TargetSpinner"
+                    style="@style/Damper_HyperStat" />
+
+
+            </LinearLayout>
+            <Button
+                android:id="@+id/setButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="57dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/renatus_75f_primary"
+                android:textSize="19.5dp"
+                tools:ignore="SpUsage" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

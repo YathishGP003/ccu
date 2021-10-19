@@ -108,7 +108,7 @@ public class UpdatePointHandler
         } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
         }
-        
+
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }

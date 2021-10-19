@@ -25,6 +25,7 @@ import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.tuners.DualDuctTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxTask;
 
 class DualDuctEquip {
     
@@ -104,9 +105,12 @@ class DualDuctEquip {
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
-    
+        
         createEquip(siteRef, equipDis, roomRef, floorRef, ahuRef, tz);
     
+        RxTask.executeAsync(() -> DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef,
+                                                                floorRef, tz));
+        
         createLogicalPoints(siteRef, equipDis, roomRef, floorRef, tz , config);
     
         createUserIntentPoints(siteRef, equipDis, roomRef, floorRef, tz );
@@ -115,8 +119,7 @@ class DualDuctEquip {
         
         createConfigPoints(siteRef, equipDis, tz, config);
         
-        DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef, floorRef, tz);
-    
+        
         setDefaultValues();
         
         CCUHsApi.getInstance().syncEntityWithPointWrite();
@@ -363,7 +366,8 @@ class DualDuctEquip {
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("dualDuct").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-                                  .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                                  .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
+                                          "occupancysensing,autoforceoccupy,autoaway")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();

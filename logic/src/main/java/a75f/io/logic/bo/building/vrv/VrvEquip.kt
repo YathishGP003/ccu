@@ -221,7 +221,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setRoomRef(roomRef)
             .setFloorRef(floorRef).setHisInterpolate("cov")
             .addMarker("vrv").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-            .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+            .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
             .setGroup(nodeAddr.toString())
             .setTz(equip.tz)
             .build()

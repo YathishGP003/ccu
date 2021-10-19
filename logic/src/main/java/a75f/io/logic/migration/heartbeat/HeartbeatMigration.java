@@ -103,12 +103,12 @@ public class HeartbeatMigration {
 
     private void addRssiPointToDevice(CCUHsApi hayStack, String profile, String nodeAddress, String timeZone,
                                       String heartBeatId){
-        HashMap device = hayStack.read("device and addr == \""+nodeAddress+"\"");
-        RawPoint rawPoint = HeartBeat.getHeartBeatRawPoint(Integer.parseInt(nodeAddress), device.get("id").toString(),
-                device.get("siteRef").toString(), device.get("roomRef").toString(), device.get("floorRef").toString(),
-                timeZone);
-        rawPoint.setPointRef(heartBeatId);
-        hayStack.addPoint(rawPoint);
-        Log.i(CCU_HEART_BEAT_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
+            HashMap device = hayStack.read("device and addr == \""+nodeAddress+"\"");
+            RawPoint rawPoint = HeartBeat.getHeartBeatRawPoint(Integer.parseInt(nodeAddress), device.get("id").toString(),
+                    device.get("siteRef").toString(), device.get("roomRef").toString(), device.get("floorRef").toString(),
+                    timeZone);
+            rawPoint.setPointRef(heartBeatId);
+            hayStack.addPoint(rawPoint);
+            Log.i(CCU_HEART_BEAT_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
     }
 }

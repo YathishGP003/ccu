@@ -18,15 +18,16 @@ public class AnalogUtil {
         try
         {
             int index = (int)Double.parseDouble(rawPoint.getType());
-            analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
+            analogSensor = SensorManager.getInstance().getAdditionalWithExternalSensorList().get(index);
         }catch (NumberFormatException e) {
             e.printStackTrace();
             return analogVal;
         }
-        Log.d(L.TAG_CCU_DEVICE, "Sensor input : type " + rawPoint.getType() + " val " + analogVal);
         double analogConversion = analogSensor.minEngineeringValue +
                                   (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
+        Log.d(L.TAG_CCU_DEVICE, "Sensor input : analogConversion " + rawPoint.getType() + " val " + analogConversion);
         return CCUUtils.roundToTwoDecimal(analogConversion);
+
         
     }
 }

@@ -204,7 +204,7 @@ class GenericTuners {
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                         .addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("sp")
+                                         .addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("sp")
                                          .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setUnit("m")
                                          .setTz(tz)
@@ -218,7 +218,7 @@ class GenericTuners {
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                      .addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
+                                      .addMarker("heartbeat").addMarker("sp")
                                       .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                       .setTz(tz)
                                       .build();

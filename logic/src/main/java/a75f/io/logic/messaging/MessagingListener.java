@@ -5,21 +5,41 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.here.oksse.ServerSentEvent;
 
+import java.util.Collections;
+import java.util.HashSet;
+
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.pubnub.PbMessageHandler;
+import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public  class MessagingListener implements ServerSentEvent.Listener {
-    public MessagingListener() {
+public class MessagingListener implements ServerSentEvent.Listener {
+    private final String siteId;
+    private final String ccuId;
+    private final String messagingUrl;
+    private final String bearerToken;
+
+    private MessagingService messagingService;
+
+    public MessagingListener(String siteId, String ccuId, String messagingUrl, String bearerToken) {
         super();
+
+        this.siteId = siteId;
+        this.ccuId = ccuId;
+        this.messagingUrl = messagingUrl;
+        this.bearerToken = bearerToken;
     }
 
     @Override
     public void onOpen(ServerSentEvent sse, Response response) {
         CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Connection Opened");
+
+        if (messagingService == null) {
+            messagingService = new ServiceGenerator().createService(messagingUrl, bearerToken);
+        }
     }
 
     @Override
@@ -30,10 +50,15 @@ public  class MessagingListener implements ServerSentEvent.Listener {
         Long timetoken = payload.get("timetoken").getAsLong();
         JsonElement messageContents = payload.getAsJsonObject().get("message");
 
+        // Special case for
+        if (isRestartCommand(messageContents)) {
+            acknowledge(messageContents);
+        } else {
+            acknowledgeAsync(payload);
+        }
+
         // Send to message handler
         PbMessageHandler.getInstance().handlePubnubMessage(messageContents, timetoken, Globals.getInstance().getApplicationContext());
-
-        MessagingClient.getInstance().queueMessageIdToAck(payload);
     }
 
     @Override
@@ -61,5 +86,44 @@ public  class MessagingListener implements ServerSentEvent.Listener {
     @Override
     public void onClosed(ServerSentEvent sse) {
         CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Socket Closed");
+    }
+
+    private boolean isRestartCommand(JsonElement messageContents) {
+        if (messageContents == null || !messageContents.isJsonObject()) {
+            return false;
+        }
+
+        JsonObject messageObject = messageContents.getAsJsonObject();
+
+        // Determine if the message is a remote Command of Type "Restart CCU" or "Restart Tablet"
+        return messageObject != null
+                && messageObject.has("command")
+                && RemoteCommandUpdateHandler.CMD.equals(messageObject.get("command").getAsString())
+                && (RemoteCommandUpdateHandler.RESTART_CCU.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString())
+                    || RemoteCommandUpdateHandler.RESTART_TABLET.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString()));
+
+    }
+
+    private void acknowledge(JsonElement messageContents) {
+        if (messageContents == null || !messageContents.isJsonObject()) {
+            return;
+        }
+
+        JsonObject messageObject = messageContents.getAsJsonObject();
+        if (!messageObject.has("messageId")) {
+            return;
+        }
+
+        String messageId = messageObject.get("messageId").getAsString();
+
+        messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(new HashSet<>(Collections.singletonList(messageId))));
+    }
+
+    /**
+     * Pushes the received messageId into the Acknowledgement queue to be picked up asynchronously
+     * by the Message Ack Job
+     */
+    private void acknowledgeAsync(JsonObject payload) {
+        MessagingClient.getInstance().queueMessageIdToAck(payload);
     }
 }

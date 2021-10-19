@@ -13,6 +13,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.pubnub.PbMessageHandler;
 import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
+import io.reactivex.rxjava3.core.Single;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -50,9 +51,11 @@ public class MessagingListener implements ServerSentEvent.Listener {
         Long timetoken = payload.get("timetoken").getAsLong();
         JsonElement messageContents = payload.getAsJsonObject().get("message");
 
-        // Special case for
+        // Special case for "Restart CCU" and "Restart Tablet" remote commands:
+        // The message needs to be synchronously acknowledged before it's acted upon to prevent the app
+        // from entering a restart-loop, where un-ack'd restart messages are continuously received at start-up
         if (isRestartCommand(messageContents)) {
-            acknowledge(messageContents);
+            acknowledge(payload);
         } else {
             acknowledgeAsync(payload);
         }
@@ -104,19 +107,24 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     }
 
-    private void acknowledge(JsonElement messageContents) {
-        if (messageContents == null || !messageContents.isJsonObject()) {
+    private void acknowledge(JsonElement payload) {
+        if (payload == null || !payload.isJsonObject()) {
             return;
         }
 
-        JsonObject messageObject = messageContents.getAsJsonObject();
-        if (!messageObject.has("messageId")) {
+        JsonObject payloadObject = payload.getAsJsonObject();
+        if (!payloadObject.has("messageId")) {
             return;
         }
 
-        String messageId = messageObject.get("messageId").getAsString();
+        String messageId = payloadObject.get("messageId").getAsString();
 
-        messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(new HashSet<>(Collections.singletonList(messageId))));
+        Single<retrofit2.Response<Void>> ackResponse = messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(new HashSet<>(Collections.singletonList(messageId))));
+        if (ackResponse.blockingGet().isSuccessful()) {
+            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Succeeded for Message:  " + messageId);
+        } else {
+            CcuLog.w(L.TAG_CCU_MESSAGING, "Failed to ACK Message: " + messageId);
+        }
     }
 
     /**

@@ -110,7 +110,7 @@ public class MessagingClient {
                 .header("Authorization", "Bearer " + bearerToken)
                 .build();
 
-        sse = new OkSse().newServerSentEvent(request, new MessagingListener());
+        sse = new OkSse().newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl, bearerToken));
         sse.setTimeout(1, TimeUnit.MINUTES);
     }
 

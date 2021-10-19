@@ -492,9 +492,11 @@ public class HClient extends HProj
    */
   public void hisWrite(HRef id, HHisItem[] items)
   {
+    long time = System.currentTimeMillis();
     HDict meta = new HDictBuilder().add("id", id).toDict();
     HGrid req = HGridBuilder.hisItemsToGrid(meta, items);
     call("hisWrite", req);
+    CcuLog.i("CCU_HS","hisWrite "+id+" "+(System.currentTimeMillis()- time));
   }
   
   
@@ -579,6 +581,7 @@ public class HClient extends HProj
             c.setRequestProperty("api-key", apiKey);
           }
           c.setConnectTimeout(30000);
+          c.setReadTimeout(30000);
           c.connect();
 
           // post expression

@@ -221,7 +221,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setRoomRef(roomRef)
             .setFloorRef(floorRef).setHisInterpolate("cov")
             .addMarker("vrv").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-            .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+            .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
             .setGroup(nodeAddr.toString())
             .setTz(equip.tz)
             .build()
@@ -241,7 +241,6 @@ class VrvEquip(hsApi : CCUHsApi,
         device.currentTemp.enabled = true
 
         device.addSensor(Port.SENSOR_RH, humidityId)
-        device.addSensor(Port.SENSOR_OCCUPANCY, occupancyId)
         device.rssi.pointRef = heartBeatId
         device.rssi.enabled = true
         device.addPointsToDb()

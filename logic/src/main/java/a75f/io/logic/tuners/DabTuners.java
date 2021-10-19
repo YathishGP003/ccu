@@ -2,6 +2,7 @@ package a75f.io.logic.tuners;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -359,7 +361,8 @@ public class DabTuners {
         
         Log.d("CCU", "addEquipDabTuners for " + equipdis);
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
-
+    
+        List<HisItem> hisItems = new ArrayList<>();
         Point zonePrioritySpread = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                        .setSiteRef(siteRef)
@@ -373,7 +376,7 @@ public class DabTuners {
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
-        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
+        hisItems.add(HSUtil.getHisItemForWritable(zonePrioritySpreadId));
 
         Point zonePriorityMultiplier = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
@@ -388,7 +391,7 @@ public class DabTuners {
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
+        hisItems.add(HSUtil.getHisItemForWritable(zonePriorityMultiplierId));
 
         Point coolingDb = new Point.Builder()
                               .setDisplayName(equipdis+"-"+"coolingDeadband")
@@ -404,7 +407,7 @@ public class DabTuners {
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
         BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
-        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
+        hisItems.add(HSUtil.getHisItemForWritable(coolingDbId));
 
         Point coolingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -419,7 +422,7 @@ public class DabTuners {
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
+        hisItems.add(HSUtil.getHisItemForWritable(coolingDbMultiplierId));
 
         Point heatingDb = new Point.Builder()
                               .setDisplayName(equipdis+"-"+"heatingDeadband")
@@ -435,7 +438,7 @@ public class DabTuners {
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
         BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
-        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
+        hisItems.add(HSUtil.getHisItemForWritable(heatingDbId));
 
         Point heatingDbMultiplier = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
@@ -450,8 +453,8 @@ public class DabTuners {
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
         BuildingTunerUtil.updateTunerLevels(heatingDbMultiplierId, roomRef, hayStack);
-        hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(heatingDbMultiplierId));
+        
         Point propGain = new Point.Builder()
                              .setDisplayName(equipdis+"-"+"proportionalKFactor")
                              .setSiteRef(siteRef)
@@ -465,7 +468,7 @@ public class DabTuners {
                              .build();
         String pgainId = hayStack.addPoint(propGain);
         BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
-        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
+        hisItems.add(HSUtil.getHisItemForWritable(pgainId));
 
         Point integralGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -480,7 +483,7 @@ public class DabTuners {
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
         BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
-        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+        hisItems.add(HSUtil.getHisItemForWritable(igainId));
 
         Point propSpread = new Point.Builder()
                                .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
@@ -495,7 +498,7 @@ public class DabTuners {
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);
-        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
+        hisItems.add(HSUtil.getHisItemForWritable(pSpreadId));
 
         Point integralTimeout = new Point.Builder()
                                     .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
@@ -511,7 +514,7 @@ public class DabTuners {
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
-        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
+        hisItems.add(HSUtil.getHisItemForWritable(iTimeoutId));
 
         Point zoneCO2Target = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"zoneCO2Target")
@@ -527,7 +530,7 @@ public class DabTuners {
                                   .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
         BuildingTunerUtil.updateTunerLevels(zoneCO2TargetId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneCO2TargetId));
 
         Point zoneCO2Threshold = new Point.Builder()
                                      .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
@@ -543,8 +546,8 @@ public class DabTuners {
                                      .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
         BuildingTunerUtil.updateTunerLevels(zoneCO2ThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
-
+        hisItems.add(HSUtil.getHisItemForWritable(zoneCO2ThresholdId));
+        
         Point zoneVOCTarget = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"zoneVOCTarget")
                                   .setSiteRef(siteRef)
@@ -559,7 +562,7 @@ public class DabTuners {
                                   .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
         BuildingTunerUtil.updateTunerLevels(zoneVOCTargetId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneVOCTargetId));
 
         Point zoneVOCThreshold = new Point.Builder()
                                      .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
@@ -575,7 +578,9 @@ public class DabTuners {
                                      .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
-        hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
+        hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
+    
+        hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 
     /***

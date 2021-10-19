@@ -2,9 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
-
-import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +15,17 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
+import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.util.CCUUiUtil;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -37,7 +36,6 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
-
 
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
@@ -77,7 +75,6 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         return fds;
     }
 
-
     @Optional
     @OnClick(R.id.imageGoback)
     void onGoBackButtonClick()
@@ -94,21 +91,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     
     private void openBLEPairing()
     {
-        if (mProfileType == ProfileType.LIGHT)
-        {
-            if (L.isSimulation())
-            {
-                showDialogFragment(LightingZoneProfileFragment
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), LightingZoneProfileFragment.ID);
-            }
-            else
-            {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.LIGHT);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
-        }
-        else if (mProfileType == ProfileType.SSE)
+        if (mProfileType == ProfileType.SSE)
         {
             if (L.isSimulation())
             {
@@ -362,6 +345,19 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        HyperStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
+                                ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
+                        HyperStatCpuFragment.ID);
+            }
+            else {
+                Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
     
     
@@ -404,6 +400,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             title.setText(getText(R.string.title_pairss));
             pairinginstruct.setImageResource(R.drawable.pairinginstruct);
+        }
+        else if (mNodeType == NodeType.HYPER_STAT) {
+            title.setText(R.string.title_pairhss);
+            pairinginstruct.setImageResource(R.drawable.sensepairscreen);
         }
     }
     

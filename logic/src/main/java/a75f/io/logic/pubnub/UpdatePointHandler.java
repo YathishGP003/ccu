@@ -85,6 +85,11 @@ public class UpdatePointHandler
             updateUI(localPoint);
             return;
         }
+    
+        if (HSUtil.isDamperReheatTypeConfig(pointUid, hayStack)) {
+            DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
+            return;
+        }
         
         if (CCUHsApi.getInstance().entitySynced(pointUid))
         {
@@ -103,7 +108,7 @@ public class UpdatePointHandler
         } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
         }
-        
+
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }

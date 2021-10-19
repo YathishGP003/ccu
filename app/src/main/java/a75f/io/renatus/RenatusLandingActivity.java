@@ -10,15 +10,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import com.google.android.material.tabs.TabItem;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
@@ -36,8 +27,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+
 import java.util.HashMap;
+
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -51,6 +47,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.logtasks.UploadLogs;
@@ -65,6 +62,13 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
@@ -72,7 +76,6 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
-
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -109,6 +112,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate");
         prefs = new Prefs(this);
         CCUUiUtil.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
@@ -205,31 +209,21 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
 
                     if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
-
-                        ZoneFragmentNew zoneFragmentTemp = (ZoneFragmentNew) mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-
                         DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
                         LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
                         try {
-                            //zoneFragmentTemp.mDrawerLayout.openDrawer(zoneFragmentTemp.drawer_screen);
                             mDrawerLayout.openDrawer(drawer_screen);
-                            //mDrawerLayout.setBackgroundDrawable(draw);
                         } catch (Exception e) {
                             e.printStackTrace();
                             if (mDrawerLayout != null && !mDrawerLayout.isShown()) {
                                 mDrawerLayout.openDrawer(drawer_screen);
-                                //mDrawerLayout.setBackgroundDrawable(draw);
                             }
-                           /* if (zoneFragmentTemp.mDrawerLayout != null && !zoneFragmentTemp.mDrawerLayout.isShown()) {
-                                zoneFragmentTemp.mDrawerLayout.openDrawer(zoneFragmentTemp.drawer_screen);
-                            }*/
                         }
-                        //ZoneFragmentTemp fragment = (ZoneFragmentTemp) getSupportFragmentManager().findFragmentById(R.id.container);
-                        //fragment.openFloor();
                     }
                 }
             });
         }
+        CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate Completed");
     }
 
     public void setViewPager() {
@@ -528,8 +522,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                         Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                         if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
-                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0)
+                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
                                 AppInstaller.getHandle().install(null, false, true, true);
+                            } else {
+                                CcuLog.d("CCU_DOWNLOAD","Update command ignored, Invalid version downloaded");
+                                Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+                            }
                         }else if(downloadId == AppInstaller.getHandle().getHomeAppDownloadId()){
                             int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
                             if(homeAppVersion >= 1) {
@@ -543,8 +541,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             if(apkName.startsWith("75f") || apkName.startsWith("75F"))
                 AppInstaller.getHandle().downloadHomeInstall(apkName);
-            else if(apkName.startsWith("RENATUS_CCU") || apkName.startsWith("DAIKIN_CCU"))
-                AppInstaller.getHandle().downloadCCUInstall(apkName);
+            else if(apkName.startsWith("RENATUS_CCU") || apkName.startsWith("DAIKIN_CCU")) {
+                if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
+                    Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
+                    AppInstaller.getHandle().downloadCCUInstall(apkName);
+                } else {
+                    CcuLog.d("CCU_DOWNLOAD","Update command ignored , previous update in progress "
+                                                    +Globals.getInstance().getCcuUpdateTriggerTimeToken());
+                }
+                
+            }
         } else if (!commands.isEmpty() && commands.equals(RESTART_MODULE)) {
 
             //TODO Send commands to SmartNode

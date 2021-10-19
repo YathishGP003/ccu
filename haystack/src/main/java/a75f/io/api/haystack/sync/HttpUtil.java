@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil
 {
+    private static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
 
     public static String executePost(String targetURL, String urlParameters) {
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
@@ -114,6 +115,8 @@ public class HttpUtil
                 connection.setUseCaches (false);
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
+                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
 
                 //Send request
                 DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
@@ -196,6 +199,9 @@ public class HttpUtil
 
                 connection.setUseCaches (false);
                 connection.setRequestMethod(httpMethod);
+                
+                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
 
                 if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
                     connection.setDoOutput(false);

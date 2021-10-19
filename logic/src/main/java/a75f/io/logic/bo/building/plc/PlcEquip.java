@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.RxTask;
 
 /**
  * Created by samjithsadasivan on 2/25/19.
@@ -89,7 +90,14 @@ public class PlcEquip {
                 .setGroup(String.valueOf(nodeAddr)).build();
 
         equipRef = hayStack.addEquip(b);
-        PlcTuners.addPlcEquipTuners(hayStack, siteRef, siteDis + "-PID-" + nodeAddr, equipRef, roomRef, floorRef, tz);
+    
+        RxTask.executeAsync(() -> PlcTuners.addPlcEquipTuners(hayStack,
+                                                              siteRef,
+                                                              siteDis + "-PID-" + nodeAddr,
+                                                              equipRef,
+                                                              roomRef,
+                                                              floorRef,
+                                                              tz));
 
         Point analog1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1InputSensor")
@@ -147,7 +155,7 @@ public class PlcEquip {
                 .build();
         String analog1AtMinOutputId = hayStack.addPoint(analog1AtMinOutput);
         hayStack.writeDefaultValById(analog1AtMinOutputId, config.analog1AtMinOutput);
-        hayStack.writeHisValById(analog1AtMinOutputId, config.analog1AtMinOutput);
+        hayStack.writeHisValueByIdWithoutCOV(analog1AtMinOutputId, config.analog1AtMinOutput);
 
         Point analog1AtMaxOutput = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1AtMaxOutput")
@@ -162,7 +170,7 @@ public class PlcEquip {
                 .build();
         String analog1AtMaxOutputId = hayStack.addPoint(analog1AtMaxOutput);
         hayStack.writeDefaultValById(analog1AtMaxOutputId, config.analog1AtMaxOutput);
-        hayStack.writeHisValById(analog1AtMaxOutputId, config.analog1AtMaxOutput);
+        hayStack.writeHisValueByIdWithoutCOV(analog1AtMaxOutputId, config.analog1AtMaxOutput);
 
         Point useAnalogIn2ForSetpoint = new Point.Builder()
                 .setDisplayName(equipDis + "-useAnalogIn2ForSetpoint")
@@ -250,7 +258,7 @@ public class PlcEquip {
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
     
         Point controlLoopInversion = new Point.Builder()
                                               .setDisplayName(equipDis + "-controlLoopInversion")
@@ -1094,7 +1102,7 @@ public class PlcEquip {
         }
 
         String dynamicTargetValueTagId = hayStack.addPoint(dynamicTargetValueTag.build());
-        hayStack.writeHisValById(dynamicTargetValueTagId, 0.0);
+        hayStack.writeHisValueByIdWithoutCOV(dynamicTargetValueTagId, 0.0);
 
         return dynamicTargetValueTagId;
     }
@@ -1120,7 +1128,7 @@ public class PlcEquip {
                 .build();
         String setpointSensorOffsetId = hayStack.addPoint(setpointSensorOffset);
         hayStack.writeDefaultValById(setpointSensorOffsetId, spSensorOffset);
-        hayStack.writeHisValById(setpointSensorOffsetId, spSensorOffset);
+        hayStack.writeHisValueByIdWithoutCOV(setpointSensorOffsetId, spSensorOffset);
         return setpointSensorOffsetId;
     }
 
@@ -1171,7 +1179,7 @@ public class PlcEquip {
         }
         String pidTargetValueId = hayStack.addPoint(pidTargetValue.build());
         hayStack.writeDefaultValById(pidTargetValueId,config.pidTargetValue);
-        hayStack.writeHisValById(pidTargetValueId, config.pidTargetValue);
+        hayStack.writeHisValueByIdWithoutCOV(pidTargetValueId, config.pidTargetValue);
 
         return pidTargetValueId;
     }
@@ -1204,7 +1212,7 @@ public class PlcEquip {
                 .setTz(tz)
                 .build();
         String pidProportionalRangeId = hayStack.addPoint(pidProportionalRange);
-        hayStack.writeDefaultValById(pidProportionalRangeId, (double) proportionalRange);
+        hayStack.writeHisValueByIdWithoutCOV(pidProportionalRangeId, (double) proportionalRange);
         return pidProportionalRangeId;
     }
     

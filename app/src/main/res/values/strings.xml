@@ -109,6 +109,91 @@
 
     </string-array>
 
+    <!-- Hyperstat -->
+
+    <string name="cooling_stage_1"> Cooling Stage 1 </string>
+    <string name="cooling_stage_2"> Cooling Stage 2 </string>
+    <string name="cooling_stage_3"> Cooling Stage 3 </string>
+    <string name="heating_stage_1"> Heating Stage 1 </string>
+    <string name="heating_stage_2"> Heating Stage 2 </string>
+    <string name="heating_stage_3"> Heating Stage 3 </string>
+    <string name="fan_low_speed"> Fan Low Speed </string>
+    <string name="fan_medium_speed"> Fan Medium Speed </string>
+    <string name="fan_high_speed"> Fan High Speed </string>
+    <string name="fan_enabled"> Fan Enabled </string>
+    <string name="occupied_enabled"> Occupied Enabled </string>
+    <string name="humidifier"> Humidifier </string>
+    <string name="dehumidifier"> De Humidifier </string>
+
+    <string-array name="hyperstat_stage_selector">
+        <item>  @string/cooling_stage_1 </item>
+        <item>  @string/cooling_stage_2 </item>
+        <item>  @string/cooling_stage_3 </item>
+        <item>  @string/heating_stage_1 </item>
+        <item>  @string/heating_stage_2 </item>
+        <item>  @string/heating_stage_3 </item>
+        <item>  @string/fan_low_speed </item>
+        <item>  @string/fan_medium_speed </item>
+        <item>  @string/fan_high_speed </item>
+        <item>  @string/fan_enabled </item>
+        <item>  @string/occupied_enabled </item>
+        <item>  @string/humidifier </item>
+        <item>  @string/dehumidifier </item>
+    </string-array>
+
+    <string name="cooling"> Cooling </string>
+    <string name="fan_speed"> Fan Speed </string>
+    <string name="heating"> Heating </string>
+    <string name="dcv_damper"> DCV Damper </string>
+
+    <string-array name="hyperstat_analog_out_selector">
+        <item>  @string/cooling </item>
+        <item>  @string/fan_speed </item>
+        <item>  @string/heating </item>
+        <item>  @string/dcv_damper </item>
+    </string-array>
+
+    <string name="current_tx_0_10"> Current TX (0–10Amps) </string>
+    <string name="current_tx_0_20"> Current TX (0–20Amps) </string>
+    <string name="current_tx_0_50"> Current TX (0–50Amps) </string>
+    <string name="key_card_sensor"> Key Card Sensor </string>
+    <string name="door_window_sensor_ai">  Door/Window Sensor</string>
+
+    <string-array name="hyperstat_analog_in_selector_ai1">
+        <item>  Current TX (0-10Amps) </item>
+        <item>  Current TX (0-20Amps) </item>
+        <item>  Current TX (0-50Amps) </item>
+        <item>  Key Card Sensor </item>
+        <item>  Door/Window Sensor (AI1) </item>
+    </string-array>
+
+
+    <string-array name="hyperstat_analog_in_selector_ai2">
+        <item>  Current TX (0-10Amps) </item>
+        <item>  Current TX (0-20Amps) </item>
+        <item>  Current TX (0-50Amps) </item>
+        <item>  Key Card Sensor </item>
+        <item>  Door/Window Sensor (AI2) </item>
+    </string-array>
+
+    <!--    Placeholder -->
+    <string-array name="hyperstat_analog_out_voltage_selector">
+        <item>  2V </item>
+        <item>  10V </item>
+        <item>  todo </item>
+    </string-array>
+
+    <!--    Placeholder -->
+    <string-array name="hyperstat_analog_out_test_selector">
+        <item>  0.0 </item>
+        <item>  0.1 </item>
+        <item>  0.2 </item>
+        <item>  0.3 </item>
+        <item>  0.4 </item>
+        <item>  0.5 </item>
+        <item>  todo </item>
+    </string-array>
+
     <string-array name="mode">
         <item>Smart</item>
         <item>Manual</item>
@@ -365,6 +450,30 @@
     <string name="label_relay6">Relay-6</string>
     <string name="label_relay7">Relay-7</string>
 
+    <!--Hyperstat Profiles-->
+    <string name="relay1">Relay 1</string>
+    <string name="relay2">Relay 2</string>
+    <string name="relay3">Relay 3</string>
+    <string name="relay4">Relay 4</string>
+    <string name="relay5">Relay 5</string>
+    <string name="relay6">Relay 6</string>
+    <string name="relay7">Relay 7</string>
+    <string name="analog1">Analog-out 1</string>
+    <string name="analog2">Analog-out 2</string>
+    <string name="analog3">Analog-out 3</string>
+    <string name="door_window_sensor">Door/Window Sensor (Th2)</string>
+    <string name="analogin_1">Analog-in 1</string>
+    <string name="analogin_2">Analog-in 2</string>
+
+    <string name="hyperstat_analog_out">Analog-out</string>
+
+    <string name="hyperstat_analog_out_1_at_min_damper">Analog-out1 at\nMin</string>
+    <string name="hyperstat_analog_out_1_at_max_damper">Analog-out1 at\nMax</string>
+    <string name="hyperstat_analog_out_2_at_min_damper">Analog-out2 at\nMin</string>
+    <string name="hyperstat_analog_out_2_at_max_damper">Analog-out2 at\nMax</string>
+    <string name="hyperstat_analog_out_3_at_min_damper">Analog-out3 at\nMin</string>
+    <string name="hyperstat_analog_out_3_at_max_damper">Analog-out3 at\nMax</string>
+
 
     <!--VAV Fully Modulating AHU Profile-->
     <string name="label_analog1">Analog-out1</string>
@@ -454,6 +563,7 @@
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>
     <string name="title_offset">TEMP OFFSET</string>
+    <string name="temperature_offset">Temperature offset</string>
     <string name="label_compstage1">Compressor Stage 1</string>
     <string name="label_compstage2">Compressor Stage 2</string>
     <string name="label_fanlow">Fan Low Speed</string>
@@ -930,6 +1040,9 @@
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
     <string name="txt_GUID_details">GUID Details:</string>
 
+    <string name="enable_force_occupy">Enable Auto Force Occupied</string>
+    <string name="enable_auto_away">Enable Auto Away</string>
+
     <string name="textbpos">BPOS</string>
     <string name="descbpos">Battery Power Occupancy Sensor</string>
     <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
@@ -961,4 +1074,45 @@
     values-round/strings.xml for round devices.
     -->
     <string name="hello_world">Hello Square World!</string>
+
+
+    <string name="hyperstat_analog_out1_at_low_fan">Analog Out1 at\nFan Low</string>
+    <string name="hyperstat_analog_out1_at_medium_fan">Analog Out1 at\nFan Medium</string>
+    <string name="hyperstat_analog_out1_at_high_fan">Analog Out1 at\nFan High</string>
+
+    <string name="hyperstat_analog_out2_at_low_fan">Analog Out2 at\nFan Low</string>
+    <string name="hyperstat_analog_out2_at_medium_fan">Analog Out2 at\nFan Medium</string>
+    <string name="hyperstat_analog_out2_at_high_fan">Analog Out2 at\nFan High</string>
+
+    <string name="hyperstat_analog_out3_at_low_fan">Analog Out3 at\nFan Low</string>
+    <string name="hyperstat_analog_out3_at_medium_fan">Analog Out3 at\nFan Medium</string>
+    <string name="hyperstat_analog_out3_at_high_fan">Analog Out3 at\nFan High</string>
+
+    <string name="zoneCO2DamperOpeningRate">CO2 Damper\nOpeningRate</string>
+    <string name="zoneCO2Threshold">CO2 Threshold</string>
+    <string name="zoneCO2Target">CO2 Target</string>
+    <string-array name="hyperstate_medium_high_fanmode">
+        <item>  Off </item>
+        <item>  Auto </item>
+        <item>  Fan Medium Current Occupied Period </item>
+        <item>  Fan Medium Occupied Period</item>
+        <item>  Fan Medium All Times</item>
+        <item>  Fan High Current Occupied Period </item>
+        <item>  Fan High Occupied Period</item>
+        <item>  Fan High All Times</item>
+    </string-array>
+    <string-array name="hyperstate_only_medium_fanmode">
+        <item>  Off </item>
+        <item>  Auto </item>
+        <item>  Fan Medium Current Occupied Period </item>
+        <item>  Fan Medium Occupied Period</item>
+        <item>  Fan Medium All Times</item>
+
+    </string-array><string-array name="hyperstate_only_high_fanmode">
+        <item>  Off </item>
+        <item>  Auto </item>
+        <item>  Fan High Current Occupied Period </item>
+        <item>  Fan High Occupied Period</item>
+        <item>  Fan High All Times</item>
+    </string-array>
 </resources>

@@ -10,6 +10,8 @@ import org.projecthaystack.HRef;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -32,6 +34,11 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil;
+import a75f.io.logic.bo.building.hyperstat.comman.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -44,6 +51,8 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.Occupancy.AUTOFORCEOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
@@ -99,6 +108,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     boolean watchdogMonitor = false;
+    
+    private Lock jobLock = new ReentrantLock();
 
     @Override
     public void bark() {
@@ -149,23 +160,33 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
 
-        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
+        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
 
         watchdogMonitor = false;
-
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
-            return;
+        
+        if (jobLock.tryLock()) {
+            try {
+                HashMap site = CCUHsApi.getInstance().read("site");
+                if (site.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+    
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                if (ccu.size() == 0) {
+                    CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
+                    return;
+                }
+                processSchedules();
+                CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
+            } catch (Exception e) {
+                CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob Failed ", e);
+            } finally {
+                jobLock.unlock();
+            }
+        } else {
+            CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob<- Job instance running ");
         }
-
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (ccu.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
-            return;
-        }
-        processSchedules();
-        CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
     public static void processSchedules() {
@@ -292,6 +313,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
+        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos")
         ||(equip.getMarkers().contains("sense") || equip.getMarkers().contains("vrv"))  ) {
 
             EquipScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
@@ -308,6 +330,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if( !equip.getMarkers().contains("system") && (equip.getMarkers().contains("standalone") || equip.getMarkers().contains("sse")))
         {
             StandaloneScheduler.processEquip(equip,equipSchedule,vacation);
+        }
+
+        if( !equip.getMarkers().contains("system") && (equip.getMarkers().contains("hyperstat")))
+        {
+            HyperStatScheduler.Companion.processEquip(equip,equipSchedule,vacation);
         }
     }
 
@@ -388,6 +415,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             return "In Preconditioning";
         }
+
+        if(curOccupancyMode == AUTOAWAY){
+            return String.format("In Auto Away");
+        }
+
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(curOccupancyMode == OCCUPIED)
         {
@@ -401,8 +433,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
-            if(curOccupancyMode == FORCEDOCCUPIED) {
-                long th = getTemporaryHoldExpiry(equip);
+            long th = getTemporaryHoldExpiry(equip);
+            if(curOccupancyMode == AUTOFORCEOCCUPIED) {
+
+                if (th > 0) {
+                    DateTime et = new DateTime(th);
+                    int min = et.getMinuteOfHour();
+                    return String.format("In Temporary Hold(AUTO) | till %s", et.getHourOfDay() + ":" + (min < 10 ? "0" + min : min));
+                }
+            }
+            else if(curOccupancyMode == FORCEDOCCUPIED ) {
                 if (th > 0) {
                     DateTime et = new DateTime(th);
                     int min = et.getMinuteOfHour();
@@ -754,6 +794,30 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
+                if (zoneOccupancy == OCCUPIED) {
+                    HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                            "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                                    " \"" + equip.getId() + "\"");
+                    if (ocupancyDetection.get("id") != null) {
+                        double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(
+                                "id").toString());
+                        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection.get(
+                                "id").toString(),
+                                val);
+                    }
+                    HashMap ocupancyDetectionHscpu = CCUHsApi.getInstance().read(
+                            "point and hyperstat and cpu and occupancy and detection and his and equipRef  ==" +
+                                    " \"" + equip.getId() + "\"");
+                    if (ocupancyDetectionHscpu.size()> 0) {
+                        double val = CCUHsApi.getInstance().readHisValById(ocupancyDetectionHscpu.get(
+                                "id").toString());
+                        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetectionHscpu.get(
+                                "id").toString(),
+                                val);
+                    }
+
+
+                }
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
@@ -1028,6 +1092,75 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             cpuPoints.put("fanEnabled","No Fan");
         return cpuPoints;
     }
+    public static HashMap<String,Object> getHyperstatCPUEquipPoints(Equip equipDetails) {
+
+        String  profileName ="cpu";
+        // All the result points
+        HashMap<String,Object> cpuPoints = new HashMap<>();
+
+        // Get points util ref
+        HSHaystackUtil hsHaystackUtil = new HSHaystackUtil(
+                profileName,equipDetails.getId(), CCUHsApi.getInstance()
+        );
+
+        // Get Existing Configuration
+        HyperStatCpuConfiguration config = HyperStatCpuEquip.Companion.getHyperstatEquipRef(
+                Short.parseShort(equipDetails.getGroup())).getConfiguration();
+
+        String equipLiveStatus = hsHaystackUtil.getEquipLiveStatus();
+        if(equipLiveStatus!=null)
+            cpuPoints.put(HSZoneStatus.STATUS.name(),equipLiveStatus);
+        else
+            cpuPoints.put(HSZoneStatus.STATUS.name(),"OFF");
+
+
+        double fanOpModePoint = hsHaystackUtil.readPointPriorityVal("zone and fan and mode and operation");
+        cpuPoints.put(HSZoneStatus.FAN_MODE.name(),fanOpModePoint);
+
+        double conditionModePoint = hsHaystackUtil.readPointPriorityVal(
+                "zone and temp and mode and conditioning");
+        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),conditionModePoint);
+
+
+        double dischargePoint = hsHaystackUtil.readHisVal(
+                "zone and sensor and discharge and air and temp and his");
+        cpuPoints.put(HSZoneStatus.DISCHARGE_AIRFLOW.name(), dischargePoint + " \u2109");
+
+
+        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier(config)){
+            double  targetHumidity = hsHaystackUtil.readPointPriorityVal("target and humidifier and his");
+            cpuPoints.put(HSZoneStatus.TARGET_HUMIDITY.name(),targetHumidity);
+        }
+        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToDeHumidifier(config)){
+            double  targetDeHumidity = hsHaystackUtil.readPointPriorityVal("target and dehumidifier and his");
+            cpuPoints.put(HSZoneStatus.TARGET_DEHUMIDIFY.name(),targetDeHumidity);
+        }
+
+        int fanLevel = HyperStatAssociationUtil.Companion.getSelectedFanLevel(config);
+        cpuPoints.put(HSZoneStatus.FAN_LEVEL.name(),fanLevel);
+
+        // Add conditioning status
+        String status = "Off";
+
+        if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)) {
+            status ="Both";
+        }
+        else if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+         && !HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
+            status = "Cool Only";
+        }else if(!HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
+                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
+            status = "Heat Only";
+        }
+        cpuPoints.put(HSZoneStatus.CONDITIONING_ENABLED.name(),status);
+
+        cpuPoints.forEach((s, o) -> Log.i(L.TAG_CCU_HSCPU, "Config "+s+ " : "+o));
+        return cpuPoints;
+    }
+
+
+
 
     public static HashMap getHPUEquipPoints(String equipID) {
         HashMap hpuPoints = new HashMap();
@@ -1096,7 +1229,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         emPoints.put("Profile","Energy Meter");
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
         ArrayList currentRate = CCUHsApi.getInstance().readAll("point and emr and rate and equipRef == \""+equipID+"\"");
-        double energyReading = CCUHsApi.getInstance().readHisValByQuery("point and emr and sensor and equipRef == \""+equipID+"\"");
+        double energyReading = CCUHsApi.getInstance().readHisValByQuery("point and emr and sensor and sp and equipRef == \""+equipID+"\"");
 
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {
@@ -1176,96 +1309,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
-        if (dynamicSetpoint > 0) {
-            switch ((int) analog2sensorType) {
-                case 0:
-                    plcPoints.put("Dynamic Unit Type", "Voltage");
-                    plcPoints.put("Dynamic Unit", "V");
-                    break;
-                case 1:
-                    plcPoints.put("Dynamic Unit Type", "Pressure");
-                    plcPoints.put("Dynamic Unit", "Inch WC");
-                    break;
-                case 2:
-                    plcPoints.put("Dynamic Unit Type", "Pressure Differential");
-                    plcPoints.put("Dynamic Unit", "Inch WC");
-                    break;
-                case 3:
-                    plcPoints.put("Dynamic Unit Type", "Airflow");
-                    plcPoints.put("Dynamic Unit", "CFM");
-                    break;
-                case 4:
-                    plcPoints.put("Dynamic Unit Type", "Humidity");
-                    plcPoints.put("Dynamic Unit", "%");
-                    break;
-                case 5:
-                    plcPoints.put("Dynamic Unit Type", "CO2 Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 6:
-                    plcPoints.put("Dynamic Unit Type", "CO Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 7:
-                    plcPoints.put("Dynamic Unit Type", "NO2 Level");
-                    plcPoints.put("Dynamic Unit", "PPM");
-                    break;
-                case 8:
-                    plcPoints.put("Dynamic Unit Type", "Current Draw");
-                    plcPoints.put("Dynamic Unit", "A");
-                    break;
-                case 9:
-                    plcPoints.put("Dynamic Unit Type", "Current Draw");
-                    plcPoints.put("Dynamic Unit", "A");
-                    break;
-                case 10:
-                    plcPoints.put("Dynamic Unit Type", "Current Draw");
-                    plcPoints.put("Dynamic Unit", "A");
-                    break;
-            }
-        }
 
-        switch ((int) analog1sensorType) {
-            case 0:
-            case 1:
-                plcPoints.put("Unit Type", "Voltage");
-                plcPoints.put("Unit", "V");
-                break;
-            case 2:
-            case 3:
-                plcPoints.put("Unit Type", "Pressure");
-                plcPoints.put("Unit", "Inch WC");
-                break;
-            case 4:
-                plcPoints.put("Unit Type", "Airflow");
-                plcPoints.put("Unit", "CFM");
-                break;
-            case 5:
-                plcPoints.put("Unit Type", "Humidity");
-                plcPoints.put("Unit", "%");
-                break;
-            case 6:
-                plcPoints.put("Unit Type", "CO2");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 7:
-                plcPoints.put("Unit Type", "CO");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 8:
-                plcPoints.put("Unit Type", "NO2");
-                plcPoints.put("Unit", "PPM");
-                break;
-            case 9:
-            case 10:
-            case 11:
-                plcPoints.put("Unit Type", "Current");
-                plcPoints.put("Unit", "A");
-            case 12:
-                plcPoints.put("Unit Type", "ION Density");
-                plcPoints.put("Unit", "ions/cc");
-                break;
-        }
+        HashMap inputDetails = CCUHsApi.getInstance().read(
+                "point and process and logical and variable and equipRef == \""+equipID+"\"");
+        HashMap targetDetails =
+                CCUHsApi.getInstance().read("point and target and pid and equipRef == \""+equipID+"\"");
+
+        plcPoints.put("Unit Type", inputDetails.get("shortDis"));
+        plcPoints.put("Unit",  inputDetails.get("unit"));
+        plcPoints.put("Dynamic Unit Type", targetDetails.get("shortDis"));
+        plcPoints.put("Dynamic Unit",  targetDetails.get("unit"));
 
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");
@@ -1307,10 +1360,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String id = ((HashMap) occ.get(0)).get("id").toString();
             double occuStatus = CCUHsApi.getInstance().readHisValById(id);
             if(cachedOccupied != null) {
-                if (cachedOccupied != null && cachedOccupied.isOccupied()) {
-                    cachedOccupied.setForcedOccupied(false);
-                    cachedOccupied.setPreconditioning(false);
-                    c = OCCUPIED;
+                if (cachedOccupied.isOccupied()) {
+                    if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
+                        c = AUTOAWAY;
+                    }else {
+                        cachedOccupied.setForcedOccupied(false);
+                        cachedOccupied.setPreconditioning(false);
+                        c = OCCUPIED;
+                    }
                 } else if (getTemporaryHoldExpiry(equip) > 0) {
                     Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
                     if ((prevStatus == OCCUPIED)) {
@@ -1318,7 +1375,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         cachedOccupied.setForcedOccupied(false);
                         cachedOccupied.setPreconditioning(false);
                         clearTempOverrides(equip.getId());
-                    } else {
+                    } else if (prevStatus == AUTOFORCEOCCUPIED){
+                        c = AUTOFORCEOCCUPIED;
+                    }else {
                         c = FORCEDOCCUPIED;
                     }
                 } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
@@ -1339,7 +1398,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                             clearTempOverrides(equip.getId());
                     } else {
                         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-                        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
+                        boolean isZoneHasStandaloneEquip =
+                                (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") ||
+                                        equip.getMarkers().contains("hyperstat")  );
                         
                         //Standalone zones could operate in preconditioning with system being OFF.
                         if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {
@@ -1644,7 +1705,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
-                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")
+                         || q.getMarkers().contains("bpos")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

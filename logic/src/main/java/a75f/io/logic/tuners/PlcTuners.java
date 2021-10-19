@@ -73,7 +73,7 @@ public class PlcTuners {
                              .build();
         String pgainId = hayStack.addPoint(propGain);
         BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
-        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
+        hayStack.writeHisValueByIdWithoutCOV(pgainId, HSUtil.getPriorityVal(pgainId));
         
         Point integralGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -88,7 +88,7 @@ public class PlcTuners {
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
         BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
-        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+        hayStack.writeHisValueByIdWithoutCOV(igainId, HSUtil.getPriorityVal(igainId));
         
         Point integralTimeout = new Point.Builder()
                                     .setDisplayName(equipdis+"-"+"pidIntegralTime")
@@ -104,7 +104,7 @@ public class PlcTuners {
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
-        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
+        hayStack.writeHisValueByIdWithoutCOV(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     }
     
 }

@@ -7,6 +7,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.logic.pubnub.BuildingScheduleListener;
+import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.DialogFragment;
@@ -65,7 +68,7 @@ import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
-public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
@@ -118,6 +121,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && scheduleScrollView != null){
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
+        }
+        if (isVisibleToUser) {
+            new Handler().post(() -> loadSchedule());
+            UpdateScheduleHandler.setBuildingScheduleListener(this);
+        } else {
+            UpdateScheduleHandler.setBuildingScheduleListener(null);
         }
     }
 
@@ -1137,5 +1146,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public void onResume() {
         super.onResume();
         new Handler().postDelayed(() -> loadSchedule(),1500);
+        UpdateScheduleHandler.setBuildingScheduleListener(this);
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        UpdateScheduleHandler.setBuildingScheduleListener(null);
+    }
+    public void refreshScreen() {
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(() -> loadSchedule());
+        }
     }
 }

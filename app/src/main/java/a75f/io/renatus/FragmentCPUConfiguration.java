@@ -277,25 +277,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
             }
         });
-        setButton.setOnClickListener(v -> {
-
-            setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
-
-            new Thread(() -> {
-                setupCPUZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-            },12000);
-
-        });
-    
+        
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

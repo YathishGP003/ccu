@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -129,6 +131,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void refreshScreen(String id)
 	{
+		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen");
+		
 		if(getActivity() != null) {
 			getActivity().runOnUiThread(new Runnable() {
 
@@ -146,17 +150,20 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			});
 		}
+		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
+		
 	}
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
 	public void updateSensorValue(short nodeAddress){}
+	public void refreshHeartBeatStatus(String id){}
 	@Override
 	public void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		checkForOao();
 		fetchPoints();
+		profileTitle.setText(L.ccu().systemProfile.getProfileName());
 
 		if(getUserVisibleHint()) {
             fetchPoints();
@@ -194,6 +201,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
+		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
+		
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
 		HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
@@ -359,11 +368,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				setUserIntentBackground("desired and ci",5 - seekBar.getProgress());
 			}
 		});
-		
-		profileTitle.setText(L.ccu().systemProfile.getProfileName());
-		
+
+
 		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
-		
+
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
 		{
@@ -438,6 +446,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
+		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
+		
 	}
 
 	private void checkForOao() {

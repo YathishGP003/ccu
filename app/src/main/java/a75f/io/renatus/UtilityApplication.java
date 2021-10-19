@@ -80,10 +80,12 @@ import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.util.Prefs;
@@ -202,6 +204,8 @@ public abstract class UtilityApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate");
+    
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         // initialize crash reports as early as possible
@@ -244,13 +248,27 @@ public abstract class UtilityApplication extends Application {
         mNetworkReceiver = new NetworkChangeReceiver();
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
+        CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
+    
     }
 
     private void initializeCrashReporting() {
-
+        CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
+    
         RaygunClient.init(this);
         RaygunClient.setVersion(versionName());
         RaygunClient.enableCrashReporting();
+    
+        if (BuildConfig.BUILD_TYPE.equals("staging") ||
+            BuildConfig.BUILD_TYPE.equals("prod") ) {
+            Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+                RaygunClient.send(paramThrowable);
+                paramThrowable.printStackTrace();
+                RenatusApp.closeApp();
+            });
+        }
+        CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");
+    
     }
 
     private String versionName() {
@@ -339,7 +357,9 @@ public abstract class UtilityApplication extends Application {
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event) {
-        LSerial.handleSerialEvent(this, event);
+        if (Globals.getInstance().isCcuReady()) {
+            LSerial.handleSerialEvent(this, event);
+        }
     }
 
     static class Listener extends DeviceEventAdapter {

@@ -4,11 +4,11 @@ import a75f.io.alerts.AlertManager
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.renatus.R
+import a75f.io.renatus.util.extension.showErrorDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -88,11 +88,3 @@ class AlertDefsFragment: Fragment() {
    }
 }
 
-// Extension function to show a simple error dialog for the given message.
-fun Fragment.showErrorDialog(msg: String) {
-   AlertDialog.Builder(requireContext())
-      .setTitle("Error")
-      .setIcon(R.drawable.ic_alert)
-      .setMessage(msg)
-      .show()
-}

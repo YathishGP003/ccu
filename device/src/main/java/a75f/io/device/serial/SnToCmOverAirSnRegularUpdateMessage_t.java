@@ -16,7 +16,7 @@ public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 	
 	public final Unsigned8 lqi = new Unsigned8(); /* Link Quality Indicator of last received data packet */
 	
-	public final Unsigned8 rssi = new Unsigned8(); /* Received Signal Strength Indicator of last received data packet */
+	public final Signed8 rssi = new Signed8(); /* Received Signal Strength Indicator of last received data packet */
 	
 	
 	public final Unsigned16 roomTemperature = new Unsigned16(); /* room temp in 1/10 F. This is the adjusted temp and is offset + measured temp */
@@ -47,7 +47,7 @@ public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 	
 	public final Unsigned8 measuredMotor2ReverseRpm = new Unsigned8(); // in 1/10s of rpm */
 	
-	public final SmartNodeSensorReading_t[] sensorReadings = array(new SmartNodeSensorReading_t[MessageConstants.NUM_SN_TYPE_VALUE_SENSOR_READINGS]);
+	public SmartNodeSensorReading_t[] sensorReadings = array(new SmartNodeSensorReading_t[MessageConstants.NUM_SN_TYPE_VALUE_SENSOR_READINGS]);
 	
 	public final Unsigned8 batteryStatus = new Unsigned8(2); /* 00 = failsafe mode (outline), 01 = 33% full (1 bar) , 10 = 100% full (2 bars) */
 	

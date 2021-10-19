@@ -312,4 +312,23 @@ public class TunerUtil
         HSUtil.removeGenericMarkerTags(markersFiltered);
         return HSUtil.getQueryFromMarkers(markersFiltered);
     }
+
+    public static double getHysteresisPoint(String markers , String equipRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and tuner and hysteresis and "+markers+" and equipRef == \""+equipRef+"\"");
+
+        if((cdb != null) && (cdb.get("id") != null) ) {
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+        return 0;
+    }
 }

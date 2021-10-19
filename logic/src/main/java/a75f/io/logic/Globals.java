@@ -19,11 +19,13 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.bpos.BPOSProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -51,10 +53,12 @@ import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -99,8 +103,10 @@ public class Globals {
 
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
-
-    private Long curPubNubMsgTimeToken;
+    
+    private static long ccuUpdateTriggerTimeToken;
+    private volatile boolean isCcuReady = false;
+    
     private Globals() {
     }
 
@@ -193,6 +199,17 @@ public class Globals {
         }
     }
 
+    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatDiagMigration.initHeartbeatDiagMigration();
+        }
+    }
+
+    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatTagMigration.initHeartbeatTagMigration();
+        }
+    }
 
     private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
@@ -233,6 +250,8 @@ public class Globals {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
+                migrateHeartbeatDiagPointForEquips(site);
+                migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 CCUHsApi.getInstance().syncEntityTree();
@@ -412,10 +431,20 @@ public class Globals {
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
                             break;
+                        case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
+                            HyperStatCpuProfile cpuProfile = new HyperStatCpuProfile();
+                            cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(cpuProfile);
+                            break;
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
                             hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(hssense);
+                            break;
+                        case BPOS:
+                            BPOSProfile bpos = new BPOSProfile();
+                            bpos.addBPOSEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(bpos);
                             break;
                         case HYPERSTAT_VRV:
                             VrvProfile vrv = new VrvProfile();
@@ -514,5 +543,20 @@ public class Globals {
 
     // While testing OTA service we've added logs
     // After verification we may remove this later
-    public static final String TAG = "DEV_DEBUG";
+    public static final String TAG = "CCU_HSCPU";
+    
+    public void setCcuUpdateTriggerTimeToken(long time) {
+        ccuUpdateTriggerTimeToken = time;
+    }
+    
+    public long getCcuUpdateTriggerTimeToken() {
+        return ccuUpdateTriggerTimeToken;
+    }
+    
+    public boolean isCcuReady() {
+        return isCcuReady;
+    }
+    public void setCcuReady(boolean ccuReady) {
+        isCcuReady = ccuReady;
+    }
 }

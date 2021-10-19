@@ -97,8 +97,15 @@ public class Tags
     public static final String HUMIDIFICATION = "humidification";
     public static final String HYPERSTAT = "hyperstat";
     public static final String SENSE = "sense";
+    public static final String BPOS = "bpos";
+
     
     public static final String MULTI_ZONE = "multiZone";
     public static final String VRV = "vrv";
+    
+    public static final String DAMPER = "damper";
+    public static final String REHEAT = "reheat";
+    public static final String PRIMARY = "primary";
+    public static final String SECONDARY = "secondary";
 
 }

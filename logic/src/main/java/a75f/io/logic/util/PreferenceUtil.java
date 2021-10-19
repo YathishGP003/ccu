@@ -3,6 +3,7 @@ package a75f.io.logic.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class PreferenceUtil {
     private static Context context;
@@ -35,6 +36,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isHeartbeatMigrationAsDiagDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("heartbeatMigrationAsDiagWithRssi",false);
+    }
+
+    public static void setHeartbeatMigrationAsDiagStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeatMigrationAsDiagWithRssi", isMigrated);
+        editor.apply();
+    }
+
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
@@ -56,6 +69,19 @@ public class PreferenceUtil {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
+        editor.apply();
+    }
+
+    public static boolean isHeartbeatTagMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Log.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
+        return sharedPreferences.getBoolean("heartbeattagMigration",false);
+    }
+
+    public static void setHeartbeatTagMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeattagMigration", isMigrated);
         editor.apply();
     }
 }

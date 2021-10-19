@@ -59,6 +59,7 @@ import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
@@ -212,6 +213,12 @@ public class Globals {
         }
     }
 
+    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatTagMigration.initHeartbeatTagMigration();
+        }
+    }
+
     private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
@@ -252,6 +259,7 @@ public class Globals {
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
                 migrateHeartbeatDiagPointForEquips(site);
+                migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 CCUHsApi.getInstance().syncEntityTree();

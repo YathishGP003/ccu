@@ -100,8 +100,9 @@ class GenericTuners {
                                            .setTz(tz)
                                            .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
-        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
-        hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writeHisValById(unoccupiedZoneSetbackId,TunerConstants.ZONE_UNOCCUPIED_SETBACK);
     
         Point heatingUserLimitMin  = new Point.Builder()
                                          .setDisplayName(equipDis+"-"+"heatingUserLimitMin")
@@ -203,7 +204,7 @@ class GenericTuners {
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                         .addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("sp")
+                                         .addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("sp")
                                          .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setUnit("m")
                                          .setTz(tz)
@@ -217,7 +218,7 @@ class GenericTuners {
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
-                                      .addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
+                                      .addMarker("heartbeat").addMarker("sp")
                                       .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                       .setTz(tz)
                                       .build();
@@ -252,6 +253,20 @@ class GenericTuners {
         String perDegreeHumidityFactorId = hayStack.addPoint(perDegreeHumidityFactor);
         hayStack.writePointForCcuUser(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,10.0, 0);
         hayStack.writeHisValById(perDegreeHumidityFactorId, 10.0);
+
+        Point autoAwaySetback   = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
+        hayStack.writeHisValById(autoAwaySetbackId, 2.0);
     
     }
 }

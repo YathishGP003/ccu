@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -57,10 +58,10 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     @Override
     public boolean isZoneDead() {
 
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
+        double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
 
-        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
+        double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
 
         for (short node : fourPfcuDeviceMap.keySet())
         {

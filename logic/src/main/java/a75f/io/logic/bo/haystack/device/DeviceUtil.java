@@ -2,10 +2,14 @@ package a75f.io.logic.bo.haystack.device;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.logic.Globals;
 
 public class DeviceUtil {
     public static void updatePhysicalPointType(int addr, String port, String type) {
@@ -75,6 +79,18 @@ public class DeviceUtil {
             return new RawPoint.Builder().setHashMap(point).build();
         }
         return null;
+    }
+
+    public static List<RawPoint> getEnabledCmdPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
+        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" +
+                device.get("id") + "\"");
+
+        return rawPoints.stream()
+                .filter( p -> p.get("pointRef") != null)
+                .filter(p -> p.get("portEnabled").toString().equals("true"))
+                .map(p -> new RawPoint.Builder().setHashMap(p).build())
+                .collect(Collectors.toList());
+
     }
 
 }

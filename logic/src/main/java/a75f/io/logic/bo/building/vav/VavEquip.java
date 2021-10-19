@@ -6,7 +6,9 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
@@ -17,6 +19,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -42,6 +45,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTuners;
+import a75f.io.logic.util.RxTask;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -163,7 +167,7 @@ public class VavEquip
         
     }
     public void createHaystackPoints(VavProfileConfiguration config, String floor, String room) {
-        
+    
         //Create Logical points
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -200,11 +204,17 @@ public class VavEquip
             fanMarker = "parallel";
         }
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
+    
+        RxTask.executeAsync(() -> VavTuners.addVavEquipTuners( CCUHsApi.getInstance(),
+                                                               siteRef,
+                                                               equipDis,
+                                                               equipRef,
+                                                               room,
+                                                               floor,
+                                                               tz));
         
-        VavTuners.addVavEquipTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-VAV-" + nodeAddr, equipRef, room, floor, tz);
-    
         createVavConfigPoints(config, equipRef, floor, room);
-    
+        List<HisItem> hisItems = new ArrayList<>();
         Point datPoint = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeAirTemp")
                                 .setEquipRef(equipRef)
@@ -219,7 +229,8 @@ public class VavEquip
                                 .build();
         
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
-    
+        hisItems.add(new HisItem(datID, new Date(System.currentTimeMillis()), 0.0));
+        
         Point eatPoint = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-enteringAirTemp")
                                 .setEquipRef(equipRef)
@@ -233,7 +244,8 @@ public class VavEquip
                                 .setTz(tz)
                                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-    
+        hisItems.add(new HisItem(eatID, new Date(System.currentTimeMillis()), 0.0));
+        
         Point damperPos = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperPos")
                                 .setEquipRef(equipRef)
@@ -247,7 +259,8 @@ public class VavEquip
                                 .setTz(tz)
                                 .build();
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
-    
+        hisItems.add(new HisItem(dpID, new Date(System.currentTimeMillis()), 0.0));
+        
         Point normalizedDamperPos = new Point.Builder()
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-normalizedDamperPos")
                                   .setEquipRef(equipRef)
@@ -275,7 +288,8 @@ public class VavEquip
                                   .setTz(tz)
                                   .build();
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
-    
+        hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
+        
         Point currentTemp = new Point.Builder()
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-currentTemp")
                                   .setEquipRef(equipRef)
@@ -289,7 +303,8 @@ public class VavEquip
                                   .setTz(tz)
                                   .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-    
+        hisItems.add(new HisItem(ctID, new Date(System.currentTimeMillis()), 0.0));
+        
         Point humidity = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-humidity")
                                     .setEquipRef(equipRef)
@@ -303,6 +318,7 @@ public class VavEquip
                                     .setTz(tz)
                                     .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+        hisItems.add(new HisItem(humidityId, new Date(System.currentTimeMillis()), 0.0));
     
         Point co2 = new Point.Builder()
                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2")
@@ -317,7 +333,8 @@ public class VavEquip
                                  .setTz(tz)
                                  .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
-    
+        hisItems.add(new HisItem(co2Id, new Date(System.currentTimeMillis()), 0.0));
+        
         Point voc = new Point.Builder()
                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-voc")
                                  .setEquipRef(equipRef)
@@ -331,7 +348,8 @@ public class VavEquip
                                  .setTz(tz)
                                  .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
-    
+        hisItems.add(new HisItem(vocId, new Date(System.currentTimeMillis()), 0.0));
+        
         Point desiredTemp = new Point.Builder()
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
                                            .setEquipRef(equipRef)
@@ -358,8 +376,8 @@ public class VavEquip
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
-        CCUHsApi.getInstance().addPoint(desiredTempCooling);
-    
+        String dtCoolingId = CCUHsApi.getInstance().addPoint(desiredTempCooling);
+        
         Point desiredTempHeating = new Point.Builder()
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempHeating")
                                            .setEquipRef(equipRef)
@@ -372,8 +390,8 @@ public class VavEquip
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
-        CCUHsApi.getInstance().addPoint(desiredTempHeating);
-    
+        String dtHeatingId = CCUHsApi.getInstance().addPoint(desiredTempHeating);
+        
         Point heatingLoopOp = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-heatingLoopOp")
                                     .setEquipRef(equipRef)
@@ -509,8 +527,8 @@ public class VavEquip
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
-    
+        hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 0.0));
+        
         Point equipStatusMessage = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
                                     .setEquipRef(equipRef)
@@ -547,12 +565,13 @@ public class VavEquip
                                     .addMarker("vav").addMarker(fanMarker).addMarker("occupancy").addMarker("mode")
                                     .addMarker("zone").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
+                                            "occupancysensing,autoforceoccupy,autoaway")
                                     .setTz(tz)
                                     .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
-        CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
-    
+        hisItems.add(new HisItem(occupancyId, new Date(System.currentTimeMillis()), 0.0));
+        
         Point equipScheduleType = new Point.Builder()
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-scheduleType")
                                            .setEquipRef(equipRef)
@@ -566,8 +585,7 @@ public class VavEquip
                                            .setEnums("building,zone,named")
                                            .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), 0.0));
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-zoneDynamicPriority")
@@ -581,11 +599,11 @@ public class VavEquip
                 .setTz(tz)
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
-
-
+        hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 10.0));
+        
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "vav", tz, false));
+        
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
@@ -640,20 +658,11 @@ public class VavEquip
         device.addSensor(Port.SENSOR_VOC, vocId);
         
         //Initialize write array for points, otherwise a read before write will throw exception
-        setCurrentTemp(0);
-        setDamperPos(0);
-        setReheatPos(0);
-        setDischargeTemp(0);
-        setSupplyAirTemp(0);
         setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
         setScheduleStatus("");
-    
-        CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
     }
     
     private String createFanOutPoint(String siteDis,
@@ -677,7 +686,7 @@ public class VavEquip
                               .setTz(tz)
                               .build();
         String fanId = CCUHsApi.getInstance().addPoint(fan);
-        CCUHsApi.getInstance().writeHisValById(fanId, 0.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanId, 0.0);
         return fanId;
     }
 
@@ -718,8 +727,8 @@ public class VavEquip
         }
 
         CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
-        CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
-        CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, 1.0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }
 
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {
@@ -811,7 +820,7 @@ public class VavEquip
                                    .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
     
         Point enableCO2Control = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableCO2Control")
@@ -827,7 +836,7 @@ public class VavEquip
                                                .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
         CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
     
         Point enableIAQControl = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableIAQControl")
@@ -843,7 +852,7 @@ public class VavEquip
                                                .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
     
         Point zonePriority = new Point.Builder()
                                          .setDisplayName(equipDis+"-zonePriority")
@@ -859,7 +868,7 @@ public class VavEquip
                                          .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
         CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)config.getPriority().ordinal());
-        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double)config.getPriority().ordinal());
     
         Point temperatureOffset = new Point.Builder()
                                      .setDisplayName(equipDis+"-temperatureOffset")
@@ -874,7 +883,7 @@ public class VavEquip
                                      .setTz(tz)
                                      .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, (double)config.temperaturOffset);
         
         Point damperMinCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-minCoolingDamperPos")
@@ -891,7 +900,7 @@ public class VavEquip
                                          .build();
         String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
-        CCUHsApi.getInstance().writeHisValById(damperMinCoolingId, (double)config.minDamperCooling);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
     
         Point damperMaxCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxCoolingDamperPos")
@@ -908,7 +917,7 @@ public class VavEquip
                                          .build();
         String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
-        CCUHsApi.getInstance().writeHisValById(damperMaxCoolingId, (double)config.maxDamperCooling);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
     
         Point damperMinHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-minHeatingDamperPos")
@@ -925,7 +934,7 @@ public class VavEquip
                                          .build();
         String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
-        CCUHsApi.getInstance().writeHisValById(damperMinHeatingId, (double)config.minDamperHeating);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
     
         Point damperMaxHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
@@ -942,7 +951,7 @@ public class VavEquip
                                          .build();
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
-        CCUHsApi.getInstance().writeHisValById(damperMaxHeatingId, (double) config.maxDamperHeating);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
     }
     
     public void setConfigNumVal(String tags,double val) {
@@ -1125,20 +1134,24 @@ public class VavEquip
     
     public double getDesiredTemp()
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and " +
+                                                      "group == \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid getDesiredTemp");
+            return 72.0;
         }
         desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
         return desiredTemp;
     }
     public void setDesiredTemp(double desiredTemp)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and " +
+                                                       "group == \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid setDesiredTemp");
+            return;
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
@@ -1147,10 +1160,12 @@ public class VavEquip
     
     public double getDesiredTempCooling()
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and group " +
+                                                   "== \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid getDesiredTempCooling");
+            return 74.0;
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)
@@ -1166,25 +1181,26 @@ public class VavEquip
     }
     public void setDesiredTempCooling(double desiredTemp)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and " +
+                                                      "group == \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid setDesiredTempCooling");
+            return;
         }
-        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
-        
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     
     public double getDesiredTempHeating()
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and " +
+                                                      "group == \""+nodeAddr+"\"");
+        if (point.isEmpty()) {
+            Log.e(L.TAG_CCU_ZONE,"Invalid getDesiredTempHeating");
+            return 0;
         }
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        ArrayList values = CCUHsApi.getInstance().readPoint(point.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -1199,40 +1215,40 @@ public class VavEquip
     
     public void setDesiredTempHeating(double desiredTemp)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and " +
+                                                      "group == \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid setDesiredTempHeating");
+            return;
         }
-        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     
     public double getDamperLimit(String coolHeat, String minMax)
     {
-        Log.d("CCU"," getDamperLimit "+coolHeat+" minMax");
-        ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
-        if (points.size() == 0) {
-            Log.d("CCU"," getDamperLimit 0");
+        HashMap point = CCUHsApi.getInstance().read("point and config and damper and pos and "+coolHeat+" and "+minMax+" and " +
+                                        "group == \""+nodeAddr+"\"");
+        if (point.isEmpty()) {
+            Log.e(L.TAG_CCU_ZONE,"Invalid getDamperLimit");
             return 0;
         }
         
-        String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
+        String id =point.get("id").toString();
         return CCUHsApi.getInstance().readDefaultValById(id);
     }
     public void setDamperLimit(String coolHeat, String minMax, double val)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        HashMap point = CCUHsApi.getInstance().read("point and damper and pos and "+coolHeat+" and "+minMax+" and " +
+                                                   "group == \""+nodeAddr+"\"");
+        String id = point.get("id").toString();
         if (id == null || id == "") {
-            throw new IllegalArgumentException();
+            Log.e(L.TAG_CCU_ZONE,"Invalid setDamperLimit");
+            return;
         }
         CCUHsApi.getInstance().writeDefaultValById(id, val);
-        CCUHsApi.getInstance().writeHisValById(id, val);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, val);
     }
     
     public double getSupplyAirTemp()

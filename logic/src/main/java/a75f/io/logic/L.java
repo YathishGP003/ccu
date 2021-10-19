@@ -42,6 +42,9 @@ public class L
     public static final String TAG_CCU_WARN = "CCU_WARN";
     public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
+    public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
+
+    public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
 
     public static Context app()
     {
@@ -151,31 +154,9 @@ public class L
 
     public static void saveCCUState()
     {
-        //LocalStorage.setApplicationSettings();
-        sync();
         Globals.getInstance().saveTags();
     }
-
-
-    private static void sync()
-    {
-        //seed all ccus
-        //send settings messages
-        //send controls messages
-    }
-    ////Schedules////
-
-
-    public static void sendTestMessage(short nodeAddress, Zone zone)
-    {
-        /*ArrayList<Struct> messages = LSmartNode.getTestMessages(zone);
-        for (Struct message : messages)
-        {
-            MeshUpdateJob.sendStruct(nodeAddress, message);
-        }*/
-    }
-
-
+    
     public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile);
@@ -343,12 +324,9 @@ public class L
     }
 
     public static ZoneProfile getProfile(short addr) {
-        Log.d("CCU","Profiles "+L.ccu().zoneProfiles.size());
-
         for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
         {
             ZoneProfile p = it.next();
-            Log.d("CCU","Profile "+p.getProfileType());
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     return p;

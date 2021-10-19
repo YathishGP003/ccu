@@ -6,5 +6,5 @@ package a75f.io.logic.bo.building;
 //Enum tag for haystack point recommends not to have special chracters in names.
 public enum Occupancy
 {
-    UNOCCUPIED, OCCUPIED, PRECONDITIONING, FORCEDOCCUPIED, VACATION, OCCUPANCYSENSING
+    UNOCCUPIED, OCCUPIED, PRECONDITIONING, FORCEDOCCUPIED, VACATION, OCCUPANCYSENSING,AUTOFORCEOCCUPIED,AUTOAWAY
 }

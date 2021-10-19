@@ -1,10 +1,14 @@
 package a75f.io.logic.bo.building.oao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
@@ -352,23 +356,26 @@ public class OAOEquip
         device.addPointsToDb();
         
         //init
-        hayStack.writeHisValById(returnAirCO2Id,0.0);
-        hayStack.writeHisValById(rtuCurrentTransformerId,0.0);
-        hayStack.writeHisValById(outsideAirTemperatureId,0.0);
-        hayStack.writeHisValById(supplyAirTemperatureId,0.0);
-        hayStack.writeHisValById(mixedAirTemperatureId,0.0);
-        hayStack.writeHisValById(mixedAirHumidityId,0.0);
-        hayStack.writeHisValById(outsideAirDamperId,0.0);
-        hayStack.writeHisValById(returnAirDamperId,0.0);
-        hayStack.writeHisValById(exhaustFanStage1Id,0.0);
-        hayStack.writeHisValById(exhaustFanStage2Id,0.0);
-        hayStack.writeHisValById(economizingAvailableId, 0.0);
-        hayStack.writeHisValById(dcvAvailableId, 0.0);
-        hayStack.writeHisValById(matThrottleId, 0.0);
-        hayStack.writeHisValById(weatherOutsideTempId, 0.0);
-        hayStack.writeHisValById(weatherOutsideHumidityId, 0.0);
-        hayStack.writeHisValById(co2WAId, 0.0);
+        List<HisItem> hisItems = new ArrayList<>();
+        hisItems.add(new HisItem(returnAirCO2Id, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(rtuCurrentTransformerId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(outsideAirTemperatureId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(supplyAirTemperatureId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(mixedAirTemperatureId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(mixedAirHumidityId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(outsideAirDamperId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(returnAirDamperId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(exhaustFanStage1Id, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(exhaustFanStage2Id, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(economizingAvailableId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(dcvAvailableId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(matThrottleId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(weatherOutsideTempId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(weatherOutsideHumidityId, new Date(System.currentTimeMillis()), 0.0));
+        hisItems.add(new HisItem(co2WAId, new Date(System.currentTimeMillis()), 0.0));
     
+        hayStack.writeHisValueByIdWithoutCOV(hisItems);
+        
         CCUHsApi.getInstance().syncEntityTree();
     }
     
@@ -530,7 +537,7 @@ public class OAOEquip
                     .setTz(tz).build();
             String smartPurgeMinDamperOpenId = CCUHsApi.getInstance().addPoint(smartPurgeMinDamperOpen);
             hayStack.writeDefaultValById(smartPurgeMinDamperOpenId, 100.0);
-            hayStack.writeHisValById(smartPurgeMinDamperOpenId, 100.0);
+            hayStack.writeHisValueByIdWithoutCOV(smartPurgeMinDamperOpenId, 100.0);
         }
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and userIntent and oao and enhanced and ventilation and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
         if (points == null || points.size() == 0) {
@@ -544,7 +551,7 @@ public class OAOEquip
                     .setTz(tz).build();
             String enhancedVentilationMinDamperOpenId = CCUHsApi.getInstance().addPoint(enhancedVentilationMinDamperOpen);
             hayStack.writeDefaultValById(enhancedVentilationMinDamperOpenId, 50.0);
-            hayStack.writeHisValById(enhancedVentilationMinDamperOpenId, 50.0);
+            hayStack.writeHisValueByIdWithoutCOV(enhancedVentilationMinDamperOpenId, 50.0);
         }
     }
     public double getHisVal(String tags) {

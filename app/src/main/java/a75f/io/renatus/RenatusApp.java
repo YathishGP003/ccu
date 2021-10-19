@@ -125,7 +125,7 @@ public class RenatusApp extends UtilityApplication
 		setIntentToRestartCCU();
 		try {
 			Log.d("CCU_DEBUG", "************Houston, May Day, May Day, May Day, Bailing Out!!!************");
-			Runtime.getRuntime().exec("su");
+			Runtime.getRuntime().exec("chmod 755 /system/xbin/su");
 			Runtime.getRuntime().exec("reboot");
 		}catch (Exception e){
 			e.printStackTrace();

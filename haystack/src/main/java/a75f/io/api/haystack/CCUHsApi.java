@@ -654,7 +654,7 @@ public class CCUHsApi
                 HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
-                return null;
+                return 0.0;
             }
         }else return 0.0;
     }
@@ -668,7 +668,7 @@ public class CCUHsApi
             return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
         } else
         {
-            return null;
+            return 0.0;
         }
     }
     
@@ -844,23 +844,44 @@ public class CCUHsApi
             return item == null ? 0 : item.getVal();
         }
     }
-
-    public synchronized void writeHisValById(String id, Double val)
+    
+    /**
+     * Write history value only if the new value is different from current value.
+     * @param id
+     * @param val
+     */
+    public void writeHisValById(String id, Double val)
     {
+        //long time = System.currentTimeMillis();
         HisItem item = curRead(id);
         Double prevVal = item == null ? 0 : item.getVal();
         if((item == null)|| (!item.initialized) || !prevVal.equals(val))
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-       
+        //CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
     }
-
-    public synchronized void writeHisValueByIdWithoutCOV(String id, Double val)
+    
+    /**
+     * Writes values without checking the current value.
+     * This shall be used all the time while initializing a new point thats just created.
+     * @param id
+     * @param val
+     */
+    public void writeHisValueByIdWithoutCOV(String id, Double val)
     {
-        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-
+        tagsDb.putHisItem(id, val);
+    }
+    
+    /**
+     * Writes a list of hisItems.
+     * This shall be used all the time while initializing a new point thats just created.
+     * @param hisItems
+     */
+    public void writeHisValueByIdWithoutCOV(List<HisItem> hisItems)
+    {
+        tagsDb.putHisItems(hisItems);
     }
 
-    public synchronized void writeHisValByQuery(String query, Double val)
+    public void writeHisValByQuery(String query, Double val)
     {
         if (CACHED_HIS_QUERY)
         {
@@ -1020,6 +1041,10 @@ public class CCUHsApi
             if (entity.get("writable") != null)
             {
                 deleteWritableArray(entity.get("id").toString());
+            }
+            if (entity.get("his") != null)
+            {
+                tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntity(entity.get("id").toString());
         }

@@ -85,8 +85,6 @@ public class PbMessageHandler
     }
     
     public void handlePubnubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
-        
-        CcuLog.d(L.TAG_CCU_PUBNUB, "handlePubnubMessage: " + receivedMessageObject.toString());
         Message message = messageHandler.obtainMessage();
         PbMessage pbMessage = new PbMessage();
         try {

@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import a75f.io.logic.tuners.BuildingTunerCache;
-import androidx.fragment.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,16 +16,17 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -107,8 +105,6 @@ public class CongratsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_congrats, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getContext().getApplicationContext();
@@ -117,22 +113,13 @@ public class CongratsFragment extends Fragment {
         p.setMargins(0, 0, 0, 80);
 
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-        HashMap site = CCUHsApi.getInstance().read("site");
-
-
-        String buldingLimit = "60|85";
-        String heatingLimit = "67|72";
-        String coolingLimit = "72|76";
-        String zoneRange = "63|82";
-        String currentTemp = "73.0";
-        String currentHumidity = "34%";
-        String coolingStage1 = "OFF";
-        String coolingStage2 = "OFF";
-        String heatingStage1 = "OFF";
-        String heatingStage2 = "OFF";
-        String humidifierStatus = "OFF";
-        String oaoStatus = "NO";
-        String analogStatus = "-|0|-|-";
+        
+        String buldingLimit;
+        String heatingLimit;
+        String coolingLimit;
+        String zoneRange;
+        String currentTemp;
+        String currentHumidity;
 
         PackageManager pm = mContext.getPackageManager();
         PackageInfo pi;
@@ -182,8 +169,6 @@ public class CongratsFragment extends Fragment {
             mHVACEquip.setText(StringUtil.isBlank(status) ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
         }
         mComfortSelector.setText("Maximum Comfort");
-
-
         return rootView;
     }
 
@@ -197,5 +182,4 @@ public class CongratsFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
     }
-
 }

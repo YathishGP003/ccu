@@ -210,6 +210,7 @@ public class RegisterGatherCCUDetails extends Activity {
     }
 
     private void loadCCUs() {
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, HGrid> loadCCUGrids = new AsyncTask<Void, Void, HGrid>() {
             @Override
             protected void onPreExecute() {
@@ -261,6 +262,7 @@ public class RegisterGatherCCUDetails extends Activity {
     }
 
 
+    @SuppressLint("StaticFieldLeak")
     private void next() {
 
         new AsyncTask<Void, Void, Void>() {

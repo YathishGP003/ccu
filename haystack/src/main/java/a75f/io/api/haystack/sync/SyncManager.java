@@ -59,7 +59,6 @@ public class SyncManager {
                                                 workPolicyKeep ? ExistingWorkPolicy.KEEP : ExistingWorkPolicy.REPLACE,
                                                 getMigrationWorkRequest())
                                                 .then(getSyncWorkRequest())
-                                                .then(getPointWriteWorkRequest())
                                                 .enqueue();
         } else {
             CcuLog.d(TAG, "Migration not Required");
@@ -71,24 +70,18 @@ public class SyncManager {
     }
     
     public void syncPointArray() {
-        
-        if (isMigrationRequired()) {
-            CcuLog.d(TAG, "syncPointArray : Migration required");
-            WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getMigrationWorkRequest())
-                                                .then(getPointWriteWorkRequest())
-                                                .enqueue();
-        } else {
-            CcuLog.d(TAG, "syncPointArray : Migration not required");
-            WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
-                                                                ExistingWorkPolicy.REPLACE,
-                                                                getPointWriteWorkRequest())
-                                                .enqueue();
-        }
+    
+        CcuLog.d(TAG, "syncPointArray : Migration not required");
+        WorkManager.getInstance(appContext).beginUniqueWork(POINT_WRITE_WORK_TAG,
+                                                            ExistingWorkPolicy.REPLACE,
+                                                            getPointWriteWorkRequest())
+                                            .enqueue();
     
     }
     
+    /**
+     * Queue a sync work followed by pointWrite work replacing any pending work in queue.
+     */
     public void syncEntitiesWithPointWrite() {
         CcuLog.d(TAG, "syncEntitiesWithPointWrite");
         
@@ -96,9 +89,29 @@ public class SyncManager {
             CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
             return;
         }
-        
-        syncEntities(false);
-        syncPointArray();
+    
+        CcuLog.d(TAG, "syncEntities");
+        if (mSyncTimerTask != null) {
+            mSyncTimerTask.cancel();
+            mSyncTimerTask = null;
+        }
+    
+        if (isMigrationRequired()) {
+            CcuLog.d(TAG, "Migration Required");
+            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                                                                ExistingWorkPolicy.REPLACE,
+                                                                getMigrationWorkRequest())
+                       .then(getSyncWorkRequest())
+                       .then(getPointWriteWorkRequest())
+                       .enqueue();
+        } else {
+            CcuLog.d(TAG, "Migration not Required");
+            WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
+                                                                ExistingWorkPolicy.REPLACE,
+                                                                getSyncWorkRequest())
+                       .then(getPointWriteWorkRequest())
+                       .enqueue();
+        }
     }
     
     

@@ -6,6 +6,7 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -435,8 +436,8 @@ public class AddtoExisting extends Fragment {
     }
 
     public void loadExistingSite(final String siteId) {
-
-
+        
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, String> getHSClientTask = new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -528,41 +529,11 @@ public class AddtoExisting extends Fragment {
         dialog.show();
     }
 
-//    private void showSiteDialog(String hGrid) {
-//        prefs.setBoolean("registered", true);
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//
-//                saveExistingSite(hGrid);
-//                Toast.makeText(mContext, "Using this site!", Toast.LENGTH_LONG).show();
-//                // CCUHsApi.getInstance().addExistingSite(hGrid);
-//                //navigateToCCUScreen();
-//
-//            }
-//        });
-//        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                Toast.makeText(mContext, "Canceled using this site!", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//
-//        builder.setTitle("Site");
-//        String ccuDetails = "";
-//        for(int i = 0; i<hGrid.numRows();i++)
-//        {
-//            ccuDetails = ccuDetails + hGrid.row(i);
-//        }
-//        builder.setMessage(ccuDetails);
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//    }
-
     private void saveExistingSite(String siteId) {
 
         CcuLog.d("ADD_CCU_EXISTING","Existing site ID used to register for existing site is: " + siteId);
 
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<String, Void, Boolean> syncSiteTask = new AsyncTask<String, Void, Boolean>() {
 
             @Override
@@ -600,48 +571,6 @@ public class AddtoExisting extends Fragment {
 
         syncSiteTask.execute(siteId);
     }
-
-//    private void saveExistingSite(HGrid hGrid) {
-//
-//        String siteIdVal = hGrid.row(0).getRef("id").val;
-//        System.out.println("Site ID val: " + siteIdVal);
-//
-//        AsyncTask<String, Void, Boolean> syncSiteTask = new AsyncTask<String, Void, Boolean>() {
-//
-//
-//            @Override
-//            protected void onPreExecute() {
-//                super.onPreExecute();
-//                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Site...");
-//            }
-//
-//            @Override
-//            protected Boolean doInBackground(String... strings) {
-//                String siteId = strings[0];
-//                boolean retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-//                Globals.getInstance().setSiteAlreadyCreated(true);
-//                BuildingTuners.getInstance();
-//                L.ccu().systemProfile = new DefaultSystem();
-//                return retVal;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Boolean success) {
-//                super.onPostExecute(success);
-//                if (!success) {
-//                    Toast.makeText(mContext, "The site failed to sync.", Toast.LENGTH_LONG).show();
-//                    ProgressDialogUtils.hideProgressDialog();
-//                    return;
-//                }
-//
-//                Toast.makeText(mContext, "Sync successful.", Toast.LENGTH_LONG).show();
-//                ProgressDialogUtils.hideProgressDialog();
-//                navigateToCCUScreen();
-//            }
-//        };
-//
-//        syncSiteTask.execute(siteIdVal);
-//    }
 
     private void navigateToCCUScreen() {
         Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);

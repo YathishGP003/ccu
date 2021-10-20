@@ -1243,7 +1243,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         CCUHsApi.getInstance().registerCcuAsync(installerEmail)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                    () -> { },  // ignore success
+                    () -> {
+                        CCUHsApi.getInstance().syncEntityWithPointWrite();
+                    },  // ignore success
                     error -> {
                         // A Toast rather than a dialog is necessary since the interface does not wait
                         // for the response here.  We should fix that when we rewrite Registration.

@@ -856,7 +856,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void setSystemUnselection() {
-        /**
+        /*
          * System Devices configuration for un-selection
          */
         rl_systemdevice.setBackgroundColor(Color.WHITE);
@@ -864,7 +864,7 @@ public class FloorPlanFragment extends Fragment {
         textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
         textViewSystemDevice.setSelected(false);
 
-        /**
+        /*
          * OAO Configuration for un-selection
          */
         rl_oao.setBackgroundColor(Color.WHITE);
@@ -872,15 +872,15 @@ public class FloorPlanFragment extends Fragment {
         textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_oao.setEnabled(true);
 
-        /**
-         * Modbus Energy Meter Configuration for un-selection
+        /*
+          Modbus Energy Meter Configuration for un-selection
          */
         rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
         textModbusEnergyMeter.setSelected(false);
         textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_modbus_energy_meter.setEnabled(true);
 
-        /**
+        /*
          * Modbus BTU Meter Configuration for un-selection
          */
         rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
@@ -888,7 +888,7 @@ public class FloorPlanFragment extends Fragment {
         textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_modbus_btu_meter.setEnabled(true);
 
-        /**
+        /*
          * Zone Configuration for un-selection
          */
         roomListView.setVisibility(View.VISIBLE);

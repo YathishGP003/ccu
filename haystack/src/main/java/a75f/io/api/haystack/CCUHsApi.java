@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -934,10 +935,6 @@ public class CCUHsApi
     public void deleteEntity(String id) {
         CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        /*if (tagsDb.idMap.get(id) != null) {
-            tagsDb.removeIdMap.put(id, id);
-            tagsDb.idMap.remove(id);
-        }*/
         syncStatusService.addDeletedEntity(id);
     }
 
@@ -968,96 +965,80 @@ public class CCUHsApi
     }
 
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
-        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
+        HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
         if (entity.get("floor") == null) {
             // not a floor :-(
             CcuLog.w("CCU_HS", "Attempt to delete Floor locally with non-floor entity id");
             return;
         }
-        ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
-        for (HashMap room : rooms)
+        ArrayList<HashMap<Object, Object>> rooms = readAllEntities("room and floorRef == \"" + id + "\"");
+        for (HashMap<Object, Object> room : rooms)
         {
             deleteEntityTree(room.get("id").toString());
         }
         deleteEntityLocally(entity.get("id").toString());
     }
     
-    public void deleteEntityTree(String id)
-    {
+    public void deleteEntityTree(String id) {
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);
-        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
-        if (entity.get("site") != null)
-        {
+        HashMap<Object, Object> entity = readEntity("id == " + id);
+        if (entity.get("site") != null) {
             //Deleting site from a CCU should not remove shared entities like site , floor or building tuner.
-            ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
-            for (HashMap equip : equips)
-            {
+            ArrayList<HashMap<Object, Object>> equips = readAllEntities("equip and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> equip : equips) {
                 if (!equip.containsKey("tuner"))
                     deleteEntityTree(equip.get("id").toString());
             }
-            ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
-            for (HashMap device : devices)
-            {
+            
+            ArrayList<HashMap<Object, Object>> devices = readAllEntities("device and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
-            ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
-            for (HashMap schedule : schedules)
-            {
+            
+            ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> schedule : schedules) {
                 if (!schedule.containsKey("building"))
                     deleteEntity(schedule.get("id").toString());
             }
-        }
-        else if (entity.get("floor") != null)
-        {
-            ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
-            for (HashMap room : rooms)
-            {
+        } else if (entity.get("floor") != null) {
+            
+            ArrayList<HashMap<Object, Object>> rooms = readAllEntities("room and floorRef == \"" + id + "\"");
+            for (HashMap<Object, Object> room : rooms) {
                 deleteEntityTree(room.get("id").toString());
             }
             deleteEntity(entity.get("id").toString());
-        }
-        else if (entity.get("room") != null)
-        {
-            ArrayList<HashMap> schedules = readAll("schedule and roomRef == "+ id );
+        } else if (entity.get("room") != null) {
+            
+            ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and roomRef == "+ id );
             Log.d("CCU","  delete Schedules in room "+schedules.size());
-            for (HashMap schedule : schedules)
-            {
+            for (HashMap<Object, Object> schedule : schedules) {
                 deleteEntity(schedule.get("id").toString());
             }
-        
-             deleteEntity(entity.get("id").toString());
-        }else if (entity.get("equip") != null)
-        {
-            ArrayList<HashMap> points = readAll("point and equipRef == \"" + id + "\"");
-            for (HashMap point : points)
-            {
-                if (point.get("writable") != null)
-                {
+            deleteEntity(entity.get("id").toString());
+        }else if (entity.get("equip") != null) {
+            
+            ArrayList<HashMap<Object, Object>> points = readAllEntities("point and equipRef == \"" + id + "\"");
+            for (HashMap<Object, Object> point : points) {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntity(point.get("id").toString());
             }
             deleteEntity(id);
-        } else if (entity.get("device") != null)
-        {
-            ArrayList<HashMap> points = readAll("point and deviceRef == \"" + id + "\"");
-            for (HashMap point : points)
-            {
-                if (point.get("writable") != null)
-                {
+        } else if (entity.get("device") != null) {
+            ArrayList<HashMap<Object, Object>> points = readAllEntities("point and deviceRef == \"" + id + "\"");
+            for (HashMap<Object, Object> point : points) {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntity(point.get("id").toString());
             }
             deleteEntity(id);
-        } else if (entity.get("point") != null)
-        {
-            if (entity.get("writable") != null)
-            {
+        } else if (entity.get("point") != null) {
+            if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
             }
-            if (entity.get("his") != null)
-            {
+            if (entity.get("his") != null) {
                 tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntity(entity.get("id").toString());
@@ -1142,6 +1123,10 @@ public class CCUHsApi
         syncManager.syncEntitiesWithPointWrite();
     }
     
+    public void syncPointArrays() {
+        syncManager.syncPointArray();
+    }
+    
     //Force-writes local entities to the backend.
     public void forceSync() {
         syncStatusService.clearSyncStatus();
@@ -1149,8 +1134,8 @@ public class CCUHsApi
     }
 
     //Reset CCU - Force-writes local entities to the backend.
+    @SuppressLint("StaticFieldLeak")
     public void resetSync() {
-
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground( final Void ... params ) {

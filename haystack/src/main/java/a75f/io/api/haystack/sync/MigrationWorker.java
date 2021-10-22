@@ -30,11 +30,13 @@ public class MigrationWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        CcuLog.i(TAG, " doWork ");
+        CcuLog.i(TAG, " doWork Migration");
         processUnSyncedItems();
         processUpdatedItems();
         processDeletedItems();
-        CcuLog.i(TAG, " doWork success");
+        syncStatusService.saveSyncStatus();
+        CCUHsApi.getInstance().saveTagsData();
+        CcuLog.i(TAG, " doWork Migration Success");
         return Result.success();
     }
     
@@ -45,17 +47,20 @@ public class MigrationWorker extends Worker {
         
         Iterator<HDict> gridIterator = allEntitiesGrid.iterator();
     
+        ConcurrentHashMap<String, String> idMap = CCUHsApi.getInstance().getIdMap();
         while (gridIterator.hasNext()) {
             HDict entity = gridIterator.next();
             String entityId = entity.get(Tags.ID).toString();
-            String entityGUID = CCUHsApi.getInstance().getGUID(entityId);
-            if ( entityGUID != null) {
-                HDictBuilder updatedEntity = new HDictBuilder().add(entity);
-                updatedEntity.add(Tags.ID, entityGUID);
-                CCUHsApi.getInstance().addEntity(updatedEntity.toDict());
+            
+            if (idMap.containsKey(entityId)) {
                 CCUHsApi.getInstance().getIdMap().remove(entityId);
             } else {
-                syncStatusService.addUnSyncedEntity(entityId);
+                CcuLog.i(TAG, "Migration Unsynced data "+entity.get("dis"));
+                if (entity.has(Tags.POINT) && entity.has(Tags.SETTING)) {
+                    CcuLog.i(TAG, "Skip migration for setting point "+entity.get("dis"));
+                } else {
+                    syncStatusService.addUnSyncedEntity(entityId);
+                }
             }
         }
         
@@ -70,10 +75,10 @@ public class MigrationWorker extends Worker {
     }
     
     private void processDeletedItems() {
-        ConcurrentHashMap<String, String> updateIdMap = CCUHsApi.getInstance().getRemoveIdMap();
-        for (Map.Entry removeEntry : updateIdMap.entrySet()) {
-            syncStatusService.addUpdatedEntity(removeEntry.getKey().toString());
-            updateIdMap.remove(removeEntry.getKey());
+        ConcurrentHashMap<String, String> removeIdMap = CCUHsApi.getInstance().getRemoveIdMap();
+        for (Map.Entry removeEntry : removeIdMap.entrySet()) {
+            syncStatusService.addDeletedEntity(removeEntry.getKey().toString());
+            removeIdMap.remove(removeEntry.getKey());
         }
     }
     

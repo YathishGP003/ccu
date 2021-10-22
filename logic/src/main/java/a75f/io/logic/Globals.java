@@ -246,7 +246,6 @@ public class Globals {
                 migrateHeartbeatDiagPointForEquips(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
-                CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())

@@ -53,6 +53,11 @@ public class SyncManager {
             return;
         }
         
+        if (SyncWorker.isSyncWorkInProgress()) {
+            CcuLog.d(TAG, "<- syncEntities : SyncWork in progress");
+            return;
+        }
+        
         if (isMigrationRequired()) {
             CcuLog.d(TAG, "Migration Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
@@ -203,4 +208,8 @@ public class SyncManager {
         }
         
     }*/
+    
+    public boolean isEntitySyncProgress() {
+        return SyncWorker.isSyncWorkInProgress();
+    }
 }

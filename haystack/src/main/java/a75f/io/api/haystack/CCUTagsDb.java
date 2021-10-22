@@ -265,7 +265,7 @@ public class CCUTagsDb extends HServer {
         for(int i = 0; i < hGrid.numRows(); i++)
         {
             HRow val = hGrid.row(i);
-            CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
+            //CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
             if(!val.has("nosync")) {
                 String key = val.get("id").toString().replace("@", "");
                 tagsMap.put(key, val);

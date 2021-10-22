@@ -26,7 +26,7 @@ import androidx.work.WorkerParameters;
 public class SyncWorker extends Worker {
     
     public static final String TAG = "CCU_HS_SyncWork";
-    public static final int ENTITY_SYNC_BATCH_SIZE = 50;
+    public static final int ENTITY_SYNC_BATCH_SIZE = 25;
     
     public static final String ENDPOINT_ADD_ENTITY = "addEntity";
     public static final String ENDPOINT_REMOVE_ENTITY = "removeEntity";
@@ -35,6 +35,8 @@ public class SyncWorker extends Worker {
     CcuRegistrationHandler  ccuSyncHandler = new CcuRegistrationHandler();
     
     SyncStatusService syncStatusService;
+    
+    private static boolean isSyncWorkInProgress = false;
     
     public SyncWorker(Context appContext, WorkerParameters workerParams) {
         super(appContext, workerParams);
@@ -46,7 +48,8 @@ public class SyncWorker extends Worker {
     public Result doWork() {
     
         CcuLog.i(TAG, " doSyncWork ");
-        
+    
+        isSyncWorkInProgress = true;
         if (!siteHandler.doSync()) {
             CcuLog.e(TAG, "Site sync failed");
             return Result.retry();
@@ -77,9 +80,14 @@ public class SyncWorker extends Worker {
             return Result.retry();
         }
         CcuLog.i(TAG, " doSyncWork success");
+        syncStatusService.saveSyncStatus();
+        isSyncWorkInProgress = false;
         return Result.success();
     }
     
+    public static boolean isSyncWorkInProgress() {
+        return isSyncWorkInProgress;
+    }
     private boolean syncUnSyncedEntities() {
         
         if (!syncStatusService.hasUnSyncedData()) {
@@ -109,8 +117,8 @@ public class SyncWorker extends Worker {
         if (!syncStatusService.hasUpdatedData()) {
             return true;
         }
+        CcuLog.d(TAG, "has updated data : "+syncStatusService.hasUpdatedData());
         HGridIterator updateEntities = syncStatusService.getUpdatedData();
-        
         while (updateEntities.hasNext()) {
             HGrid gridData = updateEntities.next(ENTITY_SYNC_BATCH_SIZE);
             String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +

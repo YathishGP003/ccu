@@ -92,7 +92,9 @@ public class BuildingTuners
             String tunerVersion = info.versionName + "." + info.versionCode;
 
             if (!CCUHsApi.getInstance().getTunerVersion().equals(tunerVersion)) {
-                doTunerMigrationJob();
+                //Dont thin tuner migration is required anymore as this has been there long enough. Keeping it commented
+                //for while - ( 10/23/2021 - Can be cleaned up if no issues reported).
+                //doTunerMigrationJob();
                 TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
                 CCUHsApi.getInstance().setTunerVersion(tunerVersion);
             }

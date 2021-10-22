@@ -107,5 +107,6 @@ public class Tags
     public static final String REHEAT = "reheat";
     public static final String PRIMARY = "primary";
     public static final String SECONDARY = "secondary";
+    public static final String SETTING = "setting";
 
 }

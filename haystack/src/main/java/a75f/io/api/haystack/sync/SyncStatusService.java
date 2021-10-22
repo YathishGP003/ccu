@@ -14,6 +14,7 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -69,6 +70,8 @@ public class SyncStatusService {
         unsyncedIdList = getListString(PREFS_ID_LIST_UNSYNCED);
         updatedIdList = getListString(PREFS_ID_LIST_UPDATED);
         deletedIdList = getListString(PREFS_ID_LIST_DELETED);
+        CcuLog.i("CCU_HS"," unsyncedIdList "+unsyncedIdList.size()+" updatedIdList "+updatedIdList.size()
+                          +" deletedIdList "+deletedIdList.size());
     }
     
     public void saveSyncStatus() {
@@ -89,16 +92,22 @@ public class SyncStatusService {
     }
     
     public void addUnSyncedEntity(String id) {
+        CcuLog.i("CCU_HS"," addUnSyncedEntity "+id);
         unsyncedIdList.add(id);
     }
     
     public void addUpdatedEntity(String id) {
+        CcuLog.i("CCU_HS"," addUpdatedEntity "+id);
+        try {
+            throw new Exception();
+        } catch ( Exception e) {
+            e.printStackTrace();
+        }
         updatedIdList.add(id);
     }
     
     public void addDeletedEntity(String id) {
         deletedIdList.add(id);
-        
         //Remove the entity from unsynced/updated list in case it is present.
         unsyncedIdList.remove(id);
         updatedIdList.remove(id);
@@ -117,6 +126,7 @@ public class SyncStatusService {
     }
     
     public void setEntitySynced(String id) {
+        CcuLog.i("CCU_HS","Set entity synced "+id);
         unsyncedIdList.remove(id);
         updatedIdList.remove(id);
         deletedIdList.remove(id);
@@ -160,7 +170,7 @@ public class SyncStatusService {
         //HRef before sending them. This is should bs removed to use above code once it is done.
         
         ArrayList<HDict> unsyncedDictList = new ArrayList<>();
-        
+        CcuLog.d("CCU_HS_Sync", " Unsynced Data : " + unsyncedIdList.size());
         for (String id : unsyncedIdList) {
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
             if (entity == null) {
@@ -174,7 +184,6 @@ public class SyncStatusService {
         }
         HGrid unsyncedGridData = HGridBuilder.dictsToGrid(unsyncedDictList.toArray(new HDict[0]));
         
-        CcuLog.d("CCU_HS_Sync", " Unsynced Data :\n" + HZincWriter.gridToString(unsyncedGridData));
         return new HGridIterator(unsyncedGridData);
     }
     
@@ -185,7 +194,7 @@ public class SyncStatusService {
                                         .readByIds(getHRefArrayFromStringList(updatedIdList));*/
     
         ArrayList<HDict> updatedDictList = new ArrayList<>();
-    
+        CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdList.size());
         for (String id : updatedIdList) {
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
             HDictBuilder builder = new HDictBuilder();
@@ -194,7 +203,7 @@ public class SyncStatusService {
             updatedDictList.add(builder.toDict());
         }
         HGrid updatedGridData = HGridBuilder.dictsToGrid(updatedDictList.toArray(new HDict[0]));
-        CcuLog.d("CCU_HS_Sync", " Updated Data :\n" + HZincWriter.gridToString(updatedGridData));
+        CcuLog.d("CCU_HS", "updated data : "+HZincWriter.gridToString(updatedGridData));
         return new HGridIterator(updatedGridData);
     }
     
@@ -205,6 +214,7 @@ public class SyncStatusService {
     }
     
     public List<String> getDeletedData() {
+        CcuLog.d("CCU_HS_Sync", " Deleted Data : " + Arrays.toString(deletedIdList.toArray()));
         return deletedIdList;
     }
     
@@ -214,7 +224,7 @@ public class SyncStatusService {
     
     private void putListString(String key, List<String> stringList) {
         String[] stringArr = stringList.toArray(new String[0]);
-        preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).apply();
+        preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).commit();
     }
     
     public boolean updateRefs(HDict entity, HDictBuilder builder) {

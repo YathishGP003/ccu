@@ -46,6 +46,7 @@ import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
+import a75f.io.api.haystack.sync.SyncWorker;
 import a75f.io.api.haystack.util.Migrations;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
@@ -1076,7 +1077,6 @@ public class CCUHsApi
 
     public boolean entitySynced(String id) {
         return syncStatusService.hasEntitySynced(id);
-        //return tagsDb.idMap.get(id) != null;
     }
 
     public boolean entityExists(String id) {
@@ -1203,6 +1203,10 @@ public class CCUHsApi
     }
 
     public void syncHisData() {
+        if (syncManager.isEntitySyncProgress()) {
+            CcuLog.d("CCU_HS"," Skip his sync, entity sync in progress");
+            return;
+        }
         hisSyncHandler.syncData();
     }
 

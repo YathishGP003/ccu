@@ -101,7 +101,7 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.d(TAG, "AddEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response);
+                updateSyncStatus(response, true);
             } else {
                 return false;
             }
@@ -125,7 +125,7 @@ public class SyncWorker extends Worker {
                                                    ENDPOINT_ADD_ENTITY, HZincWriter.gridToString(gridData));
             CcuLog.d(TAG, "UpdateEntity Response : "+response);
             if (response != null) {
-                updateSyncStatus(response);
+                updateSyncStatus(response, false);
             } else {
                 return false;
             }
@@ -158,14 +158,21 @@ public class SyncWorker extends Worker {
         return true;
     }
     
-    
-    
-    private void updateSyncStatus(String response) {
+    /**
+     * First time syncing entities require point arrays to be written to backend.
+     * @param response
+     * @param pointWriteRequired
+     */
+    private void updateSyncStatus(String response, boolean pointWriteRequired) {
         ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
         for (String id : syncedIds) {
             syncStatusService.setEntitySynced(id);
         }
         syncStatusService.saveSyncStatus();
+        
+        if (pointWriteRequired) {
+            PointWriteUtil.sendPointArrayData(syncedIds);
+        }
     }
     
     private void updateDeleteStatus(String response) {

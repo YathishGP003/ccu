@@ -609,16 +609,16 @@ public class CCUHsApi
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
         hsClient.pointWrite(id, level, who, val, dur);
 
-        if (CCUHsApi.getInstance().isCCURegistered()) {
+        if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
-                if (dur.unit == null) {
-                    dur = HNum.make(dur.val ,"ms");
-                }
+            if (dur.unit == null) {
+                dur = HNum.make(dur.val ,"ms");
+            }
 
-                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
-                HDict[] dictArr  = {b.toDict()};
-                CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-                HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            HDict[] dictArr  = {b.toDict()};
+            CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
+            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         }
     }
     

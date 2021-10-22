@@ -23,13 +23,12 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import static a75f.io.api.haystack.sync.PointWriteUtil.ENDPOINT_POINT_WRITE_MANY;
+import static a75f.io.api.haystack.sync.PointWriteUtil.WRITABLE_POINT_BATCH_SIZE;
+
 public class PointWriteWorker extends Worker {
     
     private static final String TAG = "CCU_HS_PointWriteWorker";
-    
-    public static final int WRITABLE_POINT_BATCH_SIZE = 20;
-    
-    public static final String ENDPOINT_POINT_WRITE_MANY = "pointWriteMany";
     
     SyncStatusService syncStatusService;
     
@@ -74,8 +73,11 @@ public class PointWriteWorker extends Worker {
         
         while (iterator.hasNext()) {
             HDict pointDict = (HDict) iterator.next();
-            //TODO - Should check if point is synced ?
-            ArrayList<HDict> valDictList = getWriteArrDict(pointDict.get(Tags.ID).toString());
+            String pointId = pointDict.get(Tags.ID).toString();
+            if (!syncStatusService.hasEntitySynced(pointId)) {
+                continue;
+            }
+            ArrayList<HDict> valDictList = PointWriteUtil.getWriteArrDict(pointDict.get(Tags.ID).toString());
             if (valDictList.size() > 0) {
                 pointValList.addAll(valDictList);
             }
@@ -89,37 +91,5 @@ public class PointWriteWorker extends Worker {
         return true;
     }
     
-    public ArrayList<HDict> getWriteArrDict(String pointId) {
-        ArrayList<HashMap> pointArr = CCUHsApi.getInstance().readPoint(pointId);
-        ArrayList<HDict> dictArr = new ArrayList<>();
-        for (HashMap valMap : pointArr) {
-            if (valMap.get("val") != null)
-            {
-                String value = Objects.toString(valMap.get("val"), "");
-                String level = Objects.toString(valMap.get("level"), "");
-                String who = Objects.toString(valMap.get("who"), "");
-                boolean isDouble = false;
-                double numValue = 0.0;
-                
-                try
-                {
-                    numValue = Double.parseDouble( value );
-                    isDouble = true;
-                }
-                catch (NumberFormatException e)
-                {
-                    CcuLog.d("CCU_HS", "Writable Val is not Double " + value);
-                }
-                
-                HDictBuilder b =
-                    new HDictBuilder().add("id", HRef.copy(pointId))
-                                      .add("level", (int) Double.parseDouble(level))
-                                      .add("who", who)
-                                      .add("val", isDouble? HNum.make(numValue) :
-                                                                               HStr.make(value));
-                dictArr.add(b.toDict());
-            }
-        }
-        return dictArr;
-    }
+    
 }

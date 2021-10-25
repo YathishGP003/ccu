@@ -418,7 +418,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 break;
             case R.id.analog2RTUTest:
                 checkTestMode();
-                IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance(), systemProfile);
+                IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance());
                 break;
             case R.id.humidificationTest:
                 checkTestMode();

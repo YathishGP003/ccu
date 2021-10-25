@@ -39,17 +39,15 @@ class IEDeviceHandler {
             serviceBaseUrl = ieEquipUrl
             ieService = IEServiceGenerator.instance.createService("https://$serviceBaseUrl:8080")
 
-            ieService?.let {
-                fetchGatewayId(ieService, hayStack)
-            }
+            fetchGatewayId(ieService, hayStack)
         }
 
-        ieService?.let {
+        ieService.let {
             //Ethernet interface seems to go down randomly, just making sure here that route & addr are configured.
             RootCommandExecuter.runRootCommand("ip route add 172.16.0.0/24 " +
-                                                    "dev eth0 proto static scope link table wlan0")
+                    "dev eth0 proto static scope link table wlan0")
             RootCommandExecuter.runRootCommand("ip addr add 172.16.0.10/24 broadcast " +
-                                                    "172.16.0.255 dev eth0");
+                    "172.16.0.255 dev eth0")
             updateOccMode(it, systemProfile)
 
             //Sleep is experimental to give a breather to IE. Could be removed in future
@@ -72,7 +70,7 @@ class IEDeviceHandler {
                 fetchOccStatus(it, hayStack)
                 Thread.sleep(100)
                 fetchSystemClock(it, hayStack)
-                fiveMinCounter = 0;
+                fiveMinCounter = 0
             }
             fiveMinCounter++
 
@@ -80,7 +78,7 @@ class IEDeviceHandler {
             fetchEffDAT(it, hayStack)
             fetchSFCapFbk(it, hayStack)
 
-            if (getIEMacAddress(hayStack).isNullOrEmpty()) {
+            if (getIEMacAddress(hayStack).isEmpty()) {
                 fetchGatewayId(ieService, hayStack)
             }
         }
@@ -207,7 +205,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_WARN)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                                     hayStack.writeHisValByQuery(
                                         "system and point and ie and alarm and warning",
                                         it.toDouble()
@@ -220,7 +218,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_PROB)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let{
+                { response -> response.result?.let{
                                     hayStack.writeHisValByQuery(
                                         "system and point and ie and alarm and problem",
                                         it.toDouble())
@@ -232,7 +230,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_FAULT)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                                     hayStack.writeHisValByQuery(
                                         "system and point and ie and alarm and fault",
                                     it.toDouble())
@@ -247,7 +245,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_SY, IE_POINT_NAME_SYSTEM_CLOCK)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                                     hayStack.writeHisValByQuery(
                                         "system and point and ie and clock",
                                     it.toDouble())
@@ -261,7 +259,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_MV, IE_POINT_NAME_OCCUPANCY_STATUS)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                                     hayStack.writeHisValByQuery(
                                         "system and point and ie and occStatus",
                                         it.toDouble())
@@ -275,10 +273,10 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_EFF_DAT_SETPOINT)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                     hayStack.writeHisValByQuery(
                         "system and point and ie and effDATSetpoint",
-                        it.toDouble())
+                        celsiusToFahrenheit(it.toDouble()))
                 }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching effDATSetpoint", error) }
@@ -289,10 +287,10 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_DAT_VAL)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                     hayStack.writeHisValByQuery(
                         "system and point and ie and dischargeAirTemp",
-                        it.toDouble())
+                        celsiusToFahrenheit(it.toDouble()))
                 }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching dischargeAirTemp", error) }
@@ -303,7 +301,7 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AI, IE_POINT_NAME_SF_CAPACITY_FEEDBACK)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                     hayStack.writeHisValByQuery(
                         "system and point and ie and sFCapFbk",
                         it.toDouble())
@@ -317,7 +315,7 @@ class IEDeviceHandler {
         ieService.readGatewayIdPoint()
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response -> response?.result?.let {
+                { response -> response.result?.let {
                     hayStack.writeDefaultVal(
                         "system and point and ie and macAddress", it)
                 }
@@ -349,7 +347,7 @@ class IEDeviceHandler {
         )
     }
 
-    fun sendFanControl(fanSpeed : Double, hayStack: CCUHsApi, systemProfile: VavIERtu) {
+    fun sendFanControl(fanSpeed: Double, hayStack: CCUHsApi) {
         if (isMultiZoneEnabled(hayStack)) {
             writeToIEDevice(
                 ieService,

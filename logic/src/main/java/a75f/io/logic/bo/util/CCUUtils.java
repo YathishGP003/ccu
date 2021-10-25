@@ -65,7 +65,10 @@ public class CCUUtils
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
             HashMap firmwarePoint =
                     hayStack.read("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
-            hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
+            
+            if (!hayStack.readDefaultStrValById(firmwarePoint.get("id").toString()).equals(firmwareVersion)) {
+                hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
+            }
         }
 
     }

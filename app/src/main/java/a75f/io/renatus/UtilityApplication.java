@@ -85,9 +85,9 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
@@ -108,6 +108,7 @@ public abstract class UtilityApplication extends Application {
     public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
+
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -248,6 +249,7 @@ public abstract class UtilityApplication extends Application {
         mNetworkReceiver = new NetworkChangeReceiver();
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
+        FileBackupService.scheduleFileBackupServiceJob(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
     
     }
@@ -885,4 +887,5 @@ public abstract class UtilityApplication extends Application {
         String response = ipRoutes.get(0);
         return response;
     }
+
 }

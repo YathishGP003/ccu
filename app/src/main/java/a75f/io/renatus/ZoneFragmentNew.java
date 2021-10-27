@@ -13,19 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.telephony.gsm.GsmCellLocation;
-
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.bpos.BPOSUtil;
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.plc.PlcProfile;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -3160,71 +3147,107 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
+
+        String profile_name = sensePoints.get("Profile").toString() + " (" + nodeAddress + ")";
+
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
-        textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        textViewTitle.setText(profile_name);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
         HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         linearLayoutZonePoints.addView(viewTitle);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        LinearLayout statusLayout=viewStatus.findViewById(R.id.ll_status);
+        LinearLayout statusLayout = viewStatus.findViewById(R.id.ll_status);
         statusLayout.setVisibility(View.GONE);
         LinearLayout linearl = viewStatus.findViewById(R.id.lllastupdate);
-        LinearLayout.LayoutParams param = (LinearLayout.LayoutParams)linearl.getLayoutParams();
+        LinearLayout.LayoutParams param = (LinearLayout.LayoutParams) linearl.getLayoutParams();
         param.setMargins(55, 20, 0, 20);
         linearl.setLayoutParams(param);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         linearLayoutZonePoints.addView(viewStatus);
 
-        if (sensePoints.get("isTh1Enable") == "true") {
+        if (sensePoints.get("isTh1Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
             params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
-            label.setText(sensePoints.get("Thermistor1").toString() + " : ");
-            val.setText((sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
+
+
+            String label_string = sensePoints.get("Thermistor1").toString() +
+                     " ("+ getString(R.string.thermistor1_label)+") " + " : ";
+            String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
+                    "Unit3").toString());
+
+            label.setText(label_string);
+            val.setText(val_string);
+
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
-        if (sensePoints.get("isTh2Enable") == "true") {
+        if (sensePoints.get("isTh2Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
             params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
-            label.setText(sensePoints.get("Thermistor2").toString() + " : ");
-            val.setText((sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
+
+            String label_string = sensePoints.get("Thermistor2").toString() +
+                   " (" + getString(R.string.thermistor2_label)+") " + " : ";
+            String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
+                    "Unit4").toString());
+
+            label.setText(label_string);
+            val.setText(val_string);
+
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
-        if (sensePoints.get("iAn1Enable") == "true") {
+        if (sensePoints.get("iAn1Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
             params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
-            label.setText(sensePoints.get("Analog1").toString() + " : ");
-            val.setText((sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
+
+            String label_string = sensePoints.get("Analog1").toString() +
+                    (sensePoints.get("Unit1").toString()) +
+                    " (" + getString(R.string.analog1_label) + ")"+ " : ";
+            String val_string = (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get(
+                    "Unit1").toString());
+
+            label.setText(label_string);
+            val.setText(val_string);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
-        if (sensePoints.get("iAn2Enable") == "true") {
+
+
+        if (sensePoints.get("iAn2Enable").equals("true")) {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ll.getLayoutParams();
             params.setMargins(55, 0, 0, 0);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
-            label.setText(sensePoints.get("Analog2").toString() + " : ");
-            val.setText((sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
+
+
+            String label_string = sensePoints.get("Analog2").toString() +
+                    (sensePoints.get("Unit2").toString()) +
+                    " (" + getString(R.string.analog2_label) + ") " + " : ";
+            String val_string = (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get(
+                    "Unit2").toString());
+
+
+            label.setText(label_string);
+            val.setText(val_string);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 

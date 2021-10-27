@@ -196,10 +196,6 @@ public class UpdatePointHandler
                 modbusDataInterface.refreshScreen(luid);
             }
         }
-
-        if (HSUtil.isBuildingTunerPoint(luid, CCUHsApi.getInstance())) {
-            BuildingTunerUpdateHandler.updateZoneModuleSystemPoints(luid);
-        }
     }
     
     /**

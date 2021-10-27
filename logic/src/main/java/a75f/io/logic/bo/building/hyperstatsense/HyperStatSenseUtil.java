@@ -244,7 +244,7 @@ public class HyperStatSenseUtil {
         String[] markers = null;
         switch (analog) {
             case 0:
-                shortDis = "Generic 0-10 Voltage";
+                shortDis = "Generic (0-10)V";
                 shortDisTarget = "Dynamic Target Voltage";
                 unit = "V";
                 maxVal = "10";
@@ -253,7 +253,7 @@ public class HyperStatSenseUtil {
                 markers = null;
                 break;
             case 1:
-                shortDis = "Pressure [0-2 in.]";
+                shortDis = "Pressure Sensor (0-2)inches wc";
                 shortDisTarget = "Dynamic Target Pressure";
                 unit = "inch_of_water";
                 maxVal = "2";
@@ -262,7 +262,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"pressure"};
                 break;
             case 2:
-                shortDis = "Pressure[0-0.25 in. Differential]";
+                shortDis = "Differential Pressure Sensor (0-0.25)inches wc";
                 shortDisTarget = "Dynamic Target Pressure Differential";
                 unit = "inch_of_water";
                 maxVal = "0.25";
@@ -271,7 +271,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"pressure"};
                 break;
             case 3:
-                shortDis = "Airflow";
+                shortDis = "Airflow Sensor (0-1000)CFM";
                 shortDisTarget = "Dynamic Target Airflow";
                 unit = "CFM";
                 maxVal = "1000";
@@ -280,7 +280,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"airflow"};
                 break;
             case 4:
-                shortDis = "Humidity";
+                shortDis = "Humidity (0-100)%";
                 shortDisTarget = "Dynamic Target Humidity";
                 unit = "%";
                 maxVal = "100";
@@ -289,7 +289,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"humidity"};
                 break;
             case 5:
-                shortDis = "CO2 Level";
+                shortDis = "CO2 (0-2000)ppm";
                 shortDisTarget = "Dynamic Target CO2 Level";
                 unit = "ppm";
                 maxVal = "2000";
@@ -298,7 +298,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"co2"};
                 break;
             case 6:
-                shortDis = "CO Level";
+                shortDis = "CO (0-100)ppm";
                 shortDisTarget = "Dynamic Target CO Level";
                 unit = "ppm";
                 maxVal = "100";
@@ -307,7 +307,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"co"};
                 break;
             case 7:
-                shortDis = "NO2 Level";
+                shortDis = "NO2 (0-5)ppm";
                 shortDisTarget = "Dynamic Target NO2 Level";
                 unit = "ppm";
                 maxVal = "5";
@@ -316,7 +316,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"no2"};
                 break;
             case 8:
-                shortDis = "Current Drawn[CT 0-10]";
+                shortDis = "CT (0-10)amps";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "10";
@@ -325,7 +325,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 9:
-                shortDis = "Current Drawn[CT 0-20]";
+                shortDis = "CT (0-20)amps";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "20";
@@ -334,7 +334,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 10:
-                shortDis = "Current Drawn[CT 0-50]";
+                shortDis = "CT (0-50)amps";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "50";
@@ -343,7 +343,7 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 11:
-                shortDis = "ION Density";
+                shortDis = "ION Meter (0-1 Million)ions/cc";
                 shortDisTarget = "Dynamic Target ION Density";
                 unit = "ions/cc";
                 maxVal = "10";

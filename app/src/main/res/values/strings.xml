@@ -1115,4 +1115,11 @@
         <item>  Fan High Occupied Period</item>
         <item>  Fan High All Times</item>
     </string-array>
+
+
+    <string name="thermistor1_label">Th1</string>
+    <string name="thermistor2_label">Th2</string>
+    <string name="analog1_label">A-in1</string>
+    <string name="analog2_label">A-in2</string>
+
 </resources>

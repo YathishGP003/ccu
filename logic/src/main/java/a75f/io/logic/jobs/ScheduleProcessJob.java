@@ -1881,14 +1881,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         sensePoints.put("size",size);
         if (analog1Sensor >= 0 ) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog1Sensor );
-            sensePoints.put("Analog1",getAnalogShortDis((int) analog1Sensor) );
+            sensePoints.put("Analog1",selectedSensor.sensorName );
             sensePoints.put("Unit1", selectedSensor.engineeringUnit);
             sensePoints.put("An1Val",an1Val);
         }
 
         if (analog2Sensor >= 0) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog2Sensor );
-            sensePoints.put("Analog2", getAnalogShortDis((int) analog2Sensor));
+            sensePoints.put("Analog2", selectedSensor.sensorName);
             sensePoints.put("Unit2", selectedSensor.engineeringUnit);
             sensePoints.put("An2Val",an2Val);
         }

@@ -2,13 +2,9 @@ package a75f.io.device.daikin
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
-import a75f.io.logger.CcuLog
-import a75f.io.logic.L
-import a75f.io.logic.bo.building.Occupancy
 import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.vav.VavIERtu
 import a75f.io.logic.bo.util.CCUUtils
-import a75f.io.logic.jobs.ScheduleProcessJob
 import a75f.io.logic.tuners.TunerUtil
 
 
@@ -61,8 +57,7 @@ fun getIEMacAddress(hayStack : CCUHsApi) : String {
  */
 fun isSystemOccupied(systemProfile: VavIERtu) : Boolean {
     return (systemProfile.systemController.getSystemState() != SystemController.State.OFF
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
+            && systemProfile.isSystemOccupied)
             || systemProfile.systemCoolingLoopOp > 10
             || systemProfile.systemHeatingLoopOp > 10
 }

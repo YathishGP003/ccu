@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -20,14 +18,15 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -830,6 +829,16 @@ public abstract class SystemProfile
 
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+    }
+    
+    /**
+     * System occupancy mapped to actual AHU-FAN Turning ON requirement.
+     * @return
+     */
+    public boolean isSystemOccupied() {
+         return ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED &&
+                ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION &&
+                ScheduleProcessJob.getSystemOccupancy() != Occupancy.AUTOAWAY;
     }
 
     public void reset() {

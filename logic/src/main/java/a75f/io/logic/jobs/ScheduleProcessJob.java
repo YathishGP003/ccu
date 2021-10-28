@@ -3,17 +3,22 @@ package a75f.io.logic.jobs;
 import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
+
 import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.CCUTagsDb;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
@@ -285,9 +290,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
-
-        /*ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
-        Log.e("InsideScheduleProcess","getAllVacationSchedules1- "+getAllVacationSchedules);*/
     }
 
 
@@ -313,13 +315,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
-        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos")
-        ||(equip.getMarkers().contains("sense") || equip.getMarkers().contains("vrv"))  ) {
+        ||(equip.getMarkers().contains("sense")) || equip.getMarkers().contains("bpos")) {
 
             EquipScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
                    || equip.getMarkers().contains("emr")
-                   || equip.getMarkers().contains("modbus")) {
+                   || equip.getMarkers().contains("modbus")
+                    || equip.getMarkers().contains("vrv")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 putOccupiedModeCache(equip.getRoomRef(), occ);
@@ -516,6 +518,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return (((systemOccupancy == UNOCCUPIED) || (systemOccupancy == VACATION)) ? nextOccupied.getHeatingVal() - setback : nextOccupied.getHeatingVal());
         else return 0;
     }
+    
     public static String getSystemStatusString() {
 
         if(L.ccu().systemProfile instanceof DefaultSystem)
@@ -555,6 +558,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             case PRECONDITIONING:
                 return String.format("In Preconditioning");
+    
+            case AUTOAWAY:
+                return String.format("In AutoAway Mode");
 
             case UNOCCUPIED:
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
@@ -615,14 +621,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         Occupied curr = null;
-        for (Occupied occ : occupiedHashMap.values()) {
-            if (occ.isOccupied())
-            {
+        for (Map.Entry occEntry : occupiedHashMap.entrySet()) {
+            String roomRef = occEntry.getKey().toString();
+            if (!isSystemZone(roomRef, CCUHsApi.getInstance())) {
+                continue;
+            }
+            Occupied occ = (Occupied) occEntry.getValue();
+            if (occ.isOccupied()) {
                 systemOccupancy = OCCUPIED;
                 Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
                 if (curr == null || occDay.getEthh() > curr.getCurrentlyOccupiedSchedule().getEthh()
-                        || (occDay.getEthh() == curr.getCurrentlyOccupiedSchedule().getEthh() && occDay.getEtmm() > curr.getCurrentlyOccupiedSchedule().getEtmm()) )
-                {
+                        || (occDay.getEthh() == curr.getCurrentlyOccupiedSchedule().getEthh() &&
+                            occDay.getEtmm() > curr.getCurrentlyOccupiedSchedule().getEtmm()) ) {
                     Log.d(TAG_CCU_JOB, " Occupied Schedule "+occ.getCurrentlyOccupiedSchedule().toString());
                     curr = occ;
                 }
@@ -633,15 +643,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         long millisToOccupancy = 0;
         if (systemOccupancy == UNOCCUPIED) {
             Occupied next = null;
-            for (Occupied occ : occupiedHashMap.values()) {
-                if (!occ.isSystemZone()) {
-                    if (next == null)
-                    {
-                        //Required when the CCU only has non-system equips like PID.
-                        next = occ;
-                    }
+            for (Map.Entry occEntry : occupiedHashMap.entrySet()) {
+                String roomRef = occEntry.getKey().toString();
+                if (!isSystemZone(roomRef, CCUHsApi.getInstance())) {
                     continue;
                 }
+                Occupied occ = (Occupied) occEntry.getValue();
+    
                 if (millisToOccupancy == 0) {
                     millisToOccupancy = occ.getMillisecondsUntilNextChange();
                     next = occ;
@@ -649,8 +657,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     millisToOccupancy = occ.getMillisecondsUntilNextChange();
                     next = occ;
                 }
+                nextOccupied = next;
             }
-            nextOccupied = next;
+            
             Log.d(TAG_CCU_JOB, "millisToOccupancy: "+millisToOccupancy);
         } else {
             nextOccupied = null;
@@ -661,42 +670,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return;
         }
 
-        if (systemOccupancy == UNOCCUPIED)
-        {
-            double preconDegree = 0;
-            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
-            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            if (nextOccupied != null) {
-                if (L.ccu().systemProfile.getAverageTemp() > 0)
-                {
-                    if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
-                    {
-                        if(preconRate == 0)
-                            preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
-                        preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
-                    }
-                    else if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.HEATING)
-                    {
-                        if(preconRate == 0)
-                            preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
-                        preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
-                    }
-                }
-            }
-            if ((systemMode != SystemMode.OFF) && (preconDegree > 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))
-            {
-                systemOccupancy = PRECONDITIONING;
-            }else{
-                double sysOccValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
-                Occupancy prevOccuStatus = Occupancy.values()[(int)sysOccValue];
-                if((prevOccuStatus == PRECONDITIONING) && (systemMode != SystemMode.OFF))
-                    systemOccupancy = PRECONDITIONING;
-            }
-            CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree+","+systemOccupancy.name());
+        if (systemOccupancy == UNOCCUPIED) {
+            systemOccupancy = getSystemPreconditioningStatus(millisToOccupancy);
         }
 
         if ((systemOccupancy == UNOCCUPIED )&& (getSystemTemporaryHoldExpiry() > 0)) {
             systemOccupancy = FORCEDOCCUPIED;
+        }
+    
+        if (isSystemAutoAway(CCUHsApi.getInstance())) {
+            systemOccupancy = AUTOAWAY;
         }
 
         double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
@@ -707,6 +690,90 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
     }
+    
+    private static Occupancy getSystemPreconditioningStatus(long millisToOccupancy) {
+    
+        double preconDegree = 0;
+        double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
+        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        
+        if (nextOccupied != null) {
+            if (L.ccu().systemProfile.getAverageTemp() > 0) {
+                if (L.ccu().systemProfile.getSystemController()
+                                         .getConditioningForecast(nextOccupied) == SystemController.State.COOLING) {
+                    if(preconRate == 0)
+                        preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate",
+                                                                   L.ccu().systemProfile.getSystemEquipRef());
+                    preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
+                } else if (L.ccu().systemProfile.getSystemController()
+                                                .getConditioningForecast(nextOccupied) == SystemController.State.HEATING) {
+                    if(preconRate == 0)
+                        preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate",
+                                                                   L.ccu().systemProfile.getSystemEquipRef());
+                    preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+        if ((systemMode != SystemMode.OFF)
+            && (preconDegree > 0)
+            && (millisToOccupancy > 0)
+            && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy)) {
+            return PRECONDITIONING;
+        } else {
+            double sysOccValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
+            Occupancy prevOccuStatus = Occupancy.values()[(int)sysOccValue];
+            if((prevOccuStatus == PRECONDITIONING) && (systemMode != SystemMode.OFF))
+                return PRECONDITIONING;
+        }
+        
+        return UNOCCUPIED;
+    }
+    
+    /**
+     * System is considered auto-away when all the zones are in auto-way mode.
+     * @return
+     */
+    private static boolean isSystemAutoAway(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> allEquips = hayStack.readAllEntities("equip and zone");
+        if (allEquips.isEmpty()) {
+            return false; //No zone equips
+        }
+        boolean autoAwayMode = false;
+        for (HashMap<Object, Object> equip : allEquips) {
+            HashMap<Object, Object> occupancyMode = hayStack.read(
+                "point and occupancy and mode and equipRef == \"" + equip.get("id") + "\"");
+            if (occupancyMode.isEmpty()) {
+                continue;
+            }
+            if (hayStack.readHisValById(occupancyMode.get("id").toString()) != AUTOAWAY.ordinal()) {
+                return false;
+            } else {
+                autoAwayMode = true;
+            }
+        }
+        
+        return autoAwayMode;
+    }
+    
+    /**
+     * Checks if the zone has a system-served equip like dab/vav/bpos/ti/dualduct etc.
+     */
+    private static boolean isSystemZone(String roomRef, CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> equips = hayStack
+                                                        .readAllEntities("equip and roomRef == \""+roomRef+"\"");
+        
+        for (HashMap<Object, Object> equip : equips) {
+            if((equip.containsKey("vav") || equip.containsKey("dab") || equip.containsKey("dualDuct")
+                || equip.containsKey("ti") || equip.containsKey("bpos")) && !equip.containsKey("system")) {
+                return true;
+            }
+        }
+        
+        return false;
+        
+    }
+    
     public static Occupied getNextOccupiedTimeInMillis(){
         return nextOccupied;
     }

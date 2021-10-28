@@ -43,9 +43,6 @@ import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
@@ -348,16 +345,16 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         
         ArrayAdapter<Double> testValAdapter = getArrayAdapter(0,100,1);
         ahuAnalog1Test.setAdapter(testValAdapter);
-        ahuAnalog1Test.setSelection(0,false);
+        ahuAnalog1Test.setSelection(ControlMote.getAnalog1Out(), false);
         
         ahuAnalog2Test.setAdapter(testValAdapter);
-        ahuAnalog2Test.setSelection(0,false);
+        ahuAnalog2Test.setSelection(ControlMote.getAnalog2Out(),false);
         
         ahuAnalog3Test.setAdapter(testValAdapter);
-        ahuAnalog3Test.setSelection(0,false);
+        ahuAnalog3Test.setSelection(ControlMote.getAnalog3Out(),false);
     
         ahuAnalog4Test.setAdapter(testValAdapter);
-        ahuAnalog4Test.setSelection(0,false);
+        ahuAnalog4Test.setSelection(ControlMote.getAnalog4Out(),false);
         
         
         analog1Min.setOnItemSelectedListener(this);
@@ -383,6 +380,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             }
         });
         
+        relay3Test.setChecked(ControlMote.getRelay7());
+        relay7Test.setChecked(ControlMote.getRelay7());
         relay3Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
         relay7Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
         

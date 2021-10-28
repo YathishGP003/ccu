@@ -37,6 +37,7 @@ import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
  */
 public class UsbService extends Service
 {
+	private static final String  TAG  = "CCU_SERIAL";
 
 	public static final byte ESC_BYTE = (byte) 0xD9;
 	public static final byte SOF_BYTE = 0x00;
@@ -67,8 +68,7 @@ public class UsbService extends Service
 			"com.android.example.USB_PERMISSION";
 	private static final int     BAUD_RATE                         = 38400;
 	// BaudRate. Change this value if you need
-	private static final String  TAG                               =
-			UsbService.class.getSimpleName();
+	
 	private static final boolean PARSE_DEBUG                       = false;
 	public static        boolean SERVICE_CONNECTED                 = false;
 	SerialState curState = SerialState.PARSE_INIT;
@@ -85,8 +85,9 @@ public class UsbService extends Service
 	private UsbDeviceConnection connection;
 	private UsbSerialDevice     serialPort;
 	private boolean             serialPortConnected;
-
-	;
+	
+	private int reconnectCounter = 0;
+	
 	/*
 	 * Different notifications from OS will be received here (USB attached, detached, permission responses...)
 	 * About BroadcastReceiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
@@ -460,7 +461,36 @@ public class UsbService extends Service
 			sendBroadcast(intent);
 		}
 	}
-
+	
+	/**
+	 * Scans and initializes serial ports without sending broadcast messages.
+	 */
+	private void scanSerialPortSilentlyForCmDevice() {
+		
+		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+		Log.d(TAG,"findSerialPortDevce="+usbDevices.size());
+		if (!usbDevices.isEmpty()) {
+			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+				device = entry.getValue();
+				int deviceVID = device.getVendorId();
+				int devicePID = device.getProductId();
+				Log.i(TAG, "USB Device VID: " + deviceVID);
+				Log.i(TAG, "USB Device PID: " + devicePID);
+				if (deviceVID == 0x0403 || deviceVID == 1003 ||
+				        (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext()))) {
+					boolean success = grantRootPermissionToUSBDevice(device);
+					connection = usbManager.openDevice(device);
+					if (success) {
+						new ConnectionThread().start();
+					}
+					Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
+				} else {
+					connection = null;
+					device = null;
+				}
+			}
+		}
+	}
 
 	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
 	{
@@ -527,10 +557,17 @@ public class UsbService extends Service
 				try {
 					if (!serialPortConnected) {
 						Log.i(TAG, "Serial Port is not connected sleeping");
+						if (reconnectCounter++ >= 30) {
+							Log.i(TAG, "scanSerialPortSilentlyForCmDevice");
+							try {
+								scanSerialPortSilentlyForCmDevice();
+							} catch (Exception e) {
+								Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed", e);
+							}
+							reconnectCounter = 0;
+						}
 						sleep(2000);
 						continue;
-					} else {
-						Log.i(TAG, "Serial Port is connected.");
 					}
 
 					data = messageQueue.take();

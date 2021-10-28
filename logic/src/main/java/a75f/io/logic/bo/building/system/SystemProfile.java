@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -20,14 +18,15 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -159,26 +158,37 @@ public abstract class SystemProfile
     }
 
     public void updateAhuRef(String systemEquipId) {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
         if (L.ccu().oaoProfile != null) {
             equips.add(CCUHsApi.getInstance().read("equip and oao"));
         }
 
-        for (HashMap m : equips) {
+        equips.forEach( m -> {
             Equip q = new Equip.Builder().setHashMap(m).build();
+            //All the zone equips served by AHU/RTU will have an ahuRef.
             if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
                 || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
-                || q.getMarkers().contains("vrv")) {
+                || q.getMarkers().contains("vrv") || q.getMarkers().contains("bpos")) {
                 q.setAhuRef(systemEquipId);
-            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
+                //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {
-                //Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not " +
-                 //       "updated for " + q.getDisplayName(), Toast.LENGTH_SHORT).show();
-                Log.i(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
+                //TODO- This cant happen, we are passing an equip with invalid ahuRef/gatewayRef. There should be
+                // some sort of retry mechanism.
+                Log.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
-        }
+        });
+        
+        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and modbus");
+        modbusEquips.forEach( equipMap -> {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            equip.setGatewayRef(systemEquipId);
+            CCUHsApi.getInstance().updateEquip(equip, equip.getId());
+        });
+        
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
@@ -616,33 +626,43 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(ccuAlarmVolumeLevelId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("level").addMarker("sp")
+        Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heartbeat").addMarker("interval").addMarker("level").addMarker("sp")
                 .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz).build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
-        HashMap cmHeartBeatIntervalPoint = hayStack.read("point and tuner and default and cm and heart and beat and interval");
-        ArrayList<HashMap> cmHeartBeatIntervalArr = hayStack.readPoint(cmHeartBeatIntervalPoint.get("id").toString());
-        for (HashMap valMap : cmHeartBeatIntervalArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(cmHeartBeatIntervalId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(cmHeartBeatIntervalId, Double.parseDouble(valMap.get("val").toString()));
+        HashMap cmHeartBeatIntervalPoint = hayStack.read("point and tuner and default and cm and heartbeat and interval");
+        if (cmHeartBeatIntervalPoint.get("id") != null) {
+            ArrayList<HashMap> cmHeartBeatIntervalArr =
+                    hayStack.readPoint(cmHeartBeatIntervalPoint.get("id").toString());
+            for (HashMap valMap : cmHeartBeatIntervalArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(cmHeartBeatIntervalId),
+                            (int) Double.parseDouble(valMap.get("level").toString()), valMap.get(
+                                    "who").toString(), HNum.make(Double.parseDouble(valMap.get(
+                                            "val").toString())), HNum.make(0));
+                    hayStack.writeHisValById(cmHeartBeatIntervalId,
+                            Double.parseDouble(valMap.get("val").toString()));
+                }
             }
         }
-        Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
+        Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heartbeat").addMarker("sp")
                 .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
-        HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heart and beats and to and skip");
-        ArrayList<HashMap> heartBeatsToSkipArr = hayStack.readPoint(heartBeatsToSkipPoint.get("id").toString());
-        for (HashMap valMap : heartBeatsToSkipArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heartBeatsToSkipId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(heartBeatsToSkipId, Double.parseDouble(valMap.get("val").toString()));
+        HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heartbeat");
+        if (heartBeatsToSkipPoint.get("id") != null) {
+            ArrayList<HashMap> heartBeatsToSkipArr =
+                    hayStack.readPoint(heartBeatsToSkipPoint.get("id").toString());
+            for (HashMap valMap : heartBeatsToSkipArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(heartBeatsToSkipId),
+                            (int) Double.parseDouble(valMap.get("level").toString()), valMap.get(
+                                    "who").toString(), HNum.make(Double.parseDouble(valMap.get(
+                                            "val").toString())), HNum.make(0));
+                    hayStack.writeHisValById(heartBeatsToSkipId, Double.parseDouble(valMap.get(
+                            "val").toString()));
+                }
             }
         }
         Point cmResetCommandTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmResetCommandTimer").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("reset").addMarker("command").addMarker("time")
@@ -820,6 +840,16 @@ public abstract class SystemProfile
 
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+    }
+    
+    /**
+     * System occupancy mapped to actual AHU-FAN Turning ON requirement.
+     * @return
+     */
+    public boolean isSystemOccupied() {
+         return ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED &&
+                ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION &&
+                ScheduleProcessJob.getSystemOccupancy() != Occupancy.AUTOAWAY;
     }
 
     public void reset() {

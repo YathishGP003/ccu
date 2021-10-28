@@ -1,3 +1,5 @@
- - Merged PR 2158: Resolved Zone arc issue
- - Merged PR 2128: VRV Pairing screen issue
- - Merged PR 2129: Clearing the OTA requested device list if still list contains them.
+ - Merged PR 2275: Serial scan exception handler.
+ - Merged PR 2246: System profile change is not updated in CCU entity.
+ - Merged PR 2263: Update bpos AhuRef
+ - Merged PR 2273: Reduce modbus write wait time
+ - Merged PR 2211: Save ccu data

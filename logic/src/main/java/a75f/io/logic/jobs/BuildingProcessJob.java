@@ -1,7 +1,5 @@
 package a75f.io.logic.jobs;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -118,6 +116,10 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         if (timeForEntitySync) {
             L.saveCCUState();
             CCUHsApi.getInstance().scheduleSync();
+        }
+        //Save CCU state every other minute.
+        if (now.getMinuteOfDay() % 2 == 0) {
+            L.saveCCUState();
         }
     }
 }

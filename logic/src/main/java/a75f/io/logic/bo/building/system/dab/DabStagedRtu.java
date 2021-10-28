@@ -423,9 +423,7 @@ public class DabStagedRtu extends DabSystemProfile
                     }
                     break;
                 case FAN_1:
-                    if ((systemMode != SystemMode.OFF &&
-                         (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED &&
-                          ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) ||
+                    if ((systemMode != SystemMode.OFF && (isSystemOccupied())) ||
                         ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) &&
                          (systemFanLoopOp > 0))) {
                         relayState = 1;

@@ -126,21 +126,21 @@ public class AlertFormatter
             case "offset":
                 return def.offset;
             case "equip":
-                HashMap q = hs.readMapById(p.getEquipRef());
+                HashMap<Object, Object> q = hs.readMapById(p.getEquipRef());
                 return q.get("dis").toString();
             case "zone":
-                HashMap z = hs.readMapById(p.getRoomRef());
+                HashMap<Object, Object> z = hs.readMapById(p.getRoomRef());
                 return z.get("dis").toString();
             case "floor":
-                HashMap f = hs.readMapById(p.getFloorRef());
+                HashMap<Object, Object> f = hs.readMapById(p.getFloorRef());
                 return f.get("dis").toString();
             case "site":
                 return hs.getSiteName();
             case "system":
-                HashMap system = hs.read("system and equip");
+                HashMap<Object, Object> system = hs.readEntity("system and equip");
                 return system.get("dis").toString();
             case "ccu":
-                HashMap ccu = hs.read("device and ccu");
+                HashMap<Object, Object> ccu = hs.readEntity("device and ccu");
                 return ccu.get("dis").toString();
             case "cond":
                 CcuLog.d("CCU_ALERTS"," Read cond val point "+point);

@@ -64,7 +64,7 @@ public class HeatPumpPackageUnitUtil {
     private static void updateOccupancyPoint(double configVal, Point configPoint,
                                              JsonObject msgObject, CCUHsApi hayStack) {
         
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         
         updateOccupancyPoint(configVal, equip, hayStack);
@@ -104,7 +104,7 @@ public class HeatPumpPackageUnitUtil {
     
     private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfig " + nodeAddr + " " + configPoint);
@@ -143,7 +143,7 @@ public class HeatPumpPackageUnitUtil {
     
     
     private static void updateRelay5Config(double configVal, Point configPoint, CCUHsApi hayStack) {
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateRelay5Config " + configVal);
         if (configPoint.getMarkers().contains(Tags.TYPE)) {
@@ -184,7 +184,7 @@ public class HeatPumpPackageUnitUtil {
     }
     
     private static void updateRelay6Config(double configVal, Point configPoint, CCUHsApi hayStack) {
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateRelay6Config " + configVal);
         if (configPoint.getMarkers().contains(Tags.TYPE)) {

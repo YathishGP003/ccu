@@ -33,11 +33,17 @@ public class VrvControlMessageCache {
     }
     
     public boolean isControlsPendingResponse(int node) {
-        return pendingControls.get(node) > 0;
+        if (pendingControls.get(node) != null) {
+            return pendingControls.get(node) > 0;
+        }
+        return false;
     }
     
     public boolean isControlsPendingDelivery(int node) {
-        return pendingControls.get(node) == DEFAULT_RESPONSE_TIMEOUT_MINUTES;
+        if (pendingControls.get(node) != null) {
+            return pendingControls.get(node) > DEFAULT_RESPONSE_TIMEOUT_MINUTES;
+        }
+        return false ;
     }
     
     public int getControlsPendingTimer(int node) {
@@ -45,6 +51,9 @@ public class VrvControlMessageCache {
     }
     
     public void updateControlsPending(int node) {
+        if (pendingControls.get(node) == null) {
+            return;
+        }
         int timeout = pendingControls.get(node);
         if (timeout > 0) {
             pendingControls.put(node, (timeout-1));

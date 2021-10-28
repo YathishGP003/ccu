@@ -25,10 +25,13 @@ import com.felhr.usbserial.UsbSerialInterface;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import a75f.io.api.haystack.CCUHsApi;
 
 import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
 
@@ -37,7 +40,7 @@ import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
  */
 public class UsbModbusService extends Service {
 
-    public static final String TAG = "CCU_MODBUS";
+    public static final String TAG = "CCU_SERIAL";
     public static final String ACTION_USB_MODBUS_READY =
             "com.felhr.connectivityservices.USB_MODBUS_READY";
     public static final String ACTION_USB_ATTACHED =
@@ -75,6 +78,7 @@ public class UsbModbusService extends Service {
     private boolean serialPortConnected;
     
     public SerialInputStream serialInputStream;
+    private int reconnectCounter = 0;
     ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -297,6 +301,39 @@ public class UsbModbusService extends Service {
             sendBroadcast(intent);
         }
     }
+    
+    /**
+     * Scans and initializes serial ports without sending broadcast messages.
+     */
+    private void scanSerialPortSilentlyForMbDevice() {
+    
+        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+        Log.d(TAG, "findMBSerialPortDevice=" + usbDevices.size());
+        if (!usbDevices.isEmpty()) {
+            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                device = entry.getValue();
+                int deviceVID = device.getVendorId();
+                int devicePID = device.getProductId();
+                Log.i(TAG, "Modbus USB Device VID: " + deviceVID);
+                Log.i(TAG, "Modbus USB Device PID: " + devicePID);
+                if (deviceVID == 4292 || (deviceVID == DEVICE_ID_FTDI &&
+                                          !UsbUtils.isBiskitMode(getApplicationContext()))) {
+                    boolean success = grantRootPermissionToUSBDevice(device);
+                    connection = usbManager.openDevice(device);
+                    if (connection != null && success) {
+                        ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
+                        new Thread(modbusRunnable).start();
+                        Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
+                    } else {
+                        Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
+                    }
+                } else {
+                    connection = null;
+                    device = null;
+                }
+            }
+        }
+    }
 
     private boolean grantRootPermissionToUSBDevice(UsbDevice device) {
         IBinder b = ServiceManager.getService(Context.USB_SERVICE);
@@ -347,18 +384,30 @@ public class UsbModbusService extends Service {
                 try {
                     if (!serialPortConnected) {
                         Log.i(TAG, "MB Serial Port is not connected sleeping");
-                        sleep(2000);
+                        if (reconnectCounter++ >= 30) {
+                            Log.i(TAG, "scanSerialPortSilentlyForMbDevice");
+                            ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
+                                                                                      .readAllEntities("equip and modbus");
+                            if (modbusEquips.size() > 0) {
+                                try {
+                                    scanSerialPortSilentlyForMbDevice();
+                                } catch (Exception e) {
+                                    Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed ",e);
+                                }
+                            }
+                            reconnectCounter = 0;
+                        }
+                        sleep(5000);
                         continue;
                     }
                     
                     if (serialPort != null ) {
                         data = modbusQueue.take();
                         if (data.length > 0) {
-                            //Log.i(TAG, "Write MB data : " + String.format("%02X ", data[0]));
                             Log.i(TAG, "Write MB data : " + Arrays.toString(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                             try {
-                                Thread.sleep(300);
+                                Thread.sleep(50);
                             }
                             catch (InterruptedException e) {
                                 e.printStackTrace();

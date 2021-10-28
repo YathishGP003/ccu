@@ -655,7 +655,7 @@ public class CCUTagsDb extends HServer {
                                  .add("deviceRef", p.getDeviceRef())
                                  .add("siteRef", p.getSiteRef())
                                  .add("val", p.getVal())
-                                 .add("kind", p.getKind() == null ? "Number" : p.getKind());
+                                 .add("kind", p.getKind() == null ? "Str" : p.getKind());
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -676,7 +676,7 @@ public class CCUTagsDb extends HServer {
                 .add("deviceRef", p.getDeviceRef())
                 .add("siteRef", p.getSiteRef())
                 .add("val", p.getVal())
-                .add("kind", p.getKind() == null ? "Number" : p.getKind());
+                .add("kind", p.getKind() == null ? "Str" : p.getKind());
 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -1168,11 +1168,11 @@ public class CCUTagsDb extends HServer {
                 .or()
                 .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);
-        //Leave one hisItem to make sure his data is not empty if there was no more recent entries
+        //Leave 2 hisItem entries to make sure there is atleast one his data and "delta" alert validation
+        //can be performed , which requires atleast 2 entries.
         List<HisItem>  hisItems = hisQuery.build().find();
-        if (hisItems.size() > 1)
-        {
-            hisItems.remove(hisItems.size() - 1);
+        if (hisItems.size() > 2) {
+            hisItems.remove(hisItems.size() - 2);
             hisBox.remove(hisItems);
         }
     }

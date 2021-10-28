@@ -15,7 +15,7 @@ public class SystemTuners {
      */
     public static void addPITuners(String equipRef, String tunerGroup, String typeTag, CCUHsApi hayStack) {
         
-        HashMap equip = hayStack.readMapById(equipRef);
+        HashMap<Object, Object> equip = hayStack.readMapById(equipRef);
         String equipDis = equip.get("dis").toString();
         String siteRef = equip.get("siteRef").toString();
         Point propGain = new Point.Builder()

@@ -4,8 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +56,8 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class CCUHsApi
 {
@@ -176,6 +181,7 @@ public class CCUHsApi
         return sharedPreferences.getString("token","");
     }
 
+    @SuppressLint("ApplySharedPref")
     public void setJwt(String jwtToken) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -183,17 +189,7 @@ public class CCUHsApi
         editor.commit();
     }
 
-    public String getTunerVersion() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("tunerVersion","");
-    }
-
-    public void setTunerVersion(String version) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("tunerVersion", version);
-        editor.apply();
-    }
+    
 
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
@@ -268,17 +264,23 @@ public class CCUHsApi
 
     public String addPoint(SettingPoint p)
     {
-        return tagsDb.addPoint(p);
+        String pointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     // From EntityPullHandler
     public String addPointWithId(SettingPoint p, String id) {
-        return tagsDb.addPointWithId(p, id);
+        String pointId = tagsDb.addPointWithId(p, id);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     public String updateSettingPoint(SettingPoint p, String id)
     {
-        return tagsDb.updateSettingPoint(p,id);
+        String pointId = tagsDb.updateSettingPoint(p,id);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     public String addDevice(Device d)
@@ -403,7 +405,9 @@ public class CCUHsApi
 
     /**
      * Helper method that converts HGrid to an Array of Hashmap of String.
+     * This should be replaced with parameterized reallAllEntities call.
      */
+    @Deprecated
     public ArrayList<HashMap> readAll(String query)
     {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
@@ -437,7 +441,9 @@ public class CCUHsApi
 
     /**
      * Read the first matching record
+     * This should be replaced with parameterized readEntity call.
      */
+    @Deprecated
     public HashMap read(String query)
     {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
@@ -470,7 +476,7 @@ public class CCUHsApi
         return hsClient.read(query, false);
     }
 
-    public HashMap readMapById(String id)
+    public HashMap<Object, Object> readMapById(String id)
     {
 
         HashMap<Object, Object> map = new HashMap<>();
@@ -2027,6 +2033,11 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                            });
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -2243,7 +2254,7 @@ public class CCUHsApi
     }
     
     public boolean isEntityExisting(String id) {
-        HashMap entity = readMapById(id);
+        HashMap<Object, Object> entity = readMapById(id);
         return !entity.isEmpty();
     }
     

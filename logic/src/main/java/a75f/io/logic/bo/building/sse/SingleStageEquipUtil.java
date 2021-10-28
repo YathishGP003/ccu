@@ -25,7 +25,7 @@ public class SingleStageEquipUtil {
      */
     public static void createRelay1Config(int configVal, Point configPoint) {
     
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         
         CcuLog.d(L.TAG_CCU_ZONE, "SSE createRelay1Config : "+configVal);
@@ -42,7 +42,7 @@ public class SingleStageEquipUtil {
     
     public static void updateRelay1Config(int configVal, Point configPoint) {
     
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         double curConfig = getConfigNumVal("enable and relay1", nodeAddr);
@@ -98,7 +98,7 @@ public class SingleStageEquipUtil {
      */
     public static void createRelay2Config(int configVal, Point configPoint) {
     
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         
         CcuLog.d(L.TAG_CCU_ZONE, "SSE createRelay2Config : " + configVal);
@@ -112,7 +112,7 @@ public class SingleStageEquipUtil {
     
     public static void updateRelay2Config(int configVal, Point configPoint) {
         
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         double curConfig = getConfigNumVal("enable and relay2", nodeAddr);
@@ -138,7 +138,7 @@ public class SingleStageEquipUtil {
     
     public static void updateThermistorConfig(int configVal, Point configPoint) {
     
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         if (configPoint.getMarkers().contains(Tags.TH1)) {

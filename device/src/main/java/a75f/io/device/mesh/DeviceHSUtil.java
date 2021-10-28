@@ -15,7 +15,7 @@ import a75f.io.logic.L;
 public class DeviceHSUtil {
     
     public static Point getLogicalPointForRawPoint(RawPoint rawPoint, CCUHsApi hayStack) {
-        HashMap logPoint = hayStack.readMapById(rawPoint.getPointRef());
+        HashMap<Object, Object> logPoint = hayStack.readMapById(rawPoint.getPointRef());
         if (logPoint.isEmpty()) {
             CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for " + rawPoint.getDisplayName());
             return null;

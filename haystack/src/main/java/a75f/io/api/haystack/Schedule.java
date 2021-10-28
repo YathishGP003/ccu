@@ -52,14 +52,14 @@ public class Schedule extends Entity
 
     public static String getZoneIdByEquipId(String equipId)
     {
-        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
         return equip.getRoomRef();
     }
 
     public static Schedule getScheduleByEquipId(String equipId)
     {
-        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
@@ -67,7 +67,7 @@ public class Schedule extends Entity
 
     public static Schedule getVacationByEquipId(String equipId)
     {
-        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), true);
@@ -77,7 +77,7 @@ public class Schedule extends Entity
     public static Schedule getScheduleForZone(String zoneId, boolean vacation)
     {
         
-        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+        HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
 
@@ -111,9 +111,9 @@ public class Schedule extends Entity
 
     public static Zone getZoneforEquipId(String equipId)
     {
-        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
-        HashMap zoneHashMap  = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
+        HashMap<Object, Object> zoneHashMap  = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
 
@@ -123,7 +123,7 @@ public class Schedule extends Entity
 
     public static Schedule disableScheduleForZone(String zoneId, boolean enabled)
     {
-        HashMap zoneHashMap       = CCUHsApi.getInstance().readMapById(zoneId);
+        HashMap<Object, Object> zoneHashMap       = CCUHsApi.getInstance().readMapById(zoneId);
         Zone    build             = new Zone.Builder().setHashMap(zoneHashMap).build();
         boolean currentlyDisabled = build.getMarkers().contains("disabled");
 

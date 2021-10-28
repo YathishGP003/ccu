@@ -177,7 +177,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 }
                 ArrayList<Equip> UpdatedEquips = new ArrayList<>();
                 for(Equip p: equips){
-                    HashMap map = CCUHsApi.getInstance().readMapById(p.getId());
+                    HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(p.getId());
                     map.put("dis", p.getDisplayName().replace(HSUtil.getDis(p.getSiteRef())+"-",HSUtil.getDis(p.getRoomRef())+"_").replace("-",""));
                     Equip.Builder eb = new Equip.Builder();
                     eb.setHashMap(map);

@@ -3,6 +3,7 @@ package a75f.io.logic.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class PreferenceUtil {
     private static Context context;
@@ -68,6 +69,55 @@ public class PreferenceUtil {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
+        editor.apply();
+    }
+
+    public static boolean isHeartbeatTagMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Log.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
+        return sharedPreferences.getBoolean("heartbeattagMigration",false);
+    }
+
+    public static void setHeartbeatTagMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeattagMigration", isMigrated);
+        editor.apply();
+    }
+    
+    public static String getTunerVersion() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("tunerVersion","");
+    }
+    
+    public static void setTunerVersion(String version) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("tunerVersion", version);
+        editor.apply();
+    }
+    
+    public static boolean isBposAhuRefMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("bposAhuRefMigration",false);
+    }
+    
+    public static void setBposAhuRefMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("bposAhuRefMigration", isMigrated);
+        editor.apply();
+    }
+    
+    public static String getMigrationVersion() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("migrationVersion","");
+    }
+    
+    public static void setMigrationVersion(String version) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("migrationVersion", version);
         editor.apply();
     }
 }

@@ -58,10 +58,12 @@ import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
+import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
@@ -97,11 +99,9 @@ public class Globals {
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
-    private boolean isSimulation = false;
     private boolean testHarness = true;
 
     private boolean _siteAlreadyCreated;
-    private boolean isTempOverride = false;
     
     private static long ccuUpdateTriggerTimeToken;
     private volatile boolean isCcuReady = false;
@@ -171,9 +171,6 @@ public class Globals {
         //5 seconds after application initializes start heart beat
         
         Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
-        
-        isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                .getBoolean("biskit_mode", false);
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
 
@@ -201,6 +198,12 @@ public class Globals {
     private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             HeartbeatDiagMigration.initHeartbeatDiagMigration();
+        }
+    }
+
+    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatTagMigration.initHeartbeatTagMigration();
         }
     }
 
@@ -241,9 +244,11 @@ public class Globals {
             public void run()
             {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                MigrationUtil.doMigrationTasksIfRequired();
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
                 migrateHeartbeatDiagPointForEquips(site);
+                migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 loadEquipProfiles();
@@ -272,7 +277,7 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mProcessJob);
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
-            
+                
                 CCUHsApi.getInstance().syncEntityWithPointWrite();
             
             }
@@ -296,12 +301,12 @@ public class Globals {
     }
 
     public void loadEquipProfiles() {
-        HashMap site = CCUHsApi.getInstance().read(Tags.SITE);
+        HashMap<Object,Object> site = CCUHsApi.getInstance().readEntity(Tags.SITE);
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -359,67 +364,67 @@ public class Globals {
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
-                            vr.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            vr.addLogicalMap(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vr);
                             break;
                         case VAV_SERIES_FAN:
                             VavSeriesFanProfile vsf = new VavSeriesFanProfile();
-                            vsf.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            vsf.addLogicalMap(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vsf);
                             break;
                         case VAV_PARALLEL_FAN:
                             VavParallelFanProfile vpf = new VavParallelFanProfile();
-                            vpf.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            vpf.addLogicalMap(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
                             break;
                         case DAB:
                             DabProfile dab = new DabProfile();
-                            dab.addDabEquip(Short.valueOf(eq.getGroup()));
+                            dab.addDabEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
                             break;
                         case DUAL_DUCT:
                             DualDuctProfile dualDuct = new DualDuctProfile();
-                            dualDuct.addDualDuctEquip(Short.valueOf(eq.getGroup()));
+                            dualDuct.addDualDuctEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dualDuct);
                             break;
                         case PLC:
                             PlcProfile plc = new PlcProfile();
-                            plc.addPlcEquip(Short.valueOf(eq.getGroup()));
+                            plc.addPlcEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(plc);
                             break;
                         case EMR:
                             EmrProfile emr = new EmrProfile();
-                            emr.addEmrEquip(Short.valueOf(eq.getGroup()));
+                            emr.addEmrEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(emr);
                             break;
                         case TEMP_INFLUENCE:
                             CazProfile caz = new CazProfile();
-                            caz.addCcuAsZoneEquip(Short.valueOf(eq.getGroup()));
+                            caz.addCcuAsZoneEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(caz);
                             break;
                         case SSE:
                             SingleStageProfile sse = new SingleStageProfile();
-                            sse.addSSEEquip(Short.valueOf(eq.getGroup()));
+                            sse.addSSEEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(sse);
                             break;
                         case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();
-                            cpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            cpu.addLogicalMap(Short.parseShort(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(cpu);
                             break;
                         case SMARTSTAT_HEAT_PUMP_UNIT:
                             HeatPumpUnitProfile hpu = new HeatPumpUnitProfile();
-                            hpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            hpu.addLogicalMap(Short.parseShort(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(hpu);
                             break;
                         case SMARTSTAT_TWO_PIPE_FCU:
                             TwoPipeFanCoilUnitProfile twoPfcu = new TwoPipeFanCoilUnitProfile();
-                            twoPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            twoPfcu.addLogicalMap(Short.parseShort(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(twoPfcu);
                             break;
                         case SMARTSTAT_FOUR_PIPE_FCU:
                             FourPipeFanCoilUnitProfile fourPfcu = new FourPipeFanCoilUnitProfile();
-                            fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            fourPfcu.addLogicalMap(Short.parseShort(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
                             break;
                         case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
@@ -429,17 +434,17 @@ public class Globals {
                             break;
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
-                            hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
+                            hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(hssense);
                             break;
                         case BPOS:
                             BPOSProfile bpos = new BPOSProfile();
-                            bpos.addBPOSEquip(Short.valueOf(eq.getGroup()));
+                            bpos.addBPOSEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(bpos);
                             break;
                         case HYPERSTAT_VRV:
                             VrvProfile vrv = new VrvProfile();
-                            vrv.addEquip(CCUHsApi.getInstance(), Short.valueOf(eq.getGroup()));
+                            vrv.addEquip(CCUHsApi.getInstance(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vrv);
                             break;
                         case MODBUS_PAC:
@@ -463,7 +468,7 @@ public class Globals {
                         case MODBUS_EMR_ZONE:
                         case MODBUS_DEFAULT:
                             ModbusProfile mbProfile = new ModbusProfile();
-                            mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            mbProfile.addMbEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
                             break;
 
@@ -473,7 +478,7 @@ public class Globals {
 
         }
     
-        HashMap oaoEquip = CCUHsApi.getInstance().read("equip and oao");
+        HashMap<Object,Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
         if (oaoEquip != null && oaoEquip.size() > 0)
         {
             CcuLog.d(L.TAG_CCU, "Create Dafault OAO Profile");
@@ -483,40 +488,40 @@ public class Globals {
         }
 
 
-        /**
+        /*
          * Get all the default BTU_Meter profile details
          */
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
+        ArrayList<HashMap<Object,Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and btu");
 
-        for (HashMap m : equips)
+        for (HashMap<Object,Object> m : equips)
         {
             ModbusProfile mbProfile = new ModbusProfile();
-            short address =Short.parseShort(m.get("group").toString());
-            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_BTU);
+            short address = Short.parseShort(m.get("group").toString());
+            mbProfile.addMbEquip(address, ProfileType.MODBUS_BTU);
             L.ccu().zoneProfiles.add(mbProfile);
         }
 
-        /**
+        /*
          * Get all the default BTU_Meter profile details
          */
-        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr and modbus");
+        ArrayList<HashMap<Object,Object>> emEquips = CCUHsApi.getInstance().readAllEntities("equip and emr and modbus");
 
-        for (HashMap m : emEquips)
+        for (HashMap<Object,Object> m : emEquips)
         {
             ModbusProfile mbProfile = new ModbusProfile();
             short address =Short.parseShort(m.get("group").toString());
-            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_EMR);
+            mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
         }
     }
 
     public String getSmartNodeBand() {
-        HashMap device = CCUHsApi.getInstance().read("device and addr");
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr");
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
         } else {
-            HashMap band = CCUHsApi.getInstance().read("point and snband");
+            HashMap<Object,Object> band = CCUHsApi.getInstance().readEntity("point and snband");
             if (band != null && band.size() > 0 && band.get("val") != null) {
                 return band.get("val").toString();
             }
@@ -550,4 +555,5 @@ public class Globals {
     public void setCcuReady(boolean ccuReady) {
         isCcuReady = ccuReady;
     }
+    
 }

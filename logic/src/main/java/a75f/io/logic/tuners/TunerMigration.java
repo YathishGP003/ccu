@@ -21,7 +21,7 @@ class TunerMigration {
             if (m.getKey().equalsIgnoreCase(shortDis)) {
                 ValueObj valueObj = m.getValue();
                 boolean isUpdated = false;
-                HashMap tunerMap = CCUHsApi.getInstance().readMapById(id);
+                HashMap<Object, Object> tunerMap = CCUHsApi.getInstance().readMapById(id);
                 Point tunerPoint = new Point.Builder().setHashMap(tunerMap).build();
                 Point.Builder pointBuilder = new Point.Builder().setHashMap(tunerMap);
 

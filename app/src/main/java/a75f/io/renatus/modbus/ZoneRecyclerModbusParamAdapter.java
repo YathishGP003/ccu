@@ -244,7 +244,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
 
     @Override
     public void refreshScreen(String id) {
-        HashMap pointMap = CCUHsApi.getInstance().readMapById(id);
+        HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(id);
         Point point = new Point.Builder().setHashMap(pointMap).build();
         double value = readVal(id);
         //write to modbus

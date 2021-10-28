@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
@@ -24,7 +23,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.R;
 
 public class DiagEquip
 {
@@ -40,12 +38,12 @@ public class DiagEquip
     }
     
     public String create() {
-        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+        HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip already created");
             return null;
         }
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
@@ -61,7 +59,7 @@ public class DiagEquip
     
     public void addPoints(String equipRef, String equipDis) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
-        HashMap siteMap = hsApi.read(Tags.SITE);
+        HashMap<Object,Object> siteMap = hsApi.readEntity(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         
@@ -193,7 +191,7 @@ public class DiagEquip
     
     
     public void updatePoints() {
-        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+        HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() == 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip does not exist");
             return;

@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import android.content.Intent;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -467,10 +466,9 @@ public class VavStagedRtu extends VavSystemProfile
                     }
                     break;
                 case FAN_1:
-                    if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                                          && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION))
-                                                          || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)
-                                                            && (systemFanLoopOp > 0))) {
+                    if ((systemMode != SystemMode.OFF && isSystemOccupied())
+                            || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)
+                                    && (systemFanLoopOp > 0))) {
                         relayState = 1;
                     }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
                         if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)

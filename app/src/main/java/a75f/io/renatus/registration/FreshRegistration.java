@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -1110,6 +1111,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.bottomMargin = 0;
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
+            L.saveCCUStateAsync();
         }
         if (position == 20) {
 
@@ -1157,6 +1159,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.bottomMargin = 0;
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
+            L.saveCCUStateAsync();
         }
         if (position == 21) {
 
@@ -1243,7 +1246,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         CCUHsApi.getInstance().registerCcuAsync(installerEmail)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                    () -> { },  // ignore success
+                    () -> {
+
+
+
+                    },  // ignore success
                     error -> {
                         // A Toast rather than a dialog is necessary since the interface does not wait
                         // for the response here.  We should fix that when we rewrite Registration.

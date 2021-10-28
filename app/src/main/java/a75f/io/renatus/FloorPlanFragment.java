@@ -1212,6 +1212,7 @@ public class FloorPlanFragment extends Fragment {
                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                 hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
+                L.saveCCUStateAsync();
                 CCUHsApi.getInstance().syncEntityTree();
                 roomList.add(hsZone);
                 Collections.sort(roomList, new ZoneComparator());

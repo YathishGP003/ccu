@@ -13,7 +13,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -24,7 +23,13 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.*;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createAnalog4LoopConfigPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createChilledWaterConfigPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createConfigPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createLoopPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteAnalog4LoopConfigPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteConfigPoints;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteLoopOutputPoints;
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
@@ -392,7 +397,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         double signal = 0;
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF) {
-            signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;
+            signal = (isSystemOccupied() || systemFanLoopOp > 0) ? 1 : 0;
         
         }
         if(signal != getCmdSignal("occupancy")) {
@@ -401,8 +406,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         ControlMote.setRelayState("relay3", signal);
     
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) {
+                    && isSystemOccupied()) {
             
             double humidity = dabSystem.getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");

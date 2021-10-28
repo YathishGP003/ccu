@@ -29,7 +29,7 @@ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
 public class MasterControl extends View {
 
-    public static final float RECOMMENDED_WIDTH_DP = 870.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 1550.0f;
     public static final float TEXT_PADDING_LEFT_RIGHT_DP = 4.0f;
     public static final float ARROW_IMAGE_WIDTH = 6; // dp
     public static final float SETTLED_BUILDING_LIMITS_H = 90;
@@ -81,7 +81,7 @@ public class MasterControl extends View {
     //Amount of degrees below the bottom reading and above the top reading.
     int mEdgeDegrees = 2;
 
-    int mDefaultStartDegree = 55;
+    int mDefaultStartDegree = 63;
     int mDefaultVisibleDegrees = 35;
 
     float mLowerBound = 32.0f;
@@ -676,7 +676,7 @@ public class MasterControl extends View {
                                float uTemp, int lineColor, int textColor) {
 
         mDebugTextAlignCenterPaint.setColor(textColor);
-        mDebugTextAlignCenterPaint.setTextSize(mArrowTextSize);
+        mDebugTextAlignCenterPaint.setTextSize(mArrowTextSize+5);
         mDebugTextAlignCenterPaint.getTextBounds(text, 0, text.length(), bounds);
 
         float textXLocation = (getPXForTemp(uTemp) + getPXForTemp(lTemp)) / 2.0f;

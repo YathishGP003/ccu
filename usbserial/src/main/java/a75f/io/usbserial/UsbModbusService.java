@@ -400,11 +400,10 @@ public class UsbModbusService extends Service {
                     if (serialPort != null ) {
                         data = modbusQueue.take();
                         if (data.length > 0) {
-                            //Log.i(TAG, "Write MB data : " + String.format("%02X ", data[0]));
                             Log.i(TAG, "Write MB data : " + Arrays.toString(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                             try {
-                                Thread.sleep(300);
+                                Thread.sleep(50);
                             }
                             catch (InterruptedException e) {
                                 e.printStackTrace();

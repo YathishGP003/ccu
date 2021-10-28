@@ -63,6 +63,7 @@ import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
+import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
@@ -248,13 +249,13 @@ public class Globals {
             public void run()
             {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                MigrationUtil.doMigrationTasksIfRequired();
                 performBuildingTunerUprades(site);
                 migrateHeartbeatPointForEquips(site);
                 migrateHeartbeatDiagPointForEquips(site);
                 migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
-                CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())

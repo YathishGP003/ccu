@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import org.projecthaystack.HDict;
@@ -361,5 +362,13 @@ public class HSUtil
     public static HisItem getHisItemForWritable(String id) {
         return new HisItem(id, new Date(System.currentTimeMillis()),
                     HSUtil.getPriorityVal(id) );
+    }
+    
+    public static Equip getEquipForModule(Short moduleAddr) {
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().read("equip and group == \""+moduleAddr+"\"");
+        if (equipMap.isEmpty()) {
+            return null;
+        }
+        return new Equip.Builder().setHashMap(equipMap).build();
     }
 }

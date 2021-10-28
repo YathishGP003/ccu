@@ -1,1 +1,26 @@
- - Merged PR 2172: CCU with empty floor not reporting
+ - Merged PR 2261: Intrinsic scheduling
+ - Merged PR 2229: User limit validation
+ - Merged PR 2137: 8396: CCU : No success toast appeared after fresh registration of a CCU/adding CCU to an existing site.
+ - Merged PR 2256: Added Enhancement for Master control for limit changes
+ - Merged PR 2200: 8470 : CCU : HyperStat sense Profile Zone UI enhancement
+ - Merged PR 2202: 8025 : CCU : Zone-Level MODBUS Energy Meter "emr_zone" Tag
+ - Merged PR 2245: Exclude setting point from sync
+ - Merged PR 2160: Back up CCU config and side loaded json files
+ - Merged PR 2203: Add COV check before updating firmware version
+ - Merged PR 2241: Diakin IE- Unit addition to new points
+ - Merged PR 2139: Remove multiple handling of tuner update
+ - Merged PR 2206: Vrv idu message handling fix
+ - Merged PR 1899: 8098-Daikin App gets Restarted When Restart Tablet Command is given remotely-Daikin Instance
+ - Merge branches 'bug/sdev/8098_Daikin_restart_issue' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/8098_Daikin_restart_issue
+ - Merged PR 1871: Heartbeat tuner point tags refinement
+ - Merge branches 'bug/sdev/7596_Heart_beat_tag' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7596_Heart_beat_tag
+ - sync added only once
+ - Merge branches 'bug/sdev/7596_Heart_beat_tag' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7596_Heart_beat_tag
+ - Updating the existing points as per comments
+ - Merge branches 'bug/sdev/7596_Heart_beat_tag' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7596_Heart_beat_tag
+ - heart beat migration completed
+ - Merge branches 'bug/sdev/7596_Heart_beat_tag' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7596_Heart_beat_tag
+ - migration draft
+ - Merge branches 'bug/sdev/7596_Heart_beat_tag' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7596_Heart_beat_tag
+ - added permission
+ - Heartbeat tag update

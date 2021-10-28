@@ -622,13 +622,18 @@ public abstract class SystemProfile
                 .setTz(tz).build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
         HashMap cmHeartBeatIntervalPoint = hayStack.read("point and tuner and default and cm and heartbeat and interval");
-        ArrayList<HashMap> cmHeartBeatIntervalArr = hayStack.readPoint(cmHeartBeatIntervalPoint.get("id").toString());
-        for (HashMap valMap : cmHeartBeatIntervalArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(cmHeartBeatIntervalId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(cmHeartBeatIntervalId, Double.parseDouble(valMap.get("val").toString()));
+        if (cmHeartBeatIntervalPoint.get("id") != null) {
+            ArrayList<HashMap> cmHeartBeatIntervalArr =
+                    hayStack.readPoint(cmHeartBeatIntervalPoint.get("id").toString());
+            for (HashMap valMap : cmHeartBeatIntervalArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(cmHeartBeatIntervalId),
+                            (int) Double.parseDouble(valMap.get("level").toString()), valMap.get(
+                                    "who").toString(), HNum.make(Double.parseDouble(valMap.get(
+                                            "val").toString())), HNum.make(0));
+                    hayStack.writeHisValById(cmHeartBeatIntervalId,
+                            Double.parseDouble(valMap.get("val").toString()));
+                }
             }
         }
         Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heartbeat").addMarker("sp")
@@ -636,13 +641,18 @@ public abstract class SystemProfile
                 .setTz(tz).build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
         HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heartbeat");
-        ArrayList<HashMap> heartBeatsToSkipArr = hayStack.readPoint(heartBeatsToSkipPoint.get("id").toString());
-        for (HashMap valMap : heartBeatsToSkipArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heartBeatsToSkipId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(heartBeatsToSkipId, Double.parseDouble(valMap.get("val").toString()));
+        if (heartBeatsToSkipPoint.get("id") != null) {
+            ArrayList<HashMap> heartBeatsToSkipArr =
+                    hayStack.readPoint(heartBeatsToSkipPoint.get("id").toString());
+            for (HashMap valMap : heartBeatsToSkipArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(heartBeatsToSkipId),
+                            (int) Double.parseDouble(valMap.get("level").toString()), valMap.get(
+                                    "who").toString(), HNum.make(Double.parseDouble(valMap.get(
+                                            "val").toString())), HNum.make(0));
+                    hayStack.writeHisValById(heartBeatsToSkipId, Double.parseDouble(valMap.get(
+                            "val").toString()));
+                }
             }
         }
         Point cmResetCommandTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmResetCommandTimer").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("reset").addMarker("command").addMarker("time")

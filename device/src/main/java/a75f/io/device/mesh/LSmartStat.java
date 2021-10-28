@@ -34,6 +34,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -178,8 +179,8 @@ public class LSmartStat {
         }
         double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(equipId);
         double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(equipId);
-        settings_t.minUserTemp.set((short)getMinUserTempLimits(equipId, hdb));
-        settings_t.maxUserTemp.set((short)getMaxUserTempLimits(equipId, cdb));
+        settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits(hdb));
+        settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits(cdb));
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
         try {
             Log.d("LSmartStat","sch status="+equipId+","+zone.getId());
@@ -392,16 +393,6 @@ public class LSmartStat {
         controls.time.day.set ((byte)(getCurrentDayOfWeekWithMondayAsStart() & 0xff));
         controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
         controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
-    }
-    
-    private static double getMaxUserTempLimits(String equipId, double deadband){
-        double maxCool =  TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max");
-        return maxCool- deadband;
-    }
-
-    private static double getMinUserTempLimits(String equipId, double deadband){
-        double maxHeat =  TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max");
-        return maxHeat+ deadband;
     }
     
     private static boolean is2pfcuDevice(int address) {

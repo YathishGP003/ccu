@@ -158,26 +158,37 @@ public abstract class SystemProfile
     }
 
     public void updateAhuRef(String systemEquipId) {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
         if (L.ccu().oaoProfile != null) {
             equips.add(CCUHsApi.getInstance().read("equip and oao"));
         }
 
-        for (HashMap m : equips) {
+        equips.forEach( m -> {
             Equip q = new Equip.Builder().setHashMap(m).build();
+            //All the zone equips served by AHU/RTU will have an ahuRef.
             if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
                 || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
-                || q.getMarkers().contains("vrv")) {
+                || q.getMarkers().contains("vrv") || q.getMarkers().contains("bpos")) {
                 q.setAhuRef(systemEquipId);
-            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
+                //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {
-                //Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not " +
-                 //       "updated for " + q.getDisplayName(), Toast.LENGTH_SHORT).show();
-                Log.i(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
+                //TODO- This cant happen, we are passing an equip with invalid ahuRef/gatewayRef. There should be
+                // some sort of retry mechanism.
+                Log.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
-        }
+        });
+        
+        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and modbus");
+        modbusEquips.forEach( equipMap -> {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            equip.setGatewayRef(systemEquipId);
+            CCUHsApi.getInstance().updateEquip(equip, equip.getId());
+        });
+        
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }

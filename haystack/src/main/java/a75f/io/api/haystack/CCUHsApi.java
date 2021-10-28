@@ -180,17 +180,7 @@ public class CCUHsApi
         editor.commit();
     }
 
-    public String getTunerVersion() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("tunerVersion","");
-    }
-
-    public void setTunerVersion(String version) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("tunerVersion", version);
-        editor.apply();
-    }
+    
 
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);

@@ -55,9 +55,8 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
 
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
 
-        String id = CCUHsApi.getInstance().getGUID(
-                Objects.toString(ccu.get(CcuFieldConstants.ID),"")
-        );
+        String id = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
+        
 
         String dis = Objects.toString(ccu.get(CcuFieldConstants.DESCRIPTION),"");
 
@@ -76,6 +75,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
         String facilityManagerEmail = Objects.toString(ccu.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL));
         String installerEmail = Objects.toString(ccu.get(CcuFieldConstants.INSTALLER_EMAIL));
 
+        CcuLog.i("CCU_HS_SYNC"," Sync CCU "+ccu.toString());
         if (StringUtils.isNotBlank(id)
                 && StringUtils.isNotBlank(dis)
                 && StringUtils.isNotBlank(ahuRef)

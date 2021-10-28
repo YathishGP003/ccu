@@ -389,7 +389,11 @@ public class UsbModbusService extends Service {
                             ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
                                                                                       .readAllEntities("equip and modbus");
                             if (modbusEquips.size() > 0) {
-                                scanSerialPortSilentlyForMbDevice();
+                                try {
+                                    scanSerialPortSilentlyForMbDevice();
+                                } catch (Exception e) {
+                                    Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed ",e);
+                                }
                             }
                             reconnectCounter = 0;
                         }

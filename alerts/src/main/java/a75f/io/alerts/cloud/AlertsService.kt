@@ -2,6 +2,7 @@ package a75f.io.alerts.cloud
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
+import a75f.io.constants.HttpConstants
 import a75f.io.logger.CcuLog
 import com.google.gson.*
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
@@ -163,6 +164,7 @@ class ServiceGenerator {
          addInterceptor(
             Interceptor { chain ->
                val builder = chain.request().newBuilder()
+                       .header(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
                headers.token?.let { builder.header("Authorization", "Bearer $it") }
                headers.apiKey?.let { builder.header("api-key", it) }
                headers.encoding?.let { builder.header("Accept-Encoding", it) }

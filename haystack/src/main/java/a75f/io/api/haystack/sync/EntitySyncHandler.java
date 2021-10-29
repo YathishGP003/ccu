@@ -344,14 +344,15 @@ public class EntitySyncHandler
                 return true;
             }
         }
-        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point");
-        for (Map p: points) {
+        ArrayList<HashMap> syncablePoints = CCUHsApi.getInstance().readAll("point and (his or writable)");
+        for (Map p: syncablePoints) {
             if (CCUHsApi.getInstance().getGUID(p.get("id").toString()) == null) {
                 CcuLog.d(TAG,"Entity sync required :Point not synced :"+ p.get("id"));
                 syncPending = true;
                 return true;
             }
         }
+        
         ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
         for (Map s: schedules) {
             if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {

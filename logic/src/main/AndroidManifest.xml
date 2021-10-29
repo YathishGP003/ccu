@@ -12,6 +12,10 @@
         <service
             android:name=".jobs.bearertoken.BearerTokenManagerService"
             android:exported="true"/>
+
+        <receiver android:name=".service.FileBackupJobReceiver"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

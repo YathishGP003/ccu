@@ -31,6 +31,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
@@ -194,8 +195,14 @@ public class LSmartNode
 
         try
         {
-            settings.maxUserTem.set((short) getMaxUserTempLimits(equipRef));
-            settings.minUserTemp.set((short) getMinUserTempLimits(equipRef));
+            double coolingDeadband =
+                TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""+equipRef+"\"");
+            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband));
+    
+            double heatingDeadband =
+                TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""+equipRef+"\"");
+            
+            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband));
         } catch (Exception e) {
             //Equips not having user temps are bound to throw exception
             settings.maxUserTem.set((short) 75);
@@ -344,17 +351,6 @@ public class LSmartNode
         }
     }
     
-    
-    private static void mapTestCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
-                                        short nodeAddress, ZoneProfile zp)
-    {
-        /*for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
-        {
-            short outputMapped = output.getTestVal();
-            getSmartNodePort(controlsMessage_t, output.getPort()).set(outputMapped);
-        }*/
-    }
-    
     public static boolean isAnalog(String port) {
         switch (port) {
             case ANALOG_OUT_ONE:
@@ -452,30 +448,6 @@ public class LSmartNode
     }
     
     
-    public static short mapRawValue(Output output, short rawValue)
-    {
-        switch (output.getOutputType())
-        {
-            case Relay:
-                return output.mapDigital(rawValue != 0);
-            case Analog:
-                return output.mapAnalog(rawValue);
-        }
-        return 0;
-    }
-    
-    public static double getDesiredVal(ZoneProfile z) {
-        //TODO- TEMP
-        return 72.0;
-        /*float desiredTemperature = LZoneProfile.resolveZoneProfileLogicalValue(z);
-        boolean occupied = desiredTemperature > 0;
-        if (!occupied)
-        {
-            desiredTemperature = LZoneProfile.resolveAnyValue(z);
-        }
-        return desiredTemperature;*/
-    }
-    
     public static double getDesiredTemp(short node)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
@@ -483,7 +455,6 @@ public class LSmartNode
             Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
             return 0;
         }
-        //return CCUHsApi.getInstance().readDefaultValById(point.get("id").toString());
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 
@@ -508,18 +479,6 @@ public class LSmartNode
         controls.time.day.set ((byte)(getCurrentDayOfWeekWithMondayAsStart() & 0xff));
         controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
         controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
-    }
-
-    private static double getMaxUserTempLimits(String equipId){
-        double deadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base");
-       double maxCool =  TunerUtil.readBuildingTunerValByQuery("zone and cooling and user and limit and max");
-       return maxCool- deadband;
-    }
-
-    private static double getMinUserTempLimits(String equipId){
-        double deadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base");
-        double maxHeat =  TunerUtil.readBuildingTunerValByQuery("zone and heating and user and limit and max");
-        return maxHeat+ deadband;
     }
     
     public static double getDamperLimit(String coolHeat, String minMax, short nodeAddr)

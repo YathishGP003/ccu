@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.util.PreferenceUtil;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
@@ -91,10 +92,10 @@ public class BuildingTuners
             PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
             String tunerVersion = info.versionName + "." + info.versionCode;
 
-            if (!CCUHsApi.getInstance().getTunerVersion().equals(tunerVersion)) {
+            if (!PreferenceUtil.getTunerVersion().equals(tunerVersion)) {
                 doTunerMigrationJob();
                 TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
-                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
+                PreferenceUtil.setTunerVersion(tunerVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

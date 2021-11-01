@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;

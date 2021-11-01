@@ -1,1 +1,5 @@
- - Merged PR 2172: CCU with empty floor not reporting
+ - Merged PR 2275: Serial scan exception handler.
+ - Merged PR 2246: System profile change is not updated in CCU entity.
+ - Merged PR 2263: Update bpos AhuRef
+ - Merged PR 2273: Reduce modbus write wait time
+ - Merged PR 2211: Save ccu data

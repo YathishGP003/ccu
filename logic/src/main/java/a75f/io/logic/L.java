@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.util.RxTask;
 
 /**
  * Created by Yinten isOn 9/4/2017.
@@ -368,5 +369,9 @@ public class L
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
             spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", false).commit();
         }
+    }
+    
+    public static void saveCCUStateAsync() {
+        RxTask.executeAsync(() -> Globals.getInstance().saveTags());
     }
 }

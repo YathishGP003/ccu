@@ -116,5 +116,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             L.saveCCUState();
             CCUHsApi.getInstance().scheduleSync();
         }
+        //Save CCU state every other minute.
+        if (now.getMinuteOfDay() % 2 == 0) {
+            L.saveCCUState();
+        }
     }
 }

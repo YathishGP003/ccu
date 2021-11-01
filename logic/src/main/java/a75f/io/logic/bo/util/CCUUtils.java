@@ -1,17 +1,12 @@
 package a75f.io.logic.bo.util;
 
-import android.util.Log;
-
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.modbus.Register;
-import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Created by Yinten on 10/11/2017.

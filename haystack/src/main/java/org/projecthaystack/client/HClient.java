@@ -575,6 +575,7 @@ public class HClient extends HProj
           c.setDoInput(true);
           c.setRequestProperty("Connection", "Close");
           c.setRequestProperty("Content-Type", mimeType == null ? "text/zinc": mimeType);
+          c.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
           if (StringUtils.isNotBlank(bearerToken)) {
             c.setRequestProperty("Authorization", "Bearer " + bearerToken);
           } else {

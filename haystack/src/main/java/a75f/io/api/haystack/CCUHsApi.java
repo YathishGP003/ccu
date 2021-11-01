@@ -207,14 +207,12 @@ public class CCUHsApi
      * @param immediate whether the disk write in Shared Prefs should be immediate, synchronous.  If false,
      *                  SharedPrefs will write to memory immediate but write to disk when convenient.
      */
-    public synchronized void saveTagsData(boolean immediate)
-    {
+    public synchronized void saveTagsData(boolean immediate) {
         syncStatusService.saveSyncStatus();
         tagsDb.saveTags(immediate);
     }
 
-    public String addSite(Site s)
-    {
+    public String addSite(Site s) {
         String siteId = tagsDb.addSite(s);
         Log.i("CCU_HS"," add Site "+siteId);
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(siteId, "@"));
@@ -227,8 +225,7 @@ public class CCUHsApi
         return tagsDb.addSiteWithId(s, id);
     }
 
-    public String addEquip(Equip q)
-    {
+    public String addEquip(Equip q) {
         String equipId = tagsDb.addEquip(q);
         syncStatusService.addUnSyncedEntity(equipId);
         return equipId;
@@ -239,8 +236,7 @@ public class CCUHsApi
         return tagsDb.addEquipWithId(q, id);
     }
 
-    public String addPoint(Point p)
-    {
+    public String addPoint(Point p) {
         String pointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
@@ -251,8 +247,7 @@ public class CCUHsApi
         return tagsDb.addPointWithId(p, id);
     }
 
-    public String addPoint(RawPoint p)
-    {
+    public String addPoint(RawPoint p) {
         String rawPointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(rawPointId);
         return rawPointId;
@@ -262,8 +257,7 @@ public class CCUHsApi
         return tagsDb.addPointWithId(p, id);
     }
 
-    public String addPoint(SettingPoint p)
-    {
+    public String addPoint(SettingPoint p) {
         String pointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
@@ -276,15 +270,13 @@ public class CCUHsApi
         return pointId;
     }
 
-    public String updateSettingPoint(SettingPoint p, String id)
-    {
+    public String updateSettingPoint(SettingPoint p, String id) {
         String pointId = tagsDb.updateSettingPoint(p,id);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
     }
 
-    public String addDevice(Device d)
-    {
+    public String addDevice(Device d) {
         String deviceId = tagsDb.addDevice(d);
         syncStatusService.addUnSyncedEntity(deviceId);
         return deviceId;
@@ -295,21 +287,13 @@ public class CCUHsApi
         return tagsDb.addDeviceWithId(d, id);
     }
 
-    public void updateDevice(Device d, String id)
-    {
+    public void updateDevice(Device d, String id) {
         tagsDb.updateDevice(d, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
-        
-        /*tagsDb.updateDevice(d, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }*/
     }
-    public String addFloor(Floor f)
-    {
+    public String addFloor(Floor f) {
         String floorId = tagsDb.addFloor(f);
         syncStatusService.addUnSyncedEntity(floorId);
         return floorId;
@@ -320,8 +304,7 @@ public class CCUHsApi
         return tagsDb.addFloorWithId(f, id);
     }
 
-    public String addZone(Zone z)
-    {
+    public String addZone(Zone z) {
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         return zoneId;
@@ -332,10 +315,7 @@ public class CCUHsApi
         return tagsDb.addZoneWithId(z, id);
     }
 
-    public void updateSite(Site s, String id)
-    {
-        /*tagsDb.updateSite(s, id);
-        entitySyncHandler.requestSiteSync();*/
+    public void updateSite(Site s, String id) {
         tagsDb.updateSite(s, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -344,8 +324,7 @@ public class CCUHsApi
     }
     
     //Local site entity may be updated on pubnub notification which does not need to be synced back.
-    public void updateSiteLocal(Site s, String id)
-    {
+    public void updateSiteLocal(Site s, String id) {
         tagsDb.updateSite(s, id);
         updateLocationDataForWeatherUpdate(s);
     }
@@ -1185,13 +1164,13 @@ public class CCUHsApi
                     }
 
                     // exclude building schedule for force sync
-                    HashMap buildingSchedule = read("schedule and building and not vacation");
+                    HashMap<Object, Object> buildingSchedule = readEntity("schedule and building and not vacation");
                     if (buildingSchedule.get("id").toString().contains(map.getKey())){
                         removeMap.remove(map.getKey());
                     }
 
                     // exclude building tuners for force sync
-                    ArrayList<HashMap> hQList = readAll("equip");
+                    ArrayList<HashMap<Object, Object>> hQList = readAllEntities("equip");
                     for (HashMap h: hQList){
                         Equip equip = new Equip.Builder().setHashMap(h).build();
 
@@ -1257,9 +1236,10 @@ public class CCUHsApi
         //import building tuners
         importBuildingTuners(siteId, hClient);
 
-        ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
+        ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
+                                                                    .readAllEntities("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
-        for (HashMap m : writablePoints) {
+        for (HashMap<Object, Object> m : writablePoints) {
             HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             hDicts.add(pid);
         }
@@ -1675,7 +1655,7 @@ public class CCUHsApi
     @Deprecated
     @Nullable
     public String getRemoteSiteIdWithRefSign() {
-        HashMap site = read("site");
+        HashMap<Object, Object> site = readEntity("site");
 
         if (site == null || site.get("id") == null) return null;
         String siteLuid = site.get("id").toString();
@@ -1935,11 +1915,11 @@ public class CCUHsApi
     }
     
     public void deleteHistory() {
-        ArrayList<HashMap> points = readAll("point and his");
+        ArrayList<HashMap<Object, Object>> points = readAllEntities("point and his");
         if (points.size() == 0) {
             return;
         }
-        for (Map m : points)
+        for (Map<Object, Object> m : points)
         {
             CcuLog.d("CCU_HS"," deleteHistory for point "+m.get("id"));
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
@@ -2010,7 +1990,7 @@ public class CCUHsApi
         // this issue is pre-existing.
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
             Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
-            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+            HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
         
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
         

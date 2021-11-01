@@ -2,6 +2,7 @@ package a75f.io.api.haystack.sync;
 
 import android.content.Context;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -13,7 +14,10 @@ import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.xml.transform.Result;
 
@@ -27,6 +31,7 @@ public class SyncWorker extends Worker {
     
     public static final String TAG = "CCU_HS_SyncWork";
     public static final int ENTITY_SYNC_BATCH_SIZE = 25;
+    public static final int DELETE_ENTITY_BATCH_SIZE = 50;
     
     public static final String ENDPOINT_ADD_ENTITY = "addEntity";
     public static final String ENDPOINT_REMOVE_ENTITY = "removeEntity";
@@ -50,37 +55,37 @@ public class SyncWorker extends Worker {
         CcuLog.i(TAG, " doSyncWork ");
     
         isSyncWorkInProgress = true;
-        if (!siteHandler.doSync()) {
-            CcuLog.e(TAG, "Site sync failed");
-            return Result.retry();
-        }
-    
-        if (!CCUHsApi.getInstance().isCCURegistered()) {
-            CcuLog.e(TAG, "Abort SyncWork : CCU Not registered");
+        try {
+            if (!siteHandler.doSync()) {
+                CcuLog.e(TAG, "Site sync failed");
+                return Result.retry();
+            }
+            if (!CCUHsApi.getInstance().isCCURegistered()) {
+                CcuLog.e(TAG, "Abort SyncWork : CCU Not registered");
+                return Result.failure();
+            }
+            if (!ccuSyncHandler.doSync()) {
+                CcuLog.e(TAG, "CCU sync failed");
+                return Result.retry();
+            }
+            if (!syncUnSyncedEntities()) {
+                CcuLog.e(TAG, "Unsynced entity sync failed");
+                return Result.retry();
+            }
+            if (!syncUpdatedEntities()) {
+                CcuLog.e(TAG, "Updated entity sync failed");
+                return Result.retry();
+            }
+            if (!syncDeletedEntities()) {
+                CcuLog.e(TAG, "Deleted entity sync failed");
+                return Result.retry();
+            }
+            CcuLog.i(TAG, " doSyncWork success");
+            syncStatusService.saveSyncStatus();
+        } catch (Exception e) {
+            CcuLog.i(TAG, " doSyncWork Failed ", e);
             return Result.failure();
         }
-    
-        if (!ccuSyncHandler.doSync()) {
-            CcuLog.e(TAG, "CCU sync failed");
-            return Result.retry();
-        }
-    
-        if (!syncUnSyncedEntities()) {
-            CcuLog.e(TAG, "Unsynced entity sync failed");
-            return Result.retry();
-        }
-    
-        if (!syncUpdatedEntities()) {
-            CcuLog.e(TAG, "Updated entity sync failed");
-            return Result.retry();
-        }
-    
-        if (!syncDeletedEntities()) {
-            CcuLog.e(TAG, "Deleted entity sync failed");
-            return Result.retry();
-        }
-        CcuLog.i(TAG, " doSyncWork success");
-        syncStatusService.saveSyncStatus();
         isSyncWorkInProgress = false;
         return Result.success();
     }
@@ -139,22 +144,29 @@ public class SyncWorker extends Worker {
             return true;
         }
         
-        ArrayList<HDict> entities = new ArrayList<>();
-        for (String deletedId : syncStatusService.getDeletedData()) {
-            HDictBuilder b = new HDictBuilder();
-            b.add("id", HRef.make(deletedId.replace("@", "")));
-            entities.add(b.toDict());
-        }
-        HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +
-                                               ENDPOINT_REMOVE_ENTITY, HZincWriter.gridToString(gridData));
+        List<List<String>> pointListBatches = ListUtils.partition(syncStatusService.getDeletedData()
+                                                                        , DELETE_ENTITY_BATCH_SIZE);
+        
+        List<String> deletedItems = new ArrayList<>();
+        pointListBatches.forEach( entityList -> {
+            ArrayList<HDict> entities = new ArrayList<>();
+            for (String deletedId : entityList) {
+                HDictBuilder b = new HDictBuilder();
+                b.add("id", HRef.make(deletedId.replace("@", "")));
+                entities.add(b.toDict());
+            }
+            HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +
+                                                   ENDPOINT_REMOVE_ENTITY, HZincWriter.gridToString(gridData));
     
-        CcuLog.d(TAG, "RemoveEntity Response : "+response);
-        if (response != null) {
-            updateDeleteStatus(response);
-        } else {
-            return false;
-        }
+            CcuLog.d(TAG, "RemoveEntity Response : "+response);
+            if (response == null) {
+                return;
+            }
+            deletedItems.addAll(entityList);
+        });
+    
+        updateDeleteStatus(deletedItems);
         return true;
     }
     
@@ -175,10 +187,10 @@ public class SyncWorker extends Worker {
         }
     }
     
-    private void updateDeleteStatus(String response) {
-        ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
-        for (String id : syncedIds) {
-            syncStatusService.setDeletedEntitySynced(id);
+    private void updateDeleteStatus(List<String> entityList) {
+        ListIterator<String> deletedIr = entityList.listIterator();
+        while(deletedIr.hasNext()) {
+            syncStatusService.setDeletedEntitySynced(deletedIr.next());
         }
         syncStatusService.saveSyncStatus();
     }

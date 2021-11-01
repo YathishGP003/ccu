@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -44,9 +45,9 @@ public class DiagEquip
             return null;
         }
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
+        String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+        String siteDis = Objects.requireNonNull(siteMap.get("dis")).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         Equip b = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-DiagEquip")
@@ -60,8 +61,8 @@ public class DiagEquip
     public void addPoints(String equipRef, String equipDis) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         HashMap<Object,Object> siteMap = hsApi.readEntity(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String tz = siteMap.get("tz").toString();
+        String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         
         Point batteryLevel = new Point.Builder()
                                            .setDisplayName(equipDis+"-batteryLevel")

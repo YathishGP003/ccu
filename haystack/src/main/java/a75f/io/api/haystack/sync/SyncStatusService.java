@@ -18,6 +18,7 @@ import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -171,10 +172,14 @@ public class SyncStatusService {
         
         ArrayList<HDict> unsyncedDictList = new ArrayList<>();
         CcuLog.d("CCU_HS_Sync", " Unsynced Data : " + unsyncedIdList.size());
-        for (String id : unsyncedIdList) {
+        ListIterator<String> unSyncItr = unsyncedIdList.listIterator();
+        while(unSyncItr.hasNext()) {
+            String id = unSyncItr.next();
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
             if (entity == null) {
-                CcuLog.e("CCU_HS_SyncHandler","Invalid entity for sync "+id);
+                CcuLog.e("CCU_HS_SyncHandler","Invalid unsynced entity for sync "+id);
+                //Entity might have been deleted.
+                unSyncItr.remove();
                 continue;
             }
             HDictBuilder builder = new HDictBuilder();
@@ -195,8 +200,16 @@ public class SyncStatusService {
     
         ArrayList<HDict> updatedDictList = new ArrayList<>();
         CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdList.size());
-        for (String id : updatedIdList) {
+        ListIterator<String> updatedItr = updatedIdList.listIterator();
+        while(updatedItr.hasNext()) {
+            String id = updatedItr.next();
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
+            if (entity == null) {
+                CcuLog.e("CCU_HS_SyncHandler","Invalid updated entity for sync "+id);
+                //Entity might have been deleted.
+                updatedItr.remove();
+                continue;
+            }
             HDictBuilder builder = new HDictBuilder();
             builder.add(entity);
             updateRefs(entity, builder);

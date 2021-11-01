@@ -29,6 +29,7 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.renovo.bacnet4j.LocalDevice;
@@ -285,6 +286,8 @@ public class InstallerOptions extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (ccu.size() == 0) {
+                    Toast.makeText(getContext(), "CCU device does not exist. Please clear app data and retry " +
+                                                 "registration", Toast.LENGTH_LONG).show();
                     return;
                 }
                 mNext.setEnabled(false);

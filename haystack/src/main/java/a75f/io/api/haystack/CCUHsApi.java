@@ -530,7 +530,12 @@ public class CCUHsApi
      */
     public void writePointForCcuUser(String id, int level, Double val, int duration)
     {
-        pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration));
+        writePointForCcuUser(id, level, val, duration, null);
+    }
+
+    public void writePointForCcuUser(String id, int level, Double val, int duration, String reason)
+    {
+        pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration), reason);
     }
 
     /**
@@ -609,10 +614,15 @@ public class CCUHsApi
      * type arguments.
      * */
     public void pointWriteForCcuUser(HRef id, int level, HVal val, HNum dur) {
-        pointWrite(id, level, getCCUUserName(), val, dur);
+        pointWrite(id, level, getCCUUserName(), val, dur, null);
     }
 
+
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
+        pointWrite(id, level, who, val, dur, null);
+    }
+
+    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         hsClient.pointWrite(id, level, who, val, dur);
 
         if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
@@ -620,8 +630,12 @@ public class CCUHsApi
             if (dur.unit == null) {
                 dur = HNum.make(dur.val ,"ms");
             }
-
+            
             HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            if (StringUtils.isNotEmpty(reason)) {
+                b.add("reason", reason);
+            }
+
             HDict[] dictArr  = {b.toDict()};
             CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
             HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));

@@ -278,7 +278,6 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
             
-                testCode();
                 CCUHsApi.getInstance().syncEntityWithPointWrite();
             
             }
@@ -557,12 +556,4 @@ public class Globals {
         isCcuReady = ccuReady;
     }
     
-    
-    private void testCode() {
-        ArrayList<HashMap> settingPoints = CCUHsApi.getInstance().readAll("setting and point");
-        settingPoints.stream()
-                     .map(p -> p.get("id").toString())
-                     .forEach(m -> CCUHsApi.getInstance().getSyncStatusService().addUnSyncedEntity(m));
-        
-    }
 }

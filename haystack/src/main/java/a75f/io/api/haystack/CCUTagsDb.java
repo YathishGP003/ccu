@@ -1072,7 +1072,7 @@ public class CCUTagsDb extends HServer {
                 validHisItems.add(hisItem);
             }
         }
-        CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId+" size: "+validHisItems.size());
+        //CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId+" size: "+validHisItems.size());
         return validHisItems;
     }
     

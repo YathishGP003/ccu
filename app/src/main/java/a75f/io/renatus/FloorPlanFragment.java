@@ -937,7 +937,7 @@ public class FloorPlanFragment extends Fragment {
 
                             //move zones and modules under new floor
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
-                                zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+                                zone.setFloorRef(floor.getId());
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
                                     equipDetails.setFloorRef(floor.getId());

@@ -1057,10 +1057,7 @@ public class CCUHsApi
             Log.e("CCU_HS", "id null or empty in set synced");
             return;
         }
-        
-        Log.i("CCU_HS", "Set entity synced id: "+id);
         syncStatusService.setEntitySynced(id);
-        //tagsDb.idMap.put(id, remoteId);
     }
 
     /**
@@ -1087,29 +1084,9 @@ public class CCUHsApi
                 getSiteIdRef().toString()
         );
     }
-
-    public String getLUID(String guid)
-    {
-        for (Map.Entry<String, String> entry : tagsDb.idMap.entrySet())
-        {
-            if (entry.getValue().equals(guid))
-            {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
     
-    public String getRemoveMapLUID(String guid)
-    {
-        for (Map.Entry<String, String> entry : tagsDb.removeIdMap.entrySet())
-        {
-            if (entry.getValue().equals(guid))
-            {
-                return entry.getKey();
-            }
-        }
-        return null;
+    public boolean isEntityDeleted(String id) {
+        return syncStatusService.getDeletedData().contains(id);
     }
 
     public void syncEntityTree()
@@ -1218,14 +1195,13 @@ public class CCUHsApi
 
         HGrid remoteSite = getRemoteSite(siteId);
 
-        if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr())
-        {
+        if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr()) {
             return false;
         }
 
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
-        tagsDb.idMap.put("@"+tagsDb.addSiteWithId(s, siteId), s.getId());
+        addRemoteSite(s, siteId);
         Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
 
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -1286,7 +1262,7 @@ public class CCUHsApi
                         hDictList.add(pid);
 
                         //save his data to local cache
-                        HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                        HDict rec = hsClient.readById(HRef.copy(id));
                         tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
 
                         //save points on tagsDb
@@ -1322,13 +1298,12 @@ public class CCUHsApi
                 }
 
                 Iterator it = buildingSch.iterator();
-                while (it.hasNext())
-                {
+                while (it.hasNext()) {
                     HRow r = (HRow) it.next();
                     Schedule buildingSchedule =  new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
 
                     String guid = buildingSchedule.getId();
-                    buildingSchedule.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
+                    buildingSchedule.setmSiteId(siteId);
                     CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
                     CCUHsApi.getInstance().setSynced("@" + guid);
                 }
@@ -1370,28 +1345,29 @@ public class CCUHsApi
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
-                String equipLuid;
+                String equiUuid;
                 HashMap tunerEquip = read("tuner and equip");
                 if (!tunerEquip.isEmpty()) {
-                    equipLuid = tunerEquip.get("id").toString();
+                    equiUuid = tunerEquip.get("id").toString();
                 } else {
-                    q.setSiteRef(hsApi.getSiteIdRef().toString());
+                    q.setSiteRef(siteId);
                     q.setFloorRef("@SYSTEM");
                     q.setRoomRef("@SYSTEM");
-                    equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                    hsApi.setSynced(equipLuid);
+                    equiUuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
+                    hsApi.setSynced(equiUuid);
                 }
                 //Points
                 for (Point p : points)
                 {
                     if (p.getEquipRef().equals(q.getId()))
                     {
-                        String guidKey = StringUtils.prependIfMissing(p.getId(), "@");
-                        if (getLUID(guidKey) == null) {
-                            p.setSiteRef(hsApi.getSiteIdRef().toString());
+                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
+                        HashMap<Object, Object> point = readMapById(pointId);
+                        if (point.isEmpty()) {
+                            p.setSiteRef(siteId);
                             p.setFloorRef("@SYSTEM");
                             p.setRoomRef("@SYSTEM");
-                            p.setEquipRef(equipLuid);
+                            p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
                         } else {

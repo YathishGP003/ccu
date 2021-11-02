@@ -48,7 +48,7 @@ class IEDeviceHandler {
                     "dev eth0 proto static scope link table wlan0")
             RootCommandExecuter.runRootCommand("ip addr add 172.16.0.10/24 broadcast " +
                     "172.16.0.255 dev eth0")
-            updateOccMode(it, systemProfile)
+            updateOccMode(it, systemProfile, hayStack)
 
             //Sleep is experimental to give a breather to IE. Could be removed in future
             //IE responds consistently without this.
@@ -84,9 +84,9 @@ class IEDeviceHandler {
         }
     }
 
-    private fun updateOccMode(service : IEService, systemProfile: VavIERtu) {
+    private fun updateOccMode(service : IEService, systemProfile: VavIERtu, hayStack: CCUHsApi) {
 
-        if (isSystemOccupied(systemProfile)) {
+        if (isSystemOccupied(systemProfile, hayStack)) {
             writeToIEDevice(
                 service,
                 IE_POINT_TYPE_MV,

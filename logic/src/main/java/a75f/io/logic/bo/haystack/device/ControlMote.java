@@ -337,4 +337,72 @@ public class ControlMote
         CCUHsApi.getInstance().addPoint(rssi);
         CCUHsApi.getInstance().addPoint(firmWareVersion);
     }
+    
+    public static void setAnalog1Out(double val) {
+        ControlMote.setAnalogOut(Tags.ANALOG1, val);
+    }
+    public static void setAnalog2Out(double val) {
+        ControlMote.setAnalogOut(Tags.ANALOG2, val);
+    }
+    public static void setAnalog3Out(double val) {
+        ControlMote.setAnalogOut(Tags.ANALOG3, val);
+    }
+    public static void setAnalog4Out(double val) {
+        ControlMote.setAnalogOut(Tags.ANALOG4, val);
+    }
+    public static int getAnalog1Out() {
+        return (int)ControlMote.getAnalogOut(Tags.ANALOG1);
+    }
+    public static int getAnalog2Out() {
+        return (int)ControlMote.getAnalogOut(Tags.ANALOG2);
+    }
+    public static int getAnalog3Out() {
+        return (int)ControlMote.getAnalogOut(Tags.ANALOG3);
+    }
+    public static int getAnalog4Out() {
+        return (int)ControlMote.getAnalogOut(Tags.ANALOG4);
+    }
+    public static void setRelay1(double val) {
+        ControlMote.setRelayState(Tags.RELAY1, val);
+    }
+    public static void setRelay2(double val) {
+        ControlMote.setRelayState(Tags.RELAY2, val);
+    }
+    public static void setRelay3(double val) {
+        ControlMote.setRelayState(Tags.RELAY3, val);
+    }
+    public static void setRelay4(double val) {
+        ControlMote.setRelayState(Tags.RELAY4, val);
+    }
+    public static void setRelay5(double val) {
+        ControlMote.setRelayState(Tags.RELAY5, val);
+    }
+    public static void setRelay6(double val) {
+        ControlMote.setRelayState(Tags.RELAY6, val);
+    }
+    public static void setRelay7(double val) {
+        ControlMote.setRelayState(Tags.RELAY7, val);
+    }
+    
+    public static boolean getRelay1() {
+        return ControlMote.getRelayState(Tags.RELAY1) > 0.01;
+    }
+    public static boolean getRelay2() {
+        return ControlMote.getRelayState(Tags.RELAY2) > 0.01;
+    }
+    public static boolean getRelay3() {
+        return ControlMote.getRelayState(Tags.RELAY3) > 0.01;
+    }
+    public static boolean getRelay4() {
+        return ControlMote.getRelayState(Tags.RELAY4) > 0.01;
+    }
+    public static boolean getRelay5() {
+        return ControlMote.getRelayState(Tags.RELAY5) > 0.01;
+    }
+    public static boolean getRelay6() {
+        return ControlMote.getRelayState(Tags.RELAY6) > 0.01;
+    }
+    public static boolean getRelay7() {
+        return ControlMote.getRelayState(Tags.RELAY7) > 0.01;
+    }
 }

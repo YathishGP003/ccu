@@ -1,10 +1,15 @@
 package a75f.io.renatus;
 
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.DeviceUtil;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -94,7 +99,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         return rootView;
     }
     
-    @Override
+    @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         prefs = new Prefs(getContext().getApplicationContext());
@@ -236,7 +241,15 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Spinner.setOnItemSelectedListener(this);
         relay6Spinner.setOnItemSelectedListener(this);
         relay7Spinner.setOnItemSelectedListener(this);
-
+    
+        relay1Test.setChecked(ControlMote.getRelay1());
+        relay2Test.setChecked(ControlMote.getRelay2());
+        relay3Test.setChecked(ControlMote.getRelay3());
+        relay4Test.setChecked(ControlMote.getRelay4());
+        relay5Test.setChecked(ControlMote.getRelay5());
+        relay6Test.setChecked(ControlMote.getRelay6());
+        relay7Test.setChecked(ControlMote.getRelay7());
+        
         relay1Test.setOnCheckedChangeListener(this);
         relay2Test.setOnCheckedChangeListener(this);
         relay3Test.setOnCheckedChangeListener(this);
@@ -256,7 +269,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     }
 
 
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
@@ -264,10 +277,6 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             case R.id.toggleRelay1:
                 relay1Spinner.setEnabled(relay1Cb.isChecked());
                 setConfigEnabledBackground("relay1",relay1Cb.isChecked() ? 1: 0);
-                /*if (relay1Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
-                }*/
                 break;
             case R.id.toggleRelay2:
                 relay2Spinner.setEnabled(relay2Cb.isChecked());
@@ -293,22 +302,34 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 relay7Spinner.setEnabled(relay7Cb.isChecked());
                 setConfigEnabledBackground("relay7",relay7Cb.isChecked() ? 1: 0);
                 break;
-
+    
             case R.id.relay1Test:
+                sendRelayTestSignal(Tags.RELAY1, isChecked ? 1:0);
+                break;
             case R.id.relay2Test:
+                sendRelayTestSignal(Tags.RELAY2, isChecked ? 1:0);
+                break;
             case R.id.relay3Test:
+                sendRelayTestSignal(Tags.RELAY3, isChecked ? 1:0);
+                break;
             case R.id.relay4Test:
+                sendRelayTestSignal(Tags.RELAY4, isChecked ? 1:0);
+                break;
             case R.id.relay5Test:
+                sendRelayTestSignal(Tags.RELAY5, isChecked ? 1:0);
+                break;
             case R.id.relay6Test:
+                sendRelayTestSignal(Tags.RELAY6, isChecked ? 1:0);
+                break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal();
+                sendRelayTestSignal(Tags.RELAY7, isChecked ? 1:0);
                 break;
 
         }
     }
 
 
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
@@ -373,43 +394,12 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         }
         if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
                 || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-                || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-            String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-            str = str + "\nPlease select appropriate conditioning mode from System Settings.";
-            builder.setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    })
-                    .setTitle("System Conditioning Mode Changed")
-                    .setMessage(str);
-
-            AlertDialog dlg = builder.create();
-            dlg.show();
-            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+                || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable())) {
+            SystemProfileUtil.showConditioningDisabledDialog(getActivity(), systemMode);
         }
     }
 
-    private void setUserIntentBackground(String query, double val) {
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground( final Void ... params ) {
-                TunerUtil.writeSystemUserIntentVal(query, val);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private void setConfigEnabledBackground(String config, double val) {
+    @SuppressLint("StaticFieldLeak") private void setConfigEnabledBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
@@ -427,7 +417,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-    private void setConfigAssociationBackground(String config, double val) {
+    @SuppressLint("StaticFieldLeak") private void setConfigAssociationBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -448,39 +438,11 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
-
-    public void sendRelayActivationTestSignal() {
-        
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        short relayStatus = (short) ((relay1Test.isChecked() ? 1 << MeshUtil.getRelayMapping(1) : 0)
-                                     | (relay2Test.isChecked() ? 1 << MeshUtil.getRelayMapping(2) : 0)
-                                     | (relay3Test.isChecked() ? 1 << MeshUtil.getRelayMapping(3) : 0)
-                                     | (relay4Test.isChecked() ? 1 << MeshUtil.getRelayMapping(4) : 0)
-                                     | (relay5Test.isChecked() ? 1 << MeshUtil.getRelayMapping(5) : 0)
-                                     | (relay6Test.isChecked() ? 1 << MeshUtil.getRelayMapping(6) : 0)
-                                     | (relay7Test.isChecked() ? 1 << MeshUtil.getRelayMapping(7) : 0));
-        
-        msg.relayBitmap.set(relayStatus);
-        MeshUtil.sendStructToCM(msg);
-
-        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
-
-        if (relayStatus > 0) {
-            if (!Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(true);
-            }
-        } else {
-            if (Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(false);
-            }
-        }
+    
+    private void sendRelayTestSignal(String tag, double val) {
+        Globals.getInstance().setTestMode(true);
+        ControlMote.setRelayState(tag, val);
+        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
     }
 
     private void setSpinnerBackground(){

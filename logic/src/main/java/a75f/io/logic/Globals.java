@@ -101,6 +101,7 @@ public class Globals {
     private CCUApplication mCCUApplication;
     private boolean isSimulation = false;
     private boolean testHarness = true;
+    private boolean isTestMode = false;
 
     private boolean _siteAlreadyCreated;
     private boolean isTempOverride = false;
@@ -137,14 +138,16 @@ public class Globals {
                 .getBoolean("biskit_mode", false);
     }
 
-    public boolean isTestMode()
-    {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                      .getBoolean("test_mode", false);
+    public boolean isTestMode() {
+        return isTestMode;
     }
-    public void setTestMode(boolean isTestMode) {
-        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                .edit().putBoolean("test_mode", isTestMode).apply();
+    public void setTestMode(boolean testMode) {
+        try {
+            throw new Exception("TestMode "+testMode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.isTestMode = testMode;
     }
     public boolean isWeatherTest() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,9 +23,8 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.mesh.MeshUtil;
-import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -37,6 +37,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.text.HtmlCompat;
@@ -380,10 +381,12 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             }
         });
         
-        relay3Test.setChecked(ControlMote.getRelay7());
+        relay3Test.setChecked(ControlMote.getRelay3());
         relay7Test.setChecked(ControlMote.getRelay7());
-        relay3Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
-        relay7Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
+        relay3Test.setOnCheckedChangeListener((compoundButton, b) ->
+                                                  sendAnalogRelayTestSignal(Tags.RELAY3, b ? 1.0: 0.0));
+        relay7Test.setOnCheckedChangeListener((compoundButton, b) ->
+                                                  sendAnalogRelayTestSignal(Tags.RELAY7, b ? 1.0: 0.0));
         
     }
     
@@ -515,7 +518,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         analog4OutMaxCo2.setOnItemSelectedListener(this);
     }
         
-        @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
@@ -549,11 +552,11 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         }
     }
     
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
-        double val = Double.parseDouble(arg0.getSelectedItem().toString());;
+        double val = Double.parseDouble(arg0.getSelectedItem().toString());
        
         switch (arg0.getId())
         {
@@ -577,10 +580,16 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 setConfigBackground("heating and max", val);
                 break;
             case R.id.analog1Spinner:
+                sendAnalogRelayTestSignal(Tags.ANALOG1, val);
+                break;
             case R.id.analog2Spinner:
+                sendAnalogRelayTestSignal(Tags.ANALOG2, val);
+                break;
             case R.id.analog3Spinner:
+                sendAnalogRelayTestSignal(Tags.ANALOG3, val);
+                break;
             case R.id.analog4TestSpinner:
-                sendAnalogOutTestSignal();
+                sendAnalogRelayTestSignal(Tags.ANALOG4, val);
                 break;
             case R.id.cwTargetDeltaTSpinner:
                 setConfigBackground("target and delta", val);
@@ -659,10 +668,6 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         executeBackground(() -> systemProfile.setConfigVal(tags, val));
     }
     
-    private void setUserIntentBackground(String query, double val) {
-        executeBackground(() -> TunerUtil.writeSystemUserIntentVal(query, val));
-    }
-    
     private void setConfigBackgroundWithProgress(String tags, double val) {
     
         RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving System " +
@@ -703,73 +708,23 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         }
         if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
             || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-            String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-            str = str + "\nPlease select appropriate conditioning mode from System Settings.";
-            builder.setCancelable(false)
-                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           dialog.cancel();
-                       }
-                   })
-                   .setTitle("System Conditioning Mode Changed")
-                   .setMessage(str);
-            
-            AlertDialog dlg = builder.create();
-            dlg.show();
-            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable())) {
+            SystemProfileUtil.showConditioningDisabledDialog(getActivity(), systemMode);
         }
     }
     
-    
-    public void sendAnalogOutTestSignal() {
+    private void sendAnalogRelayTestSignal(String tag, double val) {
         
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        
-        msg.analog0.set(getAnalogVal(systemProfile.getConfigVal("analog1 and min"), systemProfile.getConfigVal(
-            "analog1 and max"), Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString())));
-        
-        msg.analog1.set(getAnalogVal(systemProfile.getConfigVal("analog2 and min"), systemProfile.getConfigVal(
-            "analog2 and max"), Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString())));
-        
-        msg.analog2.set(getAnalogVal(systemProfile.getConfigVal("analog3 and min"), systemProfile.getConfigVal(
-            "analog3 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
-    
-        if (systemProfile.isDcwbEnabled()) {
-            msg.analog3.set(getAnalogVal(systemProfile.getConfigVal("analog4 and min"), systemProfile.getConfigVal(
-                            "analog4 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
+        Globals.getInstance().setTestMode(true);
+        if (tag.contains("analog")) {
+            ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
+                                                                           systemProfile.getConfigVal(tag+" and max"),
+                                                                           val));
+        } else if (tag.contains("relay")) {
+            ControlMote.setRelayState(tag, val);
         }
-        short relayStatus = (short) ((relay3Test.isChecked() ? 1 << 2 : 0) | (relay7Test.isChecked() ? 1 << 6 : 0));
-        msg.relayBitmap.set(relayStatus);
-        MeshUtil.sendStructToCM(msg);
-
-        ControlMote.setAnalogOut("analog1",Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()));
-        ControlMote.setAnalogOut("analog2",Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()));
-        ControlMote.setAnalogOut("analog3",Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()));
-        ControlMote.setAnalogOut("analog4",Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()));
-        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
-
-        if (relayStatus > 0 || Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()) > 0
-                            || Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()) > 0
-                            || Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()) > 0
-                            || Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()) > 0) {
-            if (!Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(true);
-            }
-        } else {
-            if (Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(false);
-            }
-        }
-    }
-    
-    
-    short getAnalogVal(double min, double max, double val) {
-        return max > min ? (short) (10 * (min + (max - min) * val/100)) : (short) (10 * (min - (min - max) * val/100));
+        
+        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
     }
 
     private void setSpinnerDropDownIcon(){

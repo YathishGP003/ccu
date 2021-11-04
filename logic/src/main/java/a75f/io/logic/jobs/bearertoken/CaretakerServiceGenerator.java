@@ -1,7 +1,5 @@
 package a75f.io.logic.jobs.bearertoken;
 
-import a75f.io.api.haystack.BuildConfig;
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;

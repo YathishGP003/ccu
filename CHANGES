@@ -1,5 +1,11 @@
- - Merged PR 2275: Serial scan exception handler.
- - Merged PR 2246: System profile change is not updated in CCU entity.
- - Merged PR 2263: Update bpos AhuRef
- - Merged PR 2273: Reduce modbus write wait time
- - Merged PR 2211: Save ccu data
+ - Merged PR 2302: Add unit for Smartstat-analog1In
+ - Merged PR 1893: 8528 - 75F Http Custom App Headers & Tuner Change Reason
+ - Merge branch 'master' into story/lgaskill/8528_http_app_header
+ - Merged PR 1885: 8414 - Alert Evaluation Counter Reset Fix
+ - Merge branch 'master' into story/lgaskill/8528_http_app_header
+ - Merge branch 'master' into story/lgaskill/8528_http_app_header
+ - Merge branch 'master' into story/lgaskill/8528_http_app_header
+ - Merge branch 'master' into story/lgaskill/8528_http_app_header
+ - Capturing change reason in all tuner apply paths
+ - Added CCU App Header to all renatus-bound http requests
+ - Resolved invalidated alert offset issue

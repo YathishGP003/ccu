@@ -292,7 +292,7 @@ public class VavSeriesFanProfile extends VavProfile
     }
     
     private void updateFanStatus (boolean occupied, String equipId, SystemMode mode) {
-        if ((occupied || L.ccu().systemProfile.systemFanLoopOp > 0) && mode != SystemMode.OFF) {
+        if ((occupied || valve.currentPosition > 0 || L.ccu().systemProfile.systemFanLoopOp > 0) && mode != SystemMode.OFF) {
             //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
             //Once the fan is proven on for a fixed time delay (15 seconds), the damper override is released
             CcuLog.d(L.TAG_CCU_ZONE,

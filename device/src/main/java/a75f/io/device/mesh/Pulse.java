@@ -904,15 +904,21 @@ public class Pulse
 						double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
 						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp+","+curValue);
-						if (desiredTemp > 0 && (curValue != desiredTemp)) {
+						boolean validDesiredTemp = DeviceUtil.validateDesiredTempUserLimits(nodeAddr, desiredTemp);
+						if (desiredTemp > 0 && (curValue != desiredTemp) && validDesiredTemp) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateDesiredTemp(nodeAddr, desiredTemp);
 							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
+							         "updateSetTempFromSmartNode : desiredTemp updated" +curValue+"->"+ desiredTemp);
 						} else {
-							sendSetTemperatureAck((short)nodeAddr);
+							sendSetTemperatureAck(nodeAddr);
 							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartStat : desiredTemp not changed" +curValue+"->"+ desiredTemp);
+							         "updateSetTempFromSmartNode : desiredTemp not changed" +curValue+"->"+ desiredTemp);
+						}
+						if (!validDesiredTemp) {
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							        "updateSetTempFromSmartNode "+nodeAddr+" : Invalid desiredTemp ignored "+ desiredTemp);
+							DeviceUtil.sendControlsMessage(nodeAddr, true);
 						}
 					break;
 				}
@@ -985,7 +991,10 @@ public class Pulse
 					case DESIRED_TEMP:
 						double curValue = LSmartStat.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
-						if (desiredTemp > 0 && (curValue != desiredTemp)) {
+						
+						boolean validDesiredTemp = DeviceUtil.validateDesiredTempUserLimits(nodeAddr, desiredTemp);
+						
+						if (desiredTemp > 0 && (curValue != desiredTemp) && validDesiredTemp) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
 							CcuLog.d(L.TAG_CCU_DEVICE,
@@ -994,6 +1003,12 @@ public class Pulse
 							sendSetTemperatureAck((short)nodeAddr);
 							CcuLog.d(L.TAG_CCU_DEVICE,
 							         "updateSetTempFromSmartStat : desiredTemp not changed" + desiredTemp+"->"+curValue);
+						}
+						
+						if (!validDesiredTemp) {
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat "+nodeAddr+" : Invalid desiredTemp ignored "+ desiredTemp);
+							DeviceUtil.sendControlsMessage(nodeAddr, false);
 						}
 						
 						break;

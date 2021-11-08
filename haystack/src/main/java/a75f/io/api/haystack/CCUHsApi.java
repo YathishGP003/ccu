@@ -3,8 +3,11 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +53,8 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class CCUHsApi
 {
@@ -175,17 +180,7 @@ public class CCUHsApi
         editor.commit();
     }
 
-    public String getTunerVersion() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("tunerVersion","");
-    }
-
-    public void setTunerVersion(String version) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("tunerVersion", version);
-        editor.apply();
-    }
+    
 
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
@@ -495,7 +490,12 @@ public class CCUHsApi
      */
     public void writePointForCcuUser(String id, int level, Double val, int duration)
     {
-        pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration));
+        writePointForCcuUser(id, level, val, duration, null);
+    }
+
+    public void writePointForCcuUser(String id, int level, Double val, int duration, String reason)
+    {
+        pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration), reason);
     }
 
     /**
@@ -574,10 +574,15 @@ public class CCUHsApi
      * type arguments.
      * */
     public void pointWriteForCcuUser(HRef id, int level, HVal val, HNum dur) {
-        pointWrite(id, level, getCCUUserName(), val, dur);
+        pointWrite(id, level, getCCUUserName(), val, dur, null);
     }
 
+
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
+        pointWrite(id, level, who, val, dur, null);
+    }
+
+    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         hsClient.pointWrite(id, level, who, val, dur);
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
@@ -587,6 +592,10 @@ public class CCUHsApi
                 }
 
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+                if (StringUtils.isNotEmpty(reason)) {
+                    b.add("reason", reason);
+                }
+
                 HDict[] dictArr  = {b.toDict()};
                 CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
                 HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
@@ -2087,6 +2096,11 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
+                            });
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

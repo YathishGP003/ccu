@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
@@ -334,11 +335,10 @@ public class VavIERtu extends VavSystemProfile
     
     private void addCmdPoints(String equipref) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        String siteRef = siteMap.get("id").toString();
-        String tz = siteMap.get("tz").toString();
-
-
+        String equipDis = Objects.requireNonNull(siteMap.get("dis")).toString() + "-SystemEquip";
+        String siteRef = Objects.requireNonNull(siteMap.get("id")).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
+        
         Point DATClgSetpoint = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"DATClgSetpoint")
                 .setSiteRef(siteRef)
@@ -407,6 +407,7 @@ public class VavIERtu extends VavSystemProfile
                               .setEquipRef(equipRef)
                               .addMarker("system").addMarker("effDATSetpoint").addMarker("ie")
                               .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
         String effDATSetpointId = CCUHsApi.getInstance().addPoint(effDATSetpoint);
@@ -418,6 +419,7 @@ public class VavIERtu extends VavSystemProfile
                               .setEquipRef(equipRef)
                               .addMarker("system").addMarker("dischargeAirTemp").addMarker("ie")
                               .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
         String dischargeAirTempId = CCUHsApi.getInstance().addPoint(dischargeAirTemp);
@@ -429,6 +431,7 @@ public class VavIERtu extends VavSystemProfile
                               .setEquipRef(equipRef)
                               .addMarker("system").addMarker("sFCapFbk").addMarker("ie")
                               .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                              .setUnit("%")
                               .setTz(tz)
                               .build();
         String SFCapFbkId = CCUHsApi.getInstance().addPoint(SFCapFbk);
@@ -437,9 +440,9 @@ public class VavIERtu extends VavSystemProfile
     
     private void addConfigPoints(String equipref) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        String siteRef = siteMap.get("id").toString();
-        String tz = siteMap.get("tz").toString();
+        String equipDis = Objects.requireNonNull(siteMap.get("dis")).toString() + "-SystemEquip";
+        String siteRef = Objects.requireNonNull(siteMap.get("id")).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Point coolingEnabled = new Point.Builder()
                                              .setDisplayName(equipDis+"-"+"coolingEnabled")
@@ -793,7 +796,7 @@ public class VavIERtu extends VavSystemProfile
     
         HashMap fanSpeedMax = hayStack.read("system and config and fanSpeed and max and ie");
         if (!fanSpeedMax.isEmpty()) {
-            hayStack.deleteWritablePoint(fanSpeedMax.get("id").toString());
+            hayStack.deleteWritablePoint(Objects.requireNonNull(fanSpeedMax.get("id")).toString());
         }
     }
     
@@ -861,14 +864,14 @@ public class VavIERtu extends VavSystemProfile
     private void addNewIEPointsForUpgrade(HashMap systemEquip, CCUHsApi hayStack) {
         
         
-        HashMap effDatPoint = hayStack.read("point and system and effDATSetpoint and ie");
+        HashMap<Object, Object> effDatPoint = hayStack.readEntity("point and system and effDATSetpoint and ie");
         if (!effDatPoint.isEmpty()) {
             return;
         }
-        String equipDis = systemEquip.get("dis").toString();
-        String siteRef = systemEquip.get("siteRef").toString();
-        String equipRef = systemEquip.get("id").toString();
-        String tz = systemEquip.get("tz").toString();
+        String equipDis = Objects.requireNonNull(systemEquip.get("dis")).toString();
+        String siteRef = Objects.requireNonNull(systemEquip.get("siteRef")).toString();
+        String equipRef = Objects.requireNonNull(systemEquip.get("id")).toString();
+        String tz = Objects.requireNonNull(systemEquip.get("tz")).toString();
         Point effDATSetpoint = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"effDATSetpoint")
                                    .setSiteRef(siteRef)

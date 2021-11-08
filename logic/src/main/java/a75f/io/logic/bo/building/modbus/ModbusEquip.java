@@ -51,7 +51,12 @@ public class ModbusEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String modbusEquipType = equipmentInfo.getEquipType();
+        String modbusEquipType;
+        if (equipmentInfo.getEquipType().equalsIgnoreCase(String.valueOf(ModbusEquipTypes.EMR_ZONE))) {
+            modbusEquipType = String.valueOf(ModbusEquipTypes.EMR);
+        } else {
+            modbusEquipType = equipmentInfo.getEquipType();
+        }
         String modbusName = equipmentInfo.getName();
         String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
         String gatewayRef = null;

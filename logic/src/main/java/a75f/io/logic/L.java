@@ -44,6 +44,7 @@ public class L
     public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
     public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
+    public static final String TAG_CCU_BACKUP = "CCU_BACKUP";
 
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
 

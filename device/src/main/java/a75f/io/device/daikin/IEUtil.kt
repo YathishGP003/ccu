@@ -2,13 +2,9 @@ package a75f.io.device.daikin
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
-import a75f.io.logger.CcuLog
-import a75f.io.logic.L
-import a75f.io.logic.bo.building.Occupancy
 import a75f.io.logic.bo.building.system.SystemController
 import a75f.io.logic.bo.building.system.vav.VavIERtu
 import a75f.io.logic.bo.util.CCUUtils
-import a75f.io.logic.jobs.ScheduleProcessJob
 import a75f.io.logic.tuners.TunerUtil
 
 
@@ -17,11 +13,15 @@ fun getIEUrl(hayStack : CCUHsApi): String? {
 }
 
 fun fahrenheitToCelsius(T: Double): Double {
-    return (T - 32) * 5 / 9
+    return CCUUtils.roundToTwoDecimal((T - 32) * 5/9)
+}
+
+fun celsiusToFahrenheit(T: Double): Double {
+    return CCUUtils.roundToTwoDecimal((T * 9/5) + 32)
 }
 
 fun inchToPascal(P: Double): Double {
-    return P / 0.0040146
+    return CCUUtils.roundToTwoDecimal(P / 0.0040146)
 }
 
 fun isConditioningRequired(hayStack : CCUHsApi) : Boolean  {
@@ -57,8 +57,7 @@ fun getIEMacAddress(hayStack : CCUHsApi) : String {
  */
 fun isSystemOccupied(systemProfile: VavIERtu) : Boolean {
     return (systemProfile.systemController.getSystemState() != SystemController.State.OFF
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
-            || systemProfile.systemCoolingLoopOp > 0
-            || systemProfile.systemHeatingLoopOp > 0
+            && systemProfile.isSystemOccupied)
+            || systemProfile.systemCoolingLoopOp > 10
+            || systemProfile.systemHeatingLoopOp > 10
 }

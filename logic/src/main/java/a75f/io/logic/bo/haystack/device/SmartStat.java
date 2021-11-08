@@ -87,7 +87,7 @@ public class SmartStat {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .addMarker("mV")
+                .setUnit("mV")
                 .setTz(tz)
                 .build();
 

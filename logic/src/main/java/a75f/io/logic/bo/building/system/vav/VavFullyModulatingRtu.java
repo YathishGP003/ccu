@@ -12,15 +12,12 @@ import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -278,7 +275,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = 0;
-            if((systemMode != SystemMode.OFF ) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION))
+            if((systemMode != SystemMode.OFF ) && isSystemOccupied())
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
                 signal = 1;
@@ -297,8 +294,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         ControlMote.setRelayState("relay3", signal );
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
-                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
+                                                && isSystemOccupied())
         {
             double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");

@@ -1,7 +1,6 @@
 package a75f.io.logic.jobs.bearertoken;
 
-import a75f.io.api.haystack.BuildConfig;
-import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.constants.HttpConstants;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import okhttp3.OkHttpClient;
@@ -19,6 +18,7 @@ class CaretakerServiceGenerator {
                                           Request.Builder requestBuilder = original.newBuilder()
                                                                                    .header("Authorization", " Bearer " + bearerToken)
                                                                                    .addHeader("Content-Type", "application/json")
+                                                                                   .addHeader(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
                                                                                    .method(original.method(), original.body());
                 
                                           Request request = requestBuilder.build();

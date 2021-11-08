@@ -145,6 +145,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
+                      btnTabs.setEnabled(false);
                       if (tab.getPosition() == 0){
                           if (isSetupPassWordRequired()) {
                               showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
@@ -167,6 +168,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                           menuToggle.setVisibility(View.GONE);
                           floorMenu.setVisibility(View.VISIBLE);
                       }
+                      btnTabs.setEnabled(true);
                 }
 
                 @Override

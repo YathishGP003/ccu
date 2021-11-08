@@ -102,7 +102,7 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
 
    // initialize collections for use internal to this function
    val updates: AlertDefsState = mutableMapOf()
-   val deletions: MutableList<AlertDefOccurrence> = mutableListOf()
+   val deletions: MutableList<AlertsDefStateKey> = mutableListOf()
 
    fun handleNewAlertOccurrence(alertDefOccurrence: AlertDefOccurrence) {
       val offset = alertDefOccurrence.alertDef.offset?.toInt() ?: 0
@@ -138,8 +138,8 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
       } else {
          when {
             // was a raised alert, is no longer present:  Delete partial and fixed alerts
-            progress is AlertDefProgress.Partial -> deletions.add(alertDefOccurrence)
-            progress.isFixed() -> deletions.add(alertDefOccurrence)
+            progress is AlertDefProgress.Partial -> deletions.add(key)
+            progress.isFixed() -> deletions.add(key)
             // And "resolve" active alert.
             progress.isActive() -> updates.put(key, value.copy(progress = progress.toFixed()))
          }

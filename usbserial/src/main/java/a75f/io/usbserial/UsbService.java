@@ -559,13 +559,15 @@ public class UsbService extends Service
 						Log.i(TAG, "Serial Port is not connected sleeping");
 						if (reconnectCounter++ >= 30) {
 							Log.i(TAG, "scanSerialPortSilentlyForCmDevice");
-							scanSerialPortSilentlyForCmDevice();
+							try {
+								scanSerialPortSilentlyForCmDevice();
+							} catch (Exception e) {
+								Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed", e);
+							}
 							reconnectCounter = 0;
 						}
 						sleep(2000);
 						continue;
-					} else {
-						Log.i(TAG, "Serial Port is connected.");
 					}
 
 					data = messageQueue.take();

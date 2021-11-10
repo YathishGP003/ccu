@@ -149,6 +149,7 @@ public class AlertsFragment extends Fragment
 		super.onStop();
 	}
 	private void setAlertList() {
+		alertList.clear();
 		AlertManager alertManager = AlertManager.getInstance();
 		if (!alertManager.hasService()) {
 			alertManager.rebuildServiceNewToken(CCUHsApi.getInstance().getJwt());

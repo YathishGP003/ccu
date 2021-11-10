@@ -2323,7 +2323,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
-            if (HeatPumpUnitConfiguration.enableRelay5) {
+            if (fanHighHumdOption > 1.0) {
                 if (fanHighHumdOption == 2.0) {
                     textViewLabel3.setText("Dynamic Target Humidity : ");
                     targetHumidity = (double) hpuEquipPoints.get("Target Humidity");

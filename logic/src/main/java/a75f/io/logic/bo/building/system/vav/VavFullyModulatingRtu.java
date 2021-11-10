@@ -275,7 +275,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = 0;
-            if((systemMode != SystemMode.OFF ) && isSystemOccupied())
+            if(systemMode != SystemMode.OFF  && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
                 signal = 1;

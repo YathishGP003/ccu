@@ -55,9 +55,9 @@ fun getIEMacAddress(hayStack : CCUHsApi) : String {
  * Daikin IE requires to tbe set 'occupied' if 75F system is occupied
  * or when there is conditioning during 'unoccupied' time.
  */
-fun isSystemOccupied(systemProfile: VavIERtu) : Boolean {
+fun isSystemOccupied(systemProfile: VavIERtu, hayStack: CCUHsApi) : Boolean {
     return (systemProfile.systemController.getSystemState() != SystemController.State.OFF
-            && systemProfile.isSystemOccupied)
+            && (systemProfile.isSystemOccupied || systemProfile.isReheatActive(hayStack)))
             || systemProfile.systemCoolingLoopOp > 10
             || systemProfile.systemHeatingLoopOp > 10
 }

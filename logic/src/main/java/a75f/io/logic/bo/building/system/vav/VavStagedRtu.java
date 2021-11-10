@@ -466,7 +466,7 @@ public class VavStagedRtu extends VavSystemProfile
                     }
                     break;
                 case FAN_1:
-                    if ((systemMode != SystemMode.OFF && isSystemOccupied())
+                    if ((systemMode != SystemMode.OFF && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                             || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)
                                     && (systemFanLoopOp > 0))) {
                         relayState = 1;
@@ -558,8 +558,7 @@ public class VavStagedRtu extends VavSystemProfile
             status.insert(0, "Fan Stage ");
             status.append(" ON ");
         }
-        if (isCoolingActive())
-        {
+        if (isCoolingActive()) {
             status.append("| Cooling Stage " + ((stageStatus[COOLING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[COOLING_2.ordinal()] > 0) ? ",2" : "");
             status.append((stageStatus[COOLING_3.ordinal()] > 0) ? ",3" : "");
@@ -578,8 +577,7 @@ public class VavStagedRtu extends VavSystemProfile
             status.insert(0, "Free Cooling Used | ");
         }
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-            if (getConfigEnabled("analog2") > 0)
-            {
+            if (getConfigEnabled("analog2") > 0) {
                 status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
             }
         }

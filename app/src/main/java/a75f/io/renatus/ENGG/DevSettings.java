@@ -4,15 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import a75f.io.renatus.BuildConfig;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
-
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,12 +27,16 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.filesystem.FileSystemTools;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -317,6 +314,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
     
     public static void triggerRebirth(Context context) {
+        CCUHsApi.getInstance().saveTagsData(true);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();

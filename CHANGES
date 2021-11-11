@@ -1,5 +1,19 @@
- - Merged PR 2275: Serial scan exception handler.
- - Merged PR 2246: System profile change is not updated in CCU entity.
- - Merged PR 2263: Update bpos AhuRef
- - Merged PR 2273: Reduce modbus write wait time
- - Merged PR 2211: Save ccu data
+ - Merged PR 2265: 8991: CCU : BPOS Enhancements
+ - Merged PR 2297: AHU Fan should be ON when a zone has reheat active
+ - Merged PR 2325: Daikin iE CM dead alert
+ - Merged PR 2326: Save ccu date before restarting app.
+ - Merged PR 2327: Clear alertlist visible on the screen before populating it again.
+ - Merged PR 2322: Smartstat HPU Ui issue
+ - Save data before restarting app
+ - Merge branch 'master' into Bug/samjith/8899_system_setting_disabled
+ - Fix app crash
+ - Fix : CM dead alert on Daikin IE
+ - Activate series fan during unoccupied reheat
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Turn ON AHU fan when reheat is active
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - merge
+ - Exclude setting point from sync
+ - Save ccu data

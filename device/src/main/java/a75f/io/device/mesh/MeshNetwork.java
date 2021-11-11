@@ -219,11 +219,6 @@ public class MeshNetwork extends DeviceNetwork
             //DaikinIE.sendControl();
             VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
-            
-            if (DLog.isLoggingEnabled()) {
-                sendIETestMessage(systemProfile);
-            }
-            return;
         }
     
         if (!LSerial.getInstance().isConnected()) {
@@ -233,6 +228,12 @@ public class MeshNetwork extends DeviceNetwork
             return;
         } else {
             AlertManager.getInstance().fixCMDead();
+        }
+        
+        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
+                && DLog.isLoggingEnabled()) {
+            sendIETestMessage((VavIERtu) L.ccu().systemProfile);
+            return;
         }
         
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();

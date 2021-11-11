@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -137,22 +138,7 @@ public abstract class VavSystemProfile extends SystemProfile
             }
         }
         hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
-    
-        /*Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setTz(tz).build();
-        String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
-        HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
-        ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
-        for (HashMap valMap : humidityCompensationOffsetArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(humidityCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));*/
+        
         addNewTunerPoints(equipref);
         SystemTuners.addPITuners(equipref, TunerConstants.VAV_TUNER_GROUP, Tags.VAV, CCUHsApi.getInstance());
     }
@@ -325,6 +311,26 @@ public abstract class VavSystemProfile extends SystemProfile
     @Override
     public void reset() {
         getSystemController().reset();
+    }
+    
+    /**
+     * Returns true if any of the VAV zones has reheat ON.
+     * @return
+     */
+    public boolean isReheatActive(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> reheatPoints = hayStack
+                                                              .readAllEntities("point and vav and reheat and cmd");
+        for (HashMap<Object, Object> point : reheatPoints) {
+            if (point.isEmpty()) {
+                continue;
+            }
+            double reheatPos = hayStack.readHisValById(point.get("id").toString());
+            if (reheatPos > 0.01) {
+                CcuLog.i(L.TAG_CCU_SYSTEM,"Reheat Active and requires AHU Fan");
+                return true;
+            }
+        }
+        return false;
     }
     
 }

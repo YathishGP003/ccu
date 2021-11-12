@@ -9,6 +9,8 @@ import android.os.Bundle;
 import a75f.io.api.haystack.Tags;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.dab.DabSystemController;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -48,6 +50,9 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 11/8/18.
@@ -657,8 +662,27 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         
         Globals.getInstance().setTestMode(true);
         if (tag.equals(Tags.ANALOG4)) {
-            ControlMote.setAnalogOut(tag, val);
-        }if (tag.contains("analog")) {
+            double modulatedVal;
+            if (DabSystemController.getInstance().getSystemState() == COOLING) {
+                modulatedVal = DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and cooling and " +
+                                                                                           "min"),
+                                                                systemProfile.getConfigVal(tag+" and cooling and max"),
+                                                                val);
+            } else if (DabSystemController.getInstance().getSystemState() == HEATING) {
+                modulatedVal = DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and heating and " +
+                                                                                           "min"),
+                                                                systemProfile.getConfigVal(tag+" and heating and" +
+                                                                                           " max"),
+                                                                val);
+            } else {
+                double coolingMin = systemProfile.getConfigVal(" and analog4 and cooling and min");
+                double heatingMin = systemProfile.getConfigVal(" and analog4 and heating and min");
+        
+                modulatedVal = (int) (10 * (coolingMin + heatingMin) /2);
+            }
+    
+            ControlMote.setAnalogOut(tag, modulatedVal);
+        }else if (tag.contains("analog")) {
             ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
                                                        systemProfile.getConfigVal(tag+" and max"),
                                                        val));

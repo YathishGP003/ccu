@@ -142,11 +142,6 @@ public class Globals {
         return isTestMode;
     }
     public void setTestMode(boolean testMode) {
-        try {
-            throw new Exception("TestMode "+testMode);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         this.isTestMode = testMode;
     }
     public boolean isWeatherTest() {

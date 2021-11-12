@@ -471,7 +471,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            e.printStackTrace();
+            CcuLog.e("CCU_HS","Entity does not exist "+id);
         }
         return map;
     }
@@ -484,7 +484,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            e.printStackTrace();
+            CcuLog.e("CCU_HS","Entity does not exist "+id);
         }
         return null;
     }
@@ -1043,6 +1043,7 @@ public class CCUHsApi
             }
             deleteEntity(entity.get("id").toString());
         }
+        syncStatusService.saveSyncStatus();
     }
 
     /**
@@ -1058,17 +1059,6 @@ public class CCUHsApi
             return;
         }
         syncStatusService.setEntitySynced(id);
-    }
-
-    /**
-     * Get the Global unique ID for a given local Id.
-     * Otherwise null.
-     * This function is going away, since GUID is now the same as LUID
-     */
-    @Deprecated
-    public String getGUID(String luid)
-    {
-        return tagsDb.idMap.get(luid);
     }
 
     public boolean entitySynced(String id) {
@@ -1207,10 +1197,10 @@ public class CCUHsApi
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        importBuildingSchedule(siteId, hClient);
+        importBuildingSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import building tuners
-        importBuildingTuners(siteId, hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
                                                                     .readAllEntities("point and writable");
@@ -1290,7 +1280,8 @@ public class CCUHsApi
             }
             
             try {
-                HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                HDict buildingDict =
+                    new HDictBuilder().add("filter", "building and schedule and siteRef == " + siteId).toDict();
                 HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
                 if (buildingSch == null) {
@@ -1305,7 +1296,7 @@ public class CCUHsApi
                     String guid = buildingSchedule.getId();
                     buildingSchedule.setmSiteId(siteId);
                     CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
-                    CCUHsApi.getInstance().setSynced("@" + guid);
+                    CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
                 }
             } catch (UnknownRecException e) {
                 e.printStackTrace();
@@ -1318,7 +1309,7 @@ public class CCUHsApi
         ArrayList<Point> points = new ArrayList<>();
         try {
             HDict tunerEquipDict = new HDictBuilder().add("filter",
-                                                      "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                                                      "tuner and equip and siteRef == " + siteId).toDict();
             HGrid tunerEquipGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerEquipDict));
             if (tunerEquipGrid != null) {
                 tunerEquipGrid.dump();
@@ -1327,7 +1318,7 @@ public class CCUHsApi
             equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
             
             HDict tunerPointsDict = new HDictBuilder().add("filter",
-                                                      "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                                                      "tuner and point and default and siteRef == " + siteId).toDict();
             HGrid tunerPointsGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerPointsDict));
             if (tunerPointsGrid != null) {
                 tunerPointsGrid.dump();
@@ -1389,7 +1380,7 @@ public class CCUHsApi
             return;
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        importBuildingTuners(siteId, hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
     }
 
     public HGrid getRemoteSiteDetails(String siteId)
@@ -1634,9 +1625,7 @@ public class CCUHsApi
         HashMap<Object, Object> site = readEntity("site");
 
         if (site == null || site.get("id") == null) return null;
-        String siteLuid = site.get("id").toString();
-
-        return getGUID(siteLuid);
+        return site.get("id").toString();
     }
 
     /**
@@ -1919,24 +1908,6 @@ public class CCUHsApi
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("isCcuRegistered");
         editor.commit();
-    }
-
-    /** Used only in sync package, which is all deprecated.
-     * This function is going away, since site GUID is now the site same just site ID.
-     * @return
-     */
-    @Deprecated
-    public String getSiteGuid() {
-        String siteRef = null;
-
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLuid = site.get("id").toString();
-
-        if (StringUtils.isNotBlank(siteLuid)) {
-            siteRef = CCUHsApi.getInstance().getGUID(siteLuid);
-        }
-
-        return siteRef;
     }
 
     public boolean isNetworkConnected() {

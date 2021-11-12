@@ -47,8 +47,7 @@ public class RemoveEntityHandler
                     CCUHsApi.getInstance().removeId(uuid);
                 }
             }
-        }catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             CcuLog.d(L.TAG_CCU_PUBNUB, " Failed to parse removeEntity Json " + msgObject);
         }
     }

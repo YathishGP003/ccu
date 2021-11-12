@@ -68,6 +68,12 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "CCU sync failed");
                 return Result.retry();
             }
+    
+            if (!syncDeletedEntities()) {
+                CcuLog.e(TAG, "Deleted entity sync failed");
+                return Result.retry();
+            }
+            
             if (!syncUnSyncedEntities()) {
                 CcuLog.e(TAG, "Unsynced entity sync failed");
                 return Result.retry();
@@ -76,17 +82,15 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "Updated entity sync failed");
                 return Result.retry();
             }
-            if (!syncDeletedEntities()) {
-                CcuLog.e(TAG, "Deleted entity sync failed");
-                return Result.retry();
-            }
+            
             CcuLog.i(TAG, " doSyncWork success");
             syncStatusService.saveSyncStatus();
         } catch (Exception e) {
             CcuLog.i(TAG, " doSyncWork Failed ", e);
             return Result.failure();
+        } finally {
+            isSyncWorkInProgress = false;
         }
-        isSyncWorkInProgress = false;
         return Result.success();
     }
     
@@ -143,30 +147,32 @@ public class SyncWorker extends Worker {
         if (!syncStatusService.hasDeletedData()) {
             return true;
         }
-        
-        List<List<String>> pointListBatches = ListUtils.partition(syncStatusService.getDeletedData()
-                                                                        , DELETE_ENTITY_BATCH_SIZE);
-        
-        List<String> deletedItems = new ArrayList<>();
-        pointListBatches.forEach( entityList -> {
-            ArrayList<HDict> entities = new ArrayList<>();
-            for (String deletedId : entityList) {
-                HDictBuilder b = new HDictBuilder();
-                b.add("id", HRef.make(deletedId.replace("@", "")));
-                entities.add(b.toDict());
-            }
-            HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() +
-                                                   ENDPOINT_REMOVE_ENTITY, HZincWriter.gridToString(gridData));
     
-            CcuLog.d(TAG, "RemoveEntity Response : "+response);
-            if (response == null) {
-                return;
-            }
-            deletedItems.addAll(entityList);
-        });
-    
-        updateDeleteStatus(deletedItems);
+        List<String> deletedItems = syncStatusService.getDeletedData();
+        synchronized ( deletedItems ) {
+            List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
+            List<String> deletedSyncedItems = new ArrayList<>();
+            
+            pointListBatches.forEach(entityList -> {
+                ArrayList<HDict> entities = new ArrayList<>();
+                for (String deletedId : entityList) {
+                    HDictBuilder b = new HDictBuilder();
+                    b.add("id", HRef.make(deletedId.replace("@", "")));
+                    entities.add(b.toDict());
+                }
+                HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
+                                                       HZincWriter.gridToString(gridData));
+                CcuLog.d(TAG, "RemoveEntity Response : " + response);
+                if (response == null) {
+                    return;
+                }
+                deletedSyncedItems.addAll(entityList);
+            });
+            
+            updateDeleteStatus(deletedSyncedItems);
+        }
         return true;
     }
     

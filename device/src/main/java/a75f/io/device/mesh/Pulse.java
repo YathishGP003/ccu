@@ -155,7 +155,7 @@ public class Pulse
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						logicalCurTempPoint =  logPoint.get("id").toString();
 
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + curTempVal);
 						break;
 					case TH2_IN:
 						if (isMATDamperConfigured(logPoint, nodeAddr, "secondary", hayStack)) {
@@ -244,7 +244,8 @@ public class Pulse
 				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					CcuLog.i(L.TAG_CCU_DEVICE,
+					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
@@ -252,7 +253,8 @@ public class Pulse
 				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					CcuLog.i(L.TAG_CCU_DEVICE,
+					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 				}
 			}

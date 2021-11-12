@@ -14,7 +14,7 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EmptyStackException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -32,9 +32,9 @@ public class SyncStatusService {
     Context applicationContext;
     private SharedPreferences preferences;
     
-    private List<String> unsyncedIdList = new ArrayList<>();
-    private List<String> updatedIdList = new ArrayList<>();
-    private List<String> deletedIdList = new ArrayList<>();
+    private List<String> unsyncedIdList = Collections.synchronizedList(new ArrayList<>());
+    private List<String> updatedIdList = Collections.synchronizedList(new ArrayList<>());
+    private List<String> deletedIdList = Collections.synchronizedList(new ArrayList<>());
     
     private static SyncStatusService instance = null;
     
@@ -99,15 +99,11 @@ public class SyncStatusService {
     
     public void addUpdatedEntity(String id) {
         CcuLog.i("CCU_HS"," addUpdatedEntity "+id);
-        try {
-            throw new Exception();
-        } catch ( Exception e) {
-            e.printStackTrace();
-        }
         updatedIdList.add(id);
     }
     
     public void addDeletedEntity(String id) {
+        CcuLog.i("CCU_HS"," addDeletedEntity "+id);
         deletedIdList.add(id);
         //Remove the entity from unsynced/updated list in case it is present.
         unsyncedIdList.remove(id);
@@ -123,6 +119,7 @@ public class SyncStatusService {
     }
     
     public void setDeletedEntitySynced(String id) {
+        CcuLog.i("CCU_HS","setDeletedEntitySynced "+id);
         deletedIdList.remove(id);
     }
     

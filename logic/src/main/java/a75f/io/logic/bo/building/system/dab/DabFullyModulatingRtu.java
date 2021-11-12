@@ -146,7 +146,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
+        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
     

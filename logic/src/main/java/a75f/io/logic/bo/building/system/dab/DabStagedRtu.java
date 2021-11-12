@@ -543,8 +543,7 @@ public class DabStagedRtu extends DabSystemProfile
         }
 
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
-            if (getConfigEnabled("analog2") > 0)
-            {
+            if (getConfigEnabled("analog2") > 0) {
                 status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
             }
         }

@@ -80,6 +80,7 @@ public class MigrationWorker extends Worker {
             syncStatusService.addDeletedEntity(removeEntry.getKey().toString());
             removeIdMap.remove(removeEntry.getKey());
         }
+        syncStatusService.saveSyncStatus();
     }
     
 }

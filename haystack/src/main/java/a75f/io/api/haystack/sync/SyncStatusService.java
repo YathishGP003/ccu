@@ -95,19 +95,31 @@ public class SyncStatusService {
     public void addUnSyncedEntity(String id) {
         CcuLog.i("CCU_HS"," addUnSyncedEntity "+id);
         unsyncedIdList.add(id);
+        //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
+        putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
     }
     
     public void addUpdatedEntity(String id) {
         CcuLog.i("CCU_HS"," addUpdatedEntity "+id);
         updatedIdList.add(id);
+        //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
+        putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
     }
     
     public void addDeletedEntity(String id) {
         CcuLog.i("CCU_HS"," addDeletedEntity "+id);
-        deletedIdList.add(id);
-        //Remove the entity from unsynced/updated list in case it is present.
-        unsyncedIdList.remove(id);
-        updatedIdList.remove(id);
+        if (hasEntitySynced(id)) {
+            deletedIdList.add(id);
+            putListString(PREFS_ID_LIST_DELETED, deletedIdList);
+        }
+        if (updatedIdList.contains(id)) {
+            updatedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        }
+        if (unsyncedIdList.contains(id)) {
+            unsyncedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        }
     }
     
     public void setUnSyncedEntitySynced(String id) {
@@ -121,13 +133,29 @@ public class SyncStatusService {
     public void setDeletedEntitySynced(String id) {
         CcuLog.i("CCU_HS","setDeletedEntitySynced "+id);
         deletedIdList.remove(id);
+        putListString(PREFS_ID_LIST_DELETED, deletedIdList);
+        if (updatedIdList.contains(id)) {
+            updatedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        }
+        if (unsyncedIdList.contains(id)) {
+            unsyncedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        }
     }
     
     public void setEntitySynced(String id) {
         CcuLog.i("CCU_HS","Set entity synced "+id);
-        unsyncedIdList.remove(id);
-        updatedIdList.remove(id);
-        deletedIdList.remove(id);
+        if (unsyncedIdList.contains(id)) {
+            unsyncedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        }
+        
+        if (updatedIdList.contains(id)) {
+            updatedIdList.remove(id);
+            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        }
+        
     }
     
     /**
@@ -233,8 +261,10 @@ public class SyncStatusService {
     }
     
     private void putListString(String key, List<String> stringList) {
+        long time = System.currentTimeMillis();
         String[] stringArr = stringList.toArray(new String[0]);
         preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).commit();
+        CcuLog.i("CCU_PROFILING", "Time to save "+key+" "+(System.currentTimeMillis() - time));
     }
     
     public boolean updateRefs(HDict entity, HDictBuilder builder) {

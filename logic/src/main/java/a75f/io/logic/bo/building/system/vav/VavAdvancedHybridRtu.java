@@ -264,7 +264,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             status.append(super.getStatusMessage());
         }
     
-        return status.toString().equals("")? "OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" : status.toString();
     }
     
     @Override

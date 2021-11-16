@@ -622,9 +622,7 @@ public class CCUHsApi
     }
     
     public void clearPointArrayLevel(String id, int level, boolean local) {
-        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), level,
-                                                        CCUHsApi.getInstance().getCCUUserName(),
-                                                        HNum.make(0), HNum.make(1));
+        deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()
                                  .add("id", HRef.copy(id))

@@ -4,22 +4,23 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.comman.AnalogOutChanges
-import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil.Companion.getSelectedFanLevel
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
-import a75f.io.logic.bo.building.hyperstat.comman.LogicalKeyID
+import a75f.io.logic.bo.building.hyperstat.common.AnalogOutChanges
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
+import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import a75f.io.logic.tuners.DabTuners
 import a75f.io.logic.tuners.HyperstatTuners
+import a75f.io.logic.util.RxTask
 import android.util.Log
 
 /**
@@ -61,11 +62,11 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
     fun initializePoints(config: HyperStatCpuConfiguration, room: String, floor: String, node: Short) {
-        Log.i(Globals.TAG, "initializePoints: ")
+        Log.i(L.TAG_CCU_HSCPU, "initializePoints: ")
         nodeAddress = node
         floorRef = floor
         roomRef = room
-        Log.i(Globals.TAG, "New Profile init")
+        Log.i(L.TAG_CCU_HSCPU, "New Profile init")
         siteDis = siteMap["dis"] as String
         tz = siteMap["tz"].toString()
         equipDis = "$siteDis-$profileTag-$nodeAddress"
@@ -90,37 +91,37 @@ class HyperStatCpuEquip(val node: Short) {
         // Init required reference
         init()
 
-        Log.i(Globals.TAG, "New Profile HyperstatTuners adding ")
+        Log.i(L.TAG_CCU_HSCPU, "New Profile Hyperstat CPU configuration ")
+
 
         // add Tuner Points
-        HyperstatTuners.addHyperstatModuleTuners(
-            haystack, siteRef, equipRef!!, "$siteDis-hyperstatcpu-$nodeAddress", tz!!, roomRef!!, floorRef!!
-        )
-
-        Log.i(Globals.TAG, "New Profile Tuners are  added ")
+        RxTask.executeAsync {
+            HyperstatTuners.addHyperstatModuleTuners(
+                haystack, siteRef, equipRef!!, "$siteDis-hyperstatcpu-$nodeAddress", tz!!, roomRef!!, floorRef!!
+            )
+        }
+        Log.i(L.TAG_CCU_HSCPU, "New Profile Hyperstat Tuners added ")
         // Create profile points
         hyperStatPointsUtil.addProfilePoints()
 
         // Create config points
         createProfileConfigurationPoints(hyperStatConfig = config)
 
-        Log.i(Globals.TAG, "New Profile createProfileLogicalPoints  adding ")
+        Log.i(L.TAG_CCU_HSCPU, "New Profile Profile configuration points are created ")
         // Create Logical Points
         createProfileLogicalPoints(hyperStatConfig = config)
 
-        Log.i(Globals.TAG, "New Profile  device creation")
+        Log.i(L.TAG_CCU_HSCPU, "New Profile  logical points are created")
 
         val hyperStatDevice = HyperStatDevice(
             nodeAddress.toInt(), siteRef, floorRef, roomRef, equipRef, profileName
         )
-        Log.i(Globals.TAG, "New Profile configHyperStatDevice  adding ")
-
         configHyperStatDevice(config, hyperStatDevice)
 
-        Log.i(Globals.TAG, "Synch entity called: ")
+        Log.i(L.TAG_CCU_HSCPU, "Created new physical device")
         // Syncing the Points
         haystack.syncEntityTree()
-        Log.i(Globals.TAG, "Configuration is done")
+        Log.i(L.TAG_CCU_HSCPU, "Profile Configuration is done")
         return
     }
 
@@ -141,11 +142,13 @@ class HyperStatCpuEquip(val node: Short) {
         hsHaystackUtil = HSHaystackUtil(
             profileName, equipRef!!, haystack
         )
+        Log.i(L.TAG_CCU_HSCPU, "Initialised the complete equip reference")
     }
 
     fun initEquipReference() {
         val equip = haystack.read("equip and hyperstat and group == \"$nodeAddress\"")
         if (equip.isEmpty()) {
+            Log.i(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $nodeAddress ")
             return
         }
         equipRef = equip["id"].toString()
@@ -159,7 +162,7 @@ class HyperStatCpuEquip(val node: Short) {
 
     // Function which configure HyperStat Device configurations
     private fun configHyperStatDevice(config: HyperStatCpuConfiguration, device: HyperStatDevice) {
-        Log.i(Globals.TAG, "configHyperStatDevice: ")
+        Log.i(L.TAG_CCU_HSCPU, "configHyperStatDevice: ")
         val heartBeatId = CCUHsApi.getInstance().addPoint(
             nodeAddress.let {
                 HeartBeat.getHeartBeatPoint(
@@ -316,14 +319,14 @@ class HyperStatCpuEquip(val node: Short) {
             configPointsList, relayConfigPoints, analogOutConfigPoints,
             analogInConfigPoints, thConfigPointsList, userIntentPointsList, co2ConfigPointsList, loopOutputPoints
         )
-        Log.i(Globals.TAG, "adding : points default value ")
+        Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
 
     }
 
     //Function to create Logical Points
     private fun createProfileLogicalPoints(hyperStatConfig: HyperStatCpuConfiguration) {
-        Log.i(Globals.TAG, "createProfileLogicalPoints: ")
+        Log.i(L.TAG_CCU_HSCPU, "createProfileLogicalPoints: ")
 
         val temperaturePointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
             .temperatureScheduleLogicalPoints()
@@ -355,7 +358,7 @@ class HyperStatCpuEquip(val node: Short) {
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogInPointsList))
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = thermistorInPointsList))
 
-        Log.i(Globals.TAG, "Done with Logical points creation")
+        Log.i(L.TAG_CCU_HSCPU, "Done with Logical points creation")
 
     }
 
@@ -460,16 +463,15 @@ class HyperStatCpuEquip(val node: Short) {
                 )
             }
         }
-        Log.i(Globals.TAG, "===========Update started ============")
-        Log.i(Globals.TAG, "updateConfigPoints: updateRelaysConfig")
+        Log.i(L.TAG_CCU_HSCPU, "===========Hyperstat profile Update  ============")
         updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        Log.i(Globals.TAG, "updateConfigPoints: updateAnalogInConfig")
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateConditioningMode(updatedHyperStatConfig, presetConfiguration)
+        updateConditioningMode(updatedHyperStatConfig)
         updateFanMode(updatedHyperStatConfig)
-        Log.i(Globals.TAG, "=======================Update Done calling syncEntityTree ========================")
+        Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
         haystack.syncEntityTree()
+
     }
 
 
@@ -638,7 +640,6 @@ class HyperStatCpuEquip(val node: Short) {
                 "analog3 and out and max"
             )
 
-            Log.i(Globals.TAG, "getAnalogOutConfigurations: $ao3MaxVal")
             if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
                 ) == CpuAnalogOutAssociation.FAN_SPEED
@@ -776,12 +777,12 @@ class HyperStatCpuEquip(val node: Short) {
         ) {
             updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
-        Log.i(Globals.TAG, "updateAnalogInConfig: Done")
+        Log.i(L.TAG_CCU_HSCPU, "updateAnalogInConfig: Done")
     }
 
 
     // Function which updates the Relay new configurations
-    private fun updateRelayDetails(
+     fun updateRelayDetails(
         relayState: RelayState,
         relayTag: String,
         physicalPort: Port
@@ -821,12 +822,13 @@ class HyperStatCpuEquip(val node: Short) {
 
 
     // Function which updates the Analog Out new configurations
-    private fun updateAnalogOutDetails(
+     fun updateAnalogOutDetails(
         analogOutState: AnalogOutState,
         analogOutTag: String,
         physicalPort: Port,
         changeIn: AnalogOutChanges
     ) {
+
         // Read enable/disable Point ID
         val analogOutId = hsHaystackUtil!!.readPointID(
             "config and $analogOutTag and out and enabled"
@@ -850,33 +852,31 @@ class HyperStatCpuEquip(val node: Short) {
         val fanMediumPointId = hsHaystackUtil!!.readPointID("$analogOutTag and out and medium")
         val fanHighPointId = hsHaystackUtil!!.readPointID("$analogOutTag and out and high")
 
+        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration changeIn $changeIn")
 
-        when(changeIn){
-            AnalogOutChanges.HIGH ->{
-                if(fanHighPointId != null)
-                    hyperStatPointsUtil.addDefaultValueForPoint(fanHighPointId!!, analogOutState.perAtFanHigh)
-                return
+
+        // Do the update when change is found in configuration
+        if(changeIn != AnalogOutChanges.NOCHANGE
+            && changeIn != AnalogOutChanges.ENABLED
+            && changeIn != AnalogOutChanges.MAPPING) {
+            if (fanHighPointId != null)
+                updatePointValueIfchangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
+            if (fanMediumPointId != null)
+                updatePointValueIfchangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
+            if (fanLowPointId != null)
+                updatePointValueIfchangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+
+            if (minPointId != null) {
+                updatePointValueIfchangeRequired(minPointId, analogOutState.voltageAtMin)
+                val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
+                DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
-            AnalogOutChanges.MED->{
-                if(fanMediumPointId != null)
-                    hyperStatPointsUtil.addDefaultValueForPoint(fanMediumPointId!!, analogOutState.perAtFanMedium)
-                return
+            if (maxPointId != null) {
+                updatePointValueIfchangeRequired(maxPointId, analogOutState.voltageAtMax)
+                val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
+                DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
-            AnalogOutChanges.LOW->{
-                if(fanLowPointId != null)
-                    hyperStatPointsUtil.addDefaultValueForPoint(fanLowPointId!!, analogOutState.perAtFanLow)
-                return
-            }
-            AnalogOutChanges.MIN->{
-                if(minPointId != null)
-                   hyperStatPointsUtil.addDefaultValueForPoint(minPointId!!, analogOutState.voltageAtMin)
-                return
-            }
-            AnalogOutChanges.MAX->{
-                if(maxPointId != null)
-                    hyperStatPointsUtil.addDefaultValueForPoint(maxPointId!!, analogOutState.voltageAtMax)
-                return
-            }
+            return
         }
 
         // Update the Enable , association status with configurations
@@ -896,6 +896,7 @@ class HyperStatCpuEquip(val node: Short) {
         if (fanMediumPointId != null) hsHaystackUtil!!.removePoint(fanMediumPointId)
         if (fanHighPointId != null) hsHaystackUtil!!.removePoint(fanHighPointId)
 
+        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
 
         if (analogOutState.enabled) {
 
@@ -947,8 +948,16 @@ class HyperStatCpuEquip(val node: Short) {
 
     }
 
+
+    // Function to check the changes in the point and do the update with new value
+    fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
+        val presentValue = haystack.readDefaultValById(pointId)
+        if(presentValue != newValue)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)
+    }
+
     // Function which updates the Analog In new configurations
-    private fun updateAnalogInDetails(
+    fun updateAnalogInDetails(
         analogInState: AnalogInState,
         analogInTag: String,
         physicalPort: Port
@@ -984,7 +993,7 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
 
-    private fun updateConditioningMode(config: HyperStatCpuConfiguration, present: HyperStatCpuConfiguration) {
+    private fun updateConditioningMode(config: HyperStatCpuConfiguration) {
 
 
         val conditioningModeId = hsHaystackUtil!!.readPointID("zone and userIntent and conditioning and mode")
@@ -996,7 +1005,7 @@ class HyperStatCpuEquip(val node: Short) {
 
         val curCondMode = haystack.readDefaultValById(conditioningModeId)
         var conditioningMode = curCondMode
-        Log.i(Globals.TAG, "updateConditioningMode: curCondMode $curCondMode")
+        Log.i(L.TAG_CCU_HSCPU, "updateConditioningMode: curCondMode $curCondMode")
 
         if (!isAnyRelayEnabledAssociatedToCooling(config)) {
             if (curCondMode == StandaloneConditioningMode.AUTO.ordinal.toDouble() ||
@@ -1093,11 +1102,11 @@ class HyperStatCpuEquip(val node: Short) {
         if (ao2LogicalPointId != null) logicalPoints[Port.ANALOG_OUT_TWO] = ao2LogicalPointId
         if (ao3LogicalPointId != null) logicalPoints[Port.ANALOG_OUT_THREE] = ao3LogicalPointId
 
-        Log.i(L.TAG_CCU_ZONE, "======Logical Points list : ====")
+        Log.i(L.TAG_CCU_HSCPU, "======Logical Points list : ====")
         logicalPoints.forEach { (key, id) ->
-            Log.i(L.TAG_CCU_ZONE, "key : $key  : $id")
+            Log.i(L.TAG_CCU_HSCPU, "key : $key  : $id")
         }
-        Log.i(L.TAG_CCU_ZONE, "================================")
+        Log.i(L.TAG_CCU_HSCPU, "================================")
         return logicalPoints
     }
 

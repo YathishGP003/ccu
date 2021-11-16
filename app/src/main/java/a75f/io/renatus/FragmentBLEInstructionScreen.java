@@ -22,7 +22,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
+
+import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import androidx.annotation.Nullable;

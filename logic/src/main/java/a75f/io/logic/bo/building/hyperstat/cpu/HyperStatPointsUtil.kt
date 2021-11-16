@@ -3,13 +3,14 @@ package a75f.io.logic.bo.building.hyperstat.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
-import a75f.io.logic.Globals
+import a75f.io.api.haystack.Tags
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil
-import a75f.io.logic.bo.building.hyperstat.comman.LogicalKeyID
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
 import a75f.io.logic.tuners.TunerConstants
 import android.util.Log
 import java.util.*
@@ -153,7 +154,7 @@ class HyperStatPointsUtil constructor(
     }
 
     private fun createHaystackPointWithMinMaxIncUnit(
-        displayName: String, markers: Array<String>, min: String, max: String, unit: String
+        displayName: String, markers: Array<String>, min: String, max: String, unit: String, shortDis: String
     ): Point {
         // Point which has default details
         val point = Point.Builder()
@@ -168,6 +169,7 @@ class HyperStatPointsUtil constructor(
             .setMaxVal(max)
             .setUnit(unit)
             .setHisInterpolate("cov")
+            .setShortDis(shortDis)
             // add common  markers
             .addMarker(HYPERSTAT).addMarker(profileName)
 
@@ -179,7 +181,7 @@ class HyperStatPointsUtil constructor(
 
     private fun createHaystackPointWithMinMaxIncUnitInc(
         displayName: String, markers: Array<String>, min: String, max: String, inc: String, unit: String,
-        hisInterpolate: String): Point {
+        hisInterpolate: String, shortDis: String): Point {
         // Point which has default details
         val point = Point.Builder()
             .setDisplayName(displayName)
@@ -189,6 +191,7 @@ class HyperStatPointsUtil constructor(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
+            .setShortDis(shortDis)
             .setMinVal(min)
             .setMaxVal(max)
             .setIncrementVal(inc)
@@ -266,7 +269,7 @@ class HyperStatPointsUtil constructor(
     //function which writes his write data
     fun addDefaultHisValueForPoint(pointId: String, defaultValue: Any) {
         if (defaultValue is Double)
-            hayStackAPI.writeHisValById(pointId, defaultValue.toDouble())
+            hayStackAPI.writeHisValueByIdWithoutCOV(pointId, defaultValue.toDouble())
     }
 
     // Add Points to Haystack with Default Values
@@ -738,7 +741,7 @@ class HyperStatPointsUtil constructor(
     }
 
 
-    // Function which creates Auto Force Auto Away Points
+    // Function which creates co2 Points
     fun createPointCO2ConfigPoint(
         hyperStatConfig: HyperStatCpuConfiguration
     ): MutableList<Pair<Point, Any>> {
@@ -853,7 +856,7 @@ class HyperStatPointsUtil constructor(
     fun createConfigRelayLogicalPoints(hyperStatConfig: HyperStatCpuConfiguration): MutableList<Triple<Point, Any, Any>> {
 
         val configLogicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()
-        //writeHisValById default valu =0.0
+        //writeHisValById default value = 0.0
         if (hyperStatConfig.relay1State.enabled) {
             val pointData: Point = relayConfiguration(relayState = hyperStatConfig.relay1State, "relay1")
             configLogicalPointsList.add(Triple(pointData, Port.RELAY_ONE, 0.0))
@@ -966,7 +969,7 @@ class HyperStatPointsUtil constructor(
     }
 
 
-    private fun createFanConfigForAnalogOut(
+     fun createFanConfigForAnalogOut(
         analogOutState: AnalogOutState, analogTag: String,
         configLogicalPointsList: MutableList<Triple<Point, Any, Any>>
     ) {
@@ -1056,6 +1059,7 @@ class HyperStatPointsUtil constructor(
         //   COOLING, FAN_SPEED, HEATING, DCV_DAMPER
         return when {
             HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOut = analogOutState) -> {
+
                 val minMaxPoint: Pair<Any, Any> = createMinMaxPointForAnalogOut(
                     analogTag = analogTag,
                     associationType = "cooling"
@@ -1101,7 +1105,7 @@ class HyperStatPointsUtil constructor(
                     analogTag = analogTag,
                     associationType = "dcvdamper"
                 )
-
+                Log.i(L.TAG_CCU_HSCPU, "Reconfiguration dcvdamper ")
                 Triple(
                     createAnalogOutPointForDCVDamper(analogTag = analogTag),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_DCV_DAMPER),
@@ -1299,6 +1303,7 @@ class HyperStatPointsUtil constructor(
      *  Functions which Analog Out can map
      */
     private fun createAnalogOutPointForDCVDamper(analogTag: String): Point {
+        Log.i(L.TAG_CCU_HSCPU, "createAnalogOutPointForDCVDamper dcvdamper ")
         val analogPointMarker = arrayOf(
             "writable","dcv", "damper", "runtime", "zone", "cmd", "his", "logical", "out", analogTag
         )
@@ -1351,6 +1356,7 @@ class HyperStatPointsUtil constructor(
         analogTag: String, associationType: String
     ): Pair<Any, Any> {
 
+        val type = getAnalogString(analogTag)
         val minMarker = arrayOf(
             analogTag, associationType, "config", "writable", "min","zone",
             "cmd", "out"
@@ -1362,12 +1368,12 @@ class HyperStatPointsUtil constructor(
         val minPoint = createHaystackPointWithMinMaxIncUnitInc(
             "$equipDis-$analogTag" + "atMin" + associationType,
             minMarker,
-            "0.0", "10.0", "1","V",""
+            "0.0", "10.0", "1","V","","Analog-out$type at Min $associationType"
         )
         val maxPoint = createHaystackPointWithMinMaxIncUnitInc(
             "$equipDis-$analogTag" + "atMax" + associationType,
             maxMarker,
-            "0.0", "10.0", "1","V",""
+            "0.0", "10.0", "1","V","","Analog-out$type at Max $associationType"
         )
 
         return Pair(minPoint, maxPoint)
@@ -1377,7 +1383,7 @@ class HyperStatPointsUtil constructor(
     fun createFanLowMediumHighPoint(
         analogTag: String
     ): Triple<Point, Point, Point> {
-
+        val type = getAnalogString(analogTag)
         val lowMarker = arrayOf(
             analogTag, "config", "writable", "fan", "low", "zone", "cmd", "out"
         )
@@ -1391,17 +1397,17 @@ class HyperStatPointsUtil constructor(
         val lowPoint = createHaystackPointWithMinMaxIncUnit(
             "$equipDis-$analogTag" + "atFanLow",
             lowMarker,
-            "0.0", "100.0", "%"
+            "0.0", "100.0", "%","Analog-Out$type at Fan Low"
         )
         val mediumPoint = createHaystackPointWithMinMaxIncUnit(
             "$equipDis-$analogTag" + "atFanMedium",
             mediumMarker,
-            "0.0", "100.0", "%"
+            "0.0", "100.0", "%","Analog-Out$type at Fan Medium"
         )
         val highPoint = createHaystackPointWithMinMaxIncUnit(
             "$equipDis-$analogTag" + "atFanHigh",
             highMarker,
-            "0.0", "100.0", "%"
+            "0.0", "100.0", "%","Analog-Out$type at Fan High"
         )
 
         return Triple(lowPoint, mediumPoint, highPoint)
@@ -1434,9 +1440,10 @@ class HyperStatPointsUtil constructor(
         val analogInMarker = arrayOf(
             "keycard", "sensor", "runtime", "zone", "cmd", "his", "logical", "in", analogTag
         )
-        return createHaystackPointWithHisInterPolate(
+        return createHaystackPointWithUnitEnum(
             "$equipDis-$analogTag" + "KeyCardSensor",
-            analogInMarker
+            analogInMarker,
+            "",""
         )
     }
 
@@ -1448,7 +1455,7 @@ class HyperStatPointsUtil constructor(
         )
         return createHaystackPointWithMinMaxIncUnitInc(
             "$equipDis-$analogTag$displayName",
-            analogInMarker, min, max, inc, unit,"cov"
+            analogInMarker, min, max, inc, unit,"cov","Current TX ($min-${max}Amps)"
         )
     }
 
@@ -1684,6 +1691,15 @@ class HyperStatPointsUtil constructor(
 
     private fun getAnalogOutConfigEnum(): String {
         return "na,cooling,heating,fanspeed,dcvdamper"
+    }
+
+    private fun getAnalogString(analogTag: String): Int{
+        when(analogTag){
+            Tags.ANALOG1-> return 1
+            Tags.ANALOG2-> return 2
+            Tags.ANALOG3-> return 3
+        }
+        return 0
     }
 
 }

@@ -1,12 +1,11 @@
-package a75f.io.logic.bo.building.hyperstat.comman
+package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.*
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip
 import a75f.io.logic.jobs.ScheduleProcessJob
 import a75f.io.logic.tuners.TunerUtil
@@ -30,19 +29,17 @@ class HSHaystackUtil(
         fun getBasicSettings(node: Int): BasicSettings {
             try {
                 val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
-                return if (equip?.equipRef != null) {
+                return if (equip.equipRef != null) {
                     BasicSettings(
                         StandaloneConditioningMode.values()[equip.hsHaystackUtil!!.getCurrentConditioningMode().toInt()],
-                        HyperStatAssociationUtil.getSelectedFanModeByLevel(
-                            fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration()),
-                            selectedFan = equip.hsHaystackUtil!!.getCurrentFanMode().toInt()
-                        )
+                        StandaloneFanStage.values()[equip.hsHaystackUtil!!.getCurrentFanMode().toInt()]
                     )
                 } else {
                     BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
                 }
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getBasicSettings: ${e.localizedMessage}")
+                e.printStackTrace()
+                Log.i(L.TAG_CCU_HSCPU, "Exception getBasicSettings: ${e.localizedMessage} for $node ")
             }
             return BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
         }
@@ -73,6 +70,36 @@ class HSHaystackUtil(
             return status
         }
 
+        fun getActualConditioningMode(nodeAddress: String, selectedConditioningMode: Int): Int{
+            if(selectedConditioningMode == 0)
+                return StandaloneConditioningMode.OFF.ordinal
+            return when(getPossibleConditioningModeSettings(nodeAddress.toInt())){
+                PossibleConditioningMode.BOTH-> {
+                    StandaloneConditioningMode.values()[selectedConditioningMode].ordinal
+                }
+                PossibleConditioningMode.COOLONLY->{
+                    StandaloneConditioningMode.COOL_ONLY.ordinal
+                }
+                PossibleConditioningMode.HEATONLY->{
+                    StandaloneConditioningMode.HEAT_ONLY.ordinal
+                }
+                PossibleConditioningMode.OFF->{
+                    StandaloneConditioningMode.values()[selectedConditioningMode].ordinal
+                }
+            }
+        }
+
+        fun getSelectedConditioningMode(nodeAddress: String, actualConditioningMode: Int): Int{
+            if(actualConditioningMode == 0)
+                return StandaloneConditioningMode.OFF.ordinal
+            return if(getPossibleConditioningModeSettings(nodeAddress.toInt()) ==  PossibleConditioningMode.BOTH)
+                StandaloneConditioningMode.values()[actualConditioningMode].ordinal
+            else
+                1 // always it will be 1 because possibility is Off,CoolOnly | Off,Heatonly
+
+        }
+
+
         fun getPossibleFanModeSettings(node: Int): PossibleFanMode {
             try {
                 val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
@@ -88,6 +115,23 @@ class HSHaystackUtil(
                 Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
             }
             return PossibleFanMode.OFF
+        }
+
+        fun getActualFanMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatCpuEquip.getHyperstatEquipRef(nodeAddress.toShort())
+            return HyperStatAssociationUtil.getSelectedFanModeByLevel(
+                fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration()),
+                selectedFan = position
+            ).ordinal
+
+        }
+
+        fun getFanSelectionMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatCpuEquip.getHyperstatEquipRef(nodeAddress.toShort())
+            return HyperStatAssociationUtil.getSelectedFanMode(
+                fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration()),
+                selectedFan = position
+            )
         }
     }
 

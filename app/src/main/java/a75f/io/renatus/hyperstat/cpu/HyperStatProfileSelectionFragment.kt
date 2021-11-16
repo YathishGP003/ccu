@@ -1,4 +1,4 @@
-package a75f.io.renatus.hyperstat
+package a75f.io.renatus.hyperstat.cpu
 
 import a75f.io.api.haystack.HSUtil
 import a75f.io.logger.CcuLog

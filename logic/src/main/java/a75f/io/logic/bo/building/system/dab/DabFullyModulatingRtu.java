@@ -127,8 +127,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         updateRelayOutputs(dabSystem);
         
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());
-        String systemStatus = (dabSystem.systemState == OFF) ? "System OFF " : getStatusMessage();
-        Log.i("TAG", "getSystemStatusString: oam");
+        String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
@@ -146,10 +145,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
+        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
-    
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
@@ -404,7 +402,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             setCmdSignal("occupancy", signal);
         }
         ControlMote.setRelayState("relay3", signal);
-    
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
                     && isSystemOccupied()) {
             

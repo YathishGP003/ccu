@@ -75,7 +75,9 @@ class HyperstatTuners {
 
                 // add common  markers
                 .addMarker("hyperstat").addMarker("tuner").addMarker("default").addMarker("sp")
-                .addMarker("writable").addMarker("his").addMarker("base")
+                .addMarker("writable").addMarker("his")
+
+
 
             if (!roomRef.isNullOrEmpty()) point.setRoomRef(roomRef)
             if (!floorRef.isNullOrEmpty()) point.setFloorRef(floorRef)
@@ -227,7 +229,7 @@ class HyperstatTuners {
 
             // coolingDeadband = 2 (°F)
             // Min = 0 ,  Max = 10.0 ,  Default = 2 , inc 0.5 unit = u00B0F
-            val coolingDeadBandMarkers = arrayOf("cooling", "deadband")
+            val coolingDeadBandMarkers = arrayOf("cooling", "deadband","base")
             val hsCoolingDeadBandPoint = createTunerPoint(
                 HYPERSTAT_COOLING_DEADBAND, coolingDeadBandMarkers, "0", "10.0", "0.5", "\u00B0F"
             )
@@ -295,7 +297,7 @@ class HyperstatTuners {
 
             // heatingDeadband = 2 (°F)
             // min = 0 max = 10.0 inc = 0.5 default = 2.0 unit "\u00B0F"
-            val heatingDeadbandMarkers = arrayOf("heating", "deadband")
+            val heatingDeadbandMarkers = arrayOf("heating", "deadband","base")
             val heatingDeadbandPoint = createTunerPoint(
                 HYPERSTAT_HEATING_DEADBAND, heatingDeadbandMarkers, "0", "10.0", "0.5", "\u00B0F"
             )

@@ -106,19 +106,25 @@ public class SyncStatusService {
         putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
     }
     
-    public void addDeletedEntity(String id) {
+    public void addDeletedEntity(String id, boolean saveImmediate) {
         CcuLog.i("CCU_HS"," addDeletedEntity "+id);
         if (hasEntitySynced(id)) {
             deletedIdList.add(id);
-            putListString(PREFS_ID_LIST_DELETED, deletedIdList);
+            if (saveImmediate) {
+                putListString(PREFS_ID_LIST_DELETED, deletedIdList);
+            }
         }
         if (updatedIdList.contains(id)) {
             updatedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+            if (saveImmediate) {
+                putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+            }
         }
         if (unsyncedIdList.contains(id)) {
             unsyncedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            if (saveImmediate) {
+                putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            }
         }
     }
     

@@ -933,9 +933,20 @@ public class CCUHsApi
     public void deleteEntity(String id) {
         CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        syncStatusService.addDeletedEntity(id);
+        syncStatusService.addDeletedEntity(id, true);
     }
-
+    
+    /**
+     * Used while deleteing a batch of entities. No need to persist items after each deletion.
+     * The caller has to invoke save sync status separately.
+     * @param id
+     */
+    public void deleteEntityItem(String id) {
+        CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+        syncStatusService.addDeletedEntity(id, false);
+    }
+    
     public void deleteEntityLocally(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
         if (tagsDb.idMap.get(id) != null) {
@@ -996,7 +1007,7 @@ public class CCUHsApi
             ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and siteRef == \"" + id + "\"");
             for (HashMap<Object, Object> schedule : schedules) {
                 if (!schedule.containsKey("building"))
-                    deleteEntity(schedule.get("id").toString());
+                    deleteEntityItem(schedule.get("id").toString());
             }
         } else if (entity.get("floor") != null) {
             
@@ -1004,15 +1015,15 @@ public class CCUHsApi
             for (HashMap<Object, Object> room : rooms) {
                 deleteEntityTree(room.get("id").toString());
             }
-            deleteEntity(entity.get("id").toString());
+            deleteEntityItem(entity.get("id").toString());
         } else if (entity.get("room") != null) {
             
             ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and roomRef == "+ id );
             Log.d("CCU","  delete Schedules in room "+schedules.size());
             for (HashMap<Object, Object> schedule : schedules) {
-                deleteEntity(schedule.get("id").toString());
+                deleteEntityItem(schedule.get("id").toString());
             }
-            deleteEntity(entity.get("id").toString());
+            deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
             
             ArrayList<HashMap<Object, Object>> points = readAllEntities("point and equipRef == \"" + id + "\"");
@@ -1020,18 +1031,18 @@ public class CCUHsApi
                 if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
-                deleteEntity(point.get("id").toString());
+                deleteEntityItem(point.get("id").toString());
             }
-            deleteEntity(id);
+            deleteEntityItem(id);
         } else if (entity.get("device") != null) {
             ArrayList<HashMap<Object, Object>> points = readAllEntities("point and deviceRef == \"" + id + "\"");
             for (HashMap<Object, Object> point : points) {
                 if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
-                deleteEntity(point.get("id").toString());
+                deleteEntityItem(point.get("id").toString());
             }
-            deleteEntity(id);
+            deleteEntityItem(id);
         } else if (entity.get("point") != null) {
             if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
@@ -1039,7 +1050,7 @@ public class CCUHsApi
             if (entity.get("his") != null) {
                 tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
-            deleteEntity(entity.get("id").toString());
+            deleteEntityItem(entity.get("id").toString());
         }
         syncStatusService.saveSyncStatus();
     }

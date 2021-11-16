@@ -3129,6 +3129,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                             HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
                             spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                            Log.d("CCU_UI ", "Fill spillsMap for zone "+zoneSchedule.getRoomRef());
                             ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
                             CCUHsApi.getInstance().scheduleSync();
                         }

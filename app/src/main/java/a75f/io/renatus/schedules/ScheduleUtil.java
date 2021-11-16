@@ -59,6 +59,11 @@ public class ScheduleUtil {
     public static void trimZoneSchedule(Schedule s, HashMap<String, ArrayList<Interval>> spillsMap) {
 
         ArrayList<Interval> spills = spillsMap.get(s.getRoomRef());
+        if (spills == null) {
+            Log.d("CCU_UI ","Schedule spills invalid for "+s.toString()+" in "+spillsMap.toString());
+            return;
+        }
+        Log.d("CCU_UI ","Trim spills for "+s.toString()+" in "+spillsMap.toString());
         HashMap<Schedule.Days, ArrayList<Interval>> validSpills = new HashMap<>();
         CopyOnWriteArrayList<Schedule.Days> days = new CopyOnWriteArrayList<>(s.getDays());
         CopyOnWriteArrayList<Schedule.Days> conflictDays = new CopyOnWriteArrayList<>();

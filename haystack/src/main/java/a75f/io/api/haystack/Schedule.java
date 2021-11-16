@@ -498,7 +498,7 @@ public class Schedule extends Entity
         for (String m :mMarkers ) {
             b.append(m+" ");
         }
-        
+        b.append(mRoomRef);
         return b.toString();
     }
     

@@ -77,7 +77,7 @@ public class MigrationWorker extends Worker {
     private void processDeletedItems() {
         ConcurrentHashMap<String, String> removeIdMap = CCUHsApi.getInstance().getRemoveIdMap();
         for (Map.Entry removeEntry : removeIdMap.entrySet()) {
-            syncStatusService.addDeletedEntity(removeEntry.getKey().toString());
+            syncStatusService.addDeletedEntity(removeEntry.getKey().toString(), true);
             removeIdMap.remove(removeEntry.getKey());
         }
         syncStatusService.saveSyncStatus();

@@ -271,9 +271,9 @@ public class BPOSProfile extends ZoneProfile {
                             (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
 
                     updateDesiredtemp(desiredAvgTemp);
-                    Log.i(Globals.TAG, "Falling in FORCE Occupy mode");
+                    Log.i("BPOS", "Falling in FORCE Occupy mode");
                 } else {
-                    Log.i(Globals.TAG, "We are already in force occupy");
+                    Log.i("BPOS", "We are already in force occupy");
                     // We are already in force occupy
                     // Just update with latest
                     updateDesiredtemp(desiredAvgTemp);
@@ -305,7 +305,7 @@ public class BPOSProfile extends ZoneProfile {
     }
 
     private void resetForceOccupy() {
-        Log.i(Globals.TAG, "Resetting the resetForceOccupy: ");
+        Log.i("BPOS", "Resetting the resetForceOccupy: ");
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
                 "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"", 0.0);
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +

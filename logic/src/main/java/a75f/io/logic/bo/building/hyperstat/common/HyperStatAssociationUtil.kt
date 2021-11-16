@@ -1,6 +1,6 @@
-package a75f.io.logic.bo.building.hyperstat.comman
+package a75f.io.logic.bo.building.hyperstat.common
 
-import a75f.io.logic.Globals
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.cpu.*
 import android.util.Log
@@ -493,9 +493,67 @@ class HyperStatAssociationUtil {
                     }
                 }
             } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.i(Globals.TAG, "Error getSelectedFan function ${e.localizedMessage}")
+                Log.i(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}")
             }
             return StandaloneFanStage.OFF
+        }
+
+        fun getSelectedFanMode(fanLevel: Int, selectedFan: Int): Int {
+            try {
+                when {
+                    (selectedFan == 0) -> {
+                        // No fan stages are selected so only off can present here
+                        return StandaloneFanStage.OFF.ordinal
+                    }
+                    (selectedFan == 1) -> {
+                        // No fan stages are selected so only off can present here
+                        return StandaloneFanStage.AUTO.ordinal
+                    }
+                    (fanLevel == 21) -> {
+                        // When fan level is 12 it means it is saying the all stages of fans are selected
+                        // directly we can select from the selected list
+                        return StandaloneFanStage.values()[selectedFan].ordinal
+                    }
+                    (fanLevel == 6) -> {
+                        // Only fan low are selected
+                        //  R.array.smartstat_fanmode_low
+                        if (selectedFan in 1..4)
+                            return StandaloneFanStage.values()[selectedFan].ordinal
+                    }
+                    (fanLevel == 7) -> {
+                        // R.array.hyperstate_only_medium_fanmode
+                      //  if (selectedFan in 1..4)
+                            return StandaloneFanStage.values()[selectedFan - 3].ordinal
+                    }
+                    (fanLevel == 8) -> {
+                        // R.array.hyperstate_only_high_fanmode
+                     //   if (selectedFan in 1..4)
+                            return StandaloneFanStage.values()[selectedFan - 6].ordinal
+                    }
+                    (fanLevel == 13) -> {
+                        // When fan low and mediam are selected
+                        //R.array.smartstat_2pfcu_fanmode_medium
+                       // if (selectedFan in 1..7)
+                            return StandaloneFanStage.values()[selectedFan].ordinal
+                    }
+                    (fanLevel == 15) -> {
+                        // Medium and high fan speeds are selected
+                        // R.array.hyperstate_medium_high_fanmode
+                        return StandaloneFanStage.values()[selectedFan - 3].ordinal
+
+                    }
+                    (fanLevel == 14) -> {
+                        // low high selected
+                        return if (selectedFan < 5)
+                            StandaloneFanStage.values()[selectedFan].ordinal
+                        else
+                            StandaloneFanStage.values()[selectedFan - 3].ordinal
+                    }
+                }
+            } catch (e: ArrayIndexOutOfBoundsException) {
+                Log.i(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}")
+            }
+            return StandaloneFanStage.OFF.ordinal
         }
 
         fun getSensorNameByType(sensorInputs: CpuAnalogInAssociation): String {

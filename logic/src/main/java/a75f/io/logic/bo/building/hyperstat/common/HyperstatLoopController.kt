@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.hyperstat.comman
+package a75f.io.logic.bo.building.hyperstat.common
 
 import a75.io.algos.ControlLoop
 

@@ -3,7 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 
-import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
+
 import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.hyperstat.cpu.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;

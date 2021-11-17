@@ -1079,9 +1079,7 @@ public class CCUHsApi
     }
 
     public boolean siteSynced() {
-        return entitySynced(
-                getSiteIdRef().toString()
-        );
+        return getSite() != null && entitySynced(getSiteIdRef().toString());
     }
     
     public boolean isEntityDeleted(String id) {
@@ -1618,6 +1616,10 @@ public class CCUHsApi
     {
         HDict hDict = new HDictBuilder().add("filter", "site").toDict();
         HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
+        if (site.isEmpty() || site.numRows() == 0) {
+            CcuLog.e(TAG, "getSiteIdRef - Site Not Created");
+            return null;
+        }
         return site.row(0).getRef("id");
     }
 

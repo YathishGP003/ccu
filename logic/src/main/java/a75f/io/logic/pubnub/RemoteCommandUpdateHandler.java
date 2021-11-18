@@ -31,14 +31,11 @@ public class RemoteCommandUpdateHandler
     
     public static void handleMessage(JsonObject msgObject, Context context) {
         try {
-            Log.i(Globals.TAG, " Received Remote update Command");
-
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("level").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
-            Log.i(Globals.TAG, " PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
             switch (cmdLevel){
                 case "site":
                 case "system":

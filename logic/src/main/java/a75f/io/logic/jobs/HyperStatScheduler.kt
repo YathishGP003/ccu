@@ -269,9 +269,7 @@ class HyperStatScheduler {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            Handler(Looper.getMainLooper()).postDelayed({
-                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
-            }, 100)
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
         }
 
 
@@ -293,6 +291,7 @@ class HyperStatScheduler {
                         val pointDetails = Point.Builder().setHashMap(haystack.readMapById(id)).build()
 
                         if(pointDetails.markers.contains("writable")){
+                            Log.i(L.TAG_CCU_HSCPU, " updated point write $id")
                             haystack.pointWriteForCcuUser(
                                 HRef.copy(id),
                                 TunerConstants.UI_DEFAULT_VAL_LEVEL,
@@ -301,6 +300,7 @@ class HyperStatScheduler {
                             )
                         }
                         if(pointDetails.markers.contains("his")){
+                            Log.i(L.TAG_CCU_HSCPU, " updated his write $id")
                             haystack.writeHisValById(id, value)
                         }
                     }

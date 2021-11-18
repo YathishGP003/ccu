@@ -274,6 +274,12 @@ public class HSUtil
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 
+    public static boolean isHSCPUConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.CPU)
+                && pointEntity.containsKey(Tags.HYPERSTAT);
+    }
+
     public static boolean isBPOSConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.BPOS);

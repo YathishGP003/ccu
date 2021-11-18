@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.hyperstat.comman
+package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.logic.Globals
 import android.content.Context

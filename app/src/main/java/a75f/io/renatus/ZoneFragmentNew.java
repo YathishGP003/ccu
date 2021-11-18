@@ -71,9 +71,10 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstat.comman.FanModeCacheStorage;
-import a75f.io.logic.bo.building.hyperstat.comman.HSZoneStatus;
-import a75f.io.logic.bo.building.hyperstat.comman.SettingsKt;
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage;
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -371,7 +372,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
                     Log.i(LOG_TAG + "CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress + " zoneNodes:" + zoneNodes);
-                    if (zoneNodes.contains(nodeAddress)) {
+                    if (zoneNodes != null && zoneNodes.size() > 0 && zoneNodes.contains(nodeAddress)) {
                         SeekArc tempSeekArc = seekArcArrayList.get(i);
                         new AsyncTask<String, Void, Double>() {
                             @Override
@@ -2323,7 +2324,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
-            if (HeatPumpUnitConfiguration.enableRelay5) {
+            if (fanHighHumdOption > 1.0) {
                 if (fanHighHumdOption == 2.0) {
                     textViewLabel3.setText("Dynamic Target Humidity : ");
                     targetHumidity = (double) hpuEquipPoints.get("Target Humidity");
@@ -3534,7 +3535,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         setTitleStatusConfig(viewTitle,viewStatus,nodeAddress,
                 cpuEquipPoints.get(HSZoneStatus.STATUS.name()).toString());
 
-        setUpConditionFanConfig(viewPointRow1,cpuEquipPoints,equipId);
+        setUpConditionFanConfig(viewPointRow1,cpuEquipPoints,equipId,nodeAddress);
 
         setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
 
@@ -3565,7 +3566,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
 
-    private void setUpConditionFanConfig(View viewPointRow1, HashMap cpuEquipPoints , String equipId){
+    private void setUpConditionFanConfig(View viewPointRow1, HashMap cpuEquipPoints , String equipId, String nodeAddress){
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         textViewLabel1.setText("Conditioning Mode : ");
@@ -3579,8 +3580,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int conditionMode = 0;
         int fanMode = 0;
         try {
-            conditionMode = (int) ((double)cpuEquipPoints.get(HSZoneStatus.CONDITIONING_MODE.name()));
-            fanMode = (int) ((double)cpuEquipPoints.get(HSZoneStatus.FAN_MODE.name()));
+            conditionMode = (int) (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_MODE.name()));
+            fanMode = (int)cpuEquipPoints.get(HSZoneStatus.FAN_MODE.name());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -3622,8 +3623,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         fanModeSpinner.setAdapter(fanModeAdapter);
         fanModeSpinner.setSelection(fanMode, false);
 
-        setSpinnerListenerForHyperstat(conditioningModeSpinner,HSZoneStatus.CONDITIONING_MODE,equipId,conditionMode);
-        setSpinnerListenerForHyperstat(fanModeSpinner,HSZoneStatus.FAN_MODE,equipId,fanMode);
+        setSpinnerListenerForHyperstat(conditioningModeSpinner,HSZoneStatus.CONDITIONING_MODE,equipId,conditionMode, nodeAddress);
+        setSpinnerListenerForHyperstat(fanModeSpinner,HSZoneStatus.FAN_MODE,equipId,fanMode, nodeAddress);
 
     }
 
@@ -3692,13 +3693,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     private void setSpinnerListenerForHyperstat(View view, HSZoneStatus spinnerType,String equipId,
-                                                int previousPosition){
+                                                int previousPosition, String nodeAddress){
         AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (spinnerType){
-                    case CONDITIONING_MODE : handleConditionMode(previousPosition,position,equipId); break;
-                    case FAN_MODE : handleFanMode(previousPosition,position,equipId); break;
+                    case CONDITIONING_MODE : handleConditionMode(previousPosition,position,equipId,nodeAddress); break;
+                    case FAN_MODE : handleFanMode(previousPosition,position,equipId, nodeAddress); break;
                     case TARGET_HUMIDITY : handleHumidityMode(previousPosition,position,equipId);break;
                     case TARGET_DEHUMIDIFY : handleDeHumidityMode(previousPosition,position,equipId);break;
                 }
@@ -3711,36 +3712,32 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         ((Spinner)view).setOnItemSelectedListener(onItemSelectedListener);
     }
 
-    private void handleConditionMode(int previousPosition,int selectedPosition, String equipId){
-        if (isCPUFromPubNub) {
-            if (previousPosition != selectedPosition) {
-                HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
-                        "temp and conditioning and mode and cpu", selectedPosition);
-            }
-        } else {
-            HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
-                    "temp and conditioning and mode and cpu", selectedPosition);
-
-        }
+    private void handleConditionMode(int previousPosition,int selectedPosition, String equipId,String nodeAddress){
+        Log.i(L.TAG_CCU_HSCPU, "handleConditionMode: selectedPosition "+selectedPosition);
+        int actualConditioningMode = HSHaystackUtil.Companion.getActualConditioningMode(nodeAddress,selectedPosition);
+        Log.i(L.TAG_CCU_HSCPU, "handleConditionMode: actualConditioningMode "+actualConditioningMode);
+        HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
+                "temp and conditioning and mode and cpu", actualConditioningMode);
     }
 
-    private void handleFanMode(int previousPosition, int selectedPosition, String equipId){
+    private void handleFanMode(int previousPosition, int selectedPosition, String equipId, String nodeAddress){
         if (isCPUFromPubNub) {
             if (previousPosition != selectedPosition) {
-                updateFanMode(equipId,selectedPosition);
+                updateFanMode(equipId,selectedPosition, nodeAddress);
             }
             isCPUFromPubNub = false;
         } else {
-            updateFanMode(equipId,selectedPosition);
+            updateFanMode(equipId,selectedPosition, nodeAddress);
         }
     }
 
     // Save the fan mode in cache
-    private void updateFanMode(String equipId,int selectedPosition){
+    private void updateFanMode(String equipId,int selectedPosition, String nodeAddress){
 
         FanModeCacheStorage cacheStorage = new FanModeCacheStorage();
+        int actualFanMode = HSHaystackUtil.Companion.getActualFanMode(nodeAddress,selectedPosition);
         HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                equipId, "fan and operation and mode and cpu", selectedPosition);
+                equipId, "fan and operation and mode and cpu", actualFanMode);
 
         if ((selectedPosition != 0) && (selectedPosition % 3 == 0))
             cacheStorage.saveFanModeInCache(equipId,selectedPosition);

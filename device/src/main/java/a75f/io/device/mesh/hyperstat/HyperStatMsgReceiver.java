@@ -26,14 +26,13 @@ import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil;
-import a75f.io.logic.bo.building.hyperstat.comman.PossibleConditioningMode;
-import a75f.io.logic.bo.building.hyperstat.comman.PossibleFanMode;
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
+import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -118,17 +117,17 @@ public class HyperStatMsgReceiver {
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
         if (DLog.isLoggingEnabled()) {
-            CcuLog.i(L.TAG_CCU_DEVICE, "handleOverrideMessage: "+message.toByteString());
+            CcuLog.i(L.TAG_CCU_DEVICE, "handleOverrideMessage: "+message.toString());
         }
     
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
         writeDesiredTemp(message, hsEquip, hayStack);
-        boolean isModeUpdated =  updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
-        boolean isFanUpdated = updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
-        if(isModeUpdated && isFanUpdated)
-            sendAcknowledge(nodeAddress);
+        updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
+        updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
+        Log.i(L.TAG_CCU_DEVICE, "Actual Recived Fan mode: "+message.getFanSpeed().ordinal());
+        sendAcknowledge(nodeAddress);
     }
     
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
@@ -199,7 +198,8 @@ public class HyperStatMsgReceiver {
          *  For door window sensor and keycard sensor no need to calculate the Resistance conversion
          *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
          *  we are applying the required logic according to the sensor and saving into logical point
-         *  for door window sensor 1.0 means door is closed when the Resistance is less than 10000 else it is open
+         *  for door window sensor 1.0 means door is open when the Resistance is greater than 10000 else it is closed
+         *  when registance is less than 10000
          *  for Keycard sensor 1.0 means key is present (Occupant exist) when the Resistance is less than 10000 else
          *  key is removed occupant is not exist
          */
@@ -207,8 +207,8 @@ public class HyperStatMsgReceiver {
         int index = (int)Double.parseDouble(rawPoint.getType());
         Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Thermistor input :"+val);
         if(index == 12 || index == 13){
-            hayStack.writeHisValById(point.getId(),((val*10) >= 10000)? 0.0 : 1.0);
-            Log.d(L.TAG_CCU_DEVICE, "Index : "+index +" Sensor Thermistor input : "+(((val*10) >= 10000)? 0.0 : 1.0));
+            hayStack.writeHisValById(point.getId(),((val*10) >= 10000)? 1.0 : 0.0);
+            Log.d(L.TAG_CCU_DEVICE, "Index : "+index +" Sensor Thermistor input : "+(((val*10) >= 10000)? 1.0 : 0.0));
             return;
         }
 
@@ -235,7 +235,7 @@ public class HyperStatMsgReceiver {
         if(index == 12 || index == 13){
             double voltageReceived = val/1000;
             Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Analog input :"+voltageReceived);
-            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 0.0 : 1.0);
+            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 1.0 : 0.0);
             return;
         }
         hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
@@ -422,27 +422,74 @@ public class HyperStatMsgReceiver {
 
 
     private static int getLogicalFanMode(PossibleFanMode mode,int selectedMode){
+        Log.i(L.TAG_CCU_DEVICE, "PossibleFanMode: "+mode + " selectedMode  "+selectedMode);
+        if(selectedMode == 0 ||selectedMode == 1) return selectedMode;
         switch (mode){
             case LOW:
-            case HIGH:
-            case MED:
-            case LOW_MED:
-            case LOW_MED_HIGH:
-                return StandaloneFanStage.values()[selectedMode].ordinal();
-            case LOW_HIGH:
-                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal()){
-                    return StandaloneFanStage.values()[selectedMode].ordinal();
-                }else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal()){
-                    return StandaloneFanStage.values()[selectedMode+3].ordinal();
-                }else{
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+                }
+                else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
+            case MED:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
+                }
+                else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+            case HIGH:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
+                }
+                else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+
+            case LOW_MED:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+                }
+                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
+                }
+                else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+
+            case LOW_HIGH:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+                }
+                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
+                }
+                else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+
             case MED_HIGH:
-                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal()){
-                    return StandaloneFanStage.values()[selectedMode+3].ordinal();
-                }else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal()){
-                    return StandaloneFanStage.values()[selectedMode+6].ordinal();
-                }else{
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
+                }
+                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
+                }
+                else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                }
+            case LOW_MED_HIGH:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+                }
+                else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal()){
+                    return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
+                }
+                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
+                }
+                else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
         }

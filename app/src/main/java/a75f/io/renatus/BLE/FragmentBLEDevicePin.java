@@ -1,5 +1,10 @@
 package a75f.io.renatus.BLE;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
+
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -51,16 +56,11 @@ import a75f.io.renatus.HyperStatSenseFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
+import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstat.HyperStatCpuFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
-import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
  * Created by ryanmattison isOn 7/24/17.

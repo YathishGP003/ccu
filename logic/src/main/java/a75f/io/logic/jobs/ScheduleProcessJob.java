@@ -41,9 +41,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip;
-import a75f.io.logic.bo.building.hyperstat.comman.HyperStatAssociationUtil;
-import a75f.io.logic.bo.building.hyperstat.comman.HSZoneStatus;
-import a75f.io.logic.bo.building.hyperstat.comman.HSHaystackUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -1182,11 +1182,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
 
         double fanOpModePoint = hsHaystackUtil.readPointPriorityVal("zone and fan and mode and operation");
-        cpuPoints.put(HSZoneStatus.FAN_MODE.name(),fanOpModePoint);
+        Log.i(L.TAG_CCU_HSCPU, "Saved fan mode "+fanOpModePoint);
+        int fanPosition = HSHaystackUtil.Companion.getFanSelectionMode(equipDetails.getGroup(),(int)fanOpModePoint);
+        Log.i(L.TAG_CCU_HSCPU, "converted fan mode "+fanPosition);
+        cpuPoints.put(HSZoneStatus.FAN_MODE.name(),fanPosition);
 
         double conditionModePoint = hsHaystackUtil.readPointPriorityVal(
                 "zone and temp and mode and conditioning");
-        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),conditionModePoint);
+        Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode "+conditionModePoint);
+        int selectedFanMode = HSHaystackUtil.Companion.getSelectedConditioningMode(equipDetails.getGroup(),
+                (int)conditionModePoint);
+        Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode "+selectedFanMode);
+        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),selectedFanMode);
 
 
         double dischargePoint = hsHaystackUtil.readHisVal(

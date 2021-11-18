@@ -275,7 +275,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = 0;
-            if((systemMode != SystemMode.OFF ) && isSystemOccupied())
+            if(systemMode != SystemMode.OFF  && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
                 signal = 1;
@@ -356,7 +356,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append(systemFanLoopOp > 0 ? " Fan ON ":((getCmdSignal("occupancy") > 0) ? " Fan ON " : ""));
+        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ": "");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
         

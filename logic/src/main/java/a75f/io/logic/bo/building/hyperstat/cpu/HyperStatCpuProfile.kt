@@ -9,7 +9,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.comman.*
+import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualFanMode
 import a75f.io.logic.jobs.HyperStatScheduler
 import a75f.io.logic.jobs.HyperStatScheduler.Companion.updateHyperstatUIPoints
 import a75f.io.logic.jobs.ScheduleProcessJob
@@ -47,7 +48,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     override fun updateZonePoints() {
         cpuDeviceMap.forEach { (_, equip) ->
-            Log.i(Globals.TAG, "updateZonePoints: equip.equipRef ${equip.equipRef}")
+            Log.i(L.TAG_CCU_HSCPU, "updateZonePoints: equip.equipRef ${equip.equipRef}")
             runHyperstatCPUAlgorithm(equip)
         }
     }
@@ -104,14 +105,6 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         occuStatus = equip.hsHaystackUtil!!.getOccupancyStatus()
 
-        var coolingDeadband = 2.0
-        var heatingDeadband = 2.0
-
-        if (occuStatus != null) {
-            coolingDeadband = occuStatus.coolingDeadBand
-            heatingDeadband = occuStatus.heatingDeadBand
-        }
-
         //StandaloneFanStage  StandaloneConditioningMode
         var basicSettings = fetchBasicSettings(equip, config)
 
@@ -162,18 +155,19 @@ class HyperStatCpuProfile : ZoneProfile() {
         equip.hsHaystackUtil!!.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput)
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
 
-        Log.i(Globals.TAG, "Analog Fan speed multiplier  ${hyperstatTuners.analogFanSpeedMultiplier}")
-        Log.i(Globals.TAG, "Current Working mode : ${Occupancy.values()[currentOperatingMode]}")
-        Log.i(Globals.TAG, "isForcedOccupied : ${occuStatus.isForcedOccupied} ")
-        Log.i(Globals.TAG, "isOccupancySensed : ${occuStatus.isOccupancySensed} ")
-        Log.i(Globals.TAG, "isPreconditioning : ${occuStatus.isPreconditioning} ")
-        Log.i(Globals.TAG, "logicalPointsList size : ${logicalPointsList.size} ")
-        Log.i(Globals.TAG, "Current Temp : $currentTemp ")
-        Log.i(Globals.TAG, "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} ")
-        Log.i(Globals.TAG, "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} ")
-        Log.i(Globals.TAG, "Heating : $heatingLoopOutput ")
-        Log.i(Globals.TAG, "Cooling : $coolingLoopOutput ")
-        Log.i(Globals.TAG, "Fan : $fanLoopOutput ")
+        Log.i(L.TAG_CCU_HSCPU,
+            "Analog Fan speed multiplier  ${hyperstatTuners.analogFanSpeedMultiplier} \n"+
+                 "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n"+
+                 "isForcedOccupied : ${occuStatus.isForcedOccupied} \n"+
+                 "isOccupancySensed : ${occuStatus.isOccupancySensed} \n"+
+                 "isPreconditioning : ${occuStatus.isPreconditioning} \n"+
+                 "Current Temp : $currentTemp \n"+
+                 "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} \n"+
+                 "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} \n"+
+                 "Heating Loop Output: $heatingLoopOutput \n"+
+                 "Cooling Loop Output:: $coolingLoopOutput \n"+
+                 "Fan Loop Output:: $fanLoopOutput \n"
+        )
 
 
         if (config.isEnableAutoForceOccupied) {
@@ -199,16 +193,18 @@ class HyperStatCpuProfile : ZoneProfile() {
               zoneOperatingMode = ZoneState.HEATING.ordinal
           if(currentTemp > averageDesiredTemp)
               zoneOperatingMode = ZoneState.COOLING.ordinal
-        Log.i(Globals.TAG, "averageDesiredTemp $averageDesiredTemp currentTemp $currentTemp")
-        Log.i(Globals.TAG, "zoneOperatingMode $zoneOperatingMode")
-        Log.i(Globals.TAG, "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}")
+        Log.i(L.TAG_CCU_HSCPU,
+            "averageDesiredTemp $averageDesiredTemp" +
+                "currentTemp $currentTemp"+
+                "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}"
+        )
         equip.hsHaystackUtil!!.setProfilePoint("temp and operating and mode", zoneOperatingMode.toDouble())
         if (equip.hsHaystackUtil!!.getStatus() != curState.ordinal.toDouble())
             equip.hsHaystackUtil!!.setStatus(curState.ordinal.toDouble())
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
 
-        Log.i(Globals.TAG, "updatePointsForEquip: Equip Running $curState")
+        Log.i(L.TAG_CCU_HSCPU, "Equip Running : $curState")
         HyperStatScheduler.updateHyperstatStatus(
             equipId = equip.equipRef!!,
             state = curState,
@@ -219,14 +215,10 @@ class HyperStatCpuProfile : ZoneProfile() {
     }
 
     private fun fetchBasicSettings(equip: HyperStatCpuEquip, config: HyperStatCpuConfiguration) =
-        // Current Equip Condition
+
         BasicSettings(
-            conditioningMode = StandaloneConditioningMode.values()[
-                    equip.hsHaystackUtil!!.getCurrentConditioningMode().toInt()],
-            fanMode = HyperStatAssociationUtil.getSelectedFanModeByLevel(
-                fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(config),
-                selectedFan = equip.hsHaystackUtil!!.getCurrentFanMode().toInt()
-            )
+            conditioningMode = StandaloneConditioningMode.values()[equip.hsHaystackUtil!!.getCurrentConditioningMode().toInt()],
+            fanMode = StandaloneFanStage.values()[equip.hsHaystackUtil!!.getCurrentFanMode().toInt()]
         )
 
     private fun fetchUserIntents(equip: HyperStatCpuEquip): UserIntents {
@@ -267,8 +259,9 @@ class HyperStatCpuProfile : ZoneProfile() {
     private fun runAutoForceOccupyOperation(equip: HyperStatCpuEquip) {
         val occupantDetected = (equip.hsHaystackUtil!!.getOccupancySensorPointValue().toInt() > 0)
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-        Log.i(Globals.TAG, "Auto Force: Detected : $occupantDetected")
-        Log.i(Globals.TAG, "Auto Force:cur mode  : ${Occupancy.values()[currentOperatingMode]}")
+        Log.i(L.TAG_CCU_HSCPU,
+            "Auto Force: Detected : $occupantDetected \n"+
+                 "Auto Force:cur mode  : ${Occupancy.values()[currentOperatingMode]}")
 
         val detectionPointDetails = equip.hsHaystackUtil!!.readDetectionPointDetails()
 
@@ -286,39 +279,31 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
                     updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
-                    Log.i(Globals.TAG, "Falling in FORCE Occupy mode")
+                    Log.i(L.TAG_CCU_HSCPU, "Falling in FORCE Occupy mode")
                 } else {
-
-                    Log.i(Globals.TAG, "We are already in force occupy")
-
+                    Log.i(L.TAG_CCU_HSCPU, "We are already in force occupy")
                     val occupancyHistory: HisItem = equip.haystack.curRead(detectionPointDetails["id"].toString())
                     if (occupancyHistory == null) {
-                        Log.i(Globals.TAG, "occupancy History Does not exist..")
+                        Log.i(L.TAG_CCU_HSCPU, "occupancy History Does not exist..")
                     }
                     val lastUpdatedTime: Date? = occupancyHistory.date
 
-                    Log.i(Globals.TAG, "temporaryHoldTime time $temporaryHoldTime")
-                    Log.i(Globals.TAG, "occupancy last sensed time $lastUpdatedTime")
-                    Log.i(Globals.TAG, "Expiry time  ${DateTime(temporaryHoldTime)}")
-                    Log.i(Globals.TAG, "Cur    time  ${DateTime(System.currentTimeMillis())}")
-                    Log.i(Globals.TAG, "differenceInMinutes : $differenceInMinutes")
+                    Log.i(L.TAG_CCU_HSCPU,
+                        "temporaryHoldTime time $temporaryHoldTime \n"+
+                             "occupancy last sensed time $lastUpdatedTime \n"+
+                             "Expiry time  ${DateTime(temporaryHoldTime)} \n"+
+                             "Cur time  ${DateTime(System.currentTimeMillis())} \n"+
+                         "differenceInMinutes : $differenceInMinutes \n")
 
-                    // If the last
-                    val quickPeriod = 5
-                    if (differenceInMinutes < quickPeriod) {
-                        Log.i(Globals.TAG, "Occupant Detected time is less than 30 min so extending the time")
-                        val desiredAvgTemp = equip.hsHaystackUtil!!.getDesiredTemp()
-                        updateDesiredTemp(desiredAvgTemp, equip)
-                    } else {
-                        // Wait for less then 5 then update based on the condition
-                        Log.i(Globals.TAG, "No action state waiting for time expiry")
-                    }
+                    Log.i(L.TAG_CCU_HSCPU, "Occupant Detected so extending the time")
+                    val desiredAvgTemp = equip.hsHaystackUtil!!.getDesiredTemp()
+                    updateDesiredTemp(desiredAvgTemp, equip)
 
                 }
 
             } else {
                 Log.i(
-                    Globals.TAG,
+                    L.TAG_CCU_HSCPU,
                     "Occupant not detected in unoccupied mode expires in $differenceInMinutes"
                 )
                 if (currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal && differenceInMinutes <= 0) {
@@ -327,9 +312,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
         } else {
             // Reset everything if there was force occupied condition
-            Log.i(Globals.TAG, "We are in to occupied")
+            Log.i(L.TAG_CCU_HSCPU, "We are in to occupied")
             if (currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal) {
-                Log.i(Globals.TAG, "Move to to occupied status")
+                Log.i(L.TAG_CCU_HSCPU, "Move to to occupied status")
                 resetOccupancy(equip)
             }
         }
@@ -345,7 +330,7 @@ class HyperStatCpuProfile : ZoneProfile() {
     }
 
     private fun resetOccupancy(equip: HyperStatCpuEquip) {
-        Log.i(Globals.TAG, "Resetting the resetForceOccupy ")
+        Log.i(L.TAG_CCU_HSCPU, "Resetting the resetForceOccupy ")
         equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.UNOCCUPIED.ordinal.toDouble())
 
         val coolDT = equip.haystack
@@ -361,25 +346,40 @@ class HyperStatCpuProfile : ZoneProfile() {
         val occupantDetected = (equip.hsHaystackUtil!!.getOccupancySensorPointValue().toInt() > 0)
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         val occupancy = equip.hsHaystackUtil!!.readDetectionPointDetails()
-        Log.i(Globals.TAG, "Auto Away :Detection  : $occupantDetected")
-        Log.i(Globals.TAG, "Auto Away :cur mode  : $currentOperatingMode")
+        Log.i(L.TAG_CCU_HSCPU, "Auto Away :Detection  : $occupantDetected")
+        Log.i(L.TAG_CCU_HSCPU, "Auto Away :cur mode  : $currentOperatingMode")
 
         if (occuStatus.isOccupied && (currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal)) {
 
             val occupancyHistory: HisItem = equip.haystack.curRead(occupancy["id"].toString())
 
             if (occupancyHistory == null) {
-                Log.i(Globals.TAG, "occupancy History Does not exist..")
+                Log.i(L.TAG_CCU_HSCPU, "occupancy History Does not exist..")
             }
             val lastUpdatedTime: Date? = occupancyHistory.date
-            Log.i(Globals.TAG, "Last Detected Time : $lastUpdatedTime")
+            Log.i(L.TAG_CCU_HSCPU, "Last Detected Time : $lastUpdatedTime")
             val differenceInMinutes = findDifference(lastUpdatedTime!!.time, false)
             val autoAwayTime = TunerUtil.readTunerValByQuery(
                 " point and tuner and auto and away and time", equip.equipRef
             )
-            Log.i(Globals.TAG, "findDifference : $differenceInMinutes autoAwayTime Tuner value: $autoAwayTime")
+            Log.i(L.TAG_CCU_HSCPU, "findDifference : $differenceInMinutes autoAwayTime Tuner value: $autoAwayTime")
             if (differenceInMinutes > autoAwayTime && currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
-                Log.i(Globals.TAG, "Moving to Auto Away state")
+                Log.i(L.TAG_CCU_HSCPU, "Moving to Auto Away state")
+                val coolingDtPoint = CCUHsApi.getInstance().read(
+                    "point and air and temp and " +
+                            "desired and cooling and sp and equipRef  == \"${equip.equipRef}\"")
+                if (coolingDtPoint == null || coolingDtPoint.size == 0) {
+                    throw java.lang.IllegalArgumentException()
+                }
+                val heatingDtPoint = CCUHsApi.getInstance().read(
+                    ("point and air and temp and " +
+                            "desired and heating and sp and equipRef  == \"${equip.equipRef}\"")
+                )
+                if (heatingDtPoint == null || heatingDtPoint.size == 0) {
+                    throw java.lang.IllegalArgumentException()
+                }
+                ScheduleProcessJob.clearOverrides(coolingDtPoint.get("id").toString())
+                ScheduleProcessJob.clearOverrides(heatingDtPoint.get("id").toString())
                 val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                 equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                 equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
@@ -462,7 +462,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 config.relay6State, equip, config, Port.RELAY_SIX, tuner, userIntents, basicSettings, relayStages
             )
         }
-        Log.i(Globals.TAG, "================================")
+        Log.i(L.TAG_CCU_HSCPU, "================================")
     }
 
     private fun runAnalogOutOperations(
@@ -581,7 +581,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
 
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
 
                 if (relayState == 1.0) {
                     relayStages[Stage.COOLING_1.displayName] = 1
@@ -599,7 +599,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = 0.0
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.COOLING_2.displayName] = 1
                 }
@@ -613,7 +613,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = 0.0
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.COOLING_3.displayName] = 1
                 }
@@ -644,7 +644,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = 0.0
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
 
                 if (relayState == 1.0) {
                     relayStages[Stage.HEATING_1.displayName] = 1
@@ -663,7 +663,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = 0.0
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.HEATING_2.displayName] = 1
                 }
@@ -677,7 +677,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = 0.0
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.HEATING_3.displayName] = 1
                 }
@@ -704,7 +704,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
-            Log.i(Globals.TAG, "Cond is Off , Fan is Auto  : ")
+            Log.i(L.TAG_CCU_HSCPU, "Cond is Off , Fan is Auto  : ")
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, 0.0)
             return
         }
@@ -727,7 +727,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     ) 1.0 else 0.0
                 }
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.FAN_1.displayName] = 1
                 }
@@ -752,7 +752,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     ) 1.0 else 0.0
                 }
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.FAN_2.displayName] = 1
                 }
@@ -773,7 +773,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     ) 1.0 else 0.0
                 }
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  $relayState")
+                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
                     relayStages[Stage.FAN_3.displayName] = 1
                 }
@@ -793,9 +793,9 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         if (occuStatus.isOccupied || fanLoopOutput > 0) {
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, 1.0)
-            Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  1.0")
+            Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  1.0")
         } else if (!occuStatus.isOccupied || (curState == ZoneState.COOLING && curState == ZoneState.HEATING)) {
-            Log.i(Globals.TAG, "$whichPort = ${relayAssociation.association}  0.0")
+            Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  0.0")
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, 0.0)
         }
 
@@ -809,7 +809,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             equip, logicalPointsList[whichPort]!!,
             if (occuStatus.isOccupied) 1.0 else 0.0
         )
-        Log.i(Globals.TAG, "$whichPort = OccupiedEnabled" + if (occuStatus.isOccupied) 1.0 else 0.0)
+        Log.i(L.TAG_CCU_HSCPU, "$whichPort = OccupiedEnabled" + if (occuStatus.isOccupied) 1.0 else 0.0)
     }
 
     private fun runRelayHumidifier(
@@ -831,10 +831,11 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         val currentHumidity = equip.hsHaystackUtil!!.getHumidity()
         val currentPortStatus = getCurrentPortStatus(equip, logicalPointsList[whichPort]!!)
-        Log.i(Globals.TAG, "runRelayHumidifier: currentHumidity : $currentHumidity")
-        Log.i(Globals.TAG, "runRelayHumidifier: currentPortStatus : $currentPortStatus")
-        Log.i(Globals.TAG, "runRelayHumidifier: targetMinInsideHumidity : ${userIntents.targetMinInsideHumidity}")
-        Log.i(Globals.TAG, "runRelayHumidifier: Hysteresis : ${tuner.humidityHysteresis}")
+        Log.i(L.TAG_CCU_HSCPU,
+            "runRelayHumidifier: currentHumidity : $currentHumidity \n"+
+                "currentPortStatus : $currentPortStatus \n"+
+                "targetMinInsideHumidity : ${userIntents.targetMinInsideHumidity} \n"+
+                "Hysteresis : ${tuner.humidityHysteresis} \n")
 
         var relayStatus = 0.0
         if (currentHumidity > 0 && occuStatus.isOccupied) {
@@ -847,7 +848,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         } else relayStatus = 0.0
 
         updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayStatus)
-        Log.i(Globals.TAG, "$whichPort = Humidifier  $relayStatus")
+        Log.i(L.TAG_CCU_HSCPU, "$whichPort = Humidifier  $relayStatus")
     }
 
     private fun runRelayDeHumidifier(
@@ -867,9 +868,11 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         val currentHumidity = equip.hsHaystackUtil!!.getHumidity()
         val currentPortStatus = getCurrentPortStatus(equip, logicalPointsList[whichPort]!!)
-        Log.i(L.TAG_CCU_HSCPU, "--- runRelayDeHumidifier--- ")
-        Log.i(L.TAG_CCU_HSCPU, "currentHumidity : $currentHumidity | currentPortStatus : $currentPortStatus |" +
-                " targetMaxInsideHumidity : ${userIntents.targetMaxInsideHumidity} | Hysteresis : ${tuner.humidityHysteresis}")
+        Log.i(L.TAG_CCU_HSCPU,
+            "currentHumidity : $currentHumidity \n" +
+                    "| currentPortStatus : $currentPortStatus \n" +
+                    "|targetMaxInsideHumidity : ${userIntents.targetMaxInsideHumidity} \n" +
+                    "| Hysteresis : ${tuner.humidityHysteresis} \n")
         var relayStatus = 0.0
         if (currentHumidity > 0 && occuStatus.isOccupied) {
             if (currentHumidity > userIntents.targetMaxInsideHumidity) {
@@ -938,7 +941,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         be 10v when no cooling is needed and it will be 2V when maximum cooling is needed.
          */
         updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, coolingLoopOutput.toDouble())
-        Log.i(Globals.TAG, "$whichPort = Cooling  analogSignal   $coolingLoopOutput")
+        Log.i(L.TAG_CCU_HSCPU, "$whichPort = Cooling  analogSignal   $coolingLoopOutput")
     }
 
     private fun runForAnalogOutHeating(
@@ -955,7 +958,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
          */
         updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, heatingLoopOutput.toDouble())
-        Log.i(Globals.TAG, "$whichPort = Heating  analogSignal   $heatingLoopOutput")
+        Log.i(L.TAG_CCU_HSCPU, "$whichPort = Heating  analogSignal   $heatingLoopOutput")
     }
 
     private fun runForAnalogOutFanSpeed(
@@ -1002,7 +1005,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         }
         updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, fanLoopForAnalog.toDouble())
-        Log.i(Globals.TAG, "$whichPort = Fan Speed  analogSignal   $fanLoopForAnalog")
+        Log.i(L.TAG_CCU_HSCPU, "$whichPort = Fan Speed  analogSignal   $fanLoopForAnalog")
     }
 
     private fun runForAnalogOutDCVDamper(
@@ -1023,19 +1026,19 @@ class HyperStatCpuProfile : ZoneProfile() {
 
 
         val co2Value = equip.hsHaystackUtil!!.readCo2Value()
-        Log.i(Globals.TAG, "runForAnalogOutDCVDamper: co2Value $co2Value")
+        Log.i(L.TAG_CCU_HSCPU, "runForAnalogOutDCVDamper: co2Value $co2Value")
         if (co2Value > 0 && co2Value > config.zoneCO2Threshold) {
             val damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
-            Log.i(Globals.TAG, "Damper opening percent $damperOperationPercent")
+            Log.i(L.TAG_CCU_HSCPU, "Damper opening percent $damperOperationPercent")
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, damperOperationPercent)
-            Log.i(Globals.TAG, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
+            Log.i(L.TAG_CCU_HSCPU, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
         }
 
     }
 
     private fun handleDeadZone(equip: HyperStatCpuEquip) {
 
-        Log.i(Globals.TAG, "updatePointsForEquip: Dead Zone ")
+        Log.i(L.TAG_CCU_HSCPU, "updatePointsForEquip: Dead Zone ")
 
         resetAllLogicalPointValues(equip)
 
@@ -1063,14 +1066,14 @@ class HyperStatCpuProfile : ZoneProfile() {
         fanModeSaved: Int
     ) {
 
-        Log.i(Globals.TAG, "Fan Details :${occuStatus.isOccupied}  ${basicSettings.fanMode}  $fanModeSaved")
+        Log.i(L.TAG_CCU_HSCPU, "Fan Details :${occuStatus.isOccupied}  ${basicSettings.fanMode}  $fanModeSaved")
         if (!occuStatus.isOccupied && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO
             && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME
             && basicSettings.fanMode != StandaloneFanStage.MEDIUM_ALL_TIME
             && basicSettings.fanMode != StandaloneFanStage.HIGH_ALL_TIME
         ) {
-            Log.i(Globals.TAG, "Resetting the Fan status back to  AUTO: ")
+            Log.i(L.TAG_CCU_HSCPU, "Resetting the Fan status back to  AUTO: ")
             updateHyperstatUIPoints(
                 equipRef = equip.equipRef!!,
                 command = "fan and operation and mode and cpu",
@@ -1079,11 +1082,13 @@ class HyperStatCpuProfile : ZoneProfile() {
         }
 
         if (occuStatus.isOccupied && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
-            Log.i(Globals.TAG, "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
+            Log.i(L.TAG_CCU_HSCPU, "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
+
+            val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
             updateHyperstatUIPoints(
                 equipRef = equip.equipRef!!,
                 command = "fan and operation and mode and cpu",
-                value = fanModeSaved.toDouble()
+                value = actualFanMode.toDouble()
             )
         }
     }
@@ -1100,7 +1105,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "th2 and logical and window and sensor"
             )
-            Log.i(Globals.TAG, "TH2 Door Window sensor value : Door is $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU, "TH2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
         }
 
@@ -1110,7 +1115,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog1 and in and logical and window and sensor"
             )
-            Log.i(Globals.TAG, "Analog In 1 Door Window sensor value : Door is $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU, "Analog In 1 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
         }
 
@@ -1120,15 +1125,15 @@ class HyperStatCpuProfile : ZoneProfile() {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog2 and in and logical and window and sensor"
             )
-            Log.i(Globals.TAG, "Analog In 2 Door Window sensor value : Door is $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU, "Analog In 2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
         }
-        Log.i(Globals.TAG, " is Door Open ? $isDoorOpen")
+        Log.i(L.TAG_CCU_HSCPU, " is Door Open ? $isDoorOpen")
         if (isDoorOpen) resetLoopOutputValues()
     }
 
     private fun resetLoopOutputValues() {
-        Log.i(Globals.TAG, "Resetting all the loopout values: ")
+        Log.i(L.TAG_CCU_HSCPU, "Resetting all the loopout values: ")
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
@@ -1163,14 +1168,15 @@ class HyperStatCpuProfile : ZoneProfile() {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog1 and in and logical and  keycard and sensor"
             )
-            Log.i(Globals.TAG, "runForKeycardSensor 1 : $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU, "runForKeycardSensor 1 : $sensorValue")
             if(sensorValue.toInt() == 1) {
                 equip.hsHaystackUtil!!.setSensorOccupancyPoint(1.0)
             }else{
                 val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-                if(currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
+                if(currentOperatingMode== Occupancy.OCCUPIED.ordinal
+                    && currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
 
-                    Log.i(Globals.TAG, "Moving to Auto Away state")
+                    Log.i(L.TAG_CCU_HSCPU, "Moving to Auto Away state")
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
@@ -1186,14 +1192,15 @@ class HyperStatCpuProfile : ZoneProfile() {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog2 and in and logical and keycard and sensor"
             )
-            Log.i(Globals.TAG, "runForKeycardSensor 2 : $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU, "runForKeycardSensor 2 : $sensorValue")
             if(sensorValue.toInt() == 0) {
                 equip.hsHaystackUtil!!.setSensorOccupancyPoint(1.0)
             }else{
                 val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-                if(currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
+                if(currentOperatingMode== Occupancy.OCCUPIED.ordinal
+                    && currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
 
-                    Log.i(Globals.TAG, "Moving to Auto Away state")
+                    Log.i(L.TAG_CCU_HSCPU, "Moving to Auto Away state")
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
@@ -1234,7 +1241,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     private fun resetPresentConditioningStatus(equip: HyperStatCpuEquip) {
 
-        Log.i(Globals.TAG, "Resetting all the Preset Relays and Analog outs ")
+        Log.i(L.TAG_CCU_HSCPU, "Resetting all the Preset Relays and Analog outs ")
         val logicalPointsList = equip.getLogicalPointList()
         val presentConfiguration = equip.getConfiguration()
 

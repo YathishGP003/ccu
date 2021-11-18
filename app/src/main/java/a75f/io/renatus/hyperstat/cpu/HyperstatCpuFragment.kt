@@ -1,11 +1,13 @@
-package a75f.io.renatus.hyperstat
+package a75f.io.renatus.hyperstat.cpu
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.HyperStat
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.cpu.CpuAnalogOutAssociation
@@ -13,9 +15,11 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.hyperstat.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -74,7 +78,6 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     lateinit var zoneCO2Threshold: Spinner
     lateinit var zoneCO2Target: Spinner
 
-
     /**
      * Test Signal Buttons
      */
@@ -87,7 +90,6 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     lateinit var analogOut1Test: Spinner
     lateinit var analogOut2Test: Spinner
     lateinit var analogOut3Test: Spinner
-
     companion object {
         const val ID = "HyperStatCpuFragment"
 
@@ -256,6 +258,9 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             analogOut2Test.adapter = adapterTestSignal
             analogOut3Test.adapter = adapterTestSignal
 
+            analogOut1Test.setSelection(0,false)
+            analogOut2Test.setSelection(0,false)
+            analogOut3Test.setSelection(0,false)
             analogOut1Test.setOnItemSelected { sendControl() }
             analogOut2Test.setOnItemSelected { sendControl() }
             analogOut3Test.setOnItemSelected { sendControl() }
@@ -447,10 +452,6 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 switch.isChecked = relayState.enabled
                 selector.isEnabled = relayState.enabled
                 selector.setSelection(relayState.association.ordinal)
-                /*testButton.isEnabled = relayState.enabled
-                if (!relayState.enabled) {
-                    testButton.isChecked = false
-                }*/
             }
         }
         var isDampSelected = false
@@ -459,7 +460,6 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 switch.isChecked = analogOutState.enabled
                 selector.isEnabled = analogOutState.enabled
                 selector.setSelection(analogOutState.association.ordinal)
-                // testSelector.isEnabled = analogOutState.enabled
                 vAtMinDamperLabel.text = String.format(
                     "%s%d at \nMin %s",
                     getString(R.string.hyperstat_analog_out),
@@ -517,14 +517,32 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     }
 
 
+    @SuppressLint("LogNotTimber")
     private fun sendControl() {
+        val testSignalControlMessage: HyperStat.HyperStatControlsMessage_t  = getControlMessage()
+        Log.i(L.TAG_CCU_HSCPU,
+            "--------------Hyperstat CPU test signal sendControl: ------------------\n" +
+                "Node address  ${meshAddress.toInt()}\n" +
+                "setTemp Heating  ${testSignalControlMessage.setTempHeating}\n" +
+                "setTemp Cooling  ${testSignalControlMessage.setTempCooling}\n" +
+                "conditioningMode  ${testSignalControlMessage.conditioningMode}\n" +
+                "Fan Mode  ${testSignalControlMessage.fanSpeed}\n" +
+                "Relay1 ${testSignalControlMessage.relay1}\n" +
+                "Relay2 ${testSignalControlMessage.relay2}\n" +
+                "Relay3 ${testSignalControlMessage.relay3}\n" +
+                "Relay4 ${testSignalControlMessage.relay4}\n" +
+                "Relay5 ${testSignalControlMessage.relay5}\n" +
+                "Relay6 ${testSignalControlMessage.relay6}\n" +
+                "Analog Out1 ${testSignalControlMessage.analogOut1.percent}\n" +
+                "Analog Out2 ${testSignalControlMessage.analogOut2.percent}\n" +
+                "Analog Out3 ${testSignalControlMessage.analogOut3.percent}\n" +
+                "-------------------------------------------------------------")
         HyperStatMessageSender.writeControlMessage(
-            getControlMessage(), meshAddress.toInt(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
+            testSignalControlMessage, meshAddress.toInt(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
             false
         )
         if (relay1Test.isChecked || relay2Test.isChecked || relay3Test.isChecked
-            || relay4Test.isChecked || relay5Test.isChecked || relay5Test.isChecked
-        ) {
+            || relay4Test.isChecked || relay5Test.isChecked || relay5Test.isChecked ) {
             if (!Globals.getInstance().isTestMode) {
                 Globals.getInstance().isTestMode = true
             }
@@ -536,45 +554,63 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     }
 
 
-    private fun getControlMessage(): HyperStat.HyperStatControlsMessage_t? {
+    private fun getControlMessage(): HyperStat.HyperStatControlsMessage_t {
+
+        val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
+        val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
+
+        val ao2Min = analogOutUIs[1].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
+        val ao2Max = analogOutUIs[1].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
+
+        val ao3Min = analogOutUIs[2].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
+        val ao3Max = analogOutUIs[2].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
+
         return HyperStat.HyperStatControlsMessage_t.newBuilder()
-            .setAnalogOut1(HyperStat.HyperStatAnalogOutputControl_t.newBuilder().setPercent(80))
             .setRelay1(relay1Test.isChecked)
             .setRelay2(relay2Test.isChecked)
             .setRelay3(relay3Test.isChecked)
             .setRelay4(relay4Test.isChecked)
             .setRelay5(relay5Test.isChecked)
             .setRelay6(relay6Test.isChecked)
-
             .setAnalogOut1(
                 HyperStat.HyperStatAnalogOutputControl_t
                     .newBuilder().setPercent(
-                        Integer.parseInt(
-                            analogOut1Test.selectedItem.toString()
-                        )
+                        getAnalogVal(ao1Min,ao1Max,analogOut1Test.selectedItem.toString().toDouble())
                     ).build()
             )
             .setAnalogOut2(
                 HyperStat.HyperStatAnalogOutputControl_t
                     .newBuilder().setPercent(
-                        Integer.parseInt(
-                            analogOut2Test.selectedItem.toString()
-                        )
+                        getAnalogVal(ao2Min,ao2Max,analogOut2Test.selectedItem.toString().toDouble())
                     ).build()
             )
             .setAnalogOut3(
                 HyperStat.HyperStatAnalogOutputControl_t
                     .newBuilder().setPercent(
-                        Integer.parseInt(
-                            analogOut3Test.selectedItem.toString()
-                        )
+                        getAnalogVal(ao3Min,ao3Max,analogOut3Test.selectedItem.toString().toDouble())
                     ).build()
             )
-            .setSetTempCooling(10 * 74)
-            .setSetTempHeating(10 * 69)
+            .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
+            .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
+            .setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO)
+            .setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO)
             .build()
     }
+    private fun getDesiredTempCooling(node: Short): Double {
+        return CCUHsApi.getInstance()
+            .readPointPriorityValByQuery("desired and temp and cooling and group == \"$node\"")
+    }
 
+    private fun getDesiredTempHeating(node: Short): Double {
+        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+            "desired and temp and heating and group == \"$node\"")
+    }
+
+    private fun getAnalogVal(min: Double, max: Double, voltage : Double): Int {
+        return if (max > min) (10 * (min + (max - min) * voltage / 100)).toInt() else (10 * (min - (min - max) * voltage /
+                100)).toInt()
+
+    }
 
 }
 

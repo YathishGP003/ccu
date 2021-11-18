@@ -19,6 +19,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -172,10 +173,6 @@ public class BPOSProfile extends ZoneProfile {
                 state = COOLING;
             }
         }
-
-        Log.d("BPOSProfile", "status" + state);
-        Log.d("BPOSProfile", "mBPOSEquip.getStatus()" + mBPOSEquip.getStatus());
-        Log.d("BPOSProfile", "state.ordinal()" + state.ordinal());
         if (mBPOSEquip.getStatus() != state.ordinal()) {
             mBPOSEquip.setStatus(state.ordinal());
         }
@@ -253,8 +250,18 @@ public class BPOSProfile extends ZoneProfile {
             long temporaryHoldTime =
                     ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(mBPOSEquip.mEquipRef));
             long differenceInMinutes = findDifference(temporaryHoldTime, true);
+            double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
 
-            if (occupancysensor) {
+            /*
+            If systemOccupancy is preconditioning then zone level profile will also be in
+            preconditioning.
+             */
+            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING){
+                CCUHsApi.getInstance().writeHisValByQuery(
+                        "point and bpos and occupancy and mode and " +
+                                "equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
+                        (double) Occupancy.PRECONDITIONING.ordinal());
+            }else if (occupancysensor) {
                 // If we are not is in force occupy then fall into force occupy
                 if (occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
 
@@ -262,24 +269,14 @@ public class BPOSProfile extends ZoneProfile {
                             "point and bpos and occupancy and mode and " +
                                     "equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
                             (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
-                    double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
-                    updateDesiredtemp(desiredAvgTemp);
-                    Log.i(Globals.TAG, "Falling in FORCE Occupy mode");
-                } else {
-                    Log.i(Globals.TAG, "We are already in force occupy");
-                    // We are already in force occupy
 
-                    // If the last
-                    int quickPeriod = 5;
-                    if (differenceInMinutes < quickPeriod) {
-                        Log.i(Globals.TAG, "Occupant Detected time is less than 5 min so " +
-                                "extending the time");
-                        double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
-                        updateDesiredtemp(desiredAvgTemp);
-                    } else {
-                        // Wait for less then 30 then update based on the condition
-                        Log.i(Globals.TAG, "No action state waiting for time expiry");
-                    }
+                    updateDesiredtemp(desiredAvgTemp);
+                    Log.i("BPOS", "Falling in FORCE Occupy mode");
+                } else {
+                    Log.i("BPOS", "We are already in force occupy");
+                    // We are already in force occupy
+                    // Just update with latest
+                    updateDesiredtemp(desiredAvgTemp);
                 }
             } else {
                 Log.d("BPOSProfile", "Occupant not detected in unoccupied mode");
@@ -290,7 +287,6 @@ public class BPOSProfile extends ZoneProfile {
         } else {
             // Reset everything if there was force occupied condition
             Log.d("BPOSProfile", "We are back to occupied");
-            Log.d("BPOSProfile", "Occupancy.AUTOFORCEOCCUPIED.ordinal() = "+Occupancy.AUTOFORCEOCCUPIED.ordinal());
             Log.d("BPOSProfile", "occupancyModeval = "+occupancyModeval);
             if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
                 Log.d("BPOSProfile", "Move to to occupied status");
@@ -309,7 +305,7 @@ public class BPOSProfile extends ZoneProfile {
     }
 
     private void resetForceOccupy() {
-        Log.i(Globals.TAG, "Resetting the resetForceOccupy: ");
+        Log.i("BPOS", "Resetting the resetForceOccupy: ");
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +
                 "mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"", 0.0);
         CCUHsApi.getInstance().writeHisValByQuery("point and  bpos and occupancy  and his and " +

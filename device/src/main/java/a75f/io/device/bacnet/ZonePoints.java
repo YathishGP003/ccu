@@ -597,7 +597,8 @@ public class ZonePoints {
    }
     public double getDesiredTemp(Device equip, String tags){
         try {
-            return CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and "+tags+" and equipRef == \""+equip.getEquipRef()+"\"");
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and point and desired and air and temp and "+tags+" and " +
+                                                "equipRef == \""+equip.getEquipRef()+"\"");
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

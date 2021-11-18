@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertProcessJob;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -186,6 +187,10 @@ public class Globals {
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
         PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
+
+        // Start AlertManager whether or not token is empty
+        String token = CCUHsApi.getInstance().getJwt();
+        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl(), token);
 
         //set SN address band
         String addrBand = getSmartNodeBand();

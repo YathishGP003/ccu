@@ -1,12 +1,14 @@
 package a75f.io.logic.filesystem
 
+import a75f.io.alerts.AlertManager
+import a75f.io.api.haystack.Alert
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
 import java.io.*
-import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.jvm.Throws
 
 private const val LOGS_DIR = "RenatusLogs"
 
@@ -76,6 +78,32 @@ class FileSystemTools(private val appContext: Context) {
       }
 
       return writeStringToFileInLogsDir(log.toString(), fileName)
+   }
+
+   fun writeAlerts(fileName: String): File {
+      val alerts = AlertManager.getInstance().allAlertsOldestFirst
+      val unfixedAlerts = alerts.filter { a -> !a.isFixed }
+      val unsyncdAlerts = alerts.filter { a -> !a.syncStatus }
+
+      val str = StringBuilder()
+      str.appendLine("***** Alert Count Info *****")
+      str.appendLine("Total alert count = " + alerts.size)
+      str.appendLine("Total unfixed alert count = " + unfixedAlerts.size)
+      str.appendLine("Total un-sync'd alert count = " + unsyncdAlerts.size)
+
+      str.appendLine("\n\n")
+      str.appendLine("***** Unfixed Alert Ids *****")
+      str.append(unfixedAlerts.filter{ a -> a.guid.isNotBlank() }.joinToString("\n", transform = Alert::getGuid))
+
+      str.appendLine("\n\n")
+      str.appendLine("***** Unfixed Alerts *****")
+      str.append(unfixedAlerts.joinToString("\n", transform = Alert::toString))
+
+      str.appendLine("\n\n")
+      str.appendLine("***** Un-sync'd Alerts *****")
+      str.append(unsyncdAlerts.joinToString("\n", transform = Alert::toString))
+
+      return writeStringToFileInLogsDir(str.toString(), fileName)
    }
 
    private fun findAllSharedPreferences(): Map<String, SharedPreferences> {

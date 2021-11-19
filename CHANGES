@@ -1,8 +1,2 @@
- - Merged PR 2367: Update system status during occupancy
- - Merged PR 2389: clear pointArray level with delete instead of 1ms write
- - Merged PR 2390: bacnet desired temp to be read from point array
- - Merged PR 2361: HSCPU Reconfiguration, Fan and conditioning mode issue (Hyperstat Integration issues)
- - Update dab system status when all zones temp-dead
- - clear pointArray level with delete instead of 1ms write
- - Update system status during occupancy
- - bacnet desired temp to be read from point array
+ - Merged PR 2425: Vav series to be independent of systemFanLoopOp
+ - Vav series to be independent of systemFanLoopOp

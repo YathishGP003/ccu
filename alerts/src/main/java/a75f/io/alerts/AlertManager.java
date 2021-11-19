@@ -116,11 +116,6 @@ public class AlertManager
         return mInstance;
     }
 
-//    public AlertManager(AlertsRepository alertsRepository, Context context) {
-//        repo = alertsRepository;
-//        appContext = context;
-//    }
-
     public boolean hasService() {
         return alertsService != null && repo != null;
     }

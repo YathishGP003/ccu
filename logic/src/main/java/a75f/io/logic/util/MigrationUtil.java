@@ -75,7 +75,7 @@ public class MigrationUtil {
 
     /**
      * A duplicate alert exists when an older, *unsynced* alert with the same title and equipId also exists.
-     * This keep only the oldest alert, while deleting the others.
+     * This will only keep the oldest alert, while deleting the others.
      * */
     public static void removeDuplicateAlerts(AlertManager alertManager) { // Public so it can more easily be tested...
         // Log before delete

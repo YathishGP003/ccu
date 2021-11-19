@@ -102,7 +102,7 @@ public class MigrationUtil {
                     for (int i = 1; i < alerts.size(); i++) {
                         Alert alert = alerts.get(i);
                         CcuLog.i(logTag, "Deleting alert = " + alert);
-//                        alertManager.deleteAlert(alert);
+                        alertManager.deleteAlert(alert);
                     }
                 }
             }

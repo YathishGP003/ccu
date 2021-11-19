@@ -29,11 +29,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import a75f.io.api.haystack.CCUHsApi;
-
-import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -75,10 +75,12 @@ public class UsbModbusService extends Service {
     private UsbDevice device;
     private UsbDeviceConnection connection;
     private UsbSerialDevice serialPort;
-    private boolean serialPortConnected;
+    private volatile boolean serialPortConnected;
     
     public SerialInputStream serialInputStream;
     private int reconnectCounter = 0;
+    
+    private Timer usbPortScanTimer = new Timer();
     ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -106,11 +108,10 @@ public class UsbModbusService extends Service {
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 if (!serialPortConnected) {
-                    findModbuSerialPortDevice(); // A USB device has been attached. Try to open it as a Serial port
+                     scheduleUsbConnectedEvent();
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                // Usb device was disconnected. send an intent to the Main Activity
-    
+                usbPortScanTimer.cancel();
                 // Usb device was disconnected. send an intent to the Main Activity
                 Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
                 arg0.sendBroadcast(intent);
@@ -122,6 +123,15 @@ public class UsbModbusService extends Service {
             }
         }
     };
+    
+    private void scheduleUsbConnectedEvent() {
+        usbPortScanTimer.cancel();
+        usbPortScanTimer.schedule(new TimerTask() {
+            @Override public void run() {
+                findModbusSerialPortDevice();
+            }
+        }, 1000);
+    }
     /*
      *  Data received from serial port will be received here. Just populate onReceivedData with your code
      *  In this particular example. byte stream is converted to String and send to UI thread to
@@ -207,7 +217,7 @@ public class UsbModbusService extends Service {
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
     
         try {
-            findModbuSerialPortDevice();
+            findModbusSerialPortDevice();
         } catch (SecurityException e) {
             //Android throws SecurityException if the application process is not granted android.permission.MANAGE_USB
             Log.e(TAG, "USB Security Exception", e);
@@ -250,20 +260,15 @@ public class UsbModbusService extends Service {
         registerReceiver(usbReceiver, filter);
     }
 
-    private void findModbuSerialPortDevice() {
+    private void findModbusSerialPortDevice() {
 
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        Log.d(TAG, "findMBSerialPortDevice=" + usbDevices.size());
+        Log.d(TAG, "findMBSerialPortDevice = " + usbDevices.size());
         if (!usbDevices.isEmpty()) {
             boolean keep = true;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                int deviceVID = device.getVendorId();
-                int devicePID = device.getProductId();
-                Log.i(TAG, "Modbus USB Device VID: " + deviceVID);
-                Log.i(TAG, "Modbus USB Device PID: " + devicePID);
-                if (deviceVID == 4292 || (deviceVID == DEVICE_ID_FTDI && !UsbUtils.isBiskitMode(getApplicationContext()))) {
-                    //if (deviceVID == 4292) {
+                if (UsbSerialUtil.isModbusDevice(device, getApplicationContext())) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
                     if (connection != null) {
@@ -278,9 +283,9 @@ public class UsbModbusService extends Service {
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = false;
                         }
-                        Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
+                        Log.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
+                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
                     }
                 } else {
                     connection = null;
@@ -312,25 +317,21 @@ public class UsbModbusService extends Service {
         if (!usbDevices.isEmpty()) {
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                int deviceVID = device.getVendorId();
-                int devicePID = device.getProductId();
-                Log.i(TAG, "Modbus USB Device VID: " + deviceVID);
-                Log.i(TAG, "Modbus USB Device PID: " + devicePID);
-                if (deviceVID == 4292 || (deviceVID == DEVICE_ID_FTDI &&
-                                          !UsbUtils.isBiskitMode(getApplicationContext()))) {
+                if (UsbSerialUtil.isCMDevice(device, context)) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
                     if (connection != null && success) {
                         ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
                         new Thread(modbusRunnable).start();
-                        Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
+                        Log.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
+                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
                     }
                 } else {
                     connection = null;
                     device = null;
                 }
+                
             }
         }
     }

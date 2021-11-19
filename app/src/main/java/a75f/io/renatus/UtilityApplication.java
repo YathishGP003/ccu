@@ -143,7 +143,6 @@ public abstract class UtilityApplication extends Application {
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, R.string.usb_permission_priv_app_msg, Toast.LENGTH_LONG).show();
                     break;
-                
             }
         }
     };
@@ -310,6 +309,7 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
         filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
         filter.addAction(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
+        filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbReceiver, filter);
     }
 

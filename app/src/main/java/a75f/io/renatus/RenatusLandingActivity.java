@@ -62,6 +62,9 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbService;
+import a75f.io.usbserial.UsbServiceActions;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -76,6 +79,7 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -226,6 +230,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
         }
         CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate Completed");
+    
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
+        registerReceiver(mUsbEventReceiver, filter);
     }
 
     public void setViewPager() {
@@ -350,6 +358,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         try {
             if (mConnectionChangeReceiver != null) {
                 this.unregisterReceiver(mConnectionChangeReceiver);
+            }
+            if (mUsbEventReceiver != null) {
+                unregisterReceiver(mUsbEventReceiver);
             }
         } catch (Exception e) {
             // already unregistered
@@ -626,4 +637,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
 
     }
+    
+    private final BroadcastReceiver mUsbEventReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_USB_REQUIRES_TABLET_REBOOT:
+                    CcuLog.i("CCU_SERIAL"," SHOW REBOOT DIALOG");
+                    CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
+                    Toast.makeText(context, "USB device not connected", Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
 }

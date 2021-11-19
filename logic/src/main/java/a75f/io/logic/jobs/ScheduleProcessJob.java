@@ -726,7 +726,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if((prevOccuStatus == PRECONDITIONING) && (systemMode != SystemMode.OFF))
                 return PRECONDITIONING;
         }
-        
+        CcuLog.d(L.TAG_CCU_JOB, "getSystemPreconditioningStatus : "+UNOCCUPIED);
         return UNOCCUPIED;
     }
     

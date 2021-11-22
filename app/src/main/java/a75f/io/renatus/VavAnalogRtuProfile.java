@@ -1,8 +1,13 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.DeviceUtil;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -98,7 +103,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
         return rootView;
     }
     
-    @Override
+    @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
 		prefs = new Prefs(getContext().getApplicationContext());
@@ -217,29 +222,37 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			spArray.add(Math.round(pos * 100D) / 100D);
 		}
 		
-		ArrayAdapter<Double> coolingSatMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, coolingSatArray);
+		ArrayAdapter<Double> coolingSatMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                               coolingSatArray);
 		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> coolingSatMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, coolingSatArray);
+		ArrayAdapter<Double> coolingSatMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                               coolingSatArray);
 		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> heatingSatMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, heatingSatArray);
+		ArrayAdapter<Double> heatingSatMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                               heatingSatArray);
 		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> heatingSatMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, heatingSatArray);
+		ArrayAdapter<Double> heatingSatMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                               heatingSatArray);
 		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		
-		ArrayAdapter<Double> co2MinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
+		ArrayAdapter<Double> co2MinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                        co2Array);
 		co2MinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> co2MaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
+		ArrayAdapter<Double> co2MaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                        co2Array);
 		co2MaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> spMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, spArray);
+		ArrayAdapter<Double> spMinAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                       spArray);
 		spMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		ArrayAdapter<Double> spMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, spArray);
+		ArrayAdapter<Double> spMaxAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+		                                                       spArray);
 		spMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		
@@ -294,22 +307,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
-		ahuAnalog1Test.setSelection(0,false);
+		ahuAnalog1Test.setSelection(ControlMote.getAnalog1Out(),false);
 		
 		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
-		ahuAnalog2Test.setSelection(0,false);
+		ahuAnalog2Test.setSelection(ControlMote.getAnalog2Out(),false);
 		
 		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
-		ahuAnalog3Test.setSelection(0,false);
+		ahuAnalog3Test.setSelection(ControlMote.getAnalog3Out(),false);
 		
 		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog4Test.setAdapter(co2TestAdapter);
-		ahuAnalog4Test.setSelection(0,false);
+		ahuAnalog4Test.setSelection(ControlMote.getAnalog4Out(),false);
 
 		analog1Min.setOnItemSelectedListener(this);
 		analog1Max.setOnItemSelectedListener(this);
@@ -323,8 +336,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ahuAnalog2Test.setOnItemSelectedListener(this);
 		ahuAnalog3Test.setOnItemSelectedListener(this);
 		ahuAnalog4Test.setOnItemSelectedListener(this);
-		relay7Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-		{
+		relay7Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
 			{
@@ -336,26 +348,14 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			}
 		});
 		
-		relay3Test.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				sendAnalogOutTestSignal();
-			}
-		});
-		relay7Test.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				sendAnalogOutTestSignal();
-			}
-		});
+		relay3Test.setChecked(ControlMote.getRelay3());
+		relay7Test.setChecked(ControlMote.getRelay7());
+		relay3Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogRelayTestSignal(Tags.RELAY3, b? 1 : 0));
+		relay7Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogRelayTestSignal(Tags.RELAY7, b? 1 : 0));
 	}
 	
 	
-	@Override
+	@SuppressLint("NonConstantResourceId") @Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
 	{
 		switch (buttonView.getId())
@@ -381,7 +381,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		}
 	}
 	
-	@Override
+	@SuppressLint("NonConstantResourceId") @Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)
 	{
@@ -414,15 +414,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				setConfigBackground("co2 and max", val);
 				break;
 			case R.id.analog1Spinner:
+				sendAnalogRelayTestSignal(Tags.ANALOG1, val);
+				break;
 			case R.id.analog2Spinner:
+				sendAnalogRelayTestSignal(Tags.ANALOG2, val);
+				break;
 			case R.id.analog3Spinner:
+				sendAnalogRelayTestSignal(Tags.ANALOG3, val);
+				break;
 			case R.id.analog4Spinner:
-				sendAnalogOutTestSignal();
+				sendAnalogRelayTestSignal(Tags.ANALOG4, val);
 				break;
 		}
 	}
 	
 
+	@SuppressLint("StaticFieldLeak")
 	private void setConfigBackground(String tags, double val) {
 		new AsyncTask<String, Void, Void>() {
 
@@ -438,6 +445,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
+	@SuppressLint("StaticFieldLeak")
 	private void setHumidifierConfigBackground(String tags, double val) {
 		new AsyncTask<String, Void, Void>() {
 			@Override
@@ -459,6 +467,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
+	@SuppressLint("StaticFieldLeak")
 	private void setSelectionBackground(String analog, boolean selected) {
 		new AsyncTask<String, Void, Void>() {
 			@Override
@@ -482,22 +491,6 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
 	
-	private void setUserIntentBackground(String query, double val) {
-		
-		new AsyncTask<String, Void, Void>() {
-			@Override
-			protected Void doInBackground( final String ... params ) {
-				TunerUtil.writeSystemUserIntentVal(query, val);
-				return null;
-			}
-			
-			@Override
-			protected void onPostExecute( final Void result ) {
-				// continue what you are doing...
-			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-	}
-	
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
@@ -511,24 +504,23 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		}
 		if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
 		    || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-		    || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-			String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-			str = str + "\nPlease select appropriate conditioning mode from System Settings.";
-			builder.setCancelable(false)
-			       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				       public void onClick(DialogInterface dialog, int id) {
-					       dialog.cancel();
-				       }
-			       })
-			       .setTitle("System Conditioning Mode Changed")
-			       .setMessage(str);
-			
-			AlertDialog dlg = builder.create();
-			dlg.show();
-			setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+		    || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable())) {
+			SystemProfileUtil.showConditioningDisabledDialog(getActivity(), systemMode);
 		}
+	}
+	
+	private void sendAnalogRelayTestSignal(String tag, double val) {
+		
+		Globals.getInstance().setTestMode(true);
+		if (tag.contains("analog")) {
+			ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
+			                                                               systemProfile.getConfigVal(tag+" and max"),
+			                                                               val));
+		} else if (tag.contains("relay")) {
+			ControlMote.setRelayState(tag, val);
+		}
+		
+		MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
 	}
 	
 	public void sendAnalogOutTestSignal() {

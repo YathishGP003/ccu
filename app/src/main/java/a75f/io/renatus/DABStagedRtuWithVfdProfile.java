@@ -1,9 +1,14 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.DeviceUtil;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -118,7 +123,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         return rootView;
     }
     
-    @Override
+    @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
 
@@ -231,6 +236,14 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         relay6Tb.setOnCheckedChangeListener(this);
         relay7Tb.setOnCheckedChangeListener(this);
         analog2Tb.setOnCheckedChangeListener(this);
+    
+        relay1Test.setChecked(ControlMote.getRelay1());
+        relay2Test.setChecked(ControlMote.getRelay2());
+        relay3Test.setChecked(ControlMote.getRelay3());
+        relay4Test.setChecked(ControlMote.getRelay4());
+        relay5Test.setChecked(ControlMote.getRelay5());
+        relay6Test.setChecked(ControlMote.getRelay6());
+        relay7Test.setChecked(ControlMote.getRelay7());
         
         relay1Test.setOnCheckedChangeListener(this);
         relay2Test.setOnCheckedChangeListener(this);
@@ -276,7 +289,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog2TestSpinner.setAdapter(analogAdapter);
-        analog2TestSpinner.setSelection(0,false);
+        analog2TestSpinner.setSelection(ControlMote.getAnalog2Out(),false);
         
         analog2Economizer.setAdapter(analogAdapter);
         analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"),false);
@@ -344,7 +357,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2DefaultSpinner.setEnabled(analogEnabled);
     }
     
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
@@ -384,20 +397,33 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 }
                 break;
             case R.id.relay1Test:
+                sendAnalogRelayTestSignal(Tags.RELAY1, isChecked ? 1:0);
+                break;
             case R.id.relay2Test:
+                sendAnalogRelayTestSignal(Tags.RELAY2, isChecked ? 1:0);
+                break;
             case R.id.relay3Test:
+                sendAnalogRelayTestSignal(Tags.RELAY3, isChecked ? 1:0);
+                break;
             case R.id.relay4Test:
+                sendAnalogRelayTestSignal(Tags.RELAY4, isChecked ? 1:0);
+                break;
             case R.id.relay5Test:
+                sendAnalogRelayTestSignal(Tags.RELAY5, isChecked ? 1:0);
+                break;
             case R.id.relay6Test:
+                sendAnalogRelayTestSignal(Tags.RELAY6, isChecked ? 1:0);
+                break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal();
+                sendAnalogRelayTestSignal(Tags.RELAY7, isChecked ? 1:0);
+                break;
             
         }
         updateAnalogOptions();
     }
     
     
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
@@ -453,7 +479,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 }
                 break;
            case R.id.fanspeedSpinner:
-                sendRelayActivationTestSignal();
+                sendAnalogRelayTestSignal(Tags.ANALOG2, Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2Economizer:
                 setConfigBackground("analog2 and economizer", Double.parseDouble(arg0.getSelectedItem().toString()));
@@ -510,43 +536,12 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }
         if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
             || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-            String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-            str = str + "\nPlease select appropriate conditioning mode from System Settings.";
-            builder.setCancelable(false)
-                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           dialog.cancel();
-                       }
-                   })
-                   .setTitle("System Conditioning Mode Changed")
-                   .setMessage(str);
-            
-            AlertDialog dlg = builder.create();
-            dlg.show();
-            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable())) {
+            SystemProfileUtil.showConditioningDisabledDialog(getActivity(), systemMode);
         }
     }
     
-    private void setUserIntentBackground(String query, double val) {
-        
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground( final Void ... params ) {
-                TunerUtil.writeSystemUserIntentVal(query, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-    
-    private void setConfigEnabledBackground(String config, double val) {
+    @SuppressLint("StaticFieldLeak") private void setConfigEnabledBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
@@ -564,7 +559,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
-    private void setConfigAssociationBackground(String config, double val) {
+    @SuppressLint("StaticFieldLeak") private void setConfigAssociationBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -586,7 +581,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
-    private void setConfigBackground(String config, double val) {
+    @SuppressLint("StaticFieldLeak") private void setConfigBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
@@ -601,46 +596,27 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
-    public void sendRelayActivationTestSignal() {
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        short relayStatus = (short) ((relay1Test.isChecked() ? 1 << MeshUtil.getRelayMapping(1) : 0)
-                                     | (relay2Test.isChecked() ? 1 << MeshUtil.getRelayMapping(2) : 0)
-                                     | (relay3Test.isChecked() ? 1 << MeshUtil.getRelayMapping(3) : 0)
-                                     | (relay4Test.isChecked() ? 1 << MeshUtil.getRelayMapping(4) : 0)
-                                     | (relay5Test.isChecked() ? 1 << MeshUtil.getRelayMapping(5) : 0)
-                                     | (relay6Test.isChecked() ? 1 << MeshUtil.getRelayMapping(6) : 0)
-                                     | (relay7Test.isChecked() ? 1 << MeshUtil.getRelayMapping(7) : 0));
-        
-        msg.relayBitmap.set(relayStatus);
-        msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
-        MeshUtil.sendStructToCM(msg);
-
-        ControlMote.setAnalogOut("analog2",Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()));
-        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
-        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
-
-        if (relayStatus > 0 || Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()) > 0) {
-            if (!Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(true);
-            }
-        } else {
-            if (Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(false);
-            }
+    private void sendAnalogRelayTestSignal(String tag, double val) {
+        Globals.getInstance().setTestMode(true);
+        if (tag.equals(Tags.ANALOG2)) {
+            ControlMote.setAnalogOut(tag, 10 * val);
+        }if (tag.contains("analog")) {
+            ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
+                                                                           systemProfile.getConfigVal(tag+" and max"),
+                                                                           val));
+        } else if (tag.contains("relay")) {
+            ControlMote.setRelayState(tag, val);
         }
+        
+        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
     }
 
-    private void addFanSignal() {
+    @SuppressLint("StaticFieldLeak") private void addFanSignal() {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(final Void... params) {
-                HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+                HashMap<Object, Object> fanSignal = CCUHsApi.getInstance().readEntity("point and system and cmd and fan " +
+                                                                                 "and modulating");
                 if (systemProfile != null && systemProfile.getSystemEquipRef() != null && (fanSignal == null || fanSignal.get("id") == null)) {
                     systemProfile.addAnalogCmdPoints(systemProfile.getSystemEquipRef());
                 }

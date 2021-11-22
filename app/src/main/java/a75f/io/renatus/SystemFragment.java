@@ -603,7 +603,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList, emDevice.getSlaveId());
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -655,7 +655,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList, btuDevice.getSlaveId());
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));

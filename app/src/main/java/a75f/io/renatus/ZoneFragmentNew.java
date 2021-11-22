@@ -1780,7 +1780,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
-                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(),modbusDevices.get(i).getEquipRef(),parameterList);
+                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
+                                        new ZoneRecyclerModbusParamAdapter(getContext(),
+                                                                           modbusDevices.get(i).getEquipRef(),
+                                                                           parameterList,
+                                                                           modbusDevices.get(i).getSlaveId());
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

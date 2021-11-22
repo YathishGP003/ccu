@@ -1,9 +1,14 @@
 package a75f.io.renatus.modbus;
 
 import android.content.Context;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,11 +43,17 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     Context context;
     List<Parameter> modbusParam;
     String equipRef;
+    String deviceRef;
 
-    public ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam) {
+    public ZoneRecyclerModbusParamAdapter(Context context, String equipRef, List<Parameter> modbusParam,
+                                          int slaveId) {
         this.context = context;
         this.modbusParam = modbusParam;
         this.equipRef = equipRef;
+        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+slaveId+"\"");
+        if (!device.isEmpty()) {
+            this.deviceRef = device.get("id").toString();
+        }
         UpdatePointHandler.setModbusDataInterface(this);
     }
 
@@ -131,27 +142,29 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                             Point p = readPoint(modbusParam.get(position));
-                            String unit = p.getUnit() == null ? " " : p.getUnit();
-
-                            if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
-                                for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
-                                    String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
-                                    if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
-                                        viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
+                            if (p != null) {
+                                String unit = p.getUnit() == null ? " " : p.getUnit();
+    
+                                if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
+                                    for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
+                                        String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
+                                        if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
+                                            viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
+                                        }
+                                    }
+                                } else {
+                                    if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
+                                        viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                                    } else {
+                                        viewHolder.tvParamValue.setText(String.format(java.util.Locale.US,"%.2f",readHisVal(p.getId())));
                                     }
                                 }
-                            } else {
-                                if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
-                                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                                if (unit != null && !unit.equals(" ")) {
+                                    viewHolder.tvUnit.setVisibility(View.VISIBLE);
+                                    viewHolder.tvUnit.setText("(" + unit + ")");
                                 } else {
-                                    viewHolder.tvParamValue.setText(String.format(java.util.Locale.US,"%.2f",readHisVal(p.getId())));
+                                    viewHolder.tvUnit.setVisibility(View.GONE);
                                 }
-                            }
-                            if (unit != null && !unit.equals(" ")) {
-                                viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                                viewHolder.tvUnit.setText("(" + unit + ")");
-                            } else {
-                                viewHolder.tvUnit.setVisibility(View.GONE);
                             }
                         }
                     }
@@ -166,24 +179,27 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         } else {
             if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                 Point p = readPoint(modbusParam.get(position));
-                String unit = p.getUnit() == null ? " " : p.getUnit();
-
-                if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
-                    for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
-                        String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
-                        if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
-                            viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
+                if (p != null) {
+                    String unit = p.getUnit() == null ? " " : p.getUnit();
+    
+                    if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
+                        for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
+                            String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
+                            if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
+                                viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
+                            }
                         }
+                    } else {
+                        viewHolder.tvParamValue.setText(String.format(java.util.Locale.US,"%.2f",readHisVal(p.getId())));
                     }
-                } else {
-                    viewHolder.tvParamValue.setText(String.format(java.util.Locale.US,"%.2f",readHisVal(p.getId())));
+                    if (unit != null && !unit.equals(" ")) {
+                        viewHolder.tvUnit.setVisibility(View.VISIBLE);
+                        viewHolder.tvUnit.setText("(" + unit + ")");
+                    } else {
+                        viewHolder.tvUnit.setVisibility(View.GONE);
+                    }
                 }
-                if (unit != null && !unit.equals(" ")) {
-                    viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                    viewHolder.tvUnit.setText("(" + unit + ")");
-                } else {
-                    viewHolder.tvUnit.setVisibility(View.GONE);
-                }
+                
             }
 
         }
@@ -281,15 +297,36 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     }
 
     private Point readPoint(Parameter configParams) {
-        StringBuilder tags = new StringBuilder();
+        //Read using logical tags seems direct and faster. But that approach is prone to incorrect behavior if
+        //every logical tag combination is not unique.
+        HashMap phyPoint = CCUHsApi.getInstance().read("point and physical " +
+                                         " and registerType == \""+configParams.getRegisterType()+"\""+
+                                         " and registerAddress == \""+configParams.getRegisterAddress()+ "\""+
+                                         " and parameterId == \""+configParams.getParameterId()+ "\""+
+                                         " and deviceRef == \"" + deviceRef + "\"");
+    
+        if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+            Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
+                                    + configParams.getRegisterAddress() + " and device " + deviceRef);
+            return null;
+        }
+        HashMap logPoint = CCUHsApi.getInstance().read("point and id == " + phyPoint.get("pointRef"));
+        
+        if (logPoint.isEmpty()) {
+            return null;
+        }
+        
+        /*StringBuilder tags = new StringBuilder();
         for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
             if (!Objects.nonNull(marker.getTagValue())) {
                 tags.append(" and ").append(marker.getTagName());
             }
         }
-        HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
+        HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == " +
+                                                         "\"" + equipRef + "\"");
         Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
-        return logicalPoint;
+        return logicalPoint;*/
+        return new Point.Builder().setHashMap(logPoint).build();
     }
 
     public double readVal(String id) {

@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 
@@ -86,7 +87,7 @@ public class UsbService extends Service
 	private UsbDevice           device;
 	private UsbDeviceConnection connection;
 	private UsbSerialDevice     serialPort;
-	private boolean             serialPortConnected;
+	private volatile boolean             serialPortConnected;
 	
 	private int   reconnectCounter = 0;
 	private Timer usbPortScanTimer = new Timer();
@@ -100,7 +101,6 @@ public class UsbService extends Service
 		@Override
 		public void onReceive(Context arg0, Intent arg1)
 		{
-			Log.d("UsbService.java","OnReceive == "+arg1.getAction()+","+serialPortConnected);
 			if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
 				Log.d("UsbService.java","OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
 				boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
@@ -121,22 +121,33 @@ public class UsbService extends Service
 				if (!serialPortConnected) {
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
 				}
-			}
-			else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
+			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
+				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 				usbPortScanTimer.cancel();
-				// Usb device was disconnected. send an intent to the Main Activity
-				Intent intent = new Intent(ACTION_USB_DISCONNECTED);
-				arg0.sendBroadcast(intent);
-				if (serialPortConnected) {
-					serialPort.close();
+				
+				if (UsbSerialUtil.isCMDevice(detachedDevice, context)) {
+					Log.d(TAG,"CM Serial device disconnected ");
+					if (serialPortConnected) {
+						serialPort.close();
+						serialPort = null;
+					}
+					serialPortConnected = false;
+					// Usb device was disconnected. send an intent to the Main Activity
+					Intent intent = new Intent(ACTION_USB_DISCONNECTED);
+					arg0.sendBroadcast(intent);
 				}
-				serialPortConnected = false;
 			}
+			Log.d(TAG,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
 		}
 	};
 	
+	/**
+	 * Device scan is processed on a timer thread. Also a delayed scan ensures that there is only one scan
+	 * performed for multiple events.
+	 */
 	private void scheduleUsbConnectedEvent() {
 		usbPortScanTimer.cancel();
+		usbPortScanTimer = new Timer();
 		usbPortScanTimer.schedule(new TimerTask() {
 			@Override public void run() {
 				findSerialPortDevice();
@@ -297,7 +308,7 @@ public class UsbService extends Service
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = false;
 					}
-					Log.d(TAG, "Opened Serial CM device instance "+device.getDeviceName());
+					Log.d(TAG, "Opened Serial CM device instance "+device.getVendorId()+" "+success);
 				} else {
 					connection = null;
 					device = null;
@@ -419,60 +430,53 @@ public class UsbService extends Service
 						Log.i(TAG, "Serial Port is not connected sleeping");
 						if (reconnectCounter++ >= 30) {
 							Log.i(TAG, "scanSerialPortSilentlyForCmDevice");
-							try {
-								scanSerialPortSilentlyForCmDevice();
-							} catch (Exception e) {
-								Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed", e);
-							}
+							scanSerialPortSilentlyForCmDevice();
 							reconnectCounter = 0;
+							
 							if (!serialPortConnected) {
-								Log.i(TAG, "Increment watch counter");
 								UsbSerialWatchdog.getInstance().bark(context, CCUHsApi.getInstance());
 							}
 						}
+						
 						sleep(2000);
 						continue;
 					} else {
-						UsbSerialWatchdog.getInstance().pet(context);
+						UsbSerialWatchdog.getInstance().pet();
 					}
-
-					data = messageQueue.take();
-
+					
 					if (serialPort != null) {
-						byte buffer[] = new byte[128];
-						byte crc = 0;
-						byte nOffset = 0;
-						int len = data.length;
-						if(len >= 128)
-							buffer = new byte[160]; //For OTA Updates
-						buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
-						buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
-						buffer[nOffset++] = (byte) (len & 0xff);
-						for (int i = 0; i < len; i++) {
-							buffer[i + nOffset] = data[i]; // add payload to the tx buffer
-							crc ^= data[i];             // calculate the new crc
-							if (data[i] == (byte) (ESC_BYTE &
-									0xff)) // if the data is equal to ESC byte then add another instance of that
-							{
-								nOffset++;
-								buffer[i + nOffset] = data[i];
+						data = messageQueue.poll(1, TimeUnit.SECONDS);
+						if (data != null && data.length > 0) {
+							byte buffer[] = new byte[128];
+							byte crc = 0;
+							byte nOffset = 0;
+							int len = data.length;
+							if (len >= 128)
+								buffer = new byte[160]; //For OTA Updates
+							buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
+							buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
+							buffer[nOffset++] = (byte) (len & 0xff);
+							for (int i = 0; i < len; i++) {
+								buffer[i + nOffset] = data[i]; // add payload to the tx buffer
+								crc ^= data[i];             // calculate the new crc
+								if (data[i] == (byte) (ESC_BYTE & 0xff)) // if the data is equal to ESC byte then add another instance of that
+								{
+									nOffset++;
+									buffer[i + nOffset] = data[i];
+								}
 							}
-						}
-						buffer[nOffset + len] = (byte) (crc & 0xff);
-						nOffset++;
-						buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
-						nOffset++;
-						buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
-						nOffset++;
-						serialPort.write(Arrays.copyOfRange(buffer,0,len + nOffset));
-
-						try {
+							buffer[nOffset + len] = (byte) (crc & 0xff);
+							nOffset++;
+							buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
+							nOffset++;
+							buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
+							nOffset++;
+							serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
 							Thread.sleep(300);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
 						}
 					}
 				} catch (Exception exception) {
+					Log.i(TAG, "Serial transaction failed: ", exception);
 					exception.printStackTrace();
 				}
 			}

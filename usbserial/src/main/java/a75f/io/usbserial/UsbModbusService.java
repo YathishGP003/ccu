@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 
@@ -89,8 +90,6 @@ public class UsbModbusService extends Service {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            Log.d(TAG, "OnReceive == " + arg1.getAction() + "," + serialPortConnected);
-            Log.d(TAG, "OnReceive == " + arg0.toString() + " arg1:" + arg1.getData());
             if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
                 Log.d(TAG, "OnReceive == " + arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
                 boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
@@ -113,19 +112,25 @@ public class UsbModbusService extends Service {
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
                 usbPortScanTimer.cancel();
                 // Usb device was disconnected. send an intent to the Main Activity
-                Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
-                arg0.sendBroadcast(intent);
-                if (serialPortConnected)
-                {
-                    serialPort.close();
+                UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
+                    Log.d(TAG,"Modbus Serial device disconnected ");
+                    if (serialPortConnected) {
+                        serialPort.close();
+                        serialPort = null;
+                    }
+                    serialPortConnected = false;
+                    Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
+                    arg0.sendBroadcast(intent);
                 }
-                serialPortConnected = false;
             }
+            Log.d(TAG,"UsbModbusService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
         }
     };
     
     private void scheduleUsbConnectedEvent() {
         usbPortScanTimer.cancel();
+        usbPortScanTimer = new Timer();
         usbPortScanTimer.schedule(new TimerTask() {
             @Override public void run() {
                 findModbusSerialPortDevice();
@@ -385,37 +390,32 @@ public class UsbModbusService extends Service {
                 try {
                     if (!serialPortConnected) {
                         Log.i(TAG, "MB Serial Port is not connected sleeping");
-                        if (reconnectCounter++ >= 30) {
+                        //When only modbus is disconnected
+                        if (++reconnectCounter >= 60) {
                             Log.i(TAG, "scanSerialPortSilentlyForMbDevice");
                             ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
                                                                                       .readAllEntities("equip and modbus");
                             if (modbusEquips.size() > 0) {
-                                try {
-                                    scanSerialPortSilentlyForMbDevice();
-                                } catch (Exception e) {
-                                    Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed ",e);
-                                }
+                                scanSerialPortSilentlyForMbDevice();
                             }
                             reconnectCounter = 0;
                         }
                         sleep(5000);
                         continue;
+                    } else {
+                    
                     }
                     
                     if (serialPort != null ) {
-                        data = modbusQueue.take();
-                        if (data.length > 0) {
+                        data = modbusQueue.poll(1, TimeUnit.SECONDS);
+                        if (data != null && data.length > 0) {
                             Log.i(TAG, "Write MB data : " + Arrays.toString(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
-                            try {
-                                Thread.sleep(50);
-                            }
-                            catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                            Thread.sleep(50);
                         }
                     }
                 } catch (Exception exception) {
+                    Log.i(TAG, "Modbus serial transaction failed ", exception);
                     exception.printStackTrace();
                 }
             }

@@ -71,7 +71,8 @@ public class CCUUiUtil {
     public static void showRebootDialog(Context context) {
         AlertDialog dialog = new AlertDialog.Builder(context)
                                  .setTitle("Serial Disconnected")
-                                 .setMessage("Tablet will reboot to reconnect serial.")
+                                 .setMessage("No serial port connection detected for 30 minutes.Tablet will reboot " +
+                                             "and try to reconnect. \n \n Press Cancel to avoid reboot.")
                                  .setPositiveButton(android.R.string.yes, (dialog1, which) -> RenatusApp.rebootTablet())
                                  .setNegativeButton(android.R.string.no, null)
                                  .create();

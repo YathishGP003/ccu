@@ -79,6 +79,7 @@ import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -2901,7 +2902,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 if (coolpoint.getMarkers().contains("writable")) {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
-                    ScheduleProcessJob.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval, avgval);
+                    SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval, avgval);
 
                 }
 
@@ -3069,7 +3070,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             } else
                 CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
-            ScheduleProcessJob.handleScheduleTypeUpdate(p);
+            SystemScheduleUtil.handleScheduleTypeUpdate(p);
         });
         thread.start();
     }

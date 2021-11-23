@@ -23,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 
 public class UpdatePointHandler
 {
@@ -183,7 +184,7 @@ public class UpdatePointHandler
 
         if (p.getMarkers().contains("desired"))
         {
-            ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
+            SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
             if (zoneDataInterface != null) {
                 Log.i("PubNub","Zone Data Received Refresh");
                 zoneDataInterface.refreshScreen(luid);
@@ -191,7 +192,7 @@ public class UpdatePointHandler
         }
 
         if (p.getMarkers().contains("scheduleType")) {
-            ScheduleProcessJob.handleScheduleTypeUpdate(p);
+            SystemScheduleUtil.handleScheduleTypeUpdate(p);
             if (zoneDataInterface != null) {
                 Log.i("PubNub","Zone Data Received Refresh");
                 zoneDataInterface.refreshScreen(luid);

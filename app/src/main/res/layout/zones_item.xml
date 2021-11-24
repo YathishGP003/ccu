@@ -55,6 +55,8 @@
             android:layout_height="wrap_content"
             android:text="DAB"
             android:textAppearance="@style/label_black"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
             android:clickable="false"
             android:focusable="false"
             android:duplicateParentState="true"/>

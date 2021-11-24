@@ -75,6 +75,8 @@ import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
+import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -2170,14 +2172,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                double enumVal = ConventionalPackageUnitUtil.getEnumforCPUCondMode(position , equipId);
                 if (isCPUFromPubNub) {
                     if (tempConditionMode != position) {
-                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", enumVal);
                     }
                     //isCPUFromPubNub = false;
                 } else {
                     //if(isCPUloaded) {
-                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", enumVal);
                     //}
                 }
             }
@@ -2725,13 +2728,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                double enumVal = ConventionalPackageUnitUtil.getEnumforFourPipeCondMode(position,equipId);
                 if (isFromPubNub) {
                     if (tempConditionMode != position) {
-                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
+                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", enumVal);
                     }
                     isFromPubNub = false;
                 } else {
-                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", enumVal);
                 }
             }
 

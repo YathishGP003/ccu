@@ -127,12 +127,24 @@ public class HyperStatMessageGenerator {
     }
     
     private static double getDesiredTempCooling(String equipRef) {
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and cooling and equipRef == \"" + equipRef + "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
+                    "cooling and equipRef == \"" + equipRef + "\"");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
     
     private static double getDesiredTempHeating(String equipRef) {
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and heating and equipRef == \"" + equipRef +
-                                                     "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
+                    "heating and equipRef == \"" + equipRef +
+                    "\"");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
     
 
@@ -214,7 +226,13 @@ public class HyperStatMessageGenerator {
     private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap collingDeadband = hayStack.read("point and tuner and deadband and base and cooling and equipRef == \""+equipRef+"\"");
-        return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
+        try {
+            return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
     }
 
     public static double getStandaloneHeatingDeadband(String equipRef) {
@@ -222,7 +240,13 @@ public class HyperStatMessageGenerator {
         HashMap deadbandPoint =
                 hayStack.read("point and tuner and deadband and base and heating and equipRef == \""+equipRef+
                 "\"");
-        return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
+        try {
+            return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
     }
 
 }

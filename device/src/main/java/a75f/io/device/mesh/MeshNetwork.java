@@ -154,7 +154,9 @@ public class MeshNetwork extends DeviceNetwork
                                                                "IDU Controls ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendIduControlMessage(Integer.parseInt(d.getAddr()),
                                                                                  CCUHsApi.getInstance());
-                                } else {
+
+                                    // For sense profile no need to send the control message
+                                } else if (!equip.getMarkers().contains("sense")) {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
                                                                "Settings ===================== ");
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),

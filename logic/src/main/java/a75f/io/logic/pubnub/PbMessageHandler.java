@@ -101,6 +101,7 @@ public class PbMessageHandler
     }
     
     private void handlePbMessage(JsonObject msg, Context context){
+        Log.i("DEV", "received pubnub: \n"+msg.toString());
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
             case FloorUpdateHandler.CMD:

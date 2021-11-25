@@ -807,7 +807,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
-                    clearTempOverride(equipId[0]);
+                  //  clearTempOverride(equipId[0]);
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
@@ -1276,7 +1276,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
-                    clearTempOverride(equipId);
+                  //  clearTempOverride(equipId);
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);

@@ -62,12 +62,14 @@ public class HyperStatMessageGenerator {
         //TODO - Proto file does not define profile bitmap, enabledRelay.
         HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
-            .setHeatingDeadBand((int) getStandaloneHeatingDeadband(equipRef))
-            .setCoolingDeadBand((int) getStandaloneCoolingDeadband(equipRef))
+            .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef)*10))
+            .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef)*10))
             .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and min"))
             .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max"))
-            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and min"))
-            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max"))
+                // Changed by Manjunath K. change in requirement on 17-11-2021
+                // TODO Needs to for all the profiles (Smart node and smartstat)
+            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max"))
+            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and min"))
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
@@ -86,18 +88,19 @@ public class HyperStatMessageGenerator {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
+
+        // Sense profile does not have control messages
+        if(device.containsKey("sense")) return HyperStat.HyperStatControlsMessage_t.newBuilder().build();
+
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 2);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 2);
+        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
+        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef) * 2));
         BasicSettings settings = HSHaystackUtil.Companion.getBasicSettings(address);
         Log.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "DeviceFanMode "+getDeviceFanMode(settings).name()+
                  "ConditioningMode"+getConditioningMode(settings,address).name());
-
-        // Send the operating mode
-        // controls.setOperatingMode(HyperStatOperatingMode_e.)
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
 

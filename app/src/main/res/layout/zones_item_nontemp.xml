@@ -45,6 +45,7 @@
             android:layout_gravity="top"
             android:gravity="top"
             android:layout_width="9dp"
+            android:layout_marginRight="15dp"
             android:layout_alignParentRight="true"
             android:background="@drawable/module_dead"
             android:layout_height="9dp"/>

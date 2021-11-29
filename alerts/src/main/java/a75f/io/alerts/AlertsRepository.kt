@@ -105,6 +105,8 @@ class AlertsRepository(
 
    fun getActiveDeviceDeadAlerts() = dataStore.getActiveDeviceDeadAlerts()
 
+   fun getUnsyncedAlerts() = dataStore.getUnSyncedAlerts()
+
    /**
     * @return Looks like this returns all alerts with severity not equal to an INTERNAL status
     */
@@ -198,7 +200,7 @@ class AlertsRepository(
 
       // evaluate and raise alert conditions from alert defs
       alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs, activeAlerts)
-      
+
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
 
@@ -274,7 +276,7 @@ class AlertsRepository(
          return
       }
 
-      val unsyncedAlerts: List<Alert> = dataStore.getUnSyncedAlerts()
+      val unsyncedAlerts: List<Alert> = getUnsyncedAlerts()
       CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
 
       if (unsyncedAlerts.isNotEmpty()) {

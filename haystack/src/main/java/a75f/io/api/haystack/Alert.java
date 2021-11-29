@@ -20,7 +20,7 @@ public class Alert
     public String mTitle;           // alertDef DTO
     public String mMessage;           // alertDef DTO
     public String mNotificationMsg;          // alertDef DTO
-    
+
     @Convert(converter = SeverityConverter.class, dbType = Integer.class)
     public AlertSeverity mSeverity;          // alertDef DTO
     public boolean       mEnabled;          // alertDef DTO
@@ -38,12 +38,12 @@ public class Alert
     public String ccuName;
     public @Nullable String equipId;
     public String equipName;
-    
+
     //Backend guid of the alert
     public String _id;
-    
+
     public @Nullable String ref;
-    
+
     public String deviceRef;
 
     // true if the alert has been synced (created or updated) with server
@@ -65,7 +65,7 @@ public class Alert
     {
         this.syncStatus = syncStatus;
     }
-    
+
     public String getRef()
     {
         return ref;
@@ -90,7 +90,7 @@ public class Alert
     {
         this.id = id;
     }
-    
+
     public String getmTitle()
     {
         return mTitle;
@@ -111,10 +111,7 @@ public class Alert
     {
         return mNotificationMsg;
     }
-    public void setmNotificationMsg(String mNotificationMsg)
-    {
-        this.mNotificationMsg = mNotificationMsg;
-    }
+    public void setmNotificationMsg(String mNotificationMsg) { this.mNotificationMsg = mNotificationMsg; }
     public AlertSeverity getmSeverity()
     {
         return mSeverity;
@@ -160,19 +157,11 @@ public class Alert
     {
         return _id;
     }
-    public void setGuid(String alertId)
-    {
-        this._id = alertId;
-    }
+    public void setGuid(String alertId) { this._id = alertId; }
+    public String getSafeEquipId() { return equipId == null ? "" : equipId; }
+    public void setEquipId(@Nullable String equipId) { this.equipId = equipId; }
 
-    @Override
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(" {").append(id).append(", ").append(mTitle).append(",").append(mMessage).append(", ").append(",")
-         .append(ref).append(", ").append(startTime).append(", ").append(endTime).append(", ").append(isFixed).append(", ")
-         .append(deviceRef).append(", ").append(syncStatus).append(", ").append(_id).append("}");
-        return b.toString();
-    }
+
     public Alert(){
     }
 
@@ -192,7 +181,7 @@ public class Alert
         INTERNAL_ERROR,
         INTERNAL_WARN
     }
-    
+
     public static class SeverityConverter implements PropertyConverter<AlertSeverity, Integer> {
         @Override
         public AlertSeverity convertToEntityProperty(Integer databaseValue) {
@@ -201,11 +190,37 @@ public class Alert
             }
             return AlertSeverity.values()[databaseValue];
         }
-        
+
         @Override
         public Integer convertToDatabaseValue(AlertSeverity entityProperty) {
             return entityProperty.ordinal();
         }
     }
-}
 
+    @Override
+    public String toString() {
+        return "Alert{" +
+                "id=" + id +
+                ", mTitle='" + mTitle + '\'' +
+                ", equipId='" + equipId + '\'' +
+                ", syncStatus=" + syncStatus +
+                ", isFixed=" + isFixed +
+                ", _id='" + _id + '\'' +
+                ", mMessage='" + mMessage + '\'' +
+                ", mNotificationMsg='" + mNotificationMsg + '\'' +
+                ", mSeverity=" + mSeverity +
+                ", mEnabled=" + mEnabled +
+                ", mAlertType='" + mAlertType + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", alertDefId='" + alertDefId + '\'' +
+                ", siteIdNoAt='" + siteIdNoAt + '\'' +
+                ", ccuIdNoAt='" + ccuIdNoAt + '\'' +
+                ", siteName='" + siteName + '\'' +
+                ", ccuName='" + ccuName + '\'' +
+                ", equipName='" + equipName + '\'' +
+                ", ref='" + ref + '\'' +
+                ", deviceRef='" + deviceRef + '\'' +
+                '}';
+    }
+}

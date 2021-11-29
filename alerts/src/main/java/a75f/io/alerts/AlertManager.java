@@ -2,8 +2,6 @@ package a75f.io.alerts;
 
 import android.content.Context;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -153,6 +151,12 @@ public class AlertManager
         return repo.getActiveAlerts();
     }
 
+    public List<Alert> getUnsyncedAlerts() {
+        if (! repoCheck()) return Collections.emptyList();
+
+        return repo.getUnsyncedAlerts();
+    }
+
     public List<Alert> getAllAlertsOldestFirst() {
         if (! repoCheck()) return Collections.emptyList();
 
@@ -250,4 +254,3 @@ public class AlertManager
         }
     }
 }
-

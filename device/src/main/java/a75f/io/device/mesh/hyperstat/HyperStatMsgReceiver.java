@@ -127,7 +127,7 @@ public class HyperStatMsgReceiver {
         writeDesiredTemp(message, hsEquip, hayStack);
         updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
         updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
-        Log.i(L.TAG_CCU_DEVICE, "Actual Recived Fan mode: "+message.getFanSpeed().ordinal());
+        Log.i(L.TAG_CCU_DEVICE, "Actual Received Fan mode: "+message.getFanSpeed().ordinal());
         sendAcknowledge(nodeAddress);
     }
     
@@ -191,54 +191,67 @@ public class HyperStatMsgReceiver {
             }
         }
     }
-    
+
+    /**
+     *  For door window sensor and keycard sensor no need to calculate the voltage conversion
+     *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
+     *  we are applying the required logic according to the sensor and saving into logical point
+     Keycard:
+
+     Thermisotrs:
+     >= 10K : No occupant(0)
+     < 10K : Occupied(1)
+     Analog:
+     >= 2V : Not Occupied(0)
+     < 2V : occupant(1)
+
+     Door:
+
+     Thermisor:
+     >= 10K : Door Open(1)
+     < 10K : Door Close(0)
+     Analog:
+     >= 2V : Door Open(1)
+     < 2V : Door Close(0)
+
+     Find the sensor
+     KEY_CARD_SENSOR -> "12"
+     DOOR_WINDOW_SENSOR -> "13"
+
+     */
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
 
         hayStack.writeHisValById(rawPoint.getId(), val);
-        /**
-         *  For door window sensor and keycard sensor no need to calculate the Resistance conversion
-         *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
-         *  we are applying the required logic according to the sensor and saving into logical point
-         *  for door window sensor 1.0 means door is open when the Resistance is greater than 10000 else it is closed
-         *  when registance is less than 10000
-         *  for Keycard sensor 1.0 means key is present (Occupant exist) when the Resistance is less than 10000 else
-         *  key is removed occupant is not exist
-         */
-        // Collect the sensor position
         int index = (int)Double.parseDouble(rawPoint.getType());
-        Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Thermistor input :"+val);
-        if(index == 12 || index == 13){
+
+        if(index == SensorType.DOOR_WINDOW_SENSOR.ordinal()){ // it is DOOR_WINDOW_SENSOR
             hayStack.writeHisValById(point.getId(),((val*10) >= 10000)? 1.0 : 0.0);
-            Log.d(L.TAG_CCU_DEVICE, "Index : "+index +" Sensor Thermistor input : "+(((val*10) >= 10000)? 1.0 : 0.0));
+            Log.d(L.TAG_CCU_DEVICE, "DOOR_WINDOW_SENSOR Thermistor input : "+(((val*10) >= 10000)? 1.0 : 0.0));
             return;
         }
 
         double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
         hayStack.writeHisValById(point.getId(), CCUUtils.roundToOneDecimal(thInputVal));
-
         Log.d(L.TAG_CCU_DEVICE, "Sensor input : Thermistor type " + rawPoint.getType() + " val " + thInputVal);
 
     }
     
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
         hayStack.writeHisValById(rawPoint.getId(), val);
-
-        /**
-         *  For door window sensor and keycard sensor no need to calculate the voltage conversion
-         *  so position of the door window and keycard sensor are 12 and 13 so only for those two sensors
-         *  we are applying the required logic according to the sensor and saving into logical point
-         *  for door window sensor 0.0 means door is closed when the voltage is less than 2.0 else it is open ie. 1.0
-         *  for Key card sensor 0.0 means key is present (Occupant exist) when the voltage is less than 2.0 else
-         *  key is removed occupant is not exist 1.0
-         */
-
+        double voltageReceived = val/1000;
         int index = (int)Double.parseDouble(rawPoint.getType());
-        if(index == 12 || index == 13){
-            double voltageReceived = val/1000;
-            Log.d(L.TAG_CCU_DEVICE, "Type : " +index+ "Sensor Analog input :"+voltageReceived);
+
+        if(index == SensorType.KEY_CARD_SENSOR.ordinal()){ //12 it is KEY_CARD_SENSOR
+            Log.d(L.TAG_CCU_DEVICE, "KEY_CARD_SENSOR Sensor Analog input :"+voltageReceived);
+            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 0.0 : 1.0);
+            return;
+        }
+        if(index == SensorType.DOOR_WINDOW_SENSOR.ordinal()){ //13 it is DOOR_WINDOW_SENSOR
+            Log.d(L.TAG_CCU_DEVICE, "DOOR_WINDOW_SENSOR Sensor Analog input :"+voltageReceived);
             hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 1.0 : 0.0);
             return;
         }
+        // Analog in is connected some other sensor
         hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
     }
     

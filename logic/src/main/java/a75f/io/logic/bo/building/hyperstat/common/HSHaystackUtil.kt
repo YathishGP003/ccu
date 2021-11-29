@@ -13,6 +13,7 @@ import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import java.lang.Exception
+import java.lang.NullPointerException
 import java.util.*
 
 /**
@@ -472,6 +473,40 @@ class HSHaystackUtil(
              val pointValue = CCUHsApi.getInstance().readHisValById(ocupancyDetectionHscpu["id"].toString());
             CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetectionHscpu["id"].toString(), pointValue);
         }
+    }
+
+     fun getDesiredTempCoolingPriorityValue(equipRef: String): Double {
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                "desired and temp and cooling and equipRef == \"$equipRef\""
+            )
+        } catch (e: NullPointerException) {
+            e.printStackTrace()
+        }
+        return 0.0
+    }
+
+     fun getDesiredTempHeatingPriorityValue(equipRef: String): Double {
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                "desired and temp and heating and equipRef == \"$equipRef\""
+            )
+
+        } catch (e: NullPointerException) {
+            e.printStackTrace()
+        }
+        return 0.0
+    }
+
+     fun getAverageDesiredTempPriorityValue(equipRef: String): Double {
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                ("point and desired and average and temp and equipRef == \"$equipRef\"")
+            )
+        } catch (e: NullPointerException) {
+            e.printStackTrace()
+        }
+        return 0.0
     }
 
 }

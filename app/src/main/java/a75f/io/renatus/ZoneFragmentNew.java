@@ -75,6 +75,8 @@ import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
+import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -806,7 +808,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
-                    clearTempOverride(equipId[0]);
+                  //  clearTempOverride(equipId[0]);
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
@@ -1275,7 +1277,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
-                    clearTempOverride(equipId);
+                  //  clearTempOverride(equipId);
                     boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
@@ -2171,14 +2173,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                double enumVal = ConventionalPackageUnitUtil.getEnumforCPUCondMode(position , equipId);
                 if (isCPUFromPubNub) {
                     if (tempConditionMode != position) {
-                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", enumVal);
                     }
                     //isCPUFromPubNub = false;
                 } else {
                     //if(isCPUloaded) {
-                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", enumVal);
                     //}
                 }
             }
@@ -2726,13 +2729,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                double enumVal = ConventionalPackageUnitUtil.getEnumforFourPipeCondMode(position,equipId);
                 if (isFromPubNub) {
                     if (tempConditionMode != position) {
-                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
+                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", enumVal);
                     }
                     isFromPubNub = false;
                 } else {
-                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", enumVal);
                 }
             }
 

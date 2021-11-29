@@ -1,2 +1,42 @@
- - Merged PR 2425: Vav series to be independent of systemFanLoopOp
- - Vav series to be independent of systemFanLoopOp
+ - Merged PR 2465: Hyperstat device integration issues
+ - Merged PR 2414: 7577-Added fix for Heartbeat is not appearing for Zone with longer name(10 ch...
+ - Merged PR 2417: 9285 : CCU: Renatus app crashes while pairing sense profile
+ - Merged PR 2384: 9179 : CCU Standalone profile UserIntent to write enum values
+ - Merged PR 2407: 9187 :  Temperature Offset Setting under Zone-Reconfiguration is Blank
+ - Merged PR 2401: 8815 : Smart Stat CPU Profile Relay 6 Discrepancy
+ - Merged PR 2388: 9218: Added margin for the zone UI title
+ - Merged PR 2086: 8657 - Subscribe to Messaging API
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Merged PR 2288: CCU modbus mismatch
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Merged PR 2301: Test signal improvements
+ - Merge latest from master
+ - Modulate composite test signal
+ - Merge master
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Improvements to test signal in System profile screen
+ - Merge branch 'Bug/samjith/8988_test_signal' into bug/samjith/8988_system_test_signal
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Read modbus values using register info than tags
+ - WIP
+ - Merged latest from master
+ - Resolved unhandled exceptions on loss of connection that triggered app crashes
+ - Cleaned-up synchronous Messaging ACK mehtod
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Added ability to synchronously Ack remote restart commands
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Resolved messaging-triggered crash on initial/unregisterd app startup
+ - Merged latest from master
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Toned-down messaging log levels
+ - Comment enhancement
+ - Misc cleanup
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Scheduled Messaging Ack Job
+ - Rebase with master
+ - Quick and dirty messaging retrofit service
+ - Resolved dev tools messaging switch issue
+ - Created custom swappable messaging consumer
+ - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
+ - Simple SSE Consumer and Messaging API Integration

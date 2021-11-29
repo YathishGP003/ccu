@@ -19,6 +19,9 @@ import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.joda.time.DateTime
+import org.projecthaystack.HNum
+import org.projecthaystack.HRef
+import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -32,11 +35,11 @@ class HyperStatCpuProfile : ZoneProfile() {
     // One zone can have many hyperstat devices.  Each has its own address and equip representation
     private val cpuDeviceMap: MutableMap<Short, HyperStatCpuEquip> = mutableMapOf()
 
-    var coolingLoopOutput = 0
-    var heatingLoopOutput = 0
-    var fanLoopOutput = 0
-    lateinit var logicalPointsList: HashMap<Any, String>
-    var currentConditioningStatus = StandaloneConditioningMode.OFF
+    private var coolingLoopOutput = 0
+    private var heatingLoopOutput = 0
+    private var fanLoopOutput = 0
+    private lateinit var logicalPointsList: HashMap<Any, String>
+    private var currentConditioningStatus = StandaloneConditioningMode.OFF
     lateinit var occuStatus: Occupied
     private val hyperstatCPUAlgorithm = HyperstatLoopController()
     lateinit var curState: ZoneState
@@ -72,13 +75,16 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     // Run the profile logic and algorithm for an equip.
     private fun runHyperstatCPUAlgorithm(equip: HyperStatCpuEquip) {
-
+        Log.i(L.TAG_CCU_HSCPU, "************************ HSCPU Address: ${equip.node}**********************")
         logicalPointsList = equip.getLogicalPointList()
 
         val relayStages = HashMap<String, Int>()
         curState = ZoneState.DEADBAND
 
-        if (Globals.getInstance().isTestMode) return
+        if (Globals.getInstance().isTestMode) {
+            Log.i(TAG, "Test mode is on: ")
+            return
+        }
 
         if (mInterface != null) mInterface.refreshView()
 
@@ -107,7 +113,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         occuStatus = equip.hsHaystackUtil!!.getOccupancyStatus()
 
         //StandaloneFanStage  StandaloneConditioningMode
-        var basicSettings = fetchBasicSettings(equip, config)
+        var basicSettings = fetchBasicSettings(equip)
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
 
@@ -116,7 +122,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         updateFanMode(equip, basicSettings, fanModeSaved)
 
         // Collect the update basic settings
-        basicSettings = fetchBasicSettings(equip, config)
+        basicSettings = fetchBasicSettings(equip)
 
         hyperstatCPUAlgorithm.initialise(tuners = hyperstatTuners)
 
@@ -187,7 +193,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         runRelayOperations(equip, config, hyperstatTuners, userIntents, basicSettings, relayStages)
 
-        runAnalogOutOperations(equip, config, hyperstatTuners, basicSettings)
+        runAnalogOutOperations(equip, config, basicSettings)
 
         var zoneOperatingMode = ZoneState.DEADBAND.ordinal
           if(currentTemp <= averageDesiredTemp)
@@ -212,10 +218,10 @@ class HyperStatCpuProfile : ZoneProfile() {
             portStages = relayStages,
             temperatureState = temperatureState
         )
-
+        Log.i(L.TAG_CCU_HSCPU, "**********************************************")
     }
 
-    private fun fetchBasicSettings(equip: HyperStatCpuEquip, config: HyperStatCpuConfiguration) =
+    private fun fetchBasicSettings(equip: HyperStatCpuEquip) =
 
         BasicSettings(
             conditioningMode = StandaloneConditioningMode.values()[equip.hsHaystackUtil!!.getCurrentConditioningMode().toInt()],
@@ -283,11 +289,11 @@ class HyperStatCpuProfile : ZoneProfile() {
                     Log.i(L.TAG_CCU_HSCPU, "Falling in FORCE Occupy mode")
                 } else {
                     Log.i(L.TAG_CCU_HSCPU, "We are already in force occupy")
-                    val occupancyHistory: HisItem = equip.haystack.curRead(detectionPointDetails["id"].toString())
+                    val occupancyHistory: HisItem? = equip.haystack.curRead(detectionPointDetails["id"].toString())
                     if (occupancyHistory == null) {
                         Log.i(L.TAG_CCU_HSCPU, "occupancy History Does not exist..")
                     }
-                    val lastUpdatedTime: Date? = occupancyHistory.date
+                    val lastUpdatedTime: Date? = occupancyHistory?.date
 
                     Log.i(L.TAG_CCU_HSCPU,
                         "temporaryHoldTime time $temporaryHoldTime \n"+
@@ -338,9 +344,26 @@ class HyperStatCpuProfile : ZoneProfile() {
             .read("point and desired and cooling and temp and equipRef == \"${equip.equipRef}\"")
         val heatDT = equip.haystack
             .read("point and desired and heating and temp and equipRef == \"${equip.equipRef}\"")
+        val avg = equip.haystack
+            .read("point and desired and average and temp and equipRef == \"${equip.equipRef}\"")
 
         SystemScheduleUtil.clearOverrides(heatDT["id"].toString())
         SystemScheduleUtil.clearOverrides(coolDT["id"].toString())
+        SystemScheduleUtil.clearOverrides(avg["id"].toString())
+
+        val HeatingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempHeatingPriorityValue(equip.equipRef!!)
+        val CoolingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempCoolingPriorityValue(equip.equipRef!!)
+        val DesiredTempPriorityValue = equip.hsHaystackUtil!!.getAverageDesiredTempPriorityValue(equip.equipRef!!)
+
+        Log.i(TAG, "resetOccupancy: equip.equipRef!! ${equip.equipRef!!}  ")
+        Log.i(TAG, "resetOccupancy: HeatingPriorityValue $HeatingPriorityValue  ")
+        Log.i(TAG, "resetOccupancy: CoolingPriorityValue $CoolingPriorityValue  ")
+        Log.i(TAG, "resetOccupancy: DesiredTempPriorityValue $DesiredTempPriorityValue  ")
+
+        equip.haystack.writeHisValById(heatDT["id"].toString(),HeatingPriorityValue)
+        equip.haystack.writeHisValById(coolDT["id"].toString(),CoolingPriorityValue)
+        equip.haystack.writeHisValById(avg["id"].toString(),DesiredTempPriorityValue)
+
     }
 
     private fun runAutoAwayOperation(equip: HyperStatCpuEquip) {
@@ -352,12 +375,12 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         if (occuStatus.isOccupied && (currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal)) {
 
-            val occupancyHistory: HisItem = equip.haystack.curRead(occupancy["id"].toString())
+            val occupancyHistory: HisItem? = equip.haystack.curRead(occupancy["id"].toString())
 
             if (occupancyHistory == null) {
                 Log.i(L.TAG_CCU_HSCPU, "occupancy History Does not exist..")
             }
-            val lastUpdatedTime: Date? = occupancyHistory.date
+            val lastUpdatedTime: Date? = occupancyHistory?.date
             Log.i(L.TAG_CCU_HSCPU, "Last Detected Time : $lastUpdatedTime")
             val differenceInMinutes = findDifference(lastUpdatedTime!!.time, false)
             val autoAwayTime = TunerUtil.readTunerValByQuery(
@@ -379,8 +402,10 @@ class HyperStatCpuProfile : ZoneProfile() {
                 if (heatingDtPoint == null || heatingDtPoint.size == 0) {
                     throw java.lang.IllegalArgumentException()
                 }
+
                 SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString())
                 SystemScheduleUtil.clearOverrides(heatingDtPoint.get("id").toString())
+
                 val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                 equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                 equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
@@ -395,31 +420,47 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     private fun updateDesiredTemp(desiredTemp: Double, equip: HyperStatCpuEquip) {
 
+        Log.i(L.TAG_CCU_HSCPU, "updateDesiredTemp: ")
         val heatingDeadband = occuStatus.heatingDeadBand
         val coolingDeadband = occuStatus.heatingDeadBand
 
         val coolingDesiredTemp = desiredTemp + coolingDeadband
         val heatingDesiredTemp = desiredTemp - heatingDeadband
 
-        val coolingDeadbandPointMap = equip.hsHaystackUtil!!.getCoolingDeadbandPoint()
-        val heatingDeadbandPointMap = equip.hsHaystackUtil!!.getHeatingDeadbandPoint()
+        val coolingDesiredPointMap = equip.hsHaystackUtil!!.getCoolingDeadbandPoint()
+        val heatingDesiredPointMap = equip.hsHaystackUtil!!.getHeatingDeadbandPoint()
         val avgTempPointMap = equip.hsHaystackUtil!!.getAvgDesiredTempPoint()
 
-        if (coolingDeadbandPointMap == null || heatingDeadbandPointMap == null || avgTempPointMap == null ||
-            coolingDeadbandPointMap.size == 0 || heatingDeadbandPointMap.size == 0 || avgTempPointMap.size == 0
+        if (coolingDesiredPointMap == null || heatingDesiredPointMap == null || avgTempPointMap == null ||
+            coolingDesiredPointMap.size == 0 || heatingDesiredPointMap.size == 0 || avgTempPointMap.size == 0
         )
             throw IllegalArgumentException()
 
-        val coolingDeadbandPoint = Point.Builder().setHashMap(coolingDeadbandPointMap).build()
-        val heatingDeadbandPoint = Point.Builder().setHashMap(heatingDeadbandPointMap).build()
+        val desiredCoolingPoint = Point.Builder().setHashMap(coolingDesiredPointMap).build()
+        val desiredHeatingPoint = Point.Builder().setHashMap(heatingDesiredPointMap).build()
         val avgTempPoint = Point.Builder().setHashMap(avgTempPointMap).build()
 
-        equip.haystack.writeHisValById(coolingDeadbandPoint.id, coolingDesiredTemp)
-        equip.haystack.writeHisValById(heatingDeadbandPoint.id, heatingDesiredTemp)
+        equip.haystack.writeHisValById(desiredCoolingPoint.id, coolingDesiredTemp)
+        equip.haystack.writeHisValById(desiredHeatingPoint.id, heatingDesiredTemp)
         equip.haystack.writeHisValById(avgTempPoint.id, desiredTemp)
 
+        equip.haystack.pointWriteForCcuUser(
+            HRef.copy(desiredCoolingPoint.id),
+            HayStackConstants.DEFAULT_POINT_LEVEL,
+            HNum.make(coolingDesiredTemp), HNum.make(0)
+        )
+        equip.haystack.pointWriteForCcuUser(
+            HRef.copy(desiredHeatingPoint.id),
+            HayStackConstants.DEFAULT_POINT_LEVEL,
+            HNum.make(heatingDesiredTemp), HNum.make(0)
+        )
+        equip.haystack.pointWriteForCcuUser(
+            HRef.copy(avgTempPoint.id),
+            HayStackConstants.DEFAULT_POINT_LEVEL,
+            HNum.make(desiredTemp), HNum.make(0)
+        )
         SystemScheduleUtil.handleManualDesiredTempUpdate(
-            coolingDeadbandPoint, heatingDeadbandPoint,
+            desiredCoolingPoint, desiredHeatingPoint,
             avgTempPoint, coolingDesiredTemp, heatingDesiredTemp, desiredTemp
         )
     }
@@ -469,7 +510,6 @@ class HyperStatCpuProfile : ZoneProfile() {
     private fun runAnalogOutOperations(
         equip: HyperStatCpuEquip,
         config: HyperStatCpuConfiguration,
-        tuner: HyperStatProfileTuners,
         basicSettings: BasicSettings,
     ) {
 
@@ -1040,9 +1080,9 @@ class HyperStatCpuProfile : ZoneProfile() {
     private fun handleDeadZone(equip: HyperStatCpuEquip) {
 
         Log.i(L.TAG_CCU_HSCPU, "updatePointsForEquip: Dead Zone ")
-
+        state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
-
+        equip.hsHaystackUtil!!.setProfilePoint("temp and operating and mode",  ZoneState.TEMPDEAD.ordinal.toDouble())
         if (equip.hsHaystackUtil!!.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil!!.setEquipStatus(state.ordinal.toDouble())
 
@@ -1162,27 +1202,39 @@ class HyperStatCpuProfile : ZoneProfile() {
             forced occupied. If the zone was scheduled to be occupied, the zone enters, 'auto away' state
 
     */
-
         if (config.analogIn1State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
         ) {
+            val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog1 and in and logical and  keycard and sensor"
             )
-            Log.i(L.TAG_CCU_HSCPU, "runForKeycardSensor 1 : $sensorValue")
+            Log.i(L.TAG_CCU_HSCPU,
+                "runForKeycardSensor 1 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
             if(sensorValue.toInt() == 1) {
-                equip.hsHaystackUtil!!.setSensorOccupancyPoint(1.0)
+                if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
+                    equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    Log.i(L.TAG_CCU_HSCPU, "Keycard is sensed so Falling in FORCE Occupy mode")
+                    return
+                }
+                if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal) {
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    Log.i(L.TAG_CCU_HSCPU, "Extending the time for keycard auto force occupy")
+                }
             }else{
-                val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-                if(currentOperatingMode== Occupancy.OCCUPIED.ordinal
-                    && currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
 
+                if(currentOperatingMode == Occupancy.OCCUPIED.ordinal) {
                     Log.i(L.TAG_CCU_HSCPU, "Moving to Auto Away state")
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
                     resetPresentConditioningStatus(equip)
+                }else if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
+                    || currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal) {
+                    resetOccupancy(equip)
                 }
+
             }
         }
 
@@ -1190,23 +1242,36 @@ class HyperStatCpuProfile : ZoneProfile() {
         if (config.analogIn2State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn2State)
         ) {
+            val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
-                "analog2 and in and logical and keycard and sensor"
+                "analog2 and in and logical and  keycard and sensor"
             )
-            Log.i(L.TAG_CCU_HSCPU, "runForKeycardSensor 2 : $sensorValue")
-            if(sensorValue.toInt() == 0) {
-                equip.hsHaystackUtil!!.setSensorOccupancyPoint(1.0)
+            Log.i(L.TAG_CCU_HSCPU,
+                "runForKeycardSensor 2 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
+            if(sensorValue.toInt() == 1) {
+                if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
+                    equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    Log.i(L.TAG_CCU_HSCPU, "Keycard is sensed so Falling in FORCE Occupy mode")
+                    return
+                }
+                if(currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal) {
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    Log.i(L.TAG_CCU_HSCPU, "Extending the time for keycard auto force occupy")
+                }
             }else{
-                val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-                if(currentOperatingMode== Occupancy.OCCUPIED.ordinal
-                    && currentOperatingMode != Occupancy.AUTOAWAY.ordinal) {
 
+                if(currentOperatingMode == Occupancy.OCCUPIED.ordinal) {
                     Log.i(L.TAG_CCU_HSCPU, "Moving to Auto Away state")
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
                     resetPresentConditioningStatus(equip)
+                }else if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
+                    || currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal) {
+                    resetOccupancy(equip)
                 }
+
             }
         }
 

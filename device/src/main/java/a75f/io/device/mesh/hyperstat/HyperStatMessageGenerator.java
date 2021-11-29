@@ -62,12 +62,14 @@ public class HyperStatMessageGenerator {
         //TODO - Proto file does not define profile bitmap, enabledRelay.
         HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
-            .setHeatingDeadBand((int) getStandaloneHeatingDeadband(equipRef))
-            .setCoolingDeadBand((int) getStandaloneCoolingDeadband(equipRef))
+            .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef)*10))
+            .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef)*10))
             .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and min"))
             .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max"))
-            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and min"))
-            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max"))
+                // Changed by Manjunath K. change in requirement on 17-11-2021
+                // TODO Needs to for all the profiles (Smart node and smartstat)
+            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max"))
+            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user and limit and min"))
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
@@ -86,18 +88,19 @@ public class HyperStatMessageGenerator {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
+
+        // Sense profile does not have control messages
+        if(device.containsKey("sense")) return HyperStat.HyperStatControlsMessage_t.newBuilder().build();
+
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 2);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 2);
+        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
+        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef) * 2));
         BasicSettings settings = HSHaystackUtil.Companion.getBasicSettings(address);
         Log.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "DeviceFanMode "+getDeviceFanMode(settings).name()+
                  "ConditioningMode"+getConditioningMode(settings,address).name());
-
-        // Send the operating mode
-        // controls.setOperatingMode(HyperStatOperatingMode_e.)
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
 
@@ -127,12 +130,24 @@ public class HyperStatMessageGenerator {
     }
     
     private static double getDesiredTempCooling(String equipRef) {
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and cooling and equipRef == \"" + equipRef + "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
+                    "cooling and equipRef == \"" + equipRef + "\"");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
     
     private static double getDesiredTempHeating(String equipRef) {
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and heating and equipRef == \"" + equipRef +
-                                                     "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
+                    "heating and equipRef == \"" + equipRef +
+                    "\"");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
     
 
@@ -214,7 +229,13 @@ public class HyperStatMessageGenerator {
     private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap collingDeadband = hayStack.read("point and tuner and deadband and base and cooling and equipRef == \""+equipRef+"\"");
-        return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
+        try {
+            return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
     }
 
     public static double getStandaloneHeatingDeadband(String equipRef) {
@@ -222,7 +243,13 @@ public class HyperStatMessageGenerator {
         HashMap deadbandPoint =
                 hayStack.read("point and tuner and deadband and base and heating and equipRef == \""+equipRef+
                 "\"");
-        return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
+        try {
+            return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
     }
 
 }

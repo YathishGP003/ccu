@@ -8,16 +8,19 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -158,5 +161,29 @@ public class DeviceUtil {
             ssControlsSSMessage = LSmartStat.getCurrentTimeForControlMessage(ssControlsSSMessage);
             sendStructToNodes(ssControlsSSMessage);
         }
+    }
+    
+    public static short getModulatedAnalogVal(double min, double max, double val) {
+        return max > min ? (short) (10 * (min + (max - min) * val/100)) : (short) (10 * (min - (min - max) * val/100));
+    }
+    
+    public static CcuToCmOverUsbCmRelayActivationMessage_t getCMControlsMessage() {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
+        msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
+        msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
+        msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
+        int relayBitmap = 0;
+        for (int i = 1; i <= 7; i++)
+        {
+            if (ControlMote.getRelayState("relay" + i) > 0)
+            {
+                relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
+            }
+        }
+        msg.relayBitmap.set((short) relayBitmap);
+        
+        return msg;
     }
 }

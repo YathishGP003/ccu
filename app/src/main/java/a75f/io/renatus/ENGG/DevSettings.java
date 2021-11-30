@@ -31,6 +31,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
+import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -87,6 +88,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
     public  @BindView(R.id.daikin_theme_config) CheckBox daikinThemeConfig;
 
+    @BindView(R.id.ackdMessagingBtn) ToggleButton ackdMessagingBtn;
 
     @BindView(R.id.crashButton) Button crashButton;
     public @BindView(R.id.btnRestart) Button btnRestart;
@@ -202,7 +204,20 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 CCUHsApi.getInstance().forceSync();
             }
         });
-        
+
+        ackdMessagingBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+            {
+                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .edit().putBoolean("ackd_messaging_enabled", b).apply();
+
+                MessagingClient.getInstance().init();
+            }
+        });
+        ackdMessagingBtn.setChecked(Globals.getInstance().isAckdMessagingEnabled());
+
         testModBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override

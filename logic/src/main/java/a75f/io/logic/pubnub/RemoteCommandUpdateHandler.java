@@ -16,6 +16,7 @@ import a75f.io.logic.Globals;
 public class RemoteCommandUpdateHandler
 {
     public static final String CMD = "remoteCommand";
+    public static final String CMD_TYPE = "remoteCmdType";
     public static final String OTA_UPDATE_SD = "ota_update_smartdevice";
     public static final String OTA_UPDATE_ITM = "ota_update_itm";
     public static final String UPDATE_CCU = "update_ccu";
@@ -30,7 +31,7 @@ public class RemoteCommandUpdateHandler
     
     public static void handleMessage(JsonObject msgObject, Context context) {
         try {
-            String cmdType = msgObject.get("remoteCmdType").getAsString();
+            String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("level").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");

@@ -603,6 +603,7 @@ public class CCUHsApi
     }
     
     public void clearPointArrayLevel(String id, int level, boolean local) {
+        Log.i("CCU_HSCPU", "clearPointArrayLevel: ");
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()

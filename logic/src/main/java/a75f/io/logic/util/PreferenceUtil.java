@@ -7,6 +7,7 @@ import android.util.Log;
 
 public class PreferenceUtil {
     private static Context context;
+    private static String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
 
     public static void setContext(Context c) {
         context= c;
@@ -118,6 +119,25 @@ public class PreferenceUtil {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("migrationVersion", version);
+        editor.apply();
+    }
+
+    public static boolean areDuplicateAlertsRemoved() {
+        return getBooleanPreference(REMOVED_DUPLICATE_ALERTS);
+    }
+
+    public static void removedDuplicateAlerts() {
+        setBooleanPreference(REMOVED_DUPLICATE_ALERTS, true);
+    }
+
+    private static boolean getBooleanPreference(String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(key, false);
+    }
+
+    private static void setBooleanPreference(String key, boolean value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(key, value);
         editor.apply();
     }
 }

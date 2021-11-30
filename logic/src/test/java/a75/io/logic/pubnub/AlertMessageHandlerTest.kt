@@ -36,7 +36,10 @@ class AlertMessageHandlerTest {
    }
    // a haystack API that returns our site id
    private val haystackApi = mockk<CCUHsApi>() {
-      every { globalSiteIdNoAtSign } returns SITE_ID
+      // JJG | 11-18-21
+      // Comment'd out the below line. This value no longer exists and I have no idea what it means.
+      // Other unit tests could not be ran while this error remained.
+//      every { globalSiteIdNoAtSign } returns SITE_ID
    }
 
    @Test

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -93,9 +95,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView lastUpdatedBtu;
 
 	private TextView updatedTimeOao;
-
 	
-	int spinnerInit = 0;
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
 
@@ -198,14 +198,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return rootView;
 	}
 
-	@Override
+	@SuppressLint("ClickableViewAccessibility") @Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
 		
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
-		HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+		HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
@@ -242,23 +242,20 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		
 		
-		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
-			@Override
-			public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
-				if (scrollState == SCROLL_STATE_IDLE) {
-					//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
-					new Handler().postDelayed(new Runnable()
+		systemModePicker.setOnScrollListener((numberPicker, scrollState) -> {
+			if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
+				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
+				new Handler().postDelayed(new Runnable()
+				{
+					@Override
+					public void run()
 					{
-						@Override
-						public void run()
+						if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode"))
 						{
-							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode"))
-							{
-								setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
-							}
+							SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
 						}
-					}, 100);
-				}
+					}
+				}, 100);
 			}
 		});
 		//TODO Commented this out for Automation test, we will revoke for actual prod test
@@ -286,20 +283,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
 		CCUUiUtil.setSpinnerDropDownColor(targetMaxInsideHumidity,getContext());
 		CCUUiUtil.setSpinnerDropDownColor(targetMinInsideHumidity,getContext());
-		targetMinInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
+		targetMinInsideHumidity.setOnTouchListener((v, event) -> {
 			minHumiditySpinnerReady = true;
 			return false;
-		}
 		});
 		
-		targetMaxInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				maxHumiditySpinnerReady = true;
-				return false;
-			}
+		targetMaxInsideHumidity.setOnTouchListener((v, event) -> {
+			maxHumiditySpinnerReady = true;
+			return false;
 		});
 		
 		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
@@ -365,13 +356,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				sbComfortValue.setContentDescription(String.valueOf(seekBar.getProgress()));
-				setUserIntentBackground("desired and ci",5 - seekBar.getProgress());
+				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - seekBar.getProgress());
 			}
 		});
-
-
-		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
-
+		
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
 		{
@@ -388,60 +376,30 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
 		
-		tbCompHumidity.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				if (compoundButton.isPressed())
-				{
-					setUserIntentBackground("compensate and humidity", b ? 1 : 0);
-				}
+		tbCompHumidity.setOnCheckedChangeListener((compoundButton, b) -> {
+			if (compoundButton.isPressed()) {
+				SystemProfileUtil.setUserIntentBackground("compensate and humidity", b ? 1 : 0);
 			}
 		});
 
-		tbDemandResponse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				if (compoundButton.isPressed())
-				{
-					setUserIntentBackground("demand and response", b ? 1 : 0);
-				}
+		tbDemandResponse.setOnCheckedChangeListener((compoundButton, b) -> {
+			if (compoundButton.isPressed()) {
+				SystemProfileUtil.setUserIntentBackground("demand and response", b ? 1 : 0);
 			}
 		});
-		tbSmartPrePurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				if (compoundButton.isPressed())
-				{
-					setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
-				}
+		tbSmartPrePurge.setOnCheckedChangeListener((compoundButton, b) -> {
+			if (compoundButton.isPressed()) {
+				SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
 			}
 		});
-		tbSmartPostPurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				if (compoundButton.isPressed())
-				{
-					setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
-				}
+		tbSmartPostPurge.setOnCheckedChangeListener((compoundButton, b) -> {
+			if (compoundButton.isPressed()) {
+				SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
 			}
 		});
-		tbEnhancedVentilation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				if (compoundButton.isPressed())
-				{
-					setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
-				}
+		tbEnhancedVentilation.setOnCheckedChangeListener((compoundButton, b) -> {
+			if (compoundButton.isPressed()) {
+				SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
@@ -457,13 +415,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
 			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
 			tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
-			ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
 				ArrayList<OAOEquip> equipList = new ArrayList<>();
 				for (HashMap m : equips) {
 					String nodeAddress = m.get("group").toString();
-					equipList.add(new OAOEquip(ProfileType.OAO, Short.valueOf(nodeAddress)));
+					equipList.add(new OAOEquip(ProfileType.OAO, Short.parseShort(nodeAddress)));
 					updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 					oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
 				}
@@ -501,56 +459,52 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void fetchPoints()
 	{
 		if(getActivity() != null) {
-			getActivity().runOnUiThread(new Runnable() {
+			getActivity().runOnUiThread(() -> {
+				String colorHex = CCUUiUtil.getColorCode(getContext());
+				String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+				//If the system status is not updated yet (within a minute of registering the device), generate a
+				//default message.
+				if (StringUtils.isEmpty(status)) {
+					status = L.ccu().systemProfile.getStatusMessage();
+				}
 
-				@Override
-				public void run() {
-					String colorHex = CCUUiUtil.getColorCode(getContext());
-					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
-					//If the system status is not updated yet (within a minute of registering the device), generate a
-					//default message.
-					if (StringUtils.isEmpty(status)) {
-						status = L.ccu().systemProfile.getStatusMessage();
-					}
+				if (L.ccu().systemProfile instanceof DefaultSystem) {
+					equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
+					occupancyStatus.setText("No Central equipment connected.");
+					tbCompHumidity.setChecked(false);
+					tbDemandResponse.setChecked(false);
+					tbSmartPrePurge.setChecked(false);
+					tbSmartPostPurge.setChecked(false);
+					tbEnhancedVentilation.setChecked(false);
+					sbComfortValue.setProgress(0);
+					sbComfortValue.setContentDescription("0");
+					targetMaxInsideHumidity.setSelection(humidityAdapter
+							.getPosition(0.0), false);
+					targetMinInsideHumidity.setSelection(humidityAdapter
+							.getPosition(0.0), false);
+				}else{
+					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
-					if (L.ccu().systemProfile instanceof DefaultSystem) {
-						equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
-						occupancyStatus.setText("No Central equipment connected.");
-						tbCompHumidity.setChecked(false);
-						tbDemandResponse.setChecked(false);
-						tbSmartPrePurge.setChecked(false);
-						tbSmartPostPurge.setChecked(false);
-						tbEnhancedVentilation.setChecked(false);
-						sbComfortValue.setProgress(0);
-						sbComfortValue.setContentDescription("0");
-						targetMaxInsideHumidity.setSelection(humidityAdapter
-								.getPosition(0.0), false);
-						targetMinInsideHumidity.setSelection(humidityAdapter
-								.getPosition(0.0), false);
-					}else{
-						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
+					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+					Log.i(TAG, "getSystemStatusString: Before system fragement");
+					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+					tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+					tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
+					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
+					sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
-						equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-						Log.i(TAG, "getSystemStatusString: Before system fragement");
-						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
-						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
-						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
-						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
-						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
-						sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
+					targetMaxInsideHumidity.setSelection(humidityAdapter
+							.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+					targetMinInsideHumidity.setSelection(humidityAdapter
+							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 
-						targetMaxInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-						targetMinInsideHumidity.setSelection(humidityAdapter
-								.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
-
-						if(L.ccu().systemProfile instanceof VavIERtu){
-							IEGatewayDetail.setVisibility(View.VISIBLE);
-							IEGatewayOccupancyStatus.setText(getOccStatus());
-							GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
-						}
+					if(L.ccu().systemProfile instanceof VavIERtu){
+						IEGatewayDetail.setVisibility(View.VISIBLE);
+						IEGatewayOccupancyStatus.setText(getOccStatus());
+						GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
 					}
 				}
 			});
@@ -569,14 +523,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				if (maxHumiditySpinnerReady)
 				{
 					maxHumiditySpinnerReady = false;
-					setUserIntentBackground("target and max and inside and humidity", val);
+					SystemProfileUtil.setUserIntentBackground("target and max and inside and humidity", val);
 				}
 				break;
 			case R.id.targetMinInsideHumidity:
 				if (minHumiditySpinnerReady)
 				{
 					minHumiditySpinnerReady = false;
-					setUserIntentBackground("target and min and inside and humidity", val);
+					SystemProfileUtil.setUserIntentBackground("target and min and inside and humidity", val);
 				}
 				break;
 		}
@@ -584,24 +538,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-	}
-
-	
-	private void setUserIntentBackground(String query, double val) {
-		
-		new AsyncTask<Void, Void, Void>() {
-			@Override
-			protected Void doInBackground( final Void ... params ) {
-				TunerUtil.writeSystemUserIntentVal(query, val);
-				
-				return null;
-			}
-			
-			@Override
-			protected void onPostExecute( final Void result ) {
-				// continue what you are doing...
-			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override
@@ -667,7 +603,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList, emDevice.getSlaveId());
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -719,7 +655,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList, btuDevice.getSlaveId());
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.method.DigitsKeyListener;
@@ -33,6 +34,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -86,7 +88,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     Prefs prefs;
     boolean isFromReg = false;
     
-    private CompositeDisposable disposable = new CompositeDisposable();
+    private final CompositeDisposable disposable = new CompositeDisposable();
     
     public static VavAnalogRtuProfile newInstance()
     {
@@ -210,36 +212,26 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             equipAddr.setAdapter(addressAdapter);
         */
         equipAddr.setText(eqIp);
-        equipAddr.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                final EditText editText = new EditText(getActivity());
-            
-                KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
-                editText.setKeyListener(keyListener);
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                                             .setTitle("Internet Equipment IP")
-                                             .setMessage(eqIp)
-                                             .setView(editText)
-                                             .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                                                 @Override
-                                                 public void onClick(DialogInterface dialog, int which) {
-                            
-                                                     if (editText.getText().toString().trim().length() == 0)
-                                                     {
-                                                         Toast.makeText(getActivity(), "IP Address Empty", Toast.LENGTH_SHORT).show();
-                                                         return;
-                                                     }
-                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and ipAddress",editText.getText().toString().trim());
-                                                     equipAddr.setText(editText.getText().toString());
-                                                 }
-                                             })
-                                             .setNegativeButton("Cancel", null)
-                                             .create();
-                dialog.show();
-            }
+        equipAddr.setOnClickListener(v -> {
+            final EditText editText = new EditText(getActivity());
+        
+            KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
+            editText.setKeyListener(keyListener);
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                         .setTitle("Internet Equipment IP")
+                                         .setMessage(eqIp)
+                                         .setView(editText)
+                                         .setPositiveButton("Save", (dialog1, which) -> {
+                                             if (editText.getText().toString().trim().length() == 0) {
+                                                 Toast.makeText(getActivity(), "IP Address Empty", Toast.LENGTH_SHORT).show();
+                                                 return;
+                                             }
+                                             CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and ipAddress",editText.getText().toString().trim());
+                                             equipAddr.setText(editText.getText().toString());
+                                         })
+                                         .setNegativeButton("Cancel", null)
+                                         .create();
+            dialog.show();
         });
     }
 
@@ -360,7 +352,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         return spAdapter;
     }
     
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
@@ -379,7 +371,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         }
     }
     
-    @Override
+    @SuppressLint("NonConstantResourceId") @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
@@ -413,19 +405,19 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 break;
             case R.id.analog1RTUTest:
             case R.id.analog3RTUTest:
-                checkTestMode();
+                Globals.getInstance().setTestMode(true);
                 IEDeviceHandler.getInstance().sendDatClgSetpoint(val);
                 break;
             case R.id.analog2RTUTest:
-                checkTestMode();
+                Globals.getInstance().setTestMode(true);
                 IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance());
                 break;
             case R.id.humidificationTest:
-                checkTestMode();
+                Globals.getInstance().setTestMode(true);
                 IEDeviceHandler.getInstance().sendBuildingHumidity(val);
                 break;
             case R.id.oaMinTest:
-                checkTestMode();
+                Globals.getInstance().setTestMode(true);
                 break;
         }
     }
@@ -468,40 +460,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         }
         if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
             || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-            String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-            str = str + "\nPlease select appropriate conditioning mode from System Settings.";
-            builder.setCancelable(false)
-                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           dialog.cancel();
-                       }
-                   })
-                   .setTitle("System Conditioning Mode Changed")
-                   .setMessage(str);
+            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable())) {
             
-            AlertDialog dlg = builder.create();
-            dlg.show();
-            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+            SystemProfileUtil.showConditioningDisabledDialog(getActivity(), systemMode);
         }
     }
-
-    private void checkTestMode(){
-        if (Double.parseDouble(coolingTest.getSelectedItem().toString()) > 0 || Double.parseDouble(heatingTest.getSelectedItem().toString()) > 0 ||
-                Double.parseDouble(spTest.getSelectedItem().toString()) > 0 || Double.parseDouble(humidificationTest.getSelectedItem().toString()) > 0 ||
-                Double.parseDouble(oaMinTest.getSelectedItem().toString()) > 0) {
-            if (!Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(true);
-            }
-        } else {
-            if (Globals.getInstance().isTestMode()) {
-                Globals.getInstance().setTestMode(false);
-            }
-        }
-    }
-
+    
     private void setSpinnerDropDownIcon(){
 
         CCUUiUtil.setSpinnerDropDownColor(coolingDatMin,getContext());

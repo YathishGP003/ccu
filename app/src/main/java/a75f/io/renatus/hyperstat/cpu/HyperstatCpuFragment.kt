@@ -514,6 +514,9 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         super.onDestroy()
         disposables.dispose()
         configurationDisposable.dispose()
+        if (Globals.getInstance().isTestMode) {
+            Globals.getInstance().isTestMode = false;
+        }
     }
 
 

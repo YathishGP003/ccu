@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -955,6 +956,7 @@ public class CCUTagsDb extends HServer {
     }
     
     public void deletePointArrayLevel(HRef id, int level) {
+        Log.i("CCU_HSCPU", "deletePointArrayLevel: ");
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(id.toVal());
         if (array != null) {
             array.val[level - 1] = null;

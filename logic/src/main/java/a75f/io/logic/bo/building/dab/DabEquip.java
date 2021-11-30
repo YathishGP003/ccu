@@ -611,7 +611,8 @@ public class DabEquip
                                           .setTz(tz)
                                           .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, (double)config.temperaturOffset);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, config.temperaturOffset);
+        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
         
         Point damperMinCooling = new Point.Builder()
                                          .setDisplayName(equipDis+"-minCoolingDamperPos")

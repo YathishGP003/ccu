@@ -18,7 +18,6 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
-import a75f.io.logic.tuners.DabTuners
 import a75f.io.logic.tuners.HyperstatTuners
 import a75f.io.logic.util.RxTask
 import android.util.Log

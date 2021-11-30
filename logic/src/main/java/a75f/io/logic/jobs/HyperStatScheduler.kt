@@ -35,7 +35,7 @@ class HyperStatScheduler {
 
         var hyperstatStatus: HashMap<String, String> = HashMap()
 
-        fun getHyperstatStatusString(equipRef: String?): String? {
+        private fun getHyperstatStatusString(equipRef: String?): String? {
             return if (hyperstatStatus.size > 0 && hyperstatStatus.containsKey(equipRef))
                 hyperstatStatus[equipRef] else "OFF"
         }
@@ -133,13 +133,7 @@ class HyperStatScheduler {
                 }
 
             }
-            /*
-            val curState = CCUHsApi.getInstance()
-                .readHisValByQuery("point and temp and operating and mode and his and equipRef == \"$equipId\"")
-            if (curState != state.ordinal.toDouble()) CCUHsApi.getInstance().writeHisValByQuery(
-                "point and temp and operating and mode and his and equipRef == \"$equipId\"",
-                state.ordinal.toDouble()
-            )*/
+
             if (getHyperstatStatusString(equipId) != status) {
                 if (hyperstatStatus.containsKey(equipId)) hyperstatStatus.remove(
                     equipId
@@ -166,7 +160,7 @@ class HyperStatScheduler {
             val haystack = CCUHsApi.getInstance()
 
             val occupancyStatus = haystack.readHisValByQuery(
-                "point and occupancy and mode and equipRef == \"${equip.id}\""
+                "point and hyperstat and occupancy and mode and his and equipRef == \"${equip.id}\""
             )
 
             val heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery(
@@ -180,34 +174,32 @@ class HyperStatScheduler {
             val setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.id)
             val curOccupancy = Occupancy.values()[occupancyStatus.toInt()]
             val autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback")
-            val currentOperatingMode = haystack.readHisValByQuery(
-                "point and hyperstat and occupancy and mode and his and equipRef == \"${equip.id}\""
-            )
+
 
             occ.unoccupiedZoneSetback = setback
             occ.heatingDeadBand = heatingDeadBand
             occ.coolingDeadBand = coolingDeadBand
 
-
+            Log.i(L.TAG_CCU_HSCPU, "curOccupancy $curOccupancy ")
             if (curOccupancy == Occupancy.PRECONDITIONING)
                 occ.isPreconditioning = true
             else if (curOccupancy == Occupancy.FORCEDOCCUPIED)
                 occ.isForcedOccupied = true
 
             CcuLog.d(
-                "ZoneScheduler", "Equip: " + equip.displayName + ","
-                        + occ.isPreconditioning + "," + occ.isForcedOccupied + "," + equip.id
+                L.TAG_CCU_HSCPU,
+                "Equip: " + equip.displayName +
+                        "\n equip address : " + equip.group+
+                        "\n isPreconditioning: " + occ.isPreconditioning +
+                        "\n isForcedOccupied:" + occ.isForcedOccupied +
+                        "\n isOccupied : " + occ.isOccupied
+
             )
 
             if (ScheduleProcessJob.putOccupiedModeCache(equip.roomRef, occ)) {
-
-
-                val mode = haystack.readHisValByQuery(
-                    "point and hyperstat and occupancy " +
-                            "and mode and his and equipRef == \"${equip.id}\""
-                ).toInt()
-
                 val avgTemp = (occ.coolingVal + occ.heatingVal) / 2.0
+
+
 
                 var coolingTemp = if (occ.isOccupied || occ.isPreconditioning)
                     occ.coolingVal
@@ -219,14 +211,16 @@ class HyperStatScheduler {
                 else
                     occ.heatingVal - occ.unoccupiedZoneSetback
 
-                Log.i("DEV_DEBUG","autoAwaySetbackTemp $autoawaysetback");
-                Log.i("DEV_DEBUG","${occ.coolingVal} ${occ.heatingVal} $setback");
-                if (equip.markers.contains("cpu") && currentOperatingMode == Occupancy.AUTOAWAY.ordinal.toDouble()){
+                Log.i(L.TAG_CCU_HSCPU,"autoAwaySetbackTemp $autoawaysetback");
+                Log.i(L.TAG_CCU_HSCPU,"${occ.coolingVal} ${occ.heatingVal} $setback")
+
+                if (equip.markers.contains("cpu") && occupancyStatus == Occupancy.AUTOAWAY.ordinal.toDouble()){
                     coolingTemp =  occ.coolingVal + autoawaysetback
                     heatingTemp =  occ.heatingVal - autoawaysetback
-                    Log.i("DEV_DEBUG", "processEquip After coolingTemp: $coolingTemp heatingTemp $heatingTemp")
+                    Log.i(L.TAG_CCU_HSCPU, "processEquip After coolingTemp: $coolingTemp heatingTemp $heatingTemp")
                 }
-
+                Log.i(L.TAG_CCU_HSCPU, "Hyperstat scheduler is changing the " +
+                        "coolingTemp $coolingTemp heatingTemp $heatingTemp avgTemp $avgTemp")
                 setDesiredTemp(equip, coolingTemp, "cooling", occ.isForcedOccupied)
                 setDesiredTemp(equip, heatingTemp, "heating", occ.isForcedOccupied)
                 setDesiredTemp(equip, avgTemp, "average", occ.isForcedOccupied)

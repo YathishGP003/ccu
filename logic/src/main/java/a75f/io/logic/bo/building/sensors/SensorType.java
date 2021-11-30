@@ -24,8 +24,11 @@ public enum SensorType
     UVI("uvi"),
     PM2P5("pm2p5"),
     PM10("pm10"),
-    TEMPERATURE("temperature"); // Temperature is not truly a native sensor and it is sent as part of regular
+    TEMPERATURE("temperature"), // Temperature is not truly a native sensor and it is sent as part of regular
     // update message unlike the other native sensors, which are sent as SensorReadings.
+    KEY_CARD_SENSOR("Key_card_Sensor"),
+    DOOR_WINDOW_SENSOR("Door_Window_sensor");
+
     String name;
     
     SensorType(String val) {

@@ -400,6 +400,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
         double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
+        Log.i(L.TAG_CCU_HSCPU, "Schedule process job curOccupancy "+curOccupancyMode);
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
@@ -1419,9 +1420,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     public static Occupancy getZoneStatus(Equip equip)
     {
-
+        Log.i(L.TAG_CCU_HSCPU, "getTemporaryHoldExpiry(equip): "+getTemporaryHoldExpiry(equip));
         Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
-        Occupancy c = UNOCCUPIED;
+        Occupancy occupancyState = UNOCCUPIED;
         ArrayList<String> totEquipsInZone = new ArrayList<>();
         ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         ArrayList<HashMap> zonedetails = CCUHsApi.getInstance().readAll("equip and zone and roomRef == \""+equip.getRoomRef()+"\"");
@@ -1435,17 +1436,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
         }
+        Log.i(L.TAG_CCU_HSCPU, "initial  "+occupancyState);
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) occ.get(0)).get("id").toString();
             double occuStatus = CCUHsApi.getInstance().readHisValById(id);
             if(cachedOccupied != null) {
+                Log.i(L.TAG_CCU_HSCPU, "cachedOccupied !=null   "+cachedOccupied);
                 if (cachedOccupied.isOccupied()) {
                     if(Occupancy.values()[(int) occuStatus] == AUTOAWAY){
-                        c = AUTOAWAY;
+                        occupancyState = AUTOAWAY;
                     }else {
                         cachedOccupied.setForcedOccupied(false);
                         cachedOccupied.setPreconditioning(false);
-                        c = OCCUPIED;
+                        occupancyState = OCCUPIED;
                     }
                 } else if (getTemporaryHoldExpiry(equip) > 0) {
                     Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
@@ -1455,14 +1458,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         cachedOccupied.setPreconditioning(false);
                         clearTempOverrides(equip.getId());
                     } else if (prevStatus == AUTOFORCEOCCUPIED){
-                        c = AUTOFORCEOCCUPIED;
+                        occupancyState = AUTOFORCEOCCUPIED;
                     }else {
-                        c = FORCEDOCCUPIED;
+                        occupancyState = FORCEDOCCUPIED;
                     }
                 } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
-                    c = VACATION;
+                    occupancyState = VACATION;
                 } else if ((cachedOccupied != null) && cachedOccupied.isOccupancySensed()) {
-                    c = OCCUPANCYSENSING;
+                    occupancyState = OCCUPANCYSENSING;
                 } else {
                     Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
                     if ((prevStatus == OCCUPIED)) {
@@ -1483,29 +1486,30 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         
                         //Standalone zones could operate in preconditioning with system being OFF.
                         if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {
-                            c = PRECONDITIONING;
+                            occupancyState = PRECONDITIONING;
                         }else if ((systemMode != SystemMode.OFF) && cachedOccupied.isPreconditioning()) {
-                            c = PRECONDITIONING;
+                            occupancyState = PRECONDITIONING;
                         } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING){
-                            c = PRECONDITIONING;
+                            occupancyState = PRECONDITIONING;
                         }else if ((systemMode != SystemMode.OFF) && ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())) {
-                            c = PRECONDITIONING;
+                            occupancyState = PRECONDITIONING;
                         }
                     }
                 }
             }
+            Log.i(L.TAG_CCU_HSCPU, "New occupancy value "+occupancyState);
             if(totEquipsInZone.size() > 1) {
                 for(String ids: totEquipsInZone) {
-                    CCUHsApi.getInstance().writeHisValById(ids, (double) c.ordinal());
+                    CCUHsApi.getInstance().writeHisValById(ids, (double) occupancyState.ordinal());
                 }
             }else
-                CCUHsApi.getInstance().writeHisValById(id, (double) c.ordinal());
+                CCUHsApi.getInstance().writeHisValById(id, (double) occupancyState.ordinal());
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
             zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
         }
 
-        return c;
+        return occupancyState;
     }
 
     public static void handleDesiredTempUpdate(Point point, boolean manual, double val) {
@@ -1650,7 +1654,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else if (occ!= null && !occ.isOccupied()) {
 
             double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time",coolpoint.getEquipRef());
-
+            Log.i(L.TAG_CCU_HSCPU, "Expiry time: "+HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
+            Log.i(L.TAG_CCU_JOB, "Expiry time: "+HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
             if((coolpoint != null) && (coolval != 0))
                 CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
             if((heatpoint != null) && (heatval != 0))
@@ -1733,6 +1738,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     public static void clearOverrides(String id) {
+        Log.i(L.TAG_CCU_HSCPU, "clearOverrides: called");
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)
         {
@@ -1748,7 +1754,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     public static void handleScheduleTypeUpdate(Point p){
-        CcuLog.d(L.TAG_CCU_JOB, " ScheduleType handleScheduleTypeUpdate and  clearoverides for "+p.getDisplayName()+","+CCUHsApi.getInstance().readDefaultValById(p.getId()));
+          CcuLog.d(L.TAG_CCU_JOB, " ScheduleType handleScheduleTypeUpdate and  clearoverides for "+p.getDisplayName()+","+CCUHsApi.getInstance().readDefaultValById(p.getId()));
         if (p.getRoomRef().contains("SYSTEM")) {
             return;
         }
@@ -1890,6 +1896,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + equipId + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + equipId + "\"");
         HashMap averageDT = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
+
         CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         if (!averageDT.isEmpty()) {

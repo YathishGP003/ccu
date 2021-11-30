@@ -59,7 +59,8 @@ class ServiceGenerator(
          level = HttpLoggingInterceptor.Level.HEADERS
       }
 
-      val remoteStorageUrl = RenatusServicesEnvironment.instance.urls.remoteStorageUrl
+      val remoteStorageUrl = RenatusServicesEnvironment.instance.
+      urls.remoteStorageUrl
 
       val okHttpClient = OkHttpClient.Builder().apply {
          addInterceptor(

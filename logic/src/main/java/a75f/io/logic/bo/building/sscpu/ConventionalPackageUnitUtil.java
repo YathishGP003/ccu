@@ -351,5 +351,69 @@ public class ConventionalPackageUnitUtil {
     private static double getConfigNumVal(String tags, String nodeAddr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
+
+
+    public static double getEnumforCPUCondMode(double index, String equipRef){
+        double enumForIndex = index;
+
+        double coolingS1 = CCUHsApi.getInstance().readDefaultVal("point and relay1 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+        double coolingS2 = CCUHsApi.getInstance().readDefaultVal("point and relay2 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+        double heatingS1 = CCUHsApi.getInstance().readDefaultVal("point and relay4 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+        double heatingS2 = CCUHsApi.getInstance().readDefaultVal("point and relay5 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+
+        CcuLog.d(L.TAG_CCU,"CS1 = "+ coolingS1 +
+                "CS2 = "+ coolingS2 +
+                "HS1 = "+ heatingS1 +
+                "HS2 = "+ heatingS2 );
+        if((coolingS1 == 1 || coolingS2 == 1) && (heatingS1 == 1 || heatingS2 == 1)){
+            enumForIndex = index;
+        }else if((coolingS1 == 1 || coolingS2 == 1) && (heatingS1 == 0 && heatingS2 == 0)){
+            if (index == 0) enumForIndex = 0;
+            else if(index == 1 ) enumForIndex = 3;
+        } else if((coolingS1 == 0 && coolingS2 == 0) && (heatingS1 == 1 || heatingS2 == 1)){
+            if (index == 0) enumForIndex = 0;
+            else if(index == 1 ) enumForIndex = 2;
+        }
+
+        CcuLog.d(L.TAG_CCU,"Index for Conditional mode = "+ index +
+                                   "Enum for the same = "+ enumForIndex);
+
+
+
+        return enumForIndex;
+
+
+    }
+
+    public static double getEnumforFourPipeCondMode(double index, String equipRef){
+        double enumForIndex = index;
+
+        double heating = CCUHsApi.getInstance().readDefaultVal("point and relay4 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+        double cooling = CCUHsApi.getInstance().readDefaultVal("point and relay6 and config " +
+                "and enable and zone and equipRef== \"" + equipRef + "\"");
+
+        CcuLog.d(L.TAG_CCU,"heating = "+ heating +
+                "cooling = "+ cooling );
+        if(cooling == 1  && heating == 1){
+            enumForIndex = index;
+        }else if(cooling == 1  && heating == 0){
+            if (index == 0) enumForIndex = 0;
+            else if(index == 1 ) enumForIndex = 3;
+        } else if(cooling == 0  && heating == 1){
+            if (index == 0) enumForIndex = 0;
+            else if(index == 1 ) enumForIndex = 2;
+        }
+
+        CcuLog.d(L.TAG_CCU,"Index for 4Pipe Conditional mode = "+ index +
+                "Enum for the same = "+ enumForIndex);
+        return enumForIndex;
+
+
+    }
     
 }

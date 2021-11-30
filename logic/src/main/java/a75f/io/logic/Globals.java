@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertProcessJob;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -52,6 +53,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.messaging.MessagingAckJob;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
@@ -60,6 +62,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
+import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
@@ -96,10 +99,13 @@ public class Globals {
     
     AlertProcessJob mAlertProcessJob;
 
+    MessagingAckJob messagingAckJob;
+
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
     private boolean testHarness = true;
+    private boolean isTestMode = false;
 
     private boolean _siteAlreadyCreated;
     
@@ -135,18 +141,19 @@ public class Globals {
                 .getBoolean("biskit_mode", false);
     }
 
-    public boolean isTestMode()
-    {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                      .getBoolean("test_mode", false);
+    public boolean isTestMode() {
+        return isTestMode;
     }
-    public void setTestMode(boolean isTestMode) {
-        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                .edit().putBoolean("test_mode", isTestMode).apply();
+    public void setTestMode(boolean testMode) {
+        this.isTestMode = testMode;
     }
     public boolean isWeatherTest() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("weather_test", false);
+    }
+    public boolean isAckdMessagingEnabled() {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("ackd_messaging_enabled", true);
     }
 
 
@@ -181,6 +188,10 @@ public class Globals {
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
         PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
+
+        // Start AlertManager whether or not token is empty
+        String token = CCUHsApi.getInstance().getJwt();
+        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl(), token);
 
         //set SN address band
         String addrBand = getSmartNodeBand();
@@ -257,8 +268,7 @@ public class Globals {
                 {
                     if (!site.isEmpty()) {
                         if (CCUHsApi.getInstance().siteSynced()) {
-                            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteUID);
+                            MessagingClient.getInstance().init();
                         }
                     }
                 }
@@ -273,7 +283,7 @@ public class Globals {
 
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
-            
+
                 Watchdog.getInstance().addMonitor(mProcessJob);
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
@@ -285,6 +295,17 @@ public class Globals {
         
         if (isTestMode()) {
             setTestMode(false);
+        }
+    }
+
+    public void scheduleMessagingAckJob() {
+        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
+            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+            String bearerToken = CCUHsApi.getInstance().getJwt();
+
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 

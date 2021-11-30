@@ -59,14 +59,13 @@ class PbReconnectionHandler {
     
     
     public static void handleDisconnect(PubNub pbIntance) {
-        
-        Observable.timer(PB_RECONNECT_DELAY_SECONDS, TimeUnit.SECONDS)
+        if (pbIntance != null) {
+            Observable.timer(PB_RECONNECT_DELAY_SECONDS, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
-                    .subscribe ( i -> {
+                    .subscribe(i -> {
                         CcuLog.i(L.TAG_CCU_PUBNUB, "Reconnect Pubnub");
                         pbIntance.reconnect();
-                        
                     });
-                    
+        }
     }
 }

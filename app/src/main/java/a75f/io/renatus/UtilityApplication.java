@@ -217,13 +217,6 @@ public abstract class UtilityApplication extends Application {
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
-        // Initialize AlertsManager right away.  (Urls were initialized in Globals.init)
-        RenatusServicesUrls urls = RenatusServicesEnvironment.getInstance().getUrls();
-
-        // Start AlertManager whether or not token is empty
-        String token = CCUHsApi.getInstance().getJwt();
-        AlertManager.getInstance(this, urls.getAlertsUrl(), token);
-
         //Modbus EquipmendManager
         EquipsManager.getInstance(this).setApplicationContext(this);
 

@@ -21,7 +21,7 @@ class HyperstatCPUConfigHandler {
             try{
 
             CcuLog.i(
-                L.TAG_CCU_PUBNUB, "\n **** MK ****${L.TAG_CCU_HSCPU} " + configPoint + " " + msgObject.toString()
+                L.TAG_CCU_PUBNUB, "\n **** Reconfig ****${L.TAG_CCU_HSCPU} " + configPoint + " " + msgObject.toString()
                         + " Markers =" + configPoint.markers +"\n "
             )
             when {

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstat.common
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.cpu.*
+import a75f.io.logic.bo.building.sensors.SensorType
 import android.util.Log
 
 /**
@@ -567,8 +568,8 @@ class HyperStatAssociationUtil {
                 CpuAnalogInAssociation.CURRENT_TX_0_10 -> "8"
                 CpuAnalogInAssociation.CURRENT_TX_0_20 -> "9"
                 CpuAnalogInAssociation.CURRENT_TX_0_50 -> "10"
-                CpuAnalogInAssociation.KEY_CARD_SENSOR -> "12"
-                CpuAnalogInAssociation.DOOR_WINDOW_SENSOR -> "13"
+                CpuAnalogInAssociation.KEY_CARD_SENSOR -> SensorType.KEY_CARD_SENSOR.ordinal.toString()
+                CpuAnalogInAssociation.DOOR_WINDOW_SENSOR -> SensorType.DOOR_WINDOW_SENSOR.ordinal.toString()
             }
         }
 

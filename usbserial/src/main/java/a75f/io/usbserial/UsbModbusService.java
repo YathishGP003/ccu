@@ -402,8 +402,6 @@ public class UsbModbusService extends Service {
                         }
                         sleep(5000);
                         continue;
-                    } else {
-                    
                     }
                     
                     if (serialPort != null ) {

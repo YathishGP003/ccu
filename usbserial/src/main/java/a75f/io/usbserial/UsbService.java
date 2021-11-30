@@ -540,6 +540,7 @@ public class UsbService extends Service
 				if (serialPort.open()) {
 					setDebug(false);
 					serialPortConnected = true;
+					UsbSerialWatchdog.getInstance().pet();
 					serialPort.setBaudRate(BAUD_RATE);
 					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
 					serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);

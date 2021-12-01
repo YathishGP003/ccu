@@ -23,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 
 public class UpdatePointHandler
 {
@@ -168,35 +169,28 @@ public class UpdatePointHandler
 
     private static void updatePoints(Point p){
         String luid = p.getId();
-        if (p.getMarkers().contains("his"))
-        {
-            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
-            /*if (systemDataInterface != null) {
-                Log.i("PubNub","System Data Received Refresh");
-                systemDataInterface.refreshScreen(luid);
-            }*/
-        }
+        boolean updateZoneUi = false;
 
-        if (p.getMarkers().contains("desired"))
-        {
-            ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
+        if (p.getMarkers().contains("desired")) {
+            SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
+            updateZoneUi = true;
         }
 
         if (p.getMarkers().contains("scheduleType")) {
-            ScheduleProcessJob.handleScheduleTypeUpdate(p);
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
+            SystemScheduleUtil.handleScheduleTypeUpdate(p);
+            updateZoneUi = true;
         }
+    
+        if (p.getMarkers().contains("his")) {
+            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+            updateZoneUi = true;
+        }
+    
+        if (updateZoneUi && zoneDataInterface != null) {
+            Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
+            zoneDataInterface.refreshScreen(luid);
+        }
+        
         if (p.getMarkers().contains("modbus")){
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);

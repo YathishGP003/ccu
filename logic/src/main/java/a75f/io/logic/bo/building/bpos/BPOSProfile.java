@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BPOSTuners;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -317,8 +318,8 @@ public class BPOSProfile extends ZoneProfile {
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and equipref " +
                 "== \"" + mBPOSEquip.mEquipRef + "\"");
 
-        ScheduleProcessJob.clearOverrides(heatDT.get("id").toString());
-        ScheduleProcessJob.clearOverrides(coolDT.get("id").toString());
+        SystemScheduleUtil.clearOverrides(heatDT.get("id").toString());
+        SystemScheduleUtil.clearOverrides(coolDT.get("id").toString());
     }
 
     private void updateDesiredtemp(Double dt) {
@@ -376,11 +377,12 @@ public class BPOSProfile extends ZoneProfile {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint)
-                        .build(), new Point.Builder().setHashMap(heatinDtPoint).build(),
-                new Point.Builder().
-                        setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp
-                , dt);
+        SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                                                         new Point.Builder().setHashMap(heatinDtPoint).build(),
+                                                         new Point.Builder().setHashMap(singleDtPoint).build(),
+                                                         coolingDesiredTemp,
+                                                         heatingDesiredTemp,
+                                                         dt);
 
     }
 
@@ -435,8 +437,8 @@ public class BPOSProfile extends ZoneProfile {
                     if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
                         throw new IllegalArgumentException();
                     }
-                    ScheduleProcessJob.clearOverrides(coolingDtPoint.get("id").toString());
-                    ScheduleProcessJob.clearOverrides(heatinDtPoint.get("id").toString());
+                    SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString());
+                    SystemScheduleUtil.clearOverrides(heatinDtPoint.get("id").toString());
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.AUTOAWAY.ordinal());
                     CCUHsApi.getInstance().writeHisValById(ocupancyDetection.get("id").toString(),

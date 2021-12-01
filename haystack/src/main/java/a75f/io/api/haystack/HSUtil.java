@@ -102,6 +102,56 @@ public class HSUtil
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         return new Equip.Builder().setHashMap(equipHashMap).build();
     }
+    public static HDict mapToHDict(Map<String, Object> m)
+    {
+        HDictBuilder b = new HDictBuilder();
+        for (Map.Entry<String, Object> entry : m.entrySet())
+        {
+
+            if (entry.getValue() instanceof HVal)
+            {
+                b.add(entry.getKey(), (HVal) entry.getValue());
+            }
+            else
+            {
+                b.add(entry.getKey(), (String) entry.getValue());
+            }
+        }
+        return b.toDict();
+    }
+    
+    public static void printPointArr(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null)
+                {
+                    Log.d("CCU_HS", " Override updated point " + id + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                    +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
+                }
+            }
+        }
+    }
+    
+    public static void printPointArr(Point p, String tag) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(p.getId());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null)
+                {
+                    Log.d(tag,
+                          "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                                        +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
+                }
+            }
+        }
+    }
     
     public static double getPriorityVal(String id) {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);

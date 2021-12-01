@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.util.Log;
@@ -494,7 +496,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             protected Void doInBackground( final String ... params ) {
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
                 CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+                SystemScheduleUtil.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
                 return null;
             }
             

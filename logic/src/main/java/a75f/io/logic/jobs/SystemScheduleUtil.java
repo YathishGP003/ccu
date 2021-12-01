@@ -334,26 +334,39 @@ public class SystemScheduleUtil {
         }
     }
     
+    /**
+     * Update schedule type change.
+     * Every zone has a zoneSchedule. If the zone is following the buildingSchedule, we add an additional marker tag
+     * "disabled" to its zoneSchedule. And when schedule type is changed to zoneSchedule , the "disabled" marker is
+     * removed and zoneSchedule is activated for the zone.
+     * @param p
+     */
     public static void handleScheduleTypeUpdate(Point p){
-        CcuLog.d(L.TAG_CCU_JOB, " ScheduleType handleScheduleTypeUpdate and  clearoverides for "+p.getDisplayName()+","+CCUHsApi.getInstance().readDefaultValById(p.getId()));
-        if (p.getRoomRef().contains("SYSTEM")) {
+        CcuLog.d(L.TAG_CCU_SCHEDULER, " ScheduleType handleScheduleTypeUpdate "+p.getDisplayName());
+    
+        HSUtil.printPointArr(p, L.TAG_CCU_SCHEDULER);//TODO- Added 12/01: Remove once zone schedule issue is fixed.
+        if (p.getRoomRef() == null || p.getRoomRef().contains("SYSTEM")) {
+            CcuLog.d(L.TAG_CCU_SCHEDULER, " Abort , invalid roomRef "+p.getRoomRef());
             return;
         }
         Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
         
-        if (CCUHsApi.getInstance().readDefaultValById(p.getId()) == ScheduleType.ZONE.ordinal()) {
+        if (schedule == null) {
+            CcuLog.d(L.TAG_CCU_SCHEDULER, "Failed to read schedule : schedule type update cannot be completed for "
+                     +zone+" scheduleRef "+zone.getScheduleRef());
+        }
+        if (CCUHsApi.getInstance().readPointPriorityVal(p.getId()) == ScheduleType.ZONE.ordinal()) {
             schedule.setDisabled(false);
         } else {
             schedule.setDisabled(true);
         }
-        
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null){
             CCUHsApi.getInstance().updateScheduleNoSync(schedule, schedule.getRoomRef());
         } else {
             CCUHsApi.getInstance().updateScheduleNoSync(schedule, null);
         }
-        
+    
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getEquipRef()+"\"");
         clearOverrides(coolDT.get("id").toString());
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getEquipRef()+"\"");

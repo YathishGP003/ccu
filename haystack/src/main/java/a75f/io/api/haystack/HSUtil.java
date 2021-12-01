@@ -135,7 +135,7 @@ public class HSUtil
         }
     }
     
-    public static void printPointArr(Point p) {
+    public static void printPointArr(Point p, String tag) {
         ArrayList values = CCUHsApi.getInstance().readPoint(p.getId());
         if (values != null && values.size() > 0)
         {
@@ -144,7 +144,8 @@ public class HSUtil
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null)
                 {
-                    Log.d("CCU_HS", "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                    Log.d(tag,
+                          "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                                         +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
                 }
             }

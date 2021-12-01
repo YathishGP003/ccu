@@ -1505,9 +1505,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }else
                 CCUHsApi.getInstance().writeHisValById(id, (double) occupancyState.ordinal());
             
-            if (occuStatus != occupancyState.ordinal()) {
-                SystemScheduleUtil.handleDesiredTempHisValOnOccupancyChange(equip.getId());
-            }
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
             zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");

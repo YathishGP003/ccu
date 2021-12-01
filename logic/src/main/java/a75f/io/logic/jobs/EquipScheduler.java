@@ -109,10 +109,13 @@ public class EquipScheduler {
             return; //Equip might have been deleted.
         }
         final String id = ((HashMap) points.get(0)).get("id").toString();
-        if(isForcedOccupied)
+        if(isForcedOccupied) {
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
+        }
         if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
         }
         

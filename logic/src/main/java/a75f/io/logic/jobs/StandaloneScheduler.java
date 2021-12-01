@@ -90,9 +90,11 @@ public class StandaloneScheduler {
         final String id = ((HashMap) points.get(0)).get("id").toString();
         if(isForcedOccupied){
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"FC DesiredTemp not changed : Skip PointWrite=");
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
         }else if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
         }
         try {
@@ -100,13 +102,7 @@ public class StandaloneScheduler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
-            }
-        },100);
+        CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
 
     public static void updateSmartStatStatus(String equipId, ZoneState state, HashMap<String,Integer> relayStages, ZoneTempState temperatureState){

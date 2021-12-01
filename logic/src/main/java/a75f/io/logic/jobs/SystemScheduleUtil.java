@@ -375,29 +375,4 @@ public class SystemScheduleUtil {
         clearOverrides(avgDt.get("id").toString());
         
     }
-    
-    public static void handleDesiredTempHisValOnOccupancyChange(String equipRef) {
-        
-        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""
-                                                     +equipRef+ "\"");
-        if (!coolDT.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(coolDT.get("id").toString(),
-                                                   HSUtil.getPriorityVal(coolDT.get("id").toString()));
-        }
-        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""
-                                                     +equipRef+ "\"");
-        if (!heatDT.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(heatDT.get("id").toString(),
-                                                   HSUtil.getPriorityVal(heatDT.get("id").toString()));
-        }
-        
-        HashMap avgDt = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \""
-                                                    +equipRef+ "\"");
-        if (!avgDt.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(avgDt.get("id").toString(),
-                                                   HSUtil.getPriorityVal(avgDt.get("id").toString()));
-        }
-        
-    }
-    
 }

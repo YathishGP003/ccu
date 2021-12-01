@@ -521,6 +521,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     public static String getSystemStatusString() {
+        
+        //This might happen when getSystemStatusString is called too early, even before the systemProfile is loaded.
+        if (L.ccu().systemProfile == null) {
+            return "Loading...";
+        }
 
         if(L.ccu().systemProfile instanceof DefaultSystem)
             return "No Central equipment connected.";

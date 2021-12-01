@@ -3,6 +3,7 @@ package a75f.io.device.daikin
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
 import a75f.io.logic.bo.building.system.SystemController
+import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.vav.VavIERtu
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.tuners.TunerUtil
@@ -56,8 +57,10 @@ fun getIEMacAddress(hayStack : CCUHsApi) : String {
  * or when there is conditioning during 'unoccupied' time.
  */
 fun isSystemOccupied(systemProfile: VavIERtu, hayStack: CCUHsApi) : Boolean {
-    return (systemProfile.systemController.getSystemState() != SystemController.State.OFF
-            && (systemProfile.isSystemOccupied || systemProfile.isReheatActive(hayStack)))
+    val systemMode = SystemMode.values()[TunerUtil.readSystemUserIntentVal("conditioning and mode").toInt()]
+    return systemMode != SystemMode.OFF
+            && (systemProfile.isSystemOccupied
+            || systemProfile.isReheatActive(hayStack)
             || systemProfile.systemCoolingLoopOp > 10
-            || systemProfile.systemHeatingLoopOp > 10
+            || systemProfile.systemHeatingLoopOp > 10)
 }

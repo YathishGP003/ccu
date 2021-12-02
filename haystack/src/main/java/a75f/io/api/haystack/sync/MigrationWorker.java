@@ -21,9 +21,10 @@ public class MigrationWorker extends Worker {
     
     private static final String TAG = "CCU_HS_MigrationWorker";
     SyncStatusService syncStatusService;
-    
-    public MigrationWorker(Context appContext, WorkerParameters workerParams) {
-        super(appContext, workerParams);
+    Context appContext;
+    public MigrationWorker(Context context, WorkerParameters workerParams) {
+        super(context, workerParams);
+        appContext = context;
         syncStatusService = SyncStatusService.getInstance(getApplicationContext());
     }
     
@@ -36,6 +37,7 @@ public class MigrationWorker extends Worker {
         processDeletedItems();
         syncStatusService.saveSyncStatus();
         CCUHsApi.getInstance().saveTagsData();
+        PreferenceUtil.setUuidMigrationCompleted(true, appContext);
         CcuLog.i(TAG, " doWork Migration Success");
         return Result.success();
     }
@@ -53,14 +55,11 @@ public class MigrationWorker extends Worker {
             String entityId = entity.get(Tags.ID).toString();
             
             if (idMap.containsKey(entityId)) {
-                CCUHsApi.getInstance().getIdMap().remove(entityId);
+                //Commenting this temporarily. Removing idmap will make it impossible to downgrade to a lower version.
+                //CCUHsApi.getInstance().getIdMap().remove(entityId);
             } else {
                 CcuLog.i(TAG, "Migration Unsynced data "+entity.get("dis"));
-                if (entity.has(Tags.POINT) && entity.has(Tags.SETTING)) {
-                    CcuLog.i(TAG, "Skip migration for setting point "+entity.get("dis"));
-                } else {
-                    syncStatusService.addUnSyncedEntity(entityId);
-                }
+                syncStatusService.addUnSyncedEntity(entityId);
             }
         }
         

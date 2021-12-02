@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -167,7 +169,8 @@ public class SyncManager {
     
     
     private boolean isMigrationRequired() {
-        boolean migration = false;
+        //TODO - This should be enabled once id migration is stable.
+        /*boolean migration = false;
         if (CCUHsApi.getInstance().getIdMap().size() > 0) {
             migration = true;
         }
@@ -177,7 +180,8 @@ public class SyncManager {
         if (CCUHsApi.getInstance().getRemoveIdMap().size() > 0) {
             migration = true;
         }
-        return migration;
+        return migration;*/
+        return !PreferenceUtil.getUuidMigrationCompleted(appContext);
     }
     
     public void scheduleSync() {

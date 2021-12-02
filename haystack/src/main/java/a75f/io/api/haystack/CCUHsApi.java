@@ -961,7 +961,10 @@ public class CCUHsApi
     }
     
     public void removeId(String id) {
-        tagsDb.removeIdMap.remove(id.replace("@", ""));
+        //tagsDb.removeIdMap.remove(id.replace("@", ""));
+        if (syncStatusService.getDeletedData().contains(id)) {
+            syncStatusService.setDeletedEntitySynced(id);
+        }
     }
 
     public void deleteWritableArray(String id)

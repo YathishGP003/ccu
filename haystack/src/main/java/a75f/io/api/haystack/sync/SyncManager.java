@@ -166,22 +166,33 @@ public class SyncManager {
                                         .build();
     }
     
-    
-    
+    /**
+     * Do migration if there is idmap and flag is not set.
+     * @return
+     */
     private boolean isMigrationRequired() {
-        //TODO - This should be enabled once id migration is stable.
-        /*boolean migration = false;
+        boolean migrationFlag = PreferenceUtil.getUuidMigrationCompleted(appContext);
+        if (migrationFlag) {
+            return false; //Migration has been completed.
+        }
+        
+        boolean migrationRequired = false;
         if (CCUHsApi.getInstance().getIdMap().size() > 0) {
-            migration = true;
+            migrationRequired = true;
         }
         if (CCUHsApi.getInstance().getUpdateIdMap().size() > 0) {
-            migration = true;
+            migrationRequired = true;
         }
         if (CCUHsApi.getInstance().getRemoveIdMap().size() > 0) {
-            migration = true;
+            migrationRequired = true;
         }
-        return migration;*/
-        return !PreferenceUtil.getUuidMigrationCompleted(appContext);
+        
+        if (!migrationRequired) {
+            //Nothing to migrate. May be fresh installation.
+            PreferenceUtil.setUuidMigrationCompleted(true, appContext);
+        }
+        
+        return migrationRequired;
     }
     
     public void scheduleSync() {

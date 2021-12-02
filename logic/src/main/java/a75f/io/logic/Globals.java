@@ -196,7 +196,6 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-
         importTunersAndScheduleJobs();
     }
     

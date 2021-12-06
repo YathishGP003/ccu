@@ -20,6 +20,9 @@ import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+
 /**
  * Created by samjithsadasivan on 1/10/19.
  */
@@ -331,6 +334,40 @@ public abstract class VavSystemProfile extends SystemProfile
             }
         }
         return false;
+    }
+    
+    /**
+     * Check whether system is operation without only TI/BPOS zones.
+     * @param hayStack
+     * @return
+     */
+    protected boolean isSingleZoneTIMode(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and zone and vav");
+        if (!vavEquips.isEmpty()) {
+            return false;
+        }
+        
+        ArrayList<HashMap<Object, Object>> tiEquips = CCUHsApi
+                                                          .getInstance()
+                                                          .readAllEntities("(equip and zone and ti) or" +
+                                                                           "(equip and zone and bpos)"
+                                                          );
+        if (!tiEquips.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+    
+    protected double getSingleZoneFanLoopOp(double fanSpeedMultiplier) {
+        VavSystemController systemController = (VavSystemController) getSystemController();
+        
+        double fanLoopOp = 0;
+        if (systemController.getSystemState() == COOLING ) {
+            fanLoopOp = systemController.getCoolingSignal();
+        } else if (systemController.getSystemState() == HEATING) {
+            fanLoopOp = systemController.getHeatingSignal() * fanSpeedMultiplier;
+        }
+        return fanLoopOp;
     }
     
 }

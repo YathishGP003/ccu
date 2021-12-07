@@ -109,20 +109,18 @@ public class EquipScheduler {
             return; //Equip might have been deleted.
         }
         final String id = ((HashMap) points.get(0)).get("id").toString();
-        if(isForcedOccupied)
+        if(isForcedOccupied) {
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
+        }
         if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
             return;
         }
         
         CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
-            }
-        },100);
+        CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
     
     

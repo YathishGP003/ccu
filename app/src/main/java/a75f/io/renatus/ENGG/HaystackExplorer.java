@@ -4,6 +4,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -357,7 +359,7 @@ public class HaystackExplorer extends Fragment
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
                     //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
-                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+                    SystemScheduleUtil.handleDesiredTempUpdate(p, true, val);
     
                 }
     

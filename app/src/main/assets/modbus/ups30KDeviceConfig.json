@@ -41,7 +41,7 @@
             {
               "tagName": "status"
             },
-			{
+            {
               "tagName": "powersupply"
             },
             {
@@ -88,7 +88,7 @@
             {
               "tagName": "rectifier"
             },
-			{
+            {
               "tagName": "failure"
             },
             {
@@ -109,7 +109,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1030,
       "registerNumber": "41031",
       "registerType": "holdingRegister",
@@ -138,7 +138,7 @@
             {
               "tagName": "inverter"
             },
-			{
+            {
               "tagName": "failure"
             },
             {
@@ -159,7 +159,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1041,
       "registerNumber": "41042",
       "registerType": "holdingRegister",
@@ -184,15 +184,15 @@
               "name": "Mains Supply",
               "bitValues": "2"
             },
-			{
+            {
               "name": "Battery Inversion Power",
               "bitValues": "3"
             },
-			{
+            {
               "name": "United Power Supply",
               "bitValues": "4"
             },
-			{
+            {
               "name": "Output Prohibited",
               "bitValues": "5"
             }
@@ -204,7 +204,7 @@
             {
               "tagName": "status"
             },
-			{
+            {
               "tagName": "powersupply"
             },
             {
@@ -222,7 +222,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
@@ -251,10 +251,10 @@
             {
               "tagName": "low"
             },
-			{
+            {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "shutdown"
             },
             {
@@ -275,7 +275,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1034,
       "registerNumber": "41035",
       "registerType": "holdingRegister",
@@ -322,7 +322,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
@@ -351,7 +351,7 @@
             {
               "tagName": "fan"
             },
-			{
+            {
               "tagName": "failure"
             },
             {
@@ -372,7 +372,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1030,
       "registerNumber": "41031",
       "registerType": "holdingRegister",
@@ -401,7 +401,7 @@
             {
               "tagName": "common"
             },
-			{
+            {
               "tagName": "status"
             },
             {
@@ -422,7 +422,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1030,
       "registerNumber": "41031",
       "registerType": "holdingRegister",
@@ -447,15 +447,15 @@
               "name": "Above The Upper Limit",
               "bitValues": "2"
             },
-			{
+            {
               "name": "No Battery",
               "bitValues": "3"
             },
-			{
+            {
               "name": "Pre-Alarm",
               "bitValues": "4"
             },
-			{
+            {
               "name": "Reverse Battery",
               "bitValues": "5"
             }
@@ -467,7 +467,7 @@
             {
               "tagName": "status"
             },
-			{
+            {
               "tagName": "battery"
             },
             {
@@ -485,7 +485,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1035,
       "registerNumber": "41036",
       "registerType": "holdingRegister",
@@ -514,7 +514,7 @@
             {
               "tagName": "bypass"
             },
-			{
+            {
               "tagName": "load"
             },
             {
@@ -535,7 +535,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1033,
       "registerNumber": "41034",
       "registerType": "holdingRegister",
@@ -564,7 +564,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "charger"
             },
             {
@@ -585,7 +585,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1033,
       "registerNumber": "41034",
       "registerType": "holdingRegister",
@@ -614,7 +614,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "charger"
             },
             {
@@ -635,7 +635,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1035,
       "registerNumber": "41036",
       "registerType": "holdingRegister",
@@ -661,7 +661,7 @@
             {
               "tagName": "ups"
             },
-			{
+            {
               "tagName": "systemBattery"
             },
             {
@@ -682,7 +682,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1034,
       "registerNumber": "41035",
       "registerType": "holdingRegister",
@@ -711,7 +711,7 @@
             {
               "tagName": "fuse"
             },
-			{
+            {
               "tagName": "master"
             },
             {
@@ -732,7 +732,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1033,
       "registerNumber": "41034",
       "registerType": "holdingRegister",
@@ -761,10 +761,10 @@
             {
               "tagName": "fuse"
             },
-			{
+            {
               "tagName": "master"
             },
-			{
+            {
               "tagName": "channel"
             },
             {
@@ -785,7 +785,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1050,
       "registerNumber": "41051",
       "registerType": "holdingRegister",
@@ -804,15 +804,15 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -834,7 +834,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1051,
       "registerNumber": "41052",
       "registerType": "holdingRegister",
@@ -853,15 +853,15 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -883,7 +883,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1052,
       "registerNumber": "41053",
       "registerType": "holdingRegister",
@@ -902,15 +902,15 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -932,7 +932,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1053,
       "registerNumber": "41054",
       "registerType": "holdingRegister",
@@ -951,15 +951,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -981,7 +981,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1054,
       "registerNumber": "41055",
       "registerType": "holdingRegister",
@@ -1000,15 +1000,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -1030,7 +1030,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1055,
       "registerNumber": "41056",
       "registerType": "holdingRegister",
@@ -1049,15 +1049,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -1079,7 +1079,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1056,
       "registerNumber": "41057",
       "registerType": "holdingRegister",
@@ -1098,15 +1098,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "current"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -1128,7 +1128,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1057,
       "registerNumber": "41058",
       "registerType": "holdingRegister",
@@ -1147,15 +1147,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "current"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -1177,7 +1177,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1058,
       "registerNumber": "41059",
       "registerType": "holdingRegister",
@@ -1196,15 +1196,15 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "current"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -1226,7 +1226,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1059,
       "registerNumber": "41060",
       "registerType": "holdingRegister",
@@ -1250,10 +1250,10 @@
             {
               "tagName": "voltage"
             },
-			{
+            {
               "tagName": "value"
             },
-			{
+            {
               "tagName": "battery"
             },
             {
@@ -1275,7 +1275,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1060,
       "registerNumber": "41061",
       "registerType": "holdingRegister",
@@ -1299,7 +1299,7 @@
             {
               "tagName": "average"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1321,7 +1321,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1061,
       "registerNumber": "41066",
       "registerType": "holdingRegister",
@@ -1345,7 +1345,7 @@
             {
               "tagName": "l1tol2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1367,7 +1367,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1062,
       "registerNumber": "41067",
       "registerType": "holdingRegister",
@@ -1391,7 +1391,7 @@
             {
               "tagName": "l2tol3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1413,7 +1413,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1063,
       "registerNumber": "41068",
       "registerType": "holdingRegister",
@@ -1437,7 +1437,7 @@
             {
               "tagName": "l3tol1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1459,7 +1459,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1064,
       "registerNumber": "41069",
       "registerType": "holdingRegister",
@@ -1483,7 +1483,7 @@
             {
               "tagName": "l1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1505,7 +1505,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1065,
       "registerNumber": "41070",
       "registerType": "holdingRegister",
@@ -1529,7 +1529,7 @@
             {
               "tagName": "l2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1551,7 +1551,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1066,
       "registerNumber": "41071",
       "registerType": "holdingRegister",
@@ -1575,7 +1575,7 @@
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1597,7 +1597,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1067,
       "registerNumber": "41072",
       "registerType": "holdingRegister",
@@ -1621,7 +1621,7 @@
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1643,7 +1643,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1068,
       "registerNumber": "41073",
       "registerType": "holdingRegister",
@@ -1664,13 +1664,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1688,7 +1688,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1069,
       "registerNumber": "41074",
       "registerType": "holdingRegister",
@@ -1709,13 +1709,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1733,7 +1733,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1070,
       "registerNumber": "41075",
       "registerType": "holdingRegister",
@@ -1754,13 +1754,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1778,7 +1778,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1071,
       "registerNumber": "41076",
       "registerType": "holdingRegister",
@@ -1802,7 +1802,7 @@
             {
               "tagName": "l1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1824,7 +1824,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1072,
       "registerNumber": "41077",
       "registerType": "holdingRegister",
@@ -1848,7 +1848,7 @@
             {
               "tagName": "l2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1870,7 +1870,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1073,
       "registerNumber": "41078",
       "registerType": "holdingRegister",
@@ -1894,7 +1894,7 @@
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1916,7 +1916,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1074,
       "registerNumber": "41079",
       "registerType": "holdingRegister",
@@ -1937,7 +1937,7 @@
             {
               "tagName": "frequency"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -1959,7 +1959,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1075,
       "registerNumber": "41080",
       "registerType": "holdingRegister",
@@ -1980,13 +1980,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2004,7 +2004,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1076,
       "registerNumber": "41081",
       "registerType": "holdingRegister",
@@ -2025,13 +2025,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2049,7 +2049,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1077,
       "registerNumber": "41082",
       "registerType": "holdingRegister",
@@ -2070,13 +2070,13 @@
             {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "factor"
             },
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2094,7 +2094,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1078,
       "registerNumber": "41083",
       "registerType": "holdingRegister",
@@ -2115,13 +2115,13 @@
             {
               "tagName": "peak"
             },
-			{
+            {
               "tagName": "ratio"
             },
             {
               "tagName": "l1"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2139,7 +2139,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1079,
       "registerNumber": "41084",
       "registerType": "holdingRegister",
@@ -2160,13 +2160,13 @@
             {
               "tagName": "peak"
             },
-			{
+            {
               "tagName": "ratio"
             },
             {
               "tagName": "l2"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2184,7 +2184,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1080,
       "registerNumber": "41085",
       "registerType": "holdingRegister",
@@ -2205,13 +2205,13 @@
             {
               "tagName": "peak"
             },
-			{
+            {
               "tagName": "ratio"
             },
             {
               "tagName": "l3"
             },
-			{
+            {
               "tagName": "value"
             },
             {
@@ -2229,7 +2229,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1081,
       "registerNumber": "41086",
       "registerType": "holdingRegister",
@@ -2245,18 +2245,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "active"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -2278,7 +2278,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1082,
       "registerNumber": "41087",
       "registerType": "holdingRegister",
@@ -2294,18 +2294,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "active"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -2327,7 +2327,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1083,
       "registerNumber": "41088",
       "registerType": "holdingRegister",
@@ -2343,18 +2343,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "active"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -2376,7 +2376,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1084,
       "registerNumber": "41089",
       "registerType": "holdingRegister",
@@ -2392,18 +2392,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "reactive"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -2425,7 +2425,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1085,
       "registerNumber": "41090",
       "registerType": "holdingRegister",
@@ -2441,18 +2441,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "reactive"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -2474,7 +2474,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1086,
       "registerNumber": "41091",
       "registerType": "holdingRegister",
@@ -2490,18 +2490,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "reactive"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -2523,7 +2523,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1087,
       "registerNumber": "41092",
       "registerType": "holdingRegister",
@@ -2539,18 +2539,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "apparent"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l1"
             },
             {
@@ -2572,7 +2572,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1088,
       "registerNumber": "41093",
       "registerType": "holdingRegister",
@@ -2588,18 +2588,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "apparent"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l2"
             },
             {
@@ -2621,7 +2621,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1089,
       "registerNumber": "41094",
       "registerType": "holdingRegister",
@@ -2637,18 +2637,18 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "apparent"
             },
-			{
+            {
               "tagName": "power"
             },
-			{
+            {
               "tagName": "output"
             },
-			{
+            {
               "tagName": "l3"
             },
             {
@@ -2670,7 +2670,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1090,
       "registerNumber": "41095",
       "registerType": "holdingRegister",
@@ -2691,7 +2691,7 @@
             {
               "tagName": "backup"
             },
-			{
+            {
               "tagName": "time"
             },
             {
@@ -2713,7 +2713,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1091,
       "registerNumber": "41096",
       "registerType": "holdingRegister",
@@ -2734,7 +2734,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "voltage"
             },
             {
@@ -2756,7 +2756,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1092,
       "registerNumber": "41097",
       "registerType": "holdingRegister",
@@ -2777,7 +2777,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "current"
             },
             {
@@ -2799,7 +2799,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1093,
       "registerNumber": "41098",
       "registerType": "holdingRegister",
@@ -2820,7 +2820,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "voltage"
             },
             {
@@ -2842,7 +2842,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1094,
       "registerNumber": "41099",
       "registerType": "holdingRegister",
@@ -2863,7 +2863,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "current"
             },
             {
@@ -2885,7 +2885,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1095,
       "registerNumber": "41100",
       "registerType": "holdingRegister",
@@ -2906,7 +2906,7 @@
             {
               "tagName": "battery"
             },
-			{
+            {
               "tagName": "coefficient"
             },
             {
@@ -2924,7 +2924,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1096,
       "registerNumber": "41101",
       "registerType": "holdingRegister",
@@ -2964,7 +2964,7 @@
         }
       ]
     },
-	{
+    {
       "registerAddress": 1097,
       "registerNumber": "41102",
       "registerType": "holdingRegister",

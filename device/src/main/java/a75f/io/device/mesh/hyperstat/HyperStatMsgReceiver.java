@@ -38,6 +38,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
@@ -362,8 +363,8 @@ public class HyperStatMsgReceiver {
         } else {
             CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: "+hsEquip.getDisplayName());
         }
-        
-        ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+    
+        SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
                                                          new Point.Builder().setHashMap(heatingDtPoint).build(),
                                                          new Point.Builder().setHashMap(dtPoint).build(),
                                                          coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);

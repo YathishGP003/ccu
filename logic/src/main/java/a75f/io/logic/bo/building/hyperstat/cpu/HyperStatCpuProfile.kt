@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getAc
 import a75f.io.logic.jobs.HyperStatScheduler
 import a75f.io.logic.jobs.HyperStatScheduler.Companion.updateHyperstatUIPoints
 import a75f.io.logic.jobs.ScheduleProcessJob
+import a75f.io.logic.jobs.SystemScheduleUtil
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -346,10 +347,9 @@ class HyperStatCpuProfile : ZoneProfile() {
         val avg = equip.haystack
             .read("point and desired and average and temp and equipRef == \"${equip.equipRef}\"")
 
-        // clear Desired temp
-        ScheduleProcessJob.clearOverrides(heatDT["id"].toString())
-        ScheduleProcessJob.clearOverrides(coolDT["id"].toString())
-        ScheduleProcessJob.clearOverrides(avg["id"].toString())
+        SystemScheduleUtil.clearOverrides(heatDT["id"].toString())
+        SystemScheduleUtil.clearOverrides(coolDT["id"].toString())
+        SystemScheduleUtil.clearOverrides(avg["id"].toString())
 
         val HeatingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempHeatingPriorityValue(equip.equipRef!!)
         val CoolingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempCoolingPriorityValue(equip.equipRef!!)
@@ -402,8 +402,10 @@ class HyperStatCpuProfile : ZoneProfile() {
                 if (heatingDtPoint == null || heatingDtPoint.size == 0) {
                     throw java.lang.IllegalArgumentException()
                 }
-                ScheduleProcessJob.clearOverrides(coolingDtPoint["id"].toString())
-                ScheduleProcessJob.clearOverrides(heatingDtPoint["id"].toString())
+
+                SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString())
+                SystemScheduleUtil.clearOverrides(heatingDtPoint.get("id").toString())
+
                 val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                 equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                 equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
@@ -457,7 +459,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             HayStackConstants.DEFAULT_POINT_LEVEL,
             HNum.make(desiredTemp), HNum.make(0)
         )
-        ScheduleProcessJob.handleManualDesiredTempUpdate(
+        SystemScheduleUtil.handleManualDesiredTempUpdate(
             desiredCoolingPoint, desiredHeatingPoint,
             avgTempPoint, coolingDesiredTemp, heatingDesiredTemp, desiredTemp
         )

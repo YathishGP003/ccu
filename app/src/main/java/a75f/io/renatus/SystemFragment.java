@@ -163,7 +163,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		super.onResume();
 		checkForOao();
 		fetchPoints();
-		profileTitle.setText(L.ccu().systemProfile.getProfileName());
 
 		if(getUserVisibleHint()) {
             fetchPoints();
@@ -185,6 +184,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
 		if(isVisibleToUser) {
+			profileTitle.setText(L.ccu().systemProfile.getProfileName());
 			UpdatePointHandler.setSystemDataInterface(this);
 		} else {
 			UpdatePointHandler.setSystemDataInterface(null);

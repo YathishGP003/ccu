@@ -5,17 +5,22 @@ import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 
 public class MigrationUtil {
     
@@ -39,6 +44,11 @@ public class MigrationUtil {
         if (!PreferenceUtil.areDuplicateAlertsRemoved()) {
             removeDuplicateAlerts(AlertManager.getInstance());
             PreferenceUtil.removedDuplicateAlerts();
+        }
+        
+        if (!PreferenceUtil.getEnableZoneScheduleMigration()) {
+            updateZoneScheduleTypes(CCUHsApi.getInstance());
+            PreferenceUtil.setEnableZoneScheduleMigration();
         }
 
     }
@@ -120,4 +130,43 @@ public class MigrationUtil {
             CcuLog.i(logTag, unsyncedAlert.toString());
         }
     }
+    
+    /**
+     * Addresses an issue pre-exisiting builds prior to 1.597.0 where system was following building
+     * schedule for certain zones even after enabling zone schedules.
+     * @param hayStack
+     */
+    private static void updateZoneScheduleTypes(CCUHsApi hayStack) {
+        List<HashMap<Object,Object>> allScheduleTypePoints = hayStack.readAllEntities("point and scheduleType");
+        Set<String> zoneRefs = new HashSet<>();
+        
+        allScheduleTypePoints.forEach( scheduleType -> {
+            Point scheduleTypePoint = new Point.Builder().setHashMap(scheduleType).build();
+            double scheduleTypeVal = hayStack.readPointPriorityVal(scheduleTypePoint.getId());
+            if (scheduleTypeVal == ScheduleType.ZONE.ordinal() &&
+                scheduleTypePoint.getRoomRef() != null &&
+                scheduleTypePoint.getRoomRef() != "SYSTEM") {
+                zoneRefs.add(scheduleTypePoint.getRoomRef());
+            }
+        });
+        
+        zoneRefs.forEach( zoneRef -> {
+            HashMap<Object, Object> zone = hayStack.readMapById(zoneRef);
+            CcuLog.i(L.TAG_CCU_SCHEDULER, " ZoneScheduleMigration "+zone);
+            if (zone.get("scheduleRef") != null) {
+                Schedule zoneSchedule = hayStack.getScheduleById(zone.get("scheduleRef").toString());
+                //If the zone schedule is currently disabled , then enable it.
+                if (zoneSchedule != null &&
+                    zoneSchedule.isZoneSchedule() &&
+                    zoneSchedule.getDisabled()) {
+                    zoneSchedule.setDisabled(false);
+                    hayStack.updateScheduleNoSync(zoneSchedule, zone.get("id").toString());
+                    CcuLog.i(L.TAG_CCU_SCHEDULER, " Migrated Schedule "+zone+" : "+zoneSchedule);
+                }
+            }
+        });
+        
+    }
+    
+    
 }

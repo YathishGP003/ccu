@@ -62,8 +62,8 @@ public class HyperStatMessageGenerator {
         //TODO - Proto file does not define profile bitmap, enabledRelay.
         HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
-            .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef)*10))
-            .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef)*10))
+            .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
+            .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
             .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and min"))
             .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max"))
                 // Changed by Manjunath K. change in requirement on 17-11-2021

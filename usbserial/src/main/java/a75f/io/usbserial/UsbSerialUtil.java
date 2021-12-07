@@ -41,7 +41,6 @@ public class UsbSerialUtil {
         List<HashMap<Object, Object>> zoneEquips = hayStack.readAllEntities("equip and zone");
         return zoneEquips.size() > 0 &&
                (BuildConfig.BUILD_TYPE.equals("staging") ||
-                BuildConfig.BUILD_TYPE.equals("prod") ||
-                BuildConfig.BUILD_TYPE.equals("qa"));
+                BuildConfig.BUILD_TYPE.equals("prod"));
     }
 }

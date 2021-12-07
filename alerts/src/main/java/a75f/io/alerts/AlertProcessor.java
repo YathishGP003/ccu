@@ -105,7 +105,7 @@ public class AlertProcessor
                 // subsequent conditionals  (differentiate here between && and ||)
                 if (def.conditionals.get(i - 1).operator != null
                         && def.conditionals.get(i - 1).operator.contains("&&")) {
-                    // For grpOperation == ("equip" or "delta") collect pointList and, if already present, take intersection of two conditionals
+                    // For grpOperation == ("equip" or "delta") collect pointList
                     if (def.conditionals.get(i).grpOperation != null && (def.conditionals.get(i).grpOperation.equals("equip")
                             || def.conditionals.get(0).grpOperation.equals("delta"))) {
                         if (pointList == null) {

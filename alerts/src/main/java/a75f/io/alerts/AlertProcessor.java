@@ -115,8 +115,8 @@ public class AlertProcessor
                             }
                         } else {
                             if (def.conditionals.get(i).pointList != null) {
-                                pointList.retainAll(def.conditionals.get(i).pointList);
-                                equipList.retainAll(def.conditionals.get(i).equipList);
+                                pointList.addAll(def.conditionals.get(i).pointList);
+                                equipList.addAll(def.conditionals.get(i).equipList);
                             }
                         }
 

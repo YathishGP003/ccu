@@ -246,9 +246,11 @@ class HyperStatScheduler {
             }
             val id = (points[0] as java.util.HashMap<*, *>)["id"].toString()
             if (isForcedOccupied) {
+                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
                 CcuLog.d(L.TAG_CCU_SCHEDULER, flag + "FC DesiredTemp not changed : Skip PointWrite=")
                 return
             } else if (HSUtil.getPriorityLevelVal(id, 8) == desiredTemp) {
+                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
                 CcuLog.d(L.TAG_CCU_SCHEDULER, flag + "DesiredTemp not changed : Skip PointWrite")
                 return
             }

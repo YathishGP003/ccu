@@ -177,7 +177,7 @@ public class SensorManager {
         externalSensors.add(new Sensor("Differential Pressure Sensor (0-0.25)","inches wc",0,10,-0.25,0.25,0.01));
         externalSensors.add(new Sensor("Airflow Sensor (0-1000)","CFM",0,10,0,1000,10.0));
         externalSensors.add(new Sensor("Humidity (0-100)","%",0,10,0,100,1.0));
-        externalSensors.add(new Sensor("CO2 (0-2000)","ppm",0,10,0,2000,10.0));
+        externalSensors.add(new Sensor("CO2 (0-2000)","ppm",0,10,0,2000,100.0));
         externalSensors.add(new Sensor("CO (0-100)","ppm",0,10,0,100,1.0));
         externalSensors.add(new Sensor("NO2 (0-5)","ppm",0,10,0,5,0.1));
         externalSensors.add(new Sensor("CT (0-10)","amps",0,10,0,10,0.1));

@@ -8,7 +8,8 @@ import android.util.Log;
 public class PreferenceUtil {
     private static Context context;
     private static String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
-
+    private static String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
+    
     public static void setContext(Context c) {
         context= c;
     }
@@ -139,5 +140,13 @@ public class PreferenceUtil {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean(key, value);
         editor.apply();
+    }
+    
+    public static boolean getEnableZoneScheduleMigration() {
+        return getBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION);
+    }
+    
+    public static void setEnableZoneScheduleMigration() {
+        setBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION, true);
     }
 }

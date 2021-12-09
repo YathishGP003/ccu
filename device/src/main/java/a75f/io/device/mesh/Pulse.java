@@ -326,6 +326,7 @@ public class Pulse
 		}
 		
 		if (emVal > 0) {
+			emVal = emVal/10; //SN sends multiples of 10
 			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
 			if (sp == null) {
 				sp = node.addSensor(Port.SENSOR_ENERGY_METER);

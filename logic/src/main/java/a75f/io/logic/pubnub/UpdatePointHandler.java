@@ -48,7 +48,18 @@ public class UpdatePointHandler
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " HandlePubnub for" + Arrays.toString(localPoint.getMarkers().toArray()));
-    
+
+
+        /*
+        Reconfiguration handled for PI profile
+         */
+        if (HSUtil.isPIConfig(pointUid, CCUHsApi.getInstance())) {
+            PIReConfigHandler.updateConfigPoint(msgObject, localPoint);
+            updatePoints(localPoint);
+            return;
+        }
+
+
         //Handle DCWB specific system config here.
         if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
             DcwbConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
@@ -97,6 +108,7 @@ public class UpdatePointHandler
             DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
             return;
         }
+
         
         if (CCUHsApi.getInstance().entitySynced(pointUid))
         {

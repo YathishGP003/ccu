@@ -281,9 +281,9 @@ public class HSUtil
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 
-    public static boolean isBPOSConfig(String id, CCUHsApi hayStack) {
+    public static boolean isPIConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.BPOS);
+        return pointEntity.containsKey(Tags.PLC);
     }
     
     public static boolean isDamperReheatTypeConfig(String id, CCUHsApi hayStack) {

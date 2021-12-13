@@ -62,8 +62,6 @@ import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
 import io.objectbox.query.QueryBuilder;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-
 /**
  * Created by samjithsadasivan on 8/31/18.
  */
@@ -80,6 +78,7 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     
     private static final long MAX_DB_SIZE_IN_KB = 5 * 1024 * 1024;
+    private static final long MAX_DB_SIZE_IN_KB_RECOVERY = 6 * 1024 * 1024;
     
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -143,15 +142,7 @@ public class CCUTagsDb extends HServer {
         removeIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_REMOVE_ID_MAP, null);
         updateIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_UPDATE_ID_MAP, null);
 
-        if(boxStore != null && !boxStore.isClosed())
-        {
-            boxStore.close();
-        }
-        boxStore = MyObjectBox.builder()
-                              .androidContext(appContext)
-                              .maxSizeInKByte(MAX_DB_SIZE_IN_KB)
-                              .build();
-        hisBox = boxStore.boxFor(HisItem.class);
+        initBoxStore();
 
         if (tagsString == null) {
             tagsMap = new ConcurrentHashMap<>();
@@ -199,6 +190,21 @@ public class CCUTagsDb extends HServer {
             CcuLog.d("CCU_HS", "Match check: " + matchCount + " match out of " + idMap.size());
             
         }
+    }
+    
+    public void initBoxStore() {
+        if(boxStore != null && !boxStore.isClosed()) {
+            boxStore.close();
+        }
+        boxStore = MyObjectBox.builder()
+                              .androidContext(appContext)
+                              .maxSizeInKByte(getMaxDbSizeInKb())
+                              .build();
+        hisBox = boxStore.boxFor(HisItem.class);
+    }
+    
+    private long getMaxDbSizeInKb() {
+        return MAX_DB_SIZE_IN_KB_RECOVERY;
     }
 
     private DbStrings checkAndStartGuidMigration(Gson gson) {

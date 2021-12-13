@@ -294,6 +294,7 @@ public class Globals {
                 Watchdog.getInstance().start();
             
                 CCUHsApi.getInstance().syncEntityWithPointWrite();
+                CCUHsApi.getInstance().trimObjectBoxHisStore();
             
             }
         }.start();

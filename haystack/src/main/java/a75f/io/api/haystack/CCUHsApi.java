@@ -2306,4 +2306,8 @@ public class CCUHsApi
         }
         return rowList;
     }
+    
+    public void trimObjectBoxHisStore() {
+        hisSyncHandler.doPurge(true);
+    }
 }

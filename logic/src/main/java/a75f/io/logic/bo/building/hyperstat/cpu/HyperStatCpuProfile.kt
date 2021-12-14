@@ -176,8 +176,9 @@ class HyperStatCpuProfile : ZoneProfile() {
                  "Fan Loop Output:: $fanLoopOutput \n"
         )
 
-
-        if (config.isEnableAutoForceOccupied) {
+        val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+                                                                    equip.equipRef)
+        if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {
             runAutoForceOccupyOperation(equip)
         } else {
             if (equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt() == Occupancy.AUTOFORCEOCCUPIED.ordinal)

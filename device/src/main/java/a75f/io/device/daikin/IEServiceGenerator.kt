@@ -37,7 +37,7 @@ class IEServiceGenerator {
         ).create(IEService::class.java)
     }
 
-    fun createRetrofit(baseUrl: String): Retrofit {
+    private fun createRetrofit(baseUrl: String): Retrofit {
 
         val okHttpClient = if (sslEnabled) getHttpsClient() else getHttpClient()
 
@@ -50,7 +50,7 @@ class IEServiceGenerator {
             .build()
     }
 
-    fun getHttpClient() : OkHttpClient {
+    private fun getHttpClient() : OkHttpClient {
 
         return OkHttpClient.Builder().apply {
             addInterceptor(
@@ -65,7 +65,7 @@ class IEServiceGenerator {
         }.build()
     }
 
-    fun getHttpsClient() : OkHttpClient {
+    private fun getHttpsClient() : OkHttpClient {
 
             val trustManagerValidator = arrayOf<TrustManager>(
                 object : X509TrustManager {
@@ -122,13 +122,13 @@ class IEServiceGenerator {
                     }.build()
     }
 
-    fun getHttpLoggingInterceptor() : HttpLoggingInterceptor {
+    private fun getHttpLoggingInterceptor() : HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
     }
 
-    fun readKeyStore(context: Context): KeyStore? = KeyStore.getInstance(KeyStore.getDefaultType()).also{
+    private fun readKeyStore(context: Context): KeyStore? = KeyStore.getInstance(KeyStore.getDefaultType()).also{
         val inputStream = context.resources.openRawResource(R.raw.root_ca_daikin)
         //CcuLog.i(L.TAG_CCU_DEVICE, "Certificate $inputStream")
         val cf: CertificateFactory = CertificateFactory.getInstance("X.509")

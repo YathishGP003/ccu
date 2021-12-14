@@ -70,6 +70,8 @@ class IEDeviceHandler {
                 fetchOccStatus(it, hayStack)
                 Thread.sleep(100)
                 fetchSystemClock(it, hayStack)
+                Thread.sleep(100)
+                updateSystemClock()
                 fiveMinCounter = 0
             }
             fiveMinCounter++
@@ -324,6 +326,14 @@ class IEDeviceHandler {
             )
     }
 
+    private fun updateSystemClock() {
+        ieService.writeCCUSystemClockPoint(IE_MSG_BODY.format(System.currentTimeMillis().toDouble()))
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                        { CcuLog.e(L.TAG_CCU_DEVICE, "IE Write Completed")},
+                        { error -> CcuLog.e(L.TAG_CCU_DEVICE, "IE Write failed for updateSystemClock : $error.message" ) }
+                )
+    }
 
     private fun writeToIEDevice(service: IEService, pointType : String, pointName : String, msg : String)  {
         service.writePoint(

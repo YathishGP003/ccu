@@ -18,6 +18,7 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.LocationDetails;
 
 public class WeatherDataDownloadService extends IntentService {
 
@@ -43,7 +44,7 @@ public class WeatherDataDownloadService extends IntentService {
     public static double windSpeed = 0;
     public static double windGust = 0;
     public static double windBearing = 0;
-    
+
 	public WeatherDataDownloadService() {
 		super("WeatherService");
 		// TODO Auto-generated constructor stub
@@ -55,7 +56,7 @@ public class WeatherDataDownloadService extends IntentService {
 		while (!bStopService) {
 	    	synchronized (this) {
 	    		try {
-	    			getWeatherData();
+	    			getWeatherData(null);
 	    			wait(CALLING_TIME_INTERVAL);
 	    		} catch (Exception e) {
 	    			try {
@@ -99,7 +100,7 @@ public class WeatherDataDownloadService extends IntentService {
     private static double lat = 0;
     private static double lng = 0;
 
-    public static void getWeatherData() {
+    public static void getWeatherData(LocationDetails onDataReceived ) {
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
         lat = spDefaultPrefs.getFloat("lat", 0);
         lng = spDefaultPrefs.getFloat("lng", 0);
@@ -152,7 +153,7 @@ public class WeatherDataDownloadService extends IntentService {
                             edit.putFloat("outside_hum", (float) mCurrentHumidity);
                             edit.putFloat("outside_precip",(float) mPrecipIntensity);
                             edit.commit();
-            
+                            if(onDataReceived != null ) onDataReceived.onDataReceived();
                             Log.d("CCU_WEATHER", "sunrise today at=" + mSunriseTime + ",sunset today at=" + mSunsetTime);
                             Log.d("CCU_WEATHER", "max temp is =" + maxtemp + ",min temp is=" + mintemp + ",msummary is=" + dailysummary);
                         } else {

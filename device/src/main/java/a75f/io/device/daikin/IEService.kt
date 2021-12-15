@@ -33,6 +33,13 @@ interface IEService {
     @GET("/BN/ISDevice/Device/Gateway_ID")
     fun readGatewayIdPoint(): Single<Results>
 
+    @Headers(value = ["Accept: application/xml",
+        "Content-type:text/plain"])
+    @PUT("/BN/ISDevice/Device/CCU_SystemClock/Present_Value?resp-format=eXML")
+    fun writeCCUSystemClockPoint(
+            @Body pointVal : String
+    ): Observable<Response<Void>>
+
 }
 //TODO- Exact response structure from Daikin IE is unknown now. This will be changed after field trials.
 

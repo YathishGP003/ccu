@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -160,6 +161,13 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentBPOSTempInfConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                RxjavaUtil.executeBackground(new Runnable() {
+                    @Override
+                    public void run() {
+                        LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, zoneRef,floorRef);
+                    }
+                });
+
                 
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");

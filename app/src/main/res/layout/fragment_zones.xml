@@ -56,7 +56,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="20dp"
-                android:text="Mankato,Mn"
+                android:text="Loading..."
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -76,7 +76,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="50dp"
-                android:text="71"
                 android:textColor="@color/white"
                 android:textSize="35sp"
                 android:textStyle="bold" />
@@ -88,7 +87,6 @@
                 android:layout_marginRight="25dp"
                 android:layout_marginTop="55dp"
                 android:drawableLeft="@drawable/degree"
-                android:text="F"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -100,7 +98,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_below="@+id/temperature"
                 android:layout_marginRight="25dp"
-                android:text="Sunny"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
@@ -111,7 +108,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_below="@+id/weather_condition"
                 android:layout_marginRight="25dp"
-                android:text="Today: 77/63"
                 android:textColor="@color/white"
                 android:textSize="14sp" />
 
@@ -127,8 +123,7 @@
                 android:layout_marginTop="30dp"
                 android:ellipsize="end"
                 android:maxLines="3"
-                android:text="Humid and warmer with times of sun and clouds . "
-                android:textColor="@color/white"
+               android:textColor="@color/white"
                 android:textSize="14sp" />
 
 

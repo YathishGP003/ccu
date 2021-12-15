@@ -204,7 +204,8 @@ public class CCUTagsDb extends HServer {
     }
     
     private long getMaxDbSizeInKb() {
-        return MAX_DB_SIZE_IN_KB_RECOVERY;
+        //TODO: To send recovery size based on a configuration.
+        return MAX_DB_SIZE_IN_KB;
     }
 
     private DbStrings checkAndStartGuidMigration(Gson gson) {

@@ -217,7 +217,13 @@ public class VavIERtu extends VavSystemProfile
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
     
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
-            systemFanLoopOp = VavSystemController.getInstance().getCoolingSignal();
+            if (VavSystemController.getInstance().getSystemState() == COOLING) {
+                systemFanLoopOp = VavSystemController.getInstance().getCoolingSignal();
+            } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
+                systemFanLoopOp = VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier;
+            } else {
+                systemFanLoopOp = 0;
+            }
             
         } else if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
             
@@ -545,7 +551,7 @@ public class VavIERtu extends VavSystemProfile
                                             .setTz(tz)
                                             .build();
         String maxHeatingDatId = hayStack.addPoint(maxHeatingDat);
-        hayStack.writeDefaultValById(maxHeatingDatId, 100.0 );
+        hayStack.writeDefaultValById(maxHeatingDatId, 90.0 );
     
         Point equipmentIP = new Point.Builder()
                                       .setDisplayName(equipDis+"-"+"equipmentIPAddress")
@@ -814,7 +820,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setTz(tz)
                                       .build();
         String minStaticPressureId = hayStack.addPoint(minStaticPressure);
-        hayStack.writeDefaultValById(minStaticPressureId, 0.2 );
+        hayStack.writeDefaultValById(minStaticPressureId, 0.5 );
     
         Point maxStaticPressure = new Point.Builder()
                                       .setDisplayName(equipDis+"-"+"maxStaticPressure")
@@ -826,7 +832,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setTz(tz)
                                       .build();
         String maxStaticPressureId = hayStack.addPoint(maxStaticPressure);
-        hayStack.writeDefaultValById(maxStaticPressureId, 2.0 );
+        hayStack.writeDefaultValById(maxStaticPressureId, 1.5 );
     }
     
     private void deleteStaticPressureConfigPoints(CCUHsApi hayStack) {

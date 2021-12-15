@@ -786,7 +786,7 @@
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>
     <string name="title_input_value">Input Value</string>
-    <string name="title_calculated_output">Calculated Output \nValue</string>
+    <string name="title_calculated_output">Calculated Output \n\t\t\t\tValue</string>
     <string name="title_override_value">Override Value</string>
 
     <string name="txt_alert_delete_schedule">Are you sure you want to delete the current schedule?</string>
@@ -1059,11 +1059,11 @@
     <string name="vrv_label_master_controller">Master Controller :</string>
 
     <string-array name="vrv_master_op_modes">
-        <item >OFF</item>
-        <item >FAN</item>
-        <item >HEAT</item>
-        <item >COOL</item>
-        <item >AUTO</item>
+        <item>OFF</item>
+        <item>FAN</item>
+        <item>HEAT</item>
+        <item>COOL</item>
+        <item>AUTO</item>
     </string-array>
 
     <string name="vrv_master_uninit_text">(Master Controller Selection will only be available post communication
@@ -1108,18 +1108,24 @@
         <item>  Fan Medium Occupied Period</item>
         <item>  Fan Medium All Times</item>
 
-    </string-array><string-array name="hyperstate_only_high_fanmode">
+    </string-array>
+    <string-array name="hyperstate_only_high_fanmode">
         <item>  Off </item>
         <item>  Auto </item>
         <item>  Fan High Current Occupied Period </item>
         <item>  Fan High Occupied Period</item>
         <item>  Fan High All Times</item>
     </string-array>
+    <string name="temproryOverride_Warningmessage">Kindly be cautious of changes done to any system
+        and zone level points. This may impact building equipment operation and/or even damage building
+        equipment(s) if not handled correctly.</string>
+    <string name="enter_values_in_ohm"><font size="15">Enter Value in Ohm</font></string>
 
 
     <string name="thermistor1_label">Th1</string>
     <string name="thermistor2_label">Th2</string>
     <string name="analog1_label">A-in1</string>
     <string name="analog2_label">A-in2</string>
+    <string name="time_left_to_reset_values">Time Left to Reset Values:</string>
 
 </resources>

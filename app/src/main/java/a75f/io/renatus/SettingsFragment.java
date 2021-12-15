@@ -207,7 +207,7 @@ public class SettingsFragment extends Fragment {
                     case 6: {
                         if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
                             //TODO:
-                           /* fragmentClass = TempOverrideFragment.class;
+                            fragmentClass = TempOverrideFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
                             } catch (Exception e) {
@@ -217,7 +217,7 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();*/
+                            transaction.commit();
                         } else {
                             isTransactionPending = true;
                         }

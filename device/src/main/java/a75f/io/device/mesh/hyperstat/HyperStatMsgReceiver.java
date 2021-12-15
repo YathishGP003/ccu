@@ -237,6 +237,7 @@ public class HyperStatMsgReceiver {
     }
     
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
+        Log.i(L.TAG_CCU_DEVICE, "writeAnalogInputVal: "+rawPoint.getPort()+" " +rawPoint.getType());
         hayStack.writeHisValById(rawPoint.getId(), val);
         double voltageReceived = val/1000;
         int index = (int)Double.parseDouble(rawPoint.getType());

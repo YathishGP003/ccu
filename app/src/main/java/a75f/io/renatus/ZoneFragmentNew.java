@@ -272,8 +272,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if(getActivity() != null && isAdded()) {
             getActivity().runOnUiThread(() -> {
                 if(zoneOpen) {
-                    updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
-                    tableLayout.invalidate();
+                    try {
+                        updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                        tableLayout.invalidate();
+                    } catch (IllegalStateException e) {
+                        //getLayoutInflater() might fail if Fragment is not attached to FragmentManager yet.
+                        CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
+                    }
                 }
             });
         }

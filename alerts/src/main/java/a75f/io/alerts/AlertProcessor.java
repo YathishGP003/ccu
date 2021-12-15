@@ -50,7 +50,7 @@ public class AlertProcessor
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
 
         for (AlertDefinition def : alertDefs) {
-jk            boolean doProcess = inspectAlertDef(def, occurrences);
+            boolean doProcess = inspectAlertDef(def, occurrences);
             if (!doProcess) {
                 continue;
             }
@@ -134,22 +134,29 @@ jk            boolean doProcess = inspectAlertDef(def, occurrences);
 
         // Build alert def occurrences
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
-
-        // NOTE: A "delta" alert def requires a minimum amount of point data in order to evaluate the conditionals.
-        //  If no conditionals are executed as a result of this, 'equipToResults' will be empty and an occurrence will NOT be created.
-        //  This is misleading because it appears the alert def was not processed while actually it was.
-        //  Forgoing a solution at this time because a proper solution requires transparency into these "lack of data" results at the *equip* level.
-        //  However, the Conditional class does not currently provide such transparency and a non-trivial refactor is required.
-        //  Because this alert-def-was-evaluated-but-an-alert-was-not-raised bug is only visible as a Dev Tool feature on the CCU
-        //  and alerts should be holistically addressed, deciding to not create a ticket and wait for someone to notice.
-        equipToResult.entrySet().forEach(e -> {
-            String equipRef = e.getKey();
-            String pointRef = equipToPoint.get(equipRef);
-            boolean isEquipMuted = def.isMuted(ccuId, equipRef);
-            boolean result = isEquipMuted ? false : e.getValue();
-            occurrences.add(buildOccurrence(def, result, isEquipMuted, equipRef, pointRef));
-        });
+        if (equipToResult.isEmpty()) {
+            // This will occur when not enough data exists for the points evaluated within a 'delta' grpOperation
+            occurrences.add(new AlertDefOccurrence(
+                    def,
+                    false,
+                    false,
+                    "The conditional(s) were not evaluated against any equips.",
+                    null,
+                    null));
+        } else  {
+            equipToResult.entrySet().forEach(e -> {
+                String equipRef = e.getKey();
+                String pointRef = equipToPoint.get(equipRef);
+                boolean isEquipMuted = def.isMuted(ccuId, refToId(equipRef));
+                boolean result = isEquipMuted ? false : e.getValue();
+                occurrences.add(buildOccurrence(def, result, isEquipMuted, equipRef, pointRef));
+            });
+        }
         return occurrences;
+    }
+
+    private String refToId(String ref) {
+        return ref.startsWith("@") ? ref.substring(1) : ref;
     }
 
     private boolean calculateResult(boolean currentResult, Conditional.Operator operator, Boolean status) {
@@ -184,8 +191,8 @@ jk            boolean doProcess = inspectAlertDef(def, occurrences);
      * If:
      * 1) The alert is not enabled
      * 2) or the alert def is muted
-     * 3) or a multi-conditional alert def has more than one grpOperation present. (This is currently not enforced by the Alerts Service)
-     * 4) or the alert def's grpOperation is "alert" (This was added as part of the refactor)
+     * 3) or a multi-conditional alert def has more than one grpOperation present. (This was added to the PM specs and is currently not enforced by the Alerts Service)
+     * 4) or the alert def's grpOperation is "alert" (This was added as part of the refactor. See comment below.)
      * Then the alert def will not be processed.
      */
     private boolean inspectAlertDef(AlertDefinition def, List<AlertDefOccurrence> occurrences) {

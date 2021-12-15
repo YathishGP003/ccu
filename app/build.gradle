@@ -227,11 +227,7 @@ android.applicationVariants.all { variant ->
     variant.outputs.all {
         if (variant.buildType.name == "local") {
             outputFileName = "app-" + variant.buildType.name + "-debug.apk"
-        }
-        else if (variant.buildType.name == "daikin_prod") {
-            outputFileName = "DAIKIN_CCU"+variant.buildType.versionNameSuffix+ ".apk"
-        }
-        else {
+        } else {
             outputFileName = versionName + ".apk"
         }
     }

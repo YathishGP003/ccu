@@ -44,7 +44,7 @@ public class MeshNetwork extends DeviceNetwork
     @Override
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
-        DiagEquip.getInstance().setDiagHisVal("serial and connection", LSerial.getInstance().isConnected() ? 1.0 :0);
+        
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);

@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.udojava.evalex.Expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
@@ -53,6 +55,9 @@ public class Conditional
     ArrayList<String> pointList;
     ArrayList<String> equipList;
 
+    Map<String, String> equipToPoint = new HashMap<>();
+    Map<String, Boolean> equipToStatus = new HashMap<>();
+
     // value for LHS
     double resVal;
 
@@ -80,27 +85,6 @@ public class Conditional
     public boolean keyValueConditionAllEmpty() {
         return key.isEmpty() && value.isEmpty() && condition.isEmpty();
     }
-
-    /*
-     * Here are the known values for grpOperation:
-     *
-     * ""         : run the key query system wide and fetch the matching point for evaluation with condition and value
-     * "equip"    : fetch all zone equips matching key query for individual evaluation with condition and value
-     * "delta"    : fetch all zone equips matching key query. For each equip, find the difference between the last two history values and use that for evaluation with condition and value.
-     * "min" or "max" or "ave"   : find all points matching the key query system wide, and take their min/max/ave for evaluation with condition and value.
-     * "bottom NN" or "top NN"  : (where NN is a percentage) find the values of all points matching the key query system wide. Take the bottom or top NN percent of the points. Use the closest value to that percentage and evaluate with condition and value.
-     * "oao"      : fetch all zone equips matching key query with the "oao" tag. For each, evaluate with condition and the history value of the point for the same equip matching the value query.
-     * "security" : Special logic evaluating the number of password attempts against value with condition.
-     * "alert"    : Special hard-coded logic on the CCU defines these alerts
-     *
-     * Evaluation produces 3 types results for a conditional
-     *  - when grpOperation is empty (run the query system wide and fetch the matching point) , update the status boolean
-     *  - when grpOperation is equip/delta , create pointList having all the points satisfying the conditional
-     *  - when grpOperation is max/min/bottom etc , we are comparing multiple points, resulting in single status boolean.
-     *  - when grpOperation is oao, similar logic to equip, but don't create pointList and use result from last equip evaluated (perhaps its the only matching equip?)
-     *  - when grpOperation is security, special logic evaluating password attempts.
-     *  - when grpOperation is alert, we don't use this engine, custom logic is evaluated elsewhere in system
-     */
 
     // NOTE:  algorithm part of the code is formatted normally on the left.
     // NOTE:  debugging code is indented far to the right and can be ingored when reading the algorithm.
@@ -156,19 +140,21 @@ public class Conditional
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
                                     sb.append("\nEvaluating for ").append(equips.size()).append(" equips");
             for (Map q : equips) {
-                                        sb.append("\nEquip: ").append(q.get("dis"));
-                HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
+                String equipRef = q.get("id").toString();
+                                        sb.append("\nEquip: ").append(q.get("dis")).append(", " + equipRef.substring(0, 6));
+                HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+ equipRef +"\"");
                 if (point.size() == 0) {
-                                            error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
-                                            sb.append("\n   no point for " + key+" and equipRef == \""+q.get("id")+"\"");
+                                            error = "no point for " + key+" and equipRef == \"" + equipRef  +"\"";
+                                            sb.append("\n   no point for " + key+" and equipRef == \"" + equipRef +"\"");
                     continue;
                 }
+                String pointRef = point.get("id").toString();
                 if (value.contains("zone")) {
-                    val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                    val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value + " and equipRef == \"" + equipRef + "\""));
                                             sb.append("\n   val (RHS): ").append(val).append("   --re-evaluated for this zone.");
                 }
-                                            sb.append("\n   Found point assoc w/ this equip").append(point.get("id").toString().substring(0,6)).append(" -- reading his val");
-                resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
+                                            sb.append("\n   Found point assoc w/ this equip. PointRef = ").append(pointRef.substring(0,6)).append(" -- reading his val");
+                resVal = CCUHsApi.getInstance().readHisValById(pointRef);
                                             sb.append("\n   resVal (LHS): ").append(resVal);
                 if ((value.contains("co2")&& value.contains("target")) || (value.contains("voc")&& value.contains("target"))){
                     val = String.valueOf(Double.parseDouble(val) + (Double.parseDouble(val)/10.0));
@@ -176,14 +162,18 @@ public class Conditional
                 }
                 Expression expression = new Expression(resVal+ " "+condition+" " + val);
                                             sb.append("\n").append(expression).append(": ");
-                if (expression.eval().intValue() > 0) {
+
+                boolean status = expression.eval().intValue() > 0;
+                equipToPoint.put(equipRef, pointRef);
+                equipToStatus.put(equipRef, status);
+                if (status) {
                                                 sb.append("TRUE");
-                    pointList.add(point.get("id").toString());
-                    equipList.add(q.get("id").toString());
+                    pointList.add(pointRef);
+                    equipList.add(pointRef);
                     if ((value.contains("co2")&& value.contains("target")) || (value.contains("voc")&& value.contains("target"))){
-                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+ equipRef +"\""));
                     }
-                    pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
+                    pointValList.add(new PointVal(pointRef, Double.parseDouble(val)));
                 } else {
                                                 sb.append("FALSE");
                 }
@@ -343,30 +333,32 @@ public class Conditional
                 ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
                                     sb.append("\nEvaluating for ").append(equips.size()).append(" equips for delta");
                 for (Map q : equips) {
-                                        sb.append("\nEquip: ").append(q.get("dis"));
-                    HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
+                    String equipRef = q.get("id").toString();
+                                        sb.append("\nEquip: ").append(q.get("dis")).append(", " + equipRef.substring(0, 6));
+                    HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \"" + equipRef + "\"");
                     if (point.size() == 0) {
-                                                    error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
-                                                    sb.append("\n   no point for " + key+" and equipRef == \""+q.get("id")+"\"");
+                                                    error = "no point for " + key+" and equipRef == \"" + equipRef + "\"";
+                                                    sb.append("\n   no point for " + key+" and equipRef == \"" + equipRef + "\"");
                         continue;
                     }
-                                                sb.append("\n   Found point assoc w/ this equip").append(point.get("id").toString().substring(0,6)).append(" -- reading last two his vals from today");
+                    String pointRef = point.get("id").toString();
+                                                sb.append("\n   Found point assoc w/ this equip").append(pointRef.substring(0,6)).append(" -- reading last two his vals from today");
 
                     //List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-1800000,HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT))), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT)))));
-                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),"today");
+                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(pointRef,"today");
                     ///List<HisItem> hisItems= CCUHsApi.getInstance().hisReadRemote(CCUHsApi.getInstance().getGUID(point.get("id").toString()),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis() - 3600000, HTimeZone.make(point.get("tz").toString())), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(point.get("tz").toString()))));
 
                     if (hisItems.size() < 2) {
                                                     error = " Not enough his vals to evaluate conditional ";
                                                     sb.append("\n Not enough his vals " + hisItems.size() + " to evaluate conditional.  Return");
-                        return;
+                        continue;
                     }
                     
                     HisItem reading1 = hisItems.get(hisItems.size() - 2);
                     HisItem reading2 = hisItems.get(hisItems.size() - 1);
     
                     if (value.contains("zone")) {
-                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \"" + equipRef + "\""));
                                                     sb.append("\nval (RHS): ").append(val).append("  -- recalculated for this zone");
                     }
 
@@ -383,14 +375,17 @@ public class Conditional
                     CcuLog.d("CCU_ALERTS", " expression "+expression.toString());
                                                 sb.append("\n").append(expression).append(": ");
 
-                    if (expression.eval().intValue() > 0) {
+                    boolean status = expression.eval().intValue() > 0;
+                    equipToPoint.put(equipRef, pointRef);
+                    equipToStatus.put(equipRef, status);
+                    if (status) {
                                                     sb.append("TRUE");
                         CcuLog.d("CCU_ALERTS", " Add to pointList");
-                        pointList.add(point.get("id").toString());
-                        equipList.add(q.get("id").toString());
-                        pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
-                        lastValue.add(new PointVal(point.get("id").toString(), reading1.getVal()));
-                        presentValue.add(new PointVal(point.get("id").toString(), reading2.getVal()));
+                        pointList.add(pointRef);
+                        equipList.add(equipRef);
+                        pointValList.add(new PointVal(pointRef, Double.parseDouble(val)));
+                        lastValue.add(new PointVal(pointRef, reading1.getVal()));
+                        presentValue.add(new PointVal(pointRef, reading2.getVal()));
                     } else {
                                                     sb.append("FALSE");
                     }
@@ -462,4 +457,88 @@ public class Conditional
         return operator != null ? order+":"+operator : order+": "+key+" "+condition+" "+value+" ("+grpOperation+")";
     }
 
+    public enum Operator {
+        // This matches the enum in the Alerts Service
+        AND("&&"),
+        OR("||");
+
+        private final String value;
+
+        Operator(String value) {
+            this.value = value;
+        }
+
+        public String getValue() { return this.value; }
+
+        public static Operator fromValue(String value ) {
+            Optional<Operator> operator = Arrays.asList(Operator.values()).stream()
+                    .filter(o -> o.getValue().equals(value))
+                    .findFirst();
+            // NOTE: For some reason the ::orElseThrow required the method signature to include "throws".
+            //  Did not want the calling code to have to handle this exception.
+            //  Throwing the excpetion like this is apparently OK...
+            if (operator.isPresent()) {
+                return operator.get();
+            } else {
+                String message = "operator = " + value + " does not exist. 'operator' is validated at alert def creation time." +
+                        " Is there a bug in the Alerts Service? If no, is this an 'old' alert def? If so, cleanup the local/remote databases!!";
+                CcuLog.e("Invalid Operator", message);
+                throw new IllegalArgumentException(message);
+            }
+
+        }
+    }
+
+    /*
+     * Here are the known values for grpOperation:
+     *
+     * ""         : run the key query system wide and fetch the matching point for evaluation with condition and value
+     * "equip"    : fetch all zone equips matching key query for individual evaluation with condition and value
+     * "delta"    : fetch all zone equips matching key query. For each equip, find the difference between the last two history values and use that for evaluation with condition and value.
+     * "min" or "max" or "ave"   : find all points matching the key query system wide, and take their min/max/ave for evaluation with condition and value.
+     * "bottom NN" or "top NN"  : (where NN is a percentage) find the values of all points matching the key query system wide. Take the bottom or top NN percent of the points. Use the closest value to that percentage and evaluate with condition and value.
+     * "oao"      : fetch all zone equips matching key query with the "oao" tag. For each, evaluate with condition and the history value of the point for the same equip matching the value query.
+     * "security" : Special logic evaluating the number of password attempts against value with condition.
+     * "alert"    : Special hard-coded logic on the CCU defines these alerts
+     *
+     * Evaluation produces 3 types results for a conditional
+     *  - when grpOperation is empty (run the query system wide and fetch the matching point) , update the status boolean
+     *  - when grpOperation is equip/delta , create pointList having all the points satisfying the conditional
+     *  - when grpOperation is max/min/bottom etc , we are comparing multiple points, resulting in single status boolean.
+     *  - when grpOperation is oao, similar logic to equip, but don't create pointList and use result from last equip evaluated (perhaps its the only matching equip?)
+     *  - when grpOperation is security, special logic evaluating password attempts.
+     *  - when grpOperation is alert, we don't use this engine, custom logic is evaluated elsewhere in system
+     */
+    public enum GrpOperator {
+        // This matches the enum in the Alerts Service
+        EQUIP("equip"),
+        OAO("oao"),
+        MIN("min"),
+        MAX("max"),
+        TOP60("top60"),
+        BOTTOM60("bottom60"),
+        DELTA("delta"),
+        SECURITY("security"),
+        ALERT("alert"),
+        NONE("");
+
+        private final String value;
+
+        public String getValue () { return value; }
+
+        GrpOperator(String value) {
+            this.value = value;
+        }
+
+        public static GrpOperator fromValue(String value) {
+            try {
+                return value.equals("") ? GrpOperator.NONE : GrpOperator.valueOf(value.toUpperCase());
+            } catch (Exception ex) {
+                String message = "grpOperator = '" + value + "' does not exist. 'grpOperator' is validated at alert def creation time." +
+                        " Is there a bug in the Alerts Service? If no, is this an 'old' alert def? If so, cleanup the local/remote databases!!";
+                CcuLog.e("Invalid GrpOperator", message);
+                throw ex;
+            }
+        }
+    }
 }

@@ -1305,7 +1305,7 @@ class HyperStatPointsUtil constructor(
     private fun createAnalogOutPointForDCVDamper(analogTag: String): Point {
         Log.i(L.TAG_CCU_HSCPU, "createAnalogOutPointForDCVDamper dcvdamper ")
         val analogPointMarker = arrayOf(
-            "writable","dcv", "damper", "runtime", "zone", "cmd", "his", "logical", "out", analogTag
+            "writable","dcv", "damper", "zone", "cmd", "his", "logical", "out", analogTag
         )
         return createHaystackPointWithUnit(
             "$equipDis-DcvDamper",
@@ -1318,7 +1318,7 @@ class HyperStatPointsUtil constructor(
     private fun createAnalogOutPointForFanSpeed(analogTag: String): Point {
 
         val analogPointMarker = arrayOf(
-            "writable","fan", "speed", "runtime", "zone", "cmd", "his", "logical", "out", analogTag
+            "writable","fan", "speed", "zone", "cmd", "his", "logical", "out", analogTag
         )
         return createHaystackPointWithUnit(
             "$equipDis-FanSpeed",
@@ -1330,7 +1330,7 @@ class HyperStatPointsUtil constructor(
 
     private fun createAnalogOutPointForHeating(analogTag: String): Point {
         val analogPointMarker = arrayOf(
-            "writable","heating", "runtime", "zone", "cmd", "his", "logical", "out", analogTag
+            "writable","heating",  "zone", "cmd", "his", "logical", "out", analogTag
         )
         return createHaystackPointWithUnit(
             "$equipDis-Heating",
@@ -1342,7 +1342,7 @@ class HyperStatPointsUtil constructor(
 
     private fun createAnalogOutPointForCooling(analogTag: String): Point {
         val analogPointMarker = arrayOf(
-            "writable","cooling", "runtime", "zone", "cmd", "his", "logical", "out", analogTag
+            "writable","cooling", "zone", "cmd", "his", "logical", "out", analogTag
         )
         return createHaystackPointWithUnit(
             "$equipDis-Cooling",
@@ -1427,7 +1427,7 @@ class HyperStatPointsUtil constructor(
 
      fun createPointForDoorWindowSensor(analogTag: String): Point {
         val analogInMarker = arrayOf(
-            "writable","window", "sensor", "runtime", "zone", "cmd", "his", "logical", "in", analogTag
+            "writable","window", "sensor", "zone", "cmd", "his", "logical", "in", analogTag
         )
         return createHaystackPointWithHisInterPolate(
             "$equipDis-$analogTag" + "doorWindowSensor",
@@ -1438,7 +1438,7 @@ class HyperStatPointsUtil constructor(
 
     private fun createPointForKeyCardSensor(analogTag: String): Point {
         val analogInMarker = arrayOf(
-            "keycard", "sensor", "runtime", "zone", "cmd", "his", "logical", "in", analogTag
+            "keycard", "sensor", "zone", "cmd", "his", "logical", "in", analogTag
         )
         return createHaystackPointWithUnitEnum(
             "$equipDis-$analogTag" + "KeyCardSensor",
@@ -1451,7 +1451,7 @@ class HyperStatPointsUtil constructor(
         analogTag: String, displayName: String, min: String, max: String, inc: String, unit: String
     ): Point {
         val analogInMarker = arrayOf(
-            "current", "transformer", "sensor", "runtime", "zone", "cmd", "his", "logical", "in", analogTag
+            "current", "transformer", "sensor", "zone", "cmd", "his", "logical", "in", analogTag
         )
         return createHaystackPointWithMinMaxIncUnitInc(
             "$equipDis-$analogTag$displayName",

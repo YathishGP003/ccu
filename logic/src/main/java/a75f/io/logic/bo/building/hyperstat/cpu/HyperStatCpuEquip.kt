@@ -982,6 +982,7 @@ class HyperStatCpuEquip(val node: Short) {
             )
             val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
             DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, true)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)

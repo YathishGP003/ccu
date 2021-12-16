@@ -1,42 +1,28 @@
- - Merged PR 2465: Hyperstat device integration issues
- - Merged PR 2414: 7577-Added fix for Heartbeat is not appearing for Zone with longer name(10 ch...
- - Merged PR 2417: 9285 : CCU: Renatus app crashes while pairing sense profile
- - Merged PR 2384: 9179 : CCU Standalone profile UserIntent to write enum values
- - Merged PR 2407: 9187 :  Temperature Offset Setting under Zone-Reconfiguration is Blank
- - Merged PR 2401: 8815 : Smart Stat CPU Profile Relay 6 Discrepancy
- - Merged PR 2388: 9218: Added margin for the zone UI title
- - Merged PR 2086: 8657 - Subscribe to Messaging API
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Merged PR 2288: CCU modbus mismatch
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Merged PR 2301: Test signal improvements
- - Merge latest from master
- - Modulate composite test signal
+ - Merged PR 2318: 8916 : CCU PI Re-Configuration
+ - Merged PR 2467: Usb refactor
+ - Remove qa from watchdog enabled builds
+ - Merge branch 'master' into story/samjith/9144_serial_refactor
+ - Merged PR 2481: Schedule issues Fix
+ - Merged PR 2519: 8020 : New Json with updated phase tag
+ - Merged PR 2498: Added fix for zero configuration
+ - Initialize vav temp offset pointArray value
+ - Migration util for zoneschedules
+ - Evaluate desired temp priority array every minute
+ - Merged PR 2450: IE set to Unoccupied when conditioningMode is OFF
+ - Merged PR 2511: Initialize system profile only when it is visible
+ - Fix: Zone schedule type change not validated
+ - Reset watchdog during reconnect
+ - Merge branch 'master' into story/samjith/9144_serial_refactor
  - Merge master
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Improvements to test signal in System profile screen
- - Merge branch 'Bug/samjith/8988_test_signal' into bug/samjith/8988_system_test_signal
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Read modbus values using register info than tags
- - WIP
- - Merged latest from master
- - Resolved unhandled exceptions on loss of connection that triggered app crashes
- - Cleaned-up synchronous Messaging ACK mehtod
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Added ability to synchronously Ack remote restart commands
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Resolved messaging-triggered crash on initial/unregisterd app startup
- - Merged latest from master
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Toned-down messaging log levels
- - Comment enhancement
- - Misc cleanup
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Scheduled Messaging Ack Job
- - Rebase with master
- - Quick and dirty messaging retrofit service
- - Resolved dev tools messaging switch issue
- - Created custom swappable messaging consumer
- - Merge branch 'master' into story/lgaskill/8657_subscribe_through_messaging_api
- - Simple SSE Consumer and Messaging API Integration
+ - Merged PR 2429: 8380 - Duplicate alerts
+ - Skip forced temp update when timer tuner is 0
+ - Desired Temp update during unoccupied writes level - 4. But desired temp updates during occupancy for zone schedule updates the schedule entity for ever. So as long as the level 4 value is there at the higher priority , this will be ignored.
+ - Usb serial refactor
+ - 8380 - Do not write alerts to the the save-ccu-logs output.
+ - - USB improvements Restart tablet is serial is not detected for 30 mins. This shows pop-up allowing user cancel reboot in cases, the tablet is being used at that time. Usb connection events are processed asynchronously on a non-UI thread.
+ - IE set to Unoccupied when conditioningMode is OFF
+ - 8380 - Delete stale code. Fix some English.
+ - 8380 - Uncomment a line of code.
+ - 8380 - Delete log files that never should have been committed.
+ - 8380 - Fix duplicate alerts - added data migration; refactored 409-handle logic; export alerts when saving ccu logs.
+ - Initialize system profile only when it is visible

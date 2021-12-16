@@ -62,6 +62,9 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import a75f.io.usbserial.UsbModbusService;
+import a75f.io.usbserial.UsbService;
+import a75f.io.usbserial.UsbServiceActions;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -76,6 +79,7 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -145,30 +149,30 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
-                      btnTabs.setEnabled(false);
-                      if (tab.getPosition() == 0){
-                          if (isSetupPassWordRequired()) {
-                              showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
-                          }
-                          tab.setIcon(R.drawable.ic_settings_orange);
-                          mViewPager.setAdapter(mSettingPagerAdapter);
-                          mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                    btnTabs.setEnabled(false);
+                    if (tab.getPosition() == 0){
+                        if (isSetupPassWordRequired()) {
+                            showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
+                        }
+                        tab.setIcon(R.drawable.ic_settings_orange);
+                        mViewPager.setAdapter(mSettingPagerAdapter);
+                        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
-                          menuToggle.setVisibility(View.GONE);
-                          floorMenu.setVisibility(View.GONE);
+                        menuToggle.setVisibility(View.GONE);
+                        floorMenu.setVisibility(View.GONE);
 
-                      } else if (tab.getPosition() == 1){
-                          tab.setIcon(R.drawable.ic_dashboard_orange);
-                          mViewPager.setAdapter(mStatusPagerAdapter);
-                          mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-                          if (isZonePassWordRequired()) {
-                              showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
-                          }
+                    } else if (tab.getPosition() == 1){
+                        tab.setIcon(R.drawable.ic_dashboard_orange);
+                        mViewPager.setAdapter(mStatusPagerAdapter);
+                        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                        if (isZonePassWordRequired()) {
+                            showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
+                        }
 
-                          menuToggle.setVisibility(View.GONE);
-                          floorMenu.setVisibility(View.VISIBLE);
-                      }
-                      btnTabs.setEnabled(true);
+                        menuToggle.setVisibility(View.GONE);
+                        floorMenu.setVisibility(View.VISIBLE);
+                    }
+                    btnTabs.setEnabled(true);
                 }
 
                 @Override
@@ -226,6 +230,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
         }
         CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate Completed");
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
+        registerReceiver(mUsbEventReceiver, filter);
     }
 
     public void setViewPager() {
@@ -350,6 +358,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         try {
             if (mConnectionChangeReceiver != null) {
                 this.unregisterReceiver(mConnectionChangeReceiver);
+            }
+            if (mUsbEventReceiver != null) {
+                unregisterReceiver(mUsbEventReceiver);
             }
         } catch (Exception e) {
             // already unregistered
@@ -549,9 +560,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     AppInstaller.getHandle().downloadCCUInstall(apkName);
                 } else {
                     CcuLog.d("CCU_DOWNLOAD","Update command ignored , previous update in progress "
-                                                    +Globals.getInstance().getCcuUpdateTriggerTimeToken());
+                            +Globals.getInstance().getCcuUpdateTriggerTimeToken());
                 }
-                
+
             }
         } else if (!commands.isEmpty() && commands.equals(RESTART_MODULE)) {
 
@@ -626,4 +637,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
 
     }
+
+    private final BroadcastReceiver mUsbEventReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_USB_REQUIRES_TABLET_REBOOT:
+                    CcuLog.i("CCU_SERIAL"," SHOW REBOOT DIALOG");
+                    CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
+                    Toast.makeText(context, "USB device not connected", Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
 }

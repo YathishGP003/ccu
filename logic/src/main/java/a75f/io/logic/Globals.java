@@ -90,13 +90,13 @@ public class Globals {
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
-    
+
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
-    
+
     private static Globals globals;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
-    
+
     AlertProcessJob mAlertProcessJob;
 
     MessagingAckJob messagingAckJob;
@@ -105,13 +105,15 @@ public class Globals {
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
     private boolean testHarness = true;
-    private boolean isTestMode = false;
 
     private boolean _siteAlreadyCreated;
-    
+
+    private boolean isTempOverride = false;
+    private int tempOverCount = 0;
+
     private static long ccuUpdateTriggerTimeToken;
     private volatile boolean isCcuReady = false;
-    
+
     private Globals() {
     }
 
@@ -141,11 +143,34 @@ public class Globals {
                 .getBoolean("biskit_mode", false);
     }
 
-    public boolean isTestMode() {
-        return isTestMode;
+    public boolean isTemporaryOverrideMode(){
+        return isTempOverride;
     }
-    public void setTestMode(boolean testMode) {
-        this.isTestMode = testMode;
+
+    public void setTemporaryOverrideMode(boolean isTemporaryOverrideMode){
+        isTempOverride = isTemporaryOverrideMode;
+    }
+
+    public int gettempOverCount(){
+        return tempOverCount;
+    }
+
+    public void incrementTempOverCount(){
+        tempOverCount++;
+    }
+
+    public void resetTempOverCount(){
+        tempOverCount = 0;
+    }
+
+    public boolean isTestMode()
+    {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("test_mode", false);
+    }
+    public void setTestMode(boolean isTestMode) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .edit().putBoolean("test_mode", isTestMode).apply();
     }
     public boolean isWeatherTest() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -171,13 +196,14 @@ public class Globals {
 
 
     public void initilize() {
-        
+
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
 
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-        
+
         Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
+
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
 
@@ -198,7 +224,7 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         importTunersAndScheduleJobs();
     }
-    
+
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             HeartbeatMigration.initHeartbeatMigration();
@@ -262,7 +288,7 @@ public class Globals {
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 loadEquipProfiles();
-            
+
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
@@ -271,12 +297,12 @@ public class Globals {
                         }
                     }
                 }
-            
+
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-            
+                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                                                TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+                        TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
 
                 BearerTokenManager.getInstance().scheduleJob();
 
@@ -286,12 +312,12 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mProcessJob);
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
-            
+
                 CCUHsApi.getInstance().syncEntityWithPointWrite();
-            
+
             }
         }.start();
-        
+
         if (isTestMode()) {
             setTestMode(false);
         }
@@ -376,7 +402,7 @@ public class Globals {
         }
         if(!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();
-        
+
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
@@ -497,10 +523,10 @@ public class Globals {
             }
 
         }
-    
+
         HashMap<Object,Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
-        if (oaoEquip != null && oaoEquip.size() > 0)
-        {
+
+        if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Dafault OAO Profile");
             OAOProfile oao = new OAOProfile();
             oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
@@ -556,15 +582,15 @@ public class Globals {
     public void setSiteAlreadyCreated(boolean siteAlreadyCreated) {
         _siteAlreadyCreated = siteAlreadyCreated;
     }
-    
+
     public void setCcuUpdateTriggerTimeToken(long time) {
         ccuUpdateTriggerTimeToken = time;
     }
-    
+
     public long getCcuUpdateTriggerTimeToken() {
         return ccuUpdateTriggerTimeToken;
     }
-    
+
     public boolean isCcuReady() {
         return isCcuReady;
     }

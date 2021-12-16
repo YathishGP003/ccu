@@ -28,9 +28,12 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -84,9 +87,10 @@ public class UsbService extends Service
 	private UsbDevice           device;
 	private UsbDeviceConnection connection;
 	private UsbSerialDevice     serialPort;
-	private boolean             serialPortConnected;
+	private volatile boolean             serialPortConnected;
 	
-	private int reconnectCounter = 0;
+	private int   reconnectCounter = 0;
+	private Timer usbPortScanTimer = new Timer();
 	
 	/*
 	 * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -97,46 +101,60 @@ public class UsbService extends Service
 		@Override
 		public void onReceive(Context arg0, Intent arg1)
 		{
-			Log.d("UsbService.java","OnReceive == "+arg1.getAction()+","+serialPortConnected);
-			if (arg1.getAction().equals(ACTION_USB_PERMISSION))
-			{
+			if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
 				Log.d("UsbService.java","OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
 				boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
-				if (granted) // User accepted our USB connection. Try to open the device as a serial port
-				{
+				if (granted) {
+					// User accepted our USB connection. Try to open the device as a serial port
 					Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
 					arg0.sendBroadcast(intent);
 					//connection = usbManager.openDevice(device);
 					//new ConnectionThread().start();
-				}
-				else // User not accepted our USB connection. Send an Intent to the Main Activity
-				{
+				} else {
+					// User not accepted our USB connection. Send an Intent to the Main Activity
+				
 					Log.d("UsbService.java","USB PERMISSION NOT GRANTED == "+arg1.getAction());
 					Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
 					arg0.sendBroadcast(intent);
 				}
-			}
-			else if (arg1.getAction().equals(ACTION_USB_ATTACHED))
-			{
-				if (!serialPortConnected)
-				{
-					findSerialPortDevice(); // A USB device has been attached. Try to open it as a Serial port
+			} else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
+				if (!serialPortConnected) {
+					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
+				}
+			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
+				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+				usbPortScanTimer.cancel();
+				
+				if (UsbSerialUtil.isCMDevice(detachedDevice, context)) {
+					Log.d(TAG,"CM Serial device disconnected ");
+					if (serialPortConnected) {
+						serialPort.close();
+						serialPort = null;
+					}
+					serialPortConnected = false;
+					// Usb device was disconnected. send an intent to the Main Activity
+					Intent intent = new Intent(ACTION_USB_DISCONNECTED);
+					arg0.sendBroadcast(intent);
 				}
 			}
-			else if (arg1.getAction().equals(ACTION_USB_DETACHED))
-			{
-
-				// Usb device was disconnected. send an intent to the Main Activity
-				Intent intent = new Intent(ACTION_USB_DISCONNECTED);
-				arg0.sendBroadcast(intent);
-				if (serialPortConnected)
-				{
-					serialPort.close();
-				}
-				serialPortConnected = false;
-			}
+			Log.d(TAG,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
 		}
 	};
+	
+	/**
+	 * Device scan is processed on a timer thread. Also a delayed scan ensures that there is only one scan
+	 * performed for multiple events.
+	 */
+	private void scheduleUsbConnectedEvent() {
+		usbPortScanTimer.cancel();
+		usbPortScanTimer = new Timer();
+		usbPortScanTimer.schedule(new TimerTask() {
+			@Override public void run() {
+				findSerialPortDevice();
+			}
+		}, 1000);
+	}
+	
 	/*
 	 *  Data received from serial port will be received here. Just populate onReceivedData with your code
 	 *  In this particular example. byte stream is converted to String and send to UI thread to
@@ -197,139 +215,6 @@ public class UsbService extends Service
 					}
 				}
 			};
-
-
-	private void parseBytes(byte[] inReg)
-	{
-		for (int nCount = 0; nCount < inReg.length; nCount++)
-		{
-			byte inData = inReg[nCount];
-			switch (curState)
-			{
-				case PARSE_INIT:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "Parse INIT");
-					}
-					if (inData == ESC_BYTE)
-					{
-						curState = SerialState.ESC_BYTE_RCVD;
-					}
-					break;
-				case ESC_BYTE_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "ESC_BYTE_RCVD");
-					}
-					if (inData == SOF_BYTE)
-					{
-						curState = SerialState.SOF_BYTE_RCVD;
-					}
-					else
-					{
-						curState = SerialState.BAD_PACKET;
-					}
-					break;
-				case SOF_BYTE_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "SOF_BYTE_RCVD");
-					}
-					nDataLength = inData;
-					Log.i(TAG, "Data Len: " + nDataLength);
-					curState = SerialState.LEN_BYTE_RCVD;
-					break;
-				case LEN_BYTE_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "LEN_BYTE_RCVD");
-					}
-					if (nCurIndex == nDataLength)
-					{
-						int nIncomingCRC = inData;
-						if (nIncomingCRC == nCRC)
-						{
-							curState = SerialState.CRC_RCVD;
-						}
-					}
-					else if (nCurIndex < nDataLength)
-					{
-						inDataBuffer[nCurIndex] = inData;
-						nCRC ^= inData;
-						nCurIndex++;
-						if (inData == ESC_BYTE)
-						{
-							curState = SerialState.ESC_BYTE_IN_DATA_RCVD;
-						}
-					}
-					else
-					{
-						curState = SerialState.BAD_PACKET;
-					}
-					break;
-				case ESC_BYTE_IN_DATA_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "END ESC_BYTE_IN_DATA_RCVD");
-					}
-					if (inData == ESC_BYTE)
-					{
-						curState = SerialState.LEN_BYTE_RCVD;
-					}
-					else
-					{
-						curState = SerialState.BAD_PACKET;
-					}
-					break;
-				case CRC_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "END CRC RCVD");
-					}
-					if (inData == ESC_BYTE)
-					{
-						curState = SerialState.ESC_BYTE_AS_END_OF_PACKET_RCVD;
-					}
-					else
-					{
-						curState = SerialState.BAD_PACKET;
-					}
-					break;
-				case ESC_BYTE_AS_END_OF_PACKET_RCVD:
-					if (PARSE_DEBUG)
-					{
-						Log.i(TAG, "case ESC_BYTE_AS_END_OF_PACKET_RCVD:");
-					}
-					if (inData == EOF_BYTE)
-					{
-						curState = SerialState.DATA_AVAILABLE;
-					}
-					else
-					{
-						curState = SerialState.BAD_PACKET;
-					}
-					break;
-			}
-			if (curState == SerialState.DATA_AVAILABLE)
-			{
-				if (PARSE_DEBUG)
-				{
-					Log.i(TAG, "DataAvailable sneding");
-				}
-				messageToClients(Arrays.copyOfRange(inDataBuffer, 0, nCurIndex));
-				nCurIndex = 0;
-				nCRC = 0;
-				curState = SerialState.PARSE_INIT;
-			}
-			if (curState == SerialState.BAD_PACKET)
-			{
-				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
-				nCurIndex = 0;
-				nCRC = 0;
-				curState = SerialState.PARSE_INIT;
-			}
-		}
-	}
 
 
 	private void messageToClients(byte[] data)
@@ -402,60 +287,42 @@ public class UsbService extends Service
 	}
 
 
-	private void findSerialPortDevice()
-	{
+	private void findSerialPortDevice() {
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-		Log.d(TAG,"findSerialPortDevce="+usbDevices.size());
-		if (!usbDevices.isEmpty())
-		{
+		Log.d(TAG,"findSerialPortDevice = "+usbDevices.size());
+		if (!usbDevices.isEmpty()) {
 			boolean keep = true;
-			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet())
-			{
+			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
-				int deviceVID = device.getVendorId();
-				int devicePID = device.getProductId();
-				Log.i(TAG, "USB Device VID: " + deviceVID);
-				Log.i(TAG, "USB Device PID: " + devicePID);
-				if (deviceVID == 0x0403 || deviceVID == 1003 ||
-						(deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
-				{
+				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
-					if (success)
-					{
+					if (success) {
 						new ConnectionThread().start();
 						Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = true;
-					}
-					else
-					{
+					} else {
 						Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = false;
 					}
-					Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
-				}
-				else
-				{
+					Log.d(TAG, "Opened Serial CM device instance "+device.getVendorId()+" "+success);
+				} else {
 					connection = null;
 					device = null;
 				}
-				if (!keep)
-				{
+				if (!keep) {
 					break;
 				}
 			}
-			if (!keep)
-			{
+			if (!keep) {
 				// There is no USB devices connected (but usb host were listed). Send an intent to MainActivity.
 				Intent intent = new Intent(ACTION_NO_USB);
 				sendBroadcast(intent);
 			}
-		}
-		else
-		{
+		} else {
 			// There is no USB devices connected. Send an intent to MainActivity
 			Intent intent = new Intent(ACTION_NO_USB);
 			sendBroadcast(intent);
@@ -468,28 +335,32 @@ public class UsbService extends Service
 	private void scanSerialPortSilentlyForCmDevice() {
 		
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-		Log.d(TAG,"findSerialPortDevce="+usbDevices.size());
+		Log.d(TAG,"scanSerialPortSilentlyForCmDevice = "+usbDevices.size());
 		if (!usbDevices.isEmpty()) {
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
-				int deviceVID = device.getVendorId();
-				int devicePID = device.getProductId();
-				Log.i(TAG, "USB Device VID: " + deviceVID);
-				Log.i(TAG, "USB Device PID: " + devicePID);
-				if (deviceVID == 0x0403 || deviceVID == 1003 ||
-				        (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext()))) {
+				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
 					if (success) {
 						new ConnectionThread().start();
 					}
-					Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
+					Log.d(TAG, "Opened Serial CM device instance "+device.getDeviceName());
 				} else {
 					connection = null;
 					device = null;
 				}
 			}
 		}
+	}
+	
+	private void openAndConfigureDevice(UsbDevice device) {
+		boolean success = grantRootPermissionToUSBDevice(device);
+		connection = usbManager.openDevice(device);
+		if (success) {
+			new ConnectionThread().start();
+		}
+		Log.d(TAG, "Opened Serial CM device instance for " +device.getDeviceName());
 	}
 
 	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
@@ -559,54 +430,53 @@ public class UsbService extends Service
 						Log.i(TAG, "Serial Port is not connected sleeping");
 						if (reconnectCounter++ >= 30) {
 							Log.i(TAG, "scanSerialPortSilentlyForCmDevice");
-							try {
-								scanSerialPortSilentlyForCmDevice();
-							} catch (Exception e) {
-								Log.e(TAG, "scanSerialPortSilentlyForMbDevice Failed", e);
-							}
+							scanSerialPortSilentlyForCmDevice();
 							reconnectCounter = 0;
+							
+							if (!serialPortConnected) {
+								UsbSerialWatchdog.getInstance().bark(context, CCUHsApi.getInstance());
+							}
 						}
+						
 						sleep(2000);
 						continue;
+					} else {
+						UsbSerialWatchdog.getInstance().pet();
 					}
-
-					data = messageQueue.take();
-
+					
 					if (serialPort != null) {
-						byte buffer[] = new byte[128];
-						byte crc = 0;
-						byte nOffset = 0;
-						int len = data.length;
-						if(len >= 128)
-							buffer = new byte[160]; //For OTA Updates
-						buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
-						buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
-						buffer[nOffset++] = (byte) (len & 0xff);
-						for (int i = 0; i < len; i++) {
-							buffer[i + nOffset] = data[i]; // add payload to the tx buffer
-							crc ^= data[i];             // calculate the new crc
-							if (data[i] == (byte) (ESC_BYTE &
-									0xff)) // if the data is equal to ESC byte then add another instance of that
-							{
-								nOffset++;
-								buffer[i + nOffset] = data[i];
+						data = messageQueue.poll(1, TimeUnit.SECONDS);
+						if (data != null && data.length > 0) {
+							byte buffer[] = new byte[128];
+							byte crc = 0;
+							byte nOffset = 0;
+							int len = data.length;
+							if (len >= 128)
+								buffer = new byte[160]; //For OTA Updates
+							buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
+							buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
+							buffer[nOffset++] = (byte) (len & 0xff);
+							for (int i = 0; i < len; i++) {
+								buffer[i + nOffset] = data[i]; // add payload to the tx buffer
+								crc ^= data[i];             // calculate the new crc
+								if (data[i] == (byte) (ESC_BYTE & 0xff)) // if the data is equal to ESC byte then add another instance of that
+								{
+									nOffset++;
+									buffer[i + nOffset] = data[i];
+								}
 							}
-						}
-						buffer[nOffset + len] = (byte) (crc & 0xff);
-						nOffset++;
-						buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
-						nOffset++;
-						buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
-						nOffset++;
-						serialPort.write(Arrays.copyOfRange(buffer,0,len + nOffset));
-
-						try {
+							buffer[nOffset + len] = (byte) (crc & 0xff);
+							nOffset++;
+							buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
+							nOffset++;
+							buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
+							nOffset++;
+							serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
 							Thread.sleep(300);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
 						}
 					}
 				} catch (Exception exception) {
+					Log.i(TAG, "Serial transaction failed: ", exception);
 					exception.printStackTrace();
 				}
 			}
@@ -666,12 +536,11 @@ public class UsbService extends Service
 		{
 
 			serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-			if (serialPort != null)
-			{
-				if (serialPort.open())
-				{
+			if (serialPort != null) {
+				if (serialPort.open()) {
 					setDebug(false);
 					serialPortConnected = true;
+					UsbSerialWatchdog.getInstance().pet();
 					serialPort.setBaudRate(BAUD_RATE);
 					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
 					serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
@@ -697,25 +566,18 @@ public class UsbService extends Service
 					// Everything went as expected. Send an intent to MainActivity
 					Intent intent = new Intent(ACTION_USB_READY);
 					context.sendBroadcast(intent);
-				}
-				else
-				{
+				} else {
 					// Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
 					// Send an Intent to Main Activity
-					if (serialPort instanceof CDCSerialDevice)
-					{
-						Intent intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
-						context.sendBroadcast(intent);
+					Intent intent;
+					if (serialPort instanceof CDCSerialDevice) {
+						intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
+					} else {
+						intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
 					}
-					else
-					{
-						Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
-						context.sendBroadcast(intent);
-					}
+					context.sendBroadcast(intent);
 				}
-			}
-			else
-			{
+			} else {
 				// No driver for given device, even generic CDC driver could not be loaded
 				Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
 				context.sendBroadcast(intent);

@@ -1,6 +1,6 @@
 {
-  "modbusEquipId (_id)": "5f1f30ad18beef4f1d9a442",
-  "name": "UPS-Vertiv-ITA",
+  "modbusEquipId (_id)": "5f6f34ad67baeef4f1d9a442",
+  "name": "UPS Vertiv ITA",
   "description": "This document contains the configuration necessary to ups vertiv ITA",
   "equipType": "UPSV",
   "vendor": "Vertiv",
@@ -15,7 +15,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70011",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70011",
           "name": "Power supply mode",
           "startBit": 0,
           "endBit": 15,
@@ -39,10 +39,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "status"
+              "tagName": "mode"
             },
             {
-              "tagName": "powersupply"
+              "tagName": "power"
+            },
+            {
+              "tagName": "supply"
             },
             {
               "tagName": "kind",
@@ -66,7 +69,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70022",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70022",
           "name": "Rectifier status",
           "startBit": 0,
           "endBit": 15,
@@ -116,7 +119,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70033",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70033",
           "name": "Inverter status",
           "startBit": 0,
           "endBit": 15,
@@ -166,8 +169,8 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70044",
-          "name": "Power supply status",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70044",
+          "name": "Rack combined system power supply status",
           "startBit": 0,
           "endBit": 15,
           "bitParamRange": "0-2",
@@ -205,7 +208,10 @@
               "tagName": "status"
             },
             {
-              "tagName": "powersupply"
+              "tagName": "power"
+            },
+            {
+              "tagName": "supply"
             },
             {
               "tagName": "kind",
@@ -229,7 +235,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70055",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70055",
           "name": "Low Battery Warning",
           "startBit": 0,
           "endBit": 15,
@@ -282,7 +288,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70066",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70066",
           "name": "Single Unit Output Overload",
           "startBit": 0,
           "endBit": 15,
@@ -329,7 +335,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70077",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70077",
           "name": "Bypass SCR Fan",
           "startBit": 0,
           "endBit": 15,
@@ -350,9 +356,6 @@
             },
             {
               "tagName": "fan"
-            },
-            {
-              "tagName": "scr"
             },
             {
               "tagName": "bypass"
@@ -382,7 +385,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70088",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70088",
           "name": "Common Alarm",
           "startBit": 0,
           "endBit": 15,
@@ -432,7 +435,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a70099",
+          "parameterId": "5f6f34ad67bacbf4f1d9a70099",
           "name": "UPS Battery status",
           "startBit": 0,
           "endBit": 15,
@@ -495,7 +498,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701010",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701010",
           "name": "Turning To Bypass Due To Load Impact",
           "startBit": 0,
           "endBit": 15,
@@ -545,7 +548,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701111",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701111",
           "name": "Battery Charger",
           "startBit": 0,
           "endBit": 15,
@@ -568,7 +571,7 @@
               "tagName": "battery"
             },
             {
-              "tagName": "charger"
+              "tagName": "chargingStatus"
             },
             {
               "tagName": "alarm"
@@ -595,7 +598,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701212",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701212",
           "name": "Battery Maintenance",
           "startBit": 0,
           "endBit": 15,
@@ -645,7 +648,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701313",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701313",
           "name": "Combined System overload",
           "startBit": 0,
           "endBit": 15,
@@ -665,10 +668,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "combined"
+              "tagName": "system"
             },
             {
-              "tagName": "systemoverload"
+              "tagName": "overload"
             },
             {
               "tagName": "alarm"
@@ -695,7 +698,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701414",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701414",
           "name": "Communication Failure Status",
           "startBit": 0,
           "endBit": 15,
@@ -715,7 +718,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "communication"
+              "tagName": "connection"
             },
             {
               "tagName": "failure"
@@ -745,7 +748,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701515",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701515",
           "name": "Output Fuse Broken",
           "startBit": 0,
           "endBit": 15,
@@ -795,7 +798,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701616",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701616",
           "name": "Master Channel Frequency Status",
           "startBit": 0,
           "endBit": 15,
@@ -815,13 +818,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "fuse"
-            },
-            {
-              "tagName": "master"
-            },
-            {
-              "tagName": "channel"
+              "tagName": "frequency"
             },
             {
               "tagName": "alarm"
@@ -846,9 +843,10 @@
       "registerNumber": "41051",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701717",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701717",
           "name": "Input Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -860,16 +858,13 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -895,9 +890,10 @@
       "registerNumber": "41052",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701818",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701818",
           "name": "Input Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -909,16 +905,13 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l2"
             },
             {
               "tagName": "kind",
@@ -944,9 +937,10 @@
       "registerNumber": "41053",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a701919",
+          "parameterId": "5f6f34ad67bacbf4f1d9a701919",
           "name": "Input Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -958,16 +952,13 @@
               "tagName": "input"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l3"
             },
             {
               "tagName": "kind",
@@ -993,9 +984,10 @@
       "registerNumber": "41054",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702020",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702020",
           "name": "Output Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -1007,16 +999,13 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -1042,9 +1031,10 @@
       "registerNumber": "41055",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702121",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702121",
           "name": "Output Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -1056,16 +1046,13 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "line"
+            },
+            {
+              "tagName": "yPhase"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l2"
             },
             {
               "tagName": "kind",
@@ -1091,9 +1078,10 @@
       "registerNumber": "41056",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702222",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702222",
           "name": "Output Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -1105,16 +1093,13 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l3"
             },
             {
               "tagName": "kind",
@@ -1140,9 +1125,10 @@
       "registerNumber": "41057",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702323",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702323",
           "name": "Output Phase Current L1",
           "startBit": 0,
           "endBit": 15,
@@ -1154,16 +1140,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "current"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -1189,9 +1169,10 @@
       "registerNumber": "41058",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702424",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702424",
           "name": "Output Phase Current L2",
           "startBit": 0,
           "endBit": 15,
@@ -1203,16 +1184,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
-              "tagName": "current"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l2"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "kind",
@@ -1238,9 +1213,10 @@
       "registerNumber": "41059",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702525",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702525",
           "name": "Output Phase Current L3",
           "startBit": 0,
           "endBit": 15,
@@ -1252,16 +1228,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
-              "tagName": "current"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "l3"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "kind",
@@ -1287,9 +1257,10 @@
       "registerNumber": "41060",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702626",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702626",
           "name": "DC Input Voltage (Battery 1 Voltage)",
           "startBit": 0,
           "endBit": 15,
@@ -1305,9 +1276,6 @@
             },
             {
               "tagName": "voltage"
-            },
-            {
-              "tagName": "value"
             },
             {
               "tagName": "battery"
@@ -1336,9 +1304,10 @@
       "registerNumber": "41061",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702727",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702727",
           "name": "Output Frequency (Consistency In Three Phases)",
           "startBit": 0,
           "endBit": 15,
@@ -1354,9 +1323,6 @@
             },
             {
               "tagName": "average"
-            },
-            {
-              "tagName": "value"
             },
             {
               "tagName": "kind",
@@ -1382,9 +1348,10 @@
       "registerNumber": "41066",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702828",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702828",
           "name": "Input Cable Voltage L1-L2",
           "startBit": 0,
           "endBit": 15,
@@ -1399,10 +1366,10 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l1tol2"
+              "tagName": "rPhase"
             },
             {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1428,9 +1395,10 @@
       "registerNumber": "41067",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a702929",
+          "parameterId": "5f6f34ad67bacbf4f1d9a702929",
           "name": "Input Cable Voltage L2-L3",
           "startBit": 0,
           "endBit": 15,
@@ -1445,10 +1413,10 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l2tol3"
+              "tagName": "bPhase"
             },
             {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1474,9 +1442,10 @@
       "registerNumber": "41068",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703030",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703030",
           "name": "Input Cable Voltage L3-L1",
           "startBit": 0,
           "endBit": 15,
@@ -1491,10 +1460,10 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l3tol1"
+              "tagName": "bPhase"
             },
             {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -1520,9 +1489,10 @@
       "registerNumber": "41069",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703131",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703131",
           "name": "Input Phase Current L1",
           "startBit": 0,
           "endBit": 15,
@@ -1534,13 +1504,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -1566,9 +1533,10 @@
       "registerNumber": "41070",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703232",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703232",
           "name": "Input Phase Current L2",
           "startBit": 0,
           "endBit": 15,
@@ -1580,13 +1548,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1612,9 +1577,10 @@
       "registerNumber": "41071",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703333",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703333",
           "name": "Input Phase Current L3",
           "startBit": 0,
           "endBit": 15,
@@ -1626,13 +1592,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -1658,9 +1621,10 @@
       "registerNumber": "41072",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703434",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703434",
           "name": "Input Frequency (Consistency In Three Phases)",
           "startBit": 0,
           "endBit": 15,
@@ -1673,12 +1637,6 @@
             },
             {
               "tagName": "frequency"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
             },
             {
               "tagName": "kind",
@@ -1704,9 +1662,10 @@
       "registerNumber": "41073",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703535",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703535",
           "name": "Phase L1 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1718,16 +1677,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -1749,9 +1702,10 @@
       "registerNumber": "41074",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703636",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703636",
           "name": "Phase L2 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1763,16 +1717,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1794,9 +1742,10 @@
       "registerNumber": "41075",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703737",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703737",
           "name": "Phase L3 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1808,16 +1757,10 @@
               "tagName": "input"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -1839,9 +1782,10 @@
       "registerNumber": "41076",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703838",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703838",
           "name": "Bypass Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -1856,10 +1800,7 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -1885,9 +1826,10 @@
       "registerNumber": "41077",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a703939",
+          "parameterId": "5f6f34ad67bacbf4f1d9a703939",
           "name": "Bypass Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -1902,10 +1844,7 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1931,9 +1870,10 @@
       "registerNumber": "41078",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704040",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704040",
           "name": "Bypass Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -1948,10 +1888,7 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -1977,9 +1914,10 @@
       "registerNumber": "41079",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704141",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704141",
           "name": "Bypass Frequency",
           "startBit": 0,
           "endBit": 15,
@@ -1992,9 +1930,6 @@
             },
             {
               "tagName": "frequency"
-            },
-            {
-              "tagName": "value"
             },
             {
               "tagName": "kind",
@@ -2020,9 +1955,10 @@
       "registerNumber": "41080",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704242",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704242",
           "name": "Phase L1 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2034,16 +1970,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -2065,9 +1995,10 @@
       "registerNumber": "41081",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704343",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704343",
           "name": "Phase L2 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2079,16 +2010,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -2110,9 +2035,10 @@
       "registerNumber": "41082",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704444",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704444",
           "name": "Phase L3 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2124,151 +2050,10 @@
               "tagName": "output"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1082,
-      "registerNumber": "41083",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704545",
-          "name": "Phase L1 Output Peak Ratio",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "peak"
-            },
-            {
-              "tagName": "ratio"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1083,
-      "registerNumber": "41084",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704646",
-          "name": "Phase L2 Output Peak Ratio",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "peak"
-            },
-            {
-              "tagName": "ratio"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1084,
-      "registerNumber": "41085",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704747",
-          "name": "Phase L3 Output Peak Ratio",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "peak"
-            },
-            {
-              "tagName": "ratio"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -2290,9 +2075,10 @@
       "registerNumber": "41086",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704848",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704848",
           "name": "Phase L1 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2301,7 +2087,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "active"
@@ -2311,9 +2097,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -2339,9 +2122,10 @@
       "registerNumber": "41087",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a704949",
+          "parameterId": "5f6f34ad67bacbf4f1d9a704949",
           "name": "Phase L2 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2350,7 +2134,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "active"
@@ -2360,9 +2144,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l2"
             },
             {
               "tagName": "kind",
@@ -2388,9 +2169,10 @@
       "registerNumber": "41088",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705050",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705050",
           "name": "Phase L3 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2399,7 +2181,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "active"
@@ -2409,9 +2191,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l3"
             },
             {
               "tagName": "kind",
@@ -2437,9 +2216,10 @@
       "registerNumber": "41089",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705151",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705151",
           "name": "Phase L1 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2448,7 +2228,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "reactive"
@@ -2458,9 +2238,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -2486,9 +2263,10 @@
       "registerNumber": "41090",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705252",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705252",
           "name": "Phase L2 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2497,7 +2275,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "reactive"
@@ -2507,9 +2285,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l2"
             },
             {
               "tagName": "kind",
@@ -2535,9 +2310,10 @@
       "registerNumber": "41091",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705353",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705353",
           "name": "Phase L3 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2546,7 +2322,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "reactive"
@@ -2556,9 +2332,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l3"
             },
             {
               "tagName": "kind",
@@ -2584,9 +2357,10 @@
       "registerNumber": "41092",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705454",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705454",
           "name": "Phase L1 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2595,7 +2369,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "rPhase"
             },
             {
               "tagName": "apparent"
@@ -2605,9 +2379,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l1"
             },
             {
               "tagName": "kind",
@@ -2633,9 +2404,10 @@
       "registerNumber": "41093",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705555",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705555",
           "name": "Phase L2 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2644,7 +2416,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "yPhase"
             },
             {
               "tagName": "apparent"
@@ -2654,9 +2426,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l2"
             },
             {
               "tagName": "kind",
@@ -2682,9 +2451,10 @@
       "registerNumber": "41094",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705656",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705656",
           "name": "Phase L3 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2693,7 +2463,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "phase"
+              "tagName": "bPhase"
             },
             {
               "tagName": "apparent"
@@ -2703,9 +2473,6 @@
             },
             {
               "tagName": "output"
-            },
-            {
-              "tagName": "l3"
             },
             {
               "tagName": "kind",
@@ -2733,7 +2500,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705757",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705757",
           "name": "Battery Backup Time",
           "startBit": 0,
           "endBit": 15,
@@ -2774,9 +2541,10 @@
       "registerNumber": "41099",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705858",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705858",
           "name": "Positive Battery Voltage",
           "startBit": 0,
           "endBit": 15,
@@ -2817,9 +2585,10 @@
       "registerNumber": "41100",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a705959",
+          "parameterId": "5f6f34ad67bacbf4f1d9a705959",
           "name": "Positive Battery Current",
           "startBit": 0,
           "endBit": 15,
@@ -2860,9 +2629,10 @@
       "registerNumber": "41101",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706060",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706060",
           "name": "Negative Battery Voltage",
           "startBit": 0,
           "endBit": 15,
@@ -2903,9 +2673,10 @@
       "registerNumber": "41102",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706161",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706161",
           "name": "Negative Battery Current",
           "startBit": 0,
           "endBit": 15,
@@ -2946,9 +2717,10 @@
       "registerNumber": "41103",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706262",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706262",
           "name": "Battery Aging Coefficient",
           "startBit": 0,
           "endBit": 15,
@@ -2957,13 +2729,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "aging"
-            },
-            {
               "tagName": "battery"
             },
             {
-              "tagName": "coefficient"
+              "tagName": "rate"
             },
             {
               "tagName": "kind",
@@ -2985,9 +2754,10 @@
       "registerNumber": "41104",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706363",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706363",
           "name": "Battery Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -3025,9 +2795,10 @@
       "registerNumber": "41105",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706464",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706464",
           "name": "Environmental Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -3065,9 +2836,10 @@
       "registerNumber": "41095",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706565",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706565",
           "name": "Phase L1 Output load level",
           "startBit": 0,
           "endBit": 15,
@@ -3085,10 +2857,7 @@
               "tagName": "level"
             },
             {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "value"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -3110,9 +2879,10 @@
       "registerNumber": "41096",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706666",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706666",
           "name": "Phase L2 Output load level",
           "startBit": 0,
           "endBit": 15,
@@ -3130,10 +2900,7 @@
               "tagName": "level"
             },
             {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "value"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -3155,9 +2922,10 @@
       "registerNumber": "41097",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a706767",
+          "parameterId": "5f6f34ad67bacbf4f1d9a706767",
           "name": "Phase L3 Output load level",
           "startBit": 0,
           "endBit": 15,
@@ -3175,10 +2943,7 @@
               "tagName": "level"
             },
             {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "value"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",

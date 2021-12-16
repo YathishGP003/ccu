@@ -4,4 +4,5 @@
     <string name="your_verification_code_is_correct">Your Building Passcode is correct.</string>
     <string name="your_verification_code_is_not_correct">Your Building Passcode is not correct.</string>
     <string name="failed">Failed!</string>
+    <string name="time_left_to_reset_values">Time Left to Reset Values:</string>
 </resources>

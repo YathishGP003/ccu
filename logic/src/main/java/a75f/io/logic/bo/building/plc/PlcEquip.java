@@ -284,27 +284,33 @@ public class PlcEquip {
         if (config.analog1InputSensor > 0) {
             if (!config.useAnalogIn2ForSetpoint) {
                 createTargetValuePoint(floorRef, roomRef, config);
-                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                        PlcRelayConfigHandler.getAnalog1Bundle(config.analog1InputSensor));
             }
-            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
+            String processVariableId = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, Tags.ANALOG1,
+                     String.valueOf(nodeAddr), equipRef, config.analog1InputSensor);
             device.analog1In.setPointRef(processVariableId);
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
         } else if(config.th1InputSensor > 0) {
             if (!config.useAnalogIn2ForSetpoint){
                 createTargetValuePoint(floorRef, roomRef, config);
-                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,getThermistorBundle(config.th1InputSensor));
+                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,
+                        PlcRelayConfigHandler.getThermistorBundle(config.th1InputSensor));
             }
-            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
+            String processVariableId = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, Tags.TH1,
+                    String.valueOf(nodeAddr), equipRef, config.th1InputSensor);
             device.th1In.setPointRef(processVariableId);
             device.th1In.setEnabled(true);
             device.th1In.setType(String.valueOf(config.th1InputSensor - 1));
         } else if (config.nativeSensorInput > 0) {
             if (!config.useAnalogIn2ForSetpoint){
                 createTargetValuePoint(floorRef, roomRef, config);
-                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,getNativeSensorBundle(config.nativeSensorInput));
+                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,
+                        PlcRelayConfigHandler.getNativeSensorBundle(config.nativeSensorInput));
             }
-            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
+            String processVariableId = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, "native",
+                    String.valueOf(nodeAddr), equipRef, config.nativeSensorInput);
             NativeSensor sensor =
                 SensorManager.getInstance().getNativeSensorList().get(config.nativeSensorInput - 1);
             
@@ -313,7 +319,8 @@ public class PlcEquip {
 
         if (config.useAnalogIn2ForSetpoint) {
             String setPointVariableId = createDynamicTargetInputPoint(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
-            createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog2Bundle(config.analog2InputSensor));
+            createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                    PlcRelayConfigHandler.getAnalog2Bundle(config.analog2InputSensor));
             device.analog2In.setPointRef(setPointVariableId);
             device.analog2In.setEnabled(true);
             device.analog2In.setType(String.valueOf(config.analog2InputSensor));
@@ -333,322 +340,6 @@ public class PlcEquip {
         device.addPointsToDb();
 
         hayStack.syncEntityTree();
-    }
-
-    private Bundle getAnalog1Bundle(int analog1InputSensor) {
-        Bundle mBundle = new Bundle();
-        String shortDis = "Generic 0-10 Voltage";
-        String shortDisTarget = "Target Voltage";
-        String unit = "V";
-        String maxVal = "10";
-        String minVal = "0";
-        String incrementVal = "0.1";
-        String[] markers = null;
-        switch (analog1InputSensor) {
-            case 0:
-            case 1:
-                shortDis = "Generic 0-10 Voltage";
-                shortDisTarget = "Target Voltage";
-                unit = "V";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = null;
-                break;
-            case 2:
-                shortDis = "Pressure [0-2 in.]";
-                shortDisTarget = "Target Pressure";
-                unit = "Inch wc";
-                maxVal = "2";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"pressure"};
-                break;
-            case 3:
-                shortDis = "Pressure[0-0.25 in. Differential]";
-                shortDisTarget = "Target Pressure Differential";
-                unit = "Inch wc";
-                maxVal = "0.25";
-                minVal = "-0.25";
-                incrementVal = "0.01";
-                markers = new String[]{"pressure"};
-                break;
-            case 4:
-                shortDis = "Airflow";
-                shortDisTarget = "Target Airflow";
-                unit = "CFM";
-                maxVal = "1000";
-                minVal = "0";
-                incrementVal = "10";
-                markers = new String[]{"airflow"};
-                break;
-            case 5:
-                shortDis = "Humidity";
-                shortDisTarget = "Target Humidity";
-                unit = "%";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"humidity"};
-                break;
-            case 6:
-                shortDis = "CO2 Level";
-                shortDisTarget = "Target CO2 Level";
-                unit = "ppm";
-                maxVal = "2000";
-                minVal = "0";
-                incrementVal = "100";
-                markers = new String[]{"co2"};
-                break;
-            case 7:
-                shortDis = "CO Level";
-                shortDisTarget = "Target CO Level";
-                unit = "ppm";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"co"};
-                break;
-            case 8:
-                shortDis = "NO2 Level";
-                shortDisTarget = "Target NO2 Level";
-                unit = "ppm";
-                maxVal = "5";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"no2"};
-                break;
-            case 9:
-                shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Target Current Draw";
-                unit = "amps";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 10:
-                shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Target Current Draw";
-                unit = "amps";
-                maxVal = "20";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 11:
-                shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Target Current Draw";
-                unit = "amps";
-                maxVal = "50";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 12:
-                shortDis = "ION Density";
-                shortDisTarget = "Target Ion Density";
-                unit = "ions/cc";
-                maxVal = "1000000";
-                minVal = "0";
-                incrementVal = "1000";
-                markers = new String[]{"ion", "density"};
-                break;
-        }
-
-        mBundle.putString("shortDis", shortDis);
-        mBundle.putString("shortDisTarget",shortDisTarget);
-        mBundle.putString("unit", unit);
-        mBundle.putString("maxVal", maxVal);
-        mBundle.putString("minVal", minVal);
-        mBundle.putString("incrementVal", incrementVal);
-        mBundle.putStringArray("markers", markers);
-
-        return mBundle;
-    }
-
-    private Bundle getAnalog2Bundle(int dynamicInputSensor) {
-        Bundle mBundle = new Bundle();
-        String shortDis = "Generic 0-10 Voltage";
-        String shortDisTarget = "Dynamic Target Voltage";
-        String unit = "V";
-        String maxVal = "10";
-        String minVal = "0";
-        String incrementVal = "0.1";
-        String[] markers = null;
-        switch (dynamicInputSensor) {
-            case 0:
-                shortDis = "Generic 0-10 Voltage";
-                shortDisTarget = "Dynamic Target Voltage";
-                unit = "V";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = null;
-                break;
-            case 1:
-                shortDis = "Pressure [0-2 in.]";
-                shortDisTarget = "Dynamic Target Pressure";
-                unit = "Inch wc";
-                maxVal = "2";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"pressure"};
-                break;
-            case 2:
-                shortDis = "Pressure[0-0.25 in. Differential]";
-                shortDisTarget = "Dynamic Target Pressure Differential";
-                unit = "Inch wc";
-                maxVal = "0.25";
-                minVal = "-0.25";
-                incrementVal = "0.01";
-                markers = new String[]{"pressure"};
-                break;
-            case 3:
-                shortDis = "Airflow";
-                shortDisTarget = "Dynamic Target Airflow";
-                unit = "CFM";
-                maxVal = "1000";
-                minVal = "0";
-                incrementVal = "10";
-                markers = new String[]{"airflow"};
-                break;
-            case 4:
-                shortDis = "Humidity";
-                shortDisTarget = "Dynamic Target Humidity";
-                unit = "%";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"humidity"};
-                break;
-            case 5:
-                shortDis = "CO2 Level";
-                shortDisTarget = "Dynamic Target CO2 Level";
-                unit = "ppm";
-                maxVal = "2000";
-                minVal = "0";
-                incrementVal = "100";
-                markers = new String[]{"co2"};
-                break;
-            case 6:
-                shortDis = "CO Level";
-                shortDisTarget = "Dynamic Target CO Level";
-                unit = "ppm";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"co"};
-                break;
-            case 7:
-                shortDis = "NO2 Level";
-                shortDisTarget = "Dynamic Target NO2 Level";
-                unit = "ppm";
-                maxVal = "5";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"no2"};
-                break;
-            case 8:
-                shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "amps";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 9:
-                shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "amps";
-                maxVal = "20";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 10:
-                shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "amps";
-                maxVal = "50";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-        }
-
-        mBundle.putString("shortDis", shortDis);
-        mBundle.putString("shortDisTarget", shortDisTarget);
-        mBundle.putString("unit", unit);
-        mBundle.putString("maxVal", maxVal);
-        mBundle.putString("minVal",minVal);
-        mBundle.putString("incrementVal", incrementVal);
-        mBundle.putStringArray("markers", markers);
-
-        return mBundle;
-    }
-
-    private Bundle getThermistorBundle(int thermistorInputSensor) {
-        Bundle mBundle = new Bundle();
-        String shortDis = "Temperature";
-        String shortDisTarget = "Target Temperature";
-        String unit = "\u00B0F";
-        String maxVal = "302";
-        String minVal = "-40";
-        String incrementVal = "0.5";
-        String[] markers = null;
-        switch (thermistorInputSensor) {
-            case 0:
-            case 1:
-            case 2:
-                shortDis = "Temperature";
-                shortDisTarget = "Target Temperature";
-                unit = "\u00B0F";
-                maxVal = "302";
-                minVal = "-40";
-                incrementVal = "0.5";
-                markers = new String[]{"temp"};
-                break;
-        }
-
-        mBundle.putString("shortDis", shortDis);
-        mBundle.putString("shortDisTarget", shortDisTarget);
-        mBundle.putString("unit", unit);
-        mBundle.putString("maxVal", maxVal);
-        mBundle.putString("minVal", minVal);
-        mBundle.putString("incrementVal", incrementVal);
-        mBundle.putStringArray("markers", markers);
-
-        return mBundle;
-    }
-    
-    /**
-     * Dynamically generates whole bunch of String parameters required for creating NativeSensor related points.
-     */
-    private Bundle getNativeSensorBundle(int nativeSensorInput) {
-        Bundle mBundle = new Bundle();
-        NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeSensorInput - 1);
-        String shortDis = selectedSensor.sensorName;
-        
-        //Does the name formatting as it is done with the existing sensor types.
-        //ShortDisTarget to have everything stripped off except the sensor type like (CO2/Sound etc)
-        String shortDisTarget = shortDis.replace("Native-","Target ");
-        String marker = selectedSensor.sensorName
-                                    .replace("Native-","")
-                                    .replaceAll("\\s","")
-                                    .toLowerCase();
-        
-        
-        mBundle.putString("shortDis", shortDis);
-        mBundle.putString("shortDisTarget", shortDisTarget);
-        mBundle.putString("unit", selectedSensor.engineeringUnit);
-        mBundle.putString("maxVal", String.valueOf(selectedSensor.maxEngineeringValue));
-        mBundle.putString("minVal", String.valueOf(selectedSensor.minEngineeringValue));
-        mBundle.putString("incrementVal", String.valueOf(selectedSensor.incrementEngineeringValue));
-        mBundle.putStringArray("markers", new String[]{marker});
-        
-        return mBundle;
     }
 
     public PlcProfileConfiguration getProfileConfiguration() {
@@ -727,7 +418,8 @@ public class PlcEquip {
             // add proportional range point
             if (prangePoint == null || prangePoint.get("id") == null || (currentConfig.analog2InputSensor != config.analog2InputSensor)
             || (currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)){
-                createProportionalRangePoint(config.pidProportionalRange,floorRef,roomRef,getAnalog2Bundle(config.analog2InputSensor));
+                createProportionalRangePoint(config.pidProportionalRange,floorRef,roomRef,
+                        PlcRelayConfigHandler.getAnalog2Bundle(config.analog2InputSensor));
             }
 
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_TWO.name(), true);
@@ -757,7 +449,8 @@ public class PlcEquip {
                     && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
                         || (currentConfig.analog1InputSensor != config.analog1InputSensor))){
                     CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                            PlcRelayConfigHandler.getAnalog1Bundle(config.analog1InputSensor));
                 }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
@@ -769,13 +462,15 @@ public class PlcEquip {
                 }
 
                 if (prangePoint == null || prangePoint.get("id") == null){
-                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                            PlcRelayConfigHandler.getAnalog1Bundle(config.analog1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (currentConfig.analog1InputSensor != config.analog1InputSensor) {
-                id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
+                id = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, Tags.ANALOG1,
+                        String.valueOf(nodeAddr), equipRef, config.analog1InputSensor);
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
@@ -804,7 +499,8 @@ public class PlcEquip {
                 if (prangePoint != null && prangePoint.get("id") != null && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
                         ||(currentConfig.th1InputSensor != config.th1InputSensor))){
                     CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                            PlcRelayConfigHandler.getThermistorBundle(config.th1InputSensor));
                 }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
@@ -815,13 +511,15 @@ public class PlcEquip {
                     createTargetValuePoint(floorRef, roomRef, config);
                 }
                 if (prangePoint == null || prangePoint.get("id") == null){
-                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                            PlcRelayConfigHandler.getThermistorBundle(config.th1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (currentConfig.th1InputSensor != config.th1InputSensor) {
-                id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
+                id = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, Tags.TH1,
+                        String.valueOf(nodeAddr), equipRef, config.th1InputSensor);
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
@@ -970,19 +668,20 @@ public class PlcEquip {
             
             if (prangePoint.isEmpty()){
                 createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
-                                        getNativeSensorBundle(config.nativeSensorInput));
+                        PlcRelayConfigHandler.getNativeSensorBundle(config.nativeSensorInput));
                 
             } else if (currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint ||
                        currentConfig.nativeSensorInput != config.nativeSensorInput) {
                 
                 CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
                 createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
-                                             getNativeSensorBundle(config.nativeSensorInput));
+                        PlcRelayConfigHandler.getNativeSensorBundle(config.nativeSensorInput));
             }
         }
         
         if (currentConfig.nativeSensorInput != config.nativeSensorInput) {
-            String id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
+            String id = PlcRelayConfigHandler.createProcessVariablePoint(floorRef, roomRef, "native",
+                    String.valueOf(nodeAddr), equipRef, config.nativeSensorInput);
         
             //delete and update target values
             if (!targetValuePoint.isEmpty()){
@@ -1009,57 +708,6 @@ public class PlcEquip {
         
     }
 
-    private String createProcessVariablePoint(String floorRef, String roomRef, String processTag,
-                                    PlcProfileConfiguration config) {
-
-        HashMap siteMap = hayStack.read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-PID-" + nodeAddr;
-        Bundle bundle = new Bundle();
-        if (config.analog1InputSensor > 0){
-            bundle = getAnalog1Bundle(config.analog1InputSensor);
-        } else if (config.th1InputSensor > 0){
-            bundle = getThermistorBundle(config.th1InputSensor);
-        } else if (config.nativeSensorInput > 0) {
-            bundle = getNativeSensorBundle(config.nativeSensorInput);
-        }
-
-        String shortDis = bundle.getString("shortDis");
-        String unit = bundle.getString("unit");
-        String maxVal = bundle.getString("maxVal");
-        String minVal = bundle.getString("minVal");
-        String[] markers = bundle.getStringArray("markers");
-
-        Point.Builder processVariableTag = new Point.Builder()
-                .setDisplayName(equipDis + "-processVariable- " + processTag)
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setShortDis(shortDis)
-                .setHisInterpolate("cov")
-                .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
-                .addMarker("sp")
-                .addMarker("process").addMarker("variable")
-                .setGroup(String.valueOf(nodeAddr))
-                .setMinVal(minVal)
-                .setMaxVal(maxVal)
-                .setUnit(unit)
-                .setTz(tz);
-        if (markers != null) {
-            for (String marker : markers) {
-                processVariableTag.addMarker(marker);
-            }
-        }
-
-        String processVariableTagId = hayStack.addPoint(processVariableTag.build());
-        hayStack.writeHisValById(processVariableTagId, 0.0);
-
-        return processVariableTagId;
-    }
-
     private String createDynamicTargetInputPoint(int inputSensor, String floorRef, String roomRef,
                                              String dynamicTargetTag) {
 
@@ -1069,7 +717,7 @@ public class PlcEquip {
         String equipDis = siteDis + "-PID-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
 
-        Bundle bundle = getAnalog2Bundle(inputSensor);
+        Bundle bundle = PlcRelayConfigHandler.getAnalog2Bundle(inputSensor);
         String shortDis = bundle.getString("shortDis");
         String shortDisTarget = bundle.getString("shortDisTarget");
         String unit = bundle.getString("unit");
@@ -1141,11 +789,11 @@ public class PlcEquip {
         String equipDis = siteDis + "-PID-" + nodeAddr;
         Bundle bundle = new Bundle();
         if (config.analog1InputSensor > 0){
-            bundle = getAnalog1Bundle(config.analog1InputSensor);
+            bundle = PlcRelayConfigHandler.getAnalog1Bundle(config.analog1InputSensor);
         } else if (config.th1InputSensor > 0){
-            bundle = getThermistorBundle(config.th1InputSensor);
+            bundle = PlcRelayConfigHandler.getThermistorBundle(config.th1InputSensor);
         } else if (config.nativeSensorInput > 0) {
-            bundle = getNativeSensorBundle(config.nativeSensorInput);
+            bundle = PlcRelayConfigHandler.getNativeSensorBundle(config.nativeSensorInput);
         }
 
         String shortDis = bundle.getString("shortDis");
@@ -1212,6 +860,7 @@ public class PlcEquip {
                 .setTz(tz)
                 .build();
         String pidProportionalRangeId = hayStack.addPoint(pidProportionalRange);
+        hayStack.writeDefaultValById(pidProportionalRangeId, (double) proportionalRange);
         hayStack.writeHisValueByIdWithoutCOV(pidProportionalRangeId, (double) proportionalRange);
         return pidProportionalRangeId;
     }
@@ -1264,18 +913,18 @@ public class PlcEquip {
     }
 
     public double getTargetValue() {
-        return targetValue;
+        return CCUHsApi.getInstance().readDefaultVal("point and config and target and value and group == \"" + nodeAddr + "\"");
     }
 
     public boolean isEnabledAnalog2InForSp() {
-        return isEnabledAnalog2InForSp;
+        return hayStack.readDefaultVal("point and config and enabled and analog2 and setpoint and group == \"" + nodeAddr + "\"") > 0;
     }
 
     public double getSpSensorOffset() {
-        return spSensorOffset;
+        return hayStack.readDefaultVal("point and config and setpoint and sensor and offset and group == \"" + nodeAddr + "\"");
     }
 
     public boolean isEnabledZeroErrorMidpoint() {
-        return isEnabledZeroErrorMidpoint;
+        return hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and group == \"" + nodeAddr + "\"") > 0;
     }
 }

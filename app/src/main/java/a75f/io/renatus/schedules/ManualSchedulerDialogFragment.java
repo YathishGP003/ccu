@@ -8,9 +8,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -27,8 +27,8 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.RangeBarView;
 
@@ -389,8 +389,12 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         alertDialog.setContentView(R.layout.dialog_delete_schedule);
         alertDialog.findViewById(R.id.btnCancel).setOnClickListener(view -> alertDialog.dismiss());
         alertDialog.findViewById(R.id.btnProceed).setOnClickListener(view -> {
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting schedule...");
             mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
             alertDialog.dismiss();
+            new Handler().postDelayed(() -> {
+                ProgressDialogUtils.hideProgressDialog();
+            }, 1000);
             dismiss();
         });
 

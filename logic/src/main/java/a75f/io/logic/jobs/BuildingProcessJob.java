@@ -1,5 +1,7 @@
 package a75f.io.logic.jobs;
 
+import android.util.Log;
+
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -14,7 +16,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -46,9 +47,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         watchdogMonitor = false;
         
         L.pingCloudServer();
-
+        
         if (jobLock.tryLock()) {
-
+            
             try {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (site.isEmpty()) {
@@ -57,7 +58,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 }
 
                 HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
-
+                
                 if (ccu.isEmpty()) {
                     CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
                     return;
@@ -67,10 +68,12 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     profile.updateZonePoints();
                 }
-                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed() && !MessagingClient.getInstance().isSubscribed()) {
+                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                     CCUHsApi.getInstance().syncEntityTree();
-                    if (CCUHsApi.getInstance().isCCURegistered()) {
-                        MessagingClient.getInstance().init();
+                    if (CCUHsApi.getInstance().siteSynced()) {
+                        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                        PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
+                                                                         siteUID);
                     }
                 }
                 if (L.ccu().oaoProfile != null) {
@@ -80,11 +83,11 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                                                               (double) EpidemicState.OFF.ordinal());
                 }
 
-                if (!Globals.getInstance().isTestMode()) {
+                if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
                     L.ccu().systemProfile.doSystemControl();
                 }
                 handleSync();
-
+    
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
             } catch (Exception e) {
                 CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
@@ -95,7 +98,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob : Previous Instance of job still running");
         }
     }
-
+    
     private void handleSync() {
 
         new Thread() {

@@ -795,6 +795,10 @@ public class Schedule extends Entity
         else mMarkers.remove("disabled");
     }
     
+    public boolean getDisabled() {
+        return mMarkers.contains("disabled");
+    }
+    
     public void setDaysCoolVal(double val, boolean alldays)
     {
         if (alldays) {

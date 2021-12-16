@@ -1,6 +1,6 @@
 {
-  "modbusEquipId (_id)": "5f1f30ad18b11f4f1d9a222",
-  "name": "UPS-400k",
+  "modbusEquipId (_id)": "5f1f400kvaud48cb11f4f1d9a222",
+  "name": "UPS-400KVA",
   "description": "This document contains the configuration necessary to ups-400kva",
   "equipType": "UPS400K",
   "vendor": "Vertiv",
@@ -9,13 +9,13 @@
   ],
   "registers": [
     {
-      "registerAddress": 385,
+      "registerAddress": 384,
       "registerNumber": "30385",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7071",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7071",
           "name": "system Input Voltage L1-L2",
           "startBit": 0,
           "endBit": 15,
@@ -25,13 +25,63 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l1tol2"
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "VAC"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 385,
+      "registerNumber": "30386",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7072",
+          "name": "System Input Voltage L2-L3",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
@@ -54,13 +104,13 @@
     },
     {
       "registerAddress": 386,
-      "registerNumber": "30386",
+      "registerNumber": "30387",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7072",
-          "name": "System Input Voltage L2-L3",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7073",
+          "name": "System Input Voltage L3-L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -69,13 +119,16 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l2tol3"
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "rPhase"
             },
             {
               "tagName": "unit",
@@ -98,13 +151,13 @@
     },
     {
       "registerAddress": 387,
-      "registerNumber": "30387",
+      "registerNumber": "30388",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7073",
-          "name": "System Input Voltage L3-L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7074",
+          "name": "System Input Current L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -113,17 +166,17 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
-              "tagName": "voltage"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l3tol2"
+              "tagName": "rPhase"
             },
             {
               "tagName": "unit",
-              "value": "VAC"
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -142,13 +195,13 @@
     },
     {
       "registerAddress": 388,
-      "registerNumber": "30388",
+      "registerNumber": "30389",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7074",
-          "name": "System Input Current L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7075",
+          "name": "System Input Current L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -157,16 +210,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
-            },
-            {
               "tagName": "input"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l1"
+              "tagName": "yPhase"
             },
             {
               "tagName": "unit",
@@ -189,13 +239,13 @@
     },
     {
       "registerAddress": 389,
-      "registerNumber": "30389",
+      "registerNumber": "30390",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7075",
-          "name": "System Input Current L2",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7076",
+          "name": "System Input Current L3",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -204,16 +254,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
-            },
-            {
               "tagName": "input"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l2"
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
@@ -236,59 +283,13 @@
     },
     {
       "registerAddress": 390,
-      "registerNumber": "30390",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7076",
-          "name": "System Input Current L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "input"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "unit",
-              "value": "A"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 391,
       "registerNumber": "30391",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7077",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7077",
           "name": "System Input Frequency",
           "startBit": 0,
           "endBit": 15,
@@ -296,9 +297,6 @@
           "logicalPointTags": [
             {
               "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -326,13 +324,13 @@
       ]
     },
     {
-      "registerAddress": 392,
+      "registerAddress": 391,
       "registerNumber": "30392",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7078",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7078",
           "name": "System Input Voltage L1-N",
           "startBit": 0,
           "endBit": 15,
@@ -342,13 +340,63 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l1toN"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "unit",
+              "value": "VAC"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 392,
+      "registerNumber": "30393",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7079",
+          "name": "System Input Voltage L2-N",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "unit",
@@ -371,13 +419,13 @@
     },
     {
       "registerAddress": 393,
-      "registerNumber": "30393",
+      "registerNumber": "30394",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7079",
-          "name": "System Input Voltage L2-N",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7080",
+          "name": "System Input Voltage L3-N",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -386,13 +434,16 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l2toN"
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "unit",
@@ -415,13 +466,14 @@
     },
     {
       "registerAddress": 394,
-      "registerNumber": "30394",
+      "registerNumber": "30395",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7080",
-          "name": "System Input Voltage L3-N",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7081",
+          "name": "System Input Power Factor L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -430,17 +482,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
-              "tagName": "voltage"
+              "tagName": "pf"
             },
             {
-              "tagName": "l3toN"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -459,13 +507,14 @@
     },
     {
       "registerAddress": 395,
-      "registerNumber": "30395",
+      "registerNumber": "30396",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7081",
-          "name": "System Input Power Factor L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7082",
+          "name": "System Input Power Factor L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -474,19 +523,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
-            },
-            {
               "tagName": "input"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l1"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -505,58 +548,13 @@
     },
     {
       "registerAddress": 396,
-      "registerNumber": "30396",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7082",
-          "name": "System Input Power Factor L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "input"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 397,
       "registerNumber": "30397",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7083",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7083",
           "name": "System Input Power Factor L3",
           "startBit": 0,
           "endBit": 15,
@@ -566,236 +564,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 408,
-      "registerNumber": "30408",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7084",
-          "name": "Bypass Input Voltage L1-N",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l1toN"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 409,
-      "registerNumber": "30409",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7085",
-          "name": "Bypass Input Voltage L2-N",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l2toN"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 410,
-      "registerNumber": "30410",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7086",
-          "name": "Bypass Input Voltage L3-N",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l3toN"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 411,
-      "registerNumber": "30411",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7087",
-          "name": "Bypass Input Frequency",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
               "tagName": "input"
             },
             {
-              "tagName": "frequency"
+              "tagName": "pf"
             },
             {
-              "tagName": "unit",
-              "value": "Hz"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 412,
-      "registerNumber": "30412",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7088",
-          "name": "Bypass Input Voltage L1-L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l1tol2"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -813,101 +588,13 @@
       ]
     },
     {
-      "registerAddress": 413,
-      "registerNumber": "30413",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7089",
-          "name": "Bypass Input Voltage L2-L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l2tol3"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 414,
-      "registerNumber": "30414",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7090",
-          "name": "Bypass Input Voltage L3-L1",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "l3tol1"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 425,
+      "registerAddress": 424,
       "registerNumber": "30425",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7091",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7091",
           "name": "Battery Time Remaining",
           "startBit": 0,
           "endBit": 15,
@@ -921,9 +608,6 @@
             },
             {
               "tagName": "time"
-            },
-            {
-              "tagName": "remaining"
             },
             {
               "tagName": "unit",
@@ -945,13 +629,13 @@
       ]
     },
     {
-      "registerAddress": 426,
+      "registerAddress": 425,
       "registerNumber": "30426",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7092",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7092",
           "name": "Battery Volts For Cabinet",
           "startBit": 0,
           "endBit": 15,
@@ -964,10 +648,10 @@
               "tagName": "battery"
             },
             {
-              "tagName": "volts"
+              "tagName": "voltage"
             },
             {
-              "tagName": "cabinet"
+              "tagName": "common"
             },
             {
               "tagName": "unit",
@@ -989,14 +673,14 @@
       ]
     },
     {
-      "registerAddress": 428,
-      "registerNumber": "30428",
+      "registerAddress": 426,
+      "registerNumber": "30427",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7094",
-          "name": "Battery Temperature For Cabinet",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7093",
+          "name": "Battery Temperature For Cabinet C",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1011,11 +695,8 @@
               "tagName": "temperature"
             },
             {
-              "tagName": "cabinet"
-            },
-            {
               "tagName": "unit",
-              "value": "F"
+              "value": "C"
             },
             {
               "tagName": "kind",
@@ -1033,13 +714,13 @@
       ]
     },
     {
-      "registerAddress": 429,
+      "registerAddress": 428,
       "registerNumber": "30429",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7095",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7095",
           "name": "DC Bus Current",
           "startBit": 0,
           "endBit": 15,
@@ -1077,13 +758,13 @@
       ]
     },
     {
-      "registerAddress": 430,
+      "registerAddress": 429,
       "registerNumber": "30430",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7096",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7096",
           "name": "Ups Battery 1 Status",
           "startBit": 0,
           "endBit": 15,
@@ -1131,13 +812,13 @@
       ]
     },
     {
-      "registerAddress": 441,
+      "registerAddress": 440,
       "registerNumber": "30441",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7097",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7097",
           "name": "System Output Voltage L1-N",
           "startBit": 0,
           "endBit": 15,
@@ -1153,7 +834,57 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l1toN"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "unit",
+              "value": "VAC"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 441,
+      "registerNumber": "30442",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7098",
+          "name": "System Output Voltage L2-N",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "systemOutput"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "unit",
@@ -1176,13 +907,13 @@
     },
     {
       "registerAddress": 442,
-      "registerNumber": "30442",
+      "registerNumber": "30443",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7098",
-          "name": "System Output Voltage L2-N",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7099",
+          "name": "System Output Voltage L3-N",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1197,7 +928,10 @@
               "tagName": "voltage"
             },
             {
-              "tagName": "l2toN"
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "line"
             },
             {
               "tagName": "unit",
@@ -1220,13 +954,13 @@
     },
     {
       "registerAddress": 443,
-      "registerNumber": "30443",
+      "registerNumber": "30444",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7099",
-          "name": "System Output Voltage L3-N",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7100",
+          "name": "System Output Current L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1238,14 +972,14 @@
               "tagName": "systemOutput"
             },
             {
-              "tagName": "voltage"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l3toN"
+              "tagName": "rPhase"
             },
             {
               "tagName": "unit",
-              "value": "VAC"
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -1264,13 +998,13 @@
     },
     {
       "registerAddress": 444,
-      "registerNumber": "30444",
+      "registerNumber": "30445",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7100",
-          "name": "System Output Current L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7101",
+          "name": "System Output Current L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1282,10 +1016,10 @@
               "tagName": "systemOutput"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l1"
+              "tagName": "yPhase"
             },
             {
               "tagName": "unit",
@@ -1308,13 +1042,13 @@
     },
     {
       "registerAddress": 445,
-      "registerNumber": "30445",
+      "registerNumber": "30446",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7101",
-          "name": "System Output Current L2",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7102",
+          "name": "System Output Current L3",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1326,10 +1060,10 @@
               "tagName": "systemOutput"
             },
             {
-              "tagName": "current"
+              "tagName": "phaseCur"
             },
             {
-              "tagName": "l2"
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
@@ -1352,56 +1086,12 @@
     },
     {
       "registerAddress": 446,
-      "registerNumber": "30446",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7102",
-          "name": "System Output Current L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "unit",
-              "value": "A"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 447,
       "registerNumber": "30447",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7103",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7103",
           "name": "System Output Frequency",
           "startBit": 0,
           "endBit": 15,
@@ -1411,7 +1101,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "frequency"
@@ -1436,13 +1126,13 @@
       ]
     },
     {
-      "registerAddress": 448,
+      "registerAddress": 447,
       "registerNumber": "30448",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7104",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7104",
           "name": "System Output Voltage L1-L2",
           "startBit": 0,
           "endBit": 15,
@@ -1452,13 +1142,63 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l1tol2"
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "VAC"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 448,
+      "registerNumber": "30449",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7105",
+          "name": "System Output Voltage L2-L3",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "output"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
@@ -1481,13 +1221,13 @@
     },
     {
       "registerAddress": 449,
-      "registerNumber": "30449",
+      "registerNumber": "30450",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7105",
-          "name": "System Output Voltage L2-L3",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7106",
+          "name": "System Output Voltage L3-L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1496,13 +1236,16 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "voltage"
             },
             {
-              "tagName": "l2tol3"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
@@ -1525,13 +1268,14 @@
     },
     {
       "registerAddress": 450,
-      "registerNumber": "30450",
+      "registerNumber": "30451",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7106",
-          "name": "System Output Voltage L3-L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7107",
+          "name": "System Output Power Factor L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1540,17 +1284,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
-              "tagName": "voltage"
+              "tagName": "pf"
             },
             {
-              "tagName": "l3tol1"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
+              "tagName": "rPhase"
             },
             {
               "tagName": "kind",
@@ -1569,13 +1309,14 @@
     },
     {
       "registerAddress": 451,
-      "registerNumber": "30451",
+      "registerNumber": "30452",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7107",
-          "name": "System Output Power Factor L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7108",
+          "name": "System Output Power Factor L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1584,16 +1325,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l1"
+              "tagName": "yPhase"
             },
             {
               "tagName": "kind",
@@ -1612,13 +1350,14 @@
     },
     {
       "registerAddress": 452,
-      "registerNumber": "30452",
+      "registerNumber": "30453",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.01",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7108",
-          "name": "System Output Power Factor L2",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7109",
+          "name": "System Output Power Factor L3",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1627,16 +1366,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
-              "tagName": "power"
+              "tagName": "pf"
             },
             {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l2"
+              "tagName": "bPhase"
             },
             {
               "tagName": "kind",
@@ -1655,13 +1391,13 @@
     },
     {
       "registerAddress": 453,
-      "registerNumber": "30453",
+      "registerNumber": "30454",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7109",
-          "name": "System Output Power Factor L3",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7110",
+          "name": "System Output Pct Power Phase L1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1670,16 +1406,20 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "power"
             },
             {
-              "tagName": "factor"
+              "tagName": "percent"
             },
             {
-              "tagName": "l3"
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "%"
             },
             {
               "tagName": "kind",
@@ -1698,13 +1438,13 @@
     },
     {
       "registerAddress": 454,
-      "registerNumber": "30454",
+      "registerNumber": "30455",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7110",
-          "name": "System Output Pct Power Phase L1",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7111",
+          "name": "System Output Pct Power Phase L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -1713,16 +1453,16 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "power"
             },
             {
-              "tagName": "percentage"
+              "tagName": "percent"
             },
             {
-              "tagName": "l1"
+              "tagName": "yPhase"
             },
             {
               "tagName": "unit",
@@ -1745,59 +1485,12 @@
     },
     {
       "registerAddress": 455,
-      "registerNumber": "30455",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7111",
-          "name": "System Output Pct Power Phase L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "percentage"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "unit",
-              "value": "%"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 456,
       "registerNumber": "30456",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7112",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7112",
           "name": "System Output Pct Power Phase L3",
           "startBit": 0,
           "endBit": 15,
@@ -1807,490 +1500,20 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "power"
             },
             {
-              "tagName": "percentage"
+              "tagName": "percent"
             },
             {
-              "tagName": "l3"
+              "tagName": "bPhase"
             },
             {
               "tagName": "unit",
               "value": "%"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 457,
-      "registerNumber": "30457",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7113",
-          "name": "MMS Output Apparent Power",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "mms"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "apparent"
-            },
-            {
-              "tagName": "unit",
-              "value": "kVA"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 458,
-      "registerNumber": "30458",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7114",
-          "name": "MMS Output Power",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "mms"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "unit",
-              "value": "kW"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 459,
-      "registerNumber": "30459",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7115",
-          "name": "Output Current Crest Factor Phs L1",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "crest"
-            },
-            {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 460,
-      "registerNumber": "30460",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7116",
-          "name": "Output Current Crest Factor Phs L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "crest"
-            },
-            {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 461,
-      "registerNumber": "30461",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7117",
-          "name": "Output Current Crest Factor Phs L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "crest"
-            },
-            {
-              "tagName": "factor"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 462,
-      "registerNumber": "30462",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7118",
-          "name": "System Output Power Phase L1",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "unit",
-              "value": "kW"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 463,
-      "registerNumber": "30463",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7119",
-          "name": "System Output Power Phase L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "unit",
-              "value": "kW"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 464,
-      "registerNumber": "30464",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7120",
-          "name": "System Output Power Phase L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "unit",
-              "value": "kW"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 465,
-      "registerNumber": "30465",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7121",
-          "name": "System Output Apparent Power Phs L1",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "apparent"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l1"
-            },
-            {
-              "tagName": "unit",
-              "value": "kVA"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 466,
-      "registerNumber": "30466",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7122",
-          "name": "System Output Apparent Power Phs L2",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "apparent"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l2"
-            },
-            {
-              "tagName": "unit",
-              "value": "kVA"
             },
             {
               "tagName": "kind",
@@ -2309,62 +1532,12 @@
     },
     {
       "registerAddress": 467,
-      "registerNumber": "30467",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7123",
-          "name": "System Output Apparent Power Phs L3",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "apparent"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "l3"
-            },
-            {
-              "tagName": "unit",
-              "value": "kVA"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 468,
       "registerNumber": "30468",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7124",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7124",
           "name": "System Output Power",
           "startBit": 0,
           "endBit": 15,
@@ -2377,7 +1550,7 @@
               "tagName": "power"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "unit",
@@ -2399,13 +1572,13 @@
       ]
     },
     {
-      "registerAddress": 469,
+      "registerAddress": 468,
       "registerNumber": "30469",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7125",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7125",
           "name": "System Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2418,7 +1591,7 @@
               "tagName": "power"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "apparent"
@@ -2443,13 +1616,13 @@
       ]
     },
     {
-      "registerAddress": 480,
+      "registerAddress": 479,
       "registerNumber": "30480",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7126",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7126",
           "name": "Inverter On/Off Status",
           "startBit": 0,
           "endBit": 15,
@@ -2490,65 +1663,12 @@
     },
     {
       "registerAddress": 481,
-      "registerNumber": "30481",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7127",
-          "name": "Maintenance Bypass Breaker",
-          "startBit": 0,
-          "endBit": 15,
-          "conditions": [
-            {
-              "name": "Open",
-              "bitValues": 0
-            },
-            {
-              "name": "Close",
-              "bitValues": 1
-            },
-            {
-              "name": "Not Installed",
-              "bitValues": 2
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "maintenance"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 482,
       "registerNumber": "30482",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7128",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7128",
           "name": "UPS Output Source",
           "startBit": 0,
           "endBit": 15,
@@ -2608,13 +1728,13 @@
       ]
     },
     {
-      "registerAddress": 483,
+      "registerAddress": 482,
       "registerNumber": "30483",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7129",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7129",
           "name": "System Status",
           "startBit": 0,
           "endBit": 15,
@@ -2645,7 +1765,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemStatus"
+              "tagName": "status"
+            },
+            {
+              "tagName": "warning"
             },
             {
               "tagName": "kind",
@@ -2664,55 +1787,12 @@
     },
     {
       "registerAddress": 484,
-      "registerNumber": "30484",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7130",
-          "name": "ECO Mode Operation State",
-          "startBit": 0,
-          "endBit": 15,
-          "conditions": [
-            {
-              "name": "Disabled",
-              "bitValues": 0
-            },
-            {
-              "name": "Enabled",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemStatus"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 485,
       "registerNumber": "30485",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7131",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7131",
           "name": "Input Breaker",
           "startBit": 0,
           "endBit": 15,
@@ -2738,7 +1818,7 @@
               "tagName": "input"
             },
             {
-              "tagName": "breaker"
+              "tagName": "relay"
             },
             {
               "tagName": "kind",
@@ -2757,65 +1837,12 @@
     },
     {
       "registerAddress": 486,
-      "registerNumber": "30486",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7132",
-          "name": "Internal Bypass Breaker",
-          "startBit": 0,
-          "endBit": 15,
-          "conditions": [
-            {
-              "name": "Open",
-              "bitValues": 0
-            },
-            {
-              "name": "Close",
-              "bitValues": 1
-            },
-            {
-              "name": "Not Installed",
-              "bitValues": 2
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "internal"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 487,
       "registerNumber": "30487",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7133",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7133",
           "name": "Output Breaker",
           "startBit": 0,
           "endBit": 15,
@@ -2841,7 +1868,7 @@
               "tagName": "output"
             },
             {
-              "tagName": "breaker"
+              "tagName": "relay"
             },
             {
               "tagName": "kind",
@@ -2859,378 +1886,13 @@
       ]
     },
     {
-      "registerAddress": 490,
-      "registerNumber": "30490",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7136",
-          "name": "Intelligent Parallel Operation State",
-          "startBit": 0,
-          "endBit": 15,
-          "conditions": [
-            {
-              "name": "Disabled",
-              "bitValues": 0
-            },
-            {
-              "name": "Enabled",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "intelligent"
-            },
-            {
-              "tagName": "parallel"
-            },
-            {
-              "tagName": "operation"
-            },
-            {
-              "tagName": "state"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 491,
-      "registerNumber": "30491",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7137",
-          "name": "Advanced Efficiency Mode",
-          "startBit": 0,
-          "endBit": 15,
-          "conditions": [
-            {
-              "name": "Disabled",
-              "bitValues": 0
-            },
-            {
-              "name": "Enabled",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "advanced"
-            },
-            {
-              "tagName": "efficiency"
-            },
-            {
-              "tagName": "mode"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 502,
-      "registerNumber": "30502",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7138",
-          "name": "System Input Nominal Voltage",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 503,
-      "registerNumber": "30503",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7139",
-          "name": "System Input Nominal Frequency",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "frequency"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "Hz"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 504,
-      "registerNumber": "30504",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7140",
-          "name": "System Input Nominal Current",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "A"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 505,
-      "registerNumber": "30505",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7141",
-          "name": "Bypass Nominal Voltage",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 506,
-      "registerNumber": "30506",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7142",
-          "name": "System Output Nominal Voltage",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "VAC"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 507,
-      "registerNumber": "30507",
-      "registerType": "inputRegister",
-      "parameterDefinitionType": "decimal",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7143",
-          "name": "System output Nominal Frequency",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemOutput"
-            },
-            {
-              "tagName": "frequency"
-            },
-            {
-              "tagName": "nominal"
-            },
-            {
-              "tagName": "unit",
-              "value": "Hz"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 518,
+      "registerAddress": 517,
       "registerNumber": "30518",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7144",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7144",
           "name": "Total System Operating Time",
           "startBit": 0,
           "endBit": 15,
@@ -3240,16 +1902,16 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOp"
+              "tagName": "operating"
             },
             {
-              "tagName": "output"
+              "tagName": "total"
             },
             {
-              "tagName": "frequency"
+              "tagName": "time"
             },
             {
-              "tagName": "nominal"
+              "tagName": "normal"
             },
             {
               "tagName": "unit",
@@ -3271,13 +1933,14 @@
       ]
     },
     {
-      "registerAddress": 520,
+      "registerAddress": 519,
       "registerNumber": "30520",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
+      "multiplier": "0.1",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7144",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7145",
           "name": "Average System Efficiency",
           "startBit": 0,
           "endBit": 15,
@@ -3287,7 +1950,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemEfficiency"
+              "tagName": "efficiency"
             },
             {
               "tagName": "average"
@@ -3312,448 +1975,13 @@
       ]
     },
     {
-      "registerAddress": 1,
-      "registerNumber": "10001",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7146",
-          "name": "Battery Equalize",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "equalize"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 2,
-      "registerNumber": "10002",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7147",
-          "name": "Battery Charging Inhibited",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "charging"
-            },
-            {
-              "tagName": "inhibited"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 3,
-      "registerNumber": "10003",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7148",
-          "name": "On Generator",
-          "conditions": [
-            {
-              "name": "No",
-              "bitValues": 0
-            },
-            {
-              "name": "Yes",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "generator"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 4,
-      "registerNumber": "10004",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7149",
-          "name": "Battery Self Test",
-          "conditions": [
-            {
-              "name": "No",
-              "bitValues": 0
-            },
-            {
-              "name": "Yes",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "test"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 5,
-      "registerNumber": "10005",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7150",
-          "name": "Battery Circuit Breaker 1 Open",
-          "conditions": [
-            {
-              "name": "Close",
-              "bitValues": 0
-            },
-            {
-              "name": "Open",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "circuit"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 6,
-      "registerNumber": "10006",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7151",
-          "name": "Battery Circuit Breaker 2 Open",
-          "conditions": [
-            {
-              "name": "Close",
-              "bitValues": 0
-            },
-            {
-              "name": "Open",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "circuit"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 7,
-      "registerNumber": "10007",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7152",
-          "name": "Battery Circuit Breaker 3 Open",
-          "conditions": [
-            {
-              "name": "Close",
-              "bitValues": 0
-            },
-            {
-              "name": "Open",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "circuit"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 8,
-      "registerNumber": "10008",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7153",
-          "name": "Battery Circuit Breaker 4 Open",
-          "conditions": [
-            {
-              "name": "Close",
-              "bitValues": 0
-            },
-            {
-              "name": "Open",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "circuit"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 9,
-      "registerNumber": "10009",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7154",
-          "name": "Main Battery Disconnect Open",
-          "conditions": [
-            {
-              "name": "Close",
-              "bitValues": 0
-            },
-            {
-              "name": "Open",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "main"
-            },
-            {
-              "tagName": "disconnect"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 20,
+      "registerAddress": 19,
       "registerNumber": "10020",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7155",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7155",
           "name": "System Input Power Problem",
           "conditions": [
             {
@@ -3770,7 +1998,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "power"
@@ -3794,13 +2022,13 @@
       ]
     },
     {
-      "registerAddress": 21,
+      "registerAddress": 20,
       "registerNumber": "10021",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7156",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7156",
           "name": "Rectifier Failure",
           "conditions": [
             {
@@ -3817,7 +2045,54 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemRectifier"
+              "tagName": "rectifier"
+            },
+            {
+              "tagName": "failure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 21,
+      "registerNumber": "10022",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7157",
+          "name": "Inverter Failure",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Failure",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "inverter"
             },
             {
               "tagName": "failure"
@@ -3842,59 +2117,12 @@
     },
     {
       "registerAddress": 22,
-      "registerNumber": "10022",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7157",
-          "name": "Inverter Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Failure",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInverter"
-            },
-            {
-              "tagName": "failure"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 23,
       "registerNumber": "10023",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7158",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7158",
           "name": "Bypass Not Available",
           "conditions": [
             {
@@ -3917,6 +2145,9 @@
               "tagName": "alarm"
             },
             {
+              "tagName": "unavailable"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -3932,13 +2163,13 @@
       ]
     },
     {
-      "registerAddress": 24,
+      "registerAddress": 23,
       "registerNumber": "10024",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7159",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7159",
           "name": "Battery Low",
           "conditions": [
             {
@@ -3979,13 +2210,13 @@
       ]
     },
     {
-      "registerAddress": 25,
+      "registerAddress": 24,
       "registerNumber": "10025",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7160",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7160",
           "name": "LBS Inhibited",
           "conditions": [
             {
@@ -4002,10 +2233,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "lbs"
+              "tagName": "low"
             },
             {
-              "tagName": "inhibited"
+              "tagName": "battery"
+            },
+            {
+              "tagName": "predicted"
             },
             {
               "tagName": "alarm"
@@ -4026,13 +2260,13 @@
       ]
     },
     {
-      "registerAddress": 26,
+      "registerAddress": 25,
       "registerNumber": "10026",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7161",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7161",
           "name": "System Fan Failure",
           "conditions": [
             {
@@ -4049,7 +2283,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemFan"
+              "tagName": "fan"
             },
             {
               "tagName": "failure"
@@ -4073,13 +2307,13 @@
       ]
     },
     {
-      "registerAddress": 27,
+      "registerAddress": 26,
       "registerNumber": "10027",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7162",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7162",
           "name": "Equipment Over Temperature",
           "conditions": [
             {
@@ -4094,9 +2328,6 @@
           "logicalPointTags": [
             {
               "tagName": "ups"
-            },
-            {
-              "tagName": "systemEquip"
             },
             {
               "tagName": "over"
@@ -4124,59 +2355,12 @@
     },
     {
       "registerAddress": 28,
-      "registerNumber": "10028",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7163",
-          "name": "System Shutdown EPO",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemShutdown"
-            },
-            {
-              "tagName": "epo"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 29,
       "registerNumber": "10029",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7164",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7164",
           "name": "Bypass Static Switch Unavailable",
           "conditions": [
             {
@@ -4202,57 +2386,7 @@
               "tagName": "switch"
             },
             {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 30,
-      "registerNumber": "10030",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7165",
-          "name": "Bypass-Excess Auto Retransfers",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "excess"
-            },
-            {
-              "tagName": "auto"
-            },
-            {
-              "tagName": "retransfers"
+              "tagName": "unavailable"
             },
             {
               "tagName": "alarm"
@@ -4274,62 +2408,12 @@
     },
     {
       "registerAddress": 31,
-      "registerNumber": "10031",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7166",
-          "name": "Parallel Comm Warning",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Warning",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "parallel"
-            },
-            {
-              "tagName": "communication"
-            },
-            {
-              "tagName": "warning"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 32,
       "registerNumber": "10032",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7167",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7167",
           "name": "Power Supply Failure",
           "conditions": [
             {
@@ -4373,13 +2457,13 @@
       ]
     },
     {
-      "registerAddress": 33,
+      "registerAddress": 32,
       "registerNumber": "10033",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7168",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7168",
           "name": "Battery Over Temperature",
           "conditions": [
             {
@@ -4423,110 +2507,13 @@
       ]
     },
     {
-      "registerAddress": 34,
-      "registerNumber": "10034",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7169",
-          "name": "System Input Phs Rotation Error",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "rotation"
-            },
-            {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "registerAddress": 35,
-      "registerNumber": "10035",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7170",
-          "name": "Fuse Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Failure",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemFuse"
-            },
-            {
-              "tagName": "failure"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 36,
       "registerNumber": "10036",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7171",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7171",
           "name": "Inverter Overload",
           "conditions": [
             {
@@ -4543,54 +2530,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInverter"
-            },
-            {
-              "tagName": "overload"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 37,
-      "registerNumber": "10037",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7172",
-          "name": "MMS Overload",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemMMS"
+              "tagName": "inverter"
             },
             {
               "tagName": "overload"
@@ -4615,62 +2555,12 @@
     },
     {
       "registerAddress": 38,
-      "registerNumber": "10038",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7173",
-          "name": "Inverter Shutdown Overload",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "inverter"
-            },
-            {
-              "tagName": "shutdown"
-            },
-            {
-              "tagName": "overload"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 39,
       "registerNumber": "10039",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7174",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7174",
           "name": "System Output Fault",
           "conditions": [
             {
@@ -4687,7 +2577,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemOutput"
+              "tagName": "output"
             },
             {
               "tagName": "fault"
@@ -4711,13 +2601,13 @@
       ]
     },
     {
-      "registerAddress": 40,
+      "registerAddress": 39,
       "registerNumber": "10040",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7175",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7175",
           "name": "Internal Communications Failure",
           "conditions": [
             {
@@ -4734,10 +2624,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInternal"
+              "tagName": "inside"
             },
             {
-              "tagName": "communications"
+              "tagName": "network"
             },
             {
               "tagName": "alarm"
@@ -4758,13 +2648,13 @@
       ]
     },
     {
-      "registerAddress": 41,
+      "registerAddress": 40,
       "registerNumber": "10041",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7176",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7176",
           "name": "Battery Charging Error",
           "conditions": [
             {
@@ -4808,13 +2698,13 @@
       ]
     },
     {
-      "registerAddress": 42,
+      "registerAddress": 41,
       "registerNumber": "10042",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7177",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7177",
           "name": "System Input Current Imbalance",
           "conditions": [
             {
@@ -4831,10 +2721,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "systemInput"
+              "tagName": "input"
             },
             {
               "tagName": "current"
+            },
+            {
+              "tagName": "imbalance"
             },
             {
               "tagName": "alarm"
@@ -4856,59 +2749,12 @@
     },
     {
       "registerAddress": 43,
-      "registerNumber": "10043",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7178",
-          "name": "Battery Not Qualified",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemBattery"
-            },
-            {
-              "tagName": "qualified"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 44,
       "registerNumber": "10044",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7179",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7179",
           "name": "Battery Terminals Reversed",
           "conditions": [
             {
@@ -4928,60 +2774,10 @@
               "tagName": "battery"
             },
             {
-              "tagName": "terminal"
+              "tagName": "connection"
             },
             {
-              "tagName": "reversed"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 45,
-      "registerNumber": "10045",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7180",
-          "name": "Battery Converter Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "converter"
-            },
-            {
-              "tagName": "failure"
+              "tagName": "reciprocal"
             },
             {
               "tagName": "alarm"
@@ -5003,62 +2799,12 @@
     },
     {
       "registerAddress": 46,
-      "registerNumber": "10046",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7181",
-          "name": "Load Sharing Fault",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "load"
-            },
-            {
-              "tagName": "sharing"
-            },
-            {
-              "tagName": "fault"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 47,
       "registerNumber": "10047",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7182",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7182",
           "name": "DC Bus Abnormal",
           "conditions": [
             {
@@ -5102,121 +2848,21 @@
       ]
     },
     {
-      "registerAddress": 48,
-      "registerNumber": "10048",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7183",
-          "name": "Mains Input Neutral Lost",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "mains"
-            },
-            {
-              "tagName": "neutral"
-            },
-            {
-              "tagName": "lost"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 49,
-      "registerNumber": "10049",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7184",
-          "name": "Load Impact Transfer",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "load"
-            },
-            {
-              "tagName": "impact"
-            },
-            {
-              "tagName": "transfer"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "registerAddress": 50,
-      "registerNumber": "10050",
+      "registerNumber": "10051",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7185",
-          "name": "User Operation Invalid",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7186",
+          "name": "Battery Discharging",
           "conditions": [
             {
               "name": "Normal",
               "bitValues": 0
             },
             {
-              "name": "Alarm",
+              "name": "Discharging",
               "bitValues": 1
             }
           ],
@@ -5225,13 +2871,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "user"
+              "tagName": "battery"
             },
             {
-              "tagName": "operation"
-            },
-            {
-              "tagName": "invalid"
+              "tagName": "dischargingStatus"
             },
             {
               "tagName": "alarm"
@@ -5253,59 +2896,12 @@
     },
     {
       "registerAddress": 51,
-      "registerNumber": "10051",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7186",
-          "name": "Battery Discharging",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Discharging",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "discharging"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 52,
       "registerNumber": "10052",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7187",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7187",
           "name": "UPS Output On Bypass",
           "conditions": [
             {
@@ -5347,59 +2943,12 @@
     },
     {
       "registerAddress": 53,
-      "registerNumber": "10053",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7188",
-          "name": "Output Load On Maintenance Bypass",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "load"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 54,
       "registerNumber": "10054",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7189",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7189",
           "name": "Battery Capacity Low",
           "conditions": [
             {
@@ -5419,54 +2968,10 @@
               "tagName": "battery"
             },
             {
-              "tagName": "capacity"
+              "tagName": "rate"
             },
             {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 55,
-      "registerNumber": "10055",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7190",
-          "name": "MMS On Battery",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "mms"
+              "tagName": "low"
             },
             {
               "tagName": "alarm"
@@ -5488,59 +2993,12 @@
     },
     {
       "registerAddress": 56,
-      "registerNumber": "10056",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7191",
-          "name": "Loss Of Redundancy",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "loss"
-            },
-            {
-              "tagName": "redundancy"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 57,
       "registerNumber": "10057",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7192",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7192",
           "name": "Top Outlet Fan Fault",
           "conditions": [
             {
@@ -5563,254 +3021,10 @@
               "tagName": "fault"
             },
             {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 58,
-      "registerNumber": "10058",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7193",
-          "name": "MMS Over Capacity",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "mms"
-            },
-            {
-              "tagName": "overcapacity"
+              "tagName": "outside"
             },
             {
               "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 59,
-      "registerNumber": "10059",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7194",
-          "name": "Bypass Input Voltage Fault",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Fault",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "input"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "fault"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 60,
-      "registerNumber": "10060",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7195",
-          "name": "Power Module Over Temperature",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "module"
-            },
-            {
-              "tagName": "over"
-            },
-            {
-              "tagName": "temperature"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 61,
-      "registerNumber": "10061",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7196",
-          "name": "Excess Eco Suspends",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "eco"
-            },
-            {
-              "tagName": "suspends"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 62,
-      "registerNumber": "10062",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7197",
-          "name": "Battery Ground Fault",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "ground"
-            },
-            {
-              "tagName": "fault"
             },
             {
               "tagName": "kind",
@@ -5829,56 +3043,12 @@
     },
     {
       "registerAddress": 63,
-      "registerNumber": "10063",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7198",
-          "name": "System Input Current Limit",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemInput"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 64,
       "registerNumber": "10064",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7199",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7199",
           "name": "Inverter Relay Fault",
           "conditions": [
             {
@@ -5898,7 +3068,7 @@
               "tagName": "inverter"
             },
             {
-              "tagName": "relay"
+              "tagName": "fuse"
             },
             {
               "tagName": "fault"
@@ -5919,351 +3089,13 @@
       ]
     },
     {
-      "registerAddress": 65,
-      "registerNumber": "10065",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7200",
-          "name": "Transfer To Bypass - System Overload",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemOverload"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 66,
-      "registerNumber": "10066",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7201",
-          "name": "Input Source Backfeed",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "input"
-            },
-            {
-              "tagName": "source"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 67,
-      "registerNumber": "10067",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7202",
-          "name": "Loss Of Synchronization",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "loss"
-            },
-            {
-              "tagName": "synchronization"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 68,
-      "registerNumber": "10068",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7203",
-          "name": "Battery Converter Current Limit",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "converter"
-            },
-            {
-              "tagName": "current"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 69,
-      "registerNumber": "10069",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7204",
-          "name": "LBS Cable Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "lbs"
-            },
-            {
-              "tagName": "cable"
-            },
-            {
-              "tagName": "failure"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 70,
-      "registerNumber": "10070",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7205",
-          "name": "Battery Charge Equalization Timeout",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "charge"
-            },
-            {
-              "tagName": "equalization"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "registerAddress": 71,
-      "registerNumber": "10071",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7206",
-          "name": "Parallel Cable Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "parallel"
-            },
-            {
-              "tagName": "cable"
-            },
-            {
-              "tagName": "failure"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 72,
       "registerNumber": "10072",
       "registerType": "discreteInput",
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7207",
+          "parameterId": "5f1f400kvaud48cbcbf4f1d9a7207",
           "name": "Battery Fault",
           "conditions": [
             {
@@ -6284,282 +3116,6 @@
             },
             {
               "tagName": "fault"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 73,
-      "registerNumber": "10073",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7208",
-          "name": "Battery Room Alarm",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Fault",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "roomAlarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 74,
-      "registerNumber": "10074",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7209",
-          "name": "Battery Breaker 1 Open Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 75,
-      "registerNumber": "10075",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7210",
-          "name": "Battery Breaker 2 Open Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 76,
-      "registerNumber": "10076",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7211",
-          "name": "Battery Breaker 3 Open Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 77,
-      "registerNumber": "10077",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7212",
-          "name": "Battery Breaker 4 Open Failure",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "breaker"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 78,
-      "registerNumber": "10078",
-      "registerType": "discreteInput",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7213",
-          "name": "Bypass Backfeed Detected",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "backfeed"
             },
             {
               "tagName": "alarm"

@@ -275,6 +275,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         if ((!occuStatus.isOccupied || occuStatus.vacation != null)
             && currentOperatingMode != Occupancy.AUTOAWAY.ordinal
+            && currentOperatingMode != Occupancy.PRECONDITIONING.ordinal
         ) {
 
             val temporaryHoldTime = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(equip.equipRef))
@@ -1082,7 +1083,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         Log.i(L.TAG_CCU_HSCPU, "updatePointsForEquip: Dead Zone ")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
-        equip.hsHaystackUtil!!.setProfilePoint("temp and operating and mode",  ZoneState.TEMPDEAD.ordinal.toDouble())
+        equip.hsHaystackUtil!!.setProfilePoint("temp and operating and mode", 0.0)
         if (equip.hsHaystackUtil!!.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil!!.setEquipStatus(state.ordinal.toDouble())
 

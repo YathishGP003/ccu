@@ -124,6 +124,9 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
+			if (Globals.getInstance().isTemporaryOverrideMode()) {
+				return;
+			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
 			String logicalCurTempPoint = "";

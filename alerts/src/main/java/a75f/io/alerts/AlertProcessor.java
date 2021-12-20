@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertDefOccurrence;
@@ -72,7 +74,7 @@ public class AlertProcessor
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
      *
      * Process the alert def at the alert def level.
-     * Each conditional will evaluate to exactly one evaluation status (one-conditional-to-ONE-evaluation-status relationship).
+     * Each conditional will evaluate to exactly one evaluation status.
      * This will generate only one alert def occurrence.
      */
     private AlertDefOccurrence process(AlertDefinition def) {
@@ -94,31 +96,28 @@ public class AlertProcessor
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
      *
      * Process an alert def at the equip level.
-     * Each conditional can evaluate to one or many evaluation statuses, one for each equip (one-conditional-to-MANY-evaluation-status relationship).
-     * This can generate one or many alert def occurrences, one for each equip.
+     * Each conditional can be evaluated against one or many equips.
+     * This will generate an alert def occurrence for each equip.
      *
-     * An alert def with an "equip" or "delta" grpOperation evaluates each conditional against a one or many equips.
-     * An alert def can have one or many conditionals.
-     * A particular equip may or may not have been evaluated by each conditional.
-     * In the case an equip was not evaluated against every conditional, the operator "leading into" the skipped conditional(s) is ignored.
-     *
-     * For example, an alert def has 3 conditionals.
-     *  The 1st and 2nd conditionals are AND'd and the 2nd and 3rd are OR'd: (1st result) AND (2nd result) OR (3rd result).
-     *  Equip E1 WAS NOT evaluated against the 2nd conditional key, but WAS evaluated against the 1st and 3rd.
-     *  The resulting evaluation will be: (1st result) OR (3rd result).
+     * An alert def with an "equip" or "delta" grpOperation is evaluated in this manner.
      */
     private List<AlertDefOccurrence> processForEquips(AlertDefinition def) {
-        Map<String, Boolean> equipToResult = new HashMap<>();
         Map<String, String> equipToPoint = new HashMap<>();
+
+        // Find all the equips spread across the conditionals and initialize the results map
+        Map<String, Boolean> equipToResult = def.conditionals.stream()
+                .flatMap(c -> c.equipToStatus.keySet().stream())
+                .distinct()
+                .collect(Collectors.toMap(Function.identity(), v -> false));
 
         for (int i = 0; i < def.conditionals.size(); i += 2) { // A multi-conditional alert def will have the conditions separated by a "comparision" conditional. Skip these, hence, "i += 2"
             Conditional conditional = def.conditionals.get(i);
 
-            // For each equip evaluated by the conditional, set or recalculate its overall result
-            for (Map.Entry<String, Boolean> e : conditional.equipToStatus.entrySet()) {
+            // For each equip, set (or recalculate) it's overall result
+            for (Map.Entry<String, Boolean> e : equipToResult.entrySet()) {
                 String equipRef = e.getKey();
-                Boolean status = e.getValue();
-                if (!equipToResult.containsKey(equipRef)) {
+                boolean status = conditional.equipToStatus.getOrDefault(equipRef, false); // If the equip was not evaluated, then the status is false
+                if (i == 0) {
                     equipToResult.put(equipRef, status);
                 } else {
                     Conditional operatorConditional = def.conditionals.get(i - 1);

@@ -23,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 
 public class UpdatePointHandler
 {
@@ -47,7 +48,18 @@ public class UpdatePointHandler
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " HandlePubnub for" + Arrays.toString(localPoint.getMarkers().toArray()));
-    
+
+
+        /*
+        Reconfiguration handled for PI profile
+         */
+        if (HSUtil.isPIConfig(pointUid, CCUHsApi.getInstance())) {
+            PIReConfigHandler.updateConfigPoint(msgObject, localPoint);
+            updatePoints(localPoint);
+            return;
+        }
+
+
         //Handle DCWB specific system config here.
         if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
             DcwbConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
@@ -96,6 +108,7 @@ public class UpdatePointHandler
             DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
             return;
         }
+
         
         if (CCUHsApi.getInstance().entitySynced(pointUid))
         {
@@ -168,35 +181,28 @@ public class UpdatePointHandler
 
     private static void updatePoints(Point p){
         String luid = p.getId();
-        if (p.getMarkers().contains("his"))
-        {
-            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
-            /*if (systemDataInterface != null) {
-                Log.i("PubNub","System Data Received Refresh");
-                systemDataInterface.refreshScreen(luid);
-            }*/
-        }
+        boolean updateZoneUi = false;
 
-        if (p.getMarkers().contains("desired"))
-        {
-            ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
+        if (p.getMarkers().contains("desired")) {
+            SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
+            updateZoneUi = true;
         }
 
         if (p.getMarkers().contains("scheduleType")) {
-            ScheduleProcessJob.handleScheduleTypeUpdate(p);
-            if (zoneDataInterface != null) {
-                Log.i("PubNub","Zone Data Received Refresh");
-                zoneDataInterface.refreshScreen(luid);
-            }
+            SystemScheduleUtil.handleScheduleTypeUpdate(p);
+            updateZoneUi = true;
         }
+    
+        if (p.getMarkers().contains("his")) {
+            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+            updateZoneUi = true;
+        }
+    
+        if (updateZoneUi && zoneDataInterface != null) {
+            Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
+            zoneDataInterface.refreshScreen(luid);
+        }
+        
         if (p.getMarkers().contains("modbus")){
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);

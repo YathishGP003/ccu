@@ -186,6 +186,12 @@ class CPUReconfiguration {
                     val pointId = HSReconfigureUtil.createPoint(pointData, pointsUtil, 0.0)
                     DeviceUtil.setPointEnabled(nodeAddress, Port.ANALOG_IN_ONE.name, updatedConfigValue == 1.0)
                     DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.ANALOG_IN_ONE.name, pointId)
+                    DeviceUtil.updatePhysicalPointType(
+                        nodeAddress,
+                        Port.ANALOG_IN_ONE.name,
+                        HyperStatAssociationUtil.getSensorNameByType(CpuAnalogInAssociation.values()[associationPoint.toInt()])
+                    )
+
                 }
 
                 Queries.ANALOG2_IN -> {
@@ -197,6 +203,11 @@ class CPUReconfiguration {
                     val pointId = HSReconfigureUtil.createPoint(pointData, pointsUtil, 0.0)
                     DeviceUtil.setPointEnabled(nodeAddress, Port.ANALOG_IN_TWO.name, updatedConfigValue == 1.0)
                     DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.ANALOG_IN_TWO.name, pointId)
+                    DeviceUtil.updatePhysicalPointType(
+                        nodeAddress,
+                        Port.ANALOG_IN_ONE.name,
+                        HyperStatAssociationUtil.getSensorNameByType(CpuAnalogInAssociation.values()[associationPoint.toInt()])
+                    )
                 }
 
                 Tags.TH1 -> {

@@ -24,6 +24,8 @@ const val IE_POINT_NAME_EFF_DAT_SETPOINT = "EffDATSetpoint"
 const val IE_POINT_NAME_DAT_VAL = "DAT"
 const val IE_POINT_NAME_SF_CAPACITY_FEEDBACK = "SFCapFbk"
 
+const val IE_POINT_NAME_CCU_SYSTEM_CLOCK = "CCU_SystemClock"
+
 const val IE_MSG_BODY = "<requests><request>%f</request></requests>"
 
 internal enum class OccMode {

@@ -48,6 +48,7 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -122,6 +123,9 @@ public class Pulse
 			} else {
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
+			}
+			if (Globals.getInstance().isTemporaryOverrideMode()) {
+				return;
 			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
@@ -422,8 +426,8 @@ public class Pulse
 		}
 		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
-
-		ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
+		
+		SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), new Point.Builder().setHashMap(heatinDtPoint).build(), new Point.Builder().setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp, dt);
 		sendSNControlMessage((short)node,q.getId());
 		sendSetTemperatureAck((short)node);
 
@@ -477,7 +481,7 @@ public class Pulse
         }catch (Exception e){
 		    e.printStackTrace();
         }
-		ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
+	    SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
         if(sendAck) {
 			sendSmartStatControlMessage((short) node, q.getId());
 			sendSetTemperatureAck((short) node);
@@ -966,7 +970,7 @@ public class Pulse
 			e.printStackTrace();
 		}
 		if(updatedCoolingDt != 0 || updatedHeatingDt != 0)
-			ScheduleProcessJob.handleManualDesiredTempUpdate(coolingPt,heatingPt,null,updatedCoolingDt,updatedHeatingDt, 0);
+			SystemScheduleUtil.handleManualDesiredTempUpdate(coolingPt,heatingPt,null,updatedCoolingDt,updatedHeatingDt, 0);
 
 	}
 	public static void updateSetTempFromSmartStat(CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t setTempUpdate){

@@ -208,46 +208,6 @@ class HyperStatAssociationUtil {
         }
 
 
-        // Function which checks that any of the relay is associated to cooling
-        fun isAnyRelayAssociatedToCooling(configuration: HyperStatCpuConfiguration): Boolean {
-            return when {
-                (isRelayAssociatedToCoolingStage(configuration.relay1State)) -> true
-                (isRelayAssociatedToCoolingStage(configuration.relay2State)) -> true
-                (isRelayAssociatedToCoolingStage(configuration.relay3State)) -> true
-                (isRelayAssociatedToCoolingStage(configuration.relay4State)) -> true
-                (isRelayAssociatedToCoolingStage(configuration.relay5State)) -> true
-                (isRelayAssociatedToCoolingStage(configuration.relay6State)) -> true
-                else -> false
-            }
-        }
-
-        // Function which checks that any of the relay is associated to Heating
-        fun isAnyRelayAssociatedToHeating(configuration: HyperStatCpuConfiguration): Boolean {
-            return when {
-                (isRelayAssociatedToHeatingStage(configuration.relay1State)) -> true
-                (isRelayAssociatedToHeatingStage(configuration.relay2State)) -> true
-                (isRelayAssociatedToHeatingStage(configuration.relay3State)) -> true
-                (isRelayAssociatedToHeatingStage(configuration.relay4State)) -> true
-                (isRelayAssociatedToHeatingStage(configuration.relay5State)) -> true
-                (isRelayAssociatedToHeatingStage(configuration.relay6State)) -> true
-                else -> false
-            }
-        }
-
-        // Function which checks that any of the relay is associated to Fan (Stage1,Stage2,Stage3)
-        fun isAnyRelayEnabledAssociatedToFan(configuration: HyperStatCpuConfiguration): Boolean {
-            return when {
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay1State)) -> true
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay2State)) -> true
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay3State)) -> true
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay4State)) -> true
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay5State)) -> true
-                (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay6State)) -> true
-                else -> false
-            }
-        }
-
-
         // Function which checks that any of the relay is associated to Humidifier
         fun isAnyRelayAssociatedToHumidifier(configuration: HyperStatCpuConfiguration): Boolean {
             return when {

@@ -364,16 +364,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                  * Otherwise it is derived from engineering values.
                  *
                  */
-                if (r.sensorName.equals("Generic 0-10") ) {
-                    for (double pos = OFFSET_MIN_LIMIT ; pos <= OFFSET_MAX_LIMIT; pos += OFFSET_INCREMENT) {
-                        targetVal.add(Math.round(pos * 10) /10.0);
-                    }
-                } else {
-                    for (int pos = (int) (100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1 * r.maxEngineeringValue));
-                         pos <= (100 * r.maxEngineeringValue); pos += (100 * r.incrementEgineeringValue)) {
-                        targetVal.add(pos / 100.0);
-                    }
+                for (int pos = (int)(100*r.minEngineeringValue); pos <= (100*r.maxEngineeringValue); pos+=(100*r.incrementEgineeringValue)) {
+                    targetVal.add(pos /100.0);
                 }
+
                 ArrayAdapter<Double> offsetAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 offsetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 sensorOffsetSp.setAdapter(offsetAdapter);

@@ -38,6 +38,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
@@ -236,6 +237,7 @@ public class HyperStatMsgReceiver {
     }
     
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
+        Log.i(L.TAG_CCU_DEVICE, "writeAnalogInputVal: "+rawPoint.getPort()+" " +rawPoint.getType());
         hayStack.writeHisValById(rawPoint.getId(), val);
         double voltageReceived = val/1000;
         int index = (int)Double.parseDouble(rawPoint.getType());
@@ -362,8 +364,8 @@ public class HyperStatMsgReceiver {
         } else {
             CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: "+hsEquip.getDisplayName());
         }
-        
-        ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+    
+        SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
                                                          new Point.Builder().setHashMap(heatingDtPoint).build(),
                                                          new Point.Builder().setHashMap(dtPoint).build(),
                                                          coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
@@ -374,51 +376,44 @@ public class HyperStatMsgReceiver {
         currentTempInterface = in; }
 
 
-    public static boolean updateConditioningMode(String equipId, double mode, int nodeAddress){
+    public static void updateConditioningMode(String equipId, double mode, int nodeAddress){
         PossibleConditioningMode possibleMode =
                 HSHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
         int conditioningMode;
-        if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO.ordinal()){
-            if(possibleMode != PossibleConditioningMode.BOTH)
-            {
-                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode ");
-                return false;
+        if (mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO.ordinal()){
+            if (possibleMode != PossibleConditioningMode.BOTH) {
+                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
             }
-
             conditioningMode = StandaloneConditioningMode.AUTO.ordinal();
-        }else if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_HEATING.ordinal()){
-            if(possibleMode == PossibleConditioningMode.COOLONLY)
-            {
-                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode");
-                return false;
+        } else if (mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_HEATING.ordinal()){
+            if (possibleMode == PossibleConditioningMode.COOLONLY) {
+                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
             }
             conditioningMode = StandaloneConditioningMode.HEAT_ONLY.ordinal();
-        }else if(mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_COOLING.ordinal()){
-            if(possibleMode == PossibleConditioningMode.HEATONLY)
-            {
-                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode");
-                return false;
+        } else if (mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_COOLING.ordinal()){
+            if (possibleMode == PossibleConditioningMode.HEATONLY) {
+                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
             }
             conditioningMode = StandaloneConditioningMode.COOL_ONLY.ordinal();
-        }else{
+        } else {
+            if (mode != PossibleConditioningMode.OFF.ordinal()) {
+                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
+            }
             conditioningMode = StandaloneConditioningMode.OFF.ordinal();
         }
         HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
                 "temp and conditioning and mode and cpu", conditioningMode);
-        return true;
     }
 
-    public static boolean updateFanMode(String equipId, int mode, int nodeAddress){
+    public static void updateFanMode(String equipId, int mode, int nodeAddress){
         PossibleFanMode possibleMode =
                 HSHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
         int fanMode = getLogicalFanMode(possibleMode,mode);
         if(fanMode!= -1) {
             HyperStatScheduler.Companion.updateHyperstatUIPoints(
                     equipId, "fan and operation and mode and cpu", fanMode);
-            return true;
-        }else{
-            return false;
         }
+
     }
 
     private static void sendAcknowledge(int address){
@@ -436,73 +431,81 @@ public class HyperStatMsgReceiver {
 
     private static int getLogicalFanMode(PossibleFanMode mode,int selectedMode){
         Log.i(L.TAG_CCU_DEVICE, "PossibleFanMode: "+mode + " selectedMode  "+selectedMode);
-        if(selectedMode == 0 ||selectedMode == 1) return selectedMode;
+        if(selectedMode == 0 ) return StandaloneFanStage.OFF.ordinal();
         switch (mode){
-            case LOW:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
-                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+            case OFF:
+                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_OFF.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.OFF.ordinal();
+                } else {
+                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
-                else {
+            case LOW:
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                }else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                    return StandaloneFanStage.LOW_CUR_OCC.ordinal();
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case MED:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                }else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case HIGH:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case LOW_MED:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
                     return StandaloneFanStage.LOW_CUR_OCC.ordinal();
-                }
-                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case LOW_HIGH:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
                     return StandaloneFanStage.LOW_CUR_OCC.ordinal();
-                }
-                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case MED_HIGH:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal() == selectedMode ) {
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
-                }
-                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case LOW_MED_HIGH:
-                if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
+                if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO.ordinal()) {
+                    return StandaloneFanStage.AUTO.ordinal();
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
                     return StandaloneFanStage.LOW_CUR_OCC.ordinal();
-                }
-                else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal()){
+                } else if(selectedMode == HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_MED.ordinal()){
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
-                }
-                else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
+                } else if(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
-                }
-                else {
+                } else {
                     Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
         }

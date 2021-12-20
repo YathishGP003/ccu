@@ -366,9 +366,16 @@ public class CreateNewSite extends Fragment {
                         getContext().sendBroadcast(locationUpdateIntent);
                         
                         if (ccu.size() > 0) {
-                            String ahuRef = ccu.get("ahuRef").toString();
-                            CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
-                            L.ccu().setCCUName(ccuName);
+                            if (!ccu.get("dis").toString().equals(ccuName) ||
+                                !ccu.get("installerEmail").toString().equals(installerEmail) ||
+                                !ccu.get("fmEmail").toString().equals(facilityManagerEmail) ) {
+                                
+                                CcuLog.e(TAG, "Update CCU "+ccu);
+                                String ahuRef = ccu.get("ahuRef").toString();
+                                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
+                                L.ccu().setCCUName(ccuName);
+                            }
+                            
                         } else {
                             String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), facilityManagerEmail);
                             L.ccu().setCCUName(ccuName);
@@ -844,6 +851,13 @@ public class CreateNewSite extends Fragment {
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+    
+        Site currentSite = new Site.Builder().setHashMap(site).build();
+        if (currentSite.equals(s75f)) {
+            CcuLog.d(TAG, "Update Site not detected : return");
+            return;
+        }
+        
         ccuHsApi.updateSite(s75f, siteId);
         CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
         if (!curTz.equals(s75f.getTz())) {

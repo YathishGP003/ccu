@@ -1093,7 +1093,11 @@ public class CCUHsApi
     public void syncEntityTree()
     {
         //TODO : Check if sync session is already in progress
-        syncManager.syncEntities(true);
+        if (syncManager.isEntitySyncProgress()) {
+            syncManager.scheduleSync();
+        } else {
+            syncManager.syncEntities(true);
+        }
     }
     
     public void syncEntityWithPointWrite() {

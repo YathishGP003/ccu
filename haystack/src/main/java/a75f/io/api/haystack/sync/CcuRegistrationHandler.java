@@ -20,6 +20,8 @@ class CcuRegistrationHandler {
         
         String id = Objects.toString(ccu.get(CcuFieldConstants.ID), "");
     
+        CcuLog.d(TAG, " CCU: "+ccu);
+        
         if (!CCUHsApi.getInstance().isEligibleForSync(id)) {
             CcuLog.d(TAG, "CcuRegistrationHandler CCU Sync not required "+id);
             return true;

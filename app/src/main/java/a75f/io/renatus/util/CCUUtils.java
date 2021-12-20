@@ -500,7 +500,7 @@ public class CCUUtils {
 						spDefaultPrefs.edit().putFloat("lat", (float) lat).commit();
 						spDefaultPrefs.edit().putFloat("lng",  (float) lng).commit();
 						spDefaultPrefs.edit().putString("address",address).commit();
-						WeatherDataDownloadService.getWeatherData();
+						WeatherDataDownloadService.getWeatherData(null);
 					}
 					super.onPostExecute(addresses);
 				}

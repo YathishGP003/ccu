@@ -94,6 +94,7 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
+import a75f.io.renatus.util.LocationDetails;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RelayUtil;
@@ -112,7 +113,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
@@ -258,12 +259,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
-                WeatherDataDownloadService.getWeatherData();
+                WeatherDataDownloadService.getWeatherData(ZoneFragmentNew.this);
                 if (weatherUpdateHandler != null)
                     weatherUpdateHandler.post(weatherUpdate);
             }
         }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated Done");
+        if (weather_data.getVisibility() == View.VISIBLE) {
+            Log.e("weather", "update");
+            UpdateWeatherData();
+        }
     }
 
     public void refreshScreen(String id)
@@ -2938,7 +2943,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         // TODO Auto-generated method stub
         super.onResume();
         // loadGrid(parentRootView);
-
+        if (weather_data.getVisibility() == View.VISIBLE) {
+            Log.e("weather", "update");
+            UpdateWeatherData();
+        }
         weatherUpdateHandler = new Handler();
         weatherUpdate = () -> {
             if (weatherUpdateHandler != null && getActivity() != null) {
@@ -2999,6 +3007,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             HyperStatScheduler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
+    }
+
+    @Override
+    public void onDataReceived() {
+        UpdateWeatherData();
     }
 
     class FloorComparator implements Comparator<Floor> {

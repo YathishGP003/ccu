@@ -43,7 +43,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="15dp"
-                android:text="Mankato,Mn"
+                android:text="Loading..."
                 android:textColor="@color/white"
                 android:textAppearance="@style/title_white_bold" />
 
@@ -62,7 +62,6 @@
                 android:layout_below="@+id/weather_icon"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="65dp"
-                android:text="71"
                 android:textColor="@color/white"
                 android:textSize="93sp"
                 android:fontFamily="@font/lato_light" />
@@ -74,7 +73,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="35dp"
                 android:layout_below="@+id/weather_icon"
-                android:text="°F"
                 android:textColor="@color/white"
                 android:textSize="32sp"
                 android:layout_marginTop="10dp"
@@ -86,7 +84,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/place"
                 android:layout_below="@+id/place"
-                android:text="Sunny"
                 android:layout_marginTop="3dp"
                 android:textColor="@color/white"
                 android:textSize="19.5sp"
@@ -100,7 +97,6 @@
                 android:layout_alignTop="@+id/temperature"
                 android:layout_alignBottom="@+id/temperature"
                 android:gravity="center_vertical"
-                android:text="77\n63"
                 android:textColor="@color/white"
                 android:textSize="39sp"
                 android:paddingTop="10dp"

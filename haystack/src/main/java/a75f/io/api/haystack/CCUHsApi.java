@@ -1587,7 +1587,7 @@ public class CCUHsApi
         return localId;
     }
 
-    public void updateCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
+    public void updateCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail, String siteName)
     {
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
@@ -1608,6 +1608,7 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("siteName", siteName);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 

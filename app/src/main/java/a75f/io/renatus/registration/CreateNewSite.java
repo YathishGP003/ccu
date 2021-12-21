@@ -299,7 +299,7 @@ public class CreateNewSite extends Fragment {
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail, siteName);
                         L.ccu().setCCUName(ccuName);
                     } else {
                         String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
@@ -367,7 +367,7 @@ public class CreateNewSite extends Fragment {
                         
                         if (ccu.size() > 0) {
                             String ahuRef = ccu.get("ahuRef").toString();
-                            CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
+                            CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail, siteName);
                             L.ccu().setCCUName(ccuName);
                         } else {
                             String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), facilityManagerEmail);

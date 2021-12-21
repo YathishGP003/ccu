@@ -424,7 +424,7 @@ private fun offsetSpinnerValues(
 
     val nums = arrayOfNulls<String>(count)
     for (nNum in 0 until count) {
-        var rawValue = (nNum + offsetFromZeroCount).toFloat() * inc
+        var rawValue = (nNum + offsetFromZeroCount).toDouble() * inc
         if (displayAsInt) {
             nums[nNum] = String.format("%.1f", rawValue) + suffix
         } else {

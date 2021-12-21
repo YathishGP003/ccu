@@ -15,6 +15,7 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -46,12 +47,18 @@ public class HyperStatMessageGenerator {
      * @return
      */
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
-        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder().setEncryptionKey(
-            ByteString.copyFrom(L.getEncryptionKey())).setSerializedSettingsData(getSettingsMessage(zone, address, equipRef).toByteString()).setSerializedControlsData(
-            getControlMessage(address, equipRef).toByteString()).build();
+        HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
+        HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address, equipRef);
+
+        CcuLog.i(L.TAG_CCU_SERIAL, "Generated Seed Message "+hyperStatSettingsMessage_t.toByteString().toString());
+
+        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder()
+                .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
+                .setSerializedSettingsData(hyperStatSettingsMessage_t.toByteString())
+                .setSerializedControlsData(hyperStatControlsMessage_t.toByteString())
+                .build();
         return seed;
     }
-    
     /**
      * Generate settings message for a node from haystack data.
      * @param zone
@@ -99,9 +106,9 @@ public class HyperStatMessageGenerator {
         BasicSettings settings = HSHaystackUtil.Companion.getBasicSettings(address);
         Log.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
-                 "Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
-                 "DeviceFanMode "+getDeviceFanMode(settings).name()+
-                 "ConditioningMode"+getConditioningMode(settings,address).name());
+                 "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
+                 "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
+                 "\n ConditioningMode"+getConditioningMode(settings,address).name());
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
 

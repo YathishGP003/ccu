@@ -566,9 +566,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return String.format("In Preconditioning");
     
             case AUTOAWAY:
-                return String.format("In AutoAway Mode");
+                return String.format("In AutoAway");
 
             case UNOCCUPIED:
+                if (isAnyZoneAutoAway(CCUHsApi.getInstance())) {
+                    return String.format("In AutoAway");
+                }
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
                     return "No schedule configured";
                 }
@@ -751,6 +754,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
         }
         return true;
+    }
+    
+    private static boolean isAnyZoneAutoAway(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> allEquips = hayStack.readAllEntities("equip and zone");
+        if (allEquips.isEmpty()) {
+            return false; //No zone equips
+        }
+        for (HashMap<Object, Object> equip : allEquips) {
+            if (isEquipInAutoAway(equip.get("id").toString(), hayStack)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private static boolean isEquipInAutoAway(String equipRef, CCUHsApi hayStack) {

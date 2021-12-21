@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.joda.time.DateTime
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
-import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -108,8 +107,6 @@ class HyperStatCpuProfile : ZoneProfile() {
             equip.hsHaystackUtil!!.setDesiredTemp(averageDesiredTemp)
         }
 
-
-
         occuStatus = equip.hsHaystackUtil!!.getOccupancyStatus()
 
         //StandaloneFanStage  StandaloneConditioningMode
@@ -155,6 +152,16 @@ class HyperStatCpuProfile : ZoneProfile() {
         if (heatingLoopOutput > 0) {
             fanLoopOutput = (heatingLoopOutput * hyperstatTuners.analogFanSpeedMultiplier.coerceAtMost(100.0)).toInt()
         }
+
+        /**
+         * Validating the fan loop output
+         * if conditioning mode is selected to heat only if zone asking for cooling fan should be off
+         * if conditioning mode is selected to Cool only if zone asking for heating fan should be off
+         * This is how fan is working in smartstat profile so followed same.
+         */
+
+        validateFanLoopOutPut(basicSettings,userIntents)
+
         equip.hsHaystackUtil!!.updateOccupancyDetection()
 
         runForDoorWindowSensor(config, equip)
@@ -196,9 +203,9 @@ class HyperStatCpuProfile : ZoneProfile() {
         runAnalogOutOperations(equip, config, basicSettings)
 
         var zoneOperatingMode = ZoneState.DEADBAND.ordinal
-          if(currentTemp <= averageDesiredTemp)
+          if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY)
               zoneOperatingMode = ZoneState.HEATING.ordinal
-          if(currentTemp > averageDesiredTemp)
+          if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY)
               zoneOperatingMode = ZoneState.COOLING.ordinal
         Log.i(L.TAG_CCU_HSCPU,
             "averageDesiredTemp $averageDesiredTemp" +
@@ -352,18 +359,18 @@ class HyperStatCpuProfile : ZoneProfile() {
         SystemScheduleUtil.clearOverrides(coolDT["id"].toString())
         SystemScheduleUtil.clearOverrides(avg["id"].toString())
 
-        val HeatingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempHeatingPriorityValue(equip.equipRef!!)
-        val CoolingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempCoolingPriorityValue(equip.equipRef!!)
-        val DesiredTempPriorityValue = equip.hsHaystackUtil!!.getAverageDesiredTempPriorityValue(equip.equipRef!!)
+        val heatingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempHeatingPriorityValue(equip.equipRef!!)
+        val coolingPriorityValue = equip.hsHaystackUtil!!.getDesiredTempCoolingPriorityValue(equip.equipRef!!)
+        val desiredTempPriorityValue = equip.hsHaystackUtil!!.getAverageDesiredTempPriorityValue(equip.equipRef!!)
 
-        Log.i(TAG, "resetOccupancy: equip.equipRef!! ${equip.equipRef!!}  ")
-        Log.i(TAG, "resetOccupancy: HeatingPriorityValue $HeatingPriorityValue  ")
-        Log.i(TAG, "resetOccupancy: CoolingPriorityValue $CoolingPriorityValue  ")
-        Log.i(TAG, "resetOccupancy: DesiredTempPriorityValue $DesiredTempPriorityValue  ")
+        Log.i(L.TAG_CCU_HSCPU, "resetOccupancy: equip.equipRef!! ${equip.equipRef!!}  "
+        +"\n resetOccupancy: HeatingPriorityValue $heatingPriorityValue  "
+        +"\n resetOccupancy: CoolingPriorityValue $coolingPriorityValue  "
+        +"\n resetOccupancy: DesiredTempPriorityValue $desiredTempPriorityValue  ")
 
-        equip.haystack.writeHisValById(heatDT["id"].toString(),HeatingPriorityValue)
-        equip.haystack.writeHisValById(coolDT["id"].toString(),CoolingPriorityValue)
-        equip.haystack.writeHisValById(avg["id"].toString(),DesiredTempPriorityValue)
+        equip.haystack.writeHisValById(heatDT["id"].toString(),heatingPriorityValue)
+        equip.haystack.writeHisValById(coolDT["id"].toString(),coolingPriorityValue)
+        equip.haystack.writeHisValById(avg["id"].toString(),desiredTempPriorityValue)
 
     }
 
@@ -371,8 +378,8 @@ class HyperStatCpuProfile : ZoneProfile() {
         val occupantDetected = (equip.hsHaystackUtil!!.getOccupancySensorPointValue().toInt() > 0)
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         val occupancy = equip.hsHaystackUtil!!.readDetectionPointDetails()
-        Log.i(L.TAG_CCU_HSCPU, "Auto Away :Detection  : $occupantDetected")
-        Log.i(L.TAG_CCU_HSCPU, "Auto Away :cur mode  : $currentOperatingMode")
+        Log.i(L.TAG_CCU_HSCPU, "Auto Away :Detection  : $occupantDetected"
+                +"\n Auto Away :cur mode  : $currentOperatingMode")
 
         if (occuStatus.isOccupied && (currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal)) {
 
@@ -541,10 +548,6 @@ class HyperStatCpuProfile : ZoneProfile() {
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
 
-                // If we are in Auto Away mode we no need to do Cooling
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                    return
-
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                 ) {
@@ -554,10 +557,6 @@ class HyperStatCpuProfile : ZoneProfile() {
                 }
             }
             (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
-
-                // If we are in Auto Away mode we no need to do Heating
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                    return
 
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
@@ -569,10 +568,6 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)) -> {
 
-                // If we are in Auto Away mode we no need to do Fan operations
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                    return
-
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
                     runRelayForFanSpeed(relayState, equip, port, config, tuner, relayStages, basicSettings)
                 }else{
@@ -580,14 +575,8 @@ class HyperStatCpuProfile : ZoneProfile() {
                 }
             }
             (HyperStatAssociationUtil.isRelayAssociatedToFanEnabled(relayState)) -> {
-
-                // If we are in Auto Away mode we no need to do  Fan operations
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                    return
-
                 runRelayFanEnabled(relayState, equip, port)
             }
-
 
             (HyperStatAssociationUtil.isRelayAssociatedToOccupiedEnabled(relayState)) -> {
                 runRelayOccupiedEnabled(equip, port)
@@ -740,9 +729,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         relayStages: HashMap<String, Int>,
         basicSettings: BasicSettings,
     ) {
-        Log.i(TAG, " $whichPort: ${relayAssociation.association}")
-        Log.i(TAG, "runRelayForFanSpeed: ${basicSettings.fanMode}")
-        val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
+        Log.i(TAG, " $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
 
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
@@ -756,8 +743,6 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                 var relayState = 0.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-                    if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                        return
                     if (fanLoopOutput > tuner.relayActivationHysteresis)
                         relayState = 1.0
                     if (fanLoopOutput == 0)
@@ -777,8 +762,6 @@ class HyperStatCpuProfile : ZoneProfile() {
             CpuRelayAssociation.FAN_MEDIUM_SPEED -> {
                 var relayState = 0.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-                    if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                        return
                     // possibility 7,8
                     val highestStage = HyperStatAssociationUtil.getHighestFanStage(config).ordinal
                     val divider = if (highestStage == 7) 50 else 33
@@ -802,8 +785,6 @@ class HyperStatCpuProfile : ZoneProfile() {
             CpuRelayAssociation.FAN_HIGH_SPEED -> {
                 var relayState = 0.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-                    if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                        return
                     if (fanLoopOutput > (66 + (tuner.relayActivationHysteresis / 2)))
                         relayState = 1.0
                     if (fanLoopOutput <= (66 - (tuner.relayActivationHysteresis / 2)))
@@ -937,24 +918,25 @@ class HyperStatCpuProfile : ZoneProfile() {
         port: Port,
         basicSettings: BasicSettings,
     ) {
-        val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal||
-                    basicSettings.conditioningMode== StandaloneConditioningMode.OFF) {
+
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                    runForAnalogOutCooling(equip, port)
+                }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
-                    return
                 }
-                runForAnalogOutCooling(equip, port)
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal||
-                    basicSettings.conditioningMode== StandaloneConditioningMode.OFF) {
+
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                    runForAnalogOutHeating(equip, port)
+                }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
-                    return
                 }
-                runForAnalogOutHeating(equip, port)
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
@@ -962,8 +944,6 @@ class HyperStatCpuProfile : ZoneProfile() {
                 }
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
-                if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal)
-                    return
                 runForAnalogOutDCVDamper(equip, config, port)
             }
 
@@ -1020,9 +1000,8 @@ class HyperStatCpuProfile : ZoneProfile() {
         HyperStatAssociationUtil.getHighestFanStage(config)
         var fanLoopForAnalog = 0
         if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-            val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
-            if (currentOperatingMode == Occupancy.AUTOAWAY.ordinal
-                ||basicSettings.conditioningMode == StandaloneConditioningMode.OFF){
+            equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
+            if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF){
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, 0.0)
                 return
             }
@@ -1053,7 +1032,7 @@ class HyperStatCpuProfile : ZoneProfile() {
     private fun runForAnalogOutDCVDamper(
         equip: HyperStatCpuEquip,
         config: HyperStatCpuConfiguration,
-        whichPort: Port
+        whichPort: Port,
     ) {
         /**
         If any of the Analog-out is enabled and associated with DCV Damper as the option, DCV Damper output signal
@@ -1065,17 +1044,25 @@ class HyperStatCpuProfile : ZoneProfile() {
         in that case then the output signal will be 10v when no ventilation is needed and it will be 2V
         when maximum ventilation is needed.
          */
-
-
+        val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         val co2Value = equip.hsHaystackUtil!!.readCo2Value()
-        Log.i(L.TAG_CCU_HSCPU, "runForAnalogOutDCVDamper: co2Value $co2Value")
-        if (co2Value > 0 && co2Value > config.zoneCO2Threshold) {
+        Log.i(L.TAG_CCU_HSCPU, "runForAnalogOutDCVDamper: co2Value $co2Value currentOperatingMode $currentOperatingMode")
+        if (co2Value > 0 && co2Value > config.zoneCO2Threshold
+            && !isDoorOpenState(config,equip) && ( currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
+                    currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal||
+                    currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal )
+        ) {
             val damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
             Log.i(L.TAG_CCU_HSCPU, "Damper opening percent $damperOperationPercent")
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, damperOperationPercent)
             Log.i(L.TAG_CCU_HSCPU, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
+        }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
+                    currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
+                    currentOperatingMode == Occupancy.VACATION.ordinal ||
+                    currentOperatingMode == Occupancy.UNOCCUPIED.ordinal|| isDoorOpenState(config,equip)
+                ){
+            updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, 0.0)
         }
-
     }
 
     private fun handleDeadZone(equip: HyperStatCpuEquip) {
@@ -1091,7 +1078,6 @@ class HyperStatCpuProfile : ZoneProfile() {
         if (curStatus != "Zone Temp Dead") {
             equip.hsHaystackUtil!!.writeDefaultVal("status and message and writable", "Zone Temp Dead")
         }
-
         equip.haystack.writeHisValByQuery(
             "point and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
@@ -1138,6 +1124,14 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip) {
 
+        val isDoorOpen = isDoorOpenState(config,equip)
+        Log.i(L.TAG_CCU_HSCPU, " is Door Open ? $isDoorOpen")
+        if (isDoorOpen) resetLoopOutputValues()
+    }
+
+
+    private fun isDoorOpenState(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean{
+
         // If thermistor value less than 10000 ohms door is closed (0) else door is open (1)
         // If analog in value is less than 2v door is closed(0) else door is open (1)
         var isDoorOpen = false
@@ -1170,12 +1164,10 @@ class HyperStatCpuProfile : ZoneProfile() {
             Log.i(L.TAG_CCU_HSCPU, "Analog In 2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
         }
-        Log.i(L.TAG_CCU_HSCPU, " is Door Open ? $isDoorOpen")
-        if (isDoorOpen) resetLoopOutputValues()
+        return isDoorOpen
     }
-
     private fun resetLoopOutputValues() {
-        Log.i(L.TAG_CCU_HSCPU, "Resetting all the loopout values: ")
+        Log.i(L.TAG_CCU_HSCPU, "Resetting all the loop output values: ")
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
@@ -1391,5 +1383,19 @@ class HyperStatCpuProfile : ZoneProfile() {
         return equip.haystack.readHisValById(pointId)
     }
 
+    /**
+     * If we are actually not doing any conditioning due to selected conditioning mode.
+     * then we need to reset to loop output to 0 just to ignore invalid loop output for fan
+     */
+    private fun validateFanLoopOutPut(basicSettings: BasicSettings, userIntents: UserIntents){
+        if(basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+            && currentTemp < userIntents.zoneHeatingTargetTemperature){
+            fanLoopOutput = 0
+        }
+        else if(basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+            && currentTemp > userIntents.zoneCoolingTargetTemperature){
+            fanLoopOutput = 0
+        }
+    }
 
 }

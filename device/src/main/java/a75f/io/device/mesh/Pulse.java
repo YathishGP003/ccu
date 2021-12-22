@@ -329,20 +329,21 @@ public class Pulse
 		}
 		
 		if (emVal > 0) {
+			double emValFinal = CCUUtils.roundToOneDecimal(emVal/10); //SN sends multiples of 10
 			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
 			if (sp == null) {
 				sp = node.addSensor(Port.SENSOR_ENERGY_METER);
 			}
-			if (emVal != CCUHsApi.getInstance().readHisValById(sp.getId()))
+			if (emValFinal != CCUHsApi.getInstance().readHisValById(sp.getId()))
 			{
-				CCUHsApi.getInstance().writeHisValById(sp.getId(), (double) emVal);
-				CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), (double) emVal);
+				CCUHsApi.getInstance().writeHisValById(sp.getId(), emValFinal);
+				CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), emValFinal);
 
 				if (currentTempInterface != null) {
 						currentTempInterface.updateSensorValue(addr);
 				}
 			}
-			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emVal);
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emValFinal);
 		}
 	
 	}

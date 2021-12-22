@@ -1,4 +1,4 @@
-package a75f.io.renatus.hyperstat
+package a75f.io.renatus.hyperstat.cpu
 
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -492,7 +492,7 @@ data class CpuViewState(
 
     companion object {
         fun fromConfig(config: HyperStatCpuConfiguration) = CpuViewState(
-            tempOffsetPosition = tempOffsetIndexFromValue(config.temperatureOffset),
+            tempOffsetPosition = (tempOffsetSpinnerValues().indexOf(config.temperatureOffset.toString())),
             forceOccupiedEnabled = config.isEnableAutoForceOccupied,
             autoAwayEnabled = config.isEnableAutoAway,
             relays = listOf(
@@ -522,7 +522,7 @@ data class CpuViewState(
      */
     fun toConfig(): HyperStatCpuConfiguration {
         return HyperStatCpuConfiguration().apply {
-            temperatureOffset = tempValueFromIndex(tempOffsetPosition)
+            temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
             isEnableAirFlowTempSensor = airflowTempSensorEnabled

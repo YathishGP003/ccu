@@ -98,6 +98,7 @@
         tools:listitem="@layout/spinner_dropdown_item" />
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/masterControllerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -110,6 +111,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
+        android:visibility="gone"
         android:id="@+id/masterControllerSp"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="200dp"
@@ -142,6 +144,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/masterControlUnInitText"
         android:layout_width="477dp"
         android:layout_height="57dp"

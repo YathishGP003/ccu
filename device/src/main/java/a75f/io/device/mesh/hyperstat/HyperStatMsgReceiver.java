@@ -117,17 +117,18 @@ public class HyperStatMsgReceiver {
     
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
-        if (DLog.isLoggingEnabled()) {
-            CcuLog.i(L.TAG_CCU_DEVICE, "handleOverrideMessage: "+message.toString());
-        }
-    
+
+        CcuLog.i(L.TAG_CCU_DEVICE, "OverrideMessage: "+message.toString());
+
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
         writeDesiredTemp(message, hsEquip, hayStack);
         updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
         updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
-        Log.i(L.TAG_CCU_DEVICE, "Actual Received Fan mode: "+message.getFanSpeed().ordinal());
+
+        /** send the updated control  message*/
+        HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
         sendAcknowledge(nodeAddress);
     }
     

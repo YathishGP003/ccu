@@ -374,14 +374,17 @@ class HyperStatCpuEquip(val node: Short) {
         if (updatedHyperStatConfig.zoneCO2DamperOpeningRate != presetConfiguration.zoneCO2DamperOpeningRate) {
             val pointId = hsHaystackUtil!!.readPointID("co2 and opening and rate") as String
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2DamperOpeningRate)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2DamperOpeningRate)
         }
         if (updatedHyperStatConfig.zoneCO2Threshold != presetConfiguration.zoneCO2Threshold) {
             val pointId = hsHaystackUtil!!.readPointID("co2 and threshold") as String
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Threshold)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Threshold)
         }
         if (updatedHyperStatConfig.zoneCO2Target != presetConfiguration.zoneCO2Target) {
             val pointId = hsHaystackUtil!!.readPointID("co2 and target") as String
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Target)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Target)
         }
 
 

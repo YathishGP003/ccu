@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -22,8 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +34,7 @@ import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.BuildConfig;
@@ -65,6 +69,9 @@ import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 import a75f.io.usbserial.UsbServiceActions;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -80,6 +87,7 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+import com.google.android.material.snackbar.Snackbar;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -108,8 +116,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    private CustomViewPager mViewPager;
-    private TabLayout mTabLayout, btnTabs;
+    public static CustomViewPager mViewPager;
+    public static TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
 
 
@@ -129,6 +137,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+
 
             floorMenu = findViewById(R.id.floorMenu);
             menuToggle = findViewById(R.id.menuToggle);
@@ -296,6 +305,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
                 tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
+
             }
 
             @SuppressLint("ResourceType")

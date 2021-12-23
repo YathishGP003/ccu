@@ -1,28 +1,45 @@
- - Merged PR 2318: 8916 : CCU PI Re-Configuration
- - Merged PR 2467: Usb refactor
- - Remove qa from watchdog enabled builds
- - Merge branch 'master' into story/samjith/9144_serial_refactor
- - Merged PR 2481: Schedule issues Fix
- - Merged PR 2519: 8020 : New Json with updated phase tag
- - Merged PR 2498: Added fix for zero configuration
- - Initialize vav temp offset pointArray value
- - Migration util for zoneschedules
- - Evaluate desired temp priority array every minute
- - Merged PR 2450: IE set to Unoccupied when conditioningMode is OFF
- - Merged PR 2511: Initialize system profile only when it is visible
- - Fix: Zone schedule type change not validated
- - Reset watchdog during reconnect
- - Merge branch 'master' into story/samjith/9144_serial_refactor
- - Merge master
- - Merged PR 2429: 8380 - Duplicate alerts
- - Skip forced temp update when timer tuner is 0
- - Desired Temp update during unoccupied writes level - 4. But desired temp updates during occupancy for zone schedule updates the schedule entity for ever. So as long as the level 4 value is there at the higher priority , this will be ignored.
- - Usb serial refactor
- - 8380 - Do not write alerts to the the save-ccu-logs output.
- - - USB improvements Restart tablet is serial is not detected for 30 mins. This shows pop-up allowing user cancel reboot in cases, the tablet is being used at that time. Usb connection events are processed asynchronously on a non-UI thread.
- - IE set to Unoccupied when conditioningMode is OFF
- - 8380 - Delete stale code. Fix some English.
- - 8380 - Uncomment a line of code.
- - 8380 - Delete log files that never should have been committed.
- - 8380 - Fix duplicate alerts - added data migration; refactored 409-handle logic; export alerts when saving ccu logs.
- - Initialize system profile only when it is visible
+ - Merged PR 2711: Rounding to 100 if DCV goes beyond the 100
+ - Merged PR 2648: Dont update occupancy when forced occupied timer is 0
+ - Update keykard scenario
+ - Merged PR 2668: Object  box to be trimmed during app startup.
+ - Merged PR 2680: Do not retry pubnub when messaging is enabled
+ - Merged PR 2502: User Story 8126: CCU: Temporary Override: Timer of 1 hr. to automatically reset overridden values to default
+ - Merged PR 2632: VAV single zone TI mode
+ - Merged PR 2586: Autoway status for unoccupied system
+ - Merged PR 2630: SN emr measurement correction
+ - Merged PR 2699: Offset  value reverting back in CCU
+ - Update the message when system unoccupied and atleast one zone is auto away
+ - Merge branch 'master' into story/samjith/9410_intrinsic_schedule_autoaway
+ - Merged PR 2703: Revert "bug9612_CCU Settings: Site name Changes not reflecting"
+ - Revert "bug9612_CCU Settings: Site name Changes not reflecting"
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into akumar2/bug9619/SiteNameChange
+ - bug9612_CCU Settings: Site name Changes not reflecting
+ - Merged PR 2639: CCU Condtional Mode issue , Oprating mode value issue, Conditoining in Auto away state
+ - Fix crash while updating System profile name
+ - Merge branch 'master' into Bug/samjith/9496_single_zone_bpos_mode
+ - Merge branch 'master' into story/samjith/9410_intrinsic_schedule_autoaway
+ - Merged PR 2527: Added control message before sending and ack for HyperStatLocalControlsOverri...
+ - Use bpos in deciding the usage of cmTemp
+ - Merged PR 2569: Disable mastercontrol UI
+ - Do not retry pubnub when messaging is enabled
+ - Merge
+ - Object to be trimmed during app startup. There can be potential scenarios where app continuously restarts and purgeJob never gets called.
+ - Merge branch 'Bug/samjith/9376_bpos_autoforceoccupied_issue' into Bug/samjith/9496_single_zone_bpos_mode
+ - Zone fragment timing issue : fix
+ - Merged PR 2584: Location update
+ - Merged PR 2595: Updated build name as  RENATUS_CCU_daikin_prod_*.*.apk
+ - Merged PR 2499: 9313 : BPOS : Temperature offset changes not consumed
+ - Dont update occupancy when forced occupied timer is 0
+ - Merged PR 2603: CCU update system clock
+ - Merged PR 2077: Temporary Override: PR for release
+ - Merged PR 2410: Added progress bar to delete schedule
+ - Support decimal in EM Val
+ - Merged PR 2575: Removed Runtime tag for analog out logical points
+ - Merge daikin branch
+ - Merge branch 'master' into Bug/samjith/9496_single_zone_bpos_mode
+ - SN emr measurement correction
+ - Merge branch 'master' into story/samjith/9303_daikin_ie_heartbeat
+ - System clock update
+ - Vav single zone support in BPOS
+ - Autoway status for unoccupied system
+ - Disable mastercontrol UI

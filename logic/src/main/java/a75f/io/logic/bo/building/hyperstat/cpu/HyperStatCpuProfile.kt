@@ -1045,19 +1045,22 @@ class HyperStatCpuProfile : ZoneProfile() {
         in that case then the output signal will be 10v when no ventilation is needed and it will be 2V
         when maximum ventilation is needed.
          */
+
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         val co2Value = equip.hsHaystackUtil!!.readCo2Value()
         Log.i(L.TAG_CCU_HSCPU, "runForAnalogOutDCVDamper: co2Value $co2Value currentOperatingMode $currentOperatingMode")
+
         if (co2Value > 0 && co2Value > config.zoneCO2Threshold
             && !isDoorOpenState(config,equip) && ( currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
                     currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal||
                     currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal )
         ) {
-            val damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
-            Log.i(L.TAG_CCU_HSCPU, "Damper opening percent $damperOperationPercent")
+            var damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
+            if(damperOperationPercent > 100 ) damperOperationPercent = 100.0
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, damperOperationPercent)
             Log.i(L.TAG_CCU_HSCPU, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
-        }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
+
+            }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
                     currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
                     currentOperatingMode == Occupancy.VACATION.ordinal ||
                     currentOperatingMode == Occupancy.UNOCCUPIED.ordinal|| isDoorOpenState(config,equip)

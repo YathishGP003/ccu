@@ -1204,6 +1204,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             forced occupied. If the zone was scheduled to be occupied, the zone enters, 'auto away' state
 
     */
+        val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+                                                                                        equip.equipRef)
+
         if (config.analogIn1State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
         ) {
@@ -1213,7 +1216,8 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU,
                 "runForKeycardSensor 1 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
-            if(sensorValue.toInt() == 1) {
+
+            if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
                     updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
@@ -1250,7 +1254,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU,
                 "runForKeycardSensor 2 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
-            if(sensorValue.toInt() == 1) {
+            if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
                     updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)

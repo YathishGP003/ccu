@@ -39,6 +39,7 @@ public class HisSyncHandler
     public boolean entitySyncRequired = false;
     Lock syncLock = new ReentrantLock();
     
+    private volatile boolean purgeStatus = false;
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
@@ -79,7 +80,7 @@ public class HisSyncHandler
                 }
             }
         }
-        doPurge();
+        doPurge(false);
         CcuLog.d(TAG,"<- doHisSync");
     }
     
@@ -90,6 +91,7 @@ public class HisSyncHandler
             } catch (Exception e) {
                 CcuLog.e(TAG,"HisSync Sync Failed ", e);
             } finally {
+                doPurge(false);
                 syncLock.unlock();
             }
         } else {
@@ -277,23 +279,30 @@ public class HisSyncHandler
         return entitiesWithGuid;
     }
     
-    private void doPurge() {
-    
+    public void doPurge(boolean forcedPurge) {
+        
+        if (purgeStatus) {
+            CcuLog.d(TAG, "doPurge pending:  Skipped ");
+            return;
+        }
         DateTime now = new DateTime();
         boolean timeForPurge = now.getMinuteOfDay() % 10 == 0 ? true : false;
         
-        if (timeForPurge) {
+        if (forcedPurge || timeForPurge) {
             Thread purgeThread = new Thread() {
                 @Override public void run() {
                     super.run();
+                    purgeStatus = true;
                     CcuLog.d(TAG, "doPurge ->");
                     try {
                         ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
                         for (HashMap<Object, Object> point : allHisPoints) {
                             ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
                         }
-                    } catch (UnknownRecException e) {
-                        CcuLog.d(TAG, "doPurge -> Invalid attempt to delete his data for an unknown record");
+                    } catch (Exception e) {
+                        CcuLog.d(TAG, "doPurge -> Failed" , e);
+                    } finally {
+                        purgeStatus = false;
                     }
                     CcuLog.d(TAG, "<- doPurge");
                 }

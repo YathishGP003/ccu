@@ -2824,7 +2824,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textViewUpdatedText = viewStatus.findViewById(R.id.last_updated);
         textViewUpdatedText.setVisibility(View.GONE);
         textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
-        textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the floor planner on settings page to pair a new device</br>"));
+        textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the Floor Layout on " +
+                "settings page to pair a new device</br>"));
         viewStatus.setPadding(0, 0, 0, 40);
         try {
             linearLayoutZonePoints.addView(viewStatus);

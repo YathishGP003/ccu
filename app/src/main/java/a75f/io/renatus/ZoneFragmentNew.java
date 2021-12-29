@@ -989,29 +989,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView) {
+                                        View statusView = gridItem.findViewById(R.id.status_view);
+                                        statusView.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        tableLayout.removeViewAt(row + 1);
                                         if (viewTag.getGridItem().equals("Temp") || viewTag.getGridItem().equals("Sense")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(250, 210);
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         } else {
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             ScaleControlToNormal(270,210,nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         }
-
                                         isExpanded = false;
                                         imageOn = false;
                                         viewFound = true;
@@ -1053,6 +1049,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
@@ -1608,29 +1605,27 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView) {
+                                        View statusView = gridItem.findViewById(R.id.status_view);
+                                        statusView.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        tableLayout.removeViewAt(row + 1);
+                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         if (viewTag.getGridItem().equals("NonTemp")) {
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             //ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             ScaleControlToNormal(270,210,nonTempControl);
                                             nonTempControl.setExpand(false);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             gridItem.invalidate();
                                         } else {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(250, 210);
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+
                                         }
                                         isExpanded = false;
                                         imageOn = false;
@@ -1713,9 +1708,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     linearLayoutZonePoints.removeAllViews();
                     if (nonTempEquip != null) {
                         if (nonTempEquip.getProfile().startsWith("EMR")) {
-
-                            nonTempControl.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, nonTempControl.getHeight()));
-                            nonTempControl.invalidate();
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
@@ -3382,27 +3374,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView ) {
+                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        View statusView = gridItem.findViewById(R.id.status_view);
+                                        statusView.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        tableLayout.removeViewAt(row + 1);
+                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         if (viewTag.getGridItem().equals("Sense") || viewTag.getGridItem().equals("Temp")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(250, 210);
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         } else {
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             ScaleControlToNormal(250, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         }
 
                                         isExpanded = false;
@@ -3431,6 +3420,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
+                            status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                             try {
                                 textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -3471,6 +3461,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
+                    status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     try {
                         textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));

@@ -80,6 +80,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:layout_marginLeft="25dp"
                 android:id="@+id/ll_textEmTotal">
                 <TextView
                     android:id="@+id/textEmTotal"
@@ -92,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="KWh"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textColor="?orange_75f"
                     android:layout_toEndOf="@+id/textEmTotal"/>
             </LinearLayout>
@@ -101,13 +102,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:layout_marginLeft="25dp"
                 android:layout_below="@+id/ll_textEmTotal">
                 <TextView
                     android:id="@+id/textEmCurrent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="25"
-                    android:textSize="16sp"/>
+                    android:textSize="14sp"/>
                 <TextView
                     android:id="@+id/textCurrentUnit"
                     android:layout_height="wrap_content"

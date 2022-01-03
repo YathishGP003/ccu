@@ -31,7 +31,7 @@ public class SmartStatToCmOverAirSsRegularUpdateMessage_t extends Struct {
 
     public final Unsigned16 externalThermistorInput2 = new Unsigned16(); /* external resistance sense in tens of ohms */
 
-    public final SmartNodeSensorReading_t[] sensorReadings = array(new SmartNodeSensorReading_t[MessageConstants.NUM_SN_TYPE_VALUE_SENSOR_READINGS]);
+    public SmartNodeSensorReading_t[] sensorReadings = array(new SmartNodeSensorReading_t[MessageConstants.NUM_SN_TYPE_VALUE_SENSOR_READINGS]);
 
     public final Unsigned8 occupancyDetected = new Unsigned8(1); /* 1 is occupancy sensed, 0 is no occupancy */
 

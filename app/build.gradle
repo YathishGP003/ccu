@@ -217,9 +217,15 @@ dependencies {
 
 
 def getVersionCodeTimestamp() {
-    def currentDate = new Date()
+    /*def currentDate = new Date()
     def formattedDate = currentDate.format('yyMMddHHmm')
-    def code = formattedDate.toInteger()
+    def code = formattedDate.toInteger()*/
+    /*
+    Before the year 2022, to build version code, date was converted into int from the format - yyMMddHHmm.
+    Since 2022, the date format cannot be converted to int as it exceeds the int limit.
+    With the below fix, version code can be used for many years as we are changing only the last four digits
+     */
+    def code = 2112240001 +  LocalDate.now().getYear() + LocalDate.now().getDayOfYear()
     return code
 }
 

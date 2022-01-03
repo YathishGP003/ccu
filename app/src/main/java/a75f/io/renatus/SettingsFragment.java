@@ -260,6 +260,13 @@ public class SettingsFragment extends Fragment {
         isTransactionSafe = false;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (fragment != null) {
+            fragment.onStop();
+        }
+    }
 
     @Override
     public void onDestroyView() {

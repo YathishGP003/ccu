@@ -121,8 +121,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     private synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
-        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
-        {
+    
+        if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
+            systemCoolingLoopOp = VavSystemController.getInstance().getCoolingSignal();
+        } else if (VavSystemController.getInstance().getSystemState() == COOLING &&
+             (systemMode == SystemMode.COOLONLY ||
+              systemMode == SystemMode.AUTO)) {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
@@ -192,7 +196,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
+    
+        if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
+            systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
+        } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
             double smartPurgeVAVFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");

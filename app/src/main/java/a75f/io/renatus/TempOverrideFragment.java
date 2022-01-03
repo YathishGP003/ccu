@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
@@ -36,10 +37,16 @@ import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
+import android.view.View.OnClickListener;
 import a75f.io.renatus.util.ZoneSorter;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static a75f.io.renatus.RenatusLandingActivity.btnTabs;
+import static a75f.io.renatus.RenatusLandingActivity.mTabLayout;
+import static a75f.io.renatus.RenatusLandingActivity.mViewPager;
 
 public class TempOverrideFragment extends Fragment {
-    ArrayList<HashMap> openZoneMap;
 
     ExpandableListView expandableListView;
     TempOverrideExpandableListAdapter expandableListAdapter;
@@ -56,6 +63,14 @@ public class TempOverrideFragment extends Fragment {
     private LinearLayout mRoot;
     Snackbar snackbar;
 
+    @BindView(R.id.countdownTimer)
+    TextView mCountdownView;
+    @BindView(R.id.btnReset)
+    Button btnReset;
+    FrameLayout flTOContents;
+
+    private static CountDownTimer countDownTimer;
+
     public TempOverrideFragment() {
 
     }
@@ -70,12 +85,24 @@ public class TempOverrideFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
+        ButterKnife.bind(this, rootView);
         snackbar = Snackbar.make(container, R.string.temproryOverride_Warningmessage, Snackbar.LENGTH_INDEFINITE);
 
+        flTOContents = (FrameLayout) rootView.findViewById(R.id.fl_TO_Contents);
+        //RenatusLandingActivity.snackbar.show();
         loadExistingZones();
+        startCountDownTimer();
 
         showWarningMssgForTO();
         snackbar.show();
+
+        btnReset.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopCountdownTimer();
+                startCountDownTimer();
+            }
+        });
 
         return rootView;
     }
@@ -88,9 +115,42 @@ public class TempOverrideFragment extends Fragment {
             public void onClick(View view) {
                 snackbar.dismiss();
 
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) flTOContents.getLayoutParams();
+                lp.setMargins(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.CENTER_HORIZONTAL,RelativeLayout.CENTER_HORIZONTAL,0);
+                flTOContents.setLayoutParams(lp);
             }
         });
         snackTextView.setMaxLines(2);
+    }
+
+    private void startCountDownTimer() {
+        countDownTimer = new CountDownTimer(3601000, 1000) {
+            @Override
+            public void onTick(long l) {
+                long millis = l;
+                @SuppressLint("DefaultLocale") String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis), TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)), TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+                mCountdownView.setText(hms);
+            }
+
+            @Override
+            public void onFinish() {
+                onStop();
+                if (getActivity() != null) {
+                    StatusPagerAdapter mStatusPagerAdapter = new StatusPagerAdapter(getActivity().getSupportFragmentManager());
+                    mViewPager.setAdapter(mStatusPagerAdapter);
+                    btnTabs.getTabAt(1).select();
+                    mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                }
+            }
+        };
+        countDownTimer.start();
+    }
+
+    public static void stopCountdownTimer() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
     }
 
     ArrayList<Floor> siteFloorList = new ArrayList<>();
@@ -108,16 +168,13 @@ public class TempOverrideFragment extends Fragment {
             }
         }
     }
-
-
-
     @Override
     public void onStop() {
         super.onStop();
         Globals.getInstance().setTemporaryOverrideMode(false);
         Globals.getInstance().resetTempOverCount();
         //RenatusLandingActivity.snackbar.dismiss();
-
+        stopCountdownTimer();
         tempOverRiddenValue = TempOverRiddenValue.getInstance();
         for (Map.Entry<String, String> overrideVal : tempOverRiddenValue.getAllItems()) {
             String dataToReset = overrideVal.getValue();
@@ -321,9 +378,11 @@ public class TempOverrideFragment extends Fragment {
                 if (!expandableListTitle.get(i).equals("CM-device")) {
                     int nodeAddress = Integer.parseInt(expandableListTitle.get(i).substring(3));
                     ZoneProfile profile = L.getProfile(Short.parseShort(String.valueOf(nodeAddress)));
-                    if (!profile.getProfileType().toString().equals("EMR") && !profile.getProfileType().toString().contains("MODBUS")) {
-                        ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
-                        zoneNodesList.add(zoneSorter);
+                    if (profile!=null) {
+                        if (!profile.getProfileType().toString().equals("EMR") && !profile.getProfileType().toString().contains("MODBUS")) {
+                            ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
+                            zoneNodesList.add(zoneSorter);
+                        }
                     }
                 }
             }

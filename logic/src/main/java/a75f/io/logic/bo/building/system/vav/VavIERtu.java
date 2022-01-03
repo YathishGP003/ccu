@@ -217,14 +217,7 @@ public class VavIERtu extends VavSystemProfile
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
     
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
-            if (VavSystemController.getInstance().getSystemState() == COOLING) {
-                systemFanLoopOp = VavSystemController.getInstance().getCoolingSignal();
-            } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
-                systemFanLoopOp = VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier;
-            } else {
-                systemFanLoopOp = 0;
-            }
-            
+            systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
             
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", getSystemEquipRef());
@@ -847,23 +840,6 @@ public class VavIERtu extends VavSystemProfile
             CcuLog.i(L.TAG_CCU_SYSTEM," deleteStaticPressureConfigPoints "+spMax);
             hayStack.deleteWritablePoint(spMax.get("id").toString());
         }
-    }
-    
-    private boolean isSingleZoneTIMode(CCUHsApi hayStack) {
-        ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and zone and vav");
-        if (!vavEquips.isEmpty()) {
-            return false;
-        }
-    
-        ArrayList<HashMap<Object, Object>> tiEquips = CCUHsApi
-                                                           .getInstance()
-                                                           .readAllEntities("(equip and zone and ti) or" +
-                                                                            "(equip and zone and bpos )"
-                                                           );
-        if (!tiEquips.isEmpty()) {
-            return true;
-        }
-        return false;
     }
     
     //This could be removed once all the CCUs are upgraded to version 1.579 or later.

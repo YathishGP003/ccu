@@ -12,6 +12,7 @@ enum HyperStatRequestType_e {
   HYPERSTAT_REQUEST_TYPE_IDU_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
   HYPERSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
   HYPERSTAT_REQUEST_TYPE_SETTINGS_2 = 5; // standard device settings 2
+  HYPERSTAT_REQUEST_TYPE_SETTINGS_3 = 6; // standard device settings 3
 }
 
 message HyperStatRequestMessage_t {
@@ -79,6 +80,30 @@ message HyperstatAnalogIn_t {
   HyperstatAnalogInMapping_t analogIn2Mapping = 4; // Map to keycard, door sensor etc
 }
 
+message HyperStatTunersGeneric_t {
+  uint32 unoccupiedSetback = 1;
+  uint32 heatingDeadbandMultiplier = 2; // To be removed
+  uint32 relayActivationHysteresis = 3;
+  uint32 analogFanSpeedMultiplier = 4;
+  uint32 humidityHysteresis = 5;
+  uint32 forcedOccupiedTime = 6;
+  uint32 autoAwayTime = 7;
+  uint32 autoAwayZoneSetbackTemp = 8;
+  uint32 maxSingleModeUserTemp = 9;
+  uint32 minSingleModeUserTemp = 10;
+}
+
+message HyperStatTunersFcu_t {
+  uint32 auxHeating1Activate  = 1;
+  uint32 auxHeating2Activate  = 2;
+  uint32 twoPipeHeatingThreshold = 3;
+  uint32 twoPipeCoolingThreshold = 4;
+  uint32 waterValueSamplingOnTime = 5;
+  uint32 watreValueSamplingWaitTime = 6;
+  uint32 waterValueSamplingDuringNoOperationOnTime = 7;
+  uint32 waterValueSamplingDuringNoOperationOffTime = 8;
+}
+
 message HyperStatSettingsMessage_t {
   string roomName = 1;// [(nanopb).max_size = 20];
   int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
@@ -120,6 +145,12 @@ message HyperStatSettingsMessage2_t {
   uint32 proportionalTemperatureRange = 14; // default 15 - temp range in 1/10 deg that the proportional control will apply
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
 }
+
+message HyperStatSettingsMessage3_t {
+  HyperStatTunersGeneric_t genertiTuners = 1; // Generic tuner
+  HyperStatTunersFcu_t	fcuTuners = 2;
+}
+
 
 enum HyperStatFanSpeed_e {
   HYPERSTAT_FAN_SPEED_OFF = 0;
@@ -233,6 +264,7 @@ message HyperStatCcuDatabaseSeedMessage_t {
   bytes serializedSettingsData = 2;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
   bytes serializedControlsData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
   bytes serializedSettings2Data = 4;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS2_MESSAGE
+  bytes serializedSettings3Data = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS3_MESSAGE
 }
 
 

@@ -179,6 +179,8 @@ public class RangeBar extends View {
                                 temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] =
                                     (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - deadBandSum);
                             }
+                        } else {
+                            Log.d("RangeControl"," Restricted temp : "+tempVal);
                         }
                     } else if (mSelected == RangeBarState.LOWER_HEATING_LIMIT) {
                         /**
@@ -193,6 +195,8 @@ public class RangeBar extends View {
                                 temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] =
                                     (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] + deadBandSum);
                             }
+                        } else {
+                            Log.d("RangeControl"," Restricted temp : "+tempVal);
                         }
                     }
 
@@ -228,8 +232,9 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
-
-        mDataSet = true;
+        Log.d("RangeControl"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
+                             +" lowerCoolingTemp "+lowerCoolingTemp+" upperCoolingTemp "+upperCoolingTemp+" cdb "+cdb+" hdb "+hdb);
+              mDataSet = true;
         invalidate();
     }
 

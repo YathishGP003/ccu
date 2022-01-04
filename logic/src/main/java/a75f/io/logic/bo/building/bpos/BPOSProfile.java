@@ -102,9 +102,14 @@ public class BPOSProfile extends ZoneProfile {
                 "equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         double occupancyvalue =
                 CCUHsApi.getInstance().readHisValById(occupancy.get("id").toString());
-
-        if (isAutoforceoccupiedenabled) runAutoForceOccupyOperation(mBPOSEquip.mEquipRef);
-        else if (occupancyvalue == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
+    
+    
+        double forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+                                                                  mBPOSEquip.mEquipRef);
+        //We don't need to update forced occupancy if the tuner is 0.
+        if (isAutoforceoccupiedenabled && forcedOccupiedMinutes > 0) {
+            runAutoForceOccupyOperation(mBPOSEquip.mEquipRef);
+        } else if (occupancyvalue == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
             resetForceOccupy();
         }
 

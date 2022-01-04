@@ -566,9 +566,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return String.format("In Preconditioning");
     
             case AUTOAWAY:
-                return String.format("In AutoAway Mode");
+                return String.format("In AutoAway");
 
             case UNOCCUPIED:
+                if (isAnyZoneAutoAway(CCUHsApi.getInstance())) {
+                    return String.format("In AutoAway");
+                }
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
                     return "No schedule configured";
                 }
@@ -633,7 +636,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 continue;
             }
             Occupied occ = (Occupied) occEntry.getValue();
-            if (occ.isOccupied()) {
+            if (occ.isOccupied() && !isZoneAutoAway(roomRef, CCUHsApi.getInstance())) {
                 systemOccupancy = OCCUPIED;
                 Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
                 if (curr == null || occDay.getEthh() > curr.getCurrentlyOccupiedSchedule().getEthh()
@@ -745,21 +748,50 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (allEquips.isEmpty()) {
             return false; //No zone equips
         }
-        boolean autoAwayMode = false;
         for (HashMap<Object, Object> equip : allEquips) {
-            HashMap<Object, Object> occupancyMode = hayStack.read(
-                "point and occupancy and mode and equipRef == \"" + equip.get("id") + "\"");
-            if (occupancyMode.isEmpty()) {
-                continue;
-            }
-            if (hayStack.readHisValById(occupancyMode.get("id").toString()) != AUTOAWAY.ordinal()) {
+            if (!isEquipInAutoAway(equip.get("id").toString(), hayStack)) {
                 return false;
-            } else {
-                autoAwayMode = true;
             }
         }
+        return true;
+    }
+    
+    private static boolean isAnyZoneAutoAway(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> allEquips = hayStack.readAllEntities("equip and zone");
+        if (allEquips.isEmpty()) {
+            return false; //No zone equips
+        }
+        for (HashMap<Object, Object> equip : allEquips) {
+            if (isEquipInAutoAway(equip.get("id").toString(), hayStack)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private static boolean isEquipInAutoAway(String equipRef, CCUHsApi hayStack) {
+        HashMap<Object, Object> occupancyMode = hayStack.read(
+            "point and occupancy and mode and equipRef == \"" + equipRef + "\"");
+        if (occupancyMode.isEmpty()) {
+            return false;
+        }
+        return hayStack.readHisValById(occupancyMode.get("id").toString()) == AUTOAWAY.ordinal();
+    }
+    
+    /**
+     * Zone is in AutoAway if at least one equip is in AutoAway.
+     */
+    private static boolean isZoneAutoAway(String roomRef, CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> equipsInZone = hayStack
+                                                         .readAllEntities("equip and roomRef == \""+roomRef+"\"");
         
-        return autoAwayMode;
+        for (HashMap<Object, Object> equip : equipsInZone) {
+            if (isEquipInAutoAway(equip.get("id").toString(), hayStack)) {
+                CcuLog.i(TAG_CCU_JOB, "Zone "+roomRef+" is in AutoAway "+" via "+equip);
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

@@ -183,8 +183,9 @@ class HyperStatCpuProfile : ZoneProfile() {
                  "Fan Loop Output:: $fanLoopOutput \n"
         )
 
-
-        if (config.isEnableAutoForceOccupied) {
+        val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+                                                                    equip.equipRef)
+        if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {
             runAutoForceOccupyOperation(equip)
         } else {
             if (equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt() == Occupancy.AUTOFORCEOCCUPIED.ordinal)
@@ -1044,19 +1045,22 @@ class HyperStatCpuProfile : ZoneProfile() {
         in that case then the output signal will be 10v when no ventilation is needed and it will be 2V
         when maximum ventilation is needed.
          */
+
         val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
         val co2Value = equip.hsHaystackUtil!!.readCo2Value()
         Log.i(L.TAG_CCU_HSCPU, "runForAnalogOutDCVDamper: co2Value $co2Value currentOperatingMode $currentOperatingMode")
+
         if (co2Value > 0 && co2Value > config.zoneCO2Threshold
             && !isDoorOpenState(config,equip) && ( currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
                     currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal||
                     currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal )
         ) {
-            val damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
-            Log.i(L.TAG_CCU_HSCPU, "Damper opening percent $damperOperationPercent")
+            var damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
+            if(damperOperationPercent > 100 ) damperOperationPercent = 100.0
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, damperOperationPercent)
             Log.i(L.TAG_CCU_HSCPU, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
-        }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
+
+            }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
                     currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
                     currentOperatingMode == Occupancy.VACATION.ordinal ||
                     currentOperatingMode == Occupancy.UNOCCUPIED.ordinal|| isDoorOpenState(config,equip)
@@ -1195,6 +1199,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             forced occupied. If the zone was scheduled to be occupied, the zone enters, 'auto away' state
 
     */
+        val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+                                                                                        equip.equipRef)
+
         if (config.analogIn1State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
         ) {
@@ -1204,7 +1211,8 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU,
                 "runForKeycardSensor 1 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
-            if(sensorValue.toInt() == 1) {
+
+            if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
                     updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
@@ -1241,7 +1249,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU,
                 "runForKeycardSensor 2 : $sensorValue \n + currentOperatingMode : $currentOperatingMode")
-            if(sensorValue.toInt() == 1) {
+            if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
                     updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)

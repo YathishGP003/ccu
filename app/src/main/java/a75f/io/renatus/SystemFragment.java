@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Looper;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -184,7 +185,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
 		if(isVisibleToUser) {
-			profileTitle.setText(L.ccu().systemProfile.getProfileName());
 			UpdatePointHandler.setSystemDataInterface(this);
 		} else {
 			UpdatePointHandler.setSystemDataInterface(null);
@@ -506,6 +506,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
 					}
 				
+				}
+				
+				if (L.ccu().systemProfile != null) {
+					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}
 			});
 		}

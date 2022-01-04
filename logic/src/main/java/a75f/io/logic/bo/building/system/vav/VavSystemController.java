@@ -258,7 +258,7 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti");
+            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
 
             if (isZoneDead(equip)) {
                 zoneDeadCount++;

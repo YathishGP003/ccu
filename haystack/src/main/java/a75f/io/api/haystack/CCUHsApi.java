@@ -2245,14 +2245,16 @@ public class CCUHsApi
     
     public HGrid readGrid(String query) {
         HGrid grid = null;
-        try
-        {
+        try {
             grid = hsClient.readAll(query);
         }
-        catch (UnknownRecException e)
-        {
+        catch (UnknownRecException e) {
             e.printStackTrace();
         }
         return grid;
+    }
+    
+    public void trimObjectBoxHisStore() {
+        hisSyncHandler.doPurge(true);
     }
 }

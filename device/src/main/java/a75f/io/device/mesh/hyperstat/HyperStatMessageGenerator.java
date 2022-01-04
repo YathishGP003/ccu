@@ -49,16 +49,23 @@ public class HyperStatMessageGenerator {
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
         HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
         HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address, equipRef);
-
-        CcuLog.i(L.TAG_CCU_SERIAL, "Generated Seed Message "+hyperStatSettingsMessage_t.toByteString().toString());
+        HyperStat.HyperStatSettingsMessage2_t hyperStatSettingsMessage2_t = getSetting2Message(address, equipRef);
+        HyperStat.HyperStatSettingsMessage3_t hyperStatSettingsMessage3_t = getSetting3Message(address, equipRef);
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatControlsMessage_t.toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage2_t.toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage3_t.toString());
 
         HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder()
                 .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                 .setSerializedSettingsData(hyperStatSettingsMessage_t.toByteString())
                 .setSerializedControlsData(hyperStatControlsMessage_t.toByteString())
+                .setSerializedSettings2Data(hyperStatSettingsMessage2_t.toByteString())
+                .setSerializedSettings3Data(hyperStatSettingsMessage3_t.toByteString())
                 .build();
         return seed;
     }
+    
     /**
      * Generate settings message for a node from haystack data.
      * @param zone
@@ -236,11 +243,21 @@ public class HyperStatMessageGenerator {
         return HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_OFF;
     }
         private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
-            return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
+            try{
+                return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
+            }catch (Exception e){
+                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
+            }
+            return 0;
         }
 
         private static int getHumidityMaxSp(int address, CCUHsApi hayStack) {
-            return hayStack.readDefaultVal("config and humidity and max and group == \"" + address + "\"").intValue();
+            try {
+                return hayStack.readDefaultVal("config and humidity and max and group == \"" + address + "\"").intValue();
+            }catch (Exception e){
+                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
+            }
+            return 0;
         }
 
     private static double getStandaloneCoolingDeadband(String equipRef) {
@@ -267,6 +284,13 @@ public class HyperStatMessageGenerator {
             return 0;
         }
 
+    }
+
+    public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
+        return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());
+    }
+    public static HyperStat.HyperStatSettingsMessage3_t getSetting3Message(int address, String equipRef){
+        return  HyperStatSettingsUtil.Companion.getSetting3Message(address,equipRef);
     }
 
 }

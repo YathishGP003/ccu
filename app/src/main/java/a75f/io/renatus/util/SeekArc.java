@@ -15,6 +15,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import androidx.annotation.ColorInt;
 import androidx.core.content.res.ResourcesCompat;
 import android.util.AttributeSet;
@@ -358,7 +361,9 @@ public class SeekArc extends View
                         float coolingDesiredTemp, float currentTemp, float heatingDeadBand, float coolingDeadBand)
     {
 
-
+        CcuLog.i(L.TAG_CCU_UI, " SeekArc setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
+                            +" coolingLowerLimit "+coolingLowerLimit+" coolingUpperLimit "+coolingUpperLimit +" " +
+                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand);
         mHeatingDeadBand = heatingDeadBand;
         mCoolingDeadBand = coolingDeadBand;
         mBuildingLowerTempLimit = buildingLowerLimit;
@@ -752,7 +757,7 @@ public class SeekArc extends View
         drawDesiredIcon(canvas, coolingModeTemp, mCoolingRectangle, mCoolingTargetRectTransformed);
     }
 
-    private void checkHeatingModeTemperature(float mCoolingTemp)
+    private boolean checkHeatingModeTemperature(float mCoolingTemp)
     {
 
         System.out.println("Heating Angle: " + mCoolingTemp);
@@ -760,7 +765,11 @@ public class SeekArc extends View
         {
             //setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
             setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand),false);
+            return true;
+        } else if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) > mHeatingUpperLimit) {
+            return true;
         }
+        return false;
     }
 
     private void checkForCoolingLine(Canvas canvas, float mCoolingTemp)
@@ -787,13 +796,17 @@ public class SeekArc extends View
 
     }
 
-    private void checkCoolingModeTemperature(float mHeatingTemp)
+    private boolean checkCoolingModeTemperature(float mHeatingTemp)
     {
         if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) >= getCoolingDesiredTemp() && (mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) <= mCoolingUpperLimit)
         {
             //setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
             setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand),false);
+            return true;
+        } else if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) < mCoolingUpperLimit) {
+            return true;
         }
+        return false;
     }
 
     private float getCoolingModeTempTemperature()
@@ -808,9 +821,11 @@ public class SeekArc extends View
             coolingTemperature = mCoolingLowerLimit;
         }
 
-        checkHeatingModeTemperature(coolingTemperature);
-
-        return coolingTemperature;
+        if (checkHeatingModeTemperature(coolingTemperature)) {
+            return coolingTemperature;
+        } else {
+            return mCoolingDesiredTemp;
+        }
     }
 
 
@@ -826,9 +841,11 @@ public class SeekArc extends View
             heatingTemperature = mHeatingLowerLimit;
         }
 
-        checkCoolingModeTemperature(heatingTemperature);
-
-        return heatingTemperature;
+        if (checkCoolingModeTemperature(heatingTemperature)) {
+            return heatingTemperature;
+        } else {
+            return mHeatingDesiredTemp;
+        }
     }
 
 
@@ -1439,8 +1456,9 @@ public class SeekArc extends View
         if (mCoolingDesiredTemp == coolingDesiredTemp)
             return;
 
-        if (getHeatingDesiredTemp() == mHeatingLowerLimit && ((coolingDesiredTemp - getHeatingDesiredTemp()) < (mHeatingDeadBand + mCoolingDeadBand))){
-            coolingDesiredTemp = coolingDesiredTemp + ((mHeatingDeadBand + mCoolingDeadBand) - (coolingDesiredTemp - getHeatingDesiredTemp()));
+        float deadBandSum = mHeatingDeadBand + mCoolingDeadBand;
+        if (getHeatingDesiredTemp() == mHeatingLowerLimit && ((coolingDesiredTemp - getHeatingDesiredTemp()) < deadBandSum)){
+            coolingDesiredTemp = coolingDesiredTemp + (deadBandSum - (coolingDesiredTemp - getHeatingDesiredTemp()));
         }
 
         this.mCoolingDesiredTemp = coolingDesiredTemp;

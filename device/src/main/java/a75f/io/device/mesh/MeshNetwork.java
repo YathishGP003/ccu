@@ -56,6 +56,8 @@ public class MeshNetwork extends DeviceNetwork
         
         MeshUtil.tSleep(1000);
         boolean bSeedMessage = LSerial.getInstance().isReseedMessage();
+        Log.i(L.TAG_CCU_DEVICE, "bSeedMessage: "+bSeedMessage);
+
         try
         {
             for (Floor floor : HSUtil.getFloors())
@@ -138,35 +140,33 @@ public class MeshNetwork extends DeviceNetwork
                                 Equip equip = new Equip.Builder()
                                                   .setHashMap(CCUHsApi.getInstance()
                                                                       .read("equip and group ==\""+d.getAddr()+ "\"")).build();
+
+
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
                                                               "SEEDS ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                                                            d.getEquipRef(), hyperStatProfile, false);
-                                } else if (equip.getMarkers().contains("vrv") ){
-    
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "Settings ===================== "+d.getAddr());
-                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
-                                                                               Integer.parseInt(d.getAddr()), d.getEquipRef());
-                                    
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "IDU Controls ===================== "+d.getAddr());
-                                    HyperStatMessageSender.sendIduControlMessage(Integer.parseInt(d.getAddr()),
-                                                                                 CCUHsApi.getInstance());
+                                } else{
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
+                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef());
 
-                                    // For sense profile no need to send the control message
-                                } else if (!equip.getMarkers().contains("sense")) {
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "Settings ===================== ");
-                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
-                                                                               Integer.parseInt(d.getAddr()), d.getEquipRef());
-    
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
-                                                               "Controls ===================== "+d.getAddr());
-                                    HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                    /** Sending the setting2 and setting3 messages */
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperStat setting Messages ==="+d.getAddr());
+                                    HyperStatMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
+
+                                    if (equip.getMarkers().contains("vrv") ){
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat IDU Controls ===================== "+d.getAddr());
+                                        HyperStatMessageSender.sendIduControlMessage(
+                                                Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
+                                    }
+                                    else if (!equip.getMarkers().contains("sense")){
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Controls ===================== "+d.getAddr());
+                                        HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                    }
+
+
                                 }
-                                
                         }
                     }
                 }

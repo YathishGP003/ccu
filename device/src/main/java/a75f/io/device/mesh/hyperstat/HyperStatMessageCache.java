@@ -1,5 +1,7 @@
 package a75f.io.device.mesh.hyperstat;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 public class HyperStatMessageCache {
@@ -39,6 +41,7 @@ public class HyperStatMessageCache {
      * @return true if the message is already existing in the cache
      */
     public boolean checkAndInsert(int hyperStatAddress, String simpleName, Integer messageHash) {
+
         if (messages.containsKey(hyperStatAddress)) {
             HashMap<String, Integer> stringIntegerHashMap = messages.get(hyperStatAddress);
             if (stringIntegerHashMap.containsKey(simpleName) &&

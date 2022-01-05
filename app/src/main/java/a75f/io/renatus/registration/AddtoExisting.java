@@ -47,6 +47,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.messaging.MessagingClient;
+import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RenatusLandingActivity;
@@ -458,6 +460,11 @@ public class AddtoExisting extends Fragment {
                     );
                     if (StringUtils.isNotBlank(httpResponse)) {
                         siteIdResponse = getSiteIdFromJson(httpResponse);
+                    }
+                    if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+                        if (Globals.getInstance().isAckdMessagingEnabled()) {
+                            MessagingClient.getInstance().init();
+                        }
                     }
                 } else {
                     Toast.makeText(getActivity(), "Unable to load site provided. Please try again or provide a different site ID.", Toast.LENGTH_LONG).show();

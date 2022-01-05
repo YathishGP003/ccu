@@ -284,6 +284,12 @@ class HyperStatCpuProfile : ZoneProfile() {
         if ((!occuStatus.isOccupied || occuStatus.vacation != null)
             && currentOperatingMode != Occupancy.AUTOAWAY.ordinal
             && currentOperatingMode != Occupancy.PRECONDITIONING.ordinal
+            /**
+             * Autoforce occupy and force occupy will only occur in unoccupied state
+             * Discussed with Product team on 04.01.2022 Reference
+             * Bug 9727: Hyperstat User Intent Override Issue
+             */
+            && currentOperatingMode != Occupancy.FORCEDOCCUPIED.ordinal
         ) {
 
             val temporaryHoldTime = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(equip.equipRef))
@@ -294,7 +300,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 if (currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal) {
 
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
-                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip, true)
                     Log.i(L.TAG_CCU_HSCPU, "Falling in FORCE Occupy mode")
                 } else {
                     Log.i(L.TAG_CCU_HSCPU, "We are already in force occupy")
@@ -313,7 +319,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                     Log.i(L.TAG_CCU_HSCPU, "Occupant Detected so extending the time")
                     val desiredAvgTemp = equip.hsHaystackUtil!!.getDesiredTemp()
-                    updateDesiredTemp(desiredAvgTemp, equip)
+                    updateDesiredTemp(desiredAvgTemp, equip, false)
 
                 }
 
@@ -427,14 +433,19 @@ class HyperStatCpuProfile : ZoneProfile() {
         }
     }
 
-    private fun updateDesiredTemp(desiredTemp: Double, equip: HyperStatCpuEquip) {
+    private fun updateDesiredTemp(desiredTemp: Double, equip: HyperStatCpuEquip,
+                                  isFirstTimeMovingToAutoForceOccupancy: Boolean) {
 
-        Log.i(L.TAG_CCU_HSCPU, "updateDesiredTemp: ")
-        val heatingDeadband = occuStatus.heatingDeadBand
-        val coolingDeadband = occuStatus.heatingDeadBand
+        val coolingDesiredTemp : Double
+        val heatingDesiredTemp : Double
 
-        val coolingDesiredTemp = desiredTemp + coolingDeadband
-        val heatingDesiredTemp = desiredTemp - heatingDeadband
+        if (isFirstTimeMovingToAutoForceOccupancy){
+            coolingDesiredTemp = occuStatus.coolingVal
+            heatingDesiredTemp = occuStatus.heatingVal
+        } else {
+            coolingDesiredTemp = equip.hsHaystackUtil!!.getDesiredTempCooling()
+            heatingDesiredTemp = equip.hsHaystackUtil!!.getDesiredTempHeating()
+        }
 
         val coolingDesiredPointMap = equip.hsHaystackUtil!!.getCoolingDeadbandPoint()
         val heatingDesiredPointMap = equip.hsHaystackUtil!!.getHeatingDeadbandPoint()
@@ -453,21 +464,9 @@ class HyperStatCpuProfile : ZoneProfile() {
         equip.haystack.writeHisValById(desiredHeatingPoint.id, heatingDesiredTemp)
         equip.haystack.writeHisValById(avgTempPoint.id, desiredTemp)
 
-        equip.haystack.pointWriteForCcuUser(
-            HRef.copy(desiredCoolingPoint.id),
-            HayStackConstants.DEFAULT_POINT_LEVEL,
-            HNum.make(coolingDesiredTemp), HNum.make(0)
-        )
-        equip.haystack.pointWriteForCcuUser(
-            HRef.copy(desiredHeatingPoint.id),
-            HayStackConstants.DEFAULT_POINT_LEVEL,
-            HNum.make(heatingDesiredTemp), HNum.make(0)
-        )
-        equip.haystack.pointWriteForCcuUser(
-            HRef.copy(avgTempPoint.id),
-            HayStackConstants.DEFAULT_POINT_LEVEL,
-            HNum.make(desiredTemp), HNum.make(0)
-        )
+        Log.i(L.TAG_CCU_HSCPU, " --- Update Desired temp---\n" +
+                "coolingDesiredTemp $coolingDesiredTemp heatingDesiredTemp $heatingDesiredTemp desiredTemp $desiredTemp")
+
         SystemScheduleUtil.handleManualDesiredTempUpdate(
             desiredCoolingPoint, desiredHeatingPoint,
             avgTempPoint, coolingDesiredTemp, heatingDesiredTemp, desiredTemp
@@ -1215,12 +1214,12 @@ class HyperStatCpuProfile : ZoneProfile() {
             if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
-                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip, true)
                     Log.i(L.TAG_CCU_HSCPU, "Keycard is sensed so Falling in FORCE Occupy mode")
                     return
                 }
                 if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal) {
-                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip, false)
                     Log.i(L.TAG_CCU_HSCPU, "Extending the time for keycard auto force occupy")
                 }
             }else{
@@ -1252,12 +1251,12 @@ class HyperStatCpuProfile : ZoneProfile() {
             if(sensorValue.toInt() == 1 && forcedOccupiedMinutes > 0) {
                 if(currentOperatingMode == Occupancy.UNOCCUPIED.ordinal){
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOFORCEOCCUPIED.ordinal.toDouble())
-                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip,  true)
                     Log.i(L.TAG_CCU_HSCPU, "Keycard is sensed so Falling in FORCE Occupy mode")
                     return
                 }
                 if(currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal) {
-                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip)
+                    updateDesiredTemp(equip.hsHaystackUtil!!.getDesiredTemp(), equip, false)
                     Log.i(L.TAG_CCU_HSCPU, "Extending the time for keycard auto force occupy")
                 }
             }else{
@@ -1275,8 +1274,6 @@ class HyperStatCpuProfile : ZoneProfile() {
 
             }
         }
-
-
     }
 
     override fun getEquip(): Equip? {

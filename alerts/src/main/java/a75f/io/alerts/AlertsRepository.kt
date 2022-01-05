@@ -196,10 +196,9 @@ class AlertsRepository(
    fun processAlertDefs() {
 
       val alertDefs = getAlertDefinitions()
-      val activeAlerts = dataStore.getActiveAlerts()
 
       // evaluate and raise alert conditions from alert defs
-      alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs, activeAlerts)
+      alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs)
 
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences

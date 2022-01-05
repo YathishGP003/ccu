@@ -38,11 +38,9 @@ public class HyperStatMessageSender {
                                        boolean checkDuplicate) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
                                                                                                  equipRef, profile);
-    
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
-            CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedControlsData().toString());
         }
         
         writeSeedMessage(seedMessage, address, checkDuplicate);
@@ -185,5 +183,51 @@ public class HyperStatMessageSender {
     private static byte[] getByteArrayFromInt(int integerVal) {
         return ByteBuffer.allocate(FIXED_INT_BYTES_SIZE).order(ByteOrder.LITTLE_ENDIAN).putInt(integerVal).array();
     }
-    
+
+
+    public static void sendAdditionalSettingMessages(int address, String equipRef){
+        HyperStat.HyperStatSettingsMessage2_t settingsMessage2 = HyperStatMessageGenerator.getSetting2Message(address, equipRef);
+        HyperStat.HyperStatSettingsMessage3_t settingsMessage3 = HyperStatMessageGenerator.getSetting3Message(address, equipRef);
+
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.d(L.TAG_CCU_DEVICE,"Debugger Enabled");
+            CcuLog.i(L.TAG_CCU_SERIAL, settingsMessage2.toString());
+            CcuLog.i(L.TAG_CCU_SERIAL, settingsMessage3.toString());
+        }
+
+        writeSetting2Message(settingsMessage2, address, MessageType.HYPERSTAT_SETTINGS2_MESSAGE, true);
+        writeSetting3Message(settingsMessage3, address, MessageType.HYPERSTAT_SETTINGS3_MESSAGE, true);
+    }
+
+    public static void writeSetting2Message(HyperStat.HyperStatSettingsMessage2_t message, int address,
+                                            MessageType msgType, boolean checkDuplicate) {
+
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
+        if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStat.HyperStatSettingsMessage2_t.class.getSimpleName(),
+                    messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStat.HyperStatSettingsMessage2_t.class.getSimpleName() +
+                        " was already sent, returning , type "+msgType);
+                return;
+            }
+        }
+
+        writeMessageBytesToUsb(address, msgType, message.toByteArray());
+    }
+
+    public static void writeSetting3Message(HyperStat.HyperStatSettingsMessage3_t message, int address,
+                                            MessageType msgType, boolean checkDuplicate) {
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
+        if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStat.HyperStatSettingsMessage3_t.class.getSimpleName(),
+                    messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStat.HyperStatSettingsMessage3_t.class.getSimpleName() +
+                        " was already sent, returning , type "+msgType);
+                return;
+            }
+        }
+        writeMessageBytesToUsb(address, msgType, message.toByteArray());
+    }
 }

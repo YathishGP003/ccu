@@ -91,7 +91,7 @@ public class LSerial
 
     public void setResetSeedMessage(boolean bSeedMsg){
         CcuLog.d(L.TAG_CCU_DEVICE,"setResetSeedMessage "+bSeedMsg);
-        mSendSeedMsgs =bSeedMsg;
+        mSendSeedMsgs = bSeedMsg;
     }
     /***
      * Handles all incoming messages from the CM.   It will parse them and

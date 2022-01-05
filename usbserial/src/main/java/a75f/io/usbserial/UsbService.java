@@ -71,7 +71,7 @@ public class UsbService extends Service
 			"com.android.example.USB_PERMISSION";
 	private static final int     BAUD_RATE                         = 38400;
 	// BaudRate. Change this value if you need
-	
+
 	private static final boolean PARSE_DEBUG                       = false;
 	public static        boolean SERVICE_CONNECTED                 = false;
 	SerialState curState = SerialState.PARSE_INIT;
@@ -451,8 +451,13 @@ public class UsbService extends Service
 							byte crc = 0;
 							byte nOffset = 0;
 							int len = data.length;
-							if (len >= 128)
-								buffer = new byte[160]; //For OTA Updates
+							if (len >= 128) {
+								// buffer = new byte[160]; //For OTA Updates
+								buffer = new byte[180]; /** Updated by manjunath.K on 27-12-2021 LINK :
+								 User Story 9390: CCU : Additional Setting messages for Hyperstat CPU profile for Standalone mode
+								 Hyperstat seed message contains more than 160 length of data so as of now if it
+								 exceeds more than 160 we are constructing actual length of message */
+							}
 							buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (len & 0xff);

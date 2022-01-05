@@ -843,13 +843,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-                        } else if (!zone.hasSchedule()) {
+                        } else {
                             Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
-                            DefaultSchedules.setDefaultCoolingHeatingTemp();
-                            zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            /* We are in a situation where there is a zone without a scheduleRef.
+                             * There might have been an error scenario that prevented attaching the scheduleRef, but
+                             * still created a schedule. Handle it before creating a new schedule again.
+                             */
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                                                                                 "== " +zone.getId());
+                            if (!schedule.isEmpty()) {
+                                Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                zone.setScheduleRef(schedule.get("id").toString());
+                            } else {
+                                DefaultSchedules.setDefaultCoolingHeatingTemp();
+                                zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                            //CCUHsApi.getInstance().syncEntityTree();
                         }
                         scheduleImageButton.setTag(scheduleById.getId());
                         vacationImageButton.setTag(scheduleById.getId());
@@ -1309,13 +1319,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-                        } else if (!zone.hasSchedule()) {
+                        } else {
                             Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
-                            DefaultSchedules.setDefaultCoolingHeatingTemp();
-                            zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            /* We are in a situation where there is a zone without a scheduleRef.
+                             * There might have been an error scenario that prevented attaching the scheduleRef, but
+                             * still created a schedule. Handle it before creating a new schedule again.
+                             */
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                                                                                 "== " +zone.getId());
+                            if (!schedule.isEmpty()) {
+                                Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                zone.setScheduleRef(schedule.get("id").toString());
+                            } else {
+                                DefaultSchedules.setDefaultCoolingHeatingTemp();
+                                zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                            //CCUHsApi.getInstance().syncEntityTree();
                         }
                         scheduleImageButton.setTag(scheduleById.getId());
                         vacationImageButton.setTag(scheduleById.getId());

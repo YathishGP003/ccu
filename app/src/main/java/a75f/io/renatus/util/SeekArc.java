@@ -361,7 +361,8 @@ public class SeekArc extends View
                         float coolingDesiredTemp, float currentTemp, float heatingDeadBand, float coolingDeadBand)
     {
 
-        CcuLog.i(L.TAG_CCU_UI, " SeekArc setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
+        CcuLog.i(L.TAG_CCU_UI,
+                 "SAM_TEST setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
                             +" coolingLowerLimit "+coolingLowerLimit+" coolingUpperLimit "+coolingUpperLimit +" " +
                                "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand);
         mHeatingDeadBand = heatingDeadBand;
@@ -766,7 +767,7 @@ public class SeekArc extends View
             //setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
             setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand),false);
             return true;
-        } else if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) > mHeatingUpperLimit) {
+        } else if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) >= mHeatingLowerLimit) {
             return true;
         }
         return false;
@@ -803,7 +804,7 @@ public class SeekArc extends View
             //setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
             setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand),false);
             return true;
-        } else if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) < mCoolingUpperLimit) {
+        } else if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) <= mCoolingUpperLimit) {
             return true;
         }
         return false;
@@ -1463,6 +1464,7 @@ public class SeekArc extends View
 
         this.mCoolingDesiredTemp = coolingDesiredTemp;
         mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);
+        CcuLog.i(L.TAG_CCU_UI,"SAM_TEST setCoolingDesiredTemp "+coolingDesiredTemp);
         invalidate();
     }
 
@@ -1483,6 +1485,7 @@ public class SeekArc extends View
 
         this.mHeatingDesiredTemp = heatingDesiredTemp;
         mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);
+        CcuLog.i(L.TAG_CCU_UI,"SAM_TEST setHeatingDesiredTemp "+heatingDesiredTemp);
         invalidate();
     }
 

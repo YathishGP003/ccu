@@ -3,6 +3,7 @@ package a75f.io.device;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,7 +30,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     boolean watchdogMonitor = false;
     
     private Lock jobLock = new ReentrantLock();
-    
+    private DeviceStatusUpdateJob deviceStatusUpdateJob;
     @Override
     public void bark() {
         watchdogMonitor = true;
@@ -45,6 +46,10 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         super();
         deviceNw = new MeshNetwork();//TODO- TEMP
         modbusNetwork = new ModbusNetwork();
+    
+        deviceStatusUpdateJob = new DeviceStatusUpdateJob();
+        deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", 60,
+                                    15, TimeUnit.SECONDS);
     }
     
     public void doJob()

@@ -5,6 +5,8 @@ import android.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.joda.time.DateTime;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -442,8 +444,8 @@ public class BPOSProfile extends ZoneProfile {
                     if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
                         throw new IllegalArgumentException();
                     }
-                    SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString());
-                    SystemScheduleUtil.clearOverrides(heatinDtPoint.get("id").toString());
+                    //SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString());
+                    //SystemScheduleUtil.clearOverrides(heatinDtPoint.get("id").toString());
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.AUTOAWAY.ordinal());
                     CCUHsApi.getInstance().writeHisValById(ocupancyDetection.get("id").toString(),
@@ -453,8 +455,32 @@ public class BPOSProfile extends ZoneProfile {
                 if (occupancysensor)
                     CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
                             (double) Occupancy.OCCUPIED.ordinal());
+                clearlevel3Override();
             }
+        }else{
+            Log.d("BPOSProfile", "in else");
+            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+                CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                        (double) Occupancy.PRECONDITIONING.ordinal());
+            } else {
+                CCUHsApi.getInstance().writeHisValById(occupancymode.get("id").toString(),
+                        (double) Occupancy.UNOCCUPIED.ordinal());
+            }
+            clearlevel3Override();
         }
+    }
+
+    private void clearlevel3Override() {
+        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        HashMap averageDT = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+
+        CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
+        if (!averageDT.isEmpty()) {
+            CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
+        }
+
     }
 
     @Override

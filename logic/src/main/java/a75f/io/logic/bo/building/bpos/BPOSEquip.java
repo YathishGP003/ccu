@@ -406,7 +406,7 @@ public class BPOSEquip {
         BPOSConfiguration bposconfig = new BPOSConfiguration();
         bposconfig.settempOffset(CCUHsApi.getInstance().readDefaultVal("point and temperature and" +
                 " offset and equipRef == \"" + mEquipRef + "\""));
-        bposconfig.setzonePriority(CCUHsApi.getInstance().readDefaultVal("point and priority and " +
+        bposconfig.setzonePriority(CCUHsApi.getInstance().readHisValByQuery("point and priority and " +
                 "config  and equipRef == \"" + mEquipRef + "\"").intValue());
         bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
@@ -433,6 +433,8 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeDefaultValById(tempOffset.get("id").toString(),
                 config.gettempOffset());
         CCUHsApi.getInstance().writeDefaultValById(zonepriority.get("id").toString(),
+                (double) config.getzonePriority());
+        CCUHsApi.getInstance().writeHisValById(zonepriority.get("id").toString(),
                 (double) config.getzonePriority());
         CCUHsApi.getInstance().writeDefaultValById(autoaway.get("id").toString(),
                 config.getautoAway() ? 1.0 : 0.0);

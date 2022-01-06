@@ -124,6 +124,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         CcuLog.i("UI_PROFILING","RenatusLandingActivity.onCreate");
         prefs = new Prefs(this);
         CCUUiUtil.setThemeDetails(this);

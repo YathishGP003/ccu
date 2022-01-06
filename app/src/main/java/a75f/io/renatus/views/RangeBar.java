@@ -157,7 +157,6 @@ public class RangeBar extends View {
                 getParent().requestDisallowInterceptTouchEvent(false);
                 break;
             case MotionEvent.ACTION_MOVE:
-    
                 Log.i("Movement", "mSelected - " + mSelected.name()
                                   + " Temps: " + getTempForPX(event.getX()));
                 if (getTempForPX(event.getX()) > mLowerBound && getTempForPX(event.getX()) < mUpperBound) {
@@ -180,7 +179,6 @@ public class RangeBar extends View {
                             }
                         }
                     }
-
                     invalidate();
                 }
                 break;

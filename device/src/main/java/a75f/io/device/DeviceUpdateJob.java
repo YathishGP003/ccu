@@ -11,6 +11,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshNetwork;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.modbus.ModbusNetwork;
+import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.logger.CcuLog;

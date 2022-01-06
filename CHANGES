@@ -1,45 +1,71 @@
- - Merged PR 2711: Rounding to 100 if DCV goes beyond the 100
- - Merged PR 2648: Dont update occupancy when forced occupied timer is 0
- - Update keykard scenario
- - Merged PR 2668: Object  box to be trimmed during app startup.
- - Merged PR 2680: Do not retry pubnub when messaging is enabled
- - Merged PR 2502: User Story 8126: CCU: Temporary Override: Timer of 1 hr. to automatically reset overridden values to default
- - Merged PR 2632: VAV single zone TI mode
- - Merged PR 2586: Autoway status for unoccupied system
- - Merged PR 2630: SN emr measurement correction
- - Merged PR 2699: Offset  value reverting back in CCU
- - Update the message when system unoccupied and atleast one zone is auto away
- - Merge branch 'master' into story/samjith/9410_intrinsic_schedule_autoaway
- - Merged PR 2703: Revert "bug9612_CCU Settings: Site name Changes not reflecting"
- - Revert "bug9612_CCU Settings: Site name Changes not reflecting"
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into akumar2/bug9619/SiteNameChange
- - bug9612_CCU Settings: Site name Changes not reflecting
- - Merged PR 2639: CCU Condtional Mode issue , Oprating mode value issue, Conditoining in Auto away state
- - Fix crash while updating System profile name
- - Merge branch 'master' into Bug/samjith/9496_single_zone_bpos_mode
- - Merge branch 'master' into story/samjith/9410_intrinsic_schedule_autoaway
- - Merged PR 2527: Added control message before sending and ack for HyperStatLocalControlsOverri...
- - Use bpos in deciding the usage of cmTemp
- - Merged PR 2569: Disable mastercontrol UI
- - Do not retry pubnub when messaging is enabled
- - Merge
- - Object to be trimmed during app startup. There can be potential scenarios where app continuously restarts and purgeJob never gets called.
- - Merge branch 'Bug/samjith/9376_bpos_autoforceoccupied_issue' into Bug/samjith/9496_single_zone_bpos_mode
- - Zone fragment timing issue : fix
- - Merged PR 2584: Location update
- - Merged PR 2595: Updated build name as  RENATUS_CCU_daikin_prod_*.*.apk
- - Merged PR 2499: 9313 : BPOS : Temperature offset changes not consumed
- - Dont update occupancy when forced occupied timer is 0
- - Merged PR 2603: CCU update system clock
- - Merged PR 2077: Temporary Override: PR for release
- - Merged PR 2410: Added progress bar to delete schedule
- - Support decimal in EM Val
- - Merged PR 2575: Removed Runtime tag for analog out logical points
- - Merge daikin branch
- - Merge branch 'master' into Bug/samjith/9496_single_zone_bpos_mode
- - SN emr measurement correction
- - Merge branch 'master' into story/samjith/9303_daikin_ie_heartbeat
- - System clock update
- - Vav single zone support in BPOS
- - Autoway status for unoccupied system
- - Disable mastercontrol UI
+ - Merged PR 2773: Merged Replace CCU feature with UUID migration
+ - Merged PR 2801: Syncing vacation's time zone with site's time zone
+ - Merged PR 2805: Performance improvements
+ - Merge master
+ - Merged PR 2807: CCU unregister issue
+ - Merged PR 2552: LIUD-GUID to UUID migration
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 2659: 9402 : CCU - BPOS: Zone desired temperature discrepancy when the Occupancy mode goes to Autoaway.
+ - Merged PR 2315: Handling multiple OTA pubnub requests
+ - Merged PR 2809: Bug 9861: CCU : Hyperstat : Hyperstat stopped communicating after device restarted.
+ - Merged PR 2765: Sorting schedule by day and hour when default schedule is not altered.
+ - Do not attempt unwanted registration
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 2670: DeviceStatus update to be done from different thread.
+ - Merge master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Remove untested deadband fix from other branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 2714: Bug 9711: Init messaging as soon as CCU is registered
+ - Merge master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - remove test code
+ - Merged PR 2669: 9426 - Custom Alert Incorrectly Evaluates To True
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 2763: Bug 9727: Hyperstat User Intent Override Issue
+ - Merged PR 2646: Additional Setting messages for Hyperstat CPU for Standalone mode
+ - Merged PR 2789: version code fix
+ - CCU has been using setUserVisibleHint to set listeners. There is no guarantee from framework side on exactly when this will be called, and is resulting in listeners on the ZoneView set even before it is ready. This results unwanted listener forced updates of UI, even while drawing the UI itself has not finished.
+ - Merge master
+ - Merged PR 2716: Fix for duplicate zone schedule
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 2558: Grey patch has been removed
+ - Merged PR 2728: Text changes and hiding the unimplemented feature
+ - do deadband validation on slider desired temp
+ - Fix for duplicate zone schedule
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - Merge branch 'Bug/samjith/9384_duplicate_pubnub' into ccu_idmapping_cleanup
+ - Do site/ccu sync only if there is an update
+ - 9624 - Fix logic when proccessing alert defs for equips.
+ - Merge master
+ - Disable Pb Watchdog : revert
+ - Create new job for device status update
+ - 9426 - Handle empty results after processing.
+ - 9426 - Refacotor alerts processing engine.
+ - 9426 - Update the comment.
+ - 9426 - Add all points when condition is satisfied.
+ - Improve migration logic
+ - Keep id mapping table to support version downgrades
+ - Merge schedule fix branch
+ - Merge master
+ - Merge branch 'Bug/samjith/system_profile_crash' into ccu_idmapping_cleanup
+ - Empty site handling
+ - Debug logs for zone schedule switch
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - save sync status after every update
+ - Remove temp injection code
+ - Fix DAB current temp issue
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - Clean up code and update existing site sync
+ - Fixed - remove entities issue
+ - Merge master
+ - Fix some compiler warnings
+ - PointwriteMany during entity creation
+ - Upgrade test fixes
+ - Entity sync tweaks
+ - Fix schedule sync issue - Pointwrite
+ - Sync work type updated
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - Merge branch 'master' into ccu_idmapping_cleanup
+ - WIP

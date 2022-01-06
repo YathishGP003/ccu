@@ -453,7 +453,7 @@ public class UsbService extends Service
 							int len = data.length;
 							if (len >= 128) {
 								// buffer = new byte[160]; //For OTA Updates
-								buffer = new byte[180]; /** Updated by manjunath.K on 27-12-2021 LINK :
+								buffer = new byte[300]; /** Updated by manjunath.K on 27-12-2021 LINK :
 								 User Story 9390: CCU : Additional Setting messages for Hyperstat CPU profile for Standalone mode
 								 Hyperstat seed message contains more than 160 length of data so as of now if it
 								 exceeds more than 160 we are constructing actual length of message */
@@ -476,6 +476,7 @@ public class UsbService extends Service
 							nOffset++;
 							buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
 							nOffset++;
+							Log.i(TAG, "Serial Message array length "+ (len + nOffset));
 							serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
 							Thread.sleep(300);
 						}

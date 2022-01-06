@@ -7,6 +7,10 @@ import android.util.Log;
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -28,7 +32,10 @@ public class RemoteCommandUpdateHandler
     public static final String RESTART_MODULE = "restart_module";
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
-    
+    /**
+     * Maintain Queue request for all the OTA request and process one by one
+     */
+
     public static void handleMessage(JsonObject msgObject, Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();

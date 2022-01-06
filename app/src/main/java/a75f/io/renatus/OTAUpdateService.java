@@ -1,13 +1,17 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
+
 import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import androidx.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.google.common.io.Files;
 import com.google.gson.stream.JsonReader;
@@ -20,6 +24,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -40,10 +47,8 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
+import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
 import a75f.io.usbserial.UsbService;
-
-import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
-import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
 
 public class OTAUpdateService extends IntentService {
 
@@ -51,7 +56,7 @@ public class OTAUpdateService extends IntentService {
     public static final String METADATA_FILE_FORMAT = ".meta";
     public static final String BINARY_FILE_FORMAT = ".bin";
 
-    private static final String TAG = "OTAUpdateService";
+    private static final String TAG = "OTA_Update_Service";
 
     private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -74,7 +79,8 @@ public class OTAUpdateService extends IntentService {
 
     private static boolean mUpdateInProgress = false;
     private static boolean mUpdateWaitingToComplete = false;
-
+    private static boolean otaRequestProcessInProgress = false;
+    public static final Queue<Intent> otaRequestsQueue = new LinkedList<>();
     public OTAUpdateService() {
         super("OTAUpdateService");
     }
@@ -88,7 +94,8 @@ public class OTAUpdateService extends IntentService {
 
         /* The service has been launched from an activity */
         if(action.equals(Globals.IntentActions.ACTIVITY_MESSAGE)) {
-            handleOtaUpdateStartRequest(intent);
+            //handleOtaUpdateStartRequest(intent);
+            addRequest(intent);
         }
         /* An activity has requested the OTA update to end (for debugging) */
         else if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
@@ -97,7 +104,8 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched from a PubNub notification */
         else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
-            handleOtaUpdateStartRequest(intent);
+            //handleOtaUpdateStartRequest(intent);
+            addRequest(intent);
         }
         /* The service has been launched in response to a CM disconnect */
         else if(action.equals(UsbService.ACTION_USB_DETACHED)) {
@@ -228,6 +236,8 @@ public class OTAUpdateService extends IntentService {
      * @param intent The Intent which started this OTA update
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
+        otaRequestProcessInProgress = true;
+        Log.i(TAG, "handleOtaUpdateStartRequest: called started a request");
         String id = intent.getStringExtra("id");
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
         String cmdLevel = intent.getStringExtra("cmdLevel");
@@ -335,7 +345,11 @@ public class OTAUpdateService extends IntentService {
         }
         if(mLwMeshAddresses.isEmpty()) {
             Log.d(TAG, "[VALIDATION] Could not find device " + id + " at level " + updateLevel);
+
             resetUpdateVariables();
+            otaRequestProcessInProgress = false;
+            Log.d(TAG, "[RESET] OTA Resetting the Update Variables & moving for next request");
+            processOtaRequest();
             return;
         }
 
@@ -747,6 +761,7 @@ public class OTAUpdateService extends IntentService {
 
         mUpdateWaitingToComplete = false;
         Log.d(TAG, "[RESET] Reset OTA update status");
+
     }
 
     /**
@@ -766,7 +781,37 @@ public class OTAUpdateService extends IntentService {
         mUpdateInProgress = false;
         Intent completeIntent = new Intent(Globals.IntentActions.OTA_UPDATE_COMPLETE);
         sendBroadcast(completeIntent);
+        otaRequestProcessInProgress = false;
+        Log.d(TAG, "[RESET] OTA Request process completed moving for next request");
+        processOtaRequest();
 
-        Log.d(TAG, "[RESET] No nodes remain, OTA update is complete");
+    }
+
+
+
+    /**
+     * Push OTA request to Queue
+     */
+    void addRequest(Intent otaRequest){
+        Log.i(TAG, "addRequest: "+ otaRequestsQueue);
+        if(otaRequest!=null){
+            otaRequestsQueue.add(otaRequest);
+            Log.i(TAG, "Current Requests size : "+otaRequestsQueue.size());
+            processOtaRequest();
+
+        }
+    }
+
+    void processOtaRequest(){
+        Log.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size());
+        try{
+            if(!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress){
+                handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.i(TAG,"Failed to take request from queue "+ e.getMessage());
+        }
+
     }
 }

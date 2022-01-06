@@ -9,6 +9,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HTimeZone;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +81,7 @@ public class DefaultSchedules {
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
+        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
 
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
@@ -89,8 +91,8 @@ public class DefaultSchedules {
         }
 
         HDict hDict = new HDictBuilder()
-                .add("stdt", HDateTime.make(startDate.getMillis()))
-                .add("etdt", HDateTime.make(endDate.getMillis())).toDict();
+                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
+                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
 
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
@@ -117,6 +119,7 @@ public class DefaultSchedules {
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
+        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
         
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
@@ -127,8 +130,8 @@ public class DefaultSchedules {
 
 
         HDict hDict = new HDictBuilder()
-                .add("stdt", HDateTime.make(startDate.getMillis()))
-                .add("etdt", HDateTime.make(endDate.getMillis())).toDict();
+                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
+                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
 
 
         HDict defaultSchedule = new HDictBuilder()

@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
+
+import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -49,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -866,8 +870,24 @@ public class CreateNewSite extends Fragment {
         BuildingTuners.getInstance();
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
+        updateTimeZoneInVacations();
         ccuHsApi.saveTagsData();
 
+    }
+
+    private void updateTimeZoneInVacations(){
+        List<Schedule> vacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        for(Schedule vacationSchedule : vacationSchedules){
+            if(vacationSchedule.isZoneSchedule()){
+                DefaultSchedules.upsertZoneVacation(vacationSchedule.getId(), vacationSchedule.getDis(),
+                        vacationSchedule.getStartDate(), vacationSchedule.getEndDate(),
+                        vacationSchedule.getRoomRef());
+            }
+            else if(vacationSchedule.isBuildingSchedule()){
+                DefaultSchedules.upsertVacation(vacationSchedule.getId(), vacationSchedule.getDis(),
+                        vacationSchedule.getStartDate(), vacationSchedule.getEndDate());
+            }
+        }
     }
 
     private void goTonext() {

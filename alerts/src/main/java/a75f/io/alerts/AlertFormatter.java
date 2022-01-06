@@ -1,7 +1,5 @@
 package a75f.io.alerts;
 
-import org.projecthaystack.ParseException;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,14 +46,12 @@ public class AlertFormatter
     public static String getFormattedMessage(AlertDefinition def) {
         String message = def.alert.mMessage;
         StringTokenizer t = new StringTokenizer(def.alert.mMessage);
-        while(t.hasMoreTokens())
-        {
+        while(t.hasMoreTokens()) {
             String token = t.nextToken();
             if (token.startsWith("#")) {
                 try {
-                    message = message.replace(token, parseToken(def, token, null));
-                }
-                catch (NullPointerException ex) {
+                    message = replaceToken(message, token, def, null);
+                } catch (NullPointerException ex) {
                     // while parsing message.
                     // last ditch solution.  Just use token as is.
                     message = token;
@@ -65,21 +61,26 @@ public class AlertFormatter
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
-    
+
     public static String getFormattedMessage(AlertDefinition def, String pointId) {
         String message = def.alert.mMessage;
         StringTokenizer t = new StringTokenizer(def.alert.mMessage);
-        while(t.hasMoreTokens())
-        {
+        while(t.hasMoreTokens()) {
             String token = t.nextToken();
             if (token.startsWith("#")) {
-                message = message.replace(token, parseToken(def, token, pointId));
+                message = replaceToken(message, token, def, pointId);
             }
         }
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
-    
+
+    private static String replaceToken(String message, String token, AlertDefinition def, String pointId) {
+        String value = getValue(def, token, pointId);
+        value = coerceValue(token, value);
+        return message.replace(token, value);
+    }
+
     /*
      * This method is problematic in that 'point' can sometimes be null, but other times null
      * will cause a crash.  'point' being nonnull is neither fully required nor allowed.
@@ -87,7 +88,7 @@ public class AlertFormatter
      * The strategy here is to require the client to be careful, and suggest a NPE catch block
      * if 'point' might be null.
      */
-    private static String parseToken(AlertDefinition def, String token, String point) throws NullPointerException {
+    private static String getValue(AlertDefinition def, String token, String point) throws NullPointerException {
         token.replace("#","");
         int n = getConditionalIndex(token);
         Conditional c = n > 0 ? def.conditionals.get(n-1) : null;
@@ -184,6 +185,16 @@ public class AlertFormatter
         }
         return "";
     }
-    
-    
+
+    private static String coerceValue(String token, String value) {
+        if (token.endsWith("|int")) {
+            try {
+                int integer = Double.valueOf(value).intValue();
+                return Integer.valueOf(integer).toString();
+            } catch (NumberFormatException ex) {
+                CcuLog.w("AlertFormatter", String.format("'%s' cannot not be coerced to an integer.", value));
+            }
+        }
+        return value;
+    }
 }

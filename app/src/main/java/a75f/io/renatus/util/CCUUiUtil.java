@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -67,7 +68,7 @@ public class CCUUiUtil {
     public static void setSpinnerDropDownColor(Spinner spinnerView,Context context){
         spinnerView.getBackground().setColorFilter(CCUUiUtil.getPrimaryThemeColor(context), PorterDuff.Mode.SRC_ATOP);
     }
-    
+
     public static void showRebootDialog(Context context) {
         AlertDialog dialog = new AlertDialog.Builder(context)
                                  .setTitle("Serial Disconnected")
@@ -102,6 +103,11 @@ public class CCUUiUtil {
             }
         });
         dialog.show();
-    
+
+    }
+
+    public static String getCurrentCCUVersion(){
+        String currentCCUVersion = BuildConfig.VERSION_NAME.replaceAll("[a-zA-Z]", "");
+        return currentCCUVersion.replaceAll("_","");
     }
 }

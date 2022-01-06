@@ -1128,4 +1128,8 @@
     <string name="analog2_label">A-in2</string>
     <string name="time_left_to_reset_values">Time Left to Reset Values:</string>
 
+
+    <!-- Building passcode -->
+    <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
+
 </resources>

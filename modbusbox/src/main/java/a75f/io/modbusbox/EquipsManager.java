@@ -6,13 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
 
 public class EquipsManager
 {
     private Context mContext;
     private static EquipsManager mInstance;
     EquipProcessor processor;
+
+    public EquipProcessor getProcessor() {
+        return processor;
+    }
 
     public EquipsManager(Context c) {
         if (processor == null){
@@ -86,6 +89,10 @@ public class EquipsManager
 
     public List<EquipmentDevice> getAllBtuMeters(){
         return processor.getAllBTUMeterDevicesEquips();
+    }
+
+    public EquipmentDevice fetchProfileByEquipTypeAndName(String equipType, String name){
+        return processor.getEquipByEquipTypeAndName(equipType, name);
     }
 }
 

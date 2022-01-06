@@ -545,6 +545,12 @@ public class HClient extends HProj
     return res;
   }
 
+  public HGrid call(String op, String req)
+  {
+    String resStr = postString(uri + op, req);
+    return (resStr == null? null : new HZincReader(resStr).readGrid());
+  }
+
   private HGrid postGrid(String op, HGrid req)
   {
     String reqStr = HZincWriter.gridToString(req, this.version);
@@ -561,7 +567,6 @@ public class HClient extends HProj
   private String postString(String uriStr, String req, String mimeType) {
     String bearerToken = CCUHsApi.getInstance().getJwt();
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
-
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
         Log.d("CCU_HCLIENT", "Request to " + uriStr);

@@ -168,6 +168,8 @@ public class AddtoExisting extends Fragment {
             mEt5 = rootView.findViewById(R.id.otp_edit_text5);
             mEt6 = rootView.findViewById(R.id.otp_edit_text6);
 
+            mEt1.requestFocus();
+
             addTextWatcher(mEt1);
             addTextWatcher(mEt2);
             addTextWatcher(mEt3);

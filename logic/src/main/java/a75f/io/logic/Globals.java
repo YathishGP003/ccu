@@ -16,6 +16,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -212,6 +213,7 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
 
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+        new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
 
@@ -598,5 +600,5 @@ public class Globals {
     public void setCcuReady(boolean ccuReady) {
         isCcuReady = ccuReady;
     }
-    
+
 }

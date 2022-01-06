@@ -47,7 +47,7 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
             if (Strings.isNullOrEmpty(ccuId)) {
                 return;
             }
-            String siteId =getSiteId();
+            String siteId = getSiteId();
             Log.i(TAG_CCU_BACKUP," File backup service invoked  for side-loaded modbus json files "+ccuId);
             FileOperationsUtil.zipFolder(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH, ccuId);
             File file = new File(FileConstants.MODBUS_SIDE_LOADED_JSON_PATH + ccuId  + ".zip");

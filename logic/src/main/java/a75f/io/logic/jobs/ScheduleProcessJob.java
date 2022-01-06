@@ -1356,15 +1356,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             emPoints.put("Status","OFF");
         }
+        double currentRateVal = 0;
         if (currentRate != null && currentRate.size() > 0)
         {
             String id = ((HashMap) currentRate.get(0)).get("id").toString();
             HisItem currentRateHis = CCUHsApi.getInstance().curRead(id);
-            double currentRateVal = currentRateHis.getVal();
-            emPoints.put("Current Rate",currentRateVal);
-        }else{
-            emPoints.put("Current Rate",0.0);
+            if(currentRateHis != null){
+                currentRateVal = currentRateHis.getVal();
+            }
         }
+        emPoints.put("Current Rate",currentRateVal);
         if (energyReading > 0)
         {
             emPoints.put("Energy Reading",energyReading);

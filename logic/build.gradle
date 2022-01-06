@@ -151,6 +151,7 @@ dependencies {
 
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+    implementation 'org.apache.commons:commons-lang3:3.6'
 
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')

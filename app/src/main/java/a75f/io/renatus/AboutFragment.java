@@ -39,9 +39,8 @@ import java.util.HashMap;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloud.OtpManager;
-import a75f.io.logic.cloud.OtpResponseCallBack;
+import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -154,9 +153,9 @@ public class AboutFragment extends Fragment {
     }
 
     private void setOTPOnAboutPage(){
-        OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
+        ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
-            public void onOtpResponse(JSONObject response) throws JSONException {
+            public void onSuccessResponse(JSONObject response) throws JSONException {
                     String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
                     validOTP.setText(otpGenerated);
                 String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
@@ -169,12 +168,12 @@ public class AboutFragment extends Fragment {
             }
 
             @Override
-            public void onOtpErrorResponse(JSONObject response) {
+            public void onErrorResponse(JSONObject response) {
 
             }
         };
         if(!PreferenceUtil.getOTPGeneratedToAddOrReplaceCCU().isEmpty()) {
-            new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack, true);
+            new OtpManager().getOTP(tvSiteId.getText().toString(), responseCallBack, true);
         }
     }
 
@@ -261,31 +260,31 @@ public class AboutFragment extends Fragment {
                 emailId.setError("Enter valid email id");
                 return;
             }
-            OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
+            ResponseCallback responseCallBack = new ResponseCallback() {
                 @Override
-                public void onOtpResponse(JSONObject response) throws JSONException {
+                public void onSuccessResponse(JSONObject response) throws JSONException {
                     Toast.makeText(getContext(),"email sent", Toast.LENGTH_SHORT).show();
                     alertDialog.dismiss();
                     setOTPOnAboutPage();
                 }
 
                 @Override
-                public void onOtpErrorResponse(JSONObject response) throws JSONException {
+                public void onErrorResponse(JSONObject response) throws JSONException {
                     Toast.makeText(getContext(),"Error in sending email", Toast.LENGTH_LONG).show();
                     alertDialog.dismiss();
                     setOTPOnAboutPage();
                 }
             };
             new OtpManager().postOTPShare(tvSiteId.getText().toString(), emailId.getText().toString(),
-                    otpResponseCallBack);
+                    responseCallBack);
         });
     }
 
     private void refreshOTPValue(TextView otpValue, ImageView otpRegenerate, TextView otpTimer, EditText emailId) {
         otpRegenerate.setOnClickListener(v -> {
-            OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
+            ResponseCallback responseCallBack = new ResponseCallback() {
                 @Override
-                public void onOtpResponse(JSONObject response) throws JSONException {
+                public void onSuccessResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
                     String otpGenerated = null;
                     otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
@@ -303,21 +302,21 @@ public class AboutFragment extends Fragment {
                 }
 
                 @Override
-                public void onOtpErrorResponse(JSONObject response) throws JSONException {
+                public void onErrorResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
                     String errorMessage = errorMessage = (String) response.get("response");
                     otpValue.setText(errorMessage);
                 }
             };
             ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching new Passcode");
-            new OtpManager().postOTPRefresh(tvSiteId.getText().toString(), otpResponseCallBack);
+            new OtpManager().postOTPRefresh(tvSiteId.getText().toString(), responseCallBack);
         });
     }
 
     private void setOTPValue(TextView otpValue, TextView otpTimer, EditText emailId) {
-        OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
+        ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
-            public void onOtpResponse(JSONObject response) throws JSONException {
+            public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
                 if(!PreferenceUtil.getOTPGeneratedToAddOrReplaceCCU().equals(otpGenerated)){
@@ -335,7 +334,7 @@ public class AboutFragment extends Fragment {
                 }
             }
             @Override
-            public void onOtpErrorResponse(JSONObject response) throws JSONException {
+            public void onErrorResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String errorMessage = null;
                 errorMessage = (String) response.get("response");
@@ -343,7 +342,7 @@ public class AboutFragment extends Fragment {
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching Passcode");
-        new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack, false);
+        new OtpManager().getOTP(tvSiteId.getText().toString(), responseCallBack, false);
     }
 
     @Override

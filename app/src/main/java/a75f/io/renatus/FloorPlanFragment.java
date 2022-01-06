@@ -529,18 +529,10 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
-    private boolean isSystemEM(String ref) {
-        if (ref.equalsIgnoreCase("SYSTEM"))
-            return true;
-        return false;
-    }
-
     private boolean updateEnergyMeterModule() {
         ArrayList<Equip> equipList = new ArrayList<>();
-        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr")) {
-            if (isSystemEM(m.get("roomRef").toString()) && isSystemEM(m.get("floorRef").toString())) {
-                equipList.add(new Equip.Builder().setHashMap(m).build());
-            }
+        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr and not zone")) {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
         }
 
         if (equipList != null && (equipList.size() > 0)) {
@@ -557,12 +549,10 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private boolean updateBTUMeterModule() {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu and not zone");
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips) {
-            if (m.get("roomRef").toString().equalsIgnoreCase("SYSTEM") && m.get("floorRef").toString().equalsIgnoreCase("SYSTEM")) {
-                equipList.add(new Equip.Builder().setHashMap(m).build());
-            }
+            equipList.add(new Equip.Builder().setHashMap(m).build());
         }
 
         if (equipList != null && (equipList.size() > 0)) {
@@ -1519,6 +1509,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_WLD:
                 case MODBUS_EM:
                 case MODBUS_EMS:
+                case MODBUS_EMR:
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
                 case MODBUS_BTU:

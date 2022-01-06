@@ -384,4 +384,8 @@ class IEDeviceHandler {
         )
 
     }
+
+    fun isReady() : Boolean  {
+        return ::ieService.isInitialized && ::serviceBaseUrl.isInitialized
+    }
 }

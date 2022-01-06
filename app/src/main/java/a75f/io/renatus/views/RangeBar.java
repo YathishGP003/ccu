@@ -160,10 +160,10 @@ public class RangeBar extends View {
                 Log.i("Movement", "mSelected - " + mSelected.name()
                                   + " Temps: " + getTempForPX(event.getX()));
                 if (getTempForPX(event.getX()) > mLowerBound && getTempForPX(event.getX()) < mUpperBound) {
+        
                     Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
                     if (mSelected == RangeBarState.LOWER_COOLING_LIMIT) {
-                        if (getTempForPX(event.getX()) >= lowerCoolingTemp && getTempForPX(event.getX()) <=
-                                                                              upperCoolingTemp) {
+                        if (getTempForPX(event.getX()) >= lowerCoolingTemp && getTempForPX(event.getX()) <= upperCoolingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX(event.getX());
                             if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {
@@ -171,8 +171,7 @@ public class RangeBar extends View {
                             }
                         }
                     } else if (mSelected == RangeBarState.LOWER_HEATING_LIMIT) {
-                        if (getTempForPX(event.getX()) >= upperHeatingTemp && getTempForPX(event.getX()) <=
-                                                                              lowerHeatingTemp) {
+                        if (getTempForPX(event.getX()) >= upperHeatingTemp && getTempForPX(event.getX()) <= lowerHeatingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX(event.getX());
                             if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {

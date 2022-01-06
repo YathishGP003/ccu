@@ -1122,6 +1122,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
                 if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                ArrayList<Schedule.Days> days = schedule.getDays();
+                Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
                 showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
             }
         });

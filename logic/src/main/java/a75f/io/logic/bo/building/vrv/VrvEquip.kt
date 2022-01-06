@@ -32,7 +32,7 @@ class VrvEquip(hsApi : CCUHsApi,
         createIduStatusPoints(vrvEquip, roomRef, floorRef)
         VrvTuners.addEquipVrvTuners(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
                             vrvEquip.id, roomRef, floorRef, vrvEquip.tz)
-        hayStack.syncEntityWithPointWrite()
+        hayStack.syncEntityTree()
     }
 
     private fun createEquip(

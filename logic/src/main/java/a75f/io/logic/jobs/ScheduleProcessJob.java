@@ -493,7 +493,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
      * @return
      */
     public static String getZoneStatusMessage(String zoneId, String equipId) {
-        HashMap equip = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipId);
         String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
         if (equip.containsKey("vrv")) {
             status += ", Group Address "+
@@ -1042,7 +1042,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             vavPoints.put("Discharge Airflow",0+" \u2109");
         }
 
-        HashMap equip = CCUHsApi.getInstance().readMapById(equipID);
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
         if (equip.containsKey("series")) {
             vavPoints.put("Profile","VAV Series Fan");
         } else if (equip.containsKey("parallel")){

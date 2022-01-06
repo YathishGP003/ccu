@@ -91,7 +91,7 @@ public class AlertProcessor
         }
         return buildOccurrence(def, result, false, null, null);
     }
-
+    
     /**
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
      *

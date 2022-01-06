@@ -44,7 +44,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     public DeviceUpdateJob()
     {
         super();
-        deviceNw = new MeshNetwork();//TODO- TEMP
+        deviceNw = new MeshNetwork();//TODO- TPpoEMP
         modbusNetwork = new ModbusNetwork();
     
         deviceStatusUpdateJob = new DeviceStatusUpdateJob();

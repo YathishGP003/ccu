@@ -293,9 +293,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     
     public void refreshHeartBeatStatus(String id) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshHeartBeatStatus zoneOpen "+zoneOpen);
-        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+id+"\"");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+id+"\"");
         if (!equip.isEmpty()) {
-            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
+            HashMap<Object, Object> zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
             ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
                                                                              +zone.get("id")+ "\"");
             if(equipsInZone.size() > 0) {
@@ -3169,6 +3169,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                             HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
                             spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                            Log.d("CCU_UI ", "Fill spillsMap for zone "+zoneSchedule.getRoomRef());
                             ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
                             CCUHsApi.getInstance().scheduleSync();
                         }

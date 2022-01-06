@@ -907,7 +907,7 @@ public class VavTuners {
                                      .setFloorRef(floorRef).setHisInterpolate("cov")
                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                      .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
-                                     .setMinVal("0").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                     .setMinVal("1").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                      .setUnit("%")
                                      .setTz(tz)
                                      .build();

@@ -1254,7 +1254,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                                 MessagingClient.getInstance().init();
                             }
                         }
-
+                        CCUHsApi.getInstance().syncEntityWithPointWrite();
                     },  // ignore success
                     error -> {
                         // A Toast rather than a dialog is necessary since the interface does not wait

@@ -36,21 +36,18 @@ public class RemoveEntityHandler
             System.out.println(idList.toString());
     
             for (HashMap id : idList) {
-                String guid = id.get("val").toString();
-                String luid = "@" + guid;
-                if (CCUHsApi.getInstance().entitySynced(luid))
-                {
-                    HashMap removedEntity = CCUHsApi.getInstance().readMapById(luid);
+                String uuid = "@" + id.get("val").toString();
+                if (CCUHsApi.getInstance().entitySynced(uuid)) {
+                    HashMap<Object, Object> removedEntity = CCUHsApi.getInstance().readMapById(uuid);
                     if (!removedEntity.isEmpty() && removedEntity.containsKey("schedule")){
                         UpdateScheduleHandler.refreshSchedulesScreen();
                     }
-                    CCUHsApi.getInstance().removeEntity(luid);
-                } else if(CCUHsApi.getInstance().getRemoveMapLUID(luid) != null) {
-                    CCUHsApi.getInstance().removeId(CCUHsApi.getInstance().getRemoveMapLUID("@" + guid));
+                    CCUHsApi.getInstance().removeEntity(uuid);
+                } else if(CCUHsApi.getInstance().isEntityDeleted(uuid)) {
+                    CCUHsApi.getInstance().removeId(uuid);
                 }
             }
-        }catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             CcuLog.d(L.TAG_CCU_PUBNUB, " Failed to parse removeEntity Json " + msgObject);
         }
     }

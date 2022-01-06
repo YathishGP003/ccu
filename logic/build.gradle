@@ -8,7 +8,7 @@ android {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
     }
 
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 24
@@ -170,6 +170,7 @@ dependencies {
 
     testImplementation "io.mockk:mockk:1.10.2"
     testImplementation "com.google.truth:truth:1.1"
+    implementation 'org.apache.commons:commons-lang3:3.6'
 }
 repositories {
     mavenCentral()

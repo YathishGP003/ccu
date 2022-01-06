@@ -53,7 +53,7 @@ public class UpdateScheduleHandler
         while (it.hasNext())
         {
             HRow r = (HRow) it.next();
-            if (CCUHsApi.getInstance().entitySynced("@" + uid))
+            if (CCUHsApi.getInstance().isEntityExisting("@" + uid))
             {
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setId(uid);
@@ -96,14 +96,13 @@ public class UpdateScheduleHandler
                 s.setId(uid);
                 if (s.getRoomRef() != null && s.isZoneSchedule())
                 {
-                    if (CCUHsApi.getInstance().entitySynced(s.getRoomRef()))
-                        CCUHsApi.getInstance().addSchedule(uid, s.getZoneScheduleHDict(s.getRoomRef()));
+                    CCUHsApi.getInstance().addSchedule(uid, s.getZoneScheduleHDict(s.getRoomRef()));
                 }
                 else if (s.isBuildingSchedule()&& !s.isZoneSchedule())
                 {
                     CCUHsApi.getInstance().addSchedule(uid, s.getScheduleHDict());
                 }
-                CCUHsApi.getInstance().setSynced("@" + uid, "@" + uid);
+                CCUHsApi.getInstance().setSynced("@" + uid);
             }
             ScheduleProcessJob.updateSchedules();
         }

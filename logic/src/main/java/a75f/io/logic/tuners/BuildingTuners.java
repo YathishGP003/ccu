@@ -91,9 +91,7 @@ public class BuildingTuners
         try {
             PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
             String tunerVersion = info.versionName + "." + info.versionCode;
-
             if (!PreferenceUtil.getTunerVersion().equals(tunerVersion)) {
-                doTunerMigrationJob();
                 TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
                 PreferenceUtil.setTunerVersion(tunerVersion);
             }

@@ -273,7 +273,7 @@ public class CCUTagsDb extends HServer {
         for(int i = 0; i < hGrid.numRows(); i++)
         {
             HRow val = hGrid.row(i);
-            CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
+            //CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
             if(!val.has("nosync")) {
                 String key = val.get("id").toString().replace("@", "");
                 tagsMap.put(key, val);
@@ -663,7 +663,7 @@ public class CCUTagsDb extends HServer {
                                  .add("deviceRef", p.getDeviceRef())
                                  .add("siteRef", p.getSiteRef())
                                  .add("val", p.getVal())
-                                 .add("kind", p.getKind() == null ? "Number" : p.getKind());
+                                 .add("kind", p.getKind() == null ? "Str" : p.getKind());
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -684,7 +684,7 @@ public class CCUTagsDb extends HServer {
                 .add("deviceRef", p.getDeviceRef())
                 .add("siteRef", p.getSiteRef())
                 .add("val", p.getVal())
-                .add("kind", p.getKind() == null ? "Number" : p.getKind());
+                .add("kind", p.getKind() == null ? "Str" : p.getKind());
 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -1081,7 +1081,7 @@ public class CCUTagsDb extends HServer {
                 validHisItems.add(hisItem);
             }
         }
-        CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId+" size: "+validHisItems.size());
+        //CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId+" size: "+validHisItems.size());
         return validHisItems;
     }
     

@@ -101,9 +101,9 @@ public class HttpUtil
                 }
 
                 connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type",
-                        "text/zinc");
-
+                connection.setRequestProperty("Content-Type", "text/zinc");
+                connection.setRequestProperty("Accept", "text/zinc");
+                
                 CcuLog.i("CCU_HS",url.toString());
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {

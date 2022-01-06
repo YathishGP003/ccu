@@ -350,12 +350,12 @@ public class MasterControlView extends LinearLayout {
     private void saveScheduleData(ArrayList<Schedule> schedules, Dialog masterControlDialog) {
         for (Schedule schedule : schedules) {
             if (schedule.isZoneSchedule() && schedule.getRoomRef() != null) {
-                if (CCUHsApi.getInstance().entitySynced("@" + schedule.getId()) && schedule.getRoomRef() != null) {
+                if (CCUHsApi.getInstance().isEntityExisting("@" + schedule.getId()) && schedule.getRoomRef() != null) {
                     CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
                 }
                 syncZoneSchedules(schedule);
             } else {
-                if (CCUHsApi.getInstance().entitySynced("@" + schedule.getId())) {
+                if (CCUHsApi.getInstance().isEntityExisting("@" + schedule.getId())) {
                     CCUHsApi.getInstance().updateSchedule(schedule);
                 }
                 syncBuildingSchedules(schedule);

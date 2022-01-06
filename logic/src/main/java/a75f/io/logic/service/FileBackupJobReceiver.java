@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import com.google.common.base.Strings;
+
+import org.projecthaystack.HRef;
+
 import java.io.File;
 import java.io.IOException;
 import a75f.io.api.haystack.CCUHsApi;
@@ -25,6 +28,10 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
                 return;
             }
             String siteId =getSiteId();
+            
+            if (Strings.isNullOrEmpty(siteId)) {
+                return;
+            }
             Log.i(TAG_CCU_BACKUP," File backup service invoked  for Config files "+ccuId);
             FileOperationsUtil.zipSingleFile(FileConstants.CCU_CONFIG_FILE_PATH, FileConstants.CCU_CONFIG_FILE_NAME,
                     ccuId);
@@ -59,7 +66,11 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
         return (!Strings.isNullOrEmpty(ccuId) && ccuId.startsWith("@")) ? ccuId.substring(1) : ccuId;
     }
     private static String getSiteId(){
-        String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+        HRef siteRef = CCUHsApi.getInstance().getSiteIdRef();
+        if (siteRef == null) {
+            return null;
+        }
+        String siteId = siteRef.toString();
         return (!Strings.isNullOrEmpty(siteId) && siteId.startsWith("@")) ? siteId.substring(1) : siteId;
     }
 }

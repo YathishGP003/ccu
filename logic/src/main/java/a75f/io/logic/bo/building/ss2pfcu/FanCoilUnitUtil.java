@@ -65,7 +65,7 @@ public class FanCoilUnitUtil {
     }
     private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfig " + nodeAddr + " " + configPoint);
@@ -95,7 +95,7 @@ public class FanCoilUnitUtil {
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
         
         /**
          * Relay selection changes might impact available FanModes and conditioning modes.
@@ -110,10 +110,10 @@ public class FanCoilUnitUtil {
     private static void updateOccupancyPoint(double configVal, Point configPoint,
                                              JsonObject msgObject, CCUHsApi hayStack) {
     
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         
-        HashMap occDetPoint = hayStack.read("point and occupancy and detection and fcu and his and " +
+        HashMap<Object, Object> occDetPoint = hayStack.readEntity("point and occupancy and detection and fcu and his and " +
                                                           "equipRef== \"" + equip.getId() + "\"");
     
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateOccupancyPoint "+configVal+" "+occDetPoint);

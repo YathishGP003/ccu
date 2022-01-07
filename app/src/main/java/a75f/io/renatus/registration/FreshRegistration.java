@@ -41,6 +41,8 @@ import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.logic.messaging.MessagingClient;
+import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.renatus.AboutFragment;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.DABFullyAHUProfile;
@@ -1247,9 +1249,12 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                     () -> {
-
-
-
+                        if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+                            if (Globals.getInstance().isAckdMessagingEnabled()) {
+                                MessagingClient.getInstance().init();
+                            }
+                        }
+                        CCUHsApi.getInstance().syncEntityWithPointWrite();
                     },  // ignore success
                     error -> {
                         // A Toast rather than a dialog is necessary since the interface does not wait

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog"
+    android:elevation="12dp"
+    android:orientation="vertical"
+    android:padding="35dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+
+        <TextView
+            style="?action_text_appearance"
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:textAllCaps="false"
+            android:fontFamily="@font/lato_bold"
+            android:text="LIST OF ALL EXISTING CCUs FOR THE SITE" />
+
+        <ImageView
+            android:id="@+id/close_button"
+            style="?title_orange"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="22dp"
+            app:srcCompat="@drawable/ic_baseline_close_24" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="left"
+        android:orientation="horizontal">
+
+        <TextView
+            style="?action_text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="15dp"
+            android:textColor="@color/black"
+            android:textAllCaps="false"
+            android:fontFamily="@font/lato_bold"
+            android:text="CCU Version: " />
+
+        <TextView
+            style="?action_text_appearance"
+            android:id="@+id/curr_ccu_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="15dp"
+            android:textColor="@color/black"
+            android:textAllCaps="false"
+            android:fontFamily="@font/lato_bold"
+            android:text="CCU Version" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ccus"
+        android:layout_gravity="end"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp" />
+
+</LinearLayout>

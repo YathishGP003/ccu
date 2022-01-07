@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
+
+import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -49,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -366,9 +370,16 @@ public class CreateNewSite extends Fragment {
                         getContext().sendBroadcast(locationUpdateIntent);
                         
                         if (ccu.size() > 0) {
-                            String ahuRef = ccu.get("ahuRef").toString();
-                            CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
-                            L.ccu().setCCUName(ccuName);
+                            if (!ccu.get("dis").toString().equals(ccuName) ||
+                                !ccu.get("installerEmail").toString().equals(installerEmail) ||
+                                !ccu.get("fmEmail").toString().equals(facilityManagerEmail) ) {
+                                
+                                CcuLog.e(TAG, "Update CCU "+ccu);
+                                String ahuRef = ccu.get("ahuRef").toString();
+                                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
+                                L.ccu().setCCUName(ccuName);
+                            }
+                            
                         } else {
                             String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), facilityManagerEmail);
                             L.ccu().setCCUName(ccuName);
@@ -844,6 +855,13 @@ public class CreateNewSite extends Fragment {
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+    
+        Site currentSite = new Site.Builder().setHashMap(site).build();
+        if (currentSite.equals(s75f)) {
+            CcuLog.d(TAG, "Update Site not detected : return");
+            return;
+        }
+        
         ccuHsApi.updateSite(s75f, siteId);
         CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
         if (!curTz.equals(s75f.getTz())) {
@@ -852,8 +870,24 @@ public class CreateNewSite extends Fragment {
         BuildingTuners.getInstance();
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();
+        updateTimeZoneInVacations();
         ccuHsApi.saveTagsData();
 
+    }
+
+    private void updateTimeZoneInVacations(){
+        List<Schedule> vacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        for(Schedule vacationSchedule : vacationSchedules){
+            if(vacationSchedule.isZoneSchedule()){
+                DefaultSchedules.upsertZoneVacation(vacationSchedule.getId(), vacationSchedule.getDis(),
+                        vacationSchedule.getStartDate(), vacationSchedule.getEndDate(),
+                        vacationSchedule.getRoomRef());
+            }
+            else if(vacationSchedule.isBuildingSchedule()){
+                DefaultSchedules.upsertVacation(vacationSchedule.getId(), vacationSchedule.getDis(),
+                        vacationSchedule.getStartDate(), vacationSchedule.getEndDate());
+            }
+        }
     }
 
     private void goTonext() {

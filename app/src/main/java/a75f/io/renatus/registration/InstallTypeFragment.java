@@ -64,7 +64,7 @@ public class InstallTypeFragment extends Fragment {
 
         //TODO: enable when implement
         layoutPreconfigCCU.setEnabled(false);
-        layoutReplaceCCU.setEnabled(false);
+        layoutReplaceCCU.setEnabled(true);
         layoutWithoutCloud.setEnabled(false);
 
         layoutCreateNew.setOnClickListener(new View.OnClickListener() {

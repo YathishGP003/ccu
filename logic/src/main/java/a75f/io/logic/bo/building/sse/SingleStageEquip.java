@@ -454,7 +454,7 @@ public class SingleStageEquip {
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
     
-        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
 
 

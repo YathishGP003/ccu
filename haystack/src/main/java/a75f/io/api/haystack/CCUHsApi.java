@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -44,9 +45,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.sync.EntityParser;
-import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.SyncManager;
+import a75f.io.api.haystack.sync.SyncStatusService;
+import a75f.io.api.haystack.sync.SyncWorker;
 import a75f.io.api.haystack.util.Migrations;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
@@ -58,7 +61,7 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class CCUHsApi
 {
-    
+
     public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
@@ -68,18 +71,20 @@ public class CCUHsApi
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
 
-    public EntitySyncHandler entitySyncHandler;
     public HisSyncHandler    hisSyncHandler;
 
     public boolean testHarnessEnabled = false;
-    
+
     Context context;
-    
+
     private String hayStackUrl = null;
     private String careTakerUrl = null;
-    
+
     HRef tempWeatherRef = null;
     HRef humidityWeatherRef = null;
+
+    private SyncStatusService syncStatusService;
+    private SyncManager       syncManager;
 
     public static CCUHsApi getInstance()
     {
@@ -103,15 +108,19 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(PreferenceManager.getDefaultSharedPreferences(context));
+
         hisSyncHandler = new HisSyncHandler(this);
+
+        syncStatusService = SyncStatusService.getInstance(context);
+        syncManager = new SyncManager(context);
+
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
     private void checkSiloMigration(Context context) {
         boolean hasMigratedToSilo = PreferenceManager.getDefaultSharedPreferences(context)
-                                             .getBoolean(PREFS_HAS_MIGRATED_TO_SILO, false);
+                .getBoolean(PREFS_HAS_MIGRATED_TO_SILO, false);
         if (!hasMigratedToSilo) {
 
             CcuLog.i("CCU_HS", "Migrating tags database to Silo.");
@@ -120,8 +129,8 @@ public class CCUHsApi
 
             syncEntityTree();       // used during dev; can remove otherwise if desired.
             PreferenceManager.getDefaultSharedPreferences(context).edit()
-                      .putBoolean(PREFS_HAS_MIGRATED_TO_SILO, true)
-                      .apply();
+                    .putBoolean(PREFS_HAS_MIGRATED_TO_SILO, true)
+                    .apply();
         } else {
             CcuLog.i("CCU_HS", "Already migrated tags database to Silo!");
         }
@@ -138,7 +147,6 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(null);   // null prefs.
         hisSyncHandler = new HisSyncHandler(this);
     }
 
@@ -151,7 +159,7 @@ public class CCUHsApi
     {
         return hsClient;
     }
-    
+
     public String getHSUrl() {
         Log.d("Haystack URL: ","url="+hayStackUrl);
         return hayStackUrl;
@@ -173,6 +181,7 @@ public class CCUHsApi
         return sharedPreferences.getString("token","");
     }
 
+    @SuppressLint("ApplySharedPref")
     public void setJwt(String jwtToken) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -180,7 +189,7 @@ public class CCUHsApi
         editor.commit();
     }
 
-    
+
 
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
@@ -189,6 +198,7 @@ public class CCUHsApi
 
     public synchronized void saveTagsData() {
         saveTagsData(false);
+        syncStatusService.saveSyncStatus();
     }
 
     /**
@@ -197,14 +207,16 @@ public class CCUHsApi
      * @param immediate whether the disk write in Shared Prefs should be immediate, synchronous.  If false,
      *                  SharedPrefs will write to memory immediate but write to disk when convenient.
      */
-    public synchronized void saveTagsData(boolean immediate)
-    {
+    public synchronized void saveTagsData(boolean immediate) {
+        syncStatusService.saveSyncStatus();
         tagsDb.saveTags(immediate);
     }
 
-    public String addSite(Site s)
-    {
-        return tagsDb.addSite(s);
+    public String addSite(Site s) {
+        String siteId = tagsDb.addSite(s);
+        Log.i("CCU_HS"," add Site "+siteId);
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(siteId, "@"));
+        return siteId;
     }
 
     /** For adding site originating from server. Supply the id originating from server, rather
@@ -213,9 +225,10 @@ public class CCUHsApi
         return tagsDb.addSiteWithId(s, id);
     }
 
-    public String addEquip(Equip q)
-    {
-        return tagsDb.addEquip(q);
+    public String addEquip(Equip q) {
+        String equipId = tagsDb.addEquip(q);
+        syncStatusService.addUnSyncedEntity(equipId);
+        return equipId;
     }
 
     /** For adding an equip originating from server, e.g. import tuners */
@@ -223,9 +236,10 @@ public class CCUHsApi
         return tagsDb.addEquipWithId(q, id);
     }
 
-    public String addPoint(Point p)
-    {
-        return tagsDb.addPoint(p);
+    public String addPoint(Point p) {
+        String pointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     /** For adding an point originating from server, e.g. import tuners */
@@ -233,33 +247,39 @@ public class CCUHsApi
         return tagsDb.addPointWithId(p, id);
     }
 
-    public String addPoint(RawPoint p)
-    {
-        return tagsDb.addPoint(p);
+    public String addPoint(RawPoint p) {
+        String rawPointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(rawPointId);
+        return rawPointId;
     }
 
     public String addRemotePoint(RawPoint p, String id) {
         return tagsDb.addPointWithId(p, id);
     }
 
-    public String addPoint(SettingPoint p)
-    {
-        return tagsDb.addPoint(p);
+    public String addPoint(SettingPoint p) {
+        String pointId = tagsDb.addPoint(p);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
     // From EntityPullHandler
     public String addPointWithId(SettingPoint p, String id) {
-        return tagsDb.addPointWithId(p, id);
+        String pointId = tagsDb.addPointWithId(p, id);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
-    public String updateSettingPoint(SettingPoint p, String id)
-    {
-        return tagsDb.updateSettingPoint(p,id);
+    public String updateSettingPoint(SettingPoint p, String id) {
+        String pointId = tagsDb.updateSettingPoint(p,id);
+        syncStatusService.addUnSyncedEntity(pointId);
+        return pointId;
     }
 
-    public String addDevice(Device d)
-    {
-        return tagsDb.addDevice(d);
+    public String addDevice(Device d) {
+        String deviceId = tagsDb.addDevice(d);
+        syncStatusService.addUnSyncedEntity(deviceId);
+        return deviceId;
     }
 
     // From EntityPullHandler
@@ -267,17 +287,16 @@ public class CCUHsApi
         return tagsDb.addDeviceWithId(d, id);
     }
 
-    public void updateDevice(Device d, String id)
-    {
+    public void updateDevice(Device d, String id) {
         tagsDb.updateDevice(d, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
-    public String addFloor(Floor f)
-    {
-        return tagsDb.addFloor(f);
+    public String addFloor(Floor f) {
+        String floorId = tagsDb.addFloor(f);
+        syncStatusService.addUnSyncedEntity(floorId);
+        return floorId;
     }
 
     // From EntityPullHandler
@@ -285,9 +304,10 @@ public class CCUHsApi
         return tagsDb.addFloorWithId(f, id);
     }
 
-    public String addZone(Zone z)
-    {
-        return tagsDb.addZone(z);
+    public String addZone(Zone z) {
+        String zoneId = tagsDb.addZone(z);
+        syncStatusService.addUnSyncedEntity(zoneId);
+        return zoneId;
     }
 
     // From EntityPullHandler
@@ -295,81 +315,78 @@ public class CCUHsApi
         return tagsDb.addZoneWithId(z, id);
     }
 
-    public void updateSite(Site s, String id)
-    {
+    public void updateSite(Site s, String id) {
         tagsDb.updateSite(s, id);
-        entitySyncHandler.requestSiteSync();
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
+        }
         updateLocationDataForWeatherUpdate(s);
     }
-    
+
     //Local site entity may be updated on pubnub notification which does not need to be synced back.
-    public void updateSiteLocal(Site s, String id)
-    {
+    public void updateSiteLocal(Site s, String id) {
         tagsDb.updateSite(s, id);
         updateLocationDataForWeatherUpdate(s);
     }
-    
+
     private void updateLocationDataForWeatherUpdate(Site updatedSite) {
-    
+
         SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
-    
+
         //Reset lat & lng so that WeatherService regenerates it using updated address.
         spPrefsEditor.putFloat("lat", 0);
         spPrefsEditor.putFloat("lng", 0);
-    
+
         spPrefsEditor.commit();
     }
 
     public void updateEquip(Equip q, String id)
     {
         tagsDb.updateEquip(q, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
-    
+
     public void updatePoint(RawPoint r, String id)
     {
         tagsDb.updatePoint(r, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updatePoint(Point point, String id)
     {
         tagsDb.updatePoint(point, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updateFloor(Floor r, String id)
     {
         tagsDb.updateFloor(r, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     public void updateZone(Zone z, String id)
     {
         tagsDb.updateZone(z, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
+        if (syncStatusService.hasEntitySynced(id)) {
+            syncStatusService.addUpdatedEntity(id);
         }
     }
 
     /**
      * Helper method that converts HGrid to an Array of Hashmap of String.
+     * This should be replaced with parameterized reallAllEntities call.
      */
+    @Deprecated
     public ArrayList<HashMap> readAll(String query)
     {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
@@ -403,7 +420,9 @@ public class CCUHsApi
 
     /**
      * Read the first matching record
+     * This should be replaced with parameterized readEntity call.
      */
+    @Deprecated
     public HashMap read(String query)
     {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
@@ -436,7 +455,7 @@ public class CCUHsApi
         return hsClient.read(query, false);
     }
 
-    public HashMap readMapById(String id)
+    public HashMap<Object, Object> readMapById(String id)
     {
 
         HashMap<Object, Object> map = new HashMap<>();
@@ -452,7 +471,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            e.printStackTrace();
+            CcuLog.e("CCU_HS","Entity does not exist "+id);
         }
         return map;
     }
@@ -465,7 +484,7 @@ public class CCUHsApi
         }
         catch (UnknownRecException e)
         {
-            e.printStackTrace();
+            CcuLog.e("CCU_HS","Entity does not exist "+id);
         }
         return null;
     }
@@ -515,7 +534,7 @@ public class CCUHsApi
     {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
     }
-    
+
     /**
      * Write local point array without remote sync.
      * @param id
@@ -527,7 +546,7 @@ public class CCUHsApi
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
     }
-    
+
     public void writePointStrValLocal(String id, int level, String who, String val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration));
     }
@@ -585,37 +604,37 @@ public class CCUHsApi
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
         hsClient.pointWrite(id, level, who, val, dur);
 
-        if (CCUHsApi.getInstance().isCCURegistered()) {
+        if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
-                if (dur.unit == null) {
-                    dur = HNum.make(dur.val ,"ms");
-                }
+            if (dur.unit == null) {
+                dur = HNum.make(dur.val ,"ms");
+            }
 
-                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
-                if (StringUtils.isNotEmpty(reason)) {
-                    b.add("reason", reason);
-                }
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            if (StringUtils.isNotEmpty(reason)) {
+                b.add("reason", reason);
+            }
 
-                HDict[] dictArr  = {b.toDict()};
-                CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-                HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            HDict[] dictArr  = {b.toDict()};
+            CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
+            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         }
     }
-    
+
     public void clearPointArrayLevel(String id, int level, boolean local) {
         Log.i("CCU_HSCPU", "clearPointArrayLevel: ");
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()
-                                 .add("id", HRef.copy(id))
-                                 .add("level", level)
-                                 .add("who", CCUHsApi.getInstance().getCCUUserName())
-                                 .add("duration", HNum.make(0, "ms"))
-                                 .add("val", (HVal) null);
+                    .add("id", HRef.copy(id))
+                    .add("level", level)
+                    .add("who", CCUHsApi.getInstance().getCCUUserName())
+                    .add("duration", HNum.make(0, "ms"))
+                    .add("val", (HVal) null);
             HDict[] dictArr = {b.toDict()};
             HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         }
-    
+
     }
 
     // Feb-08-2021 /pointWrite and /pointWriteMany need to hit silo /v2/.  All other calls needs to stay on v1.
@@ -665,7 +684,7 @@ public class CCUHsApi
             return 0.0;
         }
     }
-    
+
     public String readDefaultStrValById(String id)
     {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
@@ -725,18 +744,18 @@ public class CCUHsApi
         }
         return rowList;
     }
-    
+
     public HGrid readPointArrRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
         String response = HttpUtil.executePost(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d("CCU_HS", "Response : "+response);
-      
+
         return response == null ? null : new HZincReader(response).readGrid();
     }
-    
+
     public double readPointPriorityVal(String id) {
-        
+
         ArrayList values = readPoint(id);
         if (values != null && values.size() > 0)
         {
@@ -749,7 +768,7 @@ public class CCUHsApi
         }
         return 0;
     }
-    
+
     public Double readPointPriorityValByQuery(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
@@ -757,10 +776,10 @@ public class CCUHsApi
         if (id == null || id == "") {
             return null;
         }
-        
+
         return readPointPriorityVal(id.toString());
     }
-    
+
     public String readId(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
@@ -768,7 +787,7 @@ public class CCUHsApi
         if (id == null || id == "") {
             return null;
         }
-        
+
         return id.toString();
     }
 
@@ -838,7 +857,7 @@ public class CCUHsApi
             return item == null ? 0 : item.getVal();
         }
     }
-    
+
     /**
      * Write history value only if the new value is different from current value.
      * @param id
@@ -853,7 +872,7 @@ public class CCUHsApi
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
         //CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
     }
-    
+
     /**
      * Writes values without checking the current value.
      * This shall be used all the time while initializing a new point thats just created.
@@ -864,7 +883,7 @@ public class CCUHsApi
     {
         tagsDb.putHisItem(id, val);
     }
-    
+
     /**
      * Writes a list of hisItems.
      * This shall be used all the time while initializing a new point thats just created.
@@ -893,7 +912,7 @@ public class CCUHsApi
                     cachedId = p.get("id").toString();
                     QueryCache.getInstance().add(query, cachedId);
                     HisItem item = new HisItem(cachedId, new Date(), val);
-                      hisWrite(item);
+                    hisWrite(item);
                 }
             }
         } else {
@@ -915,10 +934,18 @@ public class CCUHsApi
     public void deleteEntity(String id) {
         CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        if (tagsDb.idMap.get(id) != null) {
-            tagsDb.removeIdMap.put(id, id);
-            tagsDb.idMap.remove(id);
-        }
+        syncStatusService.addDeletedEntity(id, true);
+    }
+
+    /**
+     * Used while deleteing a batch of entities. No need to persist items after each deletion.
+     * The caller has to invoke save sync status separately.
+     * @param id
+     */
+    public void deleteEntityItem(String id) {
+        CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+        syncStatusService.addDeletedEntity(id, false);
     }
 
     public void deleteEntityLocally(String id) {
@@ -927,14 +954,17 @@ public class CCUHsApi
             tagsDb.idMap.remove(id);
         }
     }
-    
+
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
     }
-    
+
     public void removeId(String id) {
-        tagsDb.removeIdMap.remove(id.replace("@", ""));
+        //tagsDb.removeIdMap.remove(id.replace("@", ""));
+        if (syncStatusService.getDeletedData().contains(id)) {
+            syncStatusService.setDeletedEntitySynced(id);
+        }
     }
 
     public void deleteWritableArray(String id)
@@ -948,100 +978,85 @@ public class CCUHsApi
     }
 
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
-        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
+        HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
         if (entity.get("floor") == null) {
             // not a floor :-(
             CcuLog.w("CCU_HS", "Attempt to delete Floor locally with non-floor entity id");
             return;
         }
-        ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
-        for (HashMap room : rooms)
+        ArrayList<HashMap<Object, Object>> rooms = readAllEntities("room and floorRef == \"" + id + "\"");
+        for (HashMap<Object, Object> room : rooms)
         {
             deleteEntityTree(room.get("id").toString());
         }
         deleteEntityLocally(entity.get("id").toString());
     }
-    
-    public void deleteEntityTree(String id)
-    {
+
+    public void deleteEntityTree(String id) {
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);
-        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
-        if (entity.get("site") != null)
-        {
+        HashMap<Object, Object> entity = readEntity("id == " + id);
+        if (entity.get("site") != null) {
             //Deleting site from a CCU should not remove shared entities like site , floor or building tuner.
-            ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
-            for (HashMap equip : equips)
-            {
+            ArrayList<HashMap<Object, Object>> equips = readAllEntities("equip and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> equip : equips) {
                 if (!equip.containsKey("tuner"))
                     deleteEntityTree(equip.get("id").toString());
             }
-            ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
-            for (HashMap device : devices)
-            {
+
+            ArrayList<HashMap<Object, Object>> devices = readAllEntities("device and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
-            ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
-            for (HashMap schedule : schedules)
-            {
+
+            ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and siteRef == \"" + id + "\"");
+            for (HashMap<Object, Object> schedule : schedules) {
                 if (!schedule.containsKey("building"))
-                    deleteEntity(schedule.get("id").toString());
+                    deleteEntityItem(schedule.get("id").toString());
             }
-        }
-        else if (entity.get("floor") != null)
-        {
-            ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
-            for (HashMap room : rooms)
-            {
+        } else if (entity.get("floor") != null) {
+
+            ArrayList<HashMap<Object, Object>> rooms = readAllEntities("room and floorRef == \"" + id + "\"");
+            for (HashMap<Object, Object> room : rooms) {
                 deleteEntityTree(room.get("id").toString());
             }
-            deleteEntity(entity.get("id").toString());
-        }
-        else if (entity.get("room") != null)
-        {
-            ArrayList<HashMap> schedules = readAll("schedule and roomRef == "+ id );
+            deleteEntityItem(entity.get("id").toString());
+        } else if (entity.get("room") != null) {
+
+            ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and roomRef == "+ id );
             Log.d("CCU","  delete Schedules in room "+schedules.size());
-            for (HashMap schedule : schedules)
-            {
-                deleteEntity(schedule.get("id").toString());
+            for (HashMap<Object, Object> schedule : schedules) {
+                deleteEntityItem(schedule.get("id").toString());
             }
-        
-             deleteEntity(entity.get("id").toString());
-        }else if (entity.get("equip") != null)
-        {
-            ArrayList<HashMap> points = readAll("point and equipRef == \"" + id + "\"");
-            for (HashMap point : points)
-            {
-                if (point.get("writable") != null)
-                {
+            deleteEntityItem(entity.get("id").toString());
+        }else if (entity.get("equip") != null) {
+
+            ArrayList<HashMap<Object, Object>> points = readAllEntities("point and equipRef == \"" + id + "\"");
+            for (HashMap<Object, Object> point : points) {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
-                deleteEntity(point.get("id").toString());
+                deleteEntityItem(point.get("id").toString());
             }
-            deleteEntity(id);
-        } else if (entity.get("device") != null)
-        {
-            ArrayList<HashMap> points = readAll("point and deviceRef == \"" + id + "\"");
-            for (HashMap point : points)
-            {
-                if (point.get("writable") != null)
-                {
+            deleteEntityItem(id);
+        } else if (entity.get("device") != null) {
+            ArrayList<HashMap<Object, Object>> points = readAllEntities("point and deviceRef == \"" + id + "\"");
+            for (HashMap<Object, Object> point : points) {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
-                deleteEntity(point.get("id").toString());
+                deleteEntityItem(point.get("id").toString());
             }
-            deleteEntity(id);
-        } else if (entity.get("point") != null)
-        {
-            if (entity.get("writable") != null)
-            {
+            deleteEntityItem(id);
+        } else if (entity.get("point") != null) {
+            if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
             }
-            if (entity.get("his") != null)
-            {
+            if (entity.get("his") != null) {
                 tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
-            deleteEntity(entity.get("id").toString());
+            deleteEntityItem(entity.get("id").toString());
         }
+        syncStatusService.saveSyncStatus();
     }
 
     /**
@@ -1050,38 +1065,17 @@ public class CCUHsApi
      *
      * The method is historical, it used to be. putIdMap(luid, guid);
      */
-    public void setSynced(String id, String remoteId)  {
+    public void setSynced(String id)  {
 
         if (id == null || id.isEmpty()) {
             Log.e("CCU_HS", "id null or empty in set synced");
             return;
         }
-        if (remoteId == null || remoteId.isEmpty()) {
-            Log.d("CCU_HS", "remote Id null or empty in set synced.  Not setting synced.");
-            return;
-        }
-
-        if (! id.equals(remoteId)) {
-            // This has not caused a crash yet, to my knowledge.  Leave in to fail fast here.
-            throw new IllegalArgumentException("remoteId not equal to id in set synced");
-        }
-
-        tagsDb.idMap.put(id, remoteId);
-    }
-
-    /**
-     * Get the Global unique ID for a given local Id.
-     * Otherwise null.
-     * This function is going away, since GUID is now the same as LUID
-     */
-    @Deprecated
-    public String getGUID(String luid)
-    {
-        return tagsDb.idMap.get(luid);
+        syncStatusService.setEntitySynced(id);
     }
 
     public boolean entitySynced(String id) {
-        return tagsDb.idMap.get(id) != null;
+        return syncStatusService.hasEntitySynced(id);
     }
 
     public boolean entityExists(String id) {
@@ -1089,102 +1083,40 @@ public class CCUHsApi
     }
 
     public boolean siteSynced() {
-        return entitySynced(
-                getSiteIdRef().toString()
-        );
+        return getSite() != null && entitySynced(getSiteIdRef().toString());
     }
 
-    public String getLUID(String guid)
-    {
-        for (Map.Entry<String, String> entry : tagsDb.idMap.entrySet())
-        {
-            if (entry.getValue().equals(guid))
-            {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-    
-    public String getRemoveMapLUID(String guid)
-    {
-        for (Map.Entry<String, String> entry : tagsDb.removeIdMap.entrySet())
-        {
-            if (entry.getValue().equals(guid))
-            {
-                return entry.getKey();
-            }
-        }
-        return null;
+    public boolean isEntityDeleted(String id) {
+        return syncStatusService.getDeletedData().contains(id);
     }
 
     public void syncEntityTree()
     {
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                if (!testHarnessEnabled)
-                {
-                    if (!entitySyncHandler.isSyncProgress())
-                    {
-                        entitySyncHandler.sync();
-                    }
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip Entity Sync");
-                }
-            }
-        }.start();
+        //TODO : Check if sync session is already in progress
+        if (syncManager.isEntitySyncProgress()) {
+            syncManager.scheduleSync();
+        } else {
+            syncManager.syncEntities(true);
+        }
     }
-    public void syncPointEntityTree()
-    {
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                if (!testHarnessEnabled)
-                {
 
-                        entitySyncHandler.syncPointEntity();
-
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip PointEntity Sync");
-                }
-            }
-        }.start();
-    }
     public void syncEntityWithPointWrite() {
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                if (!testHarnessEnabled && !entitySyncHandler.isSyncProgress())
-                {
-                    entitySyncHandler.doSyncWithWrite();
-                } else
-                {
-                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip Entity Sync");
-                }
-            }
-        }.start();
+        syncManager.syncEntitiesWithPointWrite();
     }
-    
+
+    public void syncPointArrays() {
+        syncManager.syncPointArray();
+    }
+
     //Force-writes local entities to the backend.
     public void forceSync() {
-        tagsDb.idMap.clear();
-        tagsDb.saveTags();
-        tagsDb.init(context);
-        syncEntityWithPointWrite();
+        syncStatusService.clearSyncStatus();
+        syncManager.syncEntitiesWithPointWrite();
     }
 
     //Reset CCU - Force-writes local entities to the backend.
+    @SuppressLint("StaticFieldLeak")
     public void resetSync() {
-
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground( final Void ... params ) {
@@ -1214,13 +1146,13 @@ public class CCUHsApi
                     }
 
                     // exclude building schedule for force sync
-                    HashMap buildingSchedule = read("schedule and building and not vacation");
+                    HashMap<Object, Object> buildingSchedule = readEntity("schedule and building and not vacation");
                     if (buildingSchedule.get("id").toString().contains(map.getKey())){
                         removeMap.remove(map.getKey());
                     }
 
                     // exclude building tuners for force sync
-                    ArrayList<HashMap> hQList = readAll("equip");
+                    ArrayList<HashMap<Object, Object>> hQList = readAllEntities("equip");
                     for (HashMap h: hQList){
                         Equip equip = new Equip.Builder().setHashMap(h).build();
 
@@ -1246,18 +1178,17 @@ public class CCUHsApi
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-    
+
     public void scheduleSync() {
-        entitySyncHandler.scheduleSync();
+        syncManager.scheduleSync();
     }
 
-    public void syncHisData()
-    {
-        if (!entitySyncHandler.isSyncProgress()) {
-            hisSyncHandler.syncData();
-        } else {
-            Log.d("CCU_HS", "EntitySync in progress : Skip HisSync");
+    public void syncHisData() {
+        if (syncManager.isEntitySyncProgress()) {
+            CcuLog.d("CCU_HS"," Skip his sync, entity sync in progress");
+            return;
         }
+        hisSyncHandler.syncData();
     }
 
     public boolean syncExistingSite(String siteId) {
@@ -1269,27 +1200,27 @@ public class CCUHsApi
 
         HGrid remoteSite = getRemoteSite(siteId);
 
-        if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr())
-        {
+        if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr()) {
             return false;
         }
 
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
-        tagsDb.idMap.put("@"+tagsDb.addSiteWithId(s, siteId), s.getId());
+        addRemoteSite(s, siteId);
         Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
 
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        importBuildingSchedule(siteId, hClient);
+        importBuildingSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import building tuners
-        importBuildingTuners(siteId, hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
-        ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
+        ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
+                .readAllEntities("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
-        for (HashMap m : writablePoints) {
+        for (HashMap<Object, Object> m : writablePoints) {
             HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             hDicts.add(pid);
         }
@@ -1302,16 +1233,16 @@ public class CCUHsApi
 
         for (List<HDict> sublist : partitions) {
             HGrid writableArrayPoints = hClient.call("pointWriteMany",
-                                   HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-            
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
             //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
                 return false;
             }
-            
+
             ArrayList<HDict> hDictList = new ArrayList<>();
-            
+
             Iterator rowIterator = writableArrayPoints.iterator();
             while (rowIterator.hasNext()) {
                 HRow row = (HRow) rowIterator.next();
@@ -1336,7 +1267,7 @@ public class CCUHsApi
                         hDictList.add(pid);
 
                         //save his data to local cache
-                        HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                        HDict rec = hsClient.readById(HRef.copy(id));
                         tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
 
                         //save points on tagsDb
@@ -1355,36 +1286,36 @@ public class CCUHsApi
 
 
     private void importBuildingSchedule(String siteId, HClient hClient){
-        
-            HashMap currentBuildingSchedule = read("schedule and building");
-            if (!currentBuildingSchedule.isEmpty()) {
-                //CCU already has a building schedule.
-                CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
+
+        HashMap currentBuildingSchedule = read("schedule and building");
+        if (!currentBuildingSchedule.isEmpty()) {
+            //CCU already has a building schedule.
+            CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
+            return;
+        }
+
+        try {
+            HDict buildingDict =
+                    new HDictBuilder().add("filter", "building and schedule and siteRef == " + siteId).toDict();
+            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
+            if (buildingSch == null) {
                 return;
             }
-            
-            try {
-                HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-                HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
-                if (buildingSch == null) {
-                    return;
-                }
+            Iterator it = buildingSch.iterator();
+            while (it.hasNext()) {
+                HRow r = (HRow) it.next();
+                Schedule buildingSchedule =  new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
 
-                Iterator it = buildingSch.iterator();
-                while (it.hasNext())
-                {
-                    HRow r = (HRow) it.next();
-                    Schedule buildingSchedule =  new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-
-                    String guid = buildingSchedule.getId();
-                    buildingSchedule.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
-                    CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
-                    CCUHsApi.getInstance().setSynced("@" + guid, "@" + guid);
-                }
-            } catch (UnknownRecException e) {
-                e.printStackTrace();
+                String guid = buildingSchedule.getId();
+                buildingSchedule.setmSiteId(siteId);
+                CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
+                CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
     }
 
     private void importBuildingTuners(String siteId, HClient hClient) {
@@ -1393,24 +1324,24 @@ public class CCUHsApi
         ArrayList<Point> points = new ArrayList<>();
         try {
             HDict tunerEquipDict = new HDictBuilder().add("filter",
-                                                      "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                    "tuner and equip and siteRef == " + siteId).toDict();
             HGrid tunerEquipGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerEquipDict));
             if (tunerEquipGrid != null) {
                 tunerEquipGrid.dump();
             }
             List<HashMap> equipMaps = HGridToList(tunerEquipGrid);
             equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
-            
+
             HDict tunerPointsDict = new HDictBuilder().add("filter",
-                                                      "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                    "tuner and point and default and siteRef == " + siteId).toDict();
             HGrid tunerPointsGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerPointsDict));
             if (tunerPointsGrid != null) {
                 tunerPointsGrid.dump();
             }
-            
+
             List<HashMap> pointMaps = HGridToList(tunerPointsGrid);
             pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
-            
+
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }
@@ -1420,50 +1351,51 @@ public class CCUHsApi
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
-                String equipLuid;
+                String equiUuid;
                 HashMap tunerEquip = read("tuner and equip");
                 if (!tunerEquip.isEmpty()) {
-                    equipLuid = tunerEquip.get("id").toString();
+                    equiUuid = tunerEquip.get("id").toString();
                 } else {
-                    q.setSiteRef(hsApi.getSiteIdRef().toString());
+                    q.setSiteRef(siteId);
                     q.setFloorRef("@SYSTEM");
                     q.setRoomRef("@SYSTEM");
-                    equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                    hsApi.setSynced(equipLuid, q.getId());
+                    equiUuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
+                    hsApi.setSynced(equiUuid);
                 }
                 //Points
                 for (Point p : points)
                 {
                     if (p.getEquipRef().equals(q.getId()))
                     {
-                        String guidKey = StringUtils.prependIfMissing(p.getId(), "@");
-                        if (getLUID(guidKey) == null) {
-                            p.setSiteRef(hsApi.getSiteIdRef().toString());
+                        String pointId = StringUtils.prependIfMissing(p.getId(), "@");
+                        HashMap<Object, Object> point = readMapById(pointId);
+                        if (point.isEmpty()) {
+                            p.setSiteRef(siteId);
                             p.setFloorRef("@SYSTEM");
                             p.setRoomRef("@SYSTEM");
-                            p.setEquipRef(equipLuid);
+                            p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
-                            hsApi.setSynced(pointLuid, p.getId());
+                            hsApi.setSynced(pointLuid);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
-                        
+
                     }
                 }
             }
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
-    
+
     public void importBuildingTuners() {
         String siteId = getSiteIdRef().toString();
-        
+
         if (StringUtils.isBlank(siteId)) {
             CcuLog.e(TAG, " Site ID Invalid : Skip Importing building tuner.");
             return;
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        importBuildingTuners(siteId, hClient);
+        importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
     }
 
     public HGrid getRemoteSiteDetails(String siteId)
@@ -1496,7 +1428,7 @@ public class CCUHsApi
 
         return siteGrid;
     }
-    
+
     public Site getRemoteSiteEntity(String siteGuid) {
         HGrid siteGrid = getRemoteSite(siteGuid);
         if (siteGrid != null) {
@@ -1525,7 +1457,7 @@ public class CCUHsApi
             return null;
         }
     }
-    
+
     /**
      * Get the Site entity.
      * @return Site
@@ -1568,7 +1500,7 @@ public class CCUHsApi
     {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
-        
+
         HDictBuilder hDictBuilder = new HDictBuilder();
         CcuLog.d("CCU_HS", "Site Ref: " + getSiteIdRef());
         String localId = UUID.randomUUID().toString();
@@ -1584,6 +1516,7 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
         return localId;
     }
 
@@ -1611,11 +1544,8 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }
-       CCUHsApi.getInstance().syncEntityTree();
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
 
@@ -1643,10 +1573,7 @@ public class CCUHsApi
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -1662,16 +1589,16 @@ public class CCUHsApi
     }
 
     public void updateCCUahuRef(String ahuRef) {
-        
+
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
-        
+
         if (ccu.size() == 0) {
             return;
         }
-        
+
         String id = ccu.get("id").toString();
-    
+
         HDictBuilder hDictBuilder = new HDictBuilder();
         hDictBuilder.add("id", HRef.copy(id));
         hDictBuilder.add("ccu");
@@ -1685,11 +1612,8 @@ public class CCUHsApi
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-    
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, id);
-        }
+
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
 
     }
 
@@ -1700,6 +1624,10 @@ public class CCUHsApi
     {
         HDict hDict = new HDictBuilder().add("filter", "site").toDict();
         HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
+        if (site.isEmpty() || site.numRows() == 0) {
+            CcuLog.e(TAG, "getSiteIdRef - Site Not Created");
+            return null;
+        }
         return site.row(0).getRef("id");
     }
 
@@ -1713,12 +1641,10 @@ public class CCUHsApi
     @Deprecated
     @Nullable
     public String getRemoteSiteIdWithRefSign() {
-        HashMap site = read("site");
+        HashMap<Object, Object> site = readEntity("site");
 
         if (site == null || site.get("id") == null) return null;
-        String siteLuid = site.get("id").toString();
-
-        return getGUID(siteLuid);
+        return site.get("id").toString();
     }
 
     /**
@@ -1756,7 +1682,7 @@ public class CCUHsApi
 
         return schedules;
     }
-    
+
     public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1765,7 +1691,7 @@ public class CCUHsApi
             filter = "schedule and zone and not vacation and roomRef == "+zoneId;
         else
             filter = "schedule and zone and vacation and roomRef == "+zoneId;
-        
+
         Log.d("CCU_HS"," getZoneSchedule : "+filter);
         if(filter != null) {
 
@@ -1775,7 +1701,7 @@ public class CCUHsApi
                 schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
             }
         }
-        
+
         return schedules;
     }
 
@@ -1791,60 +1717,50 @@ public class CCUHsApi
     public void addSchedule(String localId, HDict scheduleDict)
     {
         tagsDb.addHDict(localId, scheduleDict);
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
-    
+
     public void updateSchedule(String localId, HDict scheduleDict)
     {
-        addSchedule(localId, scheduleDict);
-        
+        tagsDb.addHDict(localId, scheduleDict);
+
         Log.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
-        if (tagsDb.idMap.get("@" +localId) != null)
-        {
-            tagsDb.updateIdMap.put("@" + localId, "@" + localId);
-        }
+        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
-    
+
     public void updateSchedule(Schedule schedule)
     {
-        addSchedule(schedule.getId(), schedule.getScheduleHDict());
+        tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
 
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
-        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
-        {
-            tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
-    
+
     public void updateZoneSchedule(Schedule schedule, String zoneId)
     {
-        
-        addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
-        
+        tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
-        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
-        {
-            tagsDb.updateIdMap.put("@" + schedule.getId(), "@" + schedule.getId());
-        }
+        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
-    
+
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
-        addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
+        tagsDb.addHDict(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
         Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
-    
+
     public Schedule getScheduleById(String scheduleRef)
     {
         if (scheduleRef == null)
             return null;
-        
+
         HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
         //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
-    
+
     public double getPredictedPreconRate(String ahuRef) {
         HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-    
+
         try
         {
             HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == " + ahuRef).toDict();
@@ -1870,12 +1786,12 @@ public class CCUHsApi
             e.printStackTrace();
             Log.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
         }
-        
+
         return 0;
     }
 
     public double getExternalTemp() {
-    
+
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (tempWeatherRef == null)
         {
@@ -1919,9 +1835,9 @@ public class CCUHsApi
         }
         return 0;
     }
-    
+
     public double getExternalHumidity() {
-        
+
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (humidityWeatherRef == null)
         {
@@ -1961,7 +1877,7 @@ public class CCUHsApi
         }
         return 0;
     }
-    
+
     /**
      *  Get N Number of most recent his entries
      * @param id
@@ -1972,31 +1888,31 @@ public class CCUHsApi
     public List<HisItem> getHisItems(String id, int offset, int limit) {
         return tagsDb.getHisItems(HRef.copy(id), offset, limit);
     }
-    
+
     public void deletePointArray(String id) {
         tagsDb.deletePointArray(HRef.copy(id));
     }
-    
-    
+
+
     public void deletePointArrayLevel(String id, int level) {
         tagsDb.deletePointArrayLevel(HRef.copy(id), level);
     }
-    
+
     public void deleteHistory() {
-        ArrayList<HashMap> points = readAll("point and his");
+        ArrayList<HashMap<Object, Object>> points = readAllEntities("point and his");
         if (points.size() == 0) {
             return;
         }
-        for (Map m : points)
+        for (Map<Object, Object> m : points)
         {
             CcuLog.d("CCU_HS"," deleteHistory for point "+m.get("id"));
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
         }
     }
-    
+
     public boolean isCCURegistered() {
-      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-      return spDefaultPrefs.getBoolean("isCcuRegistered", false);
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return spDefaultPrefs.getBoolean("isCcuRegistered", false);
     }
 
     public void setCcuRegistered() {
@@ -2013,24 +1929,6 @@ public class CCUHsApi
         editor.commit();
     }
 
-    /** Used only in sync package, which is all deprecated.
-     * This function is going away, since site GUID is now the site same just site ID.
-     * @return
-     */
-    @Deprecated
-    public String getSiteGuid() {
-        String siteRef = null;
-
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLuid = site.get("id").toString();
-
-        if (StringUtils.isNotBlank(siteLuid)) {
-            siteRef = CCUHsApi.getInstance().getGUID(siteLuid);
-        }
-
-        return siteRef;
-    }
-
     public boolean isNetworkConnected() {
 
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -2043,11 +1941,11 @@ public class CCUHsApi
             registerCcu(installerEmail);
             emitter.onComplete();
         })
-          .subscribeOn(Schedulers.io());
+                .subscribeOn(Schedulers.io());
     }
 
     public void registerCcu(String installerEmail) {
-        
+
         HashMap site = CCUHsApi.getInstance().read("site");
         Log.d("CCURegInfo","createNewSite Edit backgroundtask");
 
@@ -2058,10 +1956,10 @@ public class CCUHsApi
         // this issue is pre-existing.
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
             Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
-            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-        
+            HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
+
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
-        
+
             if (! entitySynced(ccuLuid)) {
                 String facilityManagerEmail = site.get("fmEmail").toString();
                 String installEmail = installerEmail;
@@ -2072,26 +1970,26 @@ public class CCUHsApi
                 String ahuRef = ccu.get("ahuRef").toString();
                 String gatewayRef = ccu.get("gatewayRef").toString();
                 String equipRef = ccu.get("equipRef").toString();
-            
+
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
-            
+
                 if (ccuRegistrationRequest != null) {
                     Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
                     String ccuRegistrationResponse = HttpUtil.executeJson(
-                        CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
-                        ccuRegistrationRequest.toString(),
-                        BuildConfig.CARETAKER_API_KEY,
-                        true,
-                        HttpConstants.HTTP_METHOD_POST
+                            CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
+                            ccuRegistrationRequest.toString(),
+                            BuildConfig.CARETAKER_API_KEY,
+                            true,
+                            HttpConstants.HTTP_METHOD_POST
                     );
                     Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
-                
+
                     if (ccuRegistrationResponse != null) {
                         try {
                             JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
                             String ccuGuid = ccuRegistrationResponseJson.getString("id");
                             String token = ccuRegistrationResponseJson.getString("token");
-                            CCUHsApi.getInstance().setSynced(ccuLuid, ccuGuid);
+                            CCUHsApi.getInstance().setSynced(ccuLuid);
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
@@ -2109,7 +2007,7 @@ public class CCUHsApi
                 Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
                 // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
                 CCUHsApi.getInstance().setCcuRegistered();
-            
+
                 if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
                     Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
@@ -2224,20 +2122,20 @@ public class CCUHsApi
         }
         return map;
     }
-    
+
     //The CCU that creates Site is considered primaryCCU.
     public boolean isPrimaryCcu() {
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         return spDefaultPrefs.getBoolean("isPrimaryCcu", false);
     }
-    
+
     public void setPrimaryCcu(boolean isPrimary) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("isPrimaryCcu", isPrimary);
         editor.commit();
     }
-    
+
     public HashSet<String> getSupportedRegions() {
         HashSet<String> regions = new HashSet();
         regions.add("Africa");
@@ -2250,10 +2148,10 @@ public class CCUHsApi
         regions.add("Europe");
         regions.add("Indian");
         regions.add("Pacific");
-        
+
         return regions;
     }
-    
+
     public void updateTimeZone(String newTz) {
         ArrayList<HashMap<Object, Object>> allPoints = readAllEntities("point");
         for (HashMap<Object, Object> point : allPoints ) {
@@ -2264,9 +2162,9 @@ public class CCUHsApi
                 Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
                 updatePoint(updatedPoint, updatedPoint.getId());
             }
-            
+
         }
-    
+
         ArrayList<HashMap<Object, Object>> allEquips = readAllEntities("equip");
         for(HashMap<Object, Object> equip : allEquips) {
             Equip updatedEquip = new Equip.Builder().setHashMap(equip).setTz(newTz).build();
@@ -2278,12 +2176,12 @@ public class CCUHsApi
         String ccuId = getCcuId();
         return ccuId == null ? Tags.CCU : Tags.CCU+"_"+ccuId;
     }
-    
+
     public String getTimeZone() {
         HashMap siteMap = read(Tags.SITE);
         return siteMap.get("tz").toString();
     }
-    
+
     /**
      * Converts a Haystack Grid to Standard Java Collection.
      * @param grid
@@ -2306,7 +2204,56 @@ public class CCUHsApi
         }
         return rowList;
     }
-    
+
+    public boolean hasEntitySynced(String id) {
+        return syncStatusService.hasEntitySynced(id);
+    }
+
+    public boolean isEligibleForSync(String id) {
+        return syncStatusService.isEligibleForSync(id);
+    }
+
+    public boolean isEntityExisting(String id) {
+        HashMap<Object, Object> entity = readMapById(id);
+        return !entity.isEmpty();
+    }
+
+    public void setEntitySynced(String id) {
+        syncStatusService.setEntitySynced(id);
+    }
+
+    public void addEntity(HDict entity) {
+        HRef id = (HRef) entity.get(Tags.ID);
+        tagsDb.tagsMap.put(id.toVal(), entity);
+    }
+
+    public ConcurrentHashMap<String, String> getIdMap() {
+        return tagsDb.idMap;
+    }
+
+    public ConcurrentHashMap<String, String> getUpdateIdMap() {
+        return tagsDb.updateIdMap;
+    }
+
+    public ConcurrentHashMap<String, String> getRemoveIdMap() {
+        return tagsDb.removeIdMap;
+    }
+
+    public SyncStatusService getSyncStatusService() {
+        return syncStatusService;
+    }
+
+    public HGrid readGrid(String query) {
+        HGrid grid = null;
+        try {
+            grid = hsClient.readAll(query);
+        }
+        catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return grid;
+    }
+
     public void trimObjectBoxHisStore() {
         hisSyncHandler.doPurge(true);
     }

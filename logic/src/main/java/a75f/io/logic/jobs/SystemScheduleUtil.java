@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.MockTime;
@@ -82,8 +83,9 @@ public class SystemScheduleUtil {
                 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                                                                                                                                                         - System.currentTimeMillis(), "ms"));
-                setAppOverrideExpiry(point, overrideExpiry.getMillis());
-                
+                setAppOverrideExpiry(point, 10);
+
+
             }
             
         }else if (occ!= null && !occ.isOccupied()) {
@@ -126,6 +128,12 @@ public class SystemScheduleUtil {
                 }
             }
         }
+
+        HashMap equipid = CCUHsApi.getInstance().read("equip and group == \"" + point.getGroup() + "\"");
+
+        Equip equip =  new Equip.Builder().setHashMap(equipid).build();
+        ScheduleProcessJob.processZoneEquipSchedule(equip);
+
         CCUHsApi.getInstance().writeHisValById(point.getId(), HSUtil.getPriorityVal(point.getId()));
     }
     
@@ -163,8 +171,8 @@ public class SystemScheduleUtil {
                     clearOverrideAndWriteToCcuLevel(heatpoint, heatval);
                 }
                 
-                setAppOverrideExpiry(coolpoint, System.currentTimeMillis() + 10*1000);
-                setAppOverrideExpiry(heatpoint, System.currentTimeMillis() + 10*1000);
+                setAppOverrideExpiry(coolpoint, 10);
+                setAppOverrideExpiry(heatpoint, 10);
                 CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());
                 CCUHsApi.getInstance().syncEntityTree();
             } else {
@@ -291,9 +299,9 @@ public class SystemScheduleUtil {
     /**
      * Updates any existing app-override levels to the point's writable array.
      * @param point
-     * @param overrRideExpiry
+     * @param overrRideExpiryseconds
      */
-    public static void setAppOverrideExpiry(Point point, long overrRideExpiry) {
+    public static void setAppOverrideExpiry(Point point, long overrRideExpiryseconds) {
         HashMap overrideLevel = getAppOverride(point.getId());
         Log.d(L.TAG_CCU_JOB, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
         if (overrideLevel == null) {
@@ -312,7 +320,7 @@ public class SystemScheduleUtil {
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
                     if (d == 0)
                     {
-                        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), l, HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(overrRideExpiry - System.currentTimeMillis(), "ms"));
+                        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), l, HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(overrRideExpiryseconds * 1000, "ms"));
                     }
                 }
             }

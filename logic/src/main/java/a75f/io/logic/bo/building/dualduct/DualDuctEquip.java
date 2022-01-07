@@ -122,7 +122,7 @@ class DualDuctEquip {
         
         setDefaultValues();
         
-        CCUHsApi.getInstance().syncEntityWithPointWrite();
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     
@@ -1222,7 +1222,7 @@ class DualDuctEquip {
         TemperatureProfileUtil.setDamperLimit(nodeAddr, "heating","max",config.getMaxHeatingDamperPos());
         setHisVal("heating and max and damper and pos",config.getMaxHeatingDamperPos());
         
-        CCUHsApi.getInstance().syncEntityWithPointWrite();
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     

@@ -458,7 +458,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void fetchPoints()
 	{
-		if(getActivity() != null) {
+		if(getActivity() != null && L.ccu().systemProfile != null) {
 			getActivity().runOnUiThread(() -> {
 				String colorHex = CCUUiUtil.getColorCode(getContext());
 				String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
@@ -482,11 +482,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 							.getPosition(0.0), false);
 					targetMinInsideHumidity.setSelection(humidityAdapter
 							.getPosition(0.0), false);
-				}else{
+				} else {
 					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-					Log.i(TAG, "getSystemStatusString: Before system fragement");
 					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
@@ -504,8 +503,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					if(L.ccu().systemProfile instanceof VavIERtu){
 						IEGatewayDetail.setVisibility(View.VISIBLE);
 						IEGatewayOccupancyStatus.setText(getOccStatus());
-						GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
+						GUIDDetails.setText(CCUHsApi.getInstance().getSiteIdRef().toString());
 					}
+				
 				}
 				
 				if (L.ccu().systemProfile != null) {

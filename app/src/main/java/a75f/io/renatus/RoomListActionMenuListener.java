@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -94,6 +95,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	}
 	
 	
+	@SuppressLint("StaticFieldLeak")
 	private void deleteSelectedRooms()
 	{
 		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)

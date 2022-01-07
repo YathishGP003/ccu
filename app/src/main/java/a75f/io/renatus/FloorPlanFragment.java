@@ -529,18 +529,10 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
-    private boolean isSystemEM(String ref) {
-        if (ref.equalsIgnoreCase("SYSTEM"))
-            return true;
-        return false;
-    }
-
     private boolean updateEnergyMeterModule() {
         ArrayList<Equip> equipList = new ArrayList<>();
-        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr")) {
-            if (isSystemEM(m.get("roomRef").toString()) && isSystemEM(m.get("floorRef").toString())) {
-                equipList.add(new Equip.Builder().setHashMap(m).build());
-            }
+        for (HashMap m : CCUHsApi.getInstance().readAll("equip and emr and not zone")) {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
         }
 
         if (equipList != null && (equipList.size() > 0)) {
@@ -557,12 +549,10 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private boolean updateBTUMeterModule() {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu and not zone");
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips) {
-            if (m.get("roomRef").toString().equalsIgnoreCase("SYSTEM") && m.get("floorRef").toString().equalsIgnoreCase("SYSTEM")) {
-                equipList.add(new Equip.Builder().setHashMap(m).build());
-            }
+            equipList.add(new Equip.Builder().setHashMap(m).build());
         }
 
         if (equipList != null && (equipList.size() > 0)) {
@@ -856,7 +846,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void setSystemUnselection() {
-        /**
+        /*
          * System Devices configuration for un-selection
          */
         rl_systemdevice.setBackgroundColor(Color.WHITE);
@@ -864,7 +854,7 @@ public class FloorPlanFragment extends Fragment {
         textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
         textViewSystemDevice.setSelected(false);
 
-        /**
+        /*
          * OAO Configuration for un-selection
          */
         rl_oao.setBackgroundColor(Color.WHITE);
@@ -872,15 +862,15 @@ public class FloorPlanFragment extends Fragment {
         textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_oao.setEnabled(true);
 
-        /**
-         * Modbus Energy Meter Configuration for un-selection
+        /*
+          Modbus Energy Meter Configuration for un-selection
          */
         rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
         textModbusEnergyMeter.setSelected(false);
         textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_modbus_energy_meter.setEnabled(true);
 
-        /**
+        /*
          * Modbus BTU Meter Configuration for un-selection
          */
         rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
@@ -888,7 +878,7 @@ public class FloorPlanFragment extends Fragment {
         textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
         rl_modbus_btu_meter.setEnabled(true);
 
-        /**
+        /*
          * Zone Configuration for un-selection
          */
         roomListView.setVisibility(View.VISIBLE);
@@ -929,16 +919,15 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                            if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
                                         StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
-                                        StringUtils.prependIfMissing(floor.getId(), "@"));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
                             }
 
                             //move zones and modules under new floor
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
-                                zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+                                zone.setFloorRef(floor.getId());
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
                                     equipDetails.setFloorRef(floor.getId());
@@ -1016,11 +1005,10 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                            if (! CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
                                 hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
                                         StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
-                                        StringUtils.prependIfMissing(floor.getId(), "@"));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
                             }
                             refreshScreen();
 
@@ -1521,6 +1509,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_WLD:
                 case MODBUS_EM:
                 case MODBUS_EMS:
+                case MODBUS_EMR:
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
                 case MODBUS_BTU:

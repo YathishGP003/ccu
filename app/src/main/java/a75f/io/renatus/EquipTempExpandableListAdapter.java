@@ -117,8 +117,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             LinearLayout ssHumiDifier = convertView.findViewById(R.id.ss_humidity_layout);
             TextView ssHumiDifierTV = convertView.findViewById(R.id.ss_target_humidity_tv);
             Spinner ssHumiDifierSpinner = convertView.findViewById(R.id.ss_humidity_spinner);
-            HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-
+            
             String zoneId = Schedule.getZoneIdByEquipId(equipId);
             String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);

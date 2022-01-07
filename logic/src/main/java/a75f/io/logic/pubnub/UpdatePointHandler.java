@@ -110,7 +110,7 @@ public class UpdatePointHandler
         }
 
         
-        if (CCUHsApi.getInstance().entitySynced(pointUid))
+        if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
             fetchRemotePoint(pointUid);
 
@@ -245,7 +245,7 @@ public class UpdatePointHandler
         }
 
         //If point does not exist on this CCU, return true (ignore)
-        if (! CCUHsApi.getInstance().entitySynced(pointUid)) {
+        if (! CCUHsApi.getInstance().isEntityExisting(pointUid)) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Point to update does not exist (so ignore): " + pointUid);
             return true;
         }

@@ -30,7 +30,7 @@ public class HyperStatSenseUtil {
 
     public static void updateConfigEnabled(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         Log.d(LOG_TAG, "updateConfigEnabled ++");
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String floorRef = equip.getFloorRef();
         String equipref = configPoint.getEquipRef();
@@ -111,7 +111,7 @@ public class HyperStatSenseUtil {
 
     public static void updateConfig(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         Log.d(LOG_TAG, "updateConfig ++");
-        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String floorRef = equip.getFloorRef();
         String equipref = configPoint.getEquipRef();

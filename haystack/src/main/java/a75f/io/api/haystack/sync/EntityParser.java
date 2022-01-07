@@ -173,7 +173,7 @@ public class EntityParser
                 String guid = s.getId();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                 CCUHsApi.getInstance().addSchedule(guid, s.getScheduleHDict());
-                CCUHsApi.getInstance().setSynced("@" + guid, "@" + guid);
+                CCUHsApi.getInstance().setSynced("@" + guid);
             }
         }
     }
@@ -188,7 +188,7 @@ public class EntityParser
                 q.setFloorRef("@SYSTEM");
                 q.setRoomRef("@SYSTEM");
                 String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@",""));
-                hsApi.setSynced(equipLuid, q.getId());
+                hsApi.setSynced(equipLuid);
                 //Points
                 for (Point p : getPoints())
                 {
@@ -198,7 +198,7 @@ public class EntityParser
                         p.setFloorRef("@SYSTEM");
                         p.setRoomRef("@SYSTEM");
                         p.setEquipRef(equipLuid);
-                        hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
+                        hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")));
                     }
                 }
             }
@@ -212,7 +212,7 @@ public class EntityParser
         {
             Site site = getSite();
             String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@", ""));
-            hsApi.setSynced(siteLuid, site.getId());
+            hsApi.setSynced(siteLuid);
         }
     }
     

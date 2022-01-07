@@ -177,7 +177,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 }
                 ArrayList<Equip> UpdatedEquips = new ArrayList<>();
                 for(Equip p: equips){
-                    HashMap map = CCUHsApi.getInstance().readMapById(p.getId());
+                    HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(p.getId());
                     map.put("dis", p.getDisplayName().replace(HSUtil.getDis(p.getSiteRef())+"-",HSUtil.getDis(p.getRoomRef())+"_").replace("-",""));
                     Equip.Builder eb = new Equip.Builder();
                     eb.setHashMap(map);
@@ -591,7 +591,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
-        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
+        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system");
         ArrayList<HashMap> moduleTuners = new ArrayList<>();
 
 

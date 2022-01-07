@@ -179,7 +179,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     TextView zoneLoadTextView = null;
     public ZoneFragmentNew() {
     }
-
+    
+    /**
+     * We are currently dependent on deprecated API setUserVisibleHint to enable listeners for updating the temperature
+     * and heartbeat. This might get called even before zoneView is drawn completely , all the updates from nodes can
+     * delay the loading of zoneView further. Potential fix to this is an additional flag in conjunction with the
+     * setUserVisibleHint to make sure the view is ready before we start listening to updates.
+     */
+    private boolean isZoneViewReady = false;
     public static ZoneFragmentNew newInstance() {
         return new ZoneFragmentNew();
     }
@@ -195,6 +202,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated");
+        isZoneViewReady = false;
         expandableListView = view.findViewById(R.id.expandableListView);
         mDrawerLayout = view.findViewById(R.id.drawer_layout);
         drawer_screen = view.findViewById(R.id.drawer_screen);
@@ -293,9 +301,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     
     public void refreshHeartBeatStatus(String id) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshHeartBeatStatus zoneOpen "+zoneOpen);
-        HashMap equip = CCUHsApi.getInstance().read("equip and group ==\""+id+"\"");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+id+"\"");
         if (!equip.isEmpty()) {
-            HashMap zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
+            HashMap<Object, Object> zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
             ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""
                                                                              +zone.get("id")+ "\"");
             if(equipsInZone.size() > 0) {
@@ -569,11 +577,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     }
     
     private void setCcuReady() {
+        isZoneViewReady = true;
         Globals.getInstance().setCcuReady(true);
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
     }
-
 
     private int loadZone(View rootView, LinearLayout[] tablerowLayout, HashMap roomMap) {
 
@@ -2984,6 +2992,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             ScheduleProcessJob.setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
+            HyperStatScheduler.Companion.setZoneDataInterface(this);
         }
     }
 
@@ -3002,7 +3011,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
+        CcuLog.i("UI_PROFILING","isVisibleToUser "+isVisibleToUser+" isZoneViewReady "+isZoneViewReady);
+        if (isVisibleToUser && isZoneViewReady) {
             UpdatePointHandler.setZoneDataInterface(this);
             Pulse.setCurrentTempInterface(this);
             ScheduleProcessJob.setScheduleDataInterface(this);
@@ -3169,6 +3179,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                             HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
                             spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                            Log.d("CCU_UI ", "Fill spillsMap for zone "+zoneSchedule.getRoomRef());
                             ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
                             CCUHsApi.getInstance().scheduleSync();
                         }

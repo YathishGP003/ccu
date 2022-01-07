@@ -19,19 +19,19 @@ import io.objectbox.BoxStore;
 import io.objectbox.query.QueryBuilder;
 public class EquipProcessor
 {
-    ArrayList<EquipmentDevice> equipmentDevices;
-    ArrayList<EquipmentDevice> energyMeterDevices;
+    private ArrayList<EquipmentDevice> equipmentDevices;
+    private ArrayList<EquipmentDevice> energyMeterDevices;
     /**
      * Hold the Modbus BTU Meter Device List
      */
-    ArrayList<EquipmentDevice> modbusBTUMeterDevices;
+    private ArrayList<EquipmentDevice> modbusBTUMeterDevices;
 
     ModbusParser parser;
     Context mContext;
     private BoxStore boxStore;
     private Box<EquipmentDevice> modbusBox;
     ObjectMapper objectMapper;
-    ArrayList<EquipmentDevice> energyMeterSystemDevices;
+    private ArrayList<EquipmentDevice> energyMeterSystemDevices;
 
     EquipProcessor(Context c) {
         mContext = c;
@@ -72,10 +72,11 @@ public class EquipProcessor
     }
 
 
-    private void readExternalJsonData(){
+    public void readExternalJsonData(){
         // Read external Json data
 
-        parser.readExternalJSONFromDir("/sdcard/ccu/modbus",equipmentDevices,modbusBTUMeterDevices,energyMeterSystemDevices,energyMeterDevices);
+        parser.readExternalJSONFromDir("/sdcard/ccu/modbus", equipmentDevices, modbusBTUMeterDevices,
+                energyMeterSystemDevices, energyMeterDevices);
         Log.i("CCU_MODBUS", "Modbus external JSON file scan completed");
 
     }
@@ -171,6 +172,30 @@ public class EquipProcessor
         configQuery.equal(EquipmentDevice_.isPaired, false);
         configQuery.equal(EquipmentDevice_.equipType, "BTU");
         return  configQuery.build().find();
+    }
+
+    private static boolean isFirstTime = true;
+    public EquipmentDevice getEquipByEquipTypeAndName(String equipType, String name){
+        if(isFirstTime) {
+            for (EquipmentDevice equipmentDevice : equipmentDevices) {
+                addEquips(equipmentDevice);
+            }
+            for (EquipmentDevice equipmentDevice : energyMeterSystemDevices) {
+                addEquips(equipmentDevice);
+            }
+            for (EquipmentDevice equipmentDevice : energyMeterDevices) {
+                addEquips(equipmentDevice);
+            }
+
+            for (EquipmentDevice equipmentDevice : modbusBTUMeterDevices) {
+                addEquips(equipmentDevice);
+            }
+            isFirstTime = false;
+        }
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.equipType, equipType);
+        configQuery.equal(EquipmentDevice_.name, name);
+        return configQuery.build().findFirst();
     }
 
 }

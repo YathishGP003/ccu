@@ -36,7 +36,7 @@ public class EntityPullHandler
         if (parser.getSite() != null) {
             Site site = parser.getSite();
             String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@",""));
-            hsApi.setSynced(siteLuid, site.getId());
+            hsApi.setSynced(siteLuid);
 
             doPullFloorTree(siteLuid, grid);
         }
@@ -50,7 +50,7 @@ public class EntityPullHandler
         {
             Site site = parser.getSite();
             String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@",""));
-            hsApi.setSynced(siteLuid, site.getId());
+            hsApi.setSynced(siteLuid);
         }
     }
     
@@ -61,14 +61,14 @@ public class EntityPullHandler
         for (Floor f : parser.getFloors()) {
             f.setSiteRef(siteLuid);
             String floorLuid = hsApi.addRemoteFloor(f, f.getId().replace("@", ""));
-            hsApi.setSynced(floorLuid, f.getId());
+            hsApi.setSynced(floorLuid);
             //Zones
             for (Zone z : parser.getZones()) {
                 if (z.getFloorRef().equals(f.getId())) {
                     z.setSiteRef(siteLuid);
                     z.setFloorRef(floorLuid);
                     String zoneLuid = hsApi.addRemoteZone(z, z.getId().replace("@", ""));
-                    hsApi.setSynced(zoneLuid, z.getId());
+                    hsApi.setSynced(zoneLuid);
                     //Equips
                     for (Equip q : parser.getEquips()) {
                         if (q.getRoomRef().equals(z.getId())) {
@@ -76,7 +76,7 @@ public class EntityPullHandler
                             q.setFloorRef(floorLuid);
                             q.setRoomRef(zoneLuid);
                             String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                            hsApi.setSynced(equipLuid, q.getId());
+                            hsApi.setSynced(equipLuid);
                             //Points
                             for (Point p : parser.getPoints()) {
                                 if (p.getEquipRef().equals(q.getId()))
@@ -85,7 +85,7 @@ public class EntityPullHandler
                                     p.setFloorRef(floorLuid);
                                     p.setRoomRef(zoneLuid);
                                     p.setEquipRef(equipLuid);
-                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
+                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")));
                                 }
                             }
     
@@ -101,7 +101,7 @@ public class EntityPullHandler
                                     d.setRoomRef(zoneLuid);
                                     d.setEquipRef(equipLuid);
                                     String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
-                                    hsApi.setSynced(deviceLuid, d.getId());
+                                    hsApi.setSynced(deviceLuid);
                                     //Physical Points
                                     for (RawPoint p : parser.getPhyPoints()) {
                                         if (p.getDeviceRef().equals(d.getId()))
@@ -112,7 +112,7 @@ public class EntityPullHandler
                                             p.setRoomRef(zoneLuid);
                                             p.setDeviceRef(deviceLuid);
                                             p.setPointRef(p.getDeviceRef());
-                                            hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
+                                            hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")));
                                         }
                                     }
                                 }
@@ -122,7 +122,7 @@ public class EntityPullHandler
                             q.setFloorRef("@SYSTEM");
                             q.setRoomRef("@SYSTEM");
                             String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
-                            hsApi.setSynced(equipLuid, q.getId());
+                            hsApi.setSynced(equipLuid);
                             //Points
                             for (Point p : parser.getPoints()) {
                                 if (p.getEquipRef().equals(q.getId()))
@@ -131,7 +131,7 @@ public class EntityPullHandler
                                     p.setFloorRef("@SYSTEM");
                                     p.setRoomRef("@SYSTEM");
                                     p.setEquipRef(equipLuid);
-                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
+                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")));
                                 }
                             }
                         }
@@ -148,14 +148,14 @@ public class EntityPullHandler
             {
                 d.setSiteRef(siteLuid);
                 String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
-                hsApi.setSynced(deviceLuid, d.getId());
+                hsApi.setSynced(deviceLuid);
                 for (SettingPoint p : parser.getSettingPoints())
                 {
                     if (p.getDeviceRef().equals(d.getId()))
                     {
                         p.setSiteRef(siteLuid);
                         p.setDeviceRef(deviceLuid);
-                        hsApi.setSynced(hsApi.addPointWithId(p, p.getId().replace("@", "")), p.getId());
+                        hsApi.setSynced(hsApi.addPointWithId(p, p.getId().replace("@", "")));
                     }
                 }
             }
@@ -168,7 +168,7 @@ public class EntityPullHandler
             {
                 d.setSiteRef(siteLuid);
                 String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
-                hsApi.setSynced(deviceLuid, d.getId());
+                hsApi.setSynced(deviceLuid);
                 hsApi.addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.copy(deviceLuid));
             }
         }

@@ -493,7 +493,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
      * @return
      */
     public static String getZoneStatusMessage(String zoneId, String equipId) {
-        HashMap equip = CCUHsApi.getInstance().readMapById(equipId);
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipId);
         String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
         if (equip.containsKey("vrv")) {
             status += ", Group Address "+
@@ -1042,7 +1042,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             vavPoints.put("Discharge Airflow",0+" \u2109");
         }
 
-        HashMap equip = CCUHsApi.getInstance().readMapById(equipID);
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
         if (equip.containsKey("series")) {
             vavPoints.put("Profile","VAV Series Fan");
         } else if (equip.containsKey("parallel")){
@@ -1356,15 +1356,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             emPoints.put("Status","OFF");
         }
+        double currentRateVal = 0;
         if (currentRate != null && currentRate.size() > 0)
         {
             String id = ((HashMap) currentRate.get(0)).get("id").toString();
             HisItem currentRateHis = CCUHsApi.getInstance().curRead(id);
-            double currentRateVal = currentRateHis.getVal();
-            emPoints.put("Current Rate",currentRateVal);
-        }else{
-            emPoints.put("Current Rate",0.0);
+            if(currentRateHis != null){
+                currentRateVal = currentRateHis.getVal();
+            }
         }
+        emPoints.put("Current Rate",currentRateVal);
         if (energyReading > 0)
         {
             emPoints.put("Energy Reading",energyReading);

@@ -60,7 +60,7 @@ public class ConventionalPackageUnitUtil {
     }
     private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfig " + nodeAddr + " " + configPoint);
@@ -91,7 +91,7 @@ public class ConventionalPackageUnitUtil {
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
         adjustCPUFanMode(equip,hayStack);
         adjustConditioningMode(equip, hayStack);
     }
@@ -99,7 +99,7 @@ public class ConventionalPackageUnitUtil {
     private static void updateOccupancyPoint(double configVal, Point configPoint,
                                              JsonObject msgObject, CCUHsApi hayStack) {
         
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
     
         updateOccupancyPoint(configVal, equip, hayStack);
@@ -138,7 +138,7 @@ public class ConventionalPackageUnitUtil {
     }
     
     private static void updateRelay6Config(double configVal, Point configPoint, CCUHsApi hayStack) {
-        HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
+        HashMap<Object, Object> equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateRelay6Config " + configVal);
         if (configPoint.getMarkers().contains(Tags.TYPE)) {
@@ -149,7 +149,7 @@ public class ConventionalPackageUnitUtil {
                 manageRelay6AssociatedPoints(configVal, equip);
             }
         }
-        hayStack.syncPointEntityTree();
+        hayStack.scheduleSync();
     }
     
     public static void manageRelay6AssociatedPoints(double configVal, Equip equip ) {

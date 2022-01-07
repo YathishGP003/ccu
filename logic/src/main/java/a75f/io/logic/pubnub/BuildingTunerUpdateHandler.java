@@ -19,7 +19,7 @@ public class BuildingTunerUpdateHandler {
     public static void updateZoneModuleSystemPoints(String id) {
 
         //update dualDuct building tuners
-        HashMap newTunerValueItem = CCUHsApi.getInstance().readMapById(id);
+        HashMap<Object, Object> newTunerValueItem = CCUHsApi.getInstance().readMapById(id);
 
         if (newTunerValueItem == null) {
             return;

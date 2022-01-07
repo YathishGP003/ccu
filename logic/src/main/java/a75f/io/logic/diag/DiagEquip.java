@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
@@ -15,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -24,7 +24,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.R;
 
 public class DiagEquip
 {
@@ -40,15 +39,15 @@ public class DiagEquip
     }
     
     public String create() {
-        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+        HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip already created");
             return null;
         }
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+        String siteDis = Objects.requireNonNull(siteMap.get("dis")).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         Equip b = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-DiagEquip")
@@ -61,9 +60,9 @@ public class DiagEquip
     
     public void addPoints(String equipRef, String equipDis) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
-        HashMap siteMap = hsApi.read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String tz = siteMap.get("tz").toString();
+        HashMap<Object,Object> siteMap = hsApi.readEntity(Tags.SITE);
+        String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+        String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         
         Point batteryLevel = new Point.Builder()
                                            .setDisplayName(equipDis+"-batteryLevel")
@@ -193,7 +192,7 @@ public class DiagEquip
     
     
     public void updatePoints() {
-        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+        HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() == 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip does not exist");
             return;

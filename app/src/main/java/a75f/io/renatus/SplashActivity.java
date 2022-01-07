@@ -81,10 +81,6 @@ public class SplashActivity extends AppCompatActivity {
                                 startActivity(i);
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION")) {
-                                if (!CCUHsApi.getInstance().isCCURegistered()){
-                                    registerCcuInBackground();
-                                    Log.i("SplashActivity","CCU is not yet registered");
-                                }
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);

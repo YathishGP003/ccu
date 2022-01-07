@@ -27,9 +27,9 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 {
     boolean watchdogMonitor = false;
-    
-    private Lock jobLock  = new ReentrantLock();
-    
+
+    private final Lock jobLock  = new ReentrantLock();
+
     @Override
     public void bark() {
         watchdogMonitor = true;
@@ -51,13 +51,14 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         if (jobLock.tryLock()) {
             
             try {
-                HashMap site = CCUHsApi.getInstance().read("site");
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (site.isEmpty()) {
                     CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");
                     return;
                 }
+
+                HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
                 
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 if (ccu.isEmpty()) {
                     CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
                     return;
@@ -116,12 +117,12 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         }.start();
 
         DateTime now = new DateTime();
-        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
         if (timeForEntitySync) {
             L.saveCCUState();
             CCUHsApi.getInstance().scheduleSync();
         }
-        //Save CCU state every other minute.
+        //Save CCU state every other minute. This could be expensive if the local entity count is high.
         if (now.getMinuteOfDay() % 2 == 0) {
             L.saveCCUState();
         }

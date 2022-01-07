@@ -157,45 +157,28 @@ public class RangeBar extends View {
                 getParent().requestDisallowInterceptTouchEvent(false);
                 break;
             case MotionEvent.ACTION_MOVE:
-    
-                float tempVal = getTempForPX(event.getX());
-                float deadBandSum = (float)(cdb + hdb);
-                
                 Log.i("Movement", "mSelected - " + mSelected.name()
-                        + " Temps: " + tempVal);
-                if (tempVal > mLowerBound && tempVal < mUpperBound) {
-
+                                  + " Temps: " + getTempForPX(event.getX()));
+                if (getTempForPX(event.getX()) > mLowerBound && getTempForPX(event.getX()) < mUpperBound) {
+        
                     Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
                     if (mSelected == RangeBarState.LOWER_COOLING_LIMIT) {
-                        /**
-                         * Update cooling temp if new temp value within the user limits and the derived heating temp
-                         * to keep the deadband will fall within heating user limits.
-                         */
-                        if (tempVal >= lowerCoolingTemp && tempVal <= upperCoolingTemp
-                                                        && (tempVal - deadBandSum) >= upperHeatingTemp) {
+                        if (getTempForPX(event.getX()) >= lowerCoolingTemp && getTempForPX(event.getX()) <= upperCoolingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = tempVal;
-                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < deadBandSum) {
-                                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] =
-                                    (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - deadBandSum);
+                            temps[mSelected.ordinal()] = getTempForPX(event.getX());
+                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {
+                                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - (float) (cdb + hdb));
                             }
                         }
                     } else if (mSelected == RangeBarState.LOWER_HEATING_LIMIT) {
-                        /**
-                         * Update heating temp if new temp value within the user limits and the derived cooling temp
-                         * to keep the deadband will fall within cooling user limits.
-                         */
-                        if (tempVal >= upperHeatingTemp && tempVal <= lowerHeatingTemp
-                                                        && (tempVal+deadBandSum) <= upperCoolingTemp) {
+                        if (getTempForPX(event.getX()) >= upperHeatingTemp && getTempForPX(event.getX()) <= lowerHeatingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = tempVal;
-                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < deadBandSum) {
-                                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] =
-                                    (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] + deadBandSum);
+                            temps[mSelected.ordinal()] = getTempForPX(event.getX());
+                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {
+                                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] + (float) (cdb + hdb));
                             }
                         }
                     }
-
                     invalidate();
                 }
                 break;

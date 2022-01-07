@@ -5,9 +5,9 @@ import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import android.content.Context
+import io.objectbox.kotlin.inValues
 import org.apache.commons.lang3.StringUtils
 import java.lang.Exception
-import java.util.*
 import kotlin.collections.ArrayList
 
 private const val PREFS_ALERT_DEFS = "ccu_alerts"
@@ -35,6 +35,10 @@ class AlertsDataStore @JvmOverloads constructor(
 
    private val boxStore = haystack.tagsDb.boxStore
    private val alertBox = boxStore.boxFor(Alert::class.java)
+
+   // All internal alert types that are triggered by events that have no resolution conditions
+   // Alert occurrences created for these types will be auto-fixed after 1 hour
+   private var eventAlertDefs = arrayOf(CCU_RESTART, CM_RESET, DEVICE_REBOOT, DEVICE_RESTART)
 
 
    fun clearAlert(alert: Alert) {
@@ -154,6 +158,12 @@ class AlertsDataStore @JvmOverloads constructor(
       val alertQuery = alertBox.query()
       alertQuery.contains(Alert_.mTitle, "CM ERROR REPORT")
          .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getActiveInternalEventAlerts(): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.inValues(Alert_.mTitle, eventAlertDefs)
       return alertQuery.build().find()
    }
 

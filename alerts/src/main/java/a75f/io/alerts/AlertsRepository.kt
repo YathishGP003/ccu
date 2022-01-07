@@ -203,6 +203,9 @@ class AlertsRepository(
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
 
+      // Fix internal event alerts (i.e. "CCU RESTART", "CM_REINIT", etc.) that have been active for > 1 hour
+      fixExpiredEventAlerts()
+
       CcuLog.d("CCU_ALERTS", "New AlertDefsState = ${alertDefsState.niceString()}")
 
       // update active alerts with new state
@@ -240,6 +243,17 @@ class AlertsRepository(
 
 
    /////   private   /////
+
+   private fun fixExpiredEventAlerts() {
+      val alerts = dataStore.getActiveInternalEventAlerts()
+      for (a in alerts) {
+         if (!a.isFixed && (System.currentTimeMillis() - a.startTime) >= 3600000) {
+            CcuLog.i("CCU_ALERTS", "Fixing expired event alert: $a")
+
+            fixAlert(a)
+         }
+      }
+   }
 
    /**
     * Called from processAlerts.

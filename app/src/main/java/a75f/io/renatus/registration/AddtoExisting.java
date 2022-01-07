@@ -463,11 +463,6 @@ public class AddtoExisting extends Fragment {
                     if (StringUtils.isNotBlank(httpResponse)) {
                         siteIdResponse = getSiteIdFromJson(httpResponse);
                     }
-                    if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-                        if (Globals.getInstance().isAckdMessagingEnabled()) {
-                            MessagingClient.getInstance().init();
-                        }
-                    }
                 } else {
                     Toast.makeText(getActivity(), "Unable to load site provided. Please try again or provide a different site ID.", Toast.LENGTH_LONG).show();
                 }

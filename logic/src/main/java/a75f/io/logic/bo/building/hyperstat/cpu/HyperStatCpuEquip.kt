@@ -798,7 +798,7 @@ class HyperStatCpuEquip(val node: Short) {
             "$relayTag and logical"
         )
         hyperStatPointsUtil.addDefaultValueForPoint(relayId, if (relayState.enabled) 1.0 else 0.0)
-        hyperStatPointsUtil.addDefaultValueForPoint(relayAssociatedId, relayState.association.ordinal)
+        hyperStatPointsUtil.addDefaultValueForPoint(relayAssociatedId, relayState.association.ordinal.toDouble())
         if (relayLogicalPointId != null) {
             hsHaystackUtil!!.removePoint(relayLogicalPointId)
         }
@@ -883,7 +883,7 @@ class HyperStatCpuEquip(val node: Short) {
 
         // Update the Enable , association status with configurations
         hyperStatPointsUtil.addDefaultValueForPoint(analogOutId, if (analogOutState.enabled) 1.0 else 0.0)
-        hyperStatPointsUtil.addDefaultValueForPoint(analogOutAssociatedId, analogOutState.association.ordinal)
+        hyperStatPointsUtil.addDefaultValueForPoint(analogOutAssociatedId, analogOutState.association.ordinal.toDouble())
 
         // Check if logical logical,min,max, fan config  Point exist
         // (This situation is when previous state was not enabled for this analog now it is enabled )
@@ -972,7 +972,7 @@ class HyperStatCpuEquip(val node: Short) {
             "$analogInTag and in and logical"
         )
         hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
-        hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal)
+        hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal.toDouble())
         if (analogInLogicalPointId != null) {
             hsHaystackUtil!!.removePoint(analogInLogicalPointId)
         }

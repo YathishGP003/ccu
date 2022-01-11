@@ -1,4 +1,4 @@
- - Merged PR 2833: 9882 - "Add to Existing Site" Registration Crash
- - Removed uneccessary messaging initialization that occurs prior to registration
- - Merged PR 2704: 8165 - Coerce token value to int.
- - 8165 - Coerce token value to int.
+ - Merged PR 2864: Updated condition for reserved in UsbService.java 454
+ - Merged PR 2826: 9728 : CCU - Zone schedule desired temp update Changes
+ - Merged PR 2596: 9396  : CCU - CCU : Heating User limit min max values update
+ - Merged PR 2827: By default we are showing  Humidity and CO2 sensor in Hyperstat Display

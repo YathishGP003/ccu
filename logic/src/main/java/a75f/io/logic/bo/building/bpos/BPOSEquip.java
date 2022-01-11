@@ -605,9 +605,6 @@ public class BPOSEquip {
     public void setStatus(double status) {
 
         ZoneState state = ZoneState.values()[((int) status)];
-
-        Log.d("Spoo_LOG", "state.toString() equip" + state.toString());
-
         CCUHsApi.getInstance().writeDefaultVal("point and status and message " +
                 " and group == \"" + mNodeAddr + "\"", state.toString());
 

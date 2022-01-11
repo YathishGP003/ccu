@@ -451,13 +451,16 @@ public class UsbService extends Service
 							byte crc = 0;
 							byte nOffset = 0;
 							int len = data.length;
-							if (len >= 128) {
+							// initially 6 bytes are already reserved for starting and ending .
+							// so we are adding we are adding condition for 120 and reserving 2 byte for
+							if (len > 120) {
 								// buffer = new byte[160]; //For OTA Updates
 								buffer = new byte[300]; /** Updated by manjunath.K on 27-12-2021 LINK :
 								 User Story 9390: CCU : Additional Setting messages for Hyperstat CPU profile for Standalone mode
 								 Hyperstat seed message contains more than 160 length of data so as of now if it
-								 exceeds more than 160 we are constructing actual length of message */
+								 exceeds more than 160 we changed to 300 length of message */
 							}
+							Log.i(TAG, "Actual Message length "+ data.length+ " and buffer size "+buffer.length);
 							buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (len & 0xff);

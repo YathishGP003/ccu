@@ -337,6 +337,8 @@ public class UsbService extends Service
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
 		Log.d(TAG,"scanSerialPortSilentlyForCmDevice = "+usbDevices.size());
 		if (!usbDevices.isEmpty()) {
+			connection = null;
+			device = null;
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
 				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
@@ -344,11 +346,10 @@ public class UsbService extends Service
 					connection = usbManager.openDevice(device);
 					if (success) {
 						new ConnectionThread().start();
+						Log.d(TAG, "Opened Serial CM device "+device.getDeviceName());
+					} else {
+						Log.d(TAG, "Failed to open Serial CM device "+device.getDeviceName());
 					}
-					Log.d(TAG, "Opened Serial CM device instance "+device.getDeviceName());
-				} else {
-					connection = null;
-					device = null;
 				}
 			}
 		}

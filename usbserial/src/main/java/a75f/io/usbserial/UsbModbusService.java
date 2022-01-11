@@ -318,11 +318,13 @@ public class UsbModbusService extends Service {
     private void scanSerialPortSilentlyForMbDevice() {
     
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        Log.d(TAG, "findMBSerialPortDevice=" + usbDevices.size());
+        Log.d(TAG, "scanSerialPortSilentlyForMbDevice=" + usbDevices.size());
         if (!usbDevices.isEmpty()) {
+            connection = null;
+            device = null;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                if (UsbSerialUtil.isCMDevice(device, context)) {
+                if (UsbSerialUtil.isModbusDevice(device, context)) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
                     if (connection != null && success) {
@@ -332,11 +334,7 @@ public class UsbModbusService extends Service {
                     } else {
                         Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
                     }
-                } else {
-                    connection = null;
-                    device = null;
                 }
-                
             }
         }
     }

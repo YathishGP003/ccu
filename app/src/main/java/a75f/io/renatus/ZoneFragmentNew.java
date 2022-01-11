@@ -916,7 +916,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);
         seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax,
-                        (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit,
+                        (float) heatLowerlimit, (float) heatUpperlimit, (float) coolLowerlimit,
                         (float) coolUpperlimit, (float) pointheatDT, (float) pointcoolDT,
                         (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
 
@@ -1378,9 +1378,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         double pointcoolDB = TunerUtil.getZoneCoolingDeadband(p.getRoomRef());
 
         if (!seekArc.isDetailedView()) {
-            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
+            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
         } else {
-            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
+            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
         }
 
         linearLayoutZonePoints.removeAllViews();

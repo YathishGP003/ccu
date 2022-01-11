@@ -113,7 +113,7 @@ public class CongratsFragment extends Fragment {
         p.setMargins(0, 0, 0, 80);
 
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-        
+
         String buldingLimit;
         String heatingLimit;
         String coolingLimit;
@@ -135,12 +135,12 @@ public class CongratsFragment extends Fragment {
         Equip eqp = new Equip.Builder().setHashMap(tuner).build();
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double buildingLimitMin =  BuildingTunerCache.getInstance().getBuildingLimitMin();
-        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user");
         HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         HashMap minCoolMap =  CCUHsApi.getInstance().read("point and limit and min and cooling and user");
         buldingLimit = (int)buildingLimitMin+"|"+ (int)buildingLimitMax;
-        heatingLimit = (int)getTuner(minHeatMap.get("id").toString())+"|"+(int)getTuner(maxHeatMap.get("id").toString());
+        heatingLimit = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(minHeatMap.get("id").toString());
         coolingLimit = (int)getTuner(minCoolMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
         zoneRange = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
         currentTemp = String.valueOf((int) SystemTemperatureUtil.getCurrentTemp(eqp.getId()));
@@ -169,6 +169,9 @@ public class CongratsFragment extends Fragment {
             mHVACEquip.setText(StringUtil.isBlank(status) ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
         }
         mComfortSelector.setText("Maximum Comfort");
+        mComfortSelector.setVisibility(View.GONE);
+
+
         return rootView;
     }
 

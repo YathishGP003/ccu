@@ -88,7 +88,7 @@ public class DeviceUtil {
     }
     
     public static short getMinUserTempLimits(double deadband){
-        double maxHeat =  BuildingTunerCache.getInstance().getMaxHeatingUserLimit();
+        double maxHeat =  BuildingTunerCache.getInstance().getMinHeatingUserLimit();
         return (short)(maxHeat+ deadband);
     }
     

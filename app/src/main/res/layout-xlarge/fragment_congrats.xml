@@ -364,6 +364,7 @@
                         android:layout_height="29dp"
                         android:textAppearance="@style/text_appearance"
                         android:text="@string/label_comfortselector"
+                        android:visibility="gone"
                         android:gravity="left|center_vertical"/>
 
                     <TextView

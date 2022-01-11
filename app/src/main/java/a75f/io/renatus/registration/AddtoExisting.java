@@ -555,6 +555,12 @@ public class AddtoExisting extends Fragment {
                     Globals.getInstance().setSiteAlreadyCreated(true);
                     CCUHsApi.getInstance().setPrimaryCcu(false);
                     L.ccu().systemProfile = new DefaultSystem();
+    
+                    if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+                        if (Globals.getInstance().isAckdMessagingEnabled()) {
+                            MessagingClient.getInstance().init();
+                        }
+                    }
                 }
                 return retVal;
             }

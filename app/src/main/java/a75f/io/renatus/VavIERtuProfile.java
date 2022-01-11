@@ -406,15 +406,21 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             case R.id.analog1RTUTest:
             case R.id.analog3RTUTest:
                 Globals.getInstance().setTestMode(true);
-                IEDeviceHandler.getInstance().sendDatClgSetpoint(val);
+                if (IEDeviceHandler.getInstance().isReady()) {
+                    IEDeviceHandler.getInstance().sendDatClgSetpoint(val);
+                }
                 break;
             case R.id.analog2RTUTest:
                 Globals.getInstance().setTestMode(true);
-                IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance());
+                if (IEDeviceHandler.getInstance().isReady()) {
+                    IEDeviceHandler.getInstance().sendFanControl(val, CCUHsApi.getInstance());
+                }
                 break;
             case R.id.humidificationTest:
                 Globals.getInstance().setTestMode(true);
-                IEDeviceHandler.getInstance().sendBuildingHumidity(val);
+                if (IEDeviceHandler.getInstance().isReady()) {
+                    IEDeviceHandler.getInstance().sendBuildingHumidity(val);
+                }
                 break;
             case R.id.oaMinTest:
                 Globals.getInstance().setTestMode(true);

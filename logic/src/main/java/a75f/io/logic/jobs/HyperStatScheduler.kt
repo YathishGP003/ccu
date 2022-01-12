@@ -2,7 +2,6 @@ package a75f.io.logic.jobs
 
 import a75f.io.api.haystack.*
 import a75f.io.logger.CcuLog
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.Occupancy
 import a75f.io.logic.bo.building.ZoneState
@@ -22,6 +21,12 @@ import org.projecthaystack.HRef
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
+import java.lang.IllegalArgumentException
+import a75f.io.api.haystack.HSUtil
+import org.joda.time.DateTime
+
 
 /**
  * Created by Manjunath K on 11-08-2021.
@@ -146,10 +151,7 @@ class HyperStatScheduler {
 
         fun processEquip(equip: Equip, equipSchedule: Schedule, vacation: Schedule?){
             val occ = equipSchedule.currentValues
-
-
             //When schedule is deleted
-
             if (occ == null) {
                 ScheduleProcessJob.occupiedHashMap.remove(equip.roomRef)
                 return
@@ -173,7 +175,7 @@ class HyperStatScheduler {
 
             val setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.id)
             val curOccupancy = Occupancy.values()[occupancyStatus.toInt()]
-            val autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback")
+            //val autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback")
 
 
             occ.unoccupiedZoneSetback = setback
@@ -211,20 +213,14 @@ class HyperStatScheduler {
                 else
                     occ.heatingVal - occ.unoccupiedZoneSetback
 
-                Log.i(L.TAG_CCU_HSCPU,"autoAwaySetbackTemp $autoawaysetback");
                 Log.i(L.TAG_CCU_HSCPU,"${occ.coolingVal} ${occ.heatingVal} $setback")
 
                 if (equip.markers.contains("cpu") && occupancyStatus == Occupancy.AUTOAWAY.ordinal.toDouble()){
-                    coolingTemp =  occ.coolingVal + autoawaysetback
-                    heatingTemp =  occ.heatingVal - autoawaysetback
-                    Log.i(L.TAG_CCU_HSCPU, "processEquip After coolingTemp: $coolingTemp heatingTemp $heatingTemp")
+                    handleAutoaway(equip, occ.isForcedOccupied);
                 }
-                Log.i(L.TAG_CCU_HSCPU, "Hyperstat scheduler is changing the " +
-                        "coolingTemp $coolingTemp heatingTemp $heatingTemp avgTemp $avgTemp")
                 setDesiredTemp(equip, coolingTemp, "cooling", occ.isForcedOccupied)
                 setDesiredTemp(equip, heatingTemp, "heating", occ.isForcedOccupied)
                 setDesiredTemp(equip, avgTemp, "average", occ.isForcedOccupied)
-
             }
         }
 
@@ -314,5 +310,86 @@ class HyperStatScheduler {
         }
 
 
+        private fun handleAutoaway(equip: Equip, isForcedOccupied: Boolean) {
+            val coolingDtPoint = CCUHsApi.getInstance().read(
+                "point and air and temp and " +
+                        "desired and cooling and sp and equipRef == \"" + equip.id + "\""
+            )
+            if (coolingDtPoint == null || coolingDtPoint.size == 0) {
+                throw IllegalArgumentException()
+            }
+            val heatingDtPoint = CCUHsApi.getInstance().read(
+                ("point and air and temp and " +
+                        "desired and heating and sp and equipRef == \"" + equip.id + "\"")
+            )
+            if (heatingDtPoint == null || heatingDtPoint.size == 0) {
+                throw IllegalArgumentException()
+            }
+            val autoAwaySetBack = TunerUtil.readTunerValByQuery("auto and away and setback")
+            Log.i(L.TAG_CCU_HSCPU,"autoAwaySetbackTemp $autoAwaySetBack");
+
+            val heatingDT = getPriorityDesiredTemp(heatingDtPoint["id"].toString())
+            val coolingDT = getPriorityDesiredTemp(coolingDtPoint["id"].toString())
+            val hp = Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(heatingDtPoint.get("id").toString()))
+                .build()
+            val cp =
+                Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(coolingDtPoint["id"].toString())).build()
+
+
+            setDesiredatlevel3(hp,(heatingDT - autoAwaySetBack), isForcedOccupied, equip, "heating")
+            setDesiredatlevel3(cp,(coolingDT + autoAwaySetBack), isForcedOccupied, equip, "cooling")
+        }
+
+        private fun setDesiredatlevel3(
+            p: Point,
+            desiredTemp: Double,
+            isForcedOccupied: Boolean,
+            equip: Equip,
+            flag: String
+        ) {
+            val occ = ScheduleProcessJob.getOccupiedModeCache(p.roomRef)
+            CcuLog.d(
+                L.TAG_CCU_SCHEDULER,
+                "setDesiredatlevel3 Equip: " + equip.displayName + " Temp: " + desiredTemp + " Flag: " + flag + "," + isForcedOccupied
+            )
+            val point = CCUHsApi.getInstance()
+                .read("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.id + "\"")
+            if (point == null || point.size == 0) {
+                return  //Equip might have been deleted.
+            }
+            val id = point["id"].toString()
+            if (isForcedOccupied) return
+            if (HSUtil.getPriorityLevelVal(id, 3) == desiredTemp) {
+                CcuLog.d(L.TAG_CCU_SCHEDULER, flag + "DesiredTemp not changed : Skip PointWrite")
+                return
+            }
+            val day = occ.currentlyOccupiedSchedule ?: return
+            val overrideExpiry = DateTime(MockTime.getInstance().mockTime)
+                .withHourOfDay(day.ethh)
+                .withMinuteOfHour(day.etmm)
+                .withDayOfWeek(day.day + 1)
+                .withSecondOfMinute(0)
+            CCUHsApi.getInstance().pointWrite(
+                HRef.make(id.replace("@", "")), 3,
+                "Scheduler", HNum.make(desiredTemp), HNum.make(
+                    overrideExpiry.millis
+                            - System.currentTimeMillis(), "ms"
+                )
+            )
+            CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id))
+            SystemScheduleUtil.setAppOverrideExpiry(p, overrideExpiry.millis)
+        }
+
+        private fun getPriorityDesiredTemp(id: String): Double {
+            val values = CCUHsApi.getInstance().readPoint(id)
+            if (values != null && values.size > 0) {
+                for (l in 4..values.size) {
+                    val valMap = values[l - 1]
+                    if (valMap["val"] != null) {
+                        return valMap["val"].toString().toDouble()
+                    }
+                }
+            }
+            return 0.0        }
     }
 }

@@ -58,6 +58,7 @@ class HyperstatCPUConfigHandler {
                         msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
                 hayStack.writePointLocal(configPoint.id, level, who, value, duration)
             } catch (e: Exception) {
+                e.printStackTrace()
                 CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : " + msgObject + " ; " + e.message)
             }
         }

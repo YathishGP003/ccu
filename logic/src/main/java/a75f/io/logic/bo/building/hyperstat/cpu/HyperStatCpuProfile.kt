@@ -122,26 +122,30 @@ class HyperStatCpuProfile : ZoneProfile() {
         basicSettings = fetchBasicSettings(equip)
 
         hyperstatCPUAlgorithm.initialise(tuners = hyperstatTuners)
+        hyperstatCPUAlgorithm.dumpLogs()
+        if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
+            hyperstatCPUAlgorithm.resetCoolingControl()
+            state = ZoneState.COOLING
+            Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
+        } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
+            hyperstatCPUAlgorithm.resetHeatingControl()
+            state = ZoneState.HEATING
+            Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
+        }
 
-        coolingLoopOutput = if (currentTemp > userIntents.zoneCoolingTargetTemperature) {
-            if(state == ZoneState.HEATING){
-                hyperstatCPUAlgorithm.resetCoolingControl()
-                state = ZoneState.COOLING
-            }
-            hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-                currentTemp, userIntents.zoneCoolingTargetTemperature
-            ).toInt()
-        } else 0
+        var loopValue =  hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
+            currentTemp, userIntents.zoneCoolingTargetTemperature
+        ).toInt()
 
-        heatingLoopOutput = if (currentTemp < userIntents.zoneHeatingTargetTemperature) {
-            if(state == ZoneState.COOLING){
-                hyperstatCPUAlgorithm.resetHeatingControl()
-                state = ZoneState.HEATING
-            }
-            hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-                userIntents.zoneHeatingTargetTemperature, currentTemp
-            ).toInt()
-        } else 0
+        Log.i(L.TAG_CCU_HSCPU, "Val cool $loopValue")
+        coolingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
+
+        loopValue = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
+            userIntents.zoneHeatingTargetTemperature, currentTemp
+        ).toInt()
+
+        Log.i(L.TAG_CCU_HSCPU, "Val heat $loopValue")
+        heatingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
 
         if (coolingLoopOutput == 0 || heatingLoopOutput == 0)
             fanLoopOutput = 0
@@ -182,7 +186,12 @@ class HyperStatCpuProfile : ZoneProfile() {
                  "Cooling Loop Output:: $coolingLoopOutput \n"+
                  "Fan Loop Output:: $fanLoopOutput \n"
         )
-
+        Log.i("Loop Output", "Current Temp : $currentTemp"+
+                "Desired Heating: ${userIntents.zoneHeatingTargetTemperature}"+
+                "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} "+
+                "Heating Loop Output: $heatingLoopOutput "+
+                "Cooling Loop Output:: $coolingLoopOutput "+
+                "Fan Loop Output:: $fanLoopOutput")
         val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
                                                                     equip.equipRef)
         if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {

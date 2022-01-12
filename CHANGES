@@ -1,4 +1,10 @@
- - Merged PR 2864: Updated condition for reserved in UsbService.java 454
- - Merged PR 2826: 9728 : CCU - Zone schedule desired temp update Changes
- - Merged PR 2596: 9396  : CCU - CCU : Heating User limit min max values update
- - Merged PR 2827: By default we are showing  Humidity and CO2 sensor in Hyperstat Display
+ - Merged PR 2890: CCU crash while adding ccu to existing site
+ - Merged PR 2772: 9685 Desired temp update at level 3 when zone moves to auto away
+ - Merged PR 2810: Resetting loop output only when change in direction for temp
+ - Merged PR 2855: Fix : Daikin IE Selection issue
+ - Merged PR 2857: Fix : ccu sends seed message for modbus devices
+ - Fix : Initialized Vfd out with correct spinner val
+ - Fix : ccu sends seed message for modbus devices
+ - Merge branch 'master' into Bug/samjith/9834_daikin_ie_selection_issue
+ - Move messaging to right place to initialize
+ - Daikin IE crash fix

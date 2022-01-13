@@ -1263,18 +1263,23 @@ public class CCUHsApi
                         HDict pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
+                                .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                        HStr.make(val.toString()) : val).toDict();
                         hDictList.add(pid);
 
-                        //save his data to local cache
                         HDict rec = hsClient.readById(HRef.copy(id));
-                        tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
 
                         //save points on tagsDb
-                        tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
+                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
+                                        val, who, HNum.make(0), rec);
 
                     }
-
+                    //save his data to local cache
+                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
+                            true);
                 }
 
             }

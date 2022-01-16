@@ -11,4 +11,17 @@ public class NetworkUtil {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
+
+    public static boolean isConnectedToInternet(Context context) {
+        if (isNetworkConnected(context)) {
+            try {
+                return Runtime.getRuntime().exec("ping -c 1 www.google.com").waitFor() == 0;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else
+            return false;
+    }
+
 }

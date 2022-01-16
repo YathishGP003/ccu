@@ -7,7 +7,7 @@
         <item name="orange_75f">@color/renatus_75f_primary</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowFullscreen">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="AppTheme.AppBarOverlay">@style/AppTheme.AppBarOverlay</item>
         <item name="AppTheme.PopupOverlay">@style/AppTheme.PopupOverlay</item>
@@ -43,7 +43,7 @@
         <item name="orange_75f">@color/daikin_75f</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowFullscreen">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="AppTheme.AppBarOverlay">@style/AppTheme.AppBarOverlay</item>
         <item name="AppTheme.PopupOverlay">@style/AppTheme.PopupOverlay</item>

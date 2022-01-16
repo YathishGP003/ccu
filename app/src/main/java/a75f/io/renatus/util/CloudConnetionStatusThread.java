@@ -13,6 +13,7 @@ import android.util.Log;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.NotificationHandler;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.UtilityApplication;
 
 public class CloudConnetionStatusThread extends Thread {
 
@@ -49,6 +50,7 @@ public class CloudConnetionStatusThread extends Thread {
                     pingCloudServer();
                 }
             }, 10);
+            NotificationHandler.setCloudConnectionStatus(NetworkUtil.isConnectedToInternet(UtilityApplication.context));
             try {
                 sleep(40*1000);
             } catch (InterruptedException e) {

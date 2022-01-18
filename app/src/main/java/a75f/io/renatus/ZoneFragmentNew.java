@@ -273,10 +273,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
         }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated Done");
-        if (weather_data.getVisibility() == View.VISIBLE) {
-            Log.e("weather", "update");
-            UpdateWeatherData();
-        }
+        weatherUpdateHandler = new Handler();
+        weatherInIt(3000);
+    }
+
+    public void weatherInIt(int delay) {
+        weatherUpdate = () -> {
+            if (weatherUpdateHandler != null && getActivity() != null) {
+                if (weather_data.getVisibility() == View.VISIBLE) {
+                    Log.e("weather", "update");
+                    UpdateWeatherData();
+                }
+                weatherUpdateHandler.postDelayed(weatherUpdate, delay);
+            }
+        };
+
+        weatherUpdate.run();
     }
 
     public void refreshScreen(String id)
@@ -2968,18 +2980,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             Log.e("weather", "update");
             UpdateWeatherData();
         }
-        weatherUpdateHandler = new Handler();
-        weatherUpdate = () -> {
-            if (weatherUpdateHandler != null && getActivity() != null) {
-                if (weather_data.getVisibility() == View.VISIBLE) {
-                    Log.e("weather", "update");
-                    UpdateWeatherData();
-                }
-                weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
-            }
-        };
-
-        weatherUpdate.run();
+        weatherInIt(15*60000);
         //Globals.getInstance().setCcuReady(true);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
     }

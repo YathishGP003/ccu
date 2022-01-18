@@ -49,6 +49,7 @@ public class L
 
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
+    public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
 
     public static Context app()
     {

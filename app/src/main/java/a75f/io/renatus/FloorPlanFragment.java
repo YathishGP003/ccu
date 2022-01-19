@@ -255,7 +255,6 @@ public class FloorPlanFragment extends Fragment {
 
 
     private Zone getSelectedZone() {
-        Log.i("test", "getSelectedZone:" + mRoomListAdapter.getSelectedPostion());
         selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
         return selectedZone;
     }
@@ -1296,7 +1295,7 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("PLC")) {
                     isPLCPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("EMR_ZONE")) {
+                if (zoneEquips.get(i).getProfile().contains("EMR")) {
                     isEMRPaired = true;
                 }
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {

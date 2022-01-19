@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertsConstantsKt;
 import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -518,8 +519,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
         if (!commands.isEmpty() && commands.equals(RESTART_CCU)) {
+            AlertManager.getInstance().generateAlert(AlertsConstantsKt.CCU_RESTART, "CCU Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
             RenatusApp.closeApp();
         } else if (!commands.isEmpty() && commands.equals(RESTART_TABLET)) {
+            AlertManager.getInstance().generateAlert(AlertsConstantsKt.DEVICE_RESTART, "Tablet Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
             RenatusApp.rebootTablet();
         } else if (!commands.isEmpty() && commands.equals(SAVE_CCU_LOGS)) {
             new Thread() {
@@ -529,6 +532,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 }
             }.start();
         } else if (!commands.isEmpty() && commands.equals(RESET_CM)) {
+            AlertManager.getInstance().generateAlert(AlertsConstantsKt.CM_RESET, "CM Reset request sent for  - " + CCUHsApi.getInstance().getCcuName());
             CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
             msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
             msg.reset.set((short)1);

@@ -27,7 +27,6 @@ public class RemoteCommandUpdateHandler
     public static final String RESTART_CCU = "restart_ccu";
     public static final String RESTART_TABLET = "restart_tablet";
     public static final String RESET_CM = "reset_cm";
-    public static final String CM_RESET = "CM RESET";
     public static final String SAVE_CCU_LOGS = "save_ccu_logs";
     public static final String RESTART_MODULE = "restart_module";
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
@@ -63,10 +62,6 @@ public class RemoteCommandUpdateHandler
                                 break;
                             case RESET_CM:
                                 CcuLog.d("RemoteCommand", "PUBNUB handle Restart reset cm=");
-                                HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                                String ccuName = ccu.get("dis").toString();
-                                AlertManager.getInstance().generateAlert(CM_RESET, "CM Reset request sent for  - " + ccuName);
-
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;

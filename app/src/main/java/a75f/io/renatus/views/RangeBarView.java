@@ -119,9 +119,9 @@ public class RangeBarView extends LinearLayout {
         hdb = TunerUtil.getHeatingDeadband(p.getId());
         cdb = TunerUtil.getCoolingDeadband(p.getId());
         HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
         heatLL = getTuner(heatLLMap.get("id").toString());
         heatUL = getTuner(heatULMap.get("id").toString());
         coolLL = getTuner(coolLLMap.get("id").toString());
@@ -150,9 +150,9 @@ public class RangeBarView extends LinearLayout {
         hdb = TunerUtil.getZoneHeatingDeadband(mSchedule.getRoomRef());
         cdb = TunerUtil.getZoneCoolingDeadband(mSchedule.getRoomRef());
         HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getId()+"\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getId()+"\"");
         heatLL = getTuner(heatLLMap.get("id").toString());

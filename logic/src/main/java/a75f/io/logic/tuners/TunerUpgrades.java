@@ -2,7 +2,11 @@ package a75f.io.logic.tuners;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,5 +161,42 @@ public class TunerUpgrades {
     
         hayStack.clearPointArrayLevel(id, TUNER_EQUIP_VAL_LEVEL, false);
         CcuLog.i(L.TAG_CCU_TUNER,"Cleared level 8 : "+id);
+    }
+
+    /*
+    To change min and max of heating desired temperature
+     */
+    public static void updateHeatingMinMax(CCUHsApi hayStack) {
+
+        Log.d("TunerUpdate", "updateHeatingMinMax ++");
+        HashMap<Object, Object> heatDTMin = hayStack.read("point and limit and min and heating " +
+                "and user");
+        HashMap<Object, Object> heatDTMax = hayStack.read("point and limit and max and heating " +
+                "and user");
+        String minId = heatDTMin.get("id").toString();
+        String maxId = heatDTMax.get("id").toString();
+        forceExpireBuildingLevel(minId,hayStack);
+        forceExpireBuildingLevel(maxId,hayStack);
+
+        hayStack.writePointForCcuUser(maxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 72.0,
+                0);
+        hayStack.writeHisValById(maxId, 72.0);
+
+        hayStack.writePointForCcuUser(minId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 67.0,
+                0);
+        hayStack.writeHisValById(minId, 67.0);
+
+    }
+
+    private static void forceExpireBuildingLevel(String id, CCUHsApi hayStack) {
+        HashMap buildingLevelVal = HSUtil.getPriorityLevel(id, TUNER_BUILDING_VAL_LEVEL);
+        if (buildingLevelVal.isEmpty() ||
+                buildingLevelVal.get(HayStackConstants.WRITABLE_ARRAY_WHO) == null ||
+                buildingLevelVal.get(HayStackConstants.WRITABLE_ARRAY_VAL) == null) {
+            CcuLog.i(L.TAG_CCU_TUNER,"Level 16 does not exist for "+id);
+            return;
+        }
+        hayStack.clearPointArrayLevel(id, TUNER_BUILDING_VAL_LEVEL, false);
+        CcuLog.i(L.TAG_CCU_TUNER,"Cleared level 16 : "+id);
     }
 }

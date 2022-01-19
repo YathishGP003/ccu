@@ -66,7 +66,10 @@ public class MeshNetwork extends DeviceNetwork
                 {
                     if(LSerial.getInstance().isNodesSeeding())break;
                     CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " =================="+bSeedMessage);
-                    for(Device d : HSUtil.getDevices(zone.getId())) { //TODO Will this work? kumar
+                    for(Device d : HSUtil.getDevices(zone.getId())) {
+                        if (d.getMarkers().contains("modbus")) {
+                            continue;
+                        }
                         NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))
                             deviceType = NodeType.SMART_STAT;

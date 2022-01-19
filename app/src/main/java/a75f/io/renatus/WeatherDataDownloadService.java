@@ -1,31 +1,26 @@
 package a75f.io.renatus;
 
-import android.app.IntentService;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.util.Timer;
+import java.util.TimerTask;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.LocationDetails;
 
-public class WeatherDataDownloadService extends IntentService {
+public class WeatherDataDownloadService {
 
 	static int CALLING_TIME_INTERVAL = 15*60000;
 	static String sUrlForecastIO = "https://api.darksky.net/forecast/64f63e0e60f15d3523a8702373e2e3eb/";
 
-    static boolean bStopService = false;
+    static boolean bStopService = true;
 	
 	static double mCurrentTemp = -100;
     static String micon = "";
@@ -44,76 +39,38 @@ public class WeatherDataDownloadService extends IntentService {
     public static double windSpeed = 0;
     public static double windGust = 0;
     public static double windBearing = 0;
+    public static LocationDetails onDataReceived;
 
-	public WeatherDataDownloadService() {
-		super("WeatherService");
-		// TODO Auto-generated constructor stub
-	}
+    private static void runPeriodicLocationUpdate(LocationDetails locationDetailsRef){
 
-	
-	@Override
-	protected void onHandleIntent(Intent arg0) {
-		while (!bStopService) {
-	    	synchronized (this) {
-	    		try {
-	    			getWeatherData(null);
-	    			wait(CALLING_TIME_INTERVAL);
-	    		} catch (Exception e) {
-	    			try {
-						wait(CALLING_TIME_INTERVAL);
-					} catch (InterruptedException e1) {
-                        Log.e("CCU_WEATHER", e1.getMessage());
-					}
-                        Log.e("CCU  _WEATHER", e.getMessage());
-	    		}
-	    	}
-	    }
-
+        onDataReceived = locationDetailsRef;
+        LocationDetails finalOnDataReceived = onDataReceived;
+        TimerTask timertask = new TimerTask() {
+            @Override
+            public void run() {
+                getWeatherData(finalOnDataReceived);
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(timertask, 0, CALLING_TIME_INTERVAL);
     }
 
-
-    private final LocationListener locationListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            lat = location.getLongitude();
-            lng = location.getLatitude();
-            Log.d("location4",lat+" "+lng);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            lat = location.getLongitude();
-            lng = location.getLatitude();
-            Log.d("location5",lat+" "+lng);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
-
-    private static double lat = 0;
-    private static double lng = 0;
-
     public static void getWeatherData(LocationDetails onDataReceived ) {
+        if(bStopService) {
+            bStopService = false;
+            runPeriodicLocationUpdate(onDataReceived);
+        }
+
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-        lat = spDefaultPrefs.getFloat("lat", 0);
-        lng = spDefaultPrefs.getFloat("lng", 0);
-        Log.d("locationy",lat+" "+lng);
-        Log.d("location1", lat + " " + lng);
+        double lat = spDefaultPrefs.getFloat("lat", 0);
+        double lng = spDefaultPrefs.getFloat("lng", 0);
+        CcuLog.i(L.TAG_CCU_WEATHER, "Lat :  "+lat+ ", Lng: "+lng);
+
         if ((lat < 0.05 && lat > -0.05)
                 || (lng < 0.05 && lng > -0.05)) {
 
             String zipCode = spDefaultPrefs.getString("zipcode", "");
             String country = spDefaultPrefs.getString("country", "");
-
-
-            //CCUUtils.getLocationInfo(zipCode + ", " + country);
             CCUUtils.getLocationInfo(country + " " +zipCode );
 
 
@@ -127,8 +84,8 @@ public class WeatherDataDownloadService extends IntentService {
                     try {
                         if (response != null) {
                             current = response.getJSONObject("currently");
-                            if (BuildConfig.DEBUG)
-                                Log.d("CCU_WEATHER", String.valueOf(finalLat) + "/" + String.valueOf(finalLng) + current.toString(4));
+                            CcuLog.i(L.TAG_CCU_WEATHER,
+                                    finalLat + "/" + finalLng + current.toString(4));
                             mCurrentTemp = current.getDouble("temperature");
                             micon = current.getString("icon");
                             mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
@@ -152,28 +109,30 @@ public class WeatherDataDownloadService extends IntentService {
                             edit.putFloat("outside_cur_temp", (float) mCurrentTemp);
                             edit.putFloat("outside_hum", (float) mCurrentHumidity);
                             edit.putFloat("outside_precip",(float) mPrecipIntensity);
-                            edit.commit();
+                            edit.apply();
                             if(onDataReceived != null ) onDataReceived.onDataReceived();
-                            Log.d("CCU_WEATHER", "sunrise today at=" + mSunriseTime + ",sunset today at=" + mSunsetTime);
-                            Log.d("CCU_WEATHER", "max temp is =" + maxtemp + ",min temp is=" + mintemp + ",msummary is=" + dailysummary);
+                            CcuLog.i(L.TAG_CCU_WEATHER,
+                                    "sunrise today at=" + mSunriseTime + ",sunset today at=" + mSunsetTime +
+                                    "CCU_WEATHER"+"max temp is =" + maxtemp + ",min temp is=" + mintemp +
+                                            ",msummary " + "is=" + dailysummary
+                            );
+
                         } else {
                             mCurrentTemp = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_cur_temp", (float) mCurrentTemp);
                             mCurrentHumidity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_hum", (float) mCurrentHumidity);
                             mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
                             mPrecipIntensity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_precip", (float) mPrecipIntensity);
                         }
-                    } catch (JSONException e) {
-                        if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
-                    } catch (NullPointerException e) {
-                        if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
+                    } catch (JSONException | NullPointerException e) {
+                        CcuLog.i(L.TAG_CCU_WEATHER,"Exception: " + e.getMessage());
                     }
-                    
+
                 }
 
                 @Override
                 protected JSONObject doInBackground(Void... params) {
                     JSONObject jsonResponse = null;
-                    String requestUrl = sUrlForecastIO + String.valueOf(finalLat) + "," + String.valueOf(finalLng)+"?exclude=minutely,hourly,alerts,flags";
+                    String requestUrl = sUrlForecastIO + finalLat + "," + finalLng +"?exclude=minutely,hourly,alerts,flags";
                     String response = HttpUtil.executeJson(
                             requestUrl,
                             null,
@@ -186,7 +145,7 @@ public class WeatherDataDownloadService extends IntentService {
                         try {
                             jsonResponse = new JSONObject(response);
                         } catch (JSONException e) {
-                            CcuLog.e("CCU_WEATHER", "Unable to parse JSON to retrieve weather data");
+                            CcuLog.e(L.TAG_CCU_WEATHER, "Unable to parse JSON to retrieve weather data "+ e.getMessage());
                         }
                     }
 
@@ -225,6 +184,4 @@ public class WeatherDataDownloadService extends IntentService {
     public static double getPrecipitation() {
         return mPrecipIntensity;
     }
-    
-    Location location;
 }

@@ -67,6 +67,7 @@ import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
@@ -271,6 +272,10 @@ public class Globals {
                 CCUHsApi.getInstance().importBuildingTuners();
             }
             TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
+
+            if(!isHeatingLimitUpdated()){
+                TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
+            }
         }
     }
 
@@ -601,4 +606,12 @@ public class Globals {
         isCcuReady = ccuReady;
     }
 
+    private boolean isHeatingLimitUpdated() {
+        double heatDTMin = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and heating and user");
+        double heatDTMax = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and heating and user");
+        double heatDTMindf = TunerUtil.readTunerValByQuery("point and limit and min and heating and user");
+        double heatDTMaxdf = TunerUtil.readTunerValByQuery("point and limit and max and heating and user");
+        if(heatDTMin > heatDTMax ||  heatDTMindf > heatDTMaxdf) return false;
+        else return true;
+    }
 }

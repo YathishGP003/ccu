@@ -73,7 +73,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.bacnet.BACnetScheduler;
@@ -83,8 +82,6 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.cloud.RenatusServicesEnvironment;
-import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.schedules.FileBackupService;
@@ -243,7 +240,7 @@ public abstract class UtilityApplication extends Application {
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
-    
+
     }
 
     private void initializeCrashReporting() {

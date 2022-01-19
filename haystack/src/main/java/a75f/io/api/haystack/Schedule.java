@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -808,12 +809,20 @@ public class Schedule extends Entity
         } else
         {
             int day = DateTime.now().dayOfWeek().get() - 1;
+            Calendar calender = Calendar.getInstance();
+            int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+            int min = calender.get(Calendar.MINUTE) ;
+            int curTime = hrs + min;
             for (Days d : mDays) {
                 if (d.mDay == day)
                 {
-                    d.mCoolingVal = val;
-                    Log.d("CCU_JOB", " Set mCoolingVal : "+val+" day "+day);
-                    break;
+                    int startSchTime = (d.mSthh * 60) + d.mStmm;
+                    int endSchTime = (d.mEthh * 60) + d.mEtmm;
+                    if (curTime > startSchTime && curTime < endSchTime) {
+                        d.mCoolingVal = val;
+                        Log.d("CCU_JOB", " Set mCoolingVal : " + val + " day " + day);
+                        break;
+                    }
                 }
             }
             
@@ -829,12 +838,20 @@ public class Schedule extends Entity
         } else
         {
             int day = DateTime.now().dayOfWeek().get() - 1;
+            Calendar calender = Calendar.getInstance();
+            int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
+            int min = calender.get(Calendar.MINUTE) ;
+            int curTime = hrs + min;
             for (Days d : mDays) {
                 if (d.mDay == day)
                 {
-                    d.mHeatingVal = val;
-                    Log.d("CCU_JOB", " Set mHeatingVal : "+val+" day "+day);
-                    break;
+                    int startSchTime = (d.mSthh * 60) + d.mStmm;
+                    int endSchTime = (d.mEthh * 60) + d.mEtmm;
+                    if (curTime > startSchTime && curTime < endSchTime) {
+                        d.mHeatingVal = val;
+                        Log.d("CCU_JOB", " Set mHeatingVal : " + val + " day " + day);
+                        break;
+                    }
                 }
             }
         }

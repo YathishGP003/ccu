@@ -57,4 +57,8 @@ class HyperstatLoopController {
         heatingControlLoop.setEnabled()
     }
 
+    fun dumpLogs(){
+        heatingControlLoop.dump()
+        coolingControlLoop.dump()
+    }
 }

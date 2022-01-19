@@ -337,6 +337,8 @@ public class UsbService extends Service
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
 		Log.d(TAG,"scanSerialPortSilentlyForCmDevice = "+usbDevices.size());
 		if (!usbDevices.isEmpty()) {
+			connection = null;
+			device = null;
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
 				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
@@ -344,11 +346,10 @@ public class UsbService extends Service
 					connection = usbManager.openDevice(device);
 					if (success) {
 						new ConnectionThread().start();
+						Log.d(TAG, "Opened Serial CM device "+device.getDeviceName());
+					} else {
+						Log.d(TAG, "Failed to open Serial CM device "+device.getDeviceName());
 					}
-					Log.d(TAG, "Opened Serial CM device instance "+device.getDeviceName());
-				} else {
-					connection = null;
-					device = null;
 				}
 			}
 		}
@@ -451,13 +452,16 @@ public class UsbService extends Service
 							byte crc = 0;
 							byte nOffset = 0;
 							int len = data.length;
-							if (len >= 128) {
+							// initially 6 bytes are already reserved for starting and ending .
+							// so we are adding we are adding condition for 120 and reserving 2 byte for
+							if (len > 120) {
 								// buffer = new byte[160]; //For OTA Updates
 								buffer = new byte[300]; /** Updated by manjunath.K on 27-12-2021 LINK :
 								 User Story 9390: CCU : Additional Setting messages for Hyperstat CPU profile for Standalone mode
 								 Hyperstat seed message contains more than 160 length of data so as of now if it
-								 exceeds more than 160 we are constructing actual length of message */
+								 exceeds more than 160 we changed to 300 length of message */
 							}
+							Log.i(TAG, "Actual Message length "+ data.length+ " and buffer size "+buffer.length);
 							buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
 							buffer[nOffset++] = (byte) (len & 0xff);

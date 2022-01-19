@@ -157,9 +157,9 @@ public class MasterControlView extends LinearLayout {
         hdb = TunerUtil.getHeatingDeadband(p.getId());
         cdb = TunerUtil.getCoolingDeadband(p.getId());
         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
         setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
@@ -192,9 +192,9 @@ public class MasterControlView extends LinearLayout {
         ArrayList<Schedule> filterSchedules = new ArrayList<>();
 
         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
@@ -511,9 +511,9 @@ public class MasterControlView extends LinearLayout {
                 String ccuName = ccu.get("dis").toString();
 
                 HashMap buildingCoolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-                HashMap buildingHeatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+                HashMap buildingHeatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
                 HashMap buildingCoolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-                HashMap buildingHeatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+                HashMap buildingHeatingLowerLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
                 HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
                 HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 

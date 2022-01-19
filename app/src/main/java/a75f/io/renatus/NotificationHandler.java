@@ -6,6 +6,7 @@ import java.util.Date;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.graphics.Color;
 
 import a75f.io.logic.Globals;
 
@@ -17,7 +18,8 @@ public class NotificationHandler {
 
     private Notification.Builder mServerConnectionStatus =
             new Notification.Builder(Globals.getInstance().getApplicationContext())
-                    .setSmallIcon(R.drawable.cloud_offline)
+                    .setSmallIcon(R.drawable.offline_cloud_notification)
+                    .setColor((Color.RED))
                     .setContentTitle("Cloud Connection Status");
 
     private Notification.Builder mCMConnectionStatus =
@@ -41,11 +43,13 @@ public class NotificationHandler {
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
         mHandler.mServerConnectionStatus.setContentText(bIsConnected ? "Online" : "Offline");
-        mHandler.mServerConnectionStatus.setSmallIcon(bIsConnected ? R.drawable.cloud_online : R.drawable.cloud_offline);
-        Notification noti = mHandler.mServerConnectionStatus.build();
-        noti.when = new Date().getTime();
-        noti.flags |= Notification.FLAG_NO_CLEAR;
-        mHandler.mNM.notify(mHandler.mServerConnectionStatusID, noti);
+        mHandler.mServerConnectionStatus.setSmallIcon(bIsConnected ? R.drawable.online_cloud_notification :
+                R.drawable.offline_cloud_notification);
+        mHandler.mServerConnectionStatus.setColor(bIsConnected ? Color.BLUE : Color.RED);
+        Notification notification = mHandler.mServerConnectionStatus.build();
+        notification.when = new Date().getTime();
+        notification.flags |= Notification.FLAG_NO_CLEAR;
+        mHandler.mNM.notify(mHandler.mServerConnectionStatusID, notification);
     }
 
     public static void setCMConnectionStatus(boolean bIsConnected) {

@@ -273,10 +273,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
         }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated Done");
-        if (weather_data.getVisibility() == View.VISIBLE) {
-            Log.e("weather", "update");
-            UpdateWeatherData();
-        }
+        weatherUpdateHandler = new Handler();
+        weatherInIt(3000);
+    }
+
+    public void weatherInIt(int delay) {
+        weatherUpdate = () -> {
+            if (weatherUpdateHandler != null && getActivity() != null) {
+                if (weather_data.getVisibility() == View.VISIBLE) {
+                    Log.e("weather", "update");
+                    UpdateWeatherData();
+                }
+                weatherUpdateHandler.postDelayed(weatherUpdate, delay);
+            }
+        };
+
+        weatherUpdate.run();
     }
 
     public void refreshScreen(String id)
@@ -916,7 +928,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);
         seekArc.setData(false, (float) buildingLimitMin, (float)buildingLimitMax,
-                        (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit,
+                        (float) heatLowerlimit, (float) heatUpperlimit, (float) coolLowerlimit,
                         (float) coolUpperlimit, (float) pointheatDT, (float) pointcoolDT,
                         (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
 
@@ -1378,9 +1390,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         double pointcoolDB = TunerUtil.getZoneCoolingDeadband(p.getRoomRef());
 
         if (!seekArc.isDetailedView()) {
-            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
+            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
         } else {
-            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
+            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatLL, (float) pointheatUL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
         }
 
         linearLayoutZonePoints.removeAllViews();
@@ -2968,18 +2980,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             Log.e("weather", "update");
             UpdateWeatherData();
         }
-        weatherUpdateHandler = new Handler();
-        weatherUpdate = () -> {
-            if (weatherUpdateHandler != null && getActivity() != null) {
-                if (weather_data.getVisibility() == View.VISIBLE) {
-                    Log.e("weather", "update");
-                    UpdateWeatherData();
-                }
-                weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
-            }
-        };
-
-        weatherUpdate.run();
+        weatherInIt(15*60000);
         //Globals.getInstance().setCcuReady(true);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
     }

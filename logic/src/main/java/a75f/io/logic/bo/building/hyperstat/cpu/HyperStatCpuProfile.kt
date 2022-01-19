@@ -23,6 +23,10 @@ import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import java.util.*
 import kotlin.collections.HashMap
+import a75f.io.api.haystack.CCUHsApi
+
+
+
 
 
 /**
@@ -122,26 +126,30 @@ class HyperStatCpuProfile : ZoneProfile() {
         basicSettings = fetchBasicSettings(equip)
 
         hyperstatCPUAlgorithm.initialise(tuners = hyperstatTuners)
+        hyperstatCPUAlgorithm.dumpLogs()
+        if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
+            hyperstatCPUAlgorithm.resetCoolingControl()
+            state = ZoneState.COOLING
+            Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
+        } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
+            hyperstatCPUAlgorithm.resetHeatingControl()
+            state = ZoneState.HEATING
+            Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
+        }
 
-        coolingLoopOutput = if (currentTemp > userIntents.zoneCoolingTargetTemperature) {
-            if(state == ZoneState.HEATING){
-                hyperstatCPUAlgorithm.resetCoolingControl()
-                state = ZoneState.COOLING
-            }
-            hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-                currentTemp, userIntents.zoneCoolingTargetTemperature
-            ).toInt()
-        } else 0
+        var loopValue =  hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
+            currentTemp, userIntents.zoneCoolingTargetTemperature
+        ).toInt()
 
-        heatingLoopOutput = if (currentTemp < userIntents.zoneHeatingTargetTemperature) {
-            if(state == ZoneState.COOLING){
-                hyperstatCPUAlgorithm.resetHeatingControl()
-                state = ZoneState.HEATING
-            }
-            hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-                userIntents.zoneHeatingTargetTemperature, currentTemp
-            ).toInt()
-        } else 0
+        Log.i(L.TAG_CCU_HSCPU, "Val cool $loopValue")
+        coolingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
+
+        loopValue = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
+            userIntents.zoneHeatingTargetTemperature, currentTemp
+        ).toInt()
+
+        Log.i(L.TAG_CCU_HSCPU, "Val heat $loopValue")
+        heatingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
 
         if (coolingLoopOutput == 0 || heatingLoopOutput == 0)
             fanLoopOutput = 0
@@ -182,7 +190,12 @@ class HyperStatCpuProfile : ZoneProfile() {
                  "Cooling Loop Output:: $coolingLoopOutput \n"+
                  "Fan Loop Output:: $fanLoopOutput \n"
         )
-
+        Log.i("Loop Output", "Current Temp : $currentTemp"+
+                "Desired Heating: ${userIntents.zoneHeatingTargetTemperature}"+
+                "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} "+
+                "Heating Loop Output: $heatingLoopOutput "+
+                "Cooling Loop Output:: $coolingLoopOutput "+
+                "Fan Loop Output:: $fanLoopOutput")
         val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
                                                                     equip.equipRef)
         if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {
@@ -387,7 +400,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         val occupancy = equip.hsHaystackUtil!!.readDetectionPointDetails()
         Log.i(L.TAG_CCU_HSCPU, "Auto Away :Detection  : $occupantDetected"
                 +"\n Auto Away :cur mode  : $currentOperatingMode")
-
+        val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
         if (occuStatus.isOccupied && (currentOperatingMode != Occupancy.AUTOFORCEOCCUPIED.ordinal)) {
 
             val occupancyHistory: HisItem? = equip.haystack.curRead(occupancy["id"].toString())
@@ -418,18 +431,21 @@ class HyperStatCpuProfile : ZoneProfile() {
                     throw java.lang.IllegalArgumentException()
                 }
 
-                SystemScheduleUtil.clearOverrides(coolingDtPoint.get("id").toString())
-                SystemScheduleUtil.clearOverrides(heatingDtPoint.get("id").toString())
-
-                val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                 equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                 equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
                 resetPresentConditioningStatus(equip)
             } else {
-                if (occupantDetected)
+                if (occupantDetected && currentOperatingMode != Occupancy.OCCUPIED.ordinal) {
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.OCCUPIED.ordinal.toDouble())
-
+                    clearLevel3DesiredTemp(CCUHsApi.getInstance(),equip.equipRef!!)
+                }
             }
+        } else{
+            Log.i(L.TAG_CCU_HSCPU, "Moving to unoccupied and clearing level 3 override")
+            CCUHsApi.getInstance().writeHisValById(detectionPointId, Occupancy.UNOCCUPIED.ordinal.toDouble())
+            Log.i(L.TAG_CCU_HSCPU, "clearLevel3DesiredTemp:2 ")
+
+            clearLevel3DesiredTemp(CCUHsApi.getInstance(),equip.equipRef!!)
         }
     }
 
@@ -1400,6 +1416,36 @@ class HyperStatCpuProfile : ZoneProfile() {
         else if(basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
             && currentTemp > userIntents.zoneCoolingTargetTemperature){
             fanLoopOutput = 0
+        }
+    }
+
+    /**
+     * Clearing the level 3 desired temp
+     */
+    private fun clearLevel3DesiredTemp(ccuHsApi: CCUHsApi, equipReff: String){
+        Log.i(L.TAG_CCU_HSCPU ,"clearLevel3DesiredTemp: ")
+
+        val coolDT = ccuHsApi.read("point and desired and cooling and temp and equipRef == \"$equipReff\"")
+        val heatDT = ccuHsApi.read("point and desired and heating and temp and equipRef == \"$equipReff\"")
+        val avgDT = ccuHsApi.read("point and desired and average and temp and equipRef == \"$equipReff\"")
+
+
+        val coolLevel3Value = HSUtil.getPriorityLevelVal(coolDT["id"].toString(),3)
+        val heatLevel3Value = HSUtil.getPriorityLevelVal(heatDT["id"].toString(),3)
+
+        if(coolLevel3Value != 0.0||heatLevel3Value != 0.0 ) {
+            ccuHsApi.pointWrite(HRef.copy(coolDT["id"].toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"))
+            ccuHsApi.pointWrite(HRef.copy(heatDT["id"].toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"))
+
+            if (avgDT.isNotEmpty()) {
+                ccuHsApi.pointWrite(
+                    HRef.copy(avgDT["id"].toString()),
+                    3,
+                    "manual",
+                    HNum.make(0),
+                    HNum.make(1, "ms")
+                )
+            }
         }
     }
 

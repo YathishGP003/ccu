@@ -329,13 +329,16 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     }
 
     public double getOperationalModes(String cmd, String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
+        // Updated with writeHisValByQuery to Default value
+        return CCUHsApi.getInstance().readDefaultVal("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
     private void handleFanStages(String equipId, short node, StandaloneLogicalFanSpeeds fanSpeed, double curHumidity){
         int fanStage2Type = (int) getConfigType("relay5", node);
         setCmdSignal("compressor and stage1", 0, node);
         setCmdSignal("compressor and stage2", 0, node);
+        if(getConfigEnabled("relay4", node) > 0 && (getCmdSignal("aux and heating ",node) > 0))
+            setCmdSignal("aux and heating ",0,node);
         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
         switch (fanSpeed) {
             case AUTO:

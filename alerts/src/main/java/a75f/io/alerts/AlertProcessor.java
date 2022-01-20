@@ -57,10 +57,8 @@ public class AlertProcessor
                 continue;
             }
 
-            def.evaluate(defaultSharedPrefs);
-            CcuLog.d("CCU_ALERTS", "Evaluate " + def.toString());
             Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
-
+            def.evaluate(defaultSharedPrefs);
             if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
                 occurrences.addAll(processForEquips(def));
             } else {

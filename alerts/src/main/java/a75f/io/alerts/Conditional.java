@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
@@ -88,7 +89,18 @@ public class Conditional
 
     // NOTE:  algorithm part of the code is formatted normally on the left.
     // NOTE:  debugging code is indented far to the right and can be ingored when reading the algorithm.
-    void evaluate(SharedPreferences spDefaultPrefs) {
+    /**
+     *  The mutedEquipIds are used by grpOperations other than 'equip' and 'delta'.
+     *  grpOperations other than 'equip' and 'delta' will set the 'status' value INSIDE this method.
+     *   These grpOperations treat the points as an aggregate and will produce, at most, ONE alert def occurrence.
+     *   Hence, if an equip is muted, this method needs to exclude its value when setting the 'status' value.
+     *   This method must be aware of the muted equip ids for these grpOperations.
+     *  grpOperations 'equip' and 'delta' do not aggregate the points, rather each equip is evaluated on its own.
+     *   These will produce an alert def occurrence for each equip and the 'status' for each equip will be set OUTSIDE this method.
+     *   Muted equips are handled by AlertProcessor::processForEquips.
+     *   NOTE: Muted equips could also be handled here, but that is a task for another day.
+     * */
+    void evaluate(SharedPreferences spDefaultPrefs, List<String> mutedEquipIds) {
                                 // these values are for debugging, not part of the algorithm
                                 error = null;
                                 sb = new StringBuilder();
@@ -231,22 +243,36 @@ public class Conditional
             pointList = null;
             equipList = null;
             pointValList = new ArrayList<>();
+
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll(key);
-            boolean noPoints = points.size() == 0;
+            for (HashMap point : points) {
+                String equipId = refToId(point.get("equipRef").toString());
+                if (mutedEquipIds == null || !mutedEquipIds.contains(equipId)) {
+                    pointValList.add(new PointVal(point.get("id").toString(),CCUHsApi.getInstance().readHisValById(point.get("id").toString())));
+                }
+            }
+
+            boolean noPoints = pointValList.isEmpty();
             if (noPoints) {
                 error = "no points for " + key;
                 sb.append("\nNo points for key. Possibly ending evaluation.");
                 status = false;
             }
 
-            for (HashMap m : points)
-            {
-                pointValList.add(new PointVal(m.get("id").toString(),CCUHsApi.getInstance().readHisValById(m.get("id").toString())));
-            }
-
-                                        sb.append("\n Found ").append(points.size()).append(" points").append(" for ").append(key);
+                                        sb.append("\n Found ").append(pointValList.size()).append(" points").append(" for ").append(key);
             for (PointVal pv : pointValList) {
                                             sb.append(" ").append(pv.id.substring(0,6)).append(", with his val: ").append(pv.val);
+            }
+
+            if (mutedEquipIds.size() > 0) {
+                                            sb.append("\n Excluded ")
+                                                    .append(mutedEquipIds.size())
+                                                    .append(" MUTED equip(s)")
+                                                    .append(" (")
+                                                    .append(mutedEquipIds.stream()
+                                                                    .map(id -> "@" + id.substring(0, 6))
+                                                                    .collect(Collectors.joining(", ")))
+                                                    .append(")");
             }
 
             if (grpOperation.contains("top"))
@@ -398,6 +424,10 @@ public class Conditional
         }
         
         CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+ (grpOperation != null ?(grpOperation.equals("equip") ? pointList.size() : status):"")+" resVal "+resVal);
+    }
+
+    private String refToId(String ref) {
+        return ref.startsWith("@") ? ref.substring(1) : ref;
     }
 
     private void clearPassword(String value, SharedPreferences pref) {

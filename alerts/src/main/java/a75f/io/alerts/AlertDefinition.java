@@ -9,10 +9,11 @@ import android.content.SharedPreferences;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertScope;
-import a75f.io.alerts.model.AlertsModelUtilKt;
+import a75f.io.alerts.model.AlertScopeEquip;
 import a75f.io.api.haystack.Alert;
 import a75f.io.logger.CcuLog;
 /**
@@ -72,14 +73,14 @@ public class AlertDefinition
     /** evaluate this alert definition against current values
      * @return a string describing the evaluation, for inspection */
     public void evaluate(SharedPreferences sharedPrefs) {
-        for (Conditional c : conditionals)
-        {
-            if (c.operator == null)
-            {
+        CcuLog.d("CCU_ALERTS", "Evaluate " + this.toString());
+        List<String> mutedEquipIds = getMutedEquipIds();
+        for (Conditional c : conditionals) {
+            if (c.operator == null) {
                 // if one alert definition conditional throws an unexpected exception, catch it here so
                 // that all of alert defs does not fail.
                 try {
-                    c.evaluate(sharedPrefs);
+                    c.evaluate(sharedPrefs, mutedEquipIds);
                 } catch (RuntimeException error) {
                     CcuLog.e("CCU_ALERTS", "Parsing error in alert def: " + this, error);
                     c.status = false;
@@ -198,5 +199,21 @@ public class AlertDefinition
     public String deepMuteEndTimeString(@Nullable String ccuId, @Nullable String equipId) {
         if (alertScope == null) return "none";
         else return alertScope.deepMuteEndTimeString(ccuId, equipId);
+    }
+
+    public List<String> getMutedEquipIds() {
+        if (alertScope == null) {
+            return List.of();
+        }
+        List<String> mutedEquipIds = new ArrayList<>();
+        alertScope.getDevices().forEach(
+                device ->  {
+                    mutedEquipIds.addAll(
+                            device.getEquips().stream()
+                                .filter(equip -> isMuted(device.getDeviceId(), equip.getEquipId()))
+                                .map(AlertScopeEquip::getEquipId)
+                                .collect(Collectors.toList()));
+        });
+        return mutedEquipIds;
     }
 }

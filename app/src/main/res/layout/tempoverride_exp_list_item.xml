@@ -77,6 +77,19 @@
             android:paddingEnd="@dimen/margin_20"
             android:paddingStart="@dimen/margin_20"/>
         <Spinner
+            android:id="@+id/spinner_analog_out3"
+            android:layout_width="10dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:entries="@array/hvac_stage_selector"
+            android:visibility="gone"
+            android:layout_weight="1"
+            tools:listitem="@layout/spinner_dropdown_item"
+            android:layout_marginEnd="@dimen/margin_20"
+            android:layout_marginStart="@dimen/margin_20"
+            android:paddingEnd="@dimen/margin_20"
+            android:paddingStart="@dimen/margin_20"/>
+        <Spinner
             android:id="@+id/spinner_relay"
             android:layout_width="10dp"
             android:layout_height="wrap_content"

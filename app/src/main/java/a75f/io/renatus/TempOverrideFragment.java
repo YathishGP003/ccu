@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +60,7 @@ public class TempOverrideFragment extends Fragment {
     TreeMap<String, String> pointMap = new TreeMap();
     HashMap<String, String> equipMap = new HashMap();
     int lastExpandedPosition;
-    String siteName;
+    static String siteName;
     private LinearLayout mRoot;
     Snackbar snackbar;
 
@@ -240,11 +241,9 @@ public class TempOverrideFragment extends Fragment {
             ArrayList tunerList = new ArrayList();
             ArrayList newTunerList = new ArrayList();
             for (Map t : tuners) {
-                if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
-                        t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
-                        t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
+                if (isExpandedTextBeginsWithAnalogType(t.get("dis").toString().toLowerCase()) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
-                    if (NewexpandedListText.startsWith("Analog")) {
+                    if (NewexpandedListText.toLowerCase().startsWith("analog")) {
                         tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("relay")) {
                         tunerList.add(t.get("dis").toString());
@@ -419,6 +418,12 @@ public class TempOverrideFragment extends Fragment {
                 }
             });
         }
+    }
+
+    public static boolean isExpandedTextBeginsWithAnalogType(String expandedListText) {
+        return (expandedListText.startsWith("analog1in") || expandedListText.startsWith("analog1out") || expandedListText.startsWith("analog2in")
+                || expandedListText.startsWith("analog2out") || expandedListText.startsWith("analog3out") || expandedListText.startsWith("relay") || expandedListText.startsWith("th") ||
+                expandedListText.startsWith(siteName.toLowerCase()));
     }
 
     public double getConfigEnabled(String config) {

@@ -872,6 +872,7 @@ public class CreateNewSite extends Fragment {
       //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();
         ccuHsApi.saveTagsData();
+        CCUHsApi.tempWeatherRef = null;
 
     }
 

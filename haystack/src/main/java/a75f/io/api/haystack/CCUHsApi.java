@@ -80,7 +80,7 @@ public class CCUHsApi
     private String hayStackUrl = null;
     private String careTakerUrl = null;
 
-    HRef tempWeatherRef = null;
+    public static HRef tempWeatherRef = null;
     HRef humidityWeatherRef = null;
 
     private SyncStatusService syncStatusService;
@@ -1796,7 +1796,6 @@ public class CCUHsApi
     }
 
     public double getExternalTemp() {
-
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (tempWeatherRef == null)
         {
@@ -1820,7 +1819,7 @@ public class CCUHsApi
                             HRow r = hisGrid.row(hisGrid.numRows() - 1);
                             HDateTime date = (HDateTime) r.get("ts");
                             //Remove unicode chars and units. 48.32°F ->48.32
-                            double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
+                            double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
                             Log.d("CCU_OAO",date+" External Temp: "+tempVal);
                             return tempVal;
 
@@ -1833,7 +1832,7 @@ public class CCUHsApi
             if (hisGrid != null && hisGrid.numRows() > 0) {
                 hisGrid.dump();
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                return Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
+                return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
             } else {
                 return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
             }

@@ -620,51 +620,56 @@ class HyperStatCpuProfile : ZoneProfile() {
         Log.i(TAG, " $whichPort: ${relayAssociation.association}")
         when (relayAssociation.association) {
             CpuRelayAssociation.COOLING_STAGE_1 -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (coolingLoopOutput > tuner.relayActivationHysteresis)
-                    relayState = 1.0
+                    relayState = 1.0    // Turn ON relay
                 if (coolingLoopOutput == 0)
-                    relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
-
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-
-                if (relayState == 1.0) {
-                    relayStages[Stage.COOLING_1.displayName] = 1
+                    relayState = 0.0   // Turn OFF relay
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
+                        relayStages[Stage.COOLING_1.displayName] = 1
+                    }
+                    curState = ZoneState.COOLING
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 }
-                curState = ZoneState.COOLING
+
             }
             CpuRelayAssociation.COOLING_STAGE_2 -> {
                 // possibility 1,2
                 val highestStage = HyperStatAssociationUtil.getHighestCoolingStage(config).ordinal
                 val divider = if (highestStage == 1) 50 else 33
-                var relayState = 0.0
+                var relayState = -1.0
                 if (coolingLoopOutput > (divider + (tuner.relayActivationHysteresis / 2)))
                     relayState = 1.0
                 if (coolingLoopOutput <= (divider - (tuner.relayActivationHysteresis / 2)))
                     relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.COOLING_2.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
+                        relayStages[Stage.COOLING_2.displayName] = 1
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    curState = ZoneState.COOLING
                 }
-                curState = ZoneState.COOLING
             }
             CpuRelayAssociation.COOLING_STAGE_3 -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (coolingLoopOutput > (66 + (tuner.relayActivationHysteresis / 2)))
                     relayState = 1.0
                 if (coolingLoopOutput <= (66 - (tuner.relayActivationHysteresis / 2)))
                     relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.COOLING_3.displayName] = 1
+                if (relayState != -1.0 ) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.COOL_ONLY
+                        relayStages[Stage.COOLING_3.displayName] = 1
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    curState = ZoneState.COOLING
                 }
-                curState = ZoneState.COOLING
             }
             else -> return
         }
@@ -684,51 +689,57 @@ class HyperStatCpuProfile : ZoneProfile() {
         when (relayAssociation.association) {
 
             CpuRelayAssociation.HEATING_STAGE_1 -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (heatingLoopOutput > tuner.relayActivationHysteresis)
                     relayState = 1.0
                 if (heatingLoopOutput == 0)
                     relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
 
-                if (relayState == 1.0) {
-                    relayStages[Stage.HEATING_1.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
+                        relayStages[Stage.HEATING_1.displayName] = 1
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    curState = ZoneState.HEATING
                 }
-                curState = ZoneState.HEATING
             }
             CpuRelayAssociation.HEATING_STAGE_2 -> {
                 // possibility 4,5,
                 val highestStage = HyperStatAssociationUtil.getHighestHeatingStage(config).ordinal
                 val divider = if (highestStage == 4) 50 else 33
 
-                var relayState = 0.0
+                var relayState = -1.0
                 if (heatingLoopOutput > (divider + (tuner.relayActivationHysteresis / 2)))
                     relayState = 1.0
                 if (heatingLoopOutput <= (divider - (tuner.relayActivationHysteresis / 2)))
                     relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.HEATING_2.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
+                        relayStages[Stage.HEATING_2.displayName] = 1
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    curState = ZoneState.HEATING
                 }
-                curState = ZoneState.HEATING
             }
             CpuRelayAssociation.HEATING_STAGE_3 -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (heatingLoopOutput > (66 + (tuner.relayActivationHysteresis / 2)))
                     relayState = 1.0
                 if (heatingLoopOutput <= (66 - (tuner.relayActivationHysteresis / 2)))
                     relayState = 0.0
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                if (relayState == 1.0) currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.HEATING_3.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    if (relayState == 1.0) {
+                        currentConditioningStatus = StandaloneConditioningMode.HEAT_ONLY
+                        relayStages[Stage.HEATING_3.displayName] = 1
+                    }
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    curState = ZoneState.HEATING
                 }
-                curState = ZoneState.HEATING
             }
             else -> return
         }
@@ -757,7 +768,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         when (relayAssociation.association) {
             CpuRelayAssociation.FAN_LOW_SPEED -> {
 
-                var relayState = 0.0
+                var relayState = -1.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
                     if (fanLoopOutput > tuner.relayActivationHysteresis)
                         relayState = 1.0
@@ -769,14 +780,16 @@ class HyperStatCpuProfile : ZoneProfile() {
                         || basicSettings.fanMode == StandaloneFanStage.LOW_ALL_TIME
                     ) 1.0 else 0.0
                 }
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.FAN_1.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    if (relayState == 1.0) {
+                        relayStages[Stage.FAN_1.displayName] = 1
+                    }
                 }
             }
             CpuRelayAssociation.FAN_MEDIUM_SPEED -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
                     // possibility 7,8
                     val highestStage = HyperStatAssociationUtil.getHighestFanStage(config).ordinal
@@ -792,6 +805,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                         || basicSettings.fanMode == StandaloneFanStage.MEDIUM_ALL_TIME
                     ) 1.0 else 0.0
                 }
+                if(relayState != -1.0)
                 updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
                 Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
                 if (relayState == 1.0) {
@@ -799,7 +813,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 }
             }
             CpuRelayAssociation.FAN_HIGH_SPEED -> {
-                var relayState = 0.0
+                var relayState = -1.0
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
                     if (fanLoopOutput > (66 + (tuner.relayActivationHysteresis / 2)))
                         relayState = 1.0
@@ -811,10 +825,12 @@ class HyperStatCpuProfile : ZoneProfile() {
                         || basicSettings.fanMode == StandaloneFanStage.HIGH_ALL_TIME
                     ) 1.0 else 0.0
                 }
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.FAN_3.displayName] = 1
+                if (relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    if (relayState == 1.0) {
+                        relayStages[Stage.FAN_3.displayName] = 1
+                    }
                 }
             }
             else -> return

@@ -1,10 +1,15 @@
- - Merged PR 2890: CCU crash while adding ccu to existing site
- - Merged PR 2772: 9685 Desired temp update at level 3 when zone moves to auto away
- - Merged PR 2810: Resetting loop output only when change in direction for temp
- - Merged PR 2855: Fix : Daikin IE Selection issue
- - Merged PR 2857: Fix : ccu sends seed message for modbus devices
- - Fix : Initialized Vfd out with correct spinner val
- - Fix : ccu sends seed message for modbus devices
- - Merge branch 'master' into Bug/samjith/9834_daikin_ie_selection_issue
- - Move messaging to right place to initialize
- - Daikin IE crash fix
+ - Merged PR 2881: 9646 - Fix deep muting.
+ - Merged PR 2819: Bug 9705: CCU: The mapping is not showing for HyperStat CPU profile on Temporary Override page
+ - Merged PR 2926: CCU: Cloud Icon to show if CCU is Online or Offline
+ - Merged PR 2840: Modified regular expression to include negative values also
+ - Merged PR 2918: updating logical relay points only when there is change
+ - Merged PR 2929: Now turning off the aux heating relay when conditioning mode is changed to OFF
+ - Merged PR 2856: 9384 - Type mismatch for HyperStat CPU reconfig analog assignment point values
+ - Merge branch 'master' into bug/lgaskill/9384_hs_cpu_reconfig_point_sync
+ - Merged PR 2832: 9825 - Generate and Fix "REBOOT ___" Alert
+ - Merged PR 2920: EMR : Cross device pairing when zone has emr paired is possible from CCU
+ - Merged PR 2797: Location reset issue has been fixed
+ - Merged PR 2836: CCU: Cloud Icon to show if CCU is Online or Offline
+ - Merged PR 2867: 9864: CCU : Master Controller - Temperature Limits are fluctuating
+ - Resolved type mismatch issue for hs cpu reconfig writable point values
+ - Added ability to detect and fix ccu, tablet and CM reboot alerts

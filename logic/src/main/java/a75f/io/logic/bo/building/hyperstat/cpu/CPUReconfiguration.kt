@@ -6,6 +6,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.common.AnalogOutChanges
 import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip.Companion.getHyperstatEquipRef
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import android.util.Log
 
@@ -288,6 +289,11 @@ class CPUReconfiguration {
             if (updatedConfigValue <= 0) {
                 Log.i(L.TAG_CCU_HSCPU, "Config Point $configType is disabled so deleting the logical point")
                 deleteLogicalPoint(haystack, configPoint.equipRef, configType, portType)
+
+                // Get Existing Configuration
+                val config = getHyperstatEquipRef(equip.group.toShort())
+                config.updateConditioningMode(config.getConfiguration())
+                config.updateFanMode(config.getConfiguration())
             }
             // Create Logical Points only when config is enabled
             if (updatedConfigValue > 0) {

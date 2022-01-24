@@ -996,7 +996,7 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
 
-    private fun updateConditioningMode(config: HyperStatCpuConfiguration) {
+     fun updateConditioningMode(config: HyperStatCpuConfiguration) {
 
 
         val conditioningModeId = hsHaystackUtil!!.readPointID("zone and userIntent and conditioning and mode")
@@ -1032,7 +1032,7 @@ class HyperStatCpuEquip(val node: Short) {
         }
     }
 
-    private fun updateFanMode(config: HyperStatCpuConfiguration) {
+     fun updateFanMode(config: HyperStatCpuConfiguration) {
 
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil!!.readPointValue("zone and userIntent and fan and mode")

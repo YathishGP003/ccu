@@ -1472,13 +1472,13 @@ class HyperStatPointsUtil constructor(
             arrayOf("zone", "air", "occupancy", "sensor", "current", "his", "cur", "logical")
 
         val humidityPoint = createHaystackPointWithUnit(
-            "$equipDis-" + Port.SENSOR_RH.portSensor+"Sensor",
+            "$equipDis-" + Port.SENSOR_RH.portSensor,
             humidityPointMarkers,
             "cov",
             "%"
         )
         val illuminancePoint = createHaystackPointWithUnit(
-            "$equipDis-" + Port.SENSOR_ILLUMINANCE.portSensor+"Sensor",
+            "$equipDis-" + Port.SENSOR_ILLUMINANCE.portSensor,
             illuminanceSensorPointMarkers,
             "cov",
             "lux"

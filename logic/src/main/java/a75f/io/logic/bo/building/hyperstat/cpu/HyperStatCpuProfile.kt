@@ -805,11 +805,12 @@ class HyperStatCpuProfile : ZoneProfile() {
                         || basicSettings.fanMode == StandaloneFanStage.MEDIUM_ALL_TIME
                     ) 1.0 else 0.0
                 }
-                if(relayState != -1.0)
-                updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
-                Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
-                if (relayState == 1.0) {
-                    relayStages[Stage.FAN_2.displayName] = 1
+                if(relayState != -1.0) {
+                    updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
+                    Log.i(L.TAG_CCU_HSCPU, "$whichPort = ${relayAssociation.association}  $relayState")
+                    if (relayState == 1.0) {
+                        relayStages[Stage.FAN_2.displayName] = 1
+                    }
                 }
             }
             CpuRelayAssociation.FAN_HIGH_SPEED -> {

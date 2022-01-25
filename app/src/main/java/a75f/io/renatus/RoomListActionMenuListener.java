@@ -63,26 +63,31 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item)
 	{
-		switch (item.getItemId())
-		{
-			case R.id.deleteSelection:
-				deleteSelectedRooms();
-				selectedRoom.clear();
-				mode.finish(); // Action picked, so close the CAB
-				return true;
-			case R.id.renameSelection:
-				renameSelectedRoom();
-				selectedRoom.clear();
-				mode.finish(); // Action picked, so close the CAB
-				return true;
-			case R.id.restartSelection:
-				restartSelectedRoomModules();
-				selectedRoom.clear();
-				mode.finish(); // Action picked, so close the CAB
-				return true;
-			default:
-				return false;
+		if (floorPlanActivity.getContext() != null && floorPlanActivity.getUserVisibleHint() ) {
+			switch (item.getItemId()) {
+				case R.id.deleteSelection:
+					deleteSelectedRooms();
+					selectedRoom.clear();
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				case R.id.renameSelection:
+					renameSelectedRoom();
+					selectedRoom.clear();
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				case R.id.restartSelection:
+					restartSelectedRoomModules();
+					selectedRoom.clear();
+					mode.finish(); // Action picked, so close the CAB
+					return true;
+				default:
+					return false;
+			}
+		} else {
+			mode.finish();
+			return false;
 		}
+
 	}
 	
 	

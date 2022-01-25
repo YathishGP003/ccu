@@ -58,29 +58,30 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item)
 	{
-		switch (item.getItemId())
-		{
-			case R.id.deleteSelection:
-				if (true)
-				{ //TODO check prefconfigured profiels
-					
-					deleteSelectedFSV();
-					EquipsManager.getInstance().deleteModules(seletedModules);
-					seletedModules.clear();
-                    floorPlanActivity.refreshScreen();
-					mode.finish(); // Action picked, so close the CAB
-                    
-				}
-				else
-				{
-					Toast.makeText(this.floorPlanActivity
-							               .getActivity(), "Cannot delete pre configured module", Toast.LENGTH_SHORT)
-					     .show();
-					mode.finish();
-				}
-				return true;
-			default:
-				return false;
+		if(floorPlanActivity.getContext() != null && floorPlanActivity.getUserVisibleHint()) {
+			switch (item.getItemId()) {
+				case R.id.deleteSelection:
+					if (true) { //TODO check prefconfigured profiels
+
+						deleteSelectedFSV();
+						EquipsManager.getInstance().deleteModules(seletedModules);
+						seletedModules.clear();
+						floorPlanActivity.refreshScreen();
+						mode.finish(); // Action picked, so close the CAB
+
+					} else {
+						Toast.makeText(this.floorPlanActivity
+								.getActivity(), "Cannot delete pre configured module", Toast.LENGTH_SHORT)
+								.show();
+						mode.finish();
+					}
+					return true;
+				default:
+					return false;
+			}
+		}else{
+			mode.finish();
+			return false;
 		}
 	}
 	

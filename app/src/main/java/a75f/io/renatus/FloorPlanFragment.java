@@ -327,12 +327,12 @@ public class FloorPlanFragment extends Fragment {
     // callback from FloorListActionMenuListener
     public void refreshScreen() {
         CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen");
-    
+
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, new FloorComparator());
         updateFloors();
         CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen Done");
-    
+
     }
 
 
@@ -1112,15 +1112,15 @@ public class FloorPlanFragment extends Fragment {
         addRoomEdit.setSelection(zone.getDisplayName().length());
 
         InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
     }
 
     public void renameFloor(Floor floor) {
         if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
             Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.",
-                           Toast.LENGTH_LONG)
-                 .show();
+                    Toast.LENGTH_LONG)
+                    .show();
             return;
         }
         floorToRename = floor;
@@ -1130,7 +1130,7 @@ public class FloorPlanFragment extends Fragment {
         addFloorEdit.setSelection(floor.getDisplayName().length());
 
         InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
     }
 

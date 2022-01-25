@@ -230,4 +230,10 @@ public class HyperStatMessageSender {
         }
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
+
+    public static void sendRestartModuleCommand(int address){
+        writeControlMessage(HyperStatMessageGenerator.getHyperstatRebootControl(), address,
+                MessageType.HYPERSTAT_CONTROLS_MESSAGE,
+                false);
+    }
 }

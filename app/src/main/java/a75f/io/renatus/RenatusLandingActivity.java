@@ -47,6 +47,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -599,6 +600,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                     snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
                                     snControlsMessage_t.controls.reset.set((short) 1);
                                     MeshUtil.sendStructToNodes(snControlsMessage_t);
+                                }else if (d.getMarkers().contains("hyperstat")) {
+                                    HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                 }
                             }
                         }
@@ -618,6 +621,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                             snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
                             snControlsMessage_t.controls.reset.set((short) 1);
                             MeshUtil.sendStructToNodes(snControlsMessage_t);
+                        }else if (d.getMarkers().contains("hyperstat")) {
+                            HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                         }
                     }
                     break;
@@ -635,6 +640,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         snControlsMessage_t.smartNodeAddress.set(Short.parseShort(equip.getGroup()));
                         snControlsMessage_t.controls.reset.set((short) 1);
                         MeshUtil.sendStructToNodes(snControlsMessage_t);
+                    }
+                    else if (equip.getMarkers().contains("hyperstat")) {
+                        HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                     }
                     break;
             }

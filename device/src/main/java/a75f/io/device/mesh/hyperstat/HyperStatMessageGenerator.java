@@ -293,4 +293,8 @@ public class HyperStatMessageGenerator {
         return  HyperStatSettingsUtil.Companion.getSetting3Message(address,equipRef);
     }
 
+    public static HyperStatControlsMessage_t getHyperstatRebootControl(){
+       return HyperStat.HyperStatControlsMessage_t.newBuilder().setReset(true).build();
+    }
+
 }

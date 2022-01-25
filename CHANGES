@@ -1,15 +1,12 @@
- - Merged PR 2881: 9646 - Fix deep muting.
- - Merged PR 2819: Bug 9705: CCU: The mapping is not showing for HyperStat CPU profile on Temporary Override page
- - Merged PR 2926: CCU: Cloud Icon to show if CCU is Online or Offline
- - Merged PR 2840: Modified regular expression to include negative values also
- - Merged PR 2918: updating logical relay points only when there is change
- - Merged PR 2929: Now turning off the aux heating relay when conditioning mode is changed to OFF
- - Merged PR 2856: 9384 - Type mismatch for HyperStat CPU reconfig analog assignment point values
- - Merge branch 'master' into bug/lgaskill/9384_hs_cpu_reconfig_point_sync
- - Merged PR 2832: 9825 - Generate and Fix "REBOOT ___" Alert
- - Merged PR 2920: EMR : Cross device pairing when zone has emr paired is possible from CCU
- - Merged PR 2797: Location reset issue has been fixed
- - Merged PR 2836: CCU: Cloud Icon to show if CCU is Online or Offline
- - Merged PR 2867: 9864: CCU : Master Controller - Temperature Limits are fluctuating
- - Resolved type mismatch issue for hs cpu reconfig writable point values
- - Added ability to detect and fix ccu, tablet and CM reboot alerts
+ - Merged PR 2984: Resolved build failed issue
+ - Merged PR 2732: do deadband validation on slider desired temp
+ - Merged PR 2835: Restrict seekarc movement based on deadband
+ - Merged PR 2974: Removed sensor string from display name in Humidity sensor and Illumanace sensor
+ - Merged PR 2941: CCU-10008-CCU_restart_after_delete_rename
+ - Merged PR 2947: Handled OTA for hyperstat module restart
+ - Merged PR 2963: Updating the fan and conditioning mode when reconfiguration done from portal end
+ - Restrict seekarc temp based on deadband
+ - Merge branch 'master' into Bug/samjith/9287_deadband_issue
+ - Verify that deadband is maintianed
+ - Consider deadband during desired temp update
+ - Add logs

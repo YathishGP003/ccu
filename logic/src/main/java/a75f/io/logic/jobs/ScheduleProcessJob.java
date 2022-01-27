@@ -1611,16 +1611,21 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equipId+"\"");
             double tempDiff = currentTemp - desiredTemp;
             double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and "+
-                                                                             (tempDiff >= 0 ? "cooling" : "heating"));
-            if (preconRate == 0) {
+                                                                             (tempDiff >= 0 ? "cooling" : "heating"),
+                    equipId);
+            /*Below lines are commented to fix Bug-10036:Tuners : Preconditioning Zone level tuner value is not getting
+              consumed for stand alone Equips.
+              Issue occurs when the tuner's priority value is set to 0*/
+
+           /*if (preconRate == 0) {
                 equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate
                 if (tempDiff >= 0) {
                     preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", equipId);
                 } else {
                     preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", equipId);
                 }
-            }
-            
+            }*/
+
             /*
              *Initial tempDiff based on average temp is used to determine heating/cooling preconditioning required.
              *Then calculate the absolute tempDiff to determine the preconditioning time.
@@ -1637,8 +1642,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 occu.setPreconditioning(false);
                 return false;
             }
-            if(occu.isPreconditioning())
+            if(occu.isPreconditioning() && preconRate > 0) {
                 return true;
+            }
             else if ((occu.getMillisecondsUntilNextChange() > 0)&& (tempDiff > 0) && (tempDiff * preconRate * 60 * 1000 >= occu.getMillisecondsUntilNextChange()))
             {
                 //zone is in preconditioning which is like occupied

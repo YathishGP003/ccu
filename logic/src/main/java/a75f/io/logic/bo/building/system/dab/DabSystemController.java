@@ -680,7 +680,7 @@ public class DabSystemController extends SystemController
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                         "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") ;
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
@@ -696,6 +696,7 @@ public class DabSystemController extends SystemController
                 tempSum += cmTemp;
                 tempZones++;
             }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController, cmTemp "+cmTemp+" tempZone "+tempZones);
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
         averageSystemTemperature =CCUUtils.roundToOneDecimal(averageSystemTemperature);

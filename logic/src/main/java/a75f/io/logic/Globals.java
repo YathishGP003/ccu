@@ -556,9 +556,10 @@ public class Globals {
         }
 
         /*
-         * Get all the default BTU_Meter profile details
+         * Get system level EMR profile details
          */
-        ArrayList<HashMap<Object,Object>> emEquips = CCUHsApi.getInstance().readAllEntities("equip and emr and modbus");
+        ArrayList<HashMap<Object,Object>> emEquips = CCUHsApi.getInstance().readAllEntities("equip and emr and modbus" +
+                " and not zone");
 
         for (HashMap<Object,Object> m : emEquips)
         {

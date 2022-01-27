@@ -3465,6 +3465,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             isExpanded = true;
                         }
                     } else if (clickposition == clickedView) {
+                        status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         v.setBackgroundColor(getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));

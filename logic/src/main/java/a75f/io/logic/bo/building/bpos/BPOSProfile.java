@@ -474,12 +474,18 @@ public class BPOSProfile extends ZoneProfile {
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         HashMap averageDT = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+        double coolDTl3 =  HSUtil.getPriorityLevelVal(coolDT.get("id").toString(),3);
+        double heatDTl3 =  HSUtil.getPriorityLevelVal(coolDT.get("id").toString(),3);
 
-        CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
-        CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
-        if (!averageDT.isEmpty()) {
-            CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
+
+        if( coolDTl3 != 0.0) {
+            CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 3, "manual", HNum.make(0), HNum.make(1, "ms"));
         }
+        if( heatDTl3 != 0.0) {
+            CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 3, "manual"
+                    , HNum.make(0), HNum.make(1, "ms"));
+        }
+
 
     }
 

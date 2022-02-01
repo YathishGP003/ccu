@@ -45,11 +45,11 @@ public class MeshNetwork extends DeviceNetwork
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
         
-        if (!LSerial.getInstance().isConnected()) {
+        /*if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }
+        }*/
         if(LSerial.getInstance().isNodesSeeding())
             return;
         MeshUtil.sendHeartbeat((short)0);

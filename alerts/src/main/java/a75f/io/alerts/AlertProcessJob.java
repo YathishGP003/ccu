@@ -60,7 +60,7 @@ public class AlertProcessJob
             alertManager.processAlerts();
 
         }catch (Exception e) {
-            CcuLog.d("CCU_ALERTS", "AlertProcessJob Exception: "+e.getMessage());
+            CcuLog.w("CCU_ALERTS", "AlertProcessJob Exception: " + e.getMessage(), e);
             e.printStackTrace();
         }
         CcuLog.d("CCU_ALERTS", "<-AlertProcessJob ");

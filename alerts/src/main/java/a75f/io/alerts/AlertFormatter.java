@@ -150,16 +150,21 @@ public class AlertFormatter
                 // 2. point id for key - > run query to fetch cond val
                 // 3. point id to get value -> run through pointValList to find
                 // the value for a point that triggered the alert.
-                if (c == null) {
-                    for (Conditional d : def.conditionals) {
-                        for (PointVal v : d.pointValList) {
-                            if (v.id.equals(point)) {
-                                return String.valueOf(v.val);
-                            }
+                if (c != null) {
+                    return point != null && !c.isValueNumeric() ? String.valueOf(hs.readHisValByQuery(c.value)) : c.val;
+                }
+
+                for (Conditional d : def.conditionals) {
+                    if (d.pointValList == null) {
+                        continue;
+                    }
+
+                    for (PointVal v : d.pointValList) {
+                        if (v.id.equals(point)) {
+                            return String.valueOf(v.val);
                         }
                     }
                 }
-                return point != null && !c.isValueNumeric() ? String.valueOf(hs.readHisValByQuery(c.value)) : c.val;
         }
         return "";
     }

@@ -1240,7 +1240,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Modulating Reheat";
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
-                else if (pointname.equals("relay2"))
+                else if (pointname.equals("relay1")) {
+                    return getVavRelayMapping(pointname, listTitle);
+                } else if (pointname.equals("relay2"))
                     return "Series Fan";
                 else if (pointname.equals("Thermistor1"))
                     return "Discharge Airflow";
@@ -1252,7 +1254,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Modulating Reheat";
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
-                else if (pointname.equals("relay2"))
+                else if (pointname.equals("relay1")) {
+                    return getVavRelayMapping(pointname, listTitle);
+                } else if (pointname.equals("relay2"))
                     return "Parallel Fan";
                 else if (pointname.equals("Thermistor1"))
                     return "Discharge Airflow";
@@ -1260,13 +1264,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Supply Airflow";
                 break;
             case "VAV_REHEAT":
+    
                 if (pointname.equals("Analog-out2"))
                     return "Modulating Reheat";
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
-                else if (pointname.equals("relay2"))
-                    return "Series Fan";
-                else if (pointname.equals("Thermistor1"))
+                else if (pointname.equals("relay1") || pointname.equals("relay2")) {
+                    return getVavRelayMapping(pointname, listTitle);
+                } else if (pointname.equals("Thermistor1"))
                     return "Discharge Airflow";
                 else if (pointname.equals("Thermistor2"))
                     return "Supply Airflow";
@@ -1637,6 +1642,19 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return "Not Used";
     }
 
+    private String getVavRelayMapping(String pointname, String listTitle) {
+        VavProfile vavProfile = (VavProfile) L.getProfile(Short.parseShort(listTitle.substring(3)));
+        VavProfileConfiguration vavProfileConfig =
+            (VavProfileConfiguration) vavProfile.getProfileConfiguration(Short.parseShort(listTitle.substring(3)));
+    
+        if (pointname.equals("relay1") && vavProfileConfig.isOpConfigured(Port.RELAY_ONE)) {
+            return "Electric Reheat Stage 1";
+        } else if (pointname.equals("relay2") && vavProfileConfig.isOpConfigured(Port.RELAY_TWO)) {
+            return "Electric Reheat Stage 2";
+        }
+        return "Not Used";
+    }
+    
     private String getProfileName(String listTitle) {
         HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
         String profile = equipGroup.get("profile").toString();

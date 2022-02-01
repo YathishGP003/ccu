@@ -150,6 +150,12 @@ public class MeshNetwork extends DeviceNetwork
                                                               "SEEDS ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                                                            d.getEquipRef(), hyperStatProfile, false);
+                                    if (equip.getMarkers().contains("vrv") ){
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU " +
+                                                                   "Controls ===================== "+d.getAddr());
+                                        HyperStatMessageSender.sendIduControlMessage(
+                                            Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
+                                    }
                                 } else{
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef());

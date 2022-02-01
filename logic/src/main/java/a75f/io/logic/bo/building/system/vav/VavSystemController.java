@@ -197,7 +197,7 @@ public class VavSystemController extends SystemController
         systemProfile = (VavSystemProfile) L.ccu().systemProfile;
         ciDesired = (int)systemProfile.getUserIntentVal("desired and ci");
         conditioningMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
-        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired
                                         + " conditioningMode: " + conditioningMode
         );
 
@@ -686,7 +686,7 @@ public class VavSystemController extends SystemController
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                     "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti");
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
@@ -699,7 +699,7 @@ public class VavSystemController extends SystemController
 
 
         if(totalEquips > 0)
-            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+tempZones+","+totalEquips+","
+            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+tempZones+","+totalEquips+", "+tempSum+", "
                        +cmTempInfForPercentileZonesDead+","+(((totalEquips - tempZones)*100)/(totalEquips)));
         if((totalEquips == 0) || (!hasTi && ((((totalEquips - tempZones)*100)/(totalEquips))
                                              >= cmTempInfForPercentileZonesDead))){
@@ -708,6 +708,7 @@ public class VavSystemController extends SystemController
                 tempSum += cmTemp;
                 tempZones++;
             }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController, cmTemp "+cmTemp+" tempZone "+tempZones);
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
         averageSystemTemperature = CCUUtils.roundToOneDecimal(averageSystemTemperature);

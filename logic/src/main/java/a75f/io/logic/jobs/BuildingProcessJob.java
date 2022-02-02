@@ -64,7 +64,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     return;
                 }
                 BuildingTunerCache.getInstance().updateTuners();
-                DiagEquip.getInstance().updatePoints();
+               
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     profile.updateZonePoints();
                 }

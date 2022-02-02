@@ -9,6 +9,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -35,8 +36,24 @@ public class DamperReheatTypeHandler {
             SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
                                               DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
-            SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
-                                              ReheatType.values()[typeVal].displayName);
+            
+            if (typeVal <= ReheatType.Pulse.ordinal()) {
+                //Modulating Reheat -> Enable AnalogOut2 and disable relays
+                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal].displayName);
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+    
+                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false );
+                
+            } else {
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.name(), false);
+                SmartNode.updatePhysicalPointType(address, Port.RELAY_ONE.toString(),
+                                                  OutputRelayActuatorType.NormallyClose.displayName);
+                SmartNode.setPointEnabled(address, Port.RELAY_ONE.toString(), true);
+                if (typeVal == ReheatType.TwoStage.ordinal()) {
+                    SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
+                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                }
+            }
         }
     
         String who = msgObject.get("who").getAsString();

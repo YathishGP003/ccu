@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -49,6 +51,11 @@ public class MigrationUtil {
         if (!PreferenceUtil.getEnableZoneScheduleMigration()) {
             updateZoneScheduleTypes(CCUHsApi.getInstance());
             PreferenceUtil.setEnableZoneScheduleMigration();
+        }
+    
+        if (!PreferenceUtil.getCleanUpDuplicateZoneSchedule()) {
+            cleanUpDuplicateZoneSchedules(CCUHsApi.getInstance());
+            PreferenceUtil.setCleanUpDuplicateZoneSchedule();
         }
 
     }
@@ -166,6 +173,38 @@ public class MigrationUtil {
             }
         });
         
+    }
+    
+    private static void cleanUpDuplicateZoneSchedules(CCUHsApi hayStack) {
+        CcuLog.i("MIGRATION_UTIL", " cleanUpDuplicateZoneSchedules ");
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        
+        rooms.forEach( zoneMap -> {
+            Zone zone = new Zone.Builder().setHashMap(zoneMap).build();
+            List<HashMap<Object,Object>> zoneSchedules = hayStack.readAllEntities("schedule and not vacation and " +
+                                                                                  "roomRef == "+zone.getId());
+            
+            //A zone is expected to have only one zone schedule.
+            if (zoneSchedules.size() > 1) {
+                zoneSchedules.forEach( schedule -> {
+                    CcuLog.i("MIGRATION_UTIL", " cleanUpDuplicateZoneSchedules Zone: "+zoneMap+" Schedule "+schedule);
+                    if (zone.getScheduleRef() == null) {
+                        CcuLog.i("MIGRATION_UTIL", " Not ideal , there is a zone without zone schedule !!!!!");
+                        Schedule zoneSchedule = hayStack.getScheduleById(schedule.get("id").toString());
+                        zone.setScheduleRef(schedule.get("id").toString());
+                        hayStack.updateZone(zone, zone.getId());
+                        hayStack.updateZoneSchedule(zoneSchedule, zone.getId());
+                    } else if (!schedule.get("id").toString().equals(zone.getScheduleRef())) {
+                        hayStack.deleteEntity(schedule.get("id").toString());
+                    }
+                });
+            } else if (zoneSchedules.size() == 1){
+                CcuLog.i("MIGRATION_UTIL",
+                         " No duplicate schedule for Zone: "+zoneMap+" : "+zoneSchedules.get(0));
+            } else {
+                CcuLog.i("MIGRATION_UTIL", "No zone schedule for "+zoneMap);
+            }
+        });
     }
     
     

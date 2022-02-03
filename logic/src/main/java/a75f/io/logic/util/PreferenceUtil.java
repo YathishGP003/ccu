@@ -9,6 +9,7 @@ public class PreferenceUtil {
     private static Context context;
     private static String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
     private static String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
+    private static String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     
     public static void setContext(Context c) {
         context= c;
@@ -148,5 +149,13 @@ public class PreferenceUtil {
     
     public static void setEnableZoneScheduleMigration() {
         setBooleanPreference(ENABLE_ZONE_SCHEDULE_MIGRATION, true);
+    }
+    
+    public static boolean getCleanUpDuplicateZoneSchedule() {
+        return getBooleanPreference(CLEAN_UP_DUPLICATE_ZONE_SCHEDULE);
+    }
+    
+    public static void setCleanUpDuplicateZoneSchedule() {
+        setBooleanPreference(CLEAN_UP_DUPLICATE_ZONE_SCHEDULE, true);
     }
 }

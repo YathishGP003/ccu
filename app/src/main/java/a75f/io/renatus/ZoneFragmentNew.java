@@ -76,8 +76,6 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
-import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -132,7 +130,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     private TextView temperature;
     private TextView weather_condition;
     private ImageView weather_icon;
-    private TextView maxmintemp;
+    private TextView maximumTemp;
+    private TextView minimumTemp;
     private TextView note;
     private Runnable weatherUpdate;
     private Handler weatherUpdateHandler;
@@ -214,7 +213,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         temperature = (TextView) getView().findViewById(R.id.temperature);
         weather_condition = (TextView) getView().findViewById(R.id.weather_condition);
         weather_icon = (ImageView) getView().findViewById(R.id.weather_icon);
-        maxmintemp = (TextView) getView().findViewById(R.id.maxmintemp);
+        maximumTemp = (TextView) getView().findViewById(R.id.maximumTemp);
+        minimumTemp = (TextView) getView().findViewById(R.id.minimumTemp);
         note = (TextView) getView().findViewById(R.id.note);
 
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
@@ -473,8 +473,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     public void UpdateWeatherData() {
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
 
-            temperature.setText(String.format("%.0f", WeatherDataDownloadService.getTemperature()));
-            maxmintemp.setText(String.format("%.0f", WeatherDataDownloadService.getMaxTemperature()) + "\n" + String.format("%.0f", WeatherDataDownloadService.getMinTemperature()));
+            temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
+            maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
+            minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
             double weatherHumidity = WeatherDataDownloadService.getHumidity();

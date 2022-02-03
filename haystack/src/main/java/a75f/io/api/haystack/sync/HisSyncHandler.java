@@ -80,7 +80,6 @@ public class HisSyncHandler
                 }
             }
         }
-        doPurge(false);
         CcuLog.d(TAG,"<- doHisSync");
     }
     

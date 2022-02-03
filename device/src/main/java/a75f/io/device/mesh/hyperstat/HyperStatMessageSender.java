@@ -140,6 +140,21 @@ public class HyperStatMessageSender {
         VrvControlMessageCache.getInstance().updateControlsPending(address);
     }
     
+    /**
+     * Sends the IDU control message as part of seed, without any duplicate check.
+     * @param address
+     * @param hayStack
+     */
+    public static void sendIduSeedControlMessage(int address, CCUHsApi hayStack) {
+        HyperStat.HyperStatIduControlsMessage_t controls = HyperStatIduMessageHandler.getIduControlMessage(address, hayStack);
+    
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
+        }
+    
+        writeIduControlMessage(controls, address, MessageType.HYPERSTAT_IDU_CONTROLS_MESSAGE, false);
+    }
+    
     public static void writeIduControlMessage(HyperStat.HyperStatIduControlsMessage_t message, int address,
                                               MessageType msgType, boolean checkDuplicate) {
         

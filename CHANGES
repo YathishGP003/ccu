@@ -1,12 +1,22 @@
- - Merged PR 2984: Resolved build failed issue
- - Merged PR 2732: do deadband validation on slider desired temp
- - Merged PR 2835: Restrict seekarc movement based on deadband
- - Merged PR 2974: Removed sensor string from display name in Humidity sensor and Illumanace sensor
- - Merged PR 2941: CCU-10008-CCU_restart_after_delete_rename
- - Merged PR 2947: Handled OTA for hyperstat module restart
- - Merged PR 2963: Updating the fan and conditioning mode when reconfiguration done from portal end
- - Restrict seekarc temp based on deadband
- - Merge branch 'master' into Bug/samjith/9287_deadband_issue
- - Verify that deadband is maintianed
- - Consider deadband during desired temp update
- - Add logs
+ - Merged PR 3059: CCU: Weather widget gets misaligned when outside temp is single digit / negative temp
+ - Merged PR 3038: Vav series not turned on fan during heating
+ - Merged PR 3030: Clean up zone schedules
+ - Merged PR 3009: Pairing screen re apearing
+ - Merged PR 3054: Weather data widget alignment issue fix in one page
+ - Merged PR 3045: updated the fan mode on reconfiguration from portal for 2pipe 4 pipe
+ - Merged PR 3049: Fix : delete last two expired items
+ - Merged PR 3041: CCU: Cloud Connection Status is shown as Offline even when Wi-Fi connection exists
+ - Merged PR 3051: remove commented code
+ - remove committed code
+ - Merged PR 3048: Support staged reheat selection from reconfiguration
+ - Staged electric reheat support from reconfig
+ - Merged PR 3021: 10108 - Prevent NPE caused by bad custom alert defs
+ - CCU send iduControl during vrv seed
+ - Merged PR 3015: bpos shall be considered in determening cm temp inclusion
+ - Merged PR 3016: Fix : Vav relay mapping strings updated
+ - Merged PR 3001: 10177-CCU : Level 3 value is updated every 1 minute for all the BPOS devices in pubnub logs
+ - bpos shall be considered in determening cm temp inclusion
+ - Merged PR 2987: Modified HS query to fetch only system EMR
+ - Merged PR 2968: Commented the logic to get precondition rate when it is zero
+ - Merged PR 2980: The greya patch in sense profile has been fixed
+ - Fix : Vav relay mapping strings updated

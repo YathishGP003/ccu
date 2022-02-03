@@ -1231,6 +1231,7 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
+        addModulelt.setEnabled(false);
         disableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
@@ -1563,6 +1564,7 @@ public class FloorPlanFragment extends Fragment {
                         @Override
                         public void run() {
                             addModulelt.setVisibility(View.VISIBLE);
+                            addModulelt.setEnabled(true);
                         }
                     });
                 }catch (Exception e){

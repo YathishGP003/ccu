@@ -235,15 +235,15 @@ public class TunerUtil
     
     public static double getProportionalGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and pgain and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        HashMap pgain = hayStack.read("point and tuner and pgain and equipRef == \""+equipRef+"\"");
+        if (!pgain.isEmpty()) {
+            ArrayList values = hayStack.readPoint(pgain.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }

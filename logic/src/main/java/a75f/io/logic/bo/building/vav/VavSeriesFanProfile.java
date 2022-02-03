@@ -100,12 +100,13 @@ public class VavSeriesFanProfile extends VavProfile
             } else {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-    
-            updateFanStatus(occupied, vavEquip.getId(), systemMode);
+            
             //When in the system is in heating, REHEAT control does not follow RP-1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip.getId());
             }
+    
+            updateFanStatus(occupied, vavEquip.getId(), systemMode);
             
             logLoopParams(node, roomTemp, loopOp);
             updateLoopParams(node);

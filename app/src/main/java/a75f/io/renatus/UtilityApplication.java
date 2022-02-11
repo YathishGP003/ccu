@@ -203,6 +203,7 @@ public abstract class UtilityApplication extends Application {
         super.onCreate();
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate");
     
+        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Started");
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         // initialize crash reports as early as possible
@@ -255,6 +256,7 @@ public abstract class UtilityApplication extends Application {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
+                CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
                 RenatusApp.closeApp();
             });
         }
@@ -342,6 +344,7 @@ public abstract class UtilityApplication extends Application {
         EventBus.getDefault().unregister(this);
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
+        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Terminated");
         super.onTerminate();
     }
 

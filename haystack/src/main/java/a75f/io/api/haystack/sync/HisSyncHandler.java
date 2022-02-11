@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
@@ -213,8 +215,9 @@ public class HisSyncHandler
                                      .add(syncType)
                                      .toDict();
         
-        String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
-        if (response != null && !hisItemList.isEmpty()) {
+        EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
+        CcuLog.e(TAG, "response "+response.getRespCode()+" : "+response.getErrRespString());
+        if (response.getRespCode() == 200 && !hisItemList.isEmpty()) {
             try {
                 ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
             } catch (IllegalArgumentException e) {
@@ -225,6 +228,9 @@ public class HisSyncHandler
                  */
                 CcuLog.e(TAG, "Failed to update HisItem !", e);
             }
+        } else if (response.getRespCode() >= 400) {
+            CcuLog.e(TAG, "His write failed! , Trying to handle the error");
+            EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
         }
     }
     

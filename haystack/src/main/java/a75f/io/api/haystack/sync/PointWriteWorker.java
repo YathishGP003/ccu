@@ -84,8 +84,14 @@ public class PointWriteWorker extends Worker {
         }
         if (pointValList.size() > 0) {
             HGrid gridData = HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[0]));
-            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl()+ENDPOINT_POINT_WRITE_MANY,
-                                                   HZincWriter.gridToString(gridData));
+            EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl()+ENDPOINT_POINT_WRITE_MANY,
+                                                   HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
+            
+            if (response.getRespCode() == 200) {
+                return true;
+            } else if (response.getRespCode() >= 400) {
+                EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getRespString());
+            }
             return response != null;
         }
         return true;

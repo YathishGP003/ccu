@@ -217,7 +217,7 @@ public class HisSyncHandler
         
         EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
         CcuLog.e(TAG, "response "+response.getRespCode()+" : "+response.getErrRespString());
-        if (response.getRespCode() == 200 && !hisItemList.isEmpty()) {
+        if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
             try {
                 ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
             } catch (IllegalArgumentException e) {
@@ -228,7 +228,7 @@ public class HisSyncHandler
                  */
                 CcuLog.e(TAG, "Failed to update HisItem !", e);
             }
-        } else if (response.getRespCode() >= 400) {
+        } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
             CcuLog.e(TAG, "His write failed! , Trying to handle the error");
             EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
         }

@@ -18,9 +18,9 @@ class EntitySyncErrorHandler {
         CcuLog.d("CCU_HS", "handle400HttpError "+respErrorString);
         HGrid unSyncedGrid = new HZincReader(respErrorString).readGrid();
         Iterator unSyncedGridIterator = unSyncedGrid.iterator();
+        
         while (unSyncedGridIterator.hasNext()) {
             HRow itemRow = (HRow) unSyncedGridIterator.next();
-            //CcuLog.d("CCU_HS", "handle400HttpError itemRow "+itemRow.toString());
             String itemId = itemRow.getRef("id").toString();
             String itemErrorType = itemRow.getStr("error");
             CcuLog.d("CCU_HS", "handle400HttpError "+itemId+" "+itemErrorType);
@@ -29,8 +29,7 @@ class EntitySyncErrorHandler {
                 continue;
             }
             if (itemErrorType.equals("NOT_FOUND")) {
-                CcuLog.d("CCU_HS","Added Unsynced Item "+itemId+" : "+itemErrorType);
-                hsApi.getSyncStatusService().addUnSyncedEntity(itemId.toString());
+                hsApi.getSyncStatusService().addUnSyncedEntity(itemId);
             }
         }
         

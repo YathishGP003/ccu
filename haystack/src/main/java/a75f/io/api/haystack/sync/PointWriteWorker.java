@@ -87,10 +87,10 @@ public class PointWriteWorker extends Worker {
             EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl()+ENDPOINT_POINT_WRITE_MANY,
                                                    HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
             
-            if (response.getRespCode() == 200) {
+            if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {
                 return true;
-            } else if (response.getRespCode() >= 400) {
-                EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getRespString());
+            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
             }
             return response != null;
         }

@@ -45,6 +45,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.sync.EntityParser;
+import a75f.io.api.haystack.sync.EntitySyncResponse;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
@@ -165,11 +166,11 @@ public class CCUHsApi
         return hayStackUrl;
     }
 
-    public String hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
+    public EntitySyncResponse hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
 
         HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
 
-        return HttpUtil.executePost(
+        return HttpUtil.executeEntitySync(
                 CCUHsApi.getInstance().getHSUrl() + "hisWriteMany/",
                 HZincWriter.gridToString(hisWriteRequest),
                 CCUHsApi.getInstance().getJwt()

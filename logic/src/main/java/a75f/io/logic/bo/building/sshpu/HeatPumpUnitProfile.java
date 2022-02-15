@@ -330,7 +330,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
 
     public double getOperationalModes(String cmd, String equipRef) {
         // Updated with writeHisValByQuery to Default value
-        return CCUHsApi.getInstance().readDefaultVal("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
     private void handleFanStages(String equipId, short node, StandaloneLogicalFanSpeeds fanSpeed, double curHumidity){

@@ -36,6 +36,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil
 {
+    
+    public static final int HTTP_RESPONSE_OK = 200;
+    public static final int HTTP_RESPONSE_ERR_REQUEST = 400;
+    
     private static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
 
     public static String executePost(String targetURL, String urlParameters) {
@@ -137,7 +141,7 @@ public class HttpUtil
                         responsee.append(linee);
                         responsee.append('\n');
                     }
-                    CcuLog.i("CCU_HS","Response error stream: " + responsee.toString());
+                    CcuLog.e("CCU_HS","Response error stream: " + responsee.toString());
                 }
 
                 //Get Response
@@ -152,7 +156,7 @@ public class HttpUtil
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
-                CcuLog.i("CCU_HS","Exception reading stream: " + e.getLocalizedMessage());
+                CcuLog.e("CCU_HS","Exception reading stream: " + e.getLocalizedMessage());
 
                 if(connection != null) {
                     connection.disconnect();
@@ -169,7 +173,104 @@ public class HttpUtil
         }
         return null;
     }
-
+    
+    /**
+     * Returns EntitySyncResponse object instead of response string.
+     * @param targetURL
+     * @param urlParameters
+     * @param bearerToken
+     * @return
+     */
+    public static EntitySyncResponse executeEntitySync(String targetURL, String urlParameters, String bearerToken)
+    {
+        CcuLog.i("CCU_HS","Client Token: " + bearerToken);
+        
+        if (StringUtils.isNotBlank(bearerToken)) {
+            URL url;
+            HttpURLConnection connection = null;
+            EntitySyncResponse syncResponse = new EntitySyncResponse();
+            try {
+                url = new URL(targetURL);
+                
+                if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
+                    connection = (HttpURLConnection)url.openConnection();
+                } else {
+                    connection = NetCipher.getHttpsURLConnection(url);
+                }
+                
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "text/zinc");
+                connection.setRequestProperty("Accept", "text/zinc");
+                
+                CcuLog.i("CCU_HS",url.toString());
+                final int chunkSize = 2048;
+                for (int i = 0; i < urlParameters.length(); i += chunkSize) {
+                    Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
+                }
+                
+                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
+                connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
+                connection.setRequestProperty("Content-Language", "en-US");
+                connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
+                connection.setUseCaches (false);
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                
+                //Send request
+                DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+                wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
+                wr.flush ();
+                
+                int responseCode = connection.getResponseCode();
+                CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+                
+                syncResponse.setRespCode(responseCode);
+                if (responseCode >= HTTP_RESPONSE_ERR_REQUEST) {
+                    
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuffer responsee = new StringBuffer();
+                    while((linee = rde.readLine()) != null) {
+                        responsee.append(linee);
+                        responsee.append('\n');
+                    }
+                    syncResponse.setErrRespString(responsee.toString());
+                    CcuLog.e("CCU_HS","Response error stream: " + responsee.toString());
+                }
+                
+                //Get Response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringBuffer response = new StringBuffer();
+                while((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\n');
+                }
+                syncResponse.setRespString(response.toString());
+                connection.getInputStream().close();
+                return syncResponse;
+                
+            } catch (Exception e) {
+                CcuLog.e("CCU_HS","Exception reading stream: " + e.getLocalizedMessage());
+                
+                if(connection != null) {
+                    connection.disconnect();
+                }
+                e.printStackTrace();
+                return syncResponse;
+                
+            } finally {
+                
+                if(connection != null) {
+                    connection.disconnect();
+                }
+            }
+        }
+        return null;
+    }
+    
     // TODO Matt Rudd - This method is a hot mess; refactor
     public static String executeJson(String targetUrl, String urlParameters, String token, boolean tokenIsApiKey, String httpMethod) {
         URL url;
@@ -221,7 +322,7 @@ public class HttpUtil
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
-
+                
                 if (responseCode >= 400) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));

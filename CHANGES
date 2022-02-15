@@ -1,2 +1,7 @@
- - Merged PR 3040: CCU send iduControl during vrv seed
- - Skip duplicate check while sending seed message
+ - Merged PR 3086: CCU to handle "NOT_FOUND" entity errors from backend.
+ - Update hpu conditionaing mode read call
+ - Add error handling from pointWrite failures
+ - Merged PR 3069: update the Range bar view
+ - Merged PR 3068: removed Runtime tag for Loop output points
+ - Merge branch 'master' into Bug/samjith/sync_issue
+ - Handle 400 error respose from server

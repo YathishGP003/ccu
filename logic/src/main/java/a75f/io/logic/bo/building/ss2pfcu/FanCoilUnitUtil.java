@@ -195,12 +195,15 @@ public class FanCoilUnitUtil {
         } else if (curFanSpeed > maxFanSpeed.ordinal()) {
             fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
         }
-        
-        if (curFanSpeed != fallbackFanSpeed) {
+        CcuLog.i(L.TAG_CCU_PUBNUB,
+                "adjustFCUFanMode curFanSpeed : "+curFanSpeed+" - fallbackFanSpeed : " +fallbackFanSpeed);
             hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
                                     "mode and equipRef == \"" + configPoint.getEquipRef() + "\"",
                                      fallbackFanSpeed);
-        }
+            hayStack.writeHisValByQuery("point and zone and userIntent and fan and " +
+                            "mode and equipRef == \"" + configPoint.getEquipRef() + "\"",
+                    fallbackFanSpeed);
+            CcuLog.i(L.TAG_CCU_PUBNUB, "adjustFCUFanMode Final Configuration "+fallbackFanSpeed);
     }
     
     private static void adjust4PFCUConditioningMode(Point configPoint, CCUHsApi hayStack) {

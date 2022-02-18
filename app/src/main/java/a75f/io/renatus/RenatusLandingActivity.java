@@ -246,6 +246,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbEventReceiver, filter);
+        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Created");
     }
 
     public void setViewPager() {
@@ -378,6 +379,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         } catch (Exception e) {
             // already unregistered
         }
+        CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
     }
 
     @Override

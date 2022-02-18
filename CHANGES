@@ -1,12 +1,7 @@
- - Merged PR 2984: Resolved build failed issue
- - Merged PR 2732: do deadband validation on slider desired temp
- - Merged PR 2835: Restrict seekarc movement based on deadband
- - Merged PR 2974: Removed sensor string from display name in Humidity sensor and Illumanace sensor
- - Merged PR 2941: CCU-10008-CCU_restart_after_delete_rename
- - Merged PR 2947: Handled OTA for hyperstat module restart
- - Merged PR 2963: Updating the fan and conditioning mode when reconfiguration done from portal end
- - Restrict seekarc temp based on deadband
- - Merge branch 'master' into Bug/samjith/9287_deadband_issue
- - Verify that deadband is maintianed
- - Consider deadband during desired temp update
- - Add logs
+ - Merged PR 3086: CCU to handle "NOT_FOUND" entity errors from backend.
+ - Update hpu conditionaing mode read call
+ - Add error handling from pointWrite failures
+ - Merged PR 3069: update the Range bar view
+ - Merged PR 3068: removed Runtime tag for Loop output points
+ - Merge branch 'master' into Bug/samjith/sync_issue
+ - Handle 400 error respose from server

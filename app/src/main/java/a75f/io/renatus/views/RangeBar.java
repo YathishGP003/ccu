@@ -29,7 +29,7 @@ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 public class RangeBar extends View {
 
     //
-    public static final float RECOMMENDED_WIDTH_DP = 300.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 900.0f;
     //
     private Paint mLinePaint;
     private Paint mTempIconPaint;
@@ -59,13 +59,13 @@ public class RangeBar extends View {
     float mLowerBound = 32.0f;
     float mUpperBound = 110.0f;
 
-    int mDegreeIncremntPX = 0;
+    int mDegreeIncremntPX = 5;
     boolean mMeasured = false;
 
     double cdb = 2.0;
     double hdb = 2.0;
 
-    private static final int PADDING_LEFT_RIGHT_PX = 20; //dp
+    private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
 
     public RangeBar(Context context) {
         super(context);

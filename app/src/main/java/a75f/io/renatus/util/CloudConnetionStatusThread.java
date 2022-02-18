@@ -11,14 +11,16 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import a75f.io.logic.Globals;
+import a75f.io.logic.cloud.CloudConnectionManager;
+import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.renatus.NotificationHandler;
 import a75f.io.renatus.RenatusApp;
-import a75f.io.renatus.UtilityApplication;
 
 public class CloudConnetionStatusThread extends Thread {
 
     static final int CLOUD_DEAD_SKIP_COUNT = 10;
     static final int WIFI_TOGGLE_SKIP_COUNT = 15;
+    private static final String TAG_CLOUD_CONNECTION_STATUS = "CLOUD_CONNECTION_STATUS";
 
     boolean bStopThread = false;
     boolean bIsThreadRunning = false;
@@ -50,7 +52,7 @@ public class CloudConnetionStatusThread extends Thread {
                     pingCloudServer();
                 }
             }, 10);
-            NotificationHandler.setCloudConnectionStatus(NetworkUtil.isConnectedToInternet(UtilityApplication.context));
+            setCloudConnectionStatus();
             try {
                 sleep(40*1000);
             } catch (InterruptedException e) {
@@ -61,6 +63,24 @@ public class CloudConnetionStatusThread extends Thread {
         Log.d("CCU_CLOUDSTATUS", "Cloud connection status thread exited");
         bIsThreadRunning = false;
         bStopThread = false;
+    }
+
+    private void setCloudConnectionStatus(){
+        CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
+            @Override
+            public void onSuccessResponse(boolean isOk) {
+                Log.i(TAG_CLOUD_CONNECTION_STATUS, "onSuccessResponse "+ isOk);
+                NotificationHandler.setCloudConnectionStatus(isOk);
+            }
+
+            @Override
+            public void onErrorResponse(boolean isOk) {
+                Log.i(TAG_CLOUD_CONNECTION_STATUS, "onErrorResponse");
+                NotificationHandler.setCloudConnectionStatus(isOk);
+            }
+        };
+
+        new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
     }
 
     private synchronized void pingCloudServer() {

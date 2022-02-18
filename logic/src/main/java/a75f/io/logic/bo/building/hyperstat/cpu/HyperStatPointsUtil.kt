@@ -315,13 +315,13 @@ class HyperStatPointsUtil constructor(
         val loopOutputPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val coolingLoopOutputPointMarker = arrayOf(
-            "cooling", "runtime", "zone", "cmd", "his", "logical", "out","loop","output","modulating"
+            "cooling",  "zone", "cmd", "his", "logical", "out","loop","output","modulating"
         )
         val heatingLoopOutputPointMarker = arrayOf(
-            "heating", "runtime", "zone", "cmd", "his", "logical", "out","loop","output","modulating"
+            "heating",  "zone", "cmd", "his", "logical", "out","loop","output","modulating"
         )
         val fanLoopOutputPointMarker = arrayOf(
-            "fan", "runtime", "zone", "cmd", "his", "logical", "out","loop","output","modulating"
+            "fan",  "zone", "cmd", "his", "logical", "out","loop","output","modulating"
         )
 
         val coolingLoopOutputPoint = createHaystackPointWithUnit(

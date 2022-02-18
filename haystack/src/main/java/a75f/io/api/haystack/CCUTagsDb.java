@@ -1182,7 +1182,8 @@ public class CCUTagsDb extends HServer {
         //can be performed , which requires atleast 2 entries.
         List<HisItem>  hisItems = hisQuery.build().find();
         if (hisItems.size() > 2) {
-            hisItems.remove(hisItems.size() - 2);
+            hisItems.remove(hisItems.size() - 1);
+            hisItems.remove(hisItems.size() - 1);
             hisBox.remove(hisItems);
         }
     }

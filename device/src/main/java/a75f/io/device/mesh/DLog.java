@@ -95,10 +95,11 @@ public class DLog
 	}
 	
 	public static boolean isLoggingEnabled() {
-  
-		return BuildConfig.BUILD_TYPE.equals("staging") ||
+    	return true;
+        //Lets keep logging until things are stabilized
+		/*return BuildConfig.BUILD_TYPE.equals("staging") ||
 				BuildConfig.BUILD_TYPE.equals("qa") ||
 		       BuildConfig.BUILD_TYPE.equals("dev") ||
-		       BuildConfig.BUILD_TYPE.equals("local");
+		       BuildConfig.BUILD_TYPE.equals("local");*/
 	}
 }

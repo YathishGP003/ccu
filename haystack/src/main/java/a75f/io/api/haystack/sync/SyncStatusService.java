@@ -32,9 +32,9 @@ public class SyncStatusService {
     Context applicationContext;
     private SharedPreferences preferences;
     
-    private List<String> unsyncedIdList = Collections.synchronizedList(new ArrayList<>());
-    private List<String> updatedIdList = Collections.synchronizedList(new ArrayList<>());
-    private List<String> deletedIdList = Collections.synchronizedList(new ArrayList<>());
+    private List<String> unsyncedIdList;
+    private List<String> updatedIdList;
+    private List<String> deletedIdList;
     
     private static SyncStatusService instance = null;
     
@@ -263,7 +263,8 @@ public class SyncStatusService {
     }
     
     private List<String> getListString(String key) {
-        return new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString(key, ""), "‚‗‚")));
+        return Collections.synchronizedList(new ArrayList<>(
+                        Arrays.asList(TextUtils.split(preferences.getString(key, ""), "‚‗‚"))));
     }
     
     private void putListString(String key, List<String> stringList) {

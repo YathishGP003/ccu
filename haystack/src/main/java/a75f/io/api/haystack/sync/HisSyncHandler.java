@@ -33,19 +33,19 @@ public class HisSyncHandler
     private static final String TAG = "CCU_HS_SYNC";
     private static final String SYNC_TYPE_EQUIP = "equip";
     private static final String SYNC_TYPE_DEVICE = "device";
-    
+
     private static final int HIS_ITEM_BATCH_SIZE = 500;
-    
+
     CCUHsApi ccuHsApi;
-    
+
     public boolean entitySyncRequired = false;
     Lock syncLock = new ReentrantLock();
-    
+
     private volatile boolean purgeStatus = false;
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
-    
+
     private void sync() {
         CcuLog.d(TAG, "doHisSync ->");
 
@@ -70,7 +70,7 @@ public class HisSyncHandler
                                 })
                               .subscribeOn(Schedulers.io())
                               .subscribe();
-                    
+
                     //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
                     syncHistorizedEquipPoints(timeForQuarterHourSync);
                 }
@@ -84,7 +84,7 @@ public class HisSyncHandler
         }
         CcuLog.d(TAG,"<- doHisSync");
     }
-    
+
     public void syncData() {
         if (syncLock.tryLock()) {
             try {
@@ -98,7 +98,7 @@ public class HisSyncHandler
         } else {
             CcuLog.d(TAG,"No need to start HisSync. Already in progress.");
         }
-        
+
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
@@ -151,7 +151,7 @@ public class HisSyncHandler
             String pointID = pointToSync.get("id").toString();
             List<HisItem> unsyncedHisItems;
             String pointDescription = pointToSync.get("dis").toString();
-            
+
             String pointTimezone = pointToSync.get("tz").toString();
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
@@ -159,7 +159,7 @@ public class HisSyncHandler
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {
-                    
+
                     HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0) : HNum.make(hisItem.getVal());
                     long pointTimestamp = hisItem.getDateInMillis();
 
@@ -179,7 +179,7 @@ public class HisSyncHandler
                 HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (latestHisItemToReSync != null) {
                     latestHisItemToReSync.setDate(quarterHourSyncDateTimeForDeviceOrEquip);
-                    
+
                     HVal pointValue = isBooleanPoint ? HBool.make(latestHisItemToReSync.getVal() > 0) : HNum.make(latestHisItemToReSync.getVal());
                     long pointTimestamp = latestHisItemToReSync.getDateInMillis();
 

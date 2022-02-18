@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 
@@ -26,7 +28,12 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
             if (isConnected != null && info.isConnected()) {
-                new Handler().postDelayed(() -> CCUHsApi.getInstance().syncEntityWithPointWrite(),60000);
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        CCUHsApi.getInstance().syncEntityWithPointWrite();
+                    }
+                }, 300000);
             }
             isConnected = info.isConnected();
         }

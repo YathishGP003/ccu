@@ -127,7 +127,8 @@ public class EquipScheduler {
                 "desired and cooling and sp and equipRef == \"" + equip.getId() + "\"");
         HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and " +
                 "desired and heating and sp and equipRef == \"" + equip.getId() + "\"");
-        double autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback");
+        double autoawaysetback = TunerUtil.readTunerValByQuery("auto and away and setback",equip.getId());
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "autoawaysetback value: " + autoawaysetback);
 
         double heatingDT = getPriorityDesiredTemp(heatinDtPoint.get("id").toString());
         double coolingDT = getPriorityDesiredTemp(coolingDtPoint.get("id").toString());

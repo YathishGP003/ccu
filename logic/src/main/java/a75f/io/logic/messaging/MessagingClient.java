@@ -1,5 +1,7 @@
 package a75f.io.logic.messaging;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
@@ -49,12 +51,13 @@ public class MessagingClient {
             PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
         } else {
             String ccuId = CCUHsApi.getInstance().getCcuId();
-            String bearerToken = CCUHsApi.getInstance().getJwt();
 
-            PbSubscriptionHandler.getInstance().close();
-
-            this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
-            Globals.getInstance().scheduleMessagingAckJob();
+            if (ccuId != null) {
+                String bearerToken = CCUHsApi.getInstance().getJwt();
+                PbSubscriptionHandler.getInstance().close();
+                this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
+                Globals.getInstance().scheduleMessagingAckJob();
+            }
         }
     }
 

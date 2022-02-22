@@ -1,7 +1,5 @@
 package a75f.io.logic.messaging;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;

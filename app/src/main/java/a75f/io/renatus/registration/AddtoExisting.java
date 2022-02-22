@@ -577,6 +577,8 @@ public class AddtoExisting extends Fragment {
     }
 
     private void navigateToCCUScreen() {
+        prefs.setBoolean("ADD_CCU", true);
+        prefs.setBoolean("CCU_SETUP", true);
         Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);
         startActivity(intent);
     }

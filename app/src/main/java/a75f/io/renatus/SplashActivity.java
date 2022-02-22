@@ -67,7 +67,8 @@ public class SplashActivity extends AppCompatActivity {
                                 i.putExtra("viewpager_position", 4);
                                 startActivity(i);
                                 finish();
-                            } else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP")) {
+                            } else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP")
+                                           && !prefs.getBoolean("ADD_CCU")) {
                                 Log.i("SplashActivity","No profile synced navigate to create profile");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", getViewPagerPosition());
@@ -84,6 +85,11 @@ public class SplashActivity extends AppCompatActivity {
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
+                                finish();
+                            }else if(site.size() > 0 && prefs.getBoolean("CCU_SETUP") && prefs.getBoolean("ADD_CCU")) {
+                                Log.i("SplashActivity","ADD CCU is not completed");
+                                Intent intent = new Intent(SplashActivity.this, RegisterGatherCCUDetails.class);
+                                startActivity(intent);
                                 finish();
                             }
                         }

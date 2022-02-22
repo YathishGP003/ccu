@@ -189,32 +189,6 @@
 
 
                 <TextView
-                    android:id="@+id/textEnableIAQ"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/damper2Type"
-                    android:layout_alignStart="@+id/textDamper2Type"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="32dp"
-                    android:text="@string/label_enableIAQ"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
-
-                <ToggleButton
-                    android:id="@+id/enableIAQControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_below="@+id/damper2Type"
-                    android:layout_alignEnd="@id/damper2Type"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
-
-                <TextView
                     android:id="@+id/textZonePriority"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -265,30 +239,52 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:id="@+id/textEnableIAQ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/zonePriority"
+                    android:layout_alignStart="@+id/textDamper2Type"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enableIAQ"
+                    android:textAppearance="@style/title_normal" />
+
+                <ToggleButton
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/zonePriority"
+                    android:layout_alignEnd="@id/damper2Type"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
                     android:id="@+id/textEnableCO2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/zonePriority"
-                    android:layout_alignStart="@+id/textEnableIAQ"
+                    android:layout_alignStart="@+id/textZonePriority"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enableCO2"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
+                    android:textAppearance="@style/title_normal" />
 
                 <ToggleButton
                     android:id="@+id/enableCO2Control"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_below="@+id/zonePriority"
-                    android:layout_alignStart="@+id/enableIAQControl"
+                    android:layout_alignEnd="@id/zonePriority"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
+                    android:textOn="" />
 
             </RelativeLayout>
 

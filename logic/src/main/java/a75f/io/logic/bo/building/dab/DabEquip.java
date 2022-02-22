@@ -744,8 +744,8 @@ public class DabEquip
         setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
+        setHisVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);

@@ -166,7 +166,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public void doJob() {
 
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
-
+        Thread.currentThread().setName("ScheduleProcessJob");
         watchdogMonitor = false;
         
         if (jobLock.tryLock()) {
@@ -204,7 +204,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         activeSystemVacation = getActiveVacation(activeVacationSchedules);
 
-        Log.d(L.TAG_CCU_JOB, " activeSystemVacation "+activeSystemVacation);
+        Log.d(TAG_CCU_SCHEDULER, " activeSystemVacation " + activeSystemVacation);
 
         //Read all equips
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
@@ -213,21 +213,21 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             Equip equip = new Equip.Builder().setHashMap(hs).build();
             if(equip != null) {
 
-                Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
+                Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
-                    CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
+                    CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
                     continue;
                 }
 
                 //If building vacation is not active, check zone vacations.
                 if (activeSystemVacation == null )
                 {
-                    Log.e(TAG, "processSchedules: "+equip.getRoomRef() );
+                    Log.e(TAG_CCU_SCHEDULER, "processSchedules: "+equip.getRoomRef() );
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                    Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
+                    Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
                     writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
                 } else
                 {
@@ -263,13 +263,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public static void processZoneEquipSchedule(Equip equip){
         if(equip != null) {
 
-            Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
+            Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
 
             Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
 
             if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
             {
-                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
+                CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
                 return;
             }
 
@@ -278,7 +278,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                 Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
+                Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
                 writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
             } else
             {
@@ -405,7 +405,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if(cachedOccupied == null)
         {
             Schedule currentSchedule = Schedule.getScheduleForZone(zoneId.replace("@", ""), false);
-            Log.d(L.TAG_CCU_JOB, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
+            Log.d(L.TAG_CCU_SCHEDULER, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
             if (currentSchedule.getDays().size() == 0) {
                 return "No schedule configured";
             }
@@ -612,7 +612,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     public static void updateSystemOccupancy() {
         if (L.ccu().systemProfile == null || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-            Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
+            Log.d(TAG_CCU_SCHEDULER, " Skip updateSystemOccupancy for Default System Profile ");
             return;
         }
 
@@ -625,7 +625,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 systemOccupancy = VACATION;
             }
             CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
-            Log.d(TAG_CCU_JOB, " In SystemVacation : systemOccupancy : "+systemOccupancy);
+            Log.d(TAG_CCU_SCHEDULER, " In SystemVacation : systemOccupancy : "+systemOccupancy);
             return;
         }
 
@@ -642,7 +642,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 if (curr == null || occDay.getEthh() > curr.getCurrentlyOccupiedSchedule().getEthh()
                         || (occDay.getEthh() == curr.getCurrentlyOccupiedSchedule().getEthh() &&
                             occDay.getEtmm() > curr.getCurrentlyOccupiedSchedule().getEtmm()) ) {
-                    Log.d(TAG_CCU_JOB, " Occupied Schedule "+occ.getCurrentlyOccupiedSchedule().toString());
+                    Log.d(TAG_CCU_SCHEDULER, " Occupied Schedule "+occ.getCurrentlyOccupiedSchedule().toString());
                     curr = occ;
                 }
             }
@@ -669,13 +669,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 nextOccupied = next;
             }
             
-            Log.d(TAG_CCU_JOB, "millisToOccupancy: "+millisToOccupancy);
+            Log.d(TAG_CCU_SCHEDULER, "millisToOccupancy: "+millisToOccupancy);
         } else {
             nextOccupied = null;
         }
 
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-            CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
+            CcuLog.d(TAG_CCU_SCHEDULER, "systemOccupancy status : " + systemOccupancy);
             return;
         }
 
@@ -697,7 +697,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
-        CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
+        CcuLog.d(TAG_CCU_SCHEDULER, "systemOccupancy status : " + systemOccupancy.name());
     }
     
     private static Occupancy getSystemPreconditioningStatus(long millisToOccupancy) {
@@ -723,7 +723,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
         }
-        CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
         if ((systemMode != SystemMode.OFF)
             && (preconDegree > 0)
             && (millisToOccupancy > 0)
@@ -735,7 +735,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if((prevOccuStatus == PRECONDITIONING) && (systemMode != SystemMode.OFF))
                 return PRECONDITIONING;
         }
-        CcuLog.d(L.TAG_CCU_JOB, "getSystemPreconditioningStatus : "+UNOCCUPIED);
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "getSystemPreconditioningStatus : "+UNOCCUPIED);
         return UNOCCUPIED;
     }
     
@@ -787,7 +787,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         
         for (HashMap<Object, Object> equip : equipsInZone) {
             if (isEquipInAutoAway(equip.get("id").toString(), hayStack)) {
-                CcuLog.i(TAG_CCU_JOB, "Zone "+roomRef+" is in AutoAway "+" via "+equip);
+                CcuLog.i(TAG_CCU_SCHEDULER, "Zone "+roomRef+" is in AutoAway "+" via "+equip);
                 return true;
             }
         }
@@ -858,18 +858,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
         }
 
-        CcuLog.d(TAG_CCU_JOB, "isAllZonesInVacation vacation: "+ (activeZoneVacation == null ? " NO " : activeZoneVacation.getVacation().getEndDateString()));
+        CcuLog.d(TAG_CCU_SCHEDULER, "isAllZonesInVacation vacation: "+ (activeZoneVacation == null ? " NO " : activeZoneVacation.getVacation().getEndDateString()));
 
         return true;
     }
 
     //Update Schedules instantly
     public static void updateSchedules() {
-        CcuLog.d(TAG_CCU_JOB,"updateSchedules ->");
+        CcuLog.d(TAG_CCU_SCHEDULER,"updateSchedules ->");
 
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
-            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-updateSchedules ");
+            CcuLog.d(TAG_CCU_SCHEDULER,"No Site Registered ! <-updateSchedules ");
             return;
         }
 
@@ -877,19 +877,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             @Override
             public void run() {
                 processSchedules();
-                CcuLog.d(TAG_CCU_JOB,"<- updateSchedules");
+                CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules");
             }
         }.start();
 
     }
     public static void updateSchedules(final Equip equip) {
-        CcuLog.d(TAG_CCU_JOB,"updateSchedules ->"+equip.getDisplayName());
+        CcuLog.d(TAG_CCU_SCHEDULER,"updateSchedules ->"+equip.getDisplayName());
 
         new Thread() {
             @Override
             public void run() {
                 processZoneEquipSchedule(equip);
-                CcuLog.d(TAG_CCU_JOB,"<- updateSchedules for equip done"+equip.getDisplayName());
+                CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules for equip done"+equip.getDisplayName());
             }
         }.start();
 
@@ -934,7 +934,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     scheduleDataInterface.refreshScreenbySchedule(equip.getGroup(),equip.getId(),zoneId);
                 }
             } else {
-                Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
+                Log.d(L.TAG_CCU_SCHEDULER, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
         }
     }

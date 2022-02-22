@@ -32,6 +32,12 @@ public class AlertProcessJob
     public void doJob()
     {
         CcuLog.d("CCU_ALERTS", "AlertProcessJob -> ");
+        Thread.currentThread().setName("AlertProcessJob");
+        
+        if (!CCUHsApi.getInstance().isCcuReady()) {
+            CcuLog.d("CCU_ALERTS", "CCU not ready! <-AlertProcessJob ");
+            return;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
     
         CcuLog.d("CCU_ALERTS","logAlert");

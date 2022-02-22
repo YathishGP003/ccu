@@ -114,8 +114,7 @@ public class Globals {
     private int tempOverCount = 0;
 
     private static long ccuUpdateTriggerTimeToken;
-    private volatile boolean isCcuReady = false;
-
+    
     private Globals() {
     }
 
@@ -598,13 +597,6 @@ public class Globals {
 
     public long getCcuUpdateTriggerTimeToken() {
         return ccuUpdateTriggerTimeToken;
-    }
-
-    public boolean isCcuReady() {
-        return isCcuReady;
-    }
-    public void setCcuReady(boolean ccuReady) {
-        isCcuReady = ccuReady;
     }
 
     private boolean isHeatingLimitUpdated() {

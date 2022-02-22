@@ -591,7 +591,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     
     private void setCcuReady() {
         isZoneViewReady = true;
-        Globals.getInstance().setCcuReady(true);
+        CCUHsApi.getInstance().setCcuReady(true);
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
     }

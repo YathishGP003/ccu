@@ -43,13 +43,17 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
-        
+        Thread.currentThread().setName("BuildingProcessJobs");
         watchdogMonitor = false;
         
         L.pingCloudServer();
+    
+        if (!CCUHsApi.getInstance().isCcuReady()) {
+            CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
+            return;
+        }
         
         if (jobLock.tryLock()) {
-            
             try {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (site.isEmpty()) {
@@ -63,8 +67,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
                     return;
                 }
+                
                 BuildingTunerCache.getInstance().updateTuners();
-               
+                
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     profile.updateZonePoints();
                 }

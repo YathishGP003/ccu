@@ -9,6 +9,9 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.Globals;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
@@ -387,12 +390,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                         setButton.setEnabled(false);
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
                         super.onPreExecute();
+                        CCUHsApi.getInstance().setCcuReady(false);
                     }
                 
                     @Override
                     protected Void doInBackground( final Void ... params ) {
                         setupDabZoneProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().setCcuReady(true);
                         return null;
                     }
                 

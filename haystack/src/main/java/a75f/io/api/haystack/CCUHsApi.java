@@ -86,7 +86,9 @@ public class CCUHsApi
 
     private SyncStatusService syncStatusService;
     private SyncManager       syncManager;
-
+    
+    private volatile boolean isCcuReady = false;
+    
     public static CCUHsApi getInstance()
     {
         if (instance == null)
@@ -2261,5 +2263,19 @@ public class CCUHsApi
 
     public void trimObjectBoxHisStore() {
         hisSyncHandler.doPurge(true);
+    }
+    
+    
+    /*
+     * A flag used to indicate CCU is ready for CPU intensive processing of sensor events and hvac algorithms.
+     * This could be used as a last ditch effort make CPU available for any fore-ground operation that
+     * can result in bad user experience.
+     * Currently used while initial loading of zone screen.
+     */
+    public boolean isCcuReady() {
+        return isCcuReady;
+    }
+    public void setCcuReady(boolean ccuReady) {
+        isCcuReady = ccuReady;
     }
 }

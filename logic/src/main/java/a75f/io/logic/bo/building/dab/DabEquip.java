@@ -96,6 +96,7 @@ public class DabEquip
     
     public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef)
     {
+        CcuLog.i("CCU_PROFILING","Create DAB entities");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -127,8 +128,11 @@ public class DabEquip
                                                                roomRef,
                                                                floorRef,
                                                                tz));
+    
+        CcuLog.i("CCU_PROFILING","Create Config entities");
         createDabConfigPoints(config, equipRef);
     
+        CcuLog.i("CCU_PROFILING","Create Profile entities");
         List<HisItem> hisItems = new ArrayList<>();
         Point damper1Pos = new Point.Builder()
                                   .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper1Pos")
@@ -409,7 +413,8 @@ public class DabEquip
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
-        
+    
+        CcuLog.i("CCU_PROFILING","Create device entities");
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
@@ -449,9 +454,11 @@ public class DabEquip
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
     
+        CcuLog.i("CCU_PROFILING","Write DAB entities' his val");
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
-    
+        CcuLog.i("CCU_PROFILING","Sync DAB entities");
         CCUHsApi.getInstance().syncEntityTree();
+        CcuLog.i("CCU_PROFILING","Create DAB entities : Done");
     }
     
     String getId(){

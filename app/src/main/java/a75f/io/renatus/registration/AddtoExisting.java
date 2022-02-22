@@ -52,6 +52,7 @@ import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RenatusLandingActivity;
+import a75f.io.renatus.util.PrefernceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.retrofit.ApiClient;
@@ -577,8 +578,8 @@ public class AddtoExisting extends Fragment {
     }
 
     private void navigateToCCUScreen() {
-        prefs.setBoolean("ADD_CCU", true);
-        prefs.setBoolean("CCU_SETUP", true);
+        prefs.setBoolean(PrefernceConstants.ADD_CCU, true);
+        prefs.setBoolean(PrefernceConstants.CCU_SETUP, true);
         Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);
         startActivity(intent);
     }

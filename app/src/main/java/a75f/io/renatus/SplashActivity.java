@@ -22,6 +22,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.PrefernceConstants;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
@@ -57,37 +58,38 @@ public class SplashActivity extends AppCompatActivity {
                             HashMap site = CCUHsApi.getInstance().read("site");
 
                             if (site.size() == 0) {
-                                Log.i("SplashActivity","No Site Synced navigate to Register");
+                                Log.i(TAG,"No Site Synced navigate to Register");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 startActivity(i);
                                 finish();
-                            } else if(site.size() > 0 && !prefs.getBoolean("CCU_SETUP")) {
-                                Log.i("SplashActivity","CCU Setup is not completed");
+                            } else if(site.size() > 0 && !prefs.getBoolean(PrefernceConstants.CCU_SETUP)) {
+                                Log.i(TAG,"CCU Setup is not completed");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", 4);
                                 startActivity(i);
                                 finish();
-                            } else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP")
+                            } else if(prefs.getBoolean(PrefernceConstants.CCU_SETUP) && !prefs.getBoolean(PrefernceConstants.PROFILE_SETUP)
                                            && !prefs.getBoolean("ADD_CCU")) {
-                                Log.i("SplashActivity","No profile synced navigate to create profile");
+                                Log.i(TAG,"No profile synced navigate to create profile");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", getViewPagerPosition());
                                 startActivity(i);
                                 finish();
-                            } else if(prefs.getBoolean("PROFILE_SETUP") && !prefs.getBoolean("REGISTRATION")) {
-                                Log.i("SplashActivity","No floor is Created");
+                            } else if(prefs.getBoolean(PrefernceConstants.PROFILE_SETUP) && !prefs.getBoolean(PrefernceConstants.REGISTRATION)) {
+                                Log.i(TAG,"No floor is Created");
                                 System.out.println("No Floor is Created");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", getViewPagerPosition());
                                 startActivity(i);
                                 finish();
-                            } else if(prefs.getBoolean("REGISTRATION")) {
+                            } else if(prefs.getBoolean(PrefernceConstants.REGISTRATION)) {
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
                                 finish();
-                            }else if(site.size() > 0 && prefs.getBoolean("CCU_SETUP") && prefs.getBoolean("ADD_CCU")) {
-                                Log.i("SplashActivity","ADD CCU is not completed");
+                            }else if(site.size() > 0 && prefs.getBoolean(PrefernceConstants.CCU_SETUP)
+                                    && prefs.getBoolean(PrefernceConstants.ADD_CCU)) {
+                                Log.i(TAG,"ADD CCU is not completed");
                                 Intent intent = new Intent(SplashActivity.this, RegisterGatherCCUDetails.class);
                                 startActivity(intent);
                                 finish();

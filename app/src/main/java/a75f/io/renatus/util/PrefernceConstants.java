@@ -5,4 +5,9 @@ public final class PrefernceConstants {
     public static final String PROFILE_SETUP = "PROFILE_SETUP";
     public static final String REGISTRATION = "REGISTRATION";
     public static final String ADD_CCU = "ADD_CCU";
+
+
+    private PrefernceConstants(){
+
+    }
 }

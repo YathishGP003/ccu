@@ -965,10 +965,17 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public static HashMap getDABEquipPoints(String equipID) {
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and damper and normalized and cmd and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and primary and equipRef == \""+equipID+"\"");
+        if (isThermister1On) {
+            dabPoints.put("airflow sensor","enabled");
+        } else {
+            dabPoints.put("airflow sensor","disabled");
+        }
         if (equipStatusPoint.length() > 0)
         {
             dabPoints.put("Status",equipStatusPoint);
@@ -1007,8 +1014,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         HashMap ssePoints = new HashMap();
         ssePoints.put("Profile","SSE");
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
+        if (isThermister1On) {
+            ssePoints.put("airflow sensor","enabled");
+        } else {
+            ssePoints.put("airflow sensor","disabled");
+        }
         if (equipStatusPoint.length() > 0)
         {
             ssePoints.put("Status",equipStatusPoint);
@@ -1027,6 +1041,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     public static HashMap getVAVEquipPoints(String equipID) {
         HashMap vavPoints = new HashMap();
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
 
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
@@ -1034,7 +1049,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
         double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
-
+        if (isThermister1On) {
+            vavPoints.put("airflow sensor","enabled");
+        } else {
+            vavPoints.put("airflow sensor","disabled");
+        }
         if (equipStatusPoint.length() > 0)
         {
             vavPoints.put("Status",equipStatusPoint);
@@ -1088,6 +1107,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
         double condtionModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
 
         boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -1103,6 +1123,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p2FCUPoints.put("Fan Mode",fanopModePoint);
         p2FCUPoints.put("Conditioning Mode",condtionModePoint);
+        if (isThermister1On) {
+            p2FCUPoints.put("airflow sensor","enabled");
+        } else {
+            p2FCUPoints.put("airflow sensor","disabled");
+        }
         if (dischargePoint != 0) {
             p2FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
@@ -1130,6 +1155,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
         double condtionModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
 
         boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -1146,6 +1172,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p4FCUPoints.put("Fan Mode",fanopModePoint);
         p4FCUPoints.put("Conditioning Mode",condtionModePoint);
+        if (isThermister1On) {
+            p4FCUPoints.put("airflow sensor","enabled");
+        } else {
+            p4FCUPoints.put("airflow sensor","disabled");
+        }
         if (dischargePoint != 0) {
             p4FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
@@ -1179,6 +1210,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         boolean isHeating1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isHeating2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
 
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
@@ -1196,6 +1228,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         cpuPoints.put("Fan Mode",fanopModePoint);
         cpuPoints.put("Conditioning Mode",conditionModePoint);
+        if (isThermister1On) {
+            cpuPoints.put("airflow sensor","enabled");
+        } else {
+            cpuPoints.put("airflow sensor","disabled");
+        }
         if (dischargePoint != 0) {
             cpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
@@ -1313,6 +1350,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         boolean isCompressor1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isCompressor2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isThermister1On = CCUHsApi.getInstance().readDefaultVal("point and config and standalone and enable and th1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
 
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -1333,6 +1371,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         hpuPoints.put("Fan Mode",fanopModePoint);
         hpuPoints.put("Conditioning Mode",conditionModePoint);
+        if (isThermister1On) {
+            hpuPoints.put("airflow sensor","enabled");
+        } else {
+            hpuPoints.put("airflow sensor","disabled");
+        }
         if (dischargePoint != 0) {
             hpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {

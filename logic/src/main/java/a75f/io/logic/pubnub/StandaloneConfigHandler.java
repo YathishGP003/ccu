@@ -25,6 +25,8 @@ public class StandaloneConfigHandler {
         } else if (configPoint.getDisplayName().contains(Tags.HPU_NAME)) {
             //HPU config points do not seem to have 'hpu' tag. Hence checking the equip type to identify profile.
             HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
+        }else if (configPoint.getDisplayName().contains(Tags.HYPERSTAT_CPU)) {
+            HyperstatCPUConfigHandler.Companion.updateConfigPoint(msgObject, configPoint, CCUHsApi.getInstance());
         }
         
     }

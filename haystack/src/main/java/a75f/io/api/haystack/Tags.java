@@ -41,6 +41,7 @@ public class Tags
     public static final String HPU = "hpu";
     public static final String HPU_NAME = "HPU";
     public static final String FCU_NAME = "FCU";
+    public static final String HYPERSTAT_CPU = "hyperstatcpu";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";

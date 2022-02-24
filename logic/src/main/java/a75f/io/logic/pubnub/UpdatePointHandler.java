@@ -98,7 +98,8 @@ public class UpdatePointHandler
          */
         if (HSUtil.isStandaloneConfig(pointUid, CCUHsApi.getInstance())
                         && !localPoint.getMarkers().contains(Tags.DESIRED)
-                        && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)) {
+                        && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
+                && !localPoint.getMarkers().contains(Tags.TUNER)) {
             StandaloneConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updateUI(localPoint);
             return;
@@ -196,6 +197,10 @@ public class UpdatePointHandler
         if (p.getMarkers().contains("his")) {
             CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
             updateZoneUi = true;
+        }
+
+        if (p.getMarkers().contains(Tags.TUNER)) {
+            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
         }
     
         if (updateZoneUi && zoneDataInterface != null) {

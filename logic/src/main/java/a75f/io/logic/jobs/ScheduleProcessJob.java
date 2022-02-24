@@ -91,6 +91,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 {
 
     private static final String TAG = "ScheduleProcessJob";
+    public static final String airflowPoint = "airflow sensor";
+    public static final String enabledPoint = "enabled";
+    public static final String disabledPoint = "disabled";
     public static final String ACTION_STATUS_CHANGE = "status_change";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
@@ -972,9 +975,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and damper and normalized and cmd and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and primary and equipRef == \""+equipID+"\"");
         if (isThermister1On) {
-            dabPoints.put("airflow sensor","enabled");
+            dabPoints.put(airflowPoint,enabledPoint);
         } else {
-            dabPoints.put("airflow sensor","disabled");
+            dabPoints.put(airflowPoint,disabledPoint);
         }
         if (equipStatusPoint.length() > 0)
         {
@@ -1019,9 +1022,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
         if (isThermister1On) {
-            ssePoints.put("airflow sensor","enabled");
+            ssePoints.put(airflowPoint,enabledPoint);
         } else {
-            ssePoints.put("airflow sensor","disabled");
+            ssePoints.put(airflowPoint,disabledPoint);
         }
         if (equipStatusPoint.length() > 0)
         {
@@ -1050,9 +1053,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
         if (isThermister1On) {
-            vavPoints.put("airflow sensor","enabled");
+            vavPoints.put(airflowPoint,enabledPoint);
         } else {
-            vavPoints.put("airflow sensor","disabled");
+            vavPoints.put(airflowPoint,disabledPoint);
         }
         if (equipStatusPoint.length() > 0)
         {
@@ -1124,9 +1127,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         p2FCUPoints.put("Fan Mode",fanopModePoint);
         p2FCUPoints.put("Conditioning Mode",condtionModePoint);
         if (isThermister1On) {
-            p2FCUPoints.put("airflow sensor","enabled");
+            p2FCUPoints.put(airflowPoint,enabledPoint);
         } else {
-            p2FCUPoints.put("airflow sensor","disabled");
+            p2FCUPoints.put(airflowPoint,disabledPoint);
         }
         if (dischargePoint != 0) {
             p2FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
@@ -1173,9 +1176,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         p4FCUPoints.put("Fan Mode",fanopModePoint);
         p4FCUPoints.put("Conditioning Mode",condtionModePoint);
         if (isThermister1On) {
-            p4FCUPoints.put("airflow sensor","enabled");
+            p4FCUPoints.put(airflowPoint,enabledPoint);
         } else {
-            p4FCUPoints.put("airflow sensor","disabled");
+            p4FCUPoints.put(airflowPoint,disabledPoint);
         }
         if (dischargePoint != 0) {
             p4FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
@@ -1229,9 +1232,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         cpuPoints.put("Fan Mode",fanopModePoint);
         cpuPoints.put("Conditioning Mode",conditionModePoint);
         if (isThermister1On) {
-            cpuPoints.put("airflow sensor","enabled");
+            cpuPoints.put(airflowPoint,enabledPoint);
         } else {
-            cpuPoints.put("airflow sensor","disabled");
+            cpuPoints.put(airflowPoint,disabledPoint);
         }
         if (dischargePoint != 0) {
             cpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
@@ -1372,9 +1375,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         hpuPoints.put("Fan Mode",fanopModePoint);
         hpuPoints.put("Conditioning Mode",conditionModePoint);
         if (isThermister1On) {
-            hpuPoints.put("airflow sensor","enabled");
+            hpuPoints.put(airflowPoint,enabledPoint);
         } else {
-            hpuPoints.put("airflow sensor","disabled");
+            hpuPoints.put(airflowPoint,disabledPoint);
         }
         if (dischargePoint != 0) {
             hpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");

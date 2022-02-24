@@ -140,6 +140,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     TableLayout tableLayout;
     private Animation in = null;
     private Animation inleft = null;
+    public String airflowPoint = "airflow sensor";
 
     ImageView imag;
     boolean imageOn = false;
@@ -1887,7 +1888,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
-        if (vavPoints.get("airflow sensor") == "enabled"){
+        if (vavPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -1925,7 +1926,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
-        if (ssePoints.get("airflow sensor") == "enabled"){
+        if (ssePoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -1990,7 +1991,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
-        if (dabPoints.get("airflow sensor") == "enabled"){
+        if (dabPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2083,7 +2084,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
-        if (cpuEquipPoints.get("airflow sensor") == "enabled"){
+        if (cpuEquipPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2169,11 +2170,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
 
 
-            ArrayList<String> arrayHumdityTargetList = new ArrayList<String>();
+            ArrayList<String> arrayHumdityTargetList = new ArrayList<>();
             for (int pos = 1; pos <= 100; pos++)
                 arrayHumdityTargetList.add(pos+"%");
 
-            ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
+            ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
@@ -2316,7 +2317,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
-        if (hpuEquipPoints.get("airflow sensor") == "enabled"){
+        if (hpuEquipPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2406,7 +2407,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             for (int pos = 1; pos <= 100; pos++)
                 arrayHumdityTargetList.add(pos+"%");
 
-            ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
+            ArrayAdapter<String> humidityTargetAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
@@ -2561,7 +2562,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
 
-        if (p2FCUPoints.get("airflow sensor") == "enabled"){
+        if (p2FCUPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2726,7 +2727,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
         textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
-        if (p4FCUPoints.get("airflow sensor") == "enabled"){
+        if (p4FCUPoints.get(airflowPoint) == "enabled"){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {

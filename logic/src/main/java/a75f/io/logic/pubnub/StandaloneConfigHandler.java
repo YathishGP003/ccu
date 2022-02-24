@@ -17,12 +17,12 @@ public class StandaloneConfigHandler {
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateStandaloneConfigPoint " + msgObject.toString());
     
-        if (configPoint.getMarkers().contains(Tags.FCU)) {
+        if (configPoint.getDisplayName().contains(Tags.FCU_NAME)) {
             FanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
         } else if (configPoint.getDisplayName().contains("CPU")) {
             //CPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
             ConventionalPackageUnitUtil.updateCPUProfile(configPoint, msgObject, hayStack);
-        } else if (HSUtil.isHPUEquip(configPoint.getId(), hayStack)) {
+        } else if (configPoint.getDisplayName().contains(Tags.HPU_NAME)) {
             //HPU config points do not seem to have 'hpu' tag. Hence checking the equip type to identify profile.
             HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
         }

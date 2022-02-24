@@ -39,6 +39,8 @@ public class Tags
     public static final String PIPE2 = "pipe2";
     public static final String CPU = "cpu";
     public static final String HPU = "hpu";
+    public static final String HPU_NAME = "HPU";
+    public static final String FCU_NAME = "FCU";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";

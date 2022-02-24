@@ -334,7 +334,7 @@ class CPUReconfiguration {
                 ) {
                     val relay = RelayState(true, CpuRelayAssociation.values()[updatedConfigValue.toInt()])
                     val hyperStatCpuEquip = HyperStatCpuEquip.getHyperstatEquipRef(associationPoint.group.toShort())
-                    hyperStatCpuEquip.updateRelayDetails(relay, whichConfig, portType)
+                    hyperStatCpuEquip.updateRelayDetails(relay, whichConfig, portType,null)
                 }
 
                 if (whichConfig.contentEquals(Queries.ANALOG1_OUT)

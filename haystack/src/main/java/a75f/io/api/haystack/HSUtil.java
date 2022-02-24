@@ -210,9 +210,8 @@ public class HSUtil
         if (!entityMap.containsKey(Tags.TUNER)) {
             return false;
         }
-
         HashMap<Object, Object> tunerEquip = hayStack.readEntity("tuner and equip");
-        return tunerEquip.get(Tags.ID).equals(entityMap.get(Tags.EQUIPREF));
+        return (tunerEquip.get(Tags.ID).toString()).equals(entityMap.get(Tags.EQUIPREF).toString());
     }
 
 

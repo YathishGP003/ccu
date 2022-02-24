@@ -2,6 +2,7 @@ package a75f.io.api.haystack.sync;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
+import org.projecthaystack.ParseException;
 import org.projecthaystack.io.HZincReader;
 
 import java.util.Iterator;
@@ -16,25 +17,32 @@ class EntitySyncErrorHandler {
      */
     public static void handle400HttpError(CCUHsApi hsApi, String respErrorString) {
         CcuLog.d("CCU_HS", "handle400HttpError "+respErrorString);
-        HGrid unSyncedGrid = new HZincReader(respErrorString).readGrid();
-        Iterator unSyncedGridIterator = unSyncedGrid.iterator();
         
-        while (unSyncedGridIterator.hasNext()) {
-            HRow itemRow = (HRow) unSyncedGridIterator.next();
-            String itemId = itemRow.getRef("id").toString();
-            String itemErrorType = itemRow.getStr("error");
-            CcuLog.d("CCU_HS", "handle400HttpError "+itemId+" "+itemErrorType);
-            if (itemId == null || itemErrorType == null) {
-                CcuLog.d("CCU_HS", "Invalid 400 error response item "+itemRow.toString());
-                continue;
+        try {
+            HGrid unSyncedGrid = new HZincReader(respErrorString).readGrid();
+    
+            Iterator unSyncedGridIterator = unSyncedGrid.iterator();
+    
+            while (unSyncedGridIterator.hasNext()) {
+                HRow itemRow = (HRow) unSyncedGridIterator.next();
+                String itemId = itemRow.getRef("id").toString();
+                String itemErrorType = itemRow.getStr("error");
+                CcuLog.d("CCU_HS", "handle400HttpError "+itemId+" "+itemErrorType);
+                if (itemId == null || itemErrorType == null) {
+                    CcuLog.d("CCU_HS", "Invalid 400 error response item "+itemRow.toString());
+                    continue;
+                }
+                if (itemErrorType.equals("NOT_FOUND")) {
+                    hsApi.getSyncStatusService().addUnSyncedEntity(itemId);
+                }
             }
-            if (itemErrorType.equals("NOT_FOUND")) {
-                hsApi.getSyncStatusService().addUnSyncedEntity(itemId);
+    
+            if (unSyncedGrid.numRows() > 0) {
+                hsApi.scheduleSync();
             }
+        } catch (Exception e) {
+            CcuLog.d("CCU_HS", "Invalid error message! ", e);
         }
         
-        if (unSyncedGrid.numRows() > 0) {
-            hsApi.scheduleSync();
-        }
     }
 }

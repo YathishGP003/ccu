@@ -433,7 +433,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                 equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                 equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
-                resetPresentConditioningStatus(equip)
+               // resetPresentConditioningStatus(equip)
             } else {
                 if (occupantDetected && currentOperatingMode != Occupancy.OCCUPIED.ordinal) {
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.OCCUPIED.ordinal.toDouble())
@@ -1262,7 +1262,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
-                    resetPresentConditioningStatus(equip)
+                    //resetPresentConditioningStatus(equip)
                 }else if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
                     || currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal) {
                     resetOccupancy(equip)
@@ -1299,7 +1299,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
-                    resetPresentConditioningStatus(equip)
+                    //resetPresentConditioningStatus(equip)
                 }else if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
                     || currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal) {
                     resetOccupancy(equip)
@@ -1338,7 +1338,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
     private fun resetPresentConditioningStatus(equip: HyperStatCpuEquip) {
 
-        Log.i(L.TAG_CCU_HSCPU, "Resetting all the Preset Relays and Analog outs ")
+        Log.i(L.TAG_CCU_HSCPU, "Resetting all the Present Relays and Analog outs ")
         val logicalPointsList = equip.getLogicalPointList()
         val presentConfiguration = equip.getConfiguration()
 

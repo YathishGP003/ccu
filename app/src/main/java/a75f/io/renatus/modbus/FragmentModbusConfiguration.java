@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -313,6 +314,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
             @Override
             protected Void doInBackground(final String... params) {
+                CCUHsApi.getInstance().setCcuReady(false);
                 setUpsModbusProfile();
                 L.saveCCUState();
                 return null;
@@ -320,6 +322,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
             @Override
             protected void onPostExecute(final Void result) {
+                CCUHsApi.getInstance().setCcuReady(true);
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentModbusConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

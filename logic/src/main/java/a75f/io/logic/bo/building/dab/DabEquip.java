@@ -548,9 +548,9 @@ public class DabEquip
                                     .build();
         String damper2ShapeId = CCUHsApi.getInstance().addPoint(damper2Shape);
         CCUHsApi.getInstance().writeDefaultValById(damper2ShapeId, (double)config.damper2Shape);
-        
-        
-        
+    
+    
+        CcuLog.i("CCU_PROFILING","Create DAB userIntents");
         Point enableOccupancyControl = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableOccupancyControl")
                                                .setEquipRef(equipRef)
@@ -677,6 +677,7 @@ public class DabEquip
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
+        CcuLog.i("CCU_PROFILING","Create DAB config entities - Done");
     }
     
     public DabProfileConfiguration getProfileConfiguration() {

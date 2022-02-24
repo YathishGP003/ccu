@@ -58,6 +58,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     public void doJob()
     {
         Thread.currentThread().setName("DeviceUpdateJob");
+        watchdogMonitor = false;
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-DeviceUpdateJob ");
             return;
@@ -65,7 +66,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         if (jobLock.tryLock()) {
             try {
                 CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
-                watchdogMonitor = false;
                 HashMap site = CCUHsApi.getInstance().read("site");
                 if (site == null || site.size() == 0) {
                     CcuLog.d(L.TAG_CCU_DEVICE, "No Site Registered ! <-DeviceUpdateJob ");

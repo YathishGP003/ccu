@@ -50,6 +50,10 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
+            //Make sure his data in synced every other minute to avoid device appearing offline for long.
+            if (DateTime.now().getMinuteOfDay() % 2 == 0) {
+                doHisSync();
+            }
             return;
         }
         
@@ -107,7 +111,21 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     private void handleSync() {
-
+        doHisSync();
+        DateTime now = new DateTime();
+        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
+        if (timeForEntitySync) {
+            L.saveCCUState();
+            CCUHsApi.getInstance().scheduleSync();
+        }
+        //Save CCU state every other minute. This could be expensive if the local entity count is high.
+        if (now.getMinuteOfDay() % 2 == 0) {
+            L.saveCCUState();
+        }
+    }
+    
+    private void doHisSync() {
+    
         new Thread() {
             @Override
             public void run() {
@@ -120,16 +138,5 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
         }.start();
-
-        DateTime now = new DateTime();
-        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
-        if (timeForEntitySync) {
-            L.saveCCUState();
-            CCUHsApi.getInstance().scheduleSync();
-        }
-        //Save CCU state every other minute. This could be expensive if the local entity count is high.
-        if (now.getMinuteOfDay() % 2 == 0) {
-            L.saveCCUState();
-        }
     }
 }

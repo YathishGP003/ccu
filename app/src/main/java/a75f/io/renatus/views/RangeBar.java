@@ -157,25 +157,32 @@ public class RangeBar extends View {
                 getParent().requestDisallowInterceptTouchEvent(false);
                 break;
             case MotionEvent.ACTION_MOVE:
+                
                 Log.i("Movement", "mSelected - " + mSelected.name()
                                   + " Temps: " + getTempForPX(event.getX()));
-                if (getTempForPX(event.getX()) > mLowerBound && getTempForPX(event.getX()) < mUpperBound) {
+                float tempSelected = getTempForPX(event.getX());
+                float deadbandSum = (float) (cdb + hdb);
+                if (tempSelected > mLowerBound && tempSelected < mUpperBound) {
         
-                    Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
+                    Log.i("Movement", "Temps: " + tempSelected);
                     if (mSelected == RangeBarState.LOWER_COOLING_LIMIT) {
-                        if (getTempForPX(event.getX()) >= lowerCoolingTemp && getTempForPX(event.getX()) <= upperCoolingTemp) {
+                        if (tempSelected >= lowerCoolingTemp && tempSelected <= upperCoolingTemp
+                                                    && (tempSelected - deadbandSum) >= upperHeatingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX(event.getX());
-                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {
-                                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - (float) (cdb + hdb));
+                            temps[mSelected.ordinal()] = tempSelected;
+                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < deadbandSum) {
+                                temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] =
+                                    (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - deadbandSum);
                             }
                         }
                     } else if (mSelected == RangeBarState.LOWER_HEATING_LIMIT) {
-                        if (getTempForPX(event.getX()) >= upperHeatingTemp && getTempForPX(event.getX()) <= lowerHeatingTemp) {
+                        if (tempSelected >= upperHeatingTemp && tempSelected <= lowerHeatingTemp
+                                                    && (tempSelected + deadbandSum) <= upperCoolingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX(event.getX());
-                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb)) {
-                                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] + (float) (cdb + hdb));
+                            temps[mSelected.ordinal()] = tempSelected;
+                            if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < deadbandSum) {
+                                temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] =
+                                    (temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] + deadbandSum);
                             }
                         }
                     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -19,6 +20,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -39,6 +42,8 @@ public class SyncStatusService {
     private static SyncStatusService instance = null;
     
     public static HashSet<String> refTypes = new HashSet<>();
+    
+    private Timer fileSaveDelayTimer;
     
     static
     {
@@ -96,7 +101,10 @@ public class SyncStatusService {
         CcuLog.i("CCU_HS"," addUnSyncedEntity "+id);
         unsyncedIdList.add(id);
         //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
-        putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        //putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        if (fileSaveDelayTimer == null) {
+            scheduleSyncDataSaveTimer();
+        }
     }
     
     public void addUpdatedEntity(String id) {
@@ -128,6 +136,23 @@ public class SyncStatusService {
         }
     }
     
+    private void scheduleSyncDataSaveTimer() {
+        fileSaveDelayTimer = new Timer();
+        fileSaveDelayTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                CcuLog.i("CCU_PROFILING", "Save sync data");
+                putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+                try {
+                    fileSaveDelayTimer.cancel();
+                    fileSaveDelayTimer = null;
+                } catch (IllegalStateException e) {
+                    CcuLog.i("CCU_HS", "Timer already cancelled",e);
+                }
+            }
+        }, 15000);
+    }
+    
     public void setUnSyncedEntitySynced(String id) {
         unsyncedIdList.remove(id);
     }
@@ -154,7 +179,10 @@ public class SyncStatusService {
         CcuLog.i("CCU_HS","Set entity synced "+id);
         if (unsyncedIdList.contains(id)) {
             unsyncedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            //putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            if (fileSaveDelayTimer == null) {
+                scheduleSyncDataSaveTimer();
+            }
         }
         
         if (updatedIdList.contains(id)) {

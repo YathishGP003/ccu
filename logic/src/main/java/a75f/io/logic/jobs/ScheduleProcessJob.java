@@ -150,7 +150,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             else
             {
-
+                if(!currentOccupiedMode.isOccupied()){
+                    checkforOccUpdate(occupied);
+                }
                 Log.i("SchedulerCache", "Putting in new occupied values");
                 occupiedHashMap.put(id, occupied);
                 return true;
@@ -159,6 +161,28 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         return false;
 
+    }
+
+    private static void checkforOccUpdate(Occupied occupied) {
+        if(occupied.isOccupied() ){
+            //Read all bpos equips
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and bpos");
+            for(HashMap hs : equips)
+            {
+                HashMap ocupancyDetection = CCUHsApi.getInstance().read(
+                        "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                                " \"" + hs.get("id") + "\"");
+                if (ocupancyDetection.get("id") != null) {
+                    double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(
+                            "id").toString());
+                    CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection.get(
+                            "id").toString(),
+                            val);
+                }
+
+            }
+
+        }
     }
 
 
@@ -904,7 +928,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             String currentZoneStatus = getZoneStatusMessage(equip.getRoomRef(), equip.getId());
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
-                if (zoneOccupancy == OCCUPIED) {
+                if (zoneOccupancy.equals(OCCUPIED)) {
                     HashMap ocupancyDetection = CCUHsApi.getInstance().read(
                             "point and  bpos and occupancy and detection and his and equipRef  ==" +
                                     " \"" + equip.getId() + "\"");

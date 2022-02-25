@@ -140,8 +140,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     TableLayout tableLayout;
     private Animation in = null;
     private Animation inleft = null;
-    public static final String airflowPoint = "airflow sensor";
-    public static final String enabled = "enabled";
+    public static final String AIRFLOW_SENSOR = "airflow sensor";
+    public static final String ENABLED = "enabled";
 
     ImageView imag;
     boolean imageOn = false;
@@ -1889,7 +1889,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
-        if (vavPoints.get(airflowPoint) == enabled){
+        if (vavPoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -1927,7 +1927,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
-        if (ssePoints.get(airflowPoint) == enabled){
+        if (ssePoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -1992,7 +1992,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
-        if (dabPoints.get(airflowPoint) == enabled){
+        if (dabPoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2085,7 +2085,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
-        if (cpuEquipPoints.get(airflowPoint) == enabled){
+        if (cpuEquipPoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2318,7 +2318,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
-        if (hpuEquipPoints.get(airflowPoint) == enabled){
+        if (hpuEquipPoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2563,7 +2563,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
 
-        if (p2FCUPoints.get(airflowPoint) == enabled) {
+        if (p2FCUPoints.get(AIRFLOW_SENSOR) == ENABLED) {
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {
@@ -2728,7 +2728,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
         textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
-        if (p4FCUPoints.get(airflowPoint) == enabled){
+        if (p4FCUPoints.get(AIRFLOW_SENSOR) == ENABLED){
             viewDischarge.setVisibility(View.VISIBLE);
 
         } else {

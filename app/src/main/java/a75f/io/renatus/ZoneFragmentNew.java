@@ -1889,12 +1889,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
-        if (vavPoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
-
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
+        if (!(Boolean) vavPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1927,12 +1922,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
-        if (ssePoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
+        if (!(Boolean) ssePoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1992,12 +1983,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
-        if (dabPoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
+        if (!(Boolean) dabPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -2085,12 +2072,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
-        if (cpuEquipPoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
+        if (!(Boolean) cpuEquipPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
 
 
         int conditionMode = 0;
@@ -2318,12 +2301,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
-        if (hpuEquipPoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
+        if (!(Boolean) hpuEquipPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
@@ -2563,12 +2542,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
 
-        if (p2FCUPoints.get(AIRFLOW_SENSOR) == ENABLED) {
-            viewDischarge.setVisibility(View.VISIBLE);
-
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
+        if (!(Boolean) p2FCUPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
@@ -2716,7 +2690,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
         HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
-
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
 
@@ -2728,12 +2701,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
         textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
-        if (p4FCUPoints.get(AIRFLOW_SENSOR) == ENABLED){
-            viewDischarge.setVisibility(View.VISIBLE);
-
-        } else {
-            viewDischarge.setVisibility(View.GONE);
-        }
+        if (!(Boolean) p4FCUPoints.get(AIRFLOW_SENSOR))  viewDischarge.setVisibility(View.GONE);
 
 
         int conditionMode = 0;

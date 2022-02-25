@@ -84,11 +84,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 {
 
     private static final String TAG = "ScheduleProcessJob";
-    public static final String AIRFLOW_SENSOR = "airflow sensor";
-    public static final String ENABLED_POINT = "enabled";
-    public static final String DISABLED = "disabled";
+    private static final String AIRFLOW_SENSOR = "airflow sensor";
     public static final String ACTION_STATUS_CHANGE = "status_change";
-    public static final String THERMISTER_QUERY_POINT = "point and config and standalone and enable and th1 and equipRef == \"";
+    private static final String THERMISTER_QUERY_POINT = "point and config and standalone and enable and th1 and equipRef == \"";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
 

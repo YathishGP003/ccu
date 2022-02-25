@@ -799,6 +799,7 @@ class HyperStatCpuEquip(val node: Short) {
         )
         hyperStatPointsUtil.addDefaultValueForPoint(relayId, if (relayState.enabled) 1.0 else 0.0)
         hyperStatPointsUtil.addDefaultValueForPoint(relayAssociatedId, relayState.association.ordinal.toDouble())
+        DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, relayState.enabled)
         if (relayLogicalPointId != null) {
             hsHaystackUtil!!.removePoint(relayLogicalPointId)
         }
@@ -815,8 +816,6 @@ class HyperStatCpuEquip(val node: Short) {
             }
 
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-
-            DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, true)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)
         }
 
@@ -899,7 +898,7 @@ class HyperStatCpuEquip(val node: Short) {
         if (fanHighPointId != null) hsHaystackUtil!!.removePoint(fanHighPointId)
 
         Log.i(L.TAG_CCU_HSCPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
-
+        DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, analogOutState.enabled)
         if (analogOutState.enabled) {
 
             val pointData: Triple<Any, Any, Any> = hyperStatPointsUtil.analogOutConfiguration(
@@ -921,7 +920,6 @@ class HyperStatCpuEquip(val node: Short) {
             hyperStatPointsUtil.addDefaultValueForPoint(newMaxPointId, analogOutState.voltageAtMax)
 
             val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
-            DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, true)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)
             DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
 
@@ -952,7 +950,7 @@ class HyperStatCpuEquip(val node: Short) {
 
 
     // Function to check the changes in the point and do the update with new value
-    fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
+    private fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
         val presentValue = haystack.readDefaultValById(pointId)
         if(presentValue != newValue)
             hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)
@@ -976,9 +974,8 @@ class HyperStatCpuEquip(val node: Short) {
         if (analogInLogicalPointId != null) {
             hsHaystackUtil!!.removePoint(analogInLogicalPointId)
         }
-
+        DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, analogInState.enabled)
         if (analogInState.enabled) {
-
             val pointData: Point = hyperStatPointsUtil.analogInConfiguration(
                 analogInState = analogInState,
                 analogTag = analogInTag
@@ -987,7 +984,6 @@ class HyperStatCpuEquip(val node: Short) {
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
 
-            DeviceUtil.setPointEnabled(nodeAddress.toInt(), physicalPort.name, true)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)
             val pointType = HyperStatAssociationUtil.getSensorNameByType(analogInState.association)
             DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)

@@ -199,10 +199,6 @@ public class UpdatePointHandler
             updateZoneUi = true;
         }
 
-        if (p.getMarkers().contains(Tags.TUNER)) {
-            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-        }
-    
         if (updateZoneUi && zoneDataInterface != null) {
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
             zoneDataInterface.refreshScreen(luid);

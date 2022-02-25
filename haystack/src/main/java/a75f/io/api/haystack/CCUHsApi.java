@@ -2276,7 +2276,25 @@ public class CCUHsApi
     public boolean isCcuReady() {
         return isCcuReady;
     }
-    public void setCcuReady(boolean ccuReady) {
-        isCcuReady = ccuReady;
+    public void setCcuReady() {
+        isCcuReady = true;
+    }
+    
+    public void resetCcuReady() {
+        isCcuReady = false;
+    }
+    
+    /**
+     * Checks if there is valid Site and CCU entities in database.
+     * @return
+     */
+    public boolean isCCUConfigured() {
+        HashMap<Object, Object> site = readEntity("site");
+        if (site.isEmpty()) {
+            return false;
+        }
+    
+        HashMap<Object, Object> ccu = readEntity("ccu");
+        return !ccu.isEmpty();
     }
 }

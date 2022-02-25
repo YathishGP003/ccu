@@ -43,11 +43,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
-        Thread.currentThread().setName("BuildingProcessJobs");
         watchdogMonitor = false;
         
         L.pingCloudServer();
-    
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
             //Make sure his data in synced every other minute to avoid device appearing offline for long.
@@ -59,44 +57,21 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         if (jobLock.tryLock()) {
             try {
-                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                if (site.isEmpty()) {
-                    CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");
-                    return;
-                }
-
-                HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
-                
-                if (ccu.isEmpty()) {
-                    CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
+                if (!CCUHsApi.getInstance().isCCUConfigured()) {
+                    CcuLog.d(L.TAG_CCU_JOB,"No Site/CCU configured ! <-BuildingProcessJob ");
                     return;
                 }
                 
                 BuildingTunerCache.getInstance().updateTuners();
                 
-                for (ZoneProfile profile : L.ccu().zoneProfiles) {
-                    profile.updateZonePoints();
-                }
+                handleMessagingRegistration();
+    
+                runZoneProfilesAlgorithm();
                 
-                boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
-                if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-                    CCUHsApi.getInstance().syncEntityTree();
-                    if (CCUHsApi.getInstance().siteSynced()) {
-                        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                        PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
-                                                                         siteUID);
-                    }
-                }
-                if (L.ccu().oaoProfile != null) {
-                    L.ccu().oaoProfile.doOAO();
-                } else {
-                    CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
-                                                              (double) EpidemicState.OFF.ordinal());
-                }
-
-                if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
-                    L.ccu().systemProfile.doSystemControl();
-                }
+                runOAOAlgorithm();
+                
+                runSystemControlAlgorithm();
+                
                 handleSync();
     
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
@@ -104,9 +79,45 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
             } finally {
                 jobLock.unlock();
+                
             }
         } else {
             CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob : Previous Instance of job still running");
+        }
+    }
+    
+    
+    //This could go away once messaging is stabilized.
+    private void handleMessagingRegistration() {
+        boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
+        if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+            CCUHsApi.getInstance().syncEntityTree();
+            if (CCUHsApi.getInstance().siteSynced()) {
+                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
+                                                                 siteUID);
+            }
+        }
+    }
+    
+    private void runZoneProfilesAlgorithm() {
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+            profile.updateZonePoints();
+        }
+    }
+    
+    private void runOAOAlgorithm() {
+        if (L.ccu().oaoProfile != null) {
+            L.ccu().oaoProfile.doOAO();
+        } else {
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
+                                                      (double) EpidemicState.OFF.ordinal());
+        }
+    }
+    
+    private void runSystemControlAlgorithm() {
+        if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
+            L.ccu().systemProfile.doSystemControl();
         }
     }
     

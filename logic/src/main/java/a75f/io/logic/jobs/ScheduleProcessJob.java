@@ -190,7 +190,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public void doJob() {
 
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
-        Thread.currentThread().setName("ScheduleProcessJob");
         watchdogMonitor = false;
         
         if (jobLock.tryLock()) {
@@ -251,7 +250,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     Log.e(TAG_CCU_SCHEDULER, "processSchedules: "+equip.getRoomRef() );
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                    Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
+                    Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size());
                     writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
                 } else
                 {
@@ -302,7 +301,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                 Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
+                Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" SystemVacation "+activeSystemVacation);
                 writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
             } else
             {

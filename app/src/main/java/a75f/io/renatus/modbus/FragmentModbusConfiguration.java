@@ -314,15 +314,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
             @Override
             protected Void doInBackground(final String... params) {
-                CCUHsApi.getInstance().setCcuReady(false);
+                CCUHsApi.getInstance().resetCcuReady();
                 setUpsModbusProfile();
                 L.saveCCUState();
+                CCUHsApi.getInstance().setCcuReady();
                 return null;
             }
 
             @Override
             protected void onPostExecute(final Void result) {
-                CCUHsApi.getInstance().setCcuReady(true);
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentModbusConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));

@@ -417,8 +417,9 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 {
                     ProgressDialogUtils.showProgressDialog(activity, "Saving Hyperstat CPU Configuration")
                 }, {
+                    CCUHsApi.getInstance().resetCcuReady()
                     viewModel.setConfigSelected()
-
+                    CCUHsApi.getInstance().setCcuReady()
                     LSerial.getInstance().sendHyperStatSeedMessage(
                         this.meshAddress, roomName, floorName, "hyperstatcpu"
                     )

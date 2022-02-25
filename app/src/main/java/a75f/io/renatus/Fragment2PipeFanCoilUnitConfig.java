@@ -241,9 +241,11 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
                     },
                     ()->{
+                        CCUHsApi.getInstance().resetCcuReady();
                         setup2PFCUZoneProfile();
                         L.saveCCUState();
                         LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                        CCUHsApi.getInstance().setCcuReady();
                     },
                     ()->{
                         ProgressDialogUtils.hideProgressDialog();

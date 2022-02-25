@@ -4,15 +4,9 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.Globals;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,6 +25,7 @@ import android.widget.ToggleButton;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -50,10 +45,10 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.annotation.Nullable;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
-
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -390,14 +385,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                         setButton.setEnabled(false);
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
                         super.onPreExecute();
-                        CCUHsApi.getInstance().setCcuReady(false);
                     }
                 
                     @Override
                     protected Void doInBackground( final Void ... params ) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupDabZoneProfile();
                         L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady(true);
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
                 

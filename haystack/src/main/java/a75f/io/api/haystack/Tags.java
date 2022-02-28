@@ -39,7 +39,7 @@ public class Tags
     public static final String PIPE2 = "pipe2";
     public static final String CPU = "cpu";
     public static final String HPU = "hpu";
-    
+
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";
     public static final String HUMIDIFIER = "humidifier";

@@ -7,7 +7,6 @@ import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,13 +14,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.textfield.TextInputLayout;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,7 +34,6 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projecthaystack.HRef;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -47,11 +43,10 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.messaging.MessagingClient;
-import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RenatusLandingActivity;
+import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.retrofit.ApiClient;
@@ -577,6 +572,8 @@ public class AddtoExisting extends Fragment {
     }
 
     private void navigateToCCUScreen() {
+        prefs.setBoolean(PreferenceConstants.ADD_CCU, true);
+        prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
         Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);
         startActivity(intent);
     }

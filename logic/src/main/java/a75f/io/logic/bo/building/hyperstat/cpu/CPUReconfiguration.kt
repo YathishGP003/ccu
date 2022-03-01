@@ -335,7 +335,7 @@ class CPUReconfiguration {
                     || whichConfig.contentEquals(Tags.RELAY6)
                 ) {
                     val relay = RelayState(true, CpuRelayAssociation.values()[updatedConfigValue.toInt()])
-                    val hyperStatCpuEquip = HyperStatCpuEquip.getHyperstatEquipRef(associationPoint.group.toShort())
+                    val hyperStatCpuEquip = getHyperstatEquipRef(associationPoint.group.toShort())
                     hyperStatCpuEquip.updateRelayDetails(relay, whichConfig, portType,null)
                 }
 
@@ -358,7 +358,7 @@ class CPUReconfiguration {
                         true, CpuAnalogOutAssociation.values()[updatedConfigValue
                             .toInt()], 2.0, 10.0, 30.0, 60.0, 100.0
                     )
-                    val hyperStatCpuEquip = HyperStatCpuEquip.getHyperstatEquipRef(associationPoint.group.toShort())
+                    val hyperStatCpuEquip = getHyperstatEquipRef(associationPoint.group.toShort())
                     Log.i(L.TAG_CCU_HSCPU, "Reconfiguration analogTag  $analogTag $analogPort")
                     hyperStatCpuEquip.updateAnalogOutDetails(
                         analogOutState,
@@ -374,7 +374,7 @@ class CPUReconfiguration {
                 ) {
 
                     val analogInState = AnalogInState(true, CpuAnalogInAssociation.values()[updatedConfigValue.toInt()])
-                    val hyperStatCpuEquip = HyperStatCpuEquip.getHyperstatEquipRef(associationPoint.group.toShort())
+                    val hyperStatCpuEquip = getHyperstatEquipRef(associationPoint.group.toShort())
                     val tag = if (whichConfig.contentEquals(Queries.ANALOG1_IN)) Tags.ANALOG1 else Tags.ANALOG2
                     val port =
                         if (whichConfig.contentEquals(Queries.ANALOG1_IN)) Port.ANALOG_IN_ONE else Port.ANALOG_IN_TWO

@@ -558,46 +558,49 @@ class HyperStatCpuFragment : BaseDialogFragment() {
 
 
     private fun getControlMessage(): HyperStat.HyperStatControlsMessage_t {
+        if (meshAddress != null) {
+            val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+            val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-        val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
-        val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
+            val ao2Min = analogOutUIs[1].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+            val ao2Max = analogOutUIs[1].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-        val ao2Min = analogOutUIs[1].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
-        val ao2Max = analogOutUIs[1].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
+            val ao3Min = analogOutUIs[2].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+            val ao3Max = analogOutUIs[2].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-        val ao3Min = analogOutUIs[2].vAtMinDamperSelector.selectedItem.toString().replace("V","").toDouble()
-        val ao3Max = analogOutUIs[2].vAtMaxDamperSelector.selectedItem.toString().replace("V","").toDouble()
-
-        return HyperStat.HyperStatControlsMessage_t.newBuilder()
-            .setRelay1(relay1Test.isChecked)
-            .setRelay2(relay2Test.isChecked)
-            .setRelay3(relay3Test.isChecked)
-            .setRelay4(relay4Test.isChecked)
-            .setRelay5(relay5Test.isChecked)
-            .setRelay6(relay6Test.isChecked)
-            .setAnalogOut1(
-                HyperStat.HyperStatAnalogOutputControl_t
-                    .newBuilder().setPercent(
-                        getAnalogVal(ao1Min,ao1Max,analogOut1Test.selectedItem.toString().toDouble())
-                    ).build()
-            )
-            .setAnalogOut2(
-                HyperStat.HyperStatAnalogOutputControl_t
-                    .newBuilder().setPercent(
-                        getAnalogVal(ao2Min,ao2Max,analogOut2Test.selectedItem.toString().toDouble())
-                    ).build()
-            )
-            .setAnalogOut3(
-                HyperStat.HyperStatAnalogOutputControl_t
-                    .newBuilder().setPercent(
-                        getAnalogVal(ao3Min,ao3Max,analogOut3Test.selectedItem.toString().toDouble())
-                    ).build()
-            )
-            .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
-            .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
-            .setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO)
-            .setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO)
-            .build()
+            return HyperStat.HyperStatControlsMessage_t.newBuilder()
+                .setRelay1(relay1Test.isChecked)
+                .setRelay2(relay2Test.isChecked)
+                .setRelay3(relay3Test.isChecked)
+                .setRelay4(relay4Test.isChecked)
+                .setRelay5(relay5Test.isChecked)
+                .setRelay6(relay6Test.isChecked)
+                .setAnalogOut1(
+                    HyperStat.HyperStatAnalogOutputControl_t
+                        .newBuilder().setPercent(
+                            getAnalogVal(ao1Min, ao1Max, analogOut1Test.selectedItem.toString().toDouble())
+                        ).build()
+                )
+                .setAnalogOut2(
+                    HyperStat.HyperStatAnalogOutputControl_t
+                        .newBuilder().setPercent(
+                            getAnalogVal(ao2Min, ao2Max, analogOut2Test.selectedItem.toString().toDouble())
+                        ).build()
+                )
+                .setAnalogOut3(
+                    HyperStat.HyperStatAnalogOutputControl_t
+                        .newBuilder().setPercent(
+                            getAnalogVal(ao3Min, ao3Max, analogOut3Test.selectedItem.toString().toDouble())
+                        ).build()
+                )
+                .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
+                .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
+                .setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO)
+                .setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO)
+                .build()
+        } else {
+            return HyperStat.HyperStatControlsMessage_t.newBuilder().build()
+        }
     }
     private fun getDesiredTempCooling(node: Short): Double {
         return CCUHsApi.getInstance()

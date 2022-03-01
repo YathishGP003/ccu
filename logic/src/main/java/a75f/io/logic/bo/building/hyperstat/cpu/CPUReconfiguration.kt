@@ -286,6 +286,8 @@ class CPUReconfiguration {
             configType: String,
             portType: Port
         ) {
+
+            DeviceUtil.setPointEnabled(equip.group.toInt(), portType.name, updatedConfigValue == 1.0)
             if (updatedConfigValue <= 0) {
                 Log.i(L.TAG_CCU_HSCPU, "Config Point $configType is disabled so deleting the logical point")
                 deleteLogicalPoint(haystack, configPoint.equipRef, configType, portType)

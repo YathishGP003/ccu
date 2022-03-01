@@ -775,10 +775,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                     if (fanLoopOutput == 0)
                         relayState = 0.0
                 } else {
-                    relayState = if (basicSettings.fanMode == StandaloneFanStage.LOW_CUR_OCC
-                        || basicSettings.fanMode == StandaloneFanStage.LOW_OCC
-                        || basicSettings.fanMode == StandaloneFanStage.LOW_ALL_TIME
-                    ) 1.0 else 0.0
+                    relayState = 1.0
                 }
                 if (relayState != -1.0) {
                     updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, relayState)
@@ -803,6 +800,9 @@ class HyperStatCpuProfile : ZoneProfile() {
                     relayState = if (basicSettings.fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
                         || basicSettings.fanMode == StandaloneFanStage.MEDIUM_OCC
                         || basicSettings.fanMode == StandaloneFanStage.MEDIUM_ALL_TIME
+                        || basicSettings.fanMode == StandaloneFanStage.HIGH_CUR_OCC
+                        || basicSettings.fanMode == StandaloneFanStage.HIGH_OCC
+                        || basicSettings.fanMode == StandaloneFanStage.HIGH_ALL_TIME
                     ) 1.0 else 0.0
                 }
                 if(relayState != -1.0) {
@@ -1465,5 +1465,4 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
         }
     }
-
 }

@@ -6,18 +6,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
 
 public class DabTuners {
     
@@ -354,6 +357,9 @@ public class DabTuners {
         hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                       DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
         hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
+        
+        SystemTuners.createCoolingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis, tz, Tags.DAB, true);
+        SystemTuners.createHeatingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis, tz, Tags.DAB, true);
     }
     
     public static void addEquipDabTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,

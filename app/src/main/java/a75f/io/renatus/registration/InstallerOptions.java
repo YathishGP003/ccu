@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import com.google.android.material.textfield.TextInputLayout;
+
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.util.Patterns;
@@ -119,6 +121,14 @@ public class InstallerOptions extends Fragment {
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
+    
+    private ToggleButton toggleCoolingLockout;
+    private ToggleButton toggleHeatingLockout;
+    private TextView textCoolingLockoutTemp;
+    private Spinner spinnerCoolingLockoutTemp;
+    private TextView textHeatingLockoutTemp;
+    private Spinner spinnerHeatingLockoutTemp;
+    
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -208,6 +218,14 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
+        toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
+        toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
+        textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
+        spinnerCoolingLockoutTemp = rootView.findViewById(R.id.spinnerCoolingLockoutTemp);
+        textHeatingLockoutTemp = rootView.findViewById(R.id.textHeatingLockoutTemp);
+        spinnerHeatingLockoutTemp = rootView.findViewById(R.id.spinnerHeatingLockoutTemp);
+        
+        initializeTempLockoutUI();
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
 
@@ -453,6 +471,48 @@ public class InstallerOptions extends Fragment {
         editSubnet.setEnabled(false);
         buttonSendIAM.setEnabled(true);
         buttonSendIAM.setVisibility(View.GONE);
+    }
+    
+    private void initializeTempLockoutUI() {
+        
+        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,60,1, getActivity());
+        spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
+        spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(55.0), false);
+    
+        spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        
+        ArrayAdapter<Double> heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+        spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
+        spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(80.0), false);
+        spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        
+        toggleCoolingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateCoolingLockoutUIVisibility(isChecked);
+        });
+        
+        toggleHeatingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateHeatingLockoutUIVisibility(isChecked);
+        });
+    }
+    
+    private void updateCoolingLockoutUIVisibility(boolean isVisible) {
+        textCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+        spinnerCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+    }
+    
+    private void updateHeatingLockoutUIVisibility(boolean isVisible) {
+        textHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+        spinnerHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
     }
 
     public void startBACnetDevice(){

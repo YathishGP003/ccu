@@ -109,5 +109,7 @@ public class Tags
     public static final String PRIMARY = "primary";
     public static final String SECONDARY = "secondary";
     public static final String SETTING = "setting";
-
+    
+    public static final String OUTSIDE_TEMP = "outsideTemp";
+    public static final String LOCKOUT = "lockout";
 }

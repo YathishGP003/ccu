@@ -470,7 +470,6 @@ class HyperStatCpuEquip(val node: Short) {
         updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateConditioningMode(updatedHyperStatConfig)
-        updateFanMode(updatedHyperStatConfig)
         Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
@@ -701,37 +700,37 @@ class HyperStatCpuEquip(val node: Short) {
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay1State, existingConfiguration.relay1State)
         ) {
-            updateRelayDetails(newConfiguration.relay1State, "relay1", Port.RELAY_ONE)
+            updateRelayDetails(newConfiguration.relay1State, "relay1", Port.RELAY_ONE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay2State, existingConfiguration.relay2State)
         ) {
-            updateRelayDetails(newConfiguration.relay2State, "relay2", Port.RELAY_TWO)
+            updateRelayDetails(newConfiguration.relay2State, "relay2", Port.RELAY_TWO, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay3State, existingConfiguration.relay3State)
         ) {
-            updateRelayDetails(newConfiguration.relay3State, "relay3", Port.RELAY_THREE)
+            updateRelayDetails(newConfiguration.relay3State, "relay3", Port.RELAY_THREE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay4State, existingConfiguration.relay4State)
         ) {
-            updateRelayDetails(newConfiguration.relay4State, "relay4", Port.RELAY_FOUR)
+            updateRelayDetails(newConfiguration.relay4State, "relay4", Port.RELAY_FOUR, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay5State, existingConfiguration.relay5State)
         ) {
-            updateRelayDetails(newConfiguration.relay5State, "relay5", Port.RELAY_FIVE)
+            updateRelayDetails(newConfiguration.relay5State, "relay5", Port.RELAY_FIVE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay6State, existingConfiguration.relay6State)
         ) {
-            updateRelayDetails(newConfiguration.relay6State, "relay6", Port.RELAY_SIX)
+            updateRelayDetails(newConfiguration.relay6State, "relay6", Port.RELAY_SIX, newConfiguration)
         }
     }
 
@@ -787,7 +786,8 @@ class HyperStatCpuEquip(val node: Short) {
      fun updateRelayDetails(
         relayState: RelayState,
         relayTag: String,
-        physicalPort: Port
+        physicalPort: Port,
+        newConfiguration: HyperStatCpuConfiguration?,
     ) {
 
         val relayId = hsHaystackUtil!!.readPointID("config and $relayTag and enabled") as String
@@ -818,7 +818,7 @@ class HyperStatCpuEquip(val node: Short) {
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)
         }
-
+       if (newConfiguration != null) updateFanMode(newConfiguration)
     }
 
 

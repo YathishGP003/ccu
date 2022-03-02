@@ -2109,6 +2109,7 @@ public class CCUHsApi
      */
     public HashMap<Object, Object> readEntity(String query)
     {
+        CcuLog.i("LOCKOUT"," read point: "+query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {

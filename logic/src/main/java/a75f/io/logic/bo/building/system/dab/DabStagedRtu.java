@@ -120,7 +120,7 @@ public class DabStagedRtu extends DabSystemProfile
     
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
-        
+        updateMechanicalConditioning(CCUHsApi.getInstance());
         stageStatus = new int[17];
         if (currentConditioning == OFF) {
             currentConditioning = getSystemController().getSystemState();
@@ -398,15 +398,19 @@ public class DabStagedRtu extends DabSystemProfile
                 case COOLING_4:
                 case COOLING_5:
                     currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
-                    if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
-                        stageThreshold = 100 * (stage.ordinal() + 1) / (coolingStages + 1);
+                    if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalCoolingAvailable()) {
+                        relayState = 0;
                     } else {
-                        stageThreshold = 100 * stage.ordinal() / coolingStages;
-                    }
-                    if (currState == 0) {
-                        relayState = systemCoolingLoopOp > stageThreshold ? 1 : 0;
-                    } else {
-                        relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                        if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+                            stageThreshold = 100 * (stage.ordinal() + 1) / (coolingStages + 1);
+                        } else {
+                            stageThreshold = 100 * stage.ordinal() / coolingStages;
+                        }
+                        if (currState == 0) {
+                            relayState = systemCoolingLoopOp > stageThreshold ? 1 : 0;
+                        } else {
+                            relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                        }
                     }
                     break;
                 case HEATING_1:
@@ -414,12 +418,16 @@ public class DabStagedRtu extends DabSystemProfile
                 case HEATING_3:
                 case HEATING_4:
                 case HEATING_5:
-                    currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
-                    stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
-                    if (currState == 0) {
-                        relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
+                    if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalHeatingAvailable()) {
+                        relayState = 0;
                     } else {
-                        relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                        currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
+                        stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
+                        if (currState == 0) {
+                            relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
+                        } else {
+                            relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                        }
                     }
                     break;
                 case FAN_1:

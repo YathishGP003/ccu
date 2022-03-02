@@ -124,15 +124,15 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
             analogMin = getConfigVal("analog1 and cooling and min");
             analogMax = getConfigVal("analog1 and cooling and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: " + analogMin + " analog1Max: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
-            
-            
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
+    
+            if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalCoolingAvailable()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp / 100)));
+                }
             }
         } else {
             signal = 0;
@@ -171,13 +171,15 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
             analogMax = getConfigVal("analog3 and heating and max");
             
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+    
+            if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalHeatingAvailable()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+                }
             }
         } else  {
             signal = 0;

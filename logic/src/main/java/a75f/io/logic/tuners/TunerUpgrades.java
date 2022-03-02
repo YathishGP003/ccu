@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -36,8 +37,10 @@ public class TunerUpgrades {
      * Takes care creating new tuners on existing equips during an upgrade.
      */
     public static void handleTunerUpgrades(CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_TUNER, " handleTunerUpgrades ");
         upgradeReheatZoneToDATMinDifferential(hayStack);
         upgradeDcwbBuildingTuners(hayStack);
+        createDefaultTempLockoutPoints(hayStack);
     }
     
     /**
@@ -198,5 +201,39 @@ public class TunerUpgrades {
         }
         hayStack.clearPointArrayLevel(id, TUNER_BUILDING_VAL_LEVEL, false);
         CcuLog.i(L.TAG_CCU_TUNER,"Cleared level 16 : "+id);
+    }
+    
+    private static void createDefaultTempLockoutPoints(CCUHsApi hayStack) {
+        
+        HashMap buildTuner = hayStack.read("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+        if (hayStack.readEntity("point and tuner and default and outsideTemp and cooling and lockout and dab").isEmpty()) {
+            SystemTuners.createCoolingTempLockoutPoint(hayStack, tunerEquip.getSiteRef(),
+                                                       tunerEquip.getId(),
+                                                       tunerEquip.getDisplayName(),
+                                                       tunerEquip.getTz(),
+                                                       Tags.DAB, true);
+        }
+    
+        if (hayStack.readEntity("point and tuner and default and outsideTemp and heating and lockout and dab").isEmpty()) {
+            SystemTuners.createHeatingTempLockoutPoint(hayStack, tunerEquip.getSiteRef(),
+                                                       tunerEquip.getId(),
+                                                       tunerEquip.getDisplayName(),
+                                                       tunerEquip.getTz(),
+                                                       Tags.DAB, true);
+        }
+    
+        if (hayStack.readEntity("point and tuner and default and outsideTemp and cooling and lockout and vav").isEmpty()) {
+            SystemTuners.createCoolingTempLockoutPoint(hayStack, tunerEquip.getSiteRef(),
+                                                       tunerEquip.getId(),
+                                                       tunerEquip.getDisplayName(),
+                                                       tunerEquip.getTz(),
+                                                       Tags.VAV, true);
+        }
+    
+        if (hayStack.readEntity("point and tuner and default and outsideTemp and heating and lockout and vav").isEmpty()) {
+            SystemTuners.createHeatingTempLockoutPoint(hayStack, tunerEquip.getSiteRef(), tunerEquip.getId(), tunerEquip.getDisplayName()
+                , tunerEquip.getTz(), Tags.VAV, true);
+        }
     }
 }

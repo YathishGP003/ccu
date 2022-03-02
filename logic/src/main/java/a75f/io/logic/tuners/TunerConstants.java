@@ -192,6 +192,6 @@ public class TunerConstants
     
     
     
-    public static final double OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT = 50;
+    public static final double OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT = 55;
     public static final double OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT = 80;
 }

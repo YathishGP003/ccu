@@ -1390,6 +1390,9 @@ public class FloorPlanFragment extends Fragment {
     @OnItemClick(R.id.moduleList)
     public void setModuleListView(AdapterView<?> parent, View view, int position, long id) {
         selectModule(position);
+        //disabling moduleListView to avoid multiple view creation
+        moduleListView.setEnabled(false);
+        disableModuleListForMiliSeconds();
     }
 
 
@@ -1572,5 +1575,10 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
         }).start();
+
+    }
+    private void disableModuleListForMiliSeconds(){
+        int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
+        new Handler(Looper.getMainLooper()).postDelayed(()->moduleListView.setEnabled(true), delay);
     }
 }

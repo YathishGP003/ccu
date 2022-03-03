@@ -122,9 +122,9 @@ public class SystemTuners {
             hayStack.writeHisValById(outsideTempCoolingLockoutId, OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
         } else {
     
-            HashMap<Object, Object> defaultCoolingLockoutTempId = hayStack.readEntity("point and tuner and dab and " +
-                                                                                      "default and outsideTemp and " +
-                                                                                      "cooling and lockout");
+            HashMap<Object, Object> defaultCoolingLockoutTempId =
+                hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
+                                    "default and outsideTemp and cooling and lockout");
     
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
@@ -177,9 +177,9 @@ public class SystemTuners {
                                           OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
             hayStack.writeHisValById(outsideTempHeatingLockoutId, OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
         } else {
-            HashMap<Object, Object> defaultCoolingLockoutTempId = hayStack.readEntity("point and tuner and dab and " +
-                                                                                      "default and outsideTemp and " +
-                                                                                      "heating and lockout");
+            HashMap<Object, Object> defaultCoolingLockoutTempId =
+                hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
+                                                          "default and outsideTemp and heating and lockout");
     
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());

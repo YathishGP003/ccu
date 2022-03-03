@@ -140,15 +140,11 @@ public class CCUHsApi
     //For Unit test
     public CCUHsApi()
     {
-        if (instance != null)
-        {
-            throw new IllegalStateException("Api instance already created , use getInstance()");
-        }
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
-        hisSyncHandler = new HisSyncHandler(this);
+        //hisSyncHandler = new HisSyncHandler(this);
     }
 
     public void resetBaseUrls(String hayStackUrl, String careTakerUrl) {

@@ -446,7 +446,7 @@ public class VavStagedRtu extends VavSystemProfile
                 case COOLING_3:
                 case COOLING_4:
                 case COOLING_5:
-                    if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalCoolingAvailable()) {
+                    if (isCoolingLockoutActive()) {
                         relayState = 0;
                     } else {
                         currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
@@ -468,7 +468,7 @@ public class VavStagedRtu extends VavSystemProfile
                 case HEATING_3:
                 case HEATING_4:
                 case HEATING_5:
-                    if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalHeatingAvailable()) {
+                    if (isHeatingLockoutActive()) {
                         relayState = 0;
                     } else {
                         currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));

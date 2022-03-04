@@ -147,8 +147,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
         status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
-        status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
-        status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
+        status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? " | Heating ON ":"");
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
@@ -277,7 +277,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             double analogMax = getConfigVal("analog1 and cooling and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemCoolingLoop : "+systemCoolingLoopOp);
     
-            if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalCoolingAvailable()) {
+            if (isCoolingLockoutActive()) {
                 signal = analogMin * ANALOG_SCALE;
             } else {
                 signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
@@ -358,7 +358,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoop : "+systemHeatingLoopOp);
     
-            if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalHeatingAvailable()) {
+            if (isHeatingLockoutActive()) {
                 signal = analogMin * ANALOG_SCALE;
             } else {
                 signal = getModulatedAnalogVal(analogMin, analogMax, systemHeatingLoopOp);
@@ -393,8 +393,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog4Min: "+analogMin+" analog4Max: "+analogMax+
                                        " systemCoolingLoopOp : "+systemCoolingLoopOp + " systemCo2LoopOp : "+systemCo2LoopOp);
-            if (loopType == 0 && isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())
-                                        && !isMechanicalCoolingAvailable()) {
+            if (loopType == 0 && isCoolingLockoutActive()) {
                 signal = analogMin * ANALOG_SCALE;
             } else {
                 signal = getModulatedAnalogVal(analogMin, analogMax,

@@ -276,8 +276,6 @@ public class Globals {
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
             }
-            //TODO - to be removed
-            TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
         }
     }
 

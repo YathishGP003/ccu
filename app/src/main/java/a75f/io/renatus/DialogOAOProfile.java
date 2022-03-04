@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -295,6 +298,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef );
+            if (L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
+                L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true);
+            }
         } else {
             mProfile.updateOaoEquip(oaoConfig);
         }

@@ -26,26 +26,22 @@ public class MockCcuHsApi extends CCUHsApi {
     
     @Override
     public String addSite(Site s) {
-        String siteId = tagsDb.addSite(s);
-        return siteId;
+        return tagsDb.addSite(s);
     }
     
     @Override
     public String addEquip(Equip q) {
-        String equipId = tagsDb.addEquip(q);
-        return equipId;
+        return tagsDb.addEquip(q);
     }
     
     @Override
     public String addPoint(Point p) {
-        String pointId = tagsDb.addPoint(p);
-        return pointId;
+        return tagsDb.addPoint(p);
     }
     
     @Override
     public String addPoint(RawPoint p) {
-        String rawPointId = tagsDb.addPoint(p);
-        return rawPointId;
+        return tagsDb.addPoint(p);
     }
     
     @Override
@@ -55,26 +51,22 @@ public class MockCcuHsApi extends CCUHsApi {
     
     @Override
     public String addPoint(SettingPoint p) {
-        String pointId = tagsDb.addPoint(p);
-        return pointId;
+        return tagsDb.addPoint(p);
     }
     
     @Override
     public String addPointWithId(SettingPoint p, String id) {
-        String pointId = tagsDb.addPointWithId(p, id);
-        return pointId;
+        return tagsDb.addPointWithId(p, id);
     }
     
     @Override
     public String updateSettingPoint(SettingPoint p, String id) {
-        String pointId = tagsDb.updateSettingPoint(p,id);
-        return pointId;
+        return tagsDb.updateSettingPoint(p,id);
     }
     
     @Override
     public String addDevice(Device d) {
-        String deviceId = tagsDb.addDevice(d);
-        return deviceId;
+        return tagsDb.addDevice(d);
     }
     
     @Override
@@ -84,14 +76,12 @@ public class MockCcuHsApi extends CCUHsApi {
     
     @Override
     public String addFloor(Floor f) {
-        String floorId = tagsDb.addFloor(f);
-        return floorId;
+        return tagsDb.addFloor(f);
     }
     
     @Override
     public String addZone(Zone z) {
-        String zoneId = tagsDb.addZone(z);
-        return zoneId;
+        return tagsDb.addZone(z);
     }
     
     @Override

@@ -119,7 +119,7 @@
 
 
             <TextView
-                android:id="@+id/textUseOutsideDesc"
+                android:id="@+id/textUseCoolingLockoutDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textCoolingLockout"
@@ -145,7 +145,7 @@
                 android:id="@+id/textCoolingLockoutTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textUseOutsideDesc"
+                android:layout_below="@+id/textUseCoolingLockoutDesc"
                 android:layout_marginStart="76dp"
                 android:layout_marginTop="20dp"
                 android:alpha="0.87"

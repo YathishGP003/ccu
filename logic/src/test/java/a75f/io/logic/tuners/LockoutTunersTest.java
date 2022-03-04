@@ -33,11 +33,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("cooling and lockout and dab and default");
         Assert.assertFalse(coolingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(coolingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
     }
     
     @Test
@@ -50,8 +50,8 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("cooling and lockout and dab and system");
         Assert.assertFalse(coolingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(coolingLockoutPoint.get("id").toString());
         
         Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
@@ -65,11 +65,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("cooling and lockout and dab and default");
         Assert.assertFalse(coolingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(coolingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
     }
     
     @Test
@@ -82,11 +82,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("cooling and lockout and vav and system");
         Assert.assertFalse(coolingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(coolingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(coolingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
     }
     
     @Test
@@ -97,11 +97,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("heating and lockout and dab and default");
         Assert.assertFalse(heatingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(heatingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
     }
     
     @Test
@@ -112,7 +112,7 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("heating and lockout and vav and default");
         Assert.assertFalse(heatingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()) ==
+        Assert.assertEquals(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()).doubleValue(),
                           TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
         double val = hayStack.readPointPriorityVal(heatingLockoutPoint.get("id").toString());
         
@@ -129,11 +129,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("heating and lockout and dab and system");
         Assert.assertFalse(heatingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(heatingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
     }
     
     @Test
@@ -146,11 +146,11 @@ public class LockoutTunersTest {
         
         HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("heating and lockout and vav and default");
         Assert.assertFalse(heatingLockoutPoint.isEmpty());
-        Assert.assertTrue(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()) ==
-                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(hayStack.readHisValById(heatingLockoutPoint.get("id").toString()).doubleValue(),
+                          TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
         double val = hayStack.readPointPriorityVal(heatingLockoutPoint.get("id").toString());
         
-        Assert.assertTrue(val == TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        Assert.assertEquals(val, TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
     }
 }
 

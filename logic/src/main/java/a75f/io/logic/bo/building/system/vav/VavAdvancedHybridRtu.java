@@ -111,13 +111,13 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     @Override
     public boolean isCoolingActive(){
         return stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COOLING_3.ordinal()] > 0
-               || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0 || systemCoolingLoopOp > 0;
+               || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0;
     }
     
     @Override
     public boolean isHeatingActive(){
         return stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[HEATING_3.ordinal()] > 0
-               || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0 || systemHeatingLoopOp > 0;
+               || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0;
     }
     
     
@@ -134,7 +134,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: " + analogMin + " analog1Max: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
     
     
-            if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalCoolingAvailable()) {
+            if (isCoolingLockoutActive()) {
                 signal = (int)(analogMin * ANALOG_SCALE);
             } else {
                 if (analogMax > analogMin) {
@@ -183,7 +183,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             analogMax = getConfigVal("analog3 and heating and max");
     
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
-            if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !isMechanicalHeatingAvailable()) {
+            if (isHeatingLockoutActive()) {
                 signal = (int)(analogMin * ANALOG_SCALE);
             } else {
                 if (analogMax > analogMin) {
@@ -252,11 +252,11 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         if (getConfigEnabled("analog1") > 0)
         {
-            status.append(systemCoolingLoopOp > 0 ? "| Cooling ON " : "");
+            status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? "| Cooling ON " : "");
         }
         if (getConfigEnabled("analog3") > 0)
         {
-            status.append(systemHeatingLoopOp > 0 ? "| Heating ON " : "");
+            status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive())? "| Heating ON " : "");
         }
         
         if (!status.toString().equals("")) {

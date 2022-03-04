@@ -57,6 +57,9 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
+    private boolean coolingLockoutActive;
+    private boolean heatingLockoutActive;
+    
     public boolean isMechanicalCoolingAvailable() {
         return mechanicalCoolingAvailable;
     }
@@ -844,7 +847,8 @@ public abstract class SystemProfile
                                                                 .addMarker("lockout").addMarker("enabled")
                                                                 .setEnums("false,true").setTz(tz).build();
             String useOutsideTempLockoutCoolingId = hayStack.addPoint(useOutsideTempLockoutCooling);
-            hayStack.writeDefaultValById(useOutsideTempLockoutCoolingId, 0.0);
+            double defaultVal = ccu().oaoProfile == null ? 0 : 1.0;
+            hayStack.writeDefaultValById(useOutsideTempLockoutCoolingId, defaultVal);
         }
     
         if(!verifyPointsAvailability("config and outsideTemp and heating and lockout",equipref)) {
@@ -957,6 +961,16 @@ public abstract class SystemProfile
                                        "heating and lockout") > 0;
     }
     
+    public void setOutsideTempCoolingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
+        hayStack.writeDefaultVal("system and config and outsideTemp and cooling and lockout", enabled ?
+                                                                                                  1.0: 0);
+    }
+    
+    public void setOutsideTempHeatingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
+        hayStack.writeDefaultVal("system and config and outsideTemp and heating and lockout", enabled ?
+                                                                                                  1.0 : 0);
+    }
+    
     public double getOutsideAirTemp(CCUHsApi hayStack) {
         double outsideAirTemp = hayStack.readHisValByQuery("system and outside and temp");
         if (outsideAirTemp == 0 && ccu().oaoProfile != null) {
@@ -984,8 +998,22 @@ public abstract class SystemProfile
         mechanicalHeatingAvailable =  outsideAirTemp < getHeatingLockoutVal();
         hayStack.writeHisValByQuery("system and mechanical and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
+        
+        coolingLockoutActive = isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalCoolingAvailable;
+        
+        heatingLockoutActive = isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalHeatingAvailable;
+        
         CcuLog.i(L.TAG_CCU_SYSTEM,
-                 "outsideAirTemp "+outsideAirTemp+ "mechanicalCoolingAvailable"+mechanicalCoolingAvailable+
-                                  "mechanicalHeatingAvailable "+mechanicalHeatingAvailable);
+                 "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+
+                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive "
+                 +coolingLockoutActive+" heatingLockoutActive "+heatingLockoutActive);
+    }
+    
+    public boolean isCoolingLockoutActive() {
+        return coolingLockoutActive;
+    }
+    
+    public boolean isHeatingLockoutActive() {
+        return heatingLockoutActive;
     }
 }

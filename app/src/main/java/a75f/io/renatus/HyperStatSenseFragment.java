@@ -15,6 +15,7 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -219,8 +220,10 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
 
             @Override
             protected Void doInBackground(final String... params) {
+                CCUHsApi.getInstance().resetCcuReady();
                 setupSenseProfile();
                 L.saveCCUState();
+                CCUHsApi.getInstance().setCcuReady();
                 return null;
             }
 

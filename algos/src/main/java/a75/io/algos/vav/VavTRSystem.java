@@ -200,7 +200,7 @@ public class VavTRSystem extends TRSystem
             case "spres":
                 return -0.3;
             case "ignoreRequest":
-                return -0.1;
+                return 2;
             case "sptrim":
                 return 0.2;
             case "timeInterval":

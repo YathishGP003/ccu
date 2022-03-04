@@ -21,4 +21,6 @@ public class HayStackConstants
     public static final String WRITABLE_ARRAY_VAL = "val";
     public static final String WRITABLE_ARRAY_WHO = "who";
     public static final String WRITABLE_ARRAY_DURATION = "duration";
+    
+    public static final String LOG_TAG = "CCU_HS";
 }

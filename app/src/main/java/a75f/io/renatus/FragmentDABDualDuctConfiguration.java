@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -474,8 +476,10 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                     
                     @Override
                     protected Void doInBackground( final Void ... params ) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupDualDuctZoneProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
                     

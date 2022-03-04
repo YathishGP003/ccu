@@ -9,6 +9,7 @@ import a75f.io.logger.CcuLog;
 
 public class AlertProcessJob
 {
+    private static final String TAG = "CCU_ALERTS";
     private static final String             jobName = "AlertProcessJob";
     Context mContext;
     
@@ -23,7 +24,7 @@ public class AlertProcessJob
             @Override
             public void run()
             {
-                CcuLog.d("CCU_ALERTS", "Job Scheduling: " +jobName);
+                CcuLog.d(TAG, "Job Scheduling: " +jobName);
                 doJob();
             }
         };
@@ -31,16 +32,21 @@ public class AlertProcessJob
     
     public void doJob()
     {
-        CcuLog.d("CCU_ALERTS", "AlertProcessJob -> ");
+        CcuLog.d(TAG, "AlertProcessJob -> ");
+        
+        if (!CCUHsApi.getInstance().isCcuReady()) {
+            CcuLog.d(TAG, "CCU not ready! <-AlertProcessJob ");
+            return;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
     
-        CcuLog.d("CCU_ALERTS","logAlert");
-        CcuLog.d("CCU_ALERTS","ActiveAlerts : "+AlertManager.getInstance().getActiveAlerts().size());
-        CcuLog.d("CCU_ALERTS","AllAlerts : "+AlertManager.getInstance().getAllAlertsOldestFirst().size());
-        CcuLog.d("CCU_ALERTS","AllExternalAlerts "+AlertManager.getInstance().getAllAlertsNotInternal().size());
+        CcuLog.d(TAG,"logAlert");
+        CcuLog.d(TAG,"ActiveAlerts : "+AlertManager.getInstance().getActiveAlerts().size());
+        CcuLog.d(TAG,"AllAlerts : "+AlertManager.getInstance().getAllAlertsOldestFirst().size());
+        CcuLog.d(TAG,"AllExternalAlerts "+AlertManager.getInstance().getAllAlertsNotInternal().size());
         
         if (site == null || site.size() == 0 || !CCUHsApi.getInstance().isCCURegistered()) {
-            CcuLog.d("CCU_ALERTS","No Site Registered or CCU is not registered (" + CCUHsApi.getInstance().isCCURegistered() + ")" + " <-AlertProcessJob ");
+            CcuLog.d(TAG,"No Site Registered or CCU is not registered (" + CCUHsApi.getInstance().isCCURegistered() + ")" + " <-AlertProcessJob ");
             return;
         }
         try
@@ -51,7 +57,7 @@ public class AlertProcessJob
             if (!alertManager.hasService()) {
                 String token = CCUHsApi.getInstance().getJwt();
                 if (token.isEmpty()) {
-                    CcuLog.w("CCU_ALERTS", "AlertProcessJob:  Site exists but token is empty");
+                    CcuLog.w(TAG, "AlertProcessJob:  Site exists but token is empty");
                     return;
                 }
                 alertManager.rebuildServiceNewToken(token);
@@ -60,9 +66,9 @@ public class AlertProcessJob
             alertManager.processAlerts();
 
         }catch (Exception e) {
-            CcuLog.w("CCU_ALERTS", "AlertProcessJob Exception: " + e.getMessage(), e);
+            CcuLog.w(TAG, "AlertProcessJob Exception: " + e.getMessage(), e);
             e.printStackTrace();
         }
-        CcuLog.d("CCU_ALERTS", "<-AlertProcessJob ");
+        CcuLog.d(TAG, "<-AlertProcessJob ");
     }
 }

@@ -249,9 +249,11 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 4PFCU Configuration");
                     },
                     ()->{
+                        CCUHsApi.getInstance().resetCcuReady();
                         setup4PFCUZoneProfile();
                         L.saveCCUState();
                         LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                        CCUHsApi.getInstance().setCcuReady();
                     },
                     ()->{
                         ProgressDialogUtils.hideProgressDialog();

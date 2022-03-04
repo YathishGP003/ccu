@@ -6,6 +6,8 @@ import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
@@ -496,8 +498,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
 
                     @Override
                     protected Void doInBackground( final String ... params ) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupPlcProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
 

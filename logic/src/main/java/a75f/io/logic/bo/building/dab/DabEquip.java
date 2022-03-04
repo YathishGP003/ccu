@@ -31,11 +31,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
+
+import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -689,8 +690,8 @@ public class DabEquip
         
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
-        config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
-        //config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
+        config.enableIAQControl = getConfigNumVal(IAQ_ENABLED) > 0;
+        
         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
     
@@ -744,8 +745,8 @@ public class DabEquip
         setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal(IAQ_ENABLED,config.enableIAQControl ? 1.0 : 0);
+        setHisVal(IAQ_ENABLED,config.enableIAQControl ? 1.0 : 0);
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);

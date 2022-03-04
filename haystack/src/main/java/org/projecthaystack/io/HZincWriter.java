@@ -65,13 +65,14 @@ public class HZincWriter extends HGridWriter
   
   public static String tagsGridToString(HGrid grid)
   {
-    CcuLog.i("_PROFILING", "tagsGridToString Cols: " + grid.numCols() +
+    CcuLog.i("CCU_PROFILING", "tagsGridToString Cols: " + grid.numCols() +
                               " Rows: " + grid.numRows() +
                               " Size: " + (grid.numCols()*grid.numRows()*2));
     StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 2);
     HZincWriter w = new HZincWriter(out);
     w.version = 3;//Hard coding for custom use.
     w.writeGrid(grid);
+    CcuLog.i("CCU_PROFILING", "tagsGridToString");
     return out.toString();
   }
 

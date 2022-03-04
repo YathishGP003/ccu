@@ -128,7 +128,7 @@ public class SystemTuners {
     
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
-            for (HashMap valMap : defaultCoolingLockoutTempPointArr) {
+            for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
                 if (valMap.get("val") != null) {
                     hayStack.pointWrite(HRef.copy(outsideTempCoolingLockoutId), (int) Double.parseDouble(valMap.get("level").toString()),
                                         valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
@@ -183,7 +183,7 @@ public class SystemTuners {
     
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
-            for (HashMap valMap : defaultCoolingLockoutTempPointArr) {
+            for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
                 if (valMap.get("val") != null) {
                     hayStack.pointWrite(HRef.copy(outsideTempHeatingLockoutId), (int) Double.parseDouble(valMap.get("level").toString()),
                                         valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));

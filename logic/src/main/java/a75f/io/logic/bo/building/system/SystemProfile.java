@@ -866,7 +866,7 @@ public abstract class SystemProfile
         }
     
         if(!verifyPointsAvailability("mechanical and cooling and available",equipref)) {
-            Point mechanicalCoolingAvailable = new Point.Builder().setDisplayName(equipDis + "-" +
+            Point mechanicalCoolingAvailablePoint = new Point.Builder().setDisplayName(equipDis + "-" +
                                                                                     "mechanicalCoolingAvailable")
                                                                     .setSiteRef(siteRef)
                                                                     .setEquipRef(equipref)
@@ -874,11 +874,11 @@ public abstract class SystemProfile
                                                                     .addMarker("his").addMarker("mechanical").addMarker("cooling")
                                                                     .addMarker("available")
                                                                     .setEnums("false,true").setTz(tz).build();
-            String mechanicalCoolingAvailableId = hayStack.addPoint(mechanicalCoolingAvailable);
+            String mechanicalCoolingAvailableId = hayStack.addPoint(mechanicalCoolingAvailablePoint);
             hayStack.writeHisValueByIdWithoutCOV(mechanicalCoolingAvailableId, 0.0);
         }
         if(!verifyPointsAvailability("mechanical and heating and available",equipref)) {
-            Point mechanicalHeatingAvailable = new Point.Builder().setDisplayName(equipDis + "-" +
+            Point mechanicalHeatingAvailablePoint = new Point.Builder().setDisplayName(equipDis + "-" +
                                                                                   "mechanicalHeatingAvailable")
                                                                   .setSiteRef(siteRef)
                                                                   .setEquipRef(equipref)
@@ -886,7 +886,7 @@ public abstract class SystemProfile
                                                                   .addMarker("his").addMarker("mechanical").addMarker("heating")
                                                                   .addMarker("available")
                                                                   .setEnums("false,true").setTz(tz).build();
-            String mechanicalHeatingAvailableId = hayStack.addPoint(mechanicalHeatingAvailable);
+            String mechanicalHeatingAvailableId = hayStack.addPoint(mechanicalHeatingAvailablePoint);
             hayStack.writeHisValueByIdWithoutCOV(mechanicalHeatingAvailableId, 0.0);
         }
         addLockoutTempTuners(hayStack, siteRef, equipref, equipDis, tz);

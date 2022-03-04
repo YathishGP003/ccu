@@ -14,5 +14,7 @@ class DeviceStatusUpdateJob extends BaseJob{
         CcuLog.d(L.TAG_CCU_JOB, "DeviceStatusUpdateJob -> ");
         DiagEquip.getInstance().setDiagHisVal("serial and connection",
                                                 LSerial.getInstance().isConnected() ? 1.0 :0);
+        DiagEquip.getInstance().updatePoints();
+        CcuLog.d(L.TAG_CCU_JOB, "<- DeviceStatusUpdateJob ");
     }
 }

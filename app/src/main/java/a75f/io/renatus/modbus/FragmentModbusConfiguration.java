@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -313,8 +314,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
             @Override
             protected Void doInBackground(final String... params) {
+                CCUHsApi.getInstance().resetCcuReady();
                 setUpsModbusProfile();
                 L.saveCCUState();
+                CCUHsApi.getInstance().setCcuReady();
                 return null;
             }
 

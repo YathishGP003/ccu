@@ -593,7 +593,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     
     private void setCcuReady() {
         isZoneViewReady = true;
-        Globals.getInstance().setCcuReady(true);
+        CCUHsApi.getInstance().setCcuReady();
         setListeners();
         zoneLoadTextView.setVisibility(View.GONE);
     }
@@ -3000,7 +3000,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             UpdateWeatherData();
         }
         weatherInIt(15*60000);
-        //Globals.getInstance().setCcuReady(true);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
     }
 

@@ -342,8 +342,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 
                     @Override
                     protected Void doInBackground(final String... params) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupHPUZoneProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
                 

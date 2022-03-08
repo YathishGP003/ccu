@@ -46,11 +46,11 @@ public class PbMessageHandler
      */
     private PbMessageHandler() {
         
-        handlerThread = new HandlerThread("UpdatePointHandlerThread"){
+        handlerThread = new HandlerThread("PbMessageHandler"){
             @Override
             protected void onLooperPrepared() {
                 super.onLooperPrepared();
-                CcuLog.i(L.TAG_CCU_PUBNUB,"UpdatePointHandler : Ready");
+                CcuLog.i(L.TAG_CCU_PUBNUB,"PbMessageHandler : Ready");
             }
         };
         

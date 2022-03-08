@@ -293,8 +293,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                 
                     @Override
                     protected Void doInBackground(final String... params) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupCPUZoneProfile();
                         L.saveCCUState();
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
                 

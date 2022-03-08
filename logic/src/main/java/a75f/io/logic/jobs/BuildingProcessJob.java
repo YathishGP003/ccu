@@ -43,51 +43,35 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
-        
         watchdogMonitor = false;
         
         L.pingCloudServer();
+        if (!CCUHsApi.getInstance().isCcuReady()) {
+            CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
+            //Make sure his data in synced every other minute to avoid device appearing offline for long.
+            if (DateTime.now().getMinuteOfDay() % 2 == 0) {
+                doHisSync();
+            }
+            return;
+        }
         
         if (jobLock.tryLock()) {
-            
             try {
-                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                if (site.isEmpty()) {
-                    CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");
+                if (!CCUHsApi.getInstance().isCCUConfigured()) {
+                    CcuLog.d(L.TAG_CCU_JOB,"No Site/CCU configured ! <-BuildingProcessJob ");
                     return;
                 }
-
-                HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
                 
-                if (ccu.isEmpty()) {
-                    CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
-                    return;
-                }
                 BuildingTunerCache.getInstance().updateTuners();
-                DiagEquip.getInstance().updatePoints();
-                for (ZoneProfile profile : L.ccu().zoneProfiles) {
-                    profile.updateZonePoints();
-                }
                 
-                boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
-                if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-                    CCUHsApi.getInstance().syncEntityTree();
-                    if (CCUHsApi.getInstance().siteSynced()) {
-                        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                        PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
-                                                                         siteUID);
-                    }
-                }
-                if (L.ccu().oaoProfile != null) {
-                    L.ccu().oaoProfile.doOAO();
-                } else {
-                    CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
-                                                              (double) EpidemicState.OFF.ordinal());
-                }
-
-                if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
-                    L.ccu().systemProfile.doSystemControl();
-                }
+                handleMessagingRegistration();
+    
+                runZoneProfilesAlgorithm();
+                
+                runOAOAlgorithm();
+                
+                runSystemControlAlgorithm();
+                
                 handleSync();
     
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
@@ -95,14 +79,64 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
             } finally {
                 jobLock.unlock();
+                
             }
         } else {
             CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob : Previous Instance of job still running");
         }
     }
     
+    
+    //This could go away once messaging is stabilized.
+    private void handleMessagingRegistration() {
+        boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
+        if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+            CCUHsApi.getInstance().syncEntityTree();
+            if (CCUHsApi.getInstance().siteSynced()) {
+                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
+                                                                 siteUID);
+            }
+        }
+    }
+    
+    private void runZoneProfilesAlgorithm() {
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+            profile.updateZonePoints();
+        }
+    }
+    
+    private void runOAOAlgorithm() {
+        if (L.ccu().oaoProfile != null) {
+            L.ccu().oaoProfile.doOAO();
+        } else {
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
+                                                      (double) EpidemicState.OFF.ordinal());
+        }
+    }
+    
+    private void runSystemControlAlgorithm() {
+        if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
+            L.ccu().systemProfile.doSystemControl();
+        }
+    }
+    
     private void handleSync() {
-
+        doHisSync();
+        DateTime now = new DateTime();
+        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
+        if (timeForEntitySync) {
+            L.saveCCUState();
+            CCUHsApi.getInstance().scheduleSync();
+        }
+        //Save CCU state every other minute. This could be expensive if the local entity count is high.
+        if (now.getMinuteOfDay() % 2 == 0) {
+            L.saveCCUState();
+        }
+    }
+    
+    private void doHisSync() {
+    
         new Thread() {
             @Override
             public void run() {
@@ -115,16 +149,5 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
         }.start();
-
-        DateTime now = new DateTime();
-        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
-        if (timeForEntitySync) {
-            L.saveCCUState();
-            CCUHsApi.getInstance().scheduleSync();
-        }
-        //Save CCU state every other minute. This could be expensive if the local entity count is high.
-        if (now.getMinuteOfDay() % 2 == 0) {
-            L.saveCCUState();
-        }
     }
 }

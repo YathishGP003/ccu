@@ -399,9 +399,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 
                     @Override
                     protected Void doInBackground( final String ... params ) {
+                        CCUHsApi.getInstance().resetCcuReady();
                         setupVavZoneProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().syncEntityTree();
+                        CCUHsApi.getInstance().setCcuReady();
                         return null;
                     }
                 

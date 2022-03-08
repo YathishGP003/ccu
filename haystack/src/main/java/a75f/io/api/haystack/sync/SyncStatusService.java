@@ -19,8 +19,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.logger.CcuLog;
 
 public class SyncStatusService {
@@ -39,6 +42,8 @@ public class SyncStatusService {
     private static SyncStatusService instance = null;
     
     public static HashSet<String> refTypes = new HashSet<>();
+    
+    private Timer fileSaveDelayTimer;
     
     static
     {
@@ -71,8 +76,8 @@ public class SyncStatusService {
         unsyncedIdList = getListString(PREFS_ID_LIST_UNSYNCED);
         updatedIdList = getListString(PREFS_ID_LIST_UPDATED);
         deletedIdList = getListString(PREFS_ID_LIST_DELETED);
-        CcuLog.i("CCU_HS"," unsyncedIdList "+unsyncedIdList.size()+" updatedIdList "+updatedIdList.size()
-                          +" deletedIdList "+deletedIdList.size());
+        CcuLog.i(HayStackConstants.LOG_TAG," unsyncedIdList " + unsyncedIdList.size() + " updatedIdList " + updatedIdList.size()
+                                    + " deletedIdList " + deletedIdList.size());
     }
     
     public void saveSyncStatus() {
@@ -93,21 +98,22 @@ public class SyncStatusService {
     }
     
     public void addUnSyncedEntity(String id) {
-        CcuLog.i("CCU_HS"," addUnSyncedEntity "+id);
+        CcuLog.i(HayStackConstants.LOG_TAG," addUnSyncedEntity "+id);
         unsyncedIdList.add(id);
-        //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
-        putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        if (fileSaveDelayTimer == null) {
+            scheduleSyncDataSaveTimer();
+        }
     }
     
     public void addUpdatedEntity(String id) {
-        CcuLog.i("CCU_HS"," addUpdatedEntity "+id);
+        CcuLog.i(HayStackConstants.LOG_TAG," addUpdatedEntity "+id);
         updatedIdList.add(id);
         //This is expensive but can avoid sync-data crash due to an app-crash or tablet reboot.
         putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
     }
     
     public void addDeletedEntity(String id, boolean saveImmediate) {
-        CcuLog.i("CCU_HS"," addDeletedEntity "+id);
+        CcuLog.i(HayStackConstants.LOG_TAG," addDeletedEntity "+id);
         if (hasEntitySynced(id)) {
             deletedIdList.add(id);
             if (saveImmediate) {
@@ -128,6 +134,23 @@ public class SyncStatusService {
         }
     }
     
+    private void scheduleSyncDataSaveTimer() {
+        fileSaveDelayTimer = new Timer();
+        fileSaveDelayTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+            CcuLog.i("CCU_PROFILING", "Save sync data");
+            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            try {
+                fileSaveDelayTimer.cancel();
+                fileSaveDelayTimer = null;
+            } catch (IllegalStateException e) {
+                CcuLog.i(HayStackConstants.LOG_TAG, "Timer already cancelled",e);
+            }
+            }
+        }, 15000);
+    }
+    
     public void setUnSyncedEntitySynced(String id) {
         unsyncedIdList.remove(id);
     }
@@ -137,7 +160,7 @@ public class SyncStatusService {
     }
     
     public void setDeletedEntitySynced(String id) {
-        CcuLog.i("CCU_HS","setDeletedEntitySynced "+id);
+        CcuLog.i(HayStackConstants.LOG_TAG,"setDeletedEntitySynced "+id);
         deletedIdList.remove(id);
         putListString(PREFS_ID_LIST_DELETED, deletedIdList);
         if (updatedIdList.contains(id)) {
@@ -151,10 +174,12 @@ public class SyncStatusService {
     }
     
     public void setEntitySynced(String id) {
-        CcuLog.i("CCU_HS","Set entity synced "+id);
+        CcuLog.i(HayStackConstants.LOG_TAG,"Set entity synced "+id);
         if (unsyncedIdList.contains(id)) {
             unsyncedIdList.remove(id);
-            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+            if (fileSaveDelayTimer == null) {
+                scheduleSyncDataSaveTimer();
+            }
         }
         
         if (updatedIdList.contains(id)) {
@@ -268,6 +293,9 @@ public class SyncStatusService {
     }
     
     private void putListString(String key, List<String> stringList) {
+        if (stringList.isEmpty()) {
+            return;
+        }
         long time = System.currentTimeMillis();
         String[] stringArr = stringList.toArray(new String[0]);
         preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).commit();

@@ -246,6 +246,23 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Updated : "
+                        android:textAppearance="@style/label_black"/>
+
+                    <TextView
+                        android:id="@+id/last_updated_time_ccu_hb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/label_grey"/>
+                </LinearLayout>
+                <LinearLayout
                     android:id="@+id/ie_gateway_details"
                     android:layout_width="wrap_content"
                     android:orientation="vertical"

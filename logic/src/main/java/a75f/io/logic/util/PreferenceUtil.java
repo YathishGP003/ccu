@@ -125,6 +125,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isCCUHeartbeatMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("CCUHeartbeatMigration",false);
+    }
+
+    public static void setCCUHeartbeatMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("CCUHeartbeatMigration", isMigrated);
+        editor.apply();
+    }
+
     public static boolean areDuplicateAlertsRemoved() {
         return getBooleanPreference(REMOVED_DUPLICATE_ALERTS);
     }

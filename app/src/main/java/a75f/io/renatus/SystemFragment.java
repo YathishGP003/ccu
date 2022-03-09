@@ -14,12 +14,14 @@ import android.os.Handler;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.pubnub.IntrinsicScheduleListener;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -93,13 +95,14 @@ import com.tooltip.Tooltip;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface, IntrinsicScheduleListener
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface,
+		IntrinsicScheduleListener, CloudConnectivityListener
 {
 	private static final String TAG = "SystemFragment";
 	private static IntrinsicScheduleListener intrinsicScheduleListener;
 	SeekBar  sbComfortValue;
 	private static final long TOOLTIP_TIME = 3000;
-	
+
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
 	ToggleButton tbCompHumidity;
@@ -120,7 +123,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView lastUpdatedBtu;
 
 	private TextView updatedTimeOao;
-	
+	private TextView cloudConnectivityUpdatedTime;
+
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
 
@@ -267,6 +271,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
+		NotificationHandler.setCloudConnectivityListener(this);
 		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
 
 		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
@@ -715,6 +720,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
 		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		updatedTimeOao = view.findViewById(R.id.last_updated_status_oao);
+		cloudConnectivityUpdatedTime = view.findViewById(R.id.last_updated_time_ccu_hb);
 
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
@@ -1114,6 +1120,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {
 		intrinsicScheduleListener = listener;
+	}
+	@Override
+	public void refreshData() {
+		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
 	}
 
 }

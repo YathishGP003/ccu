@@ -54,7 +54,7 @@ public class CloudConnetionStatusThread extends Thread {
             }, 10);
             setCloudConnectionStatus();
             try {
-                sleep(40*1000);
+                sleep(60*1000L);
             } catch (InterruptedException e) {
                 bStopThread = true;
                 Log.d("CCU_CLOUDSTATUS", "Cloud connection status thread interrupted: " + e.getMessage());

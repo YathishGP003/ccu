@@ -63,6 +63,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
+import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
@@ -358,6 +359,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
             }
         });
+        SystemFragment.refreshIntrinsicSchedulesScreen();
     }
 
     private void hasTextViewChildren() {

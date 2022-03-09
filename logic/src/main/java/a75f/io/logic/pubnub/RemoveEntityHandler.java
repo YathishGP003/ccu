@@ -12,6 +12,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 
 public class RemoveEntityHandler
 {
@@ -40,7 +41,9 @@ public class RemoveEntityHandler
                 if (CCUHsApi.getInstance().entitySynced(uuid)) {
                     HashMap<Object, Object> removedEntity = CCUHsApi.getInstance().readMapById(uuid);
                     if (!removedEntity.isEmpty() && removedEntity.containsKey("schedule")){
+                        new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek();
                         UpdateScheduleHandler.refreshSchedulesScreen();
+                        UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
                     }
                     CCUHsApi.getInstance().removeEntity(uuid);
                 } else if(CCUHsApi.getInstance().isEntityDeleted(uuid)) {

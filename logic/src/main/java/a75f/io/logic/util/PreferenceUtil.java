@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -157,5 +158,17 @@ public class PreferenceUtil {
     
     public static void setCleanUpDuplicateZoneSchedule() {
         setBooleanPreference(CLEAN_UP_DUPLICATE_ZONE_SCHEDULE, true);
+    }
+
+    public static boolean isIduPointsMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("iduMigration",false);
+    }
+
+    public static void setIduMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("iduMigration", isMigrated);
+        editor.apply();
     }
 }

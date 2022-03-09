@@ -1,6 +1,9 @@
 package a75f.io.device.mesh.hyperstat;
 
+import android.util.Log;
+
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.HyperStat.HyperStatIduControlsMessage_t;
@@ -8,6 +11,7 @@ import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.DLog;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vrv.IduThermister;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 
 /**
@@ -53,8 +57,18 @@ class HyperStatIduMessageHandler {
         setCapabilities(iduStatus.getSupportBitfield(), nodeAddress, hayStack);
         setFanSpeedControlLevelCapability(iduStatus.getSupportFanSpeedControlLevels(), nodeAddress, hayStack);
         setGroupAddress(iduStatus.getGroupAddress(), nodeAddress, hayStack);
+        setIduThermisters(iduStatus.getThDataList(),nodeAddress,hayStack);
     }
-    
+
+    private static void setIduThermisters(List<Integer> thDataList, int address, CCUHsApi hayStack) {
+        for (IduThermister iduth :IduThermister.values()) {
+            hayStack.writeHisValByQuery("idu and vrv and "+iduth+" and group == \""+address+"\"",
+                    (double) (thDataList.get(iduth.ordinal()))/10);
+            Log.d( L.TAG_CCU_SERIAL,iduth +" value = "+
+                    hayStack.readHisValByQuery("idu and vrv and "+iduth+" and group == \""+address+"\"").toString());
+        }
+    }
+
     private static void setOperationMode( int opMode, int address, CCUHsApi hayStack) {
         int currOpMode = getOperationMode(address, hayStack);
         if (opMode != currOpMode) {
@@ -137,9 +151,13 @@ class HyperStatIduMessageHandler {
     }
     
     private static void setIduDiagnosticStatus(int diagStatus, int address, CCUHsApi hayStack) {
-        if (diagStatus != hayStack.readHisValByQuery("idu and diagnosticStatus and group == \""+address+"\"")) {
-            hayStack.writeHisValByQuery("idu and diagnosticStatus and group == \""+address+"\"", (double)diagStatus);
-        }
+        hayStack.writeHisValByQuery("idu and diagnosticStatus and group == \""+address+"\"",
+                (double) diagStatus);
+
+        hayStack.writeHisValByQuery("idu and testOperation and group == \""+address+"\"",
+                (double) (diagStatus & 1));
+        hayStack.writeHisValByQuery("idu and telecoCheck and group == \""+address+"\"",
+                (double) ((diagStatus >> 1) & 1));
     }
     
     private static void setIduTemp(int iduTemp, int address, CCUHsApi hayStack) {

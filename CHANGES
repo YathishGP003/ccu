@@ -1,36 +1,4 @@
- - Merged PR 3117: Uncomment support for enableCo2Control
- - Merged PR 3080: Move diag points update to devicestatusjob
- - Merged PR 3196: Fix incorrect ignoreRequest default value
- - Merged PR 3144: Bug 10034: CCU: PR created resolving the UI issues
- - Merged PR 3077: Fix for CPU module reappears after closing the window
- - Merged PR 3115: CCU: 10265- Renatus app relaunches multiple times during registration
- - Merged PR 3152: Updating fan mode only when we do fan related relay configurations
- - Fix incorrect ignoreRequest default value
- - Merged PR 3151: 10523-CCU Tuner Sync : Improper Tuner sync at ccu
- - Fix sonarcube warnings
- - Suspend jobs while pairing is in progress
- - Merge branch 'master' into Bug/samjith/perf_modbus_zones
- - Merged PR 3002: Turn of all enabled lower relay if High Fan modes are selected in User Intent
- - removed tuner, as its handled in his
- - fixed the sq comments
- - fixed the sq comments
- - fixed the sq comments
- - fixed the sq comments
- - removed tags
- - handled all tuners
- - fixed the sq comments
- - handled Hyperstatcpu
- - Updated the conditions with correct comparision
- - Correcting the class name typo
- - WIP
- - made changes 1. Target Humidity change 2. "%" is now visible next to Target Humidity 3. Discharge Airflow is blocked when relay is turned off
- -  handling sonarqube warnings
- - Uncomment support for enableCo2Control
- - Optimisation
- - removed unwanted import
- - Added add_ccu pref to handle restart before addccu completed
- - When renatus is restarted right after syncing in add new CCU, ccuid wouldnt be created to fetch the ccuid when restarted
- - Merge branch 'master' into Bug/samjith/perf_modbus_zones
- - Merged PR 2936: CCU-9864- His point fluctuation
- - Merged PR 3053: 10156 - CCU - Autoaway not consuming timer
- - Move diag points update to devicestatusjob
+ - Merged PR 3291: Cloud Connectivity His Point
+ - Merged PR 3195: Intrinsic Schedule
+ - Merged PR 3161: 8568 - VRV: Consumption of sensor data on Hyperstat P1P2
+ - Merged PR 3239: 10041 -CCU - Zone status discrepancy

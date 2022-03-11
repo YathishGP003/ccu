@@ -726,15 +726,11 @@ public class Pulse
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
-						if(isTh2Enabled ){
-							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
-							}
-						else {
-							double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));
-						}
+						th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+						th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+						double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));
 						break;
 					case ANALOG_IN_ONE:
 						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();

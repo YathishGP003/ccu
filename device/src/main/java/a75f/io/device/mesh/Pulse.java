@@ -726,11 +726,11 @@ public class Pulse
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
-						if(isTh2Enabled && !is2pfcu){
+						if(isTh2Enabled ){
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 							}
-						else if(isTh2Enabled && is2pfcu){
+						else {
 							double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));

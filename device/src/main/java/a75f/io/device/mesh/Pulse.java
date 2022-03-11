@@ -540,8 +540,6 @@ public class Pulse
 						if (isTh2Enabled) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
-						}else {
-
 							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);

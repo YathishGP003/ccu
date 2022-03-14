@@ -502,7 +502,7 @@ public class InstallerOptions extends Fragment {
             return;
         }
         
-        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,60,1, getActivity());
+        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
         spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
         spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(ccu().systemProfile.getCoolingLockoutVal()),
                                                                                                         false);
@@ -564,7 +564,7 @@ public class InstallerOptions extends Fragment {
                                                                           +ccu().systemProfile.getSystemEquipRef()+"\"");
         if (!coolingLockoutPoint.isEmpty()) {
             RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
-                                                                       HayStackConstants.DEFAULT_POINT_LEVEL, val, 0));
+                                                                       HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
         }
     }
     
@@ -575,7 +575,7 @@ public class InstallerOptions extends Fragment {
         
         if (!heatingLockoutPoint.isEmpty()) {
             RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
-                                                                            HayStackConstants.DEFAULT_POINT_LEVEL, val, 0));
+                                                                            HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
         }
     }
 

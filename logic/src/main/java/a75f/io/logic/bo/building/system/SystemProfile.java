@@ -832,6 +832,7 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
+        
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }
     
@@ -889,18 +890,19 @@ public abstract class SystemProfile
             String mechanicalHeatingAvailableId = hayStack.addPoint(mechanicalHeatingAvailablePoint);
             hayStack.writeHisValueByIdWithoutCOV(mechanicalHeatingAvailableId, 0.0);
         }
-        addLockoutTempTuners(hayStack, siteRef, equipref, equipDis, tz);
+        String profileTag = getProfileName().contains(Tags.VAV.toUpperCase()) ?Tags.VAV : Tags.DAB;
+        addLockoutTempTuners(hayStack, siteRef, equipref, equipDis, profileTag, tz);
     }
     
     private void addLockoutTempTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
-                                      String tz) {
+                                      String profileTag, String tz) {
         HashMap<Object, Object> coolingLockoutTemp = CCUHsApi.getInstance()
                                                              .readEntity("tuner and system and dab and " +
                                                                          "outsideTemp and cooling and lockout");
         
         if (coolingLockoutTemp.isEmpty()) {
             SystemTuners.createCoolingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
-                                                       tz, Tags.DAB, false);
+                                                       tz, profileTag, false);
             
         }
         
@@ -910,7 +912,7 @@ public abstract class SystemProfile
         
         if (heatingLockoutTemp.isEmpty()) {
             SystemTuners.createHeatingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
-                                                       tz, Tags.DAB, false);
+                                                       tz, profileTag, false);
         }
     }
     

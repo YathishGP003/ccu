@@ -10,7 +10,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
-import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
@@ -102,34 +101,23 @@ public class TunerUtil
         hayStack.writeHisValById(id, val);
     }
     
+    /**
+     * Get building level cooling deadband.
+     * @param equipRef ID - of Building tuner equip
+     * @return
+     */
     public static double getCoolingDeadband(String equipRef) {
-        String systemProfile = "";
-        if (L.ccu().systemProfile != null) {
-            if (L.ccu().systemProfile.getProfileName().contains("VAV")) {
-                systemProfile = "and vav";
-            } else if (L.ccu().systemProfile.getProfileName().contains("DAB")) {
-                systemProfile = "and dab";
-            } else if (L.ccu().systemProfile.getProfileName().contains("Default")) {
-                systemProfile = "and standalone";
-            }
-        } else {
-            systemProfile = "";
-        }
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband "+systemProfile+" and cooling and not adr and not multiplier and equipRef == \""+equipRef+"\"");;
-
-        if (!cdb.isEmpty()) {
-            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
-                for (int l = 1; l <= values.size(); l++) {
-                    HashMap valMap = ((HashMap) values.get(l - 1));
-                    if (valMap.get("val") != null) {
-                        return Double.parseDouble(valMap.get("val").toString());
-                    }
-                }
-            }
-        }
-        return BuildingTunerFallback.getDefaultTunerVal("cooling and deadband");
+    
+        double standaloneDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and standalone and " +
+                                                               "cooling and not adr and not multiplier and equipRef == " +
+                                                               "\"" + equipRef + "\"");
+        double vavDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and vav and " +
+                                                        "cooling and not adr and not multiplier and equipRef == " +
+                                                        "\"" + equipRef + "\"");
+        double dabDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and dab and " +
+                                                        "cooling and not adr and not multiplier and equipRef == " +
+                                                        "\"" + equipRef + "\"");
+        return Math.max(standaloneDbVal, Math.max(vavDbVal, dabDbVal));
     }
 
     public static double getZoneCoolingDeadband(String roomRef) {
@@ -201,36 +189,24 @@ public class TunerUtil
         return maxDb;
     }
     
+    /**
+     * Get building level heating deadband.
+     * @param equipRef ID - of Building tuner equip
+     * @return
+     */
     public static double getHeatingDeadband(String equipRef) {
-        String systemProfile = "";
-        if (L.ccu().systemProfile != null) {
-            if (L.ccu().systemProfile.getProfileName().contains("VAV")) {
-                systemProfile = "and vav";
-            } else if (L.ccu().systemProfile.getProfileName().contains("DAB")) {
-                systemProfile = "and dab";
-            } else if (L.ccu().systemProfile.getProfileName().contains("Default")) {
-                systemProfile = "and standalone";
-            }
-        } else {
-            systemProfile = "";
-        }
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap hdb = hayStack.read("point and tuner and deadband "+systemProfile+" and heating and not adr and not multiplier and equipRef == \""+equipRef+"\"");
-
-        if (!hdb.isEmpty()) {
-            ArrayList values = hayStack.readPoint(hdb.get("id").toString());
-            if (values != null && values.size() > 0)
-            {
-                for (int l = 1; l <= values.size() ; l++ ) {
-                    HashMap valMap = ((HashMap) values.get(l-1));
-                    if (valMap.get("val") != null) {
-                        return Double.parseDouble(valMap.get("val").toString());
-                    }
-                }
-            }
-        }
+    
+        double standaloneDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and standalone and " +
+                                                               "heating and not adr and not multiplier and equipRef == " +
+                                                               "\"" + equipRef + "\"");
+        double vavDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and vav and " +
+                                                        "heating and not adr and not multiplier and equipRef == " +
+                                                        "\"" + equipRef + "\"");
+        double dabDbVal = TunerUtil.readTunerValByQuery("point and tuner and deadband and dab and " +
+                                                        "heating and not adr and not multiplier and equipRef == " +
+                                                        "\"" + equipRef + "\"");
+        return Math.max(standaloneDbVal, Math.max(vavDbVal, dabDbVal));
         
-        return BuildingTunerFallback.getDefaultTunerVal("heating and deadband");
     }
     
     public static double getProportionalGain(String equipRef) {

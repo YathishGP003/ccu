@@ -248,8 +248,10 @@ public class DabSystemController extends SystemController
                 double desiredTempHeating = SystemTemperatureUtil.getDesiredTempHeating(equip.getId());
                 
                 double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
-                double zoneCoolingLoad = zoneCurTemp > tempMidPoint ? zoneCurTemp - desiredTempCooling : 0;
-                double zoneHeatingLoad = zoneCurTemp < tempMidPoint ? desiredTempHeating - zoneCurTemp : 0;
+                double zoneCoolingLoad = zoneCurTemp > tempMidPoint ? zoneCurTemp - desiredTempCooling :
+                                                                      tempMidPoint-desiredTempCooling;
+                double zoneHeatingLoad = zoneCurTemp < tempMidPoint ? desiredTempHeating - zoneCurTemp :
+                                                                      desiredTempHeating - tempMidPoint;
                 
                 double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad != 0 ?
                                                                          zoneCoolingLoad : zoneHeatingLoad, equip.getId());

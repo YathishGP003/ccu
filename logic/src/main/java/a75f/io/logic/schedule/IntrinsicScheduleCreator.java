@@ -37,7 +37,7 @@ public class IntrinsicScheduleCreator {
     private boolean isAnyZoneFollowingBuildingSchedule(List<HashMap<Object, Object>> rooms){
         for(HashMap<Object, Object> room : rooms){
             String query = "point and scheduleType and roomRef == \"" + room.get("id") + "\"";
-            if(CCUHsApi.getInstance().readHisValByQuery(query).intValue() == 0){
+            if((CCUHsApi.getInstance().readHisValByQuery(query).intValue() == 0) && isZoneConsideredForIntrinsicSchedule(room)){
                 return true;
             }
         }
@@ -48,7 +48,7 @@ public class IntrinsicScheduleCreator {
                                                      DateTime currentDateTime, List<HDict> intrinsicScheduleList){
         Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
         for(HashMap<Object, Object> room : rooms){
-            if(!isZoneOnVacationForCurrentDay(room, currentDateTime)){
+            if(isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room, currentDateTime)){
                 zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
             }
         }
@@ -205,6 +205,18 @@ public class IntrinsicScheduleCreator {
         Set<Schedule.Days> buildingDayScheduleSet = new TreeSet<>(sortSchedules());
         buildingDayScheduleSet.addAll(getBuildingScheduleForDay(buildingSchedule, dayNumber));
         calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, buildingDayScheduleSet);
+    }
+
+    private boolean isZoneConsideredForIntrinsicSchedule(HashMap<Object, Object> room){
+        ArrayList<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and zone and roomRef ==\"" + room.get("id").toString() + "\"");
+        for(HashMap<Object, Object> equip : equips){
+            if(equip.containsKey(Tags.DAB) || equip.containsKey(Tags.DUALDUCT) || equip.containsKey(Tags.BPOS)
+                    || equip.containsKey(Tags.TI) || equip.containsKey(Tags.VAV)){
+                return true;
+            }
+        }
+     return false;
     }
 
     public Schedule buildIntrinsicScheduleForCurrentWeek(){

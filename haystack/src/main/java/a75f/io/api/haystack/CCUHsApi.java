@@ -1688,6 +1688,10 @@ public class CCUHsApi
         return schedules;
     }
 
+    public Schedule getIntrinsicSchedule(){
+        return new Schedule.Builder().setHDict(tagsDb.read("intrinsic and schedule")).build();
+    }
+
     public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();

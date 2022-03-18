@@ -5,13 +5,31 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
+import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.MockTime;
+import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.pubnub.IntrinsicScheduleListener;
+import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.logic.schedule.IntrinsicScheduleCreator;
+import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,26 +37,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Looper;
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 
 import a75f.io.api.haystack.modbus.Parameter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +70,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.system.DefaultSystem;
@@ -66,16 +88,21 @@ import a75f.io.renatus.views.OaoArc;
 
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
+import com.tooltip.Tooltip;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface,
+		IntrinsicScheduleListener, CloudConnectivityListener
 {
 	private static final String TAG = "SystemFragment";
+	private static IntrinsicScheduleListener intrinsicScheduleListener;
 	SeekBar  sbComfortValue;
-	
+	private static final long TOOLTIP_TIME = 3000;
+
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
 	ToggleButton tbCompHumidity;
@@ -96,7 +123,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView lastUpdatedBtu;
 
 	private TextView updatedTimeOao;
-	
+	private TextView cloudConnectivityUpdatedTime;
+
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
 
@@ -120,6 +148,51 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private TextView GUIDDetails;
 	private LinearLayout IEGatewayDetail;
 	Prefs prefs;
+
+	private TextView textViewMonday;
+	private TextView textViewTuesday;
+	private TextView textViewWednesday;
+	private TextView textViewThursday;
+	private TextView textViewFriday;
+	private TextView textViewSaturday;
+	private TextView textViewSunday;
+
+	View view00;
+	View view02;
+	View view04;
+	View view06;
+	View view08;
+	View view10;
+	View view12;
+	View view14;
+	View view16;
+	View view18;
+	View view20;
+	View view22;
+	View view24;
+	View view01;
+	View view03;
+	View view05;
+	View view07;
+	View view09;
+	View view11;
+	View view13;
+	View view15;
+	View view17;
+	View view19;
+	View view21;
+	View view23;
+
+	ArrayList<View> viewTimeLines;
+	ConstraintLayout constraintScheduler;
+	private float mPixelsBetweenAnHour;
+	private float mPixelsBetweenADay;
+
+	private Drawable mDrawableBreakLineLeft;
+	private Drawable mDrawableBreakLineRight;
+
+	Schedule schedule;
+
 	public SystemFragment()
 	{
 	}
@@ -171,6 +244,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
                 UpdatePointHandler.setSystemDataInterface(this);
             }
         }
+		UpdateScheduleHandler.setIntrinsicScheduleListener(this);
+		SystemFragment.setIntrinsicScheduleListener(this);
 	}
 
 	@Override
@@ -179,6 +254,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if (prefs.getBoolean("REGISTRATION")) {
 			UpdatePointHandler.setSystemDataInterface(null);
 		}
+		UpdateScheduleHandler.setIntrinsicScheduleListener(null);
+		SystemFragment.setIntrinsicScheduleListener(null);
 	}
 
 	@Override
@@ -194,15 +271,359 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
+		NotificationHandler.setCloudConnectivityListener(this);
 		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
+
+		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
+
+		//Week Days
+		textViewMonday = rootView.findViewById(R.id.textViewMonday);
+		textViewTuesday = rootView.findViewById(R.id.textViewTuesday);
+		textViewWednesday = rootView.findViewById(R.id.textViewWednesday);
+		textViewThursday = rootView.findViewById(R.id.textViewThursday);
+		textViewFriday = rootView.findViewById(R.id.textViewFriday);
+		textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
+		textViewSunday = rootView.findViewById(R.id.textViewSunday);
+
+		//Time lines with 2 hrs Interval 00:00 to 24:00
+		view00 = rootView.findViewById(R.id.view00);
+		view02 = rootView.findViewById(R.id.view02);
+		view04 = rootView.findViewById(R.id.view04);
+		view06 = rootView.findViewById(R.id.view06);
+		view08 = rootView.findViewById(R.id.view08);
+		view10 = rootView.findViewById(R.id.view10);
+		view12 = rootView.findViewById(R.id.view12);
+		view14 = rootView.findViewById(R.id.view14);
+		view16 = rootView.findViewById(R.id.view16);
+		view18 = rootView.findViewById(R.id.view18);
+		view20 = rootView.findViewById(R.id.view20);
+		view22 = rootView.findViewById(R.id.view22);
+		view24 = rootView.findViewById(R.id.view24);
+
+		//Time lines with 1hr Inerval 00:00 to 24:00
+		view01 = rootView.findViewById(R.id.view01);
+		view03 = rootView.findViewById(R.id.view03);
+		view05 = rootView.findViewById(R.id.view05);
+		view07 = rootView.findViewById(R.id.view07);
+		view09 = rootView.findViewById(R.id.view09);
+		view11 = rootView.findViewById(R.id.view11);
+		view13 = rootView.findViewById(R.id.view13);
+		view15 = rootView.findViewById(R.id.view15);
+		view17 = rootView.findViewById(R.id.view17);
+		view19 = rootView.findViewById(R.id.view19);
+		view21 = rootView.findViewById(R.id.view21);
+		view23 = rootView.findViewById(R.id.view23);
+
+		//collecting each timeline to arraylist
+		viewTimeLines = new ArrayList<>();
+		viewTimeLines.add(view00);
+		viewTimeLines.add(view01);
+		viewTimeLines.add(view02);
+		viewTimeLines.add(view03);
+		viewTimeLines.add(view04);
+		viewTimeLines.add(view05);
+		viewTimeLines.add(view06);
+		viewTimeLines.add(view07);
+		viewTimeLines.add(view08);
+		viewTimeLines.add(view09);
+		viewTimeLines.add(view10);
+		viewTimeLines.add(view11);
+		viewTimeLines.add(view12);
+		viewTimeLines.add(view13);
+		viewTimeLines.add(view14);
+		viewTimeLines.add(view15);
+		viewTimeLines.add(view16);
+		viewTimeLines.add(view17);
+		viewTimeLines.add(view18);
+		viewTimeLines.add(view19);
+		viewTimeLines.add(view20);
+		viewTimeLines.add(view21);
+		viewTimeLines.add(view22);
+		viewTimeLines.add(view23);
+		viewTimeLines.add(view24);
+
+		mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
+		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
+
+		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
+		//After they are measured d the schedule.
+		ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+				View viewHourOne = viewTimeLines.get(1);
+				View viewHourTwo = viewTimeLines.get(2);
+
+				mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+				mPixelsBetweenADay = constraintScheduler.getHeight() / 7f;
+
+				//Leave 20% for padding.
+				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
+				if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
+
+				loadIntrinsicSchedule();
+				drawCurrentTime();
+
+			}
+		});
+
 		return rootView;
+	}
+
+	private void loadIntrinsicSchedule(){
+		RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
+				"Loading Intrinsic Schedule..."),
+				() ->
+					schedule = new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek(),
+				()-> {
+					ProgressDialogUtils.hideProgressDialog();
+					updateUI();
+				});
+
+	}
+	private void drawCurrentTime() {
+
+		DateTime now = new DateTime(MockTime.getInstance().getMockTime());
+
+
+		DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
+		Log.i("Scheduler", "DAY: " + day.toString());
+		int hh = now.getHourOfDay();
+		int mm = now.getMinuteOfHour();
+
+
+		AppCompatImageView imageView = new AppCompatImageView(getActivity());
+
+		imageView.setImageResource(R.drawable.ic_time_marker_svg);
+		imageView.setId(View.generateViewId());
+		imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
+		lp.bottomToBottom = getTextViewFromDay(day).getId();
+		lp.topToTop = getTextViewFromDay(day).getId();
+		lp.startToStart = viewTimeLines.get(hh).getId();
+		lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+
+		constraintScheduler.addView(imageView, lp);
+	}
+
+	private TextView getTextViewFromDay(DAYS day) {
+		switch (day) {
+			case MONDAY:
+				return textViewMonday;
+
+			case TUESDAY:
+				return textViewTuesday;
+
+			case WEDNESDAY:
+				return textViewWednesday;
+
+			case THURSDAY:
+				return textViewThursday;
+
+			case FRIDAY:
+				return textViewFriday;
+
+			case SATURDAY:
+				return textViewSaturday;
+
+			case SUNDAY:
+				return textViewSunday;
+
+			default:
+				return textViewSunday;
+		}
+	}
+
+	private void updateUI() {
+		schedule.populateIntersections();
+
+		new Handler(Looper.getMainLooper()).post(() -> {
+
+			hasTextViewChildren();
+			ArrayList<Schedule.Days> days = schedule.getDays();
+			Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+			Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+
+			for (int i = 0; i < days.size(); i++) {
+				Schedule.Days daysElement = days.get(i);
+				drawSchedule(i, daysElement.getSthh(), daysElement.getEthh(), daysElement.getStmm(), daysElement.getEtmm(),
+						DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+			}
+		});
+	}
+
+	private void hasTextViewChildren() {
+
+		for (int i = constraintScheduler.getChildCount() - 1; i >= 0; i--) {
+			if (constraintScheduler.getChildAt(i).getTag() != null) {
+				constraintScheduler.removeViewAt(i);
+			}
+		}
+
+	}
+
+	private void drawSchedule(int position, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
+		Typeface typeface=Typeface.DEFAULT;
+		try {
+			typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
+		if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
+			drawScheduleBlock(position, typeface, startTimeHH, 24, startTimeMM, 0,
+					getTextViewFromDay(day), false, true, intersection);
+			drawScheduleBlock(position, typeface, 0, endTimeHH, 0, endTimeMM,
+					getTextViewFromDay(day.getNextDay()), true, false, intersection);
+		} else {
+			drawScheduleBlock(position, typeface, startTimeHH, endTimeHH, startTimeMM,
+					endTimeMM, getTextViewFromDay(day), false, false, intersection);
+		}
+
+
+	}
+
+	private void drawScheduleBlock(int position, Typeface typeface, int tempStartTime, int tempEndTime,
+								   int startTimeMM, int endTimeMM, TextView textView,
+								   boolean leftBreak, boolean rightBreak, boolean intersection) {
+
+		Log.i(L.TAG_CCU_UI, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+
+		if(getContext()==null) return;
+		AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
+		textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
+		if(typeface!=null)
+			textViewTemp.setTypeface(typeface);
+		TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+		textViewTemp.setMaxLines(2);
+		textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);
+		textViewTemp.setId(ViewCompat.generateViewId());
+		textViewTemp.setTag(position);
+
+
+		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
+		lp.baselineToBaseline = textView.getId();
+
+
+		int leftMargin = startTimeMM > 0 ? (int) ((startTimeMM / 60.0) * mPixelsBetweenAnHour) : lp.leftMargin;
+		int rightMargin = endTimeMM > 0 ? (int) (((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour) : lp.rightMargin;
+
+		lp.leftMargin = leftMargin;
+		lp.rightMargin = rightMargin;
+
+		Drawable drawableCompat = null;
+
+		if (leftBreak) {
+			drawableCompat = getResources().getDrawable(R.drawable.temperature_background_left, null);
+			if (intersection) {
+				Drawable rightGreyBar = getResources().getDrawable(R.drawable.vline, null);
+				textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
+			}else
+				textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
+
+			Space space = new Space(getActivity());
+			space.setId(View.generateViewId());
+			float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
+
+
+			ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int) px, 10);
+			spaceLP.rightToLeft = viewTimeLines.get(tempStartTime).getId();
+
+			constraintScheduler.addView(space, spaceLP);
+
+
+			if (endTimeMM > 0)
+				tempEndTime++;
+
+			lp.startToStart = space.getId();
+			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+
+
+		} else if (rightBreak) {
+			drawableCompat = getResources().getDrawable(R.drawable.temperature_background_right, null);
+			textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
+			Space space = new Space(getActivity());
+			space.setId(View.generateViewId());
+			float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
+
+
+			ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int) px, 10);
+			spaceLP.leftToRight = viewTimeLines.get(tempEndTime).getId();
+
+			constraintScheduler.addView(space, spaceLP);
+
+			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+			lp.endToEnd = space.getId();
+		} else {
+
+
+			if (intersection) {
+				Drawable rightGreyBar = getResources().getDrawable(R.drawable.vline, null);
+				textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null,
+						rightGreyBar, null);
+			}
+
+
+			drawableCompat = getResources().getDrawable(R.drawable.temperature_background, null);
+
+			if (endTimeMM > 0)
+				tempEndTime++;
+
+			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+		}
+
+		textViewTemp.setBackground(drawableCompat);
+		constraintScheduler.addView(textViewTemp, lp);
+		textViewTemp.setOnClickListener(v -> {
+			int clickedPosition = (int)v.getTag();
+			ArrayList<Schedule.Days> days = schedule.getDays();
+			Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+			Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+			Schedule.Days day = schedule.getDays().get(clickedPosition);
+			String toolTipValue = new StringBuffer().append("Schedule: ")
+					.append(convertIntHourMinsToString(day.getSthh(), day.getStmm()))
+					.append(" to ")
+					.append(convertIntHourMinsToString(day.getEthh(), day.getEtmm()))
+					.toString();
+
+			Tooltip intrinsicScheduleToolTip = new Tooltip.Builder(v)
+					.setBackgroundColor(Color.BLACK)
+					.setTextColor(Color.WHITE)
+					.setCancelable(true)
+					.setDismissOnClick(true)
+					.setGravity(Gravity.TOP)
+					.setText(toolTipValue)
+					.show();
+			new Handler(Looper.getMainLooper()).postDelayed(intrinsicScheduleToolTip::dismiss, TOOLTIP_TIME);
+		});
+	}
+	private String convertIntHourMinsToString(int hour, int minute){
+		String hr = String.valueOf(hour);
+		String min = String.valueOf(minute);
+		String zero = "0";
+		if(hour < 10){
+			hr = zero + hr;
+		}
+		if(minute < 10){
+			min = zero + min;
+		}
+		return hr + ":" +min;
+	}
+
+	public void refreshScreen() {
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
+		}
 	}
 
 	@SuppressLint("ClickableViewAccessibility") @Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
-		
+
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
 		HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
@@ -299,6 +720,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
 		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		updatedTimeOao = view.findViewById(R.id.last_updated_status_oao);
+		cloudConnectivityUpdatedTime = view.findViewById(R.id.last_updated_time_ccu_hb);
 
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
@@ -690,5 +1112,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return "Unoccupied";
 	}
 
+	public static void refreshIntrinsicSchedulesScreen() {
+		if (intrinsicScheduleListener != null) {
+			intrinsicScheduleListener.refreshScreen();
+		}
+	}
+
+	public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {
+		intrinsicScheduleListener = listener;
+	}
+	@Override
+	public void refreshData() {
+		cloudConnectivityUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(Tags.CLOUD));
+	}
 
 }

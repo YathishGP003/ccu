@@ -3,6 +3,7 @@ package a75f.io.logic.bo.util;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -44,6 +45,16 @@ public class CCUUtils
             return null;
         }
         HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+        return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
+    }
+
+    public static Date getLastReceivedTimeForCloudConnectivity(){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntity("cloud and connectivity and diag and point");
+        if(cloudConnectivityPoint.isEmpty()){
+            return null;
+        }
+        HisItem heartBeatHisItem = hayStack.curRead(cloudConnectivityPoint.get("id").toString());
         return (heartBeatHisItem == null) ? null : heartBeatHisItem.getDate();
     }
 

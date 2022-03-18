@@ -101,6 +101,15 @@ public class DiagEquip
                                        .setTz(tz)
                                        .build();
         hsApi.addPoint(wifiRssi);
+
+        Point ccuHeartbeat = new Point.Builder()
+                .setDisplayName(equipDis+"-ccuHeartbeat")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("linear")
+                .addMarker("diag").addMarker("cloud").addMarker("connectivity").addMarker("his")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(ccuHeartbeat);
     
         Point wifiLinkSpeed = new Point.Builder()
                                  .setDisplayName(equipDis+"-wifiLinkSpeed")

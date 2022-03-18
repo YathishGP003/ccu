@@ -62,6 +62,7 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
+import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
@@ -245,6 +246,12 @@ public class Globals {
         }
     }
 
+    private void migrateIduPoints(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            IduPointsMigration.init();
+        }
+    }
+
     private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
@@ -293,6 +300,7 @@ public class Globals {
                 migrateHeartbeatwithNewtags(site);
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
+                migrateIduPoints(site);
                 loadEquipProfiles();
 
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())

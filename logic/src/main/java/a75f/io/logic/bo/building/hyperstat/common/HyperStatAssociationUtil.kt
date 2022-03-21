@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.cpu.*
 import a75f.io.logic.bo.building.sensors.SensorType
@@ -244,22 +245,25 @@ class HyperStatAssociationUtil {
                 third = false   //  Fan High
             )
 
-            if (configuration.relay1State.enabled && isRelayAssociatedToFan(configuration.relay1State))
+            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration)) return 21 // All options are enabled due to
+            // analog fan speed
+
+            if (isRelayEnabledAssociatedToFan(configuration.relay1State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay1State.association, fanEnabledStages)
 
-            if (configuration.relay2State.enabled && isRelayAssociatedToFan(configuration.relay2State))
+            if (isRelayEnabledAssociatedToFan(configuration.relay2State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay2State.association, fanEnabledStages)
 
-            if (configuration.relay3State.enabled && isRelayAssociatedToFan(configuration.relay3State))
+            if (isRelayEnabledAssociatedToFan(configuration.relay3State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay3State.association, fanEnabledStages)
 
-            if (configuration.relay4State.enabled && isRelayAssociatedToFan(configuration.relay4State))
+            if (isRelayEnabledAssociatedToFan(configuration.relay4State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay4State.association, fanEnabledStages)
 
-            if (configuration.relay5State.enabled && isRelayAssociatedToFan(configuration.relay5State))
+            if (isRelayEnabledAssociatedToFan(configuration.relay5State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay5State.association, fanEnabledStages)
 
-            if (configuration.relay6State.enabled && isRelayAssociatedToFan(configuration.relay6State))
+            if (isRelayEnabledAssociatedToFan(configuration.relay6State))
                 fanEnabledStages = updateSelectedFanLevel(configuration.relay6State.association, fanEnabledStages)
 
             if (fanEnabledStages.first) fanLevel += 6
@@ -291,6 +295,25 @@ class HyperStatAssociationUtil {
         }
 
         // Function which checks that any of the relay Enabled and is associated to Heating
+        fun isAnyRelayEnabledAssociatedToFan(configuration: HyperStatCpuConfiguration): Boolean {
+            return when {
+                (configuration.relay1State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay1State)) -> true
+                (configuration.relay2State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay2State)) -> true
+                (configuration.relay3State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay3State)) -> true
+                (configuration.relay4State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay4State)) -> true
+                (configuration.relay5State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay5State)) -> true
+                (configuration.relay6State.enabled &&
+                        isRelayAssociatedToFan(configuration.relay6State)) -> true
+                else -> false
+            }
+        }
+
+        // Function which checks that any of the relay Enabled and is associated to Heating
         fun isAnyRelayEnabledAssociatedToHeating(configuration: HyperStatCpuConfiguration): Boolean {
             return when {
                 (configuration.relay1State.enabled &&
@@ -309,6 +332,10 @@ class HyperStatAssociationUtil {
             }
         }
 
+        // function to check the input relay is enabled and associated to fan speed
+        fun isRelayEnabledAssociatedToFan(relayState: RelayState): Boolean {
+         return (relayState.enabled && isRelayAssociatedToFan(relayState))
+        }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
         fun isAnyRelayEnabledAssociatedToCooling(configuration: HyperStatCpuConfiguration): Boolean {
@@ -329,13 +356,92 @@ class HyperStatAssociationUtil {
             }
         }
 
-        // function which checks the any of the relay is associated to cooling heating fan stage or fan enabled
+        // Function which checks that any of the Analog Out is mapped to Cooling
+        fun isAnyAnalogOutEnabledAssociatedToCooling(configuration: HyperStatCpuConfiguration): Boolean {
+            return when {
+                (configuration.analogOut1State.enabled &&
+                        isAnalogOutAssociatedToCooling(configuration.analogOut1State)) -> true
+                (configuration.analogOut2State.enabled &&
+                        isAnalogOutAssociatedToCooling(configuration.analogOut2State)) -> true
+                (configuration.analogOut3State.enabled &&
+                        isAnalogOutAssociatedToCooling(configuration.analogOut3State)) -> true
+                else -> false
+            }
+        }
+
+        // Function which checks that any of the Analog Out is mapped to Heating
+        fun isAnyAnalogOutEnabledAssociatedToHeating(configuration: HyperStatCpuConfiguration): Boolean {
+            return when {
+                (configuration.analogOut1State.enabled &&
+                        isAnalogOutAssociatedToHeating(configuration.analogOut1State)) -> true
+                (configuration.analogOut2State.enabled &&
+                        isAnalogOutAssociatedToHeating(configuration.analogOut2State)) -> true
+                (configuration.analogOut3State.enabled &&
+                        isAnalogOutAssociatedToHeating(configuration.analogOut3State)) -> true
+                else -> false
+            }
+        }
+
+        // Function which checks that any of the Analog Out is mapped to Fan speed
+        fun isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration: HyperStatCpuConfiguration): Boolean {
+            return when {
+                (configuration.analogOut1State.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut1State)) -> true
+                (configuration.analogOut2State.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut2State)) -> true
+                (configuration.analogOut3State.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut3State)) -> true
+                else -> false
+            }
+        }
+
+
+        // function which checks the any of Port (Can be relay or Analog) while reconfiguration
+        fun isPortEffectedConditioningModes(configuration: HyperStatCpuConfiguration, port: Port): Boolean{
+
+            when(port){
+                Port.RELAY_ONE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay1State))
+                Port.RELAY_TWO-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay2State))
+                Port.RELAY_THREE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay3State))
+                Port.RELAY_FOUR-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay4State))
+                Port.RELAY_FIVE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay5State))
+                Port.RELAY_SIX-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay6State))
+                Port.ANALOG_OUT_ONE-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut1State))
+                Port.ANALOG_OUT_TWO-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut2State))
+                Port.ANALOG_OUT_THREE-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut3State))
+            }
+            return false
+        }
+        // function which checks the any of Port (Can be relay or Analog) while reconfiguration
+        fun isPortEffectedFanModes(configuration: HyperStatCpuConfiguration, port: Port): Boolean{
+
+            when(port){
+                Port.RELAY_ONE-> return (isRelayAssociatedToFan(configuration.relay1State))
+                Port.RELAY_TWO-> return (isRelayAssociatedToFan(configuration.relay2State))
+                Port.RELAY_THREE-> return (isRelayAssociatedToFan(configuration.relay3State))
+                Port.RELAY_FOUR-> return (isRelayAssociatedToFan(configuration.relay4State))
+                Port.RELAY_FIVE-> return (isRelayAssociatedToFan(configuration.relay5State))
+                Port.RELAY_SIX-> return (isRelayAssociatedToFan(configuration.relay6State))
+                Port.ANALOG_OUT_ONE-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut1State))
+                Port.ANALOG_OUT_TWO-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut2State))
+                Port.ANALOG_OUT_THREE-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut3State))
+            }
+            return false
+        }
+
+
+
+        // function which checks the any of the relay is associated to any conditioning
         fun isRelayAssociatedToAnyOfConditioningModes(relayState: RelayState): Boolean{
-            if(!relayState.enabled) return false
             if(isRelayAssociatedToCoolingStage(relayState)) return true
             if(isRelayAssociatedToHeatingStage(relayState)) return true
-            if(isRelayAssociatedToFan(relayState)) return true
-            if(isRelayAssociatedToFanEnabled(relayState)) return true
+            return false
+        }
+
+        // function which checks the any of the relay is associated to cooling heating fan stage or fan enabled
+        fun isAnalogAssociatedToAnyOfConditioningModes(analogOut: AnalogOutState): Boolean{
+            if(isAnalogOutAssociatedToCooling(analogOut)) return true
+            if(isAnalogOutAssociatedToHeating(analogOut)) return true
             return false
         }
 
@@ -483,23 +589,19 @@ class HyperStatAssociationUtil {
                     }
                     (fanLevel == 7) -> {
                         // R.array.hyperstate_only_medium_fanmode
-                      //  if (selectedFan in 1..4)
                             return StandaloneFanStage.values()[selectedFan - 3].ordinal
                     }
                     (fanLevel == 8) -> {
                         // R.array.hyperstate_only_high_fanmode
-                     //   if (selectedFan in 1..4)
                             return StandaloneFanStage.values()[selectedFan - 6].ordinal
                     }
                     (fanLevel == 13) -> {
                         // When fan low and mediam are selected
                         //R.array.smartstat_2pfcu_fanmode_medium
-                       // if (selectedFan in 1..7)
                             return StandaloneFanStage.values()[selectedFan].ordinal
                     }
                     (fanLevel == 15) -> {
                         // Medium and high fan speeds are selected
-                        // R.array.hyperstate_medium_high_fanmode
                         return StandaloneFanStage.values()[selectedFan - 3].ordinal
 
                     }

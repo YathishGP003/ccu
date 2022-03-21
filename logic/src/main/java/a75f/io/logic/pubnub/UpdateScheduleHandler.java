@@ -26,11 +26,13 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 
 public class UpdateScheduleHandler
 {
     public static final String CMD = "updateSchedule";
     private static BuildingScheduleListener scheduleListener = null;
+    private static IntrinsicScheduleListener intrinsicScheduleListener;
     
     public static void handleMessage(JsonObject msgObject)
     {
@@ -106,7 +108,9 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
+        new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek();
         refreshSchedulesScreen();
+        refreshIntrinsicSchedulesScreen();
     }
     
     public static void trimZoneSchedules(Schedule buildingSchedule)
@@ -199,8 +203,18 @@ public class UpdateScheduleHandler
             scheduleListener.refreshScreen();
         }
     }
+
+    public static void refreshIntrinsicSchedulesScreen() {
+        if (intrinsicScheduleListener != null) {
+            intrinsicScheduleListener.refreshScreen();
+        }
+    }
     
     public static void setBuildingScheduleListener(BuildingScheduleListener listener) {
         scheduleListener = listener;
+    }
+
+    public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {
+        intrinsicScheduleListener = listener;
     }
 }

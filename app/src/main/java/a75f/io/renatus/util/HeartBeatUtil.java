@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.util.CCUUtils;
 
 import a75f.io.renatus.R;
@@ -48,7 +49,10 @@ public class HeartBeatUtil {
 
     public static String getLastUpdatedTime(String nodeAddress){
         Date updatedTime = null;
-        if(StringUtils.length(nodeAddress)<4){
+        if(nodeAddress.equalsIgnoreCase(Tags.CLOUD)){
+            updatedTime = CCUUtils.getLastReceivedTimeForCloudConnectivity();
+        }
+        else if(StringUtils.length(nodeAddress)<4){
             updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
         }
         else{

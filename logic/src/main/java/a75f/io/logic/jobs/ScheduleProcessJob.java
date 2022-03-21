@@ -418,6 +418,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
         double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
+
+        boolean isZoneTempDead = CCUHsApi.getInstance().readHisValByQuery("point and status and " +
+                "his and  equipRef == \"" + equip.getId() + "\"") == 3;
         Log.i(L.TAG_CCU_HSCPU, "Schedule process job curOccupancy "+curOccupancyMode);
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
@@ -430,9 +433,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return "No schedule configured";
         }
         Log.d("ZoneSchedule","zoneStatusString = "+equip.getDisplayName()+","+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
-        if (!isZoneHasStandaloneEquip && (systemOccupancy == PRECONDITIONING) ) {
+        if (!isZoneHasStandaloneEquip
+                && (systemOccupancy == PRECONDITIONING)
+                && cachedOccupied.getVacation() == null
+                && !isZoneTempDead) {
             return "In Preconditioning ";
-        }else if(curOccupancyMode == PRECONDITIONING) {//zone is in preconditioning even if any one equip
+        }else if(curOccupancyMode == PRECONDITIONING
+                && cachedOccupied.getVacation() == null
+                && !isZoneTempDead) {//zone is in preconditioning even if any one equip
 
             return "In Preconditioning";
         }
@@ -479,7 +487,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             } else
             {
-                if(curOccupancyMode == PRECONDITIONING) {//Currently handled only for standalone
+                if(curOccupancyMode == PRECONDITIONING && !isZoneTempDead) {//Currently handled only for standalone
                     if (cachedOccupied.getNextOccupiedSchedule() == null){
                         return "No schedule configured";
                     }
@@ -1554,7 +1562,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         boolean isZoneHasStandaloneEquip =
                                 (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") ||
                                         equip.getMarkers().contains("hyperstat")  );
-                        
+
                         //Standalone zones could operate in preconditioning with system being OFF.
                         if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {
                             occupancyState = PRECONDITIONING;

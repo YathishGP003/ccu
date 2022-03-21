@@ -6,6 +6,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.tuners.VrvTuners
+import java.util.*
 
 class VrvEquip(hsApi : CCUHsApi,
                addr: Short) {
@@ -30,6 +31,9 @@ class VrvEquip(hsApi : CCUHsApi,
         createStatusPoints(vrvEquip, roomRef, floorRef)
         createConfigPoints(config, vrvEquip, roomRef, floorRef)
         createIduStatusPoints(vrvEquip, roomRef, floorRef)
+        VrvPoints.createThermisterPoints(vrvEquip, roomRef, floorRef,nodeAddr,hayStack)
+        VrvPoints.createTestOperationPoint(vrvEquip, roomRef, floorRef,nodeAddr,hayStack)
+        VrvPoints.createTelecoCheckPoint(vrvEquip, roomRef, floorRef,nodeAddr,hayStack)
         VrvTuners.addEquipVrvTuners(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
                             vrvEquip.id, roomRef, floorRef, vrvEquip.tz)
         hayStack.syncEntityTree()

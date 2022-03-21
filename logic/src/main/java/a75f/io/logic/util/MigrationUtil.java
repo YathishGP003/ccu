@@ -4,7 +4,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +55,11 @@ public class MigrationUtil {
         if (!PreferenceUtil.getCleanUpDuplicateZoneSchedule()) {
             cleanUpDuplicateZoneSchedules(CCUHsApi.getInstance());
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
+        }
+
+        if (!PreferenceUtil.isCCUHeartbeatMigrationDone()) {
+            addCCUHeartbeatDiagPoint();
+            PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
         }
 
     }
@@ -206,6 +210,22 @@ public class MigrationUtil {
             }
         });
     }
-    
+
+    private static void addCCUHeartbeatDiagPoint(){
+        Map<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
+        if(!diagEquip.isEmpty()){
+            Map<Object,Object> cloudConnectivityPoint = CCUHsApi.getInstance().readEntity("cloud and connectivity" +
+                    " and diag and point");
+            if(cloudConnectivityPoint.isEmpty()){
+                CCUHsApi.getInstance().addPoint(new Point.Builder()
+                        .setDisplayName("DiagEquip-ccuHeartbeat")
+                        .setEquipRef(diagEquip.get("id").toString())
+                        .setSiteRef(diagEquip.get("siteRef").toString())
+                        .addMarker("diag").addMarker("cloud").addMarker("connectivity").addMarker("his")
+                        .setTz(diagEquip.get("tz").toString())
+                        .build());
+            }
+        }
+    }
     
 }

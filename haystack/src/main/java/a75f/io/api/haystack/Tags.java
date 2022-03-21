@@ -109,5 +109,14 @@ public class Tags
     public static final String PRIMARY = "primary";
     public static final String SECONDARY = "secondary";
     public static final String SETTING = "setting";
+    public static final String CLOUD = "cloud";
+
+    public static final String DAY = "day";
+    public static final String STHH = "sthh";
+    public static final String STMM = "stmm";
+    public static final String ETHH = "ethh";
+    public static final String ETMM = "etmm";
+    public static final String COOLVAL = "coolVal";
+    public static final String HEATVAL = "heatVal";
 
 }

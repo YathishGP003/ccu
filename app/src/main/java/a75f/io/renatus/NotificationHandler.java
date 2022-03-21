@@ -8,13 +8,16 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Color;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 
 public class NotificationHandler {
 
     private NotificationManager mNM = null;
     private int mServerConnectionStatusID = 1;
     private int mCMConnectionStatusID = 2;
+    private static CloudConnectivityListener cloudConnectivityListener;
 
     private Notification.Builder mServerConnectionStatus =
             new Notification.Builder(Globals.getInstance().getApplicationContext())
@@ -41,7 +44,21 @@ public class NotificationHandler {
         mHandler.mNM.cancelAll();
     }
 
+    public static void setCloudConnectivityListener(CloudConnectivityListener listener){
+        cloudConnectivityListener = listener;
+    }
+
+    public static void refreshCloudConnectivityLastUpdatedTime(){
+        if(cloudConnectivityListener != null){
+            cloudConnectivityListener.refreshData();
+        }
+    }
+
     public static void setCloudConnectionStatus(boolean bIsConnected) {
+        if(bIsConnected){
+            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connectivity",1.0);
+        }
+        refreshCloudConnectivityLastUpdatedTime();
         mHandler.mServerConnectionStatus.setContentText(bIsConnected ? "Online" : "Offline");
         mHandler.mServerConnectionStatus.setSmallIcon(bIsConnected ? R.drawable.online_cloud_notification :
                 R.drawable.offline_cloud_notification);

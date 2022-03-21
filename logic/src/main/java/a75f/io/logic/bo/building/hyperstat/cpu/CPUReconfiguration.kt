@@ -291,14 +291,9 @@ class CPUReconfiguration {
             if (updatedConfigValue <= 0) {
                 Log.i(L.TAG_CCU_HSCPU, "Config Point $configType is disabled so deleting the logical point")
                 deleteLogicalPoint(haystack, configPoint.equipRef, configType, portType)
-
-                // Get Existing Configuration
-                val config = getHyperstatEquipRef(equip.group.toShort())
-                config.updateConditioningMode(config.getConfiguration())
-                config.updateFanMode(config.getConfiguration())
             }
             // Create Logical Points only when config is enabled
-            if (updatedConfigValue > 0) {
+            else if (updatedConfigValue > 0) {
                 val logicalPointId: String? = HSReconfigureUtil.readPointID(
                     "$configType and logical",
                     configPoint.equipRef, Tags.CPU, haystack
@@ -318,6 +313,23 @@ class CPUReconfiguration {
                     )
                 }
             }
+            // Get Existing Configuration
+            val config = getHyperstatEquipRef(equip.group.toShort())
+            if(HyperStatAssociationUtil.isPortEffectedConditioningModes(config.getConfiguration(),portType)) {
+                Log.i(
+                    L.TAG_CCU_HSCPU,
+                    "True Effected to conditioning mode"
+                )
+                config.updateConditioningMode()
+
+            }
+            if(HyperStatAssociationUtil.isPortEffectedFanModes(config.getConfiguration(),portType)) {
+                Log.i(
+                    L.TAG_CCU_HSCPU,
+                    "True Effected to Fan mode"
+                )
+                config.updateFanMode(config.getConfiguration())
+            }
         }
 
 
@@ -336,7 +348,7 @@ class CPUReconfiguration {
                 ) {
                     val relay = RelayState(true, CpuRelayAssociation.values()[updatedConfigValue.toInt()])
                     val hyperStatCpuEquip = getHyperstatEquipRef(associationPoint.group.toShort())
-                    hyperStatCpuEquip.updateRelayDetails(relay, whichConfig, portType,null)
+                    hyperStatCpuEquip.updateRelayDetails(relay, whichConfig, portType,hyperStatCpuEquip.getConfiguration())
                 }
 
                 if (whichConfig.contentEquals(Queries.ANALOG1_OUT)
@@ -364,7 +376,8 @@ class CPUReconfiguration {
                         analogOutState,
                         analogTag,
                         analogPort,
-                        AnalogOutChanges.MAPPING
+                        AnalogOutChanges.MAPPING,
+                        hyperStatCpuEquip.getConfiguration()
                     )
 
                 }

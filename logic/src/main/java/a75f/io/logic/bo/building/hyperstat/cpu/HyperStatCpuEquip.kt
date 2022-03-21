@@ -9,13 +9,8 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.AnalogOutChanges
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
-import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.tuners.HyperstatTuners
@@ -469,7 +464,6 @@ class HyperStatCpuEquip(val node: Short) {
         updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateConditioningMode(updatedHyperStatConfig)
         Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
@@ -744,7 +738,7 @@ class HyperStatCpuEquip(val node: Short) {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut1State, existingConfiguration.analogOut1State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn)
+            updateAnalogOutDetails(newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn, newConfiguration)
         }
         if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
                 (newConfiguration.analogOut2State, existingConfiguration.analogOut2State)
@@ -752,7 +746,7 @@ class HyperStatCpuEquip(val node: Short) {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut2State, existingConfiguration.analogOut2State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn)
+            updateAnalogOutDetails(newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn, newConfiguration)
         }
         if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
                 (newConfiguration.analogOut3State, existingConfiguration.analogOut3State)
@@ -760,7 +754,7 @@ class HyperStatCpuEquip(val node: Short) {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut3State, existingConfiguration.analogOut3State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn)
+            updateAnalogOutDetails(newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn, newConfiguration)
         }
     }
 
@@ -818,7 +812,13 @@ class HyperStatCpuEquip(val node: Short) {
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
             DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), physicalPort.name, pointId)
         }
-       if (newConfiguration != null) updateFanMode(newConfiguration)
+        CcuLog.i(L.TAG_CCU_ZONE, "updateRelayDetails: ${relayState.association.name} ${relayState.enabled}")
+        CcuLog.i(L.TAG_CCU_ZONE, "isRelayAssociatedToAnyOfConditioningModes: "+HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
+       if ( newConfiguration != null && HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)){
+           updateFanMode(newConfiguration)
+       }
+        if(HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
+            updateConditioningMode()
     }
 
 
@@ -827,7 +827,8 @@ class HyperStatCpuEquip(val node: Short) {
         analogOutState: AnalogOutState,
         analogOutTag: String,
         physicalPort: Port,
-        changeIn: AnalogOutChanges
+        changeIn: AnalogOutChanges,
+        newConfiguration: HyperStatCpuConfiguration?
     ) {
 
         // Read enable/disable Point ID
@@ -945,7 +946,17 @@ class HyperStatCpuEquip(val node: Short) {
             }
 
         }
+        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Anaalog $changeIn")
+        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
+        if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
+                    && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
+            updateFanMode(newConfiguration)
+        }
 
+        if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
+                    && HyperStatAssociationUtil.isAnalogAssociatedToAnyOfConditioningModes(analogOutState))) {
+            updateConditioningMode()
+        }
     }
 
 
@@ -992,9 +1003,8 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
 
-     fun updateConditioningMode(config: HyperStatCpuConfiguration) {
-
-
+     fun updateConditioningMode() {
+         CcuLog.i(L.TAG_CCU_ZONE, "updateConditioningMode: ")
         val conditioningModeId = hsHaystackUtil!!.readPointID("zone and userIntent and conditioning and mode")
 
         if (conditioningModeId!!.isEmpty()) {
@@ -1006,21 +1016,16 @@ class HyperStatCpuEquip(val node: Short) {
         var conditioningMode = curCondMode
         Log.i(L.TAG_CCU_HSCPU, "updateConditioningMode: curCondMode $curCondMode")
 
-        if (!isAnyRelayEnabledAssociatedToCooling(config)) {
-            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal.toDouble() ||
-                curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble()
-            ) {
-                conditioningMode = StandaloneConditioningMode.OFF.ordinal.toDouble()
-            }
-        }
-        if (!isAnyRelayEnabledAssociatedToHeating(config)) {
-            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal.toDouble() ||
-                curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble()
-            ) {
-                conditioningMode = StandaloneConditioningMode.OFF.ordinal.toDouble()
-            }
-        }
-
+         when(HSHaystackUtil.getPossibleConditioningModeSettings(nodeAddress.toInt())){
+             PossibleConditioningMode.BOTH -> {
+                 if(curCondMode != StandaloneConditioningMode.AUTO.ordinal.toDouble())
+                     conditioningMode = StandaloneConditioningMode.AUTO.ordinal.toDouble()
+             }
+             PossibleConditioningMode.COOLONLY, PossibleConditioningMode.HEATONLY , PossibleConditioningMode.OFF -> {
+                 if(curCondMode != StandaloneConditioningMode.OFF.ordinal.toDouble())
+                     conditioningMode = StandaloneConditioningMode.OFF.ordinal.toDouble()
+             }
+         }
         CcuLog.i(L.TAG_CCU_ZONE, "adjustCPUConditioningMode $curCondMode -> $conditioningMode")
         if (curCondMode != conditioningMode) {
             haystack.writeDefaultValById(conditioningModeId, conditioningMode)
@@ -1029,43 +1034,15 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
      fun updateFanMode(config: HyperStatCpuConfiguration) {
-
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil!!.readPointValue("zone and userIntent and fan and mode")
         var fallbackFanSpeed = StandaloneFanStage.OFF.ordinal.toDouble() // Indicating always OFF
-
-        if (fanLevel > 0) {
-            /*
-             For more details please refer following function
-              a75f.io.renatus.util.CCUUiUtil.getFanOptionByLevel()
-            */
-            if (curFanSpeed > StandaloneFanStage.AUTO.ordinal) {
-                when {
-                    (fanLevel == 21) -> {
-                        fallbackFanSpeed = getFallBackModeValue(min = 1, max = 10, curFanSpeed)
-                    }
-                    (fanLevel == 6 || fanLevel == 7 || fanLevel == 8) -> {
-                        fallbackFanSpeed = getFallBackModeValue(min = 1, max = 4, curFanSpeed)
-                    }
-                    (fanLevel == 13 || fanLevel == 14 || fanLevel == 15) -> {
-                        fallbackFanSpeed = getFallBackModeValue(min = 1, max = 7, curFanSpeed)
-                    }
-                }
-            } else {
-                fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal.toDouble()
-            }
-            hsHaystackUtil!!.writeDefaultVal("zone and userIntent and fan and mode", fallbackFanSpeed)
-        } else {
-            // If no Fan Stages are selected directly go to Off state
-            hsHaystackUtil!!.writeDefaultVal("zone and userIntent and fan and mode", fallbackFanSpeed)
+         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
+        if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal.toDouble()
         }
-    }
-
-    private fun getFallBackModeValue(min: Int, max: Int, curFanSpeed: Double): Double {
-        return if (curFanSpeed.toInt() in min..max)
-            curFanSpeed
-        else
-            StandaloneFanStage.AUTO.ordinal.toDouble()
+         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
+         hsHaystackUtil!!.writeDefaultVal("zone and userIntent and fan and mode", fallbackFanSpeed)
     }
 
     fun getCurrentTemp(): Double {

@@ -1649,38 +1649,31 @@ class HyperStatPointsUtil constructor(
     // Function which finds default fan speed
     private fun getDefaultFanSpeed(config: HyperStatCpuConfiguration): StandaloneFanStage {
 
-        return if (config.relay1State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay1State))
-            StandaloneFanStage.AUTO
-        else if (config.relay2State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay2State))
-            StandaloneFanStage.AUTO
-        else if (config.relay3State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay3State))
-            StandaloneFanStage.AUTO
-        else if (config.relay4State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay4State))
-            StandaloneFanStage.AUTO
-        else if (config.relay5State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay5State))
-            StandaloneFanStage.AUTO
-        else if (config.relay6State.enabled && HyperStatAssociationUtil.isRelayAssociatedToFan(config.relay6State))
-            StandaloneFanStage.AUTO
-        else
-            StandaloneFanStage.OFF
+        return if (HyperStatAssociationUtil.isAnyAnalogOutEnabledAssociatedToFanSpeed(config)
+            || HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToFan(config)){
+             StandaloneFanStage.AUTO
+        }
+        else StandaloneFanStage.OFF
     }
 
     // Function which finds default default cooling mode
     private fun getDefaultConditioningMode(config: HyperStatCpuConfiguration): StandaloneConditioningMode {
-        return if (config.relay1State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay1State))
+
+        return if((HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToCooling(config)
+                    || HyperStatAssociationUtil.isAnyAnalogOutEnabledAssociatedToCooling(config))
+                    && (HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToHeating(config)
+                    || HyperStatAssociationUtil.isAnyAnalogOutEnabledAssociatedToHeating(config))) {
             StandaloneConditioningMode.AUTO
-        else if (config.relay2State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay2State))
-            StandaloneConditioningMode.AUTO
-        else if (config.relay3State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay3State))
-            StandaloneConditioningMode.AUTO
-        else if (config.relay4State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay4State))
-            StandaloneConditioningMode.AUTO
-        else if (config.relay5State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay5State))
-            StandaloneConditioningMode.AUTO
-        else if (config.relay6State.enabled && HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(config.relay6State))
-            StandaloneConditioningMode.AUTO
-        else
-            StandaloneConditioningMode.OFF
+        }
+        else if(HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToCooling(config)
+            ||HyperStatAssociationUtil.isAnyAnalogOutEnabledAssociatedToCooling(config)) {
+            StandaloneConditioningMode.COOL_ONLY
+        }
+        else if(HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToHeating(config)
+            ||HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToCooling(config)) {
+            StandaloneConditioningMode.HEAT_ONLY
+        }
+        else StandaloneConditioningMode.OFF
     }
 
 

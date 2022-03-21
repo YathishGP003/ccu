@@ -4,6 +4,8 @@ import a75f.io.api.haystack.*
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip
@@ -51,23 +53,19 @@ class HSHaystackUtil(
                 val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
                 // Add conditioning status
                 val config = equip.getConfiguration()
-                if (isAnyRelayEnabledAssociatedToCooling(config)
-                    && isAnyRelayEnabledAssociatedToHeating(config)
-                ) {
+                if ((isAnyRelayEnabledAssociatedToCooling(config) || isAnyAnalogOutEnabledAssociatedToCooling(config))
+                    && (isAnyRelayEnabledAssociatedToHeating(config)|| isAnyAnalogOutEnabledAssociatedToHeating(config) )) {
                     status = PossibleConditioningMode.BOTH
-                } else if (isAnyRelayEnabledAssociatedToCooling(config)
-                    && !isAnyRelayEnabledAssociatedToHeating(config)
-                ) {
+                } else if (isAnyRelayEnabledAssociatedToCooling(config) || isAnyAnalogOutEnabledAssociatedToCooling(config)) {
                     status = PossibleConditioningMode.COOLONLY
-                } else if (!isAnyRelayEnabledAssociatedToCooling(config)
-                    && isAnyRelayEnabledAssociatedToHeating(config)
-                ) {
+                } else if (isAnyRelayEnabledAssociatedToHeating(config)||isAnyAnalogOutEnabledAssociatedToHeating(config)) {
                     status = PossibleConditioningMode.HEATONLY
                 }
 
             }catch (e: Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.localizedMessage}")
+                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.message}")
             }
+            Log.i(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
             return status
         }
 

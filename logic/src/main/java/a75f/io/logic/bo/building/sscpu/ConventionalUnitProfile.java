@@ -113,6 +113,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
 				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
+                                "equipRef == \"" + cpuEquip.getId() + "\"", 0.0);
                 continue;
             }
 			setTempCooling = cpuDevice.getDesiredTempCooling();

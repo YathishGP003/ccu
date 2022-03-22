@@ -153,6 +153,8 @@ public class VavIERtu extends VavSystemProfile
     
     private synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        updateMechanicalConditioning(CCUHsApi.getInstance());
+        
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Node;
 import a75f.io.logic.bo.building.Output;
@@ -20,6 +21,7 @@ import a75f.io.logic.bo.building.Schedulable;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.util.RxTask;
 
@@ -319,6 +321,11 @@ public class L
         if (equip.get("id") != null)
         {
             hsApi.deleteEntityTree(equip.get("id").toString());
+            
+            if(equip.containsKey(Tags.OAO) &&
+                            ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
+                ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hsApi, false);
+            }
         }
         HashMap device = hsApi.read("device and addr == \""+node+"\"");
         if (device.get("id") != null)

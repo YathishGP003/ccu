@@ -120,6 +120,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     
     private synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        updateMechanicalConditioning(CCUHsApi.getInstance());
+        
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
     
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
@@ -144,13 +146,14 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             analogMax = getConfigVal("analog1 and cooling and sat and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" SAT: "+getSystemSAT());
     
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
+            if (isCoolingLockoutActive()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp / 100)));
+                }
             }
         } else {
             signal = 0;
@@ -175,13 +178,14 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             analogMin = getConfigVal("analog3 and heating and min");
             analogMax = getConfigVal("analog3 and heating and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" HeatingSignal : "+VavSystemController.getInstance().getHeatingSignal());
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+            if (isHeatingLockoutActive()) {
+                signal = (int)(analogMin * ANALOG_SCALE);
+            } else {
+                if (analogMax > analogMin) {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+                }
             }
             
         } else {
@@ -364,8 +368,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
         status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ": "");
-        status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
-        status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive())? " | Cooling ON ":"");
+        status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive())? " | Heating ON ":"");
         
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");

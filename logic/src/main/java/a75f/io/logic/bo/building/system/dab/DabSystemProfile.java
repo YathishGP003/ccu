@@ -293,7 +293,6 @@ public abstract class DabSystemProfile extends SystemProfile
         }
     }
     
-    
     protected void addUserIntentPoints(String equipref)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

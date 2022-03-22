@@ -102,6 +102,10 @@ data class AlertSyncDto(
    val ccuName: String,
    val equipId: String?,
    val equipName: String?,
+   val floorId: String?,
+   val floorName: String?,
+   val zoneId: String?,
+   val zoneName: String?,
    val startTime: Long,
    val endTime: Long,
    val mTitle: String,
@@ -117,9 +121,9 @@ data class AlertSyncDto(
       @JvmStatic
       fun fromAlert(alert: Alert): AlertSyncDto {
          with(alert) {
-            // we can/should take the placeholder out once Madhu updates server.
+
             return AlertSyncDto(alertDefId,
-               siteIdNoAt, siteName, ccuIdNoAt, ccuName, equipId, equipName,
+               siteIdNoAt, siteName, ccuIdNoAt, ccuName, equipId, equipName, floorId, floorName, zoneId, zoneName,
                startTime, endTime,
                mTitle, mAlertType, mSeverity.name, mMessage, mNotificationMsg,
                mEnabled, isFixed)

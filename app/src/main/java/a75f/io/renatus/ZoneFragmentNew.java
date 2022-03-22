@@ -3679,20 +3679,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
 
         }
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        conditioningModeSpinner.setAdapter(conModeAdapter);
-        conditioningModeSpinner.setSelection(conditionMode, false);
-
-
+        try {
+            conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            conditioningModeSpinner.setAdapter(conModeAdapter);
+            conditioningModeSpinner.setSelection(conditionMode, false);
+        }catch (Exception e){
+            Log.i(L.TAG_CCU_ZONE, "Exception while setting condition ode: "+e.getMessage()+ " Con Mode "+fanMode);
+            e.printStackTrace();
+        }
+        
         int fanSpinnerSelectionValues =
                 RelayUtil.getFanOptionByLevel((Integer)cpuEquipPoints.get(HSZoneStatus.FAN_LEVEL.name()));
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(),fanSpinnerSelectionValues, R.layout.spinner_zone_item);
 
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        fanModeSpinner.setAdapter(fanModeAdapter);
-        fanModeSpinner.setSelection(fanMode, false);
-
+        try {
+            fanModeSpinner.setAdapter(fanModeAdapter);
+            fanModeSpinner.setSelection(fanMode, false);
+        }catch (Exception e){
+            Log.i(L.TAG_CCU_ZONE, "Exception while setting fan ode: "+e.getMessage()+ " fan Mode "+fanMode);
+            e.printStackTrace();
+        }
         setSpinnerListenerForHyperstat(conditioningModeSpinner,HSZoneStatus.CONDITIONING_MODE,equipId,conditionMode, nodeAddress);
         setSpinnerListenerForHyperstat(fanModeSpinner,HSZoneStatus.FAN_MODE,equipId,fanMode, nodeAddress);
 

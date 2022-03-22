@@ -25,6 +25,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import java.lang.IllegalArgumentException
 import a75f.io.api.haystack.HSUtil
+import a75f.io.logic.bo.building.hvac.AnalogOutput
 import org.joda.time.DateTime
 
 
@@ -49,6 +50,7 @@ class HyperStatScheduler {
             equipId: String,
             state: ZoneState,
             portStages: HashMap<String, Int>,
+            analogOutStages: HashMap<String, Int>,
             temperatureState: ZoneTempState
         ) {
             var status: String
@@ -138,6 +140,39 @@ class HyperStatScheduler {
                 }
 
             }
+
+            if(analogOutStages.isNotEmpty()){
+                if (status == "OFF " || status.isBlank()) status = "" else status += ", "
+
+                if(analogOutStages.containsKey(AnalogOutput.COOLING.name))
+                    status += "Cooling Analog ON"
+
+                if(analogOutStages.containsKey(AnalogOutput.HEATING.name)) {
+                    if(status.isNotBlank()
+                        && (status[status.length-2]!=',')
+                        && (status[status.length-2]!='|'))
+                        status += " | "
+                    status += "Heating Analog ON"
+                }
+
+                if(analogOutStages.containsKey(AnalogOutput.FAN_SPEED.name)) {
+                    if(status.isNotBlank()
+                        && (status[status.length-2]!=',')
+                        && (status[status.length-2]!='|'))
+                        status += " | "
+                    status += "Fan Analog ON"
+                }
+
+                if(analogOutStages.containsKey(AnalogOutput.DCV_DAMPER.name)) {
+                    if(status.isNotBlank()
+                        && (status[status.length-2]!=',')
+                        && (status[status.length-2]!='|'))
+                        status += " | "
+                    status += "DCV Analog ON"
+                }
+
+            }
+
 
             if (getHyperstatStatusString(equipId) != status) {
                 if (hyperstatStatus.containsKey(equipId)) hyperstatStatus.remove(

@@ -39,6 +39,11 @@ public class Alert
     public @Nullable String equipId;
     public String equipName;
 
+    public @Nullable String floorId;
+    public String floorName;
+    public @Nullable String zoneId;
+    public String zoneName;
+
     //Backend guid of the alert
     public String _id;
 
@@ -219,6 +224,10 @@ public class Alert
                 ", siteName='" + siteName + '\'' +
                 ", ccuName='" + ccuName + '\'' +
                 ", equipName='" + equipName + '\'' +
+                ", floorId='" + floorId + '\'' +
+                ", floorName='" + floorName + '\'' +
+                ", zoneId='" + zoneId + '\'' +
+                ", zoneName='" + zoneName + '\'' +
                 ", ref='" + ref + '\'' +
                 ", deviceRef='" + deviceRef + '\'' +
                 '}';

@@ -1,5 +1,16 @@
 package a75f.io.logic.jobs;
 
+import static a75f.io.logic.L.TAG_CCU_JOB;
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
+import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.VACATION;
+
 import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
@@ -32,11 +43,12 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip;
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -46,17 +58,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.watchdog.WatchdogMonitor;
-
-import static a75f.io.logic.L.TAG_CCU_JOB;
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
-import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
-import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.VACATION;
 
 /*
     The scheduler needs to maintain the state of things, so it doesn't write
@@ -415,7 +416,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
+        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse")
+                                                 || equip.getMarkers().contains("hyperstat"));
         double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
 
@@ -435,8 +437,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         Log.d("ZoneSchedule","zoneStatusString = "+equip.getDisplayName()+","+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
         if (!isZoneHasStandaloneEquip
                 && (systemOccupancy == PRECONDITIONING)
-                && cachedOccupied.getVacation() == null
-                && !isZoneTempDead) {
+                && cachedOccupied.getVacation() == null) {
             return "In Preconditioning ";
         }else if(curOccupancyMode == PRECONDITIONING
                 && cachedOccupied.getVacation() == null
@@ -1165,9 +1166,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             p4FCUPoints.put("Discharge Airflow", 0 + " \u2109");
         }
         if(isCoolingOn && !isHeatingOn)
-            p4FCUPoints.put("condEnabled","Cool Only");
+            p4FCUPoints.put("condEnabled",StringConstants.COOL_ONLY);
         else if(!isCoolingOn && isHeatingOn)
-            p4FCUPoints.put("condEnabled","Heat Only");
+            p4FCUPoints.put("condEnabled",StringConstants.HEAT_ONLY);
         else if(!isCoolingOn && !isHeatingOn)
             p4FCUPoints.put("condEnabled","Off");
 
@@ -1272,10 +1273,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double conditionModePoint = hsHaystackUtil.readPointPriorityVal(
                 "zone and temp and mode and conditioning");
         Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode "+conditionModePoint);
-        int selectedFanMode = HSHaystackUtil.Companion.getSelectedConditioningMode(equipDetails.getGroup(),
+        int selectedConditioningMode = HSHaystackUtil.Companion.getSelectedConditioningMode(equipDetails.getGroup(),
                 (int)conditionModePoint);
-        Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode "+selectedFanMode);
-        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),selectedFanMode);
+        Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode "+selectedConditioningMode);
+        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),selectedConditioningMode);
 
 
         double dischargePoint = hsHaystackUtil.readHisVal(
@@ -1297,20 +1298,17 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         // Add conditioning status
         String status = "Off";
+        PossibleConditioningMode possibleConditioningMode =
+                HSHaystackUtil.Companion.getPossibleConditioningModeSettings(Integer.parseInt(equipDetails.getGroup()));
 
-        if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
-                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)) {
-            status ="Both";
+        switch (possibleConditioningMode){
+            case OFF: status ="Off"; break;
+            case BOTH: status ="Both"; break;
+            case COOLONLY: status ="Cool Only"; break;
+            case HEATONLY: status ="Heat Only"; break;
         }
-        else if(HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
-         && !HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
-            status = "Cool Only";
-        }else if(!HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config)
-                && HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config)){
-            status = "Heat Only";
-        }
+
         cpuPoints.put(HSZoneStatus.CONDITIONING_ENABLED.name(),status);
-
         cpuPoints.forEach((s, o) -> Log.i(L.TAG_CCU_HSCPU, "Config "+s+ " : "+o));
         return cpuPoints;
     }

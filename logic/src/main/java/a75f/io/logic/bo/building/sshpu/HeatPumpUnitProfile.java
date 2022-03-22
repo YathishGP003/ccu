@@ -106,6 +106,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
+                        "equipRef == \"" + hpuEquip.getId() + "\"", 0.0);
                 continue;
 
             }

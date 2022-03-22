@@ -24,9 +24,7 @@ import org.projecthaystack.HRef
 import java.util.*
 import kotlin.collections.HashMap
 import a75f.io.api.haystack.CCUHsApi
-
-
-
+import a75f.io.logic.bo.building.hvac.AnalogOutput
 
 
 /**
@@ -82,6 +80,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         logicalPointsList = equip.getLogicalPointList()
 
         val relayStages = HashMap<String, Int>()
+        val analogOutStages = HashMap<String, Int>()
         curState = ZoneState.DEADBAND
 
         if (Globals.getInstance().isTestMode) {
@@ -214,7 +213,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
         runRelayOperations(equip, config, hyperstatTuners, userIntents, basicSettings, relayStages)
 
-        runAnalogOutOperations(equip, config, basicSettings)
+        runAnalogOutOperations(equip, config, basicSettings , analogOutStages)
 
         var zoneOperatingMode = ZoneState.DEADBAND.ordinal
           if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY)
@@ -237,6 +236,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             equipId = equip.equipRef!!,
             state = curState,
             portStages = relayStages,
+            analogOutStages = analogOutStages,
             temperatureState = temperatureState
         )
         Log.i(L.TAG_CCU_HSCPU, "**********************************************")
@@ -535,16 +535,23 @@ class HyperStatCpuProfile : ZoneProfile() {
         equip: HyperStatCpuEquip,
         config: HyperStatCpuConfiguration,
         basicSettings: BasicSettings,
+        analogOutStages: HashMap<String, Int>
     ) {
 
         if (config.analogOut1State.enabled) {
-            handleAnalogOutState(config.analogOut1State, equip, config, Port.ANALOG_OUT_ONE, basicSettings)
+            handleAnalogOutState(
+                config.analogOut1State, equip, config, Port.ANALOG_OUT_ONE, basicSettings, analogOutStages
+            )
         }
         if (config.analogOut2State.enabled) {
-            handleAnalogOutState(config.analogOut2State, equip, config, Port.ANALOG_OUT_TWO, basicSettings)
+            handleAnalogOutState(
+                config.analogOut2State, equip, config, Port.ANALOG_OUT_TWO, basicSettings, analogOutStages
+            )
         }
         if (config.analogOut3State.enabled) {
-            handleAnalogOutState(config.analogOut3State, equip, config, Port.ANALOG_OUT_THREE, basicSettings)
+            handleAnalogOutState(
+                config.analogOut3State, equip, config, Port.ANALOG_OUT_THREE, basicSettings, analogOutStages
+            )
         }
     }
 
@@ -950,6 +957,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         config: HyperStatCpuConfiguration,
         port: Port,
         basicSettings: BasicSettings,
+        analogOutStages: HashMap<String, Int>
     ) {
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
@@ -958,6 +966,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
                     runForAnalogOutCooling(equip, port)
+                    dumpAnalogOutLoopStatus(coolingLoopOutput, AnalogOutput.COOLING.name, analogOutStages)
                 }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
                 }
@@ -966,6 +975,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                    dumpAnalogOutLoopStatus(heatingLoopOutput, AnalogOutput.HEATING.name, analogOutStages)
                     runForAnalogOutHeating(equip, port)
                 }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
@@ -973,14 +983,18 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-                    runForAnalogOutFanSpeed(analogOutState, equip, config, port, basicSettings)
+                    runForAnalogOutFanSpeed(analogOutState, equip, config, port, basicSettings, analogOutStages)
                 }
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
-                runForAnalogOutDCVDamper(equip, config, port)
+                runForAnalogOutDCVDamper(equip, config, port, analogOutStages)
             }
 
         }
+    }
+
+    private fun dumpAnalogOutLoopStatus(loopOutPut: Int, stage: String, analogOutStages: HashMap<String, Int> ){
+        if(loopOutPut > 0) analogOutStages[stage] = loopOutPut
     }
 
     private fun runForAnalogOutCooling(
@@ -1022,6 +1036,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         config: HyperStatCpuConfiguration,
         whichPort: Port,
         basicSettings: BasicSettings,
+        analogOutStages: HashMap<String, Int>
     ) {
 
         /**
@@ -1058,6 +1073,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
 
         }
+        if( fanLoopForAnalog > 0 ) analogOutStages[AnalogOutput.FAN_SPEED.name] = fanLoopOutput
         updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, fanLoopForAnalog.toDouble())
         Log.i(L.TAG_CCU_HSCPU, "$whichPort = Fan Speed  analogSignal   $fanLoopForAnalog")
     }
@@ -1066,6 +1082,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         equip: HyperStatCpuEquip,
         config: HyperStatCpuConfiguration,
         whichPort: Port,
+        analogOutStages: HashMap<String, Int>
     ) {
         /**
         If any of the Analog-out is enabled and associated with DCV Damper as the option, DCV Damper output signal
@@ -1090,6 +1107,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             var damperOperationPercent = (co2Value - config.zoneCO2Threshold) / config.zoneCO2DamperOpeningRate
             if(damperOperationPercent > 100 ) damperOperationPercent = 100.0
             updateLogicalPointIdValue(equip, logicalPointsList[whichPort]!!, damperOperationPercent)
+          if(damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] = damperOperationPercent.toInt()
             Log.i(L.TAG_CCU_HSCPU, "$whichPort = OutDCVDamper  analogSignal  $damperOperationPercent")
 
             }else if (co2Value < config.zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
@@ -1118,6 +1136,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             "point and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
+        equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.UNOCCUPIED.ordinal.toDouble())
 
     }
 
@@ -1299,7 +1318,6 @@ class HyperStatCpuProfile : ZoneProfile() {
                     val detectionPointId = equip.hsHaystackUtil!!.readPointID("occupancy and detection and his")
                     equip.haystack.writeHisValueByIdWithoutCOV(detectionPointId, 0.0)
                     equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.AUTOAWAY.ordinal.toDouble())
-                    //resetPresentConditioningStatus(equip)
                 }else if(currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
                     || currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal) {
                     resetOccupancy(equip)
@@ -1336,38 +1354,6 @@ class HyperStatCpuProfile : ZoneProfile() {
         return false
     }
 
-    private fun resetPresentConditioningStatus(equip: HyperStatCpuEquip) {
-
-        Log.i(L.TAG_CCU_HSCPU, "Resetting all the Present Relays and Analog outs ")
-        val logicalPointsList = equip.getLogicalPointList()
-        val presentConfiguration = equip.getConfiguration()
-
-        // Reset if any of the Relay mapped to Cooling Heating Fan Stage or Fan Enabled
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay1State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_ONE]!!)
-        }
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay2State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_TWO]!!)
-        }
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay3State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_THREE]!!)
-        }
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay4State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_FOUR]!!)
-        }
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay5State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_FIVE]!!)
-        }
-        if (HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(presentConfiguration.relay6State)) {
-            resetPoint(equip, logicalPointsList[Port.RELAY_SIX]!!)
-        }
-
-        // Reset all the analog points
-        resetPoint(equip, logicalPointsList[Port.ANALOG_OUT_ONE]!!)
-        resetPoint(equip, logicalPointsList[Port.ANALOG_OUT_TWO]!!)
-        resetPoint(equip, logicalPointsList[Port.ANALOG_OUT_THREE]!!)
-    }
-
     private fun resetPoint(equip: HyperStatCpuEquip, pointId: String) {
       equip.haystack.writeHisValById(pointId, 0.0)
     }
@@ -1379,6 +1365,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             equipId = equip.equipRef!!,
             state = ZoneState.DEADBAND,
             portStages = HashMap(),
+            analogOutStages = HashMap(),
             temperatureState = ZoneTempState.TEMP_DEAD
         )
 

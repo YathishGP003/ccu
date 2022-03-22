@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog"
+    android:elevation="12dp"
+    android:padding="35dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        tools:ignore="UseCompoundDrawables">
+
+        <TextView
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/title_enter_passcode"
+            android:textColor="@color/black"/>
+
+
+        <ImageView
+            android:id="@+id/icon_close"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="200dp"
+            android:src="@drawable/icon_close"
+            app:tint="?orange_75f"
+            android:contentDescription="@string/image_description"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/margin_right_otp"
+        android:id="@+id/ll_passcode"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <EditText
+            android:id="@+id/code1"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_right_otp"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor" />
+
+        <EditText
+            android:id="@+id/code2"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_right_otp"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor"/>
+
+        <EditText
+            android:id="@+id/code3"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_right_otp"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor"/>
+
+        <EditText
+            android:id="@+id/code4"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_right_otp"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor"/>
+
+        <EditText
+            android:id="@+id/code5"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_right_otp"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor"/>
+
+        <EditText
+            android:id="@+id/code6"
+            android:layout_width="@dimen/et_otp_width"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:autofillHints="title_enter_passcode"
+            tools:ignore="LabelFor"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@null"
+        android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+        android:drawablePadding="5dp"
+        android:fontFamily="@font/lato_bold"
+        android:text="@string/button_next"
+        android:textColor="?orange_75f"
+        android:textSize="20sp"
+        android:layout_marginStart="550dp"/>
+
+
+
+</LinearLayout>

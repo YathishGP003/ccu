@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import android.os.CountDownTimer;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -26,6 +29,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,6 +53,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+
 /**
  * Created by Mahesh on 17-07-2019.
  */
@@ -67,6 +74,15 @@ public class AboutFragment extends Fragment {
     TextView otpCountDown;
     @BindView(R.id.tvSiteId)
     TextView tvSiteId;
+
+    EditText code1;
+    EditText code2;
+    EditText code3;
+    EditText code4;
+    EditText code5;
+    EditText code6;
+    Button next;
+    String enteredPassCode;
 
     ProgressBar loading;
     private AlertDialog.Builder builder;
@@ -394,5 +410,181 @@ public class AboutFragment extends Fragment {
             otpwithSpace.append(doubleSpace);
         }
         return otpwithSpace.toString().trim();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.activateSession)
+    public void activateSession(){
+        AlertDialog alertActivateSession = new AlertDialog.Builder(getActivity()).create();
+        View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.layout_activate_session_passcode,null);
+        alertActivateSession.setView(dialogView);
+        alertActivateSession.setCancelable(false);
+        alertActivateSession.show();
+
+        code1 =  dialogView.findViewById(R.id.code1);
+        code2 =  dialogView.findViewById(R.id.code2);
+        code3 =  dialogView.findViewById(R.id.code3);
+        code4 =  dialogView.findViewById(R.id.code4);
+        code5 =  dialogView.findViewById(R.id.code5);
+        code6 =  dialogView.findViewById(R.id.code6);
+
+
+        code1.requestFocus();
+        addTextWatcher(code1);
+        addTextWatcher(code2);
+        addTextWatcher(code3);
+        addTextWatcher(code4);
+        addTextWatcher(code5);
+        addTextWatcher(code6);
+
+        ImageView imgclose= dialogView.findViewById(R.id.icon_close);
+        imgclose.setOnClickListener(view -> {
+            if( alertActivateSession.isShowing()){
+                alertActivateSession.dismiss();
+            }
+        });
+
+        next = dialogView.findViewById(R.id.buttonNext);
+
+        next.setOnClickListener(v -> {
+            enteredPassCode = code1.getText().toString() + code2.getText().toString() +
+                    code3.getText().toString() + code4.getText().toString() +
+                    code5.getText().toString() + code6.getText().toString();
+            if (enteredPassCode.length() == 6) {
+                alertActivateSession.dismiss();
+                validateBuildingPassCode(enteredPassCode);
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void validateBuildingPassCode(String enteredPassCode) {
+        ResponseCallback responseCallBack = new ResponseCallback() {
+            @Override
+            public void onSuccessResponse(JSONObject response) throws JSONException {
+                ProgressDialogUtils.hideProgressDialog();
+                if (response.getString("valid").equals("true")) {
+                    String ccuId = CCUHsApi.getInstance().getCcuId();
+                    retriveCCUDetails(ccuId);
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_msg), Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+            @Override
+            public void onErrorResponse(JSONObject response) throws JSONException {
+                ProgressDialogUtils.hideProgressDialog();
+                String errResponse = "No address associated with hostname";
+                if ((response.get("response").toString()).contains(errResponse)) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.no_internet),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_msg),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+        ProgressDialogUtils.showProgressDialog(getActivity(), getString(R.string.passcode_validation_msg));
+        new OtpManager().validateOTP(enteredPassCode, responseCallBack);
+    }
+
+
+    private void retriveCCUDetails(String ccu) {
+        AlertDialog alertInProgress = new AlertDialog.Builder(getActivity()).create();
+        View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.layout_session_inprogress,null);
+        alertInProgress.setView(dialogView);
+        alertInProgress.setCancelable(false);
+        alertInProgress.show();
+        ResponseCallback responseCallBack = new ResponseCallback() {
+            @Override
+            public void onSuccessResponse(JSONObject response) throws JSONException {
+                alertInProgress.dismiss();
+                showSuccessDailog();
+            }
+
+            @Override
+            public void onErrorResponse(JSONObject response) throws JSONException {
+                Toast.makeText(getApplicationContext(),R.string.token_error_msg,Toast.LENGTH_LONG).show();
+            }
+        };
+        new OtpManager().postBearerToken(ccu, enteredPassCode, responseCallBack);
+    }
+
+    private void showSuccessDailog() {
+        AlertDialog alertSuccess = new AlertDialog.Builder(getActivity()).create();
+        View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.layout_session_success,null);
+        Button okay = dialogView.findViewById(R.id.Okay);
+        okay.setOnClickListener(v -> alertSuccess.dismiss());
+        alertSuccess.setView(dialogView);
+        alertSuccess.setCancelable(false);
+        alertSuccess.show();
+    }
+
+
+    private void addTextWatcher(final EditText editText) {
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                 //Nothing to do
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Nothing to do
+            }
+
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public void afterTextChanged(Editable s) {
+                switch (editText.getId()) {
+                    case R.id.code1:
+                        if (editText.length() == 1) {
+                            code2.requestFocus();
+                        }
+                        break;
+                    case R.id.code2:
+                        if (editText.length() == 1) {
+                            code3.requestFocus();
+                        } else if (editText.length() == 0) {
+                            code1.requestFocus();
+                        }
+                        break;
+                    case R.id.code3:
+                        if (editText.length() == 1) {
+                            code4.requestFocus();
+                        } else if (editText.length() == 0) {
+                            code2.requestFocus();
+                        }
+                        break;
+                    case R.id.code4:
+                        if (editText.length() == 1) {
+                            code5.requestFocus();
+                        } else if (editText.length() == 0) {
+                            code3.requestFocus();
+                        }
+                        break;
+                    case R.id.code5:
+                        if (editText.length() == 1) {
+                            code6.requestFocus();
+                        } else if (editText.length() == 0) {
+                            code4.requestFocus();
+                        }
+                        break;
+                    case R.id.code6:
+                        if (editText.length() == 1) {
+                           next.setEnabled(true);
+                        } else if (editText.length() == 0) {
+                            code5.requestFocus();
+                            next.setEnabled(false);
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + editText.getId());
+                }
+            }
+        });
     }
 }

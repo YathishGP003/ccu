@@ -10,6 +10,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT;
@@ -126,6 +128,10 @@ public class SystemTuners {
                 hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
                                     "default and outsideTemp and cooling and lockout");
     
+            if (defaultCoolingLockoutTempId.isEmpty()) {
+                CcuLog.e(L.TAG_CCU_TUNER,"Default coolingLockoutTuner is empty, migration failed");
+                return outsideTempCoolingLockoutId;
+            }
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
             for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
@@ -181,6 +187,10 @@ public class SystemTuners {
                 hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
                                                           "default and outsideTemp and heating and lockout");
     
+            if (defaultCoolingLockoutTempId.isEmpty()) {
+                CcuLog.e(L.TAG_CCU_TUNER,"Default heatingLockoutTuner is empty, migration failed");
+                return outsideTempHeatingLockoutId;
+            }
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
             for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {

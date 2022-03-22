@@ -1134,4 +1134,17 @@
     <!-- Building passcode -->
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
 
+    <!-- Activate Session Passcode -->
+    <string name="title_activate_session">Activate Device Session</string>
+    <string name="title_enter_passcode">Please enter session activation passcode</string>
+    <string name="image_description">Close the dailog</string>
+    <string name="passcode_validation_msg">Validating Passcode</string>
+    <string name="error_msg">Please check the entered passcode</string>
+    <string name="validating_msg">Device session activation in progress</string>
+    <string name="token_error_msg">Failed to retrieve token</string>
+    <string name="success_msg">Device session activated successfully</string>
+    <string name="okay">OKAY</string>
+    <string name="no_internet">Please check the internet connection</string>
+
+
 </resources>

@@ -338,7 +338,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");
-        new OtpManager().postBearerToken(ccu, enteredPassCode, responseCallBack);
+        new OtpManager().postBearerToken(ccu.getCcuId(), enteredPassCode, responseCallBack);
     }
 
     private void initRestoreCCUProcess(CCU ccu) {

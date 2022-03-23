@@ -16,6 +16,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.Toast
+import a75f.io.renatus.BuildConfig
+import a75f.io.renatus.util.CCUUiUtil
+import androidx.core.view.isVisible
 
 
 const val HYPERSTAT_PROFILE_SELECTION_ID = "HyperStatProfileSelection"
@@ -78,6 +81,8 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val fourPipeCell = view.findViewById<View>(R.id.fourPipeCell)
       val vrvCell = view.findViewById<View>(R.id.vrvCell)
       val senseCell = view.findViewById<View>(R.id.hypersenseCell)
+
+      vrvCell.isVisible = BuildConfig.BUILD_TYPE == "daikin_prod" || CCUUiUtil.isDaikinThemeEnabled(context)
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
       cpuCell.setOnClickListener { showCPUConfigFragment() }

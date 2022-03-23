@@ -1357,10 +1357,10 @@ public class FloorPlanFragment extends Fragment {
 
     private void showDialogFragment(DialogFragment dialogFragment, String id) {
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        Fragment prev = getFragmentManager().findFragmentByTag(id);
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+        Fragment prev = getParentFragmentManager().findFragmentByTag(id);
         if (prev != null) {
-            ft.remove(prev);
+            getParentFragmentManager().beginTransaction().remove(prev).commitAllowingStateLoss();
         }
         ft.addToBackStack(null);
         //TODO: no broadcast recievers
@@ -1557,26 +1557,10 @@ public class FloorPlanFragment extends Fragment {
 
     //Disabling the Pair button for 2 seconds thenenabling to avoid double click on pair module
     public void disableForMiliSeconds(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
-                    Thread.sleep(delay);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addModulelt.setVisibility(View.VISIBLE);
-                            addModulelt.setEnabled(true);
-                        }
-                    });
-                }catch (Exception e){
-
-                }
-            }
-        }).start();
-
+        int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
+        new Handler(Looper.getMainLooper()).postDelayed(()->{addModulelt.setEnabled(true);addModulelt.setVisibility(View.VISIBLE);},delay);
     }
+
     private void disableModuleListForMiliSeconds(){
         int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
         new Handler(Looper.getMainLooper()).postDelayed(()->moduleListView.setEnabled(true), delay);

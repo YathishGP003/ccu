@@ -84,6 +84,19 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+    </string-array>
+
+    <string-array name="system_profile_select_daikin">
+        <item>  Default System Profile</item>
+        <item>  VAV Staged RTU </item>
+        <item>  VAV Fully Modulating AHU </item>
+        <item>  VAV Staged RTU with VFD Fan</item>
+        <item>  VAV Advanced Hybrid AHU</item>
+        <!--<item>  VAV Bacnet RTU </item>-->
+        <item>  DAB Staged RTU </item>
+        <item>  DAB Fully Modulating AHU</item>
+        <item>  DAB Staged RTU with VFD Fan</item>
+        <item>  DAB Advanced Hybrid AHU</item>
         <item>  Daikin IE RTU</item>
     </string-array>
 

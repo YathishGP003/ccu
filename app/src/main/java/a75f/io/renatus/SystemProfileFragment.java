@@ -74,7 +74,9 @@ public class SystemProfileFragment extends Fragment {
             txtHeader.setVisibility(View.VISIBLE);
         }
 
-        ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.system_profile_select, R.layout.spinner_dropdown_item);
+        ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(),
+                                                                                                  getSystemProfileArrayResource(),
+                                                                                                  R.layout.spinner_dropdown_item);
         systemProfileSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spSystemProfile.setAdapter(systemProfileSelectorAdapter);
         CCUUiUtil.setSpinnerDropDownColor(spSystemProfile,getContext());
@@ -220,4 +222,12 @@ public class SystemProfileFragment extends Fragment {
         }
         return true;
     }
+    
+    private int getSystemProfileArrayResource() {
+        if (BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
+            return R.array.system_profile_select_daikin;
+        }
+        return R.array.system_profile_select;
+    }
+    
 }

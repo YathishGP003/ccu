@@ -38,7 +38,7 @@ public class FloorUpdateHandler {
                 floor.setId(row.get("id").toString());
                 floor.setOrientation(Double.parseDouble(row.get("orientation").toString()));
                 floor.setFloorNum(Double.parseDouble(row.get("floorNum").toString()));
-                CCUHsApi.getInstance().updateFloor(floor, floor.getId());
+                CCUHsApi.getInstance().updateFloorLocally(floor, floor.getId());
             }
         }
     }

@@ -373,6 +373,11 @@ public class CCUHsApi
             syncStatusService.addUpdatedEntity(id);
         }
     }
+    
+    public void updateFloorLocally(Floor r, String id)
+    {
+        tagsDb.updateFloor(r, id);
+    }
 
     public void updateZone(Zone z, String id)
     {

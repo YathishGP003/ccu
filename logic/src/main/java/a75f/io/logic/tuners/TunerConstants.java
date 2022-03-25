@@ -161,7 +161,9 @@ public class TunerConstants
     public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
     public static final double DEFAULT_FAN_ON_CONTROL_DELAY = 1;
     public static final double DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL = 9;
-    
+    public static final double DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP = 90;
+    public static final double DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET = 20;
+
     public static final double TR_IGNORE_REQUEST = 2.0;
     public static final double TR_TIME_DELAY = 2.0;
     public static final double TR_TIME_INTERVAL = 2.0;

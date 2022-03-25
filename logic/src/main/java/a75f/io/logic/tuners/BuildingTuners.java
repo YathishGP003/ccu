@@ -2,6 +2,7 @@ package a75f.io.logic.tuners;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,15 +88,20 @@ public class BuildingTuners
     }
 
     private void checkForTunerMigration() {
+        Log.i(L.TAG_CCU_TUNER, "checkForTunerMigration: ");
         PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
         try {
             PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
             String tunerVersion = info.versionName + "." + info.versionCode;
+
+            Log.i(L.TAG_CCU_TUNER, " PreferenceUtil.getTunerVersion(): "+ PreferenceUtil.getTunerVersion()+"" +
+                    " Version "+tunerVersion);
             if (!PreferenceUtil.getTunerVersion().equals(tunerVersion)) {
                 TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
                 PreferenceUtil.setTunerVersion(tunerVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
+            Log.i(L.TAG_CCU_TUNER, "checkForTunerMigration: "+e.getLocalizedMessage());
             e.printStackTrace();
         }
     }

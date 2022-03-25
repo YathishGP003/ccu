@@ -17,7 +17,6 @@ public class ControlLoop
     int proportionalSpread = 3;
     double proportionalGain = 0.5;
     double integralGain = 0.5;
-    
     GenericPIController piController;
     
     boolean enabled;
@@ -28,7 +27,7 @@ public class ControlLoop
         piController.setProportionalGain(proportionalGain);
         piController.setMaxAllowedError(proportionalSpread);
         piController.setIntegralMaxTimeout(integralMaxTimeout);
-        
+
     }
     
     public double getLoopOutput(double sp, double cp) {
@@ -78,11 +77,16 @@ public class ControlLoop
         this.integralGain = integralGain;
         piController.setIntegralGain(integralGain);
     }
-    
+
+    public void useNegativeCumulativeError(boolean isRequired) {
+        piController.setNegativeCumulativeErrNeeded(isRequired);
+    }
     public void dump() {
         piController.dump();
     }
-    
+    public void dumpHSLogs() {
+        piController.dumpHyperstat();
+    }
     @Override
     public String toString() {
         return piController.toString();

@@ -12,6 +12,8 @@ class Queries {
         const val ANALOG3_OUT = "analog3 and out"
         const val ANALOG1_IN = "analog1 and in"
         const val ANALOG2_IN = "analog2 and in"
+        const val EQUIP_AND_TUNER = "equip and tuner"
+
     }
 
 }

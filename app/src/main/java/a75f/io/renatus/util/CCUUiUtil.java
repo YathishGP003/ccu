@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -14,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.color.MaterialColors;
 
@@ -24,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
-import androidx.appcompat.app.AlertDialog;
 
 public class CCUUiUtil {
 

@@ -153,10 +153,12 @@ class HyperStatCpuProfile : ZoneProfile() {
         if (coolingLoopOutput == 0 || heatingLoopOutput == 0)
             fanLoopOutput = 0
 
-        if (coolingLoopOutput > 0) {
+        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
             fanLoopOutput = ((coolingLoopOutput * hyperstatTuners.analogFanSpeedMultiplier.coerceAtMost(100.0)).toInt())
         }
-        if (heatingLoopOutput > 0) {
+        if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
             fanLoopOutput = (heatingLoopOutput * hyperstatTuners.analogFanSpeedMultiplier.coerceAtMost(100.0)).toInt()
         }
 
@@ -166,8 +168,8 @@ class HyperStatCpuProfile : ZoneProfile() {
          * if conditioning mode is selected to Cool only if zone asking for heating fan should be off
          * This is how fan is working in smartstat profile so followed same.
          */
-
-        validateFanLoopOutPut(basicSettings,userIntents)
+        // Will monitor 21-03-2022 Dinesh found some issue while verifying cumulative US 10079
+       // validateFanLoopOutPut(basicSettings,userIntents)
 
         equip.hsHaystackUtil!!.updateOccupancyDetection()
 

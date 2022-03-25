@@ -1,22 +1,10 @@
- - Merged PR 3344: Remove IE profile from non-daikin build
- - Merged PR 3343: Building level deadband to pick the biggest of DAB/VAV/Standalone.
- - Merged PR 3334: Saving restored ccu state into shared pref
- - Merged PR 3119: Fix for End of Pairing Land on New Pairing Screen
- - Merged PR 3388: US-10146:Removed VRV option from 75F Renatus
- - Merged PR 3260: Mechanical cooling lockout
- - Merge master
- - Merged PR 3338: 10645 - Add zone & floor details to alert
- - Merged PR 3374: 10990 - CCU : TEMP DEAD zones are going for Preconditioning
- - Merged PR 3311: 9843- CCU 30 day token expiry
- - Merged PR 3234: Analog out configurations for Fan mode and conditioning mode
- - Resolve merge conflicts
- - Merged PR 3375: Intrinsic schedule display fix to consider only system profiles
- - Remove IE profile from non-daikin build
- - Building level deadband to pick the biggest of DAB/VAV/Standalone.
- - Fix QA observations: Update coolingLockoutTuner to 50. Installer options changes to be written to System level.
- - Fix sonarqube comments
- - Merge branch 'master' into Bug/samjith/10206_mech_cooling_lockout
- - misc issues
- - Added unit tests
- - Algo and tuner implementation
- - Temperature Lockout UI development
+ - Merged PR 3446: Update floor locally on pubnub
+ - Merged PR 3321: Bug 10055: th2 physical points are read and displayed in internal portal
+ - Changed the progress message to Loading Schedule
+ - Merged PR 3356: Adding additional tuners for vav profile
+ - Merged PR 3279: -ve cumulative error for hyperst
+ - Handle crash when non-primary CCU is upgraded first
+ - Update floor locally on pubnub
+ - Bug 10055: th2 physical points are read and displayed in internal portal
+ - Bug 10055: th2 physical points are read and displayed in internal portal
+ - Bug 10055: th2 physical points are read and displayed in internal portal

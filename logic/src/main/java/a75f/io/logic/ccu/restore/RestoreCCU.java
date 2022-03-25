@@ -136,6 +136,7 @@ public class RestoreCCU {
     }
 
     public void getSystemProfileOfCCU(String ccuId, String siteCode){
+        Log.i(TAG, "Restoring system profile of CCU started");
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode);
         HGrid systemGrid = restoreCCUHsApi.getCCUSystemEquip(ahuRef);
         if (systemGrid == null){
@@ -146,9 +147,11 @@ public class RestoreCCU {
             HRow systemEquipRow = (HRow) systemGridIterator.next();
             getEquipAndPoints(systemEquipRow);
         }
+        Log.i(TAG, "Restoring system profile of CCU completed");
     }
 
     public void getCMDeviceOfCCU(String ccuId, String siteCode){
+        Log.i(TAG, "Restoring CM device is started");
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode);
         HGrid cmDeviceGrid = restoreCCUHsApi.getDevice(ahuRef);
         if(cmDeviceGrid == null){
@@ -159,9 +162,11 @@ public class RestoreCCU {
             HRow cmDeviceRow = (HRow) cmDeviceGridIterator.next();
             getDeviceAndPoints(cmDeviceRow);
         }
+        Log.i(TAG, "Restoring CM device is completed");
     }
 
     public void getDiagEquipOfCCU(String ccuId, String siteCode){
+        Log.i(TAG, "Restoring Diag equip is started");
         String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode);
         HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquip(gatewayRef);
         if(diagEquipGrid == null){
@@ -172,6 +177,7 @@ public class RestoreCCU {
             HRow diagEquipRow = (HRow) diagEquipGridIterator.next();
             getEquipAndPoints(diagEquipRow);
         }
+        Log.i(TAG, "Restoring Diag equip is completed");
     }
 
     public void getZoneEquipsOfCCU(String ccuId, String siteCode, int deviceCount,
@@ -235,8 +241,12 @@ public class RestoreCCU {
         }
     }
 
-    private EquipmentDevice getFromBox(String equipType, String name) {
+    private EquipmentDevice getFromBoxByOnEquipType(String equipType, String name) {
         return EquipsManager.getInstance().fetchProfileByEquipTypeAndName(equipType, name);
+    }
+
+    private EquipmentDevice getFromBoxByVendorAndModel(String vendor, String model) {
+        return EquipsManager.getInstance().fetchProfileByVendorAndModel(vendor, model);
     }
 
     private String getModbusName(String equipDispName, String slaveId, String modbusEquipType){
@@ -259,9 +269,16 @@ public class RestoreCCU {
         ArrayList<HashMap> mbDispPointList = CCUHsApi.getInstance().readAll("point and modbus and displayInUi and " +
                 "shortDis  and equipRef == \""+equipRow.get("id").toString()+ "\"");
         String profile =  equipRow.get("profile").toString().replace("MODBUS_","");
-        String modbusName = getModbusName(equipRow.get("dis").toString(), equipRow.get("group").toString(),
+        String modbusDisplayName = equipRow.get("dis").toString();
+        String modbusName = getModbusName(modbusDisplayName, equipRow.get("group").toString(),
                 profile);
-        EquipmentDevice modbusDevice = getFromBox(profile, modbusName);
+
+        EquipmentDevice modbusDevice = (profile.equalsIgnoreCase("DEFAULT"))?
+        getFromBoxByVendorAndModel(equipRow.get("vendor").toString(), equipRow.get("model").toString()):
+                getFromBoxByOnEquipType(profile, modbusName);
+        if(modbusDevice == null){
+            throw new NullHGridException("Error while restoring Modbus with the display name : "+modbusDisplayName);
+        }
         modbusDevice.setId(0);
         modbusDevice.setPaired(true);
         String zoneRef = equipRow.get("roomRef").toString().replace("@SYSTEM","SYSTEM");
@@ -349,6 +366,7 @@ public class RestoreCCU {
     public void syncExistingSite(String siteCode){
         Log.i(TAG, "Saving site details started");
         restoreCCUHsApi.syncExistingSite(siteCode);
+        Log.i(TAG, "Saving site details completed");
     }
 
 }

@@ -107,6 +107,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                twoPfcuDevice.setProfilePoint("occupancy and mode", Occupancy.UNOCCUPIED.ordinal());
                 continue;
 
             }

@@ -1136,6 +1136,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             "point and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
+        equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.UNOCCUPIED.ordinal.toDouble())
 
     }
 

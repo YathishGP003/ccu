@@ -212,6 +212,32 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="82dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                style="@style/title_normal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/title_activate_session" />
+
+
+            <ImageView
+                android:id="@+id/activateSession"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.40"
+                android:layout_marginEnd="-60dp"
+                app:srcCompat="@drawable/icon_arrowright" />
+
+        </LinearLayout>
+
+
     </LinearLayout>
 
 </RelativeLayout>

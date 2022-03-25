@@ -357,7 +357,8 @@ public class CCUTagsDb extends HServer {
                                   // add directory flag to change where ObjectBox puts its database files
                                   .directory(TEST_DIRECTORY)
                                   // optional: add debug flags for more detailed ObjectBox log output
-                                  .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
+                                  //.debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS)
+                                  .build();
             hisBox = boxStore.boxFor(HisItem.class);
         }
     }

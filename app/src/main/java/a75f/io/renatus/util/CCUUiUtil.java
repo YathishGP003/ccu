@@ -11,11 +11,13 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
 import com.google.android.material.color.MaterialColors;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -109,5 +111,15 @@ public class CCUUiUtil {
     public static String getCurrentCCUVersion(){
         String currentCCUVersion = BuildConfig.VERSION_NAME.replaceAll("[a-zA-Z]", "");
         return currentCCUVersion.replaceAll("_","");
+    }
+    
+    public static ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment, Context c) {
+        ArrayList<Double> list = new ArrayList<>();
+        for (double val = start;  val <= end; val += increment) {
+            list.add(val);
+        }
+        ArrayAdapter<Double> adapter = new ArrayAdapter<>(c, R.layout.spinner_dropdown_item, list);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
     }
 }

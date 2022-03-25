@@ -4,6 +4,7 @@ import java.util.GregorianCalendar;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 
 /**
@@ -36,7 +37,15 @@ public class AlertBuilder
         alert.ccuName = haystack.getCcuName();
         if (equipRef != null) {
             alert.equipId = equipRef.replaceFirst("@","");
-            alert.equipName = HSUtil.getDis(equipRef);
+
+            Equip equip = HSUtil.getEquipInfo(equipRef);
+            String zoneRef = equip.getRoomRef();
+            String floorRef = equip.getFloorRef();
+            alert.equipName = equip.getDisplayName();
+            alert.zoneId = zoneRef.replaceFirst("@","");
+            alert.zoneName = HSUtil.getDis(zoneRef);
+            alert.floorId = floorRef.replaceFirst("@","");
+            alert.floorName = HSUtil.getDis(floorRef);
         }
         return alert;
     }

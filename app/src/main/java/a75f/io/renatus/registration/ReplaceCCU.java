@@ -34,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,6 +70,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private String enteredPassCode;
     private View toastFail;
     private View toastCcuRestoreSuccess;
+    private static final String TAG= "CCU_REPLACE";
 
     public ReplaceCCU() {
         // Required empty public constructor
@@ -295,18 +297,18 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                 }
                                 catch(NullHGridException nullHGridException){
                                     success.set(false);
-                                    Log.i("Replace CCU", nullHGridException.getMessage());
+                                    Log.i(TAG, nullHGridException.getMessage());
                                     nullHGridException.printStackTrace();
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            ProgressDialogUtils.hideProgressDialog();
                                             replaceCCUErrorDailog = new AlertDialog.Builder(getContext()).create();
                                             replaceCCUErrorDailog.setTitle("Error occurred while replacing "+ ccu.getName());
-                                            replaceCCUErrorDailog.setMessage( "Please check your wifi connection,  " +
-                                                    "delete Renatus data and try once again.");
+                                            replaceCCUErrorDailog.setMessage( "Please check your wifi connection, and "
+                                                    + "try once again.");
                                             replaceCCUErrorDailog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialogInterface, i) -> {
-                                                ProgressDialogUtils.hideProgressDialog();
-                                                System.exit(0);
+                                                deleteRenatusData();
                                             });
                                             replaceCCUErrorDailog.setIcon(R.drawable.ic_alert);
                                             replaceCCUErrorDailog.show();
@@ -331,14 +333,26 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 toast.setView(toastFail);
                 TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
-                textView.setText(ccu.getName()+"  replace is failed. Please clear the app data and try " +
-                        "once again");
+                textView.setText(ccu.getName()+"  replace is failed. Please try again");
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
+                deleteRenatusData();
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");
-        new OtpManager().postBearerToken(ccu, enteredPassCode, responseCallBack);
+        new OtpManager().postBearerToken(ccu.getCcuId(), enteredPassCode, responseCallBack);
+    }
+
+    private void deleteRenatusData(){
+       try{
+            String packageName = getApplicationContext().getPackageName();
+            Runtime runtime = Runtime.getRuntime();
+            runtime.exec("pm clear "+packageName);
+        }
+        catch (IOException exception){
+            Log.i(TAG, exception.getMessage());
+            exception.printStackTrace();
+        }
     }
 
     private void initRestoreCCUProcess(CCU ccu) {
@@ -367,6 +381,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         restoreCCU.getModbusSystemEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getZoneEquipsOfCCU(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getOAOEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
+        L.saveCCUState();
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){

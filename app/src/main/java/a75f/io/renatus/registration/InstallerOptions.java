@@ -10,8 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -32,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.renovo.bacnet4j.LocalDevice;
 import com.renovo.bacnet4j.service.unconfirmed.IAmRequest;
 import com.renovo.bacnet4j.service.unconfirmed.WhoIsRequest;
@@ -54,6 +53,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BuildConfig;
@@ -62,8 +62,10 @@ import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
+import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
@@ -119,6 +121,19 @@ public class InstallerOptions extends Fragment {
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
+    
+    private ToggleButton toggleCoolingLockout;
+    private ToggleButton toggleHeatingLockout;
+    private TextView textCoolingLockoutTemp;
+    private Spinner spinnerCoolingLockoutTemp;
+    private TextView textHeatingLockoutTemp;
+    private Spinner spinnerHeatingLockoutTemp;
+    
+    private TextView textCoolingLockout;
+    private TextView textUseCoolingLockoutDesc;
+    private TextView textHeatingLockout;
+    private TextView textHeatingLockoutDesc;
+    
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -208,6 +223,19 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
+        
+        toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
+        toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
+        textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
+        spinnerCoolingLockoutTemp = rootView.findViewById(R.id.spinnerCoolingLockoutTemp);
+        textHeatingLockoutTemp = rootView.findViewById(R.id.textHeatingLockoutTemp);
+        spinnerHeatingLockoutTemp = rootView.findViewById(R.id.spinnerHeatingLockoutTemp);
+        textCoolingLockout = rootView.findViewById(R.id.textCoolingLockout);
+        textUseCoolingLockoutDesc = rootView.findViewById(R.id.textUseCoolingLockoutDesc);
+        textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
+        textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
+        
+        initializeTempLockoutUI(CCUHsApi.getInstance());
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
 
@@ -453,6 +481,102 @@ public class InstallerOptions extends Fragment {
         editSubnet.setEnabled(false);
         buttonSendIAM.setEnabled(true);
         buttonSendIAM.setVisibility(View.GONE);
+    }
+    
+    private void hideTempLockoutUI() {
+        toggleCoolingLockout.setVisibility(View.GONE);
+        toggleHeatingLockout.setVisibility(View.GONE);
+        textCoolingLockoutTemp.setVisibility(View.GONE);
+        spinnerCoolingLockoutTemp.setVisibility(View.GONE);
+        textHeatingLockoutTemp.setVisibility(View.GONE);
+        spinnerHeatingLockoutTemp.setVisibility(View.GONE);
+        textCoolingLockout.setVisibility(View.GONE);
+        textUseCoolingLockoutDesc.setVisibility(View.GONE);
+        textHeatingLockout.setVisibility(View.GONE);
+        textHeatingLockoutDesc.setVisibility(View.GONE);
+    }
+    private void initializeTempLockoutUI(CCUHsApi hayStack) {
+        
+        if (ccu().systemProfile == null || ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+            hideTempLockoutUI();
+            return;
+        }
+        
+        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
+        spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
+        spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(ccu().systemProfile.getCoolingLockoutVal()),
+                                                                                                        false);
+    
+        spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+                //Not handled
+            }
+        });
+        
+        ArrayAdapter<Double> heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+        spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
+        spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(ccu().systemProfile.getHeatingLockoutVal())
+                                                                                                        , false);
+        spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setHeatingLockoutVal(hayStack,
+                                     Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+                //Not handled
+            }
+        });
+        boolean coolingLockoutConfig = ccu().systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack);
+        toggleCoolingLockout.setChecked(coolingLockoutConfig);
+        updateCoolingLockoutUIVisibility(coolingLockoutConfig);
+        
+        toggleCoolingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, isChecked);
+            updateCoolingLockoutUIVisibility(isChecked);
+        });
+    
+        boolean heatingLockoutConfig = ccu().systemProfile.isOutsideTempHeatingLockoutEnabled(hayStack);
+        toggleHeatingLockout.setChecked(heatingLockoutConfig);
+        updateHeatingLockoutUIVisibility(heatingLockoutConfig);
+        
+        toggleHeatingLockout.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ccu().systemProfile.setOutsideTempHeatingLockoutEnabled(hayStack, isChecked);
+            updateHeatingLockoutUIVisibility(isChecked);
+        });
+    }
+    
+    private void updateCoolingLockoutUIVisibility(boolean isVisible) {
+        textCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+        spinnerCoolingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+    }
+    
+    private void updateHeatingLockoutUIVisibility(boolean isVisible) {
+        textHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+        spinnerHeatingLockoutTemp.setVisibility(isVisible ? View.VISIBLE:View.GONE);
+    }
+    
+    private void setCoolingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> coolingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                                                                          "and cooling and lockout and equipRef ==\""
+                                                                          +ccu().systemProfile.getSystemEquipRef()+"\"");
+        if (!coolingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
+                                                                       HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
+    }
+    
+    private void setHeatingLockoutVal(CCUHsApi hayStack, double val) {
+        HashMap<Object, Object> heatingLockoutPoint = hayStack.readEntity("point and tuner and outsideTemp " +
+                                                                          "and heating and lockout and equipRef ==\""
+                                                                          +ccu().systemProfile.getSystemEquipRef()+"\"");
+        
+        if (!heatingLockoutPoint.isEmpty()) {
+            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
+                                                                            HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
+        }
     }
 
     public void startBACnetDevice(){

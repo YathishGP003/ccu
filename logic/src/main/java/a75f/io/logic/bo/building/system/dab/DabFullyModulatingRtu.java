@@ -97,6 +97,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     private synchronized void updateSystemPoints() {
         
         updateOutsideWeatherParams();
+        updateMechanicalConditioning(CCUHsApi.getInstance());
         
         DabSystemController dabSystem = DabSystemController.getInstance();
         
@@ -146,8 +147,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
         status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
-        status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
-        status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
+        status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? " | Heating ON ":"");
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
@@ -275,8 +276,14 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             double analogMin = getConfigVal("analog1 and cooling and min");
             double analogMax = getConfigVal("analog1 and cooling and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemCoolingLoop : "+systemCoolingLoopOp);
-            signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+    
+            if (isCoolingLockoutActive()) {
+                signal = analogMin * ANALOG_SCALE;
+            } else {
+                signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+            }
         }
+        
         if (signal != getCmdSignal("cooling")) {
             setCmdSignal("cooling", signal);
         }
@@ -350,7 +357,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             double analogMax = getConfigVal("analog3 and heating and max");
         
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoop : "+systemHeatingLoopOp);
-            signal = getModulatedAnalogVal(analogMin, analogMax, systemHeatingLoopOp);
+    
+            if (isHeatingLockoutActive()) {
+                signal = analogMin * ANALOG_SCALE;
+            } else {
+                signal = getModulatedAnalogVal(analogMin, analogMax, systemHeatingLoopOp);
+            }
         }
         
         if (signal != getCmdSignal("heating")) {
@@ -381,7 +393,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog4Min: "+analogMin+" analog4Max: "+analogMax+
                                        " systemCoolingLoopOp : "+systemCoolingLoopOp + " systemCo2LoopOp : "+systemCo2LoopOp);
-            signal = getModulatedAnalogVal(analogMin, analogMax, loopType == 0 ? systemCoolingLoopOp : systemCo2LoopOp);
+            if (loopType == 0 && isCoolingLockoutActive()) {
+                signal = analogMin * ANALOG_SCALE;
+            } else {
+                signal = getModulatedAnalogVal(analogMin, analogMax,
+                                               loopType == 0 ? systemCoolingLoopOp : systemCo2LoopOp);
+            }
         }
     
         if (signal != getCmdSignal(loopTag)) {

@@ -1,11 +1,18 @@
 package a75f.io.logic.tuners;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+
+import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
+import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT;
 
 public class SystemTuners {
     
@@ -74,5 +81,116 @@ public class SystemTuners {
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         BuildingTunerUtil.copyFromBuildingTuner(iTimeoutId, TunerUtil.getQueryString(integralTimeout), hayStack);
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
+    }
+    
+    
+    private static String addCoolingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
+                                              String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+        Point.Builder outsideTempCoolingLockout  =
+            new Point.Builder().setDisplayName(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempCoolingLockout")
+                               .setSiteRef(siteRef)
+                               .setEquipRef(equipRef)
+                               .setHisInterpolate("cov")
+                               .addMarker(Tags.TUNER).addMarker(tunerTypeTag)
+                               .addMarker(Tags.WRITABLE).addMarker(Tags.HIS)
+                               .addMarker(Tags.OUTSIDE_TEMP).addMarker(Tags.COOLING)
+                               .addMarker(Tags.LOCKOUT).addMarker(Tags.SP)
+                               .setMinVal("0")
+                               .setMaxVal("70")
+                               .setIncrementVal("1")
+                               .setUnit("\u00B0F")
+                               .setTunerGroup(tunerTypeTag.toUpperCase())
+                               .setTz(tz);
+    
+        if (isDefault) {
+            outsideTempCoolingLockout.addMarker(Tags.DEFAULT);
+        } else {
+            outsideTempCoolingLockout.addMarker(Tags.SYSTEM);
+        }
+        return hayStack.addPoint(outsideTempCoolingLockout.build());
+    }
+    
+    public static String createCoolingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
+                                                     String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+        
+        
+        String outsideTempCoolingLockoutId = addCoolingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis,
+                                                                        tz,tunerTypeTag, isDefault);
+        if (isDefault) {
+            hayStack.writePointForCcuUser(outsideTempCoolingLockoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                          OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
+            hayStack.writeHisValById(outsideTempCoolingLockoutId, OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+        } else {
+    
+            HashMap<Object, Object> defaultCoolingLockoutTempId =
+                hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
+                                    "default and outsideTemp and cooling and lockout");
+    
+            ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
+                hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
+            for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(outsideTempCoolingLockoutId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(outsideTempCoolingLockoutId, HSUtil.getPriorityVal(outsideTempCoolingLockoutId));
+        }
+        
+        return outsideTempCoolingLockoutId;
+    }
+    
+    private static String addHeatingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
+                                                     String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+        Point.Builder outsideTempHeatingLockout  =
+            new Point.Builder().setDisplayName(equipDis + "-"+tunerTypeTag.toUpperCase()+"-" + "outsideTempHeatingLockout")
+                               .setSiteRef(siteRef)
+                               .setEquipRef(equipRef)
+                               .setHisInterpolate("cov")
+                               .addMarker(Tags.TUNER).addMarker(tunerTypeTag)
+                               .addMarker(Tags.WRITABLE).addMarker(Tags.HIS)
+                               .addMarker(Tags.OUTSIDE_TEMP).addMarker(Tags.HEATING)
+                               .addMarker(Tags.LOCKOUT).addMarker(Tags.SP)
+                               .setMinVal("50")
+                               .setMaxVal("100")
+                               .setIncrementVal("1")
+                               .setUnit("\u00B0F")
+                               .setTunerGroup(tunerTypeTag.toUpperCase())
+                               .setTz(tz);
+    
+        if (isDefault) {
+            outsideTempHeatingLockout.addMarker(Tags.DEFAULT);
+        } else {
+            outsideTempHeatingLockout.addMarker(Tags.SYSTEM);
+        }
+        return hayStack.addPoint(outsideTempHeatingLockout.build());
+    }
+    
+    public static String createHeatingTempLockoutPoint(CCUHsApi hayStack, String siteRef, String equipRef,
+                                                     String equipDis, String tz, String tunerTypeTag, boolean isDefault) {
+        
+        
+        String outsideTempHeatingLockoutId = addHeatingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis,
+                                                                        tz,tunerTypeTag, isDefault);
+        if (isDefault) {
+            hayStack.writePointForCcuUser(outsideTempHeatingLockoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                          OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
+            hayStack.writeHisValById(outsideTempHeatingLockoutId, OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        } else {
+            HashMap<Object, Object> defaultCoolingLockoutTempId =
+                hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
+                                                          "default and outsideTemp and heating and lockout");
+    
+            ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
+                hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
+            for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(outsideTempHeatingLockoutId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(outsideTempHeatingLockoutId, HSUtil.getPriorityVal(outsideTempHeatingLockoutId));
+        }
+        return outsideTempHeatingLockoutId;
     }
 }

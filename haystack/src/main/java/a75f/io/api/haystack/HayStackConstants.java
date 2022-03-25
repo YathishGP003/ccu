@@ -12,6 +12,7 @@ public class HayStackConstants
     public static final int CCU_USER_WRITE_LEVEL = 8;
     public static final int FORCE_OVERRIDE_LEVEL = 4;
     public static final int USER_APP_WRITE_LEVEL = 10;
+    public static final int SYSTEM_POINT_LEVEL = 14;
     public static final String PASS = "Password";
     public static final String USER = "User";
     public static final String ID = "id";

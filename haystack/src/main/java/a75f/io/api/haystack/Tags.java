@@ -99,7 +99,6 @@ public class Tags
     public static final String SENSE = "sense";
     public static final String BPOS = "bpos";
     public static final String PLC = "pid";
-
     
     public static final String MULTI_ZONE = "multiZone";
     public static final String VRV = "vrv";
@@ -109,6 +108,9 @@ public class Tags
     public static final String PRIMARY = "primary";
     public static final String SECONDARY = "secondary";
     public static final String SETTING = "setting";
+
+    public static final String OUTSIDE_TEMP = "outsideTemp";
+    public static final String LOCKOUT = "lockout";
     public static final String CLOUD = "cloud";
 
     public static final String DAY = "day";
@@ -118,5 +120,4 @@ public class Tags
     public static final String ETMM = "etmm";
     public static final String COOLVAL = "coolVal";
     public static final String HEATVAL = "heatVal";
-
 }

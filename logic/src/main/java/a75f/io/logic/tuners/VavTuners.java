@@ -737,6 +737,9 @@ public class VavTuners {
         hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                       DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
         hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
+    
+        SystemTuners.createCoolingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis, tz, Tags.VAV, true);
+        SystemTuners.createHeatingTempLockoutPoint(hayStack, siteRef, equipRef, equipDis, tz, Tags.VAV, true);
     }
     
     public static void addVavEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,

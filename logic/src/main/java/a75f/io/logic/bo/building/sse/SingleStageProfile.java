@@ -106,7 +106,8 @@ public class SingleStageProfile extends ZoneProfile
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + sseEquip.nodeAddr + "\"", "Zone Temp Dead");
-
+                CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
+                        "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
             }
             return;
         }

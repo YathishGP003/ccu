@@ -416,7 +416,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
+        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse")
+                                                 || equip.getMarkers().contains("hyperstat"));
         double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
 
@@ -436,8 +437,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         Log.d("ZoneSchedule","zoneStatusString = "+equip.getDisplayName()+","+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
         if (!isZoneHasStandaloneEquip
                 && (systemOccupancy == PRECONDITIONING)
-                && cachedOccupied.getVacation() == null
-                && !isZoneTempDead) {
+                && cachedOccupied.getVacation() == null) {
             return "In Preconditioning ";
         }else if(curOccupancyMode == PRECONDITIONING
                 && cachedOccupied.getVacation() == null

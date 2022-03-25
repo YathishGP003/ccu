@@ -94,5 +94,8 @@ public class EquipsManager
     public EquipmentDevice fetchProfileByEquipTypeAndName(String equipType, String name){
         return processor.getEquipByEquipTypeAndName(equipType, name);
     }
+    public EquipmentDevice fetchProfileByVendorAndModel(String vendor, String model){
+        return processor.getEquipByVendorAndModel(vendor, model);
+    }
 }
 

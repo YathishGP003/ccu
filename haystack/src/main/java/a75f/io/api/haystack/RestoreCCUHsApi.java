@@ -45,7 +45,7 @@ public class RestoreCCUHsApi {
     private HisSyncHandler hisSyncHandler;
     private CCUHsApi ccuHsApi;
 
-    public static final String TAG = RestoreCCUHsApi.class.getSimpleName();
+    public static final String TAG = "CCU_REPLACE";
 
     public static RestoreCCUHsApi getInstance() {
         if (instance == null) {
@@ -473,7 +473,8 @@ public class RestoreCCUHsApi {
      * @param hClient
      */
     private void importBuildingSchedule(String siteId, HClient hClient){
-        HashMap currentBuildingSchedule = ccuHsApi.read("schedule and building");
+        Log.i(TAG, "Import building schedule started");
+        HashMap<Object, Object> currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and not special");
         if (!currentBuildingSchedule.isEmpty()) {
             //CCU already has a building schedule.
             CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
@@ -482,7 +483,8 @@ public class RestoreCCUHsApi {
 
         try {
             HDict buildingDict =
-                    new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                    new HDictBuilder().add("filter",
+                            "building and schedule and not special and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -501,8 +503,10 @@ public class RestoreCCUHsApi {
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
         } catch (UnknownRecException e) {
+            Log.i(TAG, "Exception occured while Importing building schedule "+e.getMessage());
             e.printStackTrace();
         }
+        Log.i(TAG, "Import building schedule completed");
     }
 
     /**
@@ -512,7 +516,7 @@ public class RestoreCCUHsApi {
      */
 
     private void importBuildingTuners(String siteId, HClient hClient) {
-        CcuLog.i(TAG, " importBuildingTuners");
+        CcuLog.i(TAG, " import BuildingTuners started");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         try {
@@ -661,8 +665,9 @@ public class RestoreCCUHsApi {
 
                         //save his data to local cache
                         HDict rec = hsClient.readById(HRef.copy(id));
-                        tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
-
+                        if(row.has("his") && NumberUtils.isCreatable(val.toString())) {
+                            tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+                        }
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
 

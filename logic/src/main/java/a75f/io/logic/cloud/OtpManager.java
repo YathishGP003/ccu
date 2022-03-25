@@ -75,7 +75,7 @@ public class OtpManager {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 CcuLog.e(TAG_CCU_OTP_BUILDING_PASSCODE, "Error while reading Building Passcode "+t.getMessage(), t);
                 try {
-                    responseCallBack.onErrorResponse(new JSONObject("{\"response\": \"ERROR\"}"));
+                    responseCallBack.onErrorResponse(new JSONObject().put("response",t.getMessage()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -206,12 +206,12 @@ public class OtpManager {
         });
     }
 
-    public void postBearerToken(CCU ccu, String buildingPassCode, ResponseCallback responseCallBack){
+    public void postBearerToken(String ccuId, String buildingPassCode, ResponseCallback responseCallBack){
         Retrofit retrofit = getRetrofitForCareTakerBaseUrl();
         Map<String, Object> reqParams = new HashMap<>();
         reqParams.put("siteCode", buildingPassCode);
         Call<ResponseBody> call =
-                retrofit.create(OtpService.class).postBearerToken(StringUtils.prependIfMissing(ccu.getCcuId(), "@"), reqParams);
+                retrofit.create(OtpService.class).postBearerToken(StringUtils.prependIfMissing(ccuId, "@"), reqParams);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

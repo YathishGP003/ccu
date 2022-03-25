@@ -176,7 +176,23 @@ public class EquipProcessor
 
     private static boolean isFirstTime = true;
     public EquipmentDevice getEquipByEquipTypeAndName(String equipType, String name){
-        if(isFirstTime) {
+        addEquipmentDevices();
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.equipType, equipType);
+        configQuery.equal(EquipmentDevice_.name, name);
+        return configQuery.build().findFirst();
+    }
+
+    public  EquipmentDevice getEquipByVendorAndModel(String vendor, String model){
+        addEquipmentDevices();
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.vendor, vendor);
+        configQuery.contains(EquipmentDevice_.modelNumbers, model);
+        return configQuery.build().findFirst();
+    }
+
+    private void addEquipmentDevices() {
+        if (isFirstTime) {
             for (EquipmentDevice equipmentDevice : equipmentDevices) {
                 addEquips(equipmentDevice);
             }
@@ -192,10 +208,6 @@ public class EquipProcessor
             }
             isFirstTime = false;
         }
-        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
-        configQuery.equal(EquipmentDevice_.equipType, equipType);
-        configQuery.equal(EquipmentDevice_.name, name);
-        return configQuery.build().findFirst();
     }
 
 }

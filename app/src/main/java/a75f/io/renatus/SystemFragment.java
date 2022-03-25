@@ -374,7 +374,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void loadIntrinsicSchedule(){
 		RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-				"Loading Intrinsic Schedule..."),
+				"Loading Schedule..."),
 				() ->
 					schedule = new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek(),
 				()-> {

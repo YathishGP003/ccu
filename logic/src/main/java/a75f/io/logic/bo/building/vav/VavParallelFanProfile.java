@@ -143,7 +143,7 @@ public class VavParallelFanProfile extends VavProfile
             
             int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
             if (conditioning == SystemController.State.COOLING) {
-                updateReheatDuringSystemCooling(heatingLoopOp);
+                updateReheatDuringSystemCooling(heatingLoopOp, vavEquip.getId());
                 loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
             } else if (conditioning == SystemController.State.HEATING) {
                 loopOp = heatingLoopOp;
@@ -203,12 +203,12 @@ public class VavParallelFanProfile extends VavProfile
         coolingLoop.setDisabled();
     }
     
-    private void updateReheatDuringSystemCooling(int loopOp) {
+    private void updateReheatDuringSystemCooling(int loopOp, String equipId) {
         
         double dischargeTemp = vavDevice.getDischargeTemp();
         double supplyAirTemp = vavDevice.getSupplyAirTemp();
-        
-        double dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * loopOp / 100;
+        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", equipId);
+        double dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
         vavDevice.setDischargeSp(dischargeSp);
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());

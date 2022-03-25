@@ -638,6 +638,23 @@ public class VavTuners {
         hayStack.writePointForCcuUser(reheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
                                       TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL, 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+
+
+        Point reheatZoneMaxDischargeTempTuner = createMaxDischargeTempTuner(true, equipDis, equipRef, null, siteRef, tz);
+        String reheatZoneMaxDischargeTempTunerId = CCUHsApi.getInstance().addPoint(reheatZoneMaxDischargeTempTuner);
+        hayStack.writePointForCcuUser(reheatZoneMaxDischargeTempTunerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and max"),0);
+        CCUHsApi.getInstance().writeHisValById(reheatZoneMaxDischargeTempTunerId, BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and max"));
+
+
+        Point reheatZoneDischargeTempOffSetTuner = createDischargeTempOffsetTuner(true, equipDis, equipRef, null,
+                siteRef, tz);
+        String reheatZoneDischargeTempOffSetTunerId = CCUHsApi.getInstance().addPoint(reheatZoneDischargeTempOffSetTuner);
+        hayStack.writePointForCcuUser(reheatZoneDischargeTempOffSetTunerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"), 0);
+        CCUHsApi.getInstance().writeHisValById(reheatZoneDischargeTempOffSetTunerId,
+                BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
+
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -978,11 +995,23 @@ public class VavTuners {
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
-        Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(false, equipdis, equipref,
-                                                                                          roomRef, siteRef, tz );
+
+        Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(false, equipdis, equipref, roomRef, siteRef, tz );
         String reheatZoneToDATMinDifferentialId = hayStack.addPoint(reheatZoneToDATMinDifferential);
         BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(reheatZoneToDATMinDifferentialId));
+
+        Point reheatZoneMaxDischargeTempTuner = createMaxDischargeTempTuner(false, equipdis, equipref,   roomRef, siteRef, tz);
+        String reheatZoneMaxDischargeTempTunerId = CCUHsApi.getInstance().addPoint(reheatZoneMaxDischargeTempTuner);
+        BuildingTunerUtil.updateTunerLevels(reheatZoneMaxDischargeTempTunerId, roomRef, hayStack);
+        hisItems.add(HSUtil.getHisItemForWritable(reheatZoneMaxDischargeTempTunerId));
+
+
+        Point reheatZoneDischargeTempOffSetTuner = createDischargeTempOffsetTuner(false, equipdis, equipref,   roomRef, siteRef, tz);
+        String reheatZoneDischargeTempOffSetTunerId = CCUHsApi.getInstance().addPoint(reheatZoneDischargeTempOffSetTuner);
+        BuildingTunerUtil.updateTunerLevels(reheatZoneDischargeTempOffSetTunerId, roomRef, hayStack);
+        hisItems.add(HSUtil.getHisItemForWritable(reheatZoneDischargeTempOffSetTunerId));
+
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     
@@ -1012,5 +1041,64 @@ public class VavTuners {
         }
         
         return reheatZoneToDATMinDifferential.build();
+    }
+
+
+    public static Point createMaxDischargeTempTuner(boolean defaultTuner, String equipDis,
+                                                                  String equipRef, String roomRef, String siteRef,
+                                                                  String tz) {
+        Point.Builder reheatZoneMaxDischargeTemp  = new Point.Builder()
+                .setDisplayName(equipDis + "-VAV-"+"reheatZoneMaxDischargeTemp")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("vav")
+                .addMarker("reheat").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("max")
+                .addMarker("writable").addMarker("sp")
+                .setMinVal("70")
+                .setMaxVal("120")
+                .setIncrementVal("1")
+                .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz);
+        if (defaultTuner) {
+            reheatZoneMaxDischargeTemp.addMarker(Tags.DEFAULT);
+        }
+
+        //roomRef is expected to be null for building tuners.
+        if (roomRef != null) {
+            reheatZoneMaxDischargeTemp.setRoomRef(roomRef);
+        }
+
+        return reheatZoneMaxDischargeTemp.build();
+    }
+
+    public static Point createDischargeTempOffsetTuner(boolean defaultTuner, String equipDis,
+                                                    String equipRef, String roomRef, String siteRef,
+                                                    String tz) {
+        Point.Builder reheatZoneMaxDischargeTempOffSet  = new Point.Builder()
+                .setDisplayName(equipDis + "-VAV-"+"reheatZoneDischargeTempOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("vav")
+                .addMarker("reheat").addMarker("discharge").addMarker("air").addMarker("temp")
+                .addMarker("temperature").addMarker("offset").addMarker("writable").addMarker("sp")
+                .setMinVal("0")
+                .setMaxVal("50")
+                .setIncrementVal("1")
+                .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz);
+        if (defaultTuner) {
+            reheatZoneMaxDischargeTempOffSet.addMarker(Tags.DEFAULT);
+        }
+
+        //roomRef is expected to be null for building tuners.
+        if (roomRef != null) {
+            reheatZoneMaxDischargeTempOffSet.setRoomRef(roomRef);
+        }
+
+        return reheatZoneMaxDischargeTempOffSet.build();
     }
 }

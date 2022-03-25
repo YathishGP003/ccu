@@ -28,6 +28,8 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
+import android.util.Log;
+
 /**
  * Created by samjithsadasivan on 8/23/18.
  */
@@ -109,7 +111,7 @@ public class VavReheatProfile extends VavProfile
                 }
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
                 if (conditioning == SystemController.State.COOLING) {
-                    updateReheatDuringSystemCooling(heatingLoopOp, roomTemp);
+                    updateReheatDuringSystemCooling(heatingLoopOp, roomTemp, vavEquip.getId());
                     loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
                 } else if (conditioning == SystemController.State.HEATING) {
                     loopOp = heatingLoopOp;
@@ -227,10 +229,13 @@ public class VavReheatProfile extends VavProfile
         coolingLoop.setDisabled();
     }
     
-    private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp) {
+    private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp, String vavEquip) {
+        Log.i(TAG, "updateReheatDuringSystemCooling: ");
+        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", vavEquip);
+        double heatingLoopOffset = TunerUtil.readTunerValByQuery("offset  and discharge and air and temp", vavEquip);
         double dischargeTemp = vavDevice.getDischargeTemp();
         double supplyAirTemp = vavDevice.getSupplyAirTemp();
-        double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
+        double datMax = (roomTemp + heatingLoopOffset) > maxDischargeTemp ? maxDischargeTemp : (roomTemp + heatingLoopOffset);
         
         if (!isSupplyAirTempValid(supplyAirTemp, dischargeTemp)) {
             CcuLog.d(L.TAG_CCU_ZONE, "updateReheatDuringSystemCooling : Invalid SAT , Use roomTemp "+roomTemp);

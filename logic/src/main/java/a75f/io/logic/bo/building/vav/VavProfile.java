@@ -36,8 +36,6 @@ import static a75f.io.logic.bo.building.ZoneState.HEATING;
 public abstract class VavProfile extends ZoneProfile {
     
     public static String TAG = VavProfile.class.getSimpleName().toUpperCase();
-    public static final int MAX_DISCHARGE_TEMP = 90;
-    public static final int HEATING_LOOP_OFFSET = 20;
     public static final int REHEAT_THRESHOLD_HEATING_LOOP = 50;
     
     public HashMap<Short, VavEquip> vavDeviceMap;

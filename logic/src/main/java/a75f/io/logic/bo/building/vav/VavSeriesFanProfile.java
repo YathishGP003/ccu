@@ -85,7 +85,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
             
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            int loopOp = getLoopOp(conditioning, roomTemp);
+            int loopOp = getLoopOp(conditioning, roomTemp,vavEquip.getId());
             
             SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
@@ -129,7 +129,7 @@ public class VavSeriesFanProfile extends VavProfile
         setDamperLimits(node, damper);
     }
     
-    private int getLoopOp(SystemController.State conditioning, double roomTemp) {
+    private int getLoopOp(SystemController.State conditioning, double roomTemp, String vavEquip) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
@@ -147,7 +147,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
             loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
             if (conditioning == VavSystemController.State.COOLING ) {
-                updateReheatDuringSystemCooling(loopOp);
+                updateReheatDuringSystemCooling(loopOp,vavEquip);
             }
         } else {
             //Zone is in deadband
@@ -207,12 +207,12 @@ public class VavSeriesFanProfile extends VavProfile
         coolingLoop.setDisabled();
     }
     
-    private void updateReheatDuringSystemCooling(int loopOp) {
+    private void updateReheatDuringSystemCooling(int loopOp, String equipId) {
         
         double dischargeTemp = vavDevice.getDischargeTemp();
         double supplyAirTemp = vavDevice.getSupplyAirTemp();
-        
-        double dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * loopOp / 100;
+        double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", equipId);
+        double dischargeSp = supplyAirTemp + (maxDischargeTemp - supplyAirTemp) * loopOp / 100;
         vavDevice.setDischargeSp(dischargeSp);
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());

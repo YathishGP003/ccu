@@ -129,9 +129,12 @@ class BuildingTunerFallback {
         tagsValMap.put("target,cumulative,damper",TunerConstants.TARGET_CUMULATIVE_DAMPER);
         tagsValMap.put("reheat,dat,differential",TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
         tagsValMap.put("adaptive,comfort,margin",TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN);
-    
+
         tagsValMap.put("outsideTemp,cooling,lockout",TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
         tagsValMap.put("outsideTemp,heating,lockout",TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+        tagsValMap.put("discharge,air,temp,max", TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
+        tagsValMap.put("discharge,air,temp,offset", TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
+
         return tagsValMap;
     }
     

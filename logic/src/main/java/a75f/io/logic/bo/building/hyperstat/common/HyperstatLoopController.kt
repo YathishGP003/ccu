@@ -20,6 +20,7 @@ class HyperstatLoopController {
         controlLoop.setIntegralGain(tuners.integralGain)
         controlLoop.setProportionalSpread(tuners.proportionalSpread.toInt())
         controlLoop.setIntegralMaxTimeout(tuners.integralMaxTimeout)
+        controlLoop.useNegativeCumulativeError(false)
     }
 
     /**
@@ -58,7 +59,7 @@ class HyperstatLoopController {
     }
 
     fun dumpLogs(){
-        heatingControlLoop.dump()
-        coolingControlLoop.dump()
+        heatingControlLoop.dumpHSLogs()
+        coolingControlLoop.dumpHSLogs()
     }
 }

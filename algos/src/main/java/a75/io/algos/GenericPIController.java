@@ -11,7 +11,7 @@ public class GenericPIController
     
     private double proportionalGain;
     private double integralGain;
-    
+    private boolean isNegativeCumulativeErrNeeded;
     
     public double proportionalError;
     public double integralError;
@@ -25,12 +25,19 @@ public class GenericPIController
     private int integralMaxTimeout;
     
     protected double controlVariable;
-    
+
+    public GenericPIController() {
+        this.isNegativeCumulativeErrNeeded = true;
+    }
+
     public void updateControlVariable(double setPoint, double controlPoint) {
         error = setPoint - controlPoint;
         applyErrorLimits();
         calculateProportionalError();
-        calculateIntegralError();
+        if (isNegativeCumulativeErrNeeded)
+            calculateIntegralError();
+        else
+            calculateIEWithoutNegativeCE();
         calculateControlVariable();
         
     }
@@ -56,9 +63,8 @@ public class GenericPIController
     public void calculateIntegralError() {
         
         integralError = limitedError * integralGain;
-        
         cumulativeError = cumulativeError + integralError/integralMaxTimeout;
-        
+
         //apply integral limits
         double integralLimit = maxAllowedError * integralGain;
         double negativeIntLimit = -1 * integralLimit;
@@ -67,7 +73,25 @@ public class GenericPIController
         cumulativeError = Math.max(cumulativeError, negativeIntLimit);
         
     }
-    
+    // Calculate the integral Error without negative Cumulative error
+    public void calculateIEWithoutNegativeCE() {
+
+    integralError = limitedError * integralGain;
+        if(cumulativeError > 0)
+            cumulativeError = cumulativeError + integralError/integralMaxTimeout;
+        else
+            cumulativeError = integralError/integralMaxTimeout;
+
+    //apply integral limits
+    double integralLimit = maxAllowedError * integralGain;
+    double negativeIntLimit = -1 * integralLimit;
+
+    cumulativeError = Math.min(cumulativeError, integralLimit);
+    cumulativeError = Math.max(cumulativeError, negativeIntLimit);
+
+}
+
+
     public void calculateControlVariable() {
         controlVariable = proportionalError + cumulativeError;
         
@@ -113,7 +137,11 @@ public class GenericPIController
     {
         this.integralMaxTimeout = integralMaxTimeout;
     }
-    
+
+    public void setNegativeCumulativeErrNeeded(boolean negativeCumulativeErrNeeded) {
+        isNegativeCumulativeErrNeeded = negativeCumulativeErrNeeded;
+    }
+
     public double getControlVariable() {
         //Log.d("VAV", "PE: " + proportionalError + ", IE : " + cumulativeError + ", CV: " + controlVariable);
         return controlVariable;
@@ -132,7 +160,11 @@ public class GenericPIController
         CcuLog.d("CCU_ZONE","PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
         " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
     }
-    
+    public void dumpHyperstat() {
+        CcuLog.d("CCU_HSCPU",
+                "PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
+                " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
+    }
     @Override
     public String toString() {
         return  "PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +

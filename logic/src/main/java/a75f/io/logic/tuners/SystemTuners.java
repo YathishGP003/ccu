@@ -10,6 +10,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT;
@@ -126,6 +128,14 @@ public class SystemTuners {
                 hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
                                     "default and outsideTemp and cooling and lockout");
     
+            if (defaultCoolingLockoutTempId.isEmpty()) {
+                //This could happen if a non-primary CCU is upgraded first.
+                CcuLog.e(L.TAG_CCU_TUNER,"Default coolingLockoutTuner is empty, migration failed");
+                hayStack.writePointForCcuUser(outsideTempCoolingLockoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                              OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT, 0);
+                hayStack.writeHisValById(outsideTempCoolingLockoutId, OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT);
+                return outsideTempCoolingLockoutId;
+            }
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
                 hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
             for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
@@ -177,12 +187,20 @@ public class SystemTuners {
                                           OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
             hayStack.writeHisValById(outsideTempHeatingLockoutId, OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
         } else {
-            HashMap<Object, Object> defaultCoolingLockoutTempId =
+            HashMap<Object, Object> defaultHatingLockoutTempId =
                 hayStack.readEntity("point and tuner and "+tunerTypeTag+" and " +
                                                           "default and outsideTemp and heating and lockout");
     
+            if (defaultHatingLockoutTempId.isEmpty()) {
+                //This could happen if a non-primary CCU is upgraded first.
+                CcuLog.e(L.TAG_CCU_TUNER,"Default heatingLockoutTuner is empty, use default val");
+                hayStack.writePointForCcuUser(outsideTempHeatingLockoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                              OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT, 0);
+                hayStack.writeHisValById(outsideTempHeatingLockoutId, OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT);
+                return outsideTempHeatingLockoutId;
+            }
             ArrayList<HashMap> defaultCoolingLockoutTempPointArr =
-                hayStack.readPoint(defaultCoolingLockoutTempId.get("id").toString());
+                hayStack.readPoint(defaultHatingLockoutTempId.get("id").toString());
             for (HashMap<Object, Object> valMap : defaultCoolingLockoutTempPointArr) {
                 if (valMap.get("val") != null) {
                     hayStack.pointWrite(HRef.copy(outsideTempHeatingLockoutId), (int) Double.parseDouble(valMap.get("level").toString()),

@@ -299,7 +299,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
 
     private void configCCULogo(){
 
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(getContext()))
+        if(CCUUiUtil.isDaikinEnvironment(getContext()))
             daikinCcu.setVisibility(View.VISIBLE);
         else
             ccu75Image.setVisibility(View.VISIBLE);

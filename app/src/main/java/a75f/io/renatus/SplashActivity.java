@@ -4,20 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import a75f.io.logger.CcuLog;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
@@ -101,7 +100,7 @@ public class SplashActivity extends AppCompatActivity {
             }
         };
         CcuLog.i("UI_PROFILING", "SplashActivity.onCreate Done");
-    
+
     }
     
     @Override
@@ -177,7 +176,7 @@ public class SplashActivity extends AppCompatActivity {
 
 
     private void configSplashLogo(){
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
+        if(CCUUiUtil.isDaikinEnvironment(this))
             daikinSplash.setVisibility(View.VISIBLE);
         else
             splashLogo75f.setVisibility(View.VISIBLE);

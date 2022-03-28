@@ -55,13 +55,10 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 
 	private void configLogo(){
 		ImageView logo = findViewById(R.id.logo);
-		if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(this)){
+		if(CCUUiUtil.isDaikinEnvironment(this))
 			logo.setImageDrawable(getResources().getDrawable(R.drawable.d3));
-
-		}else{
+		else
 			logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
-
-		}
 
 	}
 }

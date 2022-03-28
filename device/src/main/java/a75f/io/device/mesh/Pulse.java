@@ -86,7 +86,8 @@ public class Pulse
 			mTimeSinceCMDead = 0;
 			HashMap ccu = CCUHsApi.getInstance().read("ccu");
 			String ccuName = ccu.get("dis").toString();
-			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to be serviced. Please contact 75F support for assistance.");
+			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to " +
+					"be serviced. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 		}
 	}
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
@@ -118,7 +119,8 @@ public class Pulse
 					mDeviceLowSignalAlert.put(nodeAddr,true);
 					HashMap ccu = CCUHsApi.getInstance().read("ccu");
 					String ccuName = ccu.get("dis").toString();
-					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, "For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL,
+							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 				}
 			} else {
 				mDeviceLowSignalCount.remove(nodeAddr);
@@ -682,7 +684,9 @@ public class Pulse
 					mDeviceLowSignalAlert.put(nodeAddr,true);
 					HashMap ccu = CCUHsApi.getInstance().read("ccu");
 					String ccuName = ccu.get("dis").toString();
-					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, "For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL,
+							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has " +
+									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 				}
 			} else {
 				mDeviceLowSignalCount.remove(nodeAddr);
@@ -1255,7 +1259,8 @@ public class Pulse
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
 
-				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
+				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
+						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 				 mDeviceUpdate.remove(address);
 				 break;
 			 } else {

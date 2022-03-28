@@ -243,7 +243,7 @@ public class InstallerOptions extends Fragment {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
 
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
+        if(CCUUiUtil.isDaikinEnvironment(getContext()))
         {
             textBacnetEnable.setVisibility(View.GONE);
             toggleBACnet.setVisibility(View.GONE);

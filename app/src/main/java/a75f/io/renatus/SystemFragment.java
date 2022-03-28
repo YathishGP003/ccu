@@ -1092,7 +1092,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void configWatermark(){
-		if(!BuildConfig.BUILD_TYPE.equals("daikin_prod")&&! CCUUiUtil.isDaikinThemeEnabled(getContext()))
+		if(!CCUUiUtil.isDaikinEnvironment(getContext()))
 			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
 
 	}

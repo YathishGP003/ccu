@@ -149,7 +149,7 @@ public class DabSystemController extends SystemController
         } else {
             handleOperationalChangeOver();
         }
-    
+        updateWeightedAverageConditioningLoad();
         writeAlgoVariablesToDb();
         updateLoopOpSignals();
         
@@ -421,7 +421,10 @@ public class DabSystemController extends SystemController
             heatingSignal = 0;
             piController.reset();
         }
+    }
     
+    private void updateWeightedAverageConditioningLoad() {
+        
         if (systemState == COOLING) {
             weightedAverageCoolingLoadPostML = weightedAverageCoolingLoadSum/prioritySum;
         } else {

@@ -1,6 +1,7 @@
 # CCU
-Central Control Unit (CCU) is at the core of 75F platform. It is responsible for registration of new Sites, commissioning of new modules, aggregation of sensor data and controlling the building, triggering alerts, syncing building data to cloud etc. It is primarily a Java project with few android/kotlin modules.
 ---
+Central Control Unit (CCU) is at the core of 75F platform. It is responsible for registration of new Sites, commissioning of new modules, aggregation of sensor data and controlling the building, triggering alerts, syncing building data to cloud etc. It is primarily a Java project with few android/kotlin modules.
+
 
 <details open="open">
    <summary>Table of Contents</summary>
@@ -9,11 +10,8 @@ Central Control Unit (CCU) is at the core of 75F platform. It is responsible for
       <li><a href=“#build-apk”>Building apk</a></li>
       <li><a href=“#connect-ccu“>Connecting to CCU</a></li>
       <li><a href=“#installation”>Installation</a> </li>
-    
-      <li><a href="#testing">Testing</a></li>
-      <ul>
-         <li><a href=“#android-studio”>Android Studio</a></li>
-      </ul>
+      <li><a href=“#testing”>Testing</a> </li>
+      <li><a href=“#more-info>More Info</a> </li>
    </ol>
 </details>
 
@@ -49,12 +47,12 @@ Easiest Option to build is to select the appropriate build variant from Android 
 
 If you choose to build from terminal , here are commands for various builds.
 
-> ./gradlew assembleLocal
-> ./gradlew assembleDev
-> ./gradlew assembleQA
-> ./gradlew assembleStaging
-> ./gradlew assembleProd
-> ./gradlew assembleDaikinProd
+* ./gradlew assembleLocal
+* ./gradlew assembleDev
+* ./gradlew assembleQA
+* ./gradlew assembleStaging
+* ./gradlew assembleProd
+* ./gradlew assembleDaikinProd
 
 
 ##  Connectioning to CCU
@@ -106,7 +104,12 @@ Install command installs application into the data partition.
 ## Testing
 
 ---
-
-### Android Studio
 Right-click the `ccu` source or test directory in the project tree and select the "Run Tests ..." Option
 
+
+
+## More Info
+
+More information about CCU project can be found at our internal wiki.
+https://dev.azure.com/75fdevelopment/75F%20Engineering/_wiki/wikis/75F-Engineering.wiki/144/CCU
+ 

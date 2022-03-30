@@ -615,7 +615,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void refreshScreen() {
 		if(getActivity() != null) {
-			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
+			getActivity().runOnUiThread(this::updateUI);
 		}
 	}
 

@@ -3,6 +3,8 @@ package a75f.io.logic.bo.building.sensors;
 import java.util.ArrayList;
 import java.util.List;
 
+import a75f.io.logic.bo.building.definitions.Consts;
+
 /**
  * Class the provides singleton access to all all the supported sensor types.
  * SensorList is iterated every minute to parse inputs or update measurements received. The list created once and
@@ -134,7 +136,7 @@ public class SensorManager {
         nativeSensors.add(new NativeSensor("Native-CO", "ppm", 0, 100, 1, SensorType.CO));
         nativeSensors.add(new NativeSensor("Native-NO", "ppm", 0, 5, 0.1, SensorType.NO));
         nativeSensors.add(new NativeSensor("Native-VOC", "ppb", 0, 60000, 1000, SensorType.VOC));
-        nativeSensors.add(new NativeSensor("Native-Pressure", "inches wc", 0, 2, 0.1, SensorType.PRESSURE));
+        nativeSensors.add(new NativeSensor("Native-Pressure", Consts.PRESSURE_UNIT, 0, 2, 0.1, SensorType.PRESSURE));
         nativeSensors.add(new NativeSensor("Native-Sound", "dB", 0, 140, 1, SensorType.SOUND));
         nativeSensors.add(new NativeSensor("Native-Occupancy", "", 0, 1, 1, SensorType.OCCUPANCY));
         nativeSensors.add(new NativeSensor("Native-Illuminance", "lux", 0, 2000, 10, SensorType.ILLUMINANCE));
@@ -173,8 +175,8 @@ public class SensorManager {
         externalSensors = new ArrayList<>();
     
         externalSensors.add(new Sensor("Generic (0-10)","V", 0, 10,0,10,0.1));
-        externalSensors.add(new Sensor("Pressure Sensor (0-2)","inches wc",0,10,0,2,0.1));
-        externalSensors.add(new Sensor("Differential Pressure Sensor (0-0.25)","inches wc",0,10,-0.25,0.25,0.01));
+        externalSensors.add(new Sensor("Pressure Sensor (0-2)",Consts.PRESSURE_UNIT,0,10,0,2,0.1));
+        externalSensors.add(new Sensor("Differential Pressure Sensor (0-0.25)",Consts.PRESSURE_UNIT,0,10,-0.25,0.25,0.01));
         externalSensors.add(new Sensor("Airflow Sensor (0-1000)","CFM",0,10,0,1000,10.0));
         externalSensors.add(new Sensor("Humidity (0-100)","%",0,10,0,100,1.0));
         externalSensors.add(new Sensor("CO2 (0-2000)","ppm",0,10,0,2000,100.0));

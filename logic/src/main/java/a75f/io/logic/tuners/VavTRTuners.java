@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.Consts;
 
 /**
  * Created by samjithsadasivan on 1/8/19.
@@ -253,7 +254,7 @@ public class VavTRTuners
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his")
                                   .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                  .setUnit("inch wc")
+                                  .setUnit(Consts.PRESSURE_UNIT)
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
@@ -275,7 +276,7 @@ public class VavTRTuners
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his")
                                  .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                 .setUnit("inch wc")
+                                 .setUnit(Consts.PRESSURE_UNIT)
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
@@ -297,7 +298,7 @@ public class VavTRTuners
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his")
                                  .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                 .setUnit("inch wc")
+                                 .setUnit(Consts.PRESSURE_UNIT)
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
@@ -384,7 +385,7 @@ public class VavTRTuners
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his")
                                   .setMinVal("-0.5").setMaxVal("-0.01").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                  .setUnit("inch wc")
+                                  .setUnit(Consts.PRESSURE_UNIT)
                                   .setTz(tz)
                                   .build();
         String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
@@ -406,7 +407,7 @@ public class VavTRTuners
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his")
                                  .setMinVal("0.01").setMaxVal("0.2").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                 .setUnit("inch wc")
+                                 .setUnit(Consts.PRESSURE_UNIT)
                                  .setTz(tz)
                                  .build();
         String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
@@ -428,7 +429,7 @@ public class VavTRTuners
                                     .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                     .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his")
                                     .setMinVal("0.05").setMaxVal("0.5").setIncrementVal("0.05").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                    .setUnit("inch wc")
+                                    .setUnit(Consts.PRESSURE_UNIT)
                                     .setTz(tz)
                                     .build();
         String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);

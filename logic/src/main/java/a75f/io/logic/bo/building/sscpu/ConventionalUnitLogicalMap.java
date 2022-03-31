@@ -19,6 +19,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -242,7 +243,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("inch wc")
+                .setUnit(Consts.PRESSURE_UNIT)
                 .setTz(tz)
                 .build();
         String psId = CCUHsApi.getInstance().addPoint(ps);

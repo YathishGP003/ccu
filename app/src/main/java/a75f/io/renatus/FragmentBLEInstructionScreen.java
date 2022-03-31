@@ -386,16 +386,13 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         if (mNodeType == NodeType.SMART_NODE)
         {
             title.setText(getText(R.string.title_pairsn));
-            if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
-            {
+            if(CCUUiUtil.isDaikinEnvironment(getContext())) {
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
-            }
-            else
-            {
+            } else {
                 pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
             }
-           // pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
+
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {

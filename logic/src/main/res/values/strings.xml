@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">logic</string>
+    <string name="Daikin_Environment">daikin_prod</string>
 </resources>

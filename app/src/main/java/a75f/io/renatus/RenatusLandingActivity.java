@@ -653,7 +653,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void configLogo(){
 
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(this)){
+        if(CCUUiUtil.isDaikinEnvironment(this)){
             logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.d3));
             powerbylogo.setVisibility(View.VISIBLE);
         }else{

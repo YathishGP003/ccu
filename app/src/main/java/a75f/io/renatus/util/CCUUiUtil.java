@@ -43,7 +43,7 @@ public class CCUUiUtil {
         return  context.getResources().getIdentifier("@drawable/"+name, "drawable", context.getPackageName());
     }
     public static void setThemeDetails(Activity activity){
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(activity)){
+        if(CCUUiUtil.isDaikinEnvironment(activity)){
             activity.setTheme(R.style.RenatusAppDaikinTheme);
         }
     }
@@ -112,7 +112,7 @@ public class CCUUiUtil {
         String currentCCUVersion = BuildConfig.VERSION_NAME.replaceAll("[a-zA-Z]", "");
         return currentCCUVersion.replaceAll("_","");
     }
-    
+
     public static ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment, Context c) {
         ArrayList<Double> list = new ArrayList<>();
         for (double val = start;  val <= end; val += increment) {
@@ -121,5 +121,9 @@ public class CCUUiUtil {
         ArrayAdapter<Double> adapter = new ArrayAdapter<>(c, R.layout.spinner_dropdown_item, list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
+    }
+
+    public static boolean isDaikinEnvironment(Context context){
+        return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
 }

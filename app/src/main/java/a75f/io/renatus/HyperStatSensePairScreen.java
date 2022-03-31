@@ -104,7 +104,7 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
         mProfileName = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         ButterKnife.bind(this, view);
         pairImage = view.findViewById(R.id.hyperSensePairing);
-        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext())){
+        if(CCUUiUtil.isDaikinEnvironment(getContext())){
             pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
         }
         return view;

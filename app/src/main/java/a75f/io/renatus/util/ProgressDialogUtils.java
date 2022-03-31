@@ -34,7 +34,7 @@ public class ProgressDialogUtils {
             } else {
                 tv.setVisibility(View.GONE);
             }
-            if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(context))
+            if(CCUUiUtil.isDaikinEnvironment(context))
                 gifView.setImageResource(R.drawable.daikin_loader);
             else
                 gifView.setImageResource(R.drawable.loader1);

@@ -1146,6 +1146,7 @@
 
     <!-- Building passcode -->
     <string name="label_passcode_Generate">Please enter your Building Passcode (Generated from CCU/Portal)</string>
+    <string name="Daikin_Environment">daikin_prod</string>
 
     <string name="use_outside_temp_lockout_cooling">Use Outside Temp Lockout Cooling</string>
     <string name="use_outside_temp_lockout_heating">Use Outside Temp Lockout Heating</string>

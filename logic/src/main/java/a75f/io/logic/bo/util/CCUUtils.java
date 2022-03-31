@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.util;
 
+import android.content.Context;
+
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +10,8 @@ import java.util.Map;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.logic.BuildConfig;
+import a75f.io.logic.R;
 
 /**
  * Created by Yinten on 10/11/2017.
@@ -77,5 +81,16 @@ public class CCUUtils
             }
         }
 
+    }
+
+    public static boolean isDaikinEnvironment(Context context){
+        return BuildConfig.BUILD_TYPE.equalsIgnoreCase(context.getString(R.string.Daikin_Environment));
+    }
+
+    public static String getSupportMsgContent(Context context){
+        if(isDaikinEnvironment(context))
+            return "please contact SiteLine\u2122 Customer Support.";
+        else
+            return "please contact 75F Customer Support.";
     }
 }

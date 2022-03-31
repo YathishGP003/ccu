@@ -113,8 +113,8 @@ public class DeviceUtil {
         BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
         if ((desiredTemp + coolingDeadband) > buildingTuner.getMaxCoolingUserLimit() ||
             (desiredTemp + coolingDeadband) < buildingTuner.getMinCoolingUserLimit() ||
-            (desiredTemp - heatingDeadband) > buildingTuner.getMinHeatingUserLimit() ||
-            (desiredTemp - heatingDeadband < buildingTuner.getMaxHeatingUserLimit())) {
+            (desiredTemp - heatingDeadband) < buildingTuner.getMinHeatingUserLimit() ||
+            (desiredTemp - heatingDeadband > buildingTuner.getMaxHeatingUserLimit())) {
             CcuLog.d(L.TAG_CCU_DEVICE,
                      "validateDesiredTempUserLimits desiredTemp "+desiredTemp+" coolingDeadband "+coolingDeadband+"" +
                      " heatingDeadband "+heatingDeadband+" maxCoolingLimit "+buildingTuner.getMaxCoolingUserLimit()+

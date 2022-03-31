@@ -12,6 +12,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
@@ -732,7 +733,7 @@ public class PlcRelayConfigHandler {
             case 2:
                 shortDis = "Pressure [0-2 in.]";
                 shortDisTarget = "Target Pressure";
-                unit = "Inch wc";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "2";
                 minVal = "0";
                 incrementVal = "0.1";
@@ -741,7 +742,7 @@ public class PlcRelayConfigHandler {
             case 3:
                 shortDis = "Pressure[0-0.25 in. Differential]";
                 shortDisTarget = "Target Pressure Differential";
-                unit = "Inch wc";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "0.25";
                 minVal = "-0.25";
                 incrementVal = "0.01";
@@ -950,7 +951,7 @@ public class PlcRelayConfigHandler {
             case 1:
                 shortDis = "Pressure [0-2 in.]";
                 shortDisTarget = "Dynamic Target Pressure";
-                unit = "Inch wc";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "2";
                 minVal = "0";
                 incrementVal = "0.1";
@@ -959,7 +960,7 @@ public class PlcRelayConfigHandler {
             case 2:
                 shortDis = "Pressure[0-0.25 in. Differential]";
                 shortDisTarget = "Dynamic Target Pressure Differential";
-                unit = "Inch wc";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "0.25";
                 minVal = "-0.25";
                 incrementVal = "0.01";

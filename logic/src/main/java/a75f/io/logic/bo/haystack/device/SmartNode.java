@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -254,7 +255,7 @@ public class SmartNode
                 sensorUnit = "lux";
                 break;
             case SENSOR_PRESSURE:
-                sensorUnit = "inch wc";
+                sensorUnit = Consts.PRESSURE_UNIT;
                 break;
             case SENSOR_SOUND:
                 sensorUnit = "dB";

@@ -291,7 +291,7 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().addPoint(sat);
         Point co2 = new Point.Builder().setDisplayName(equipDis + "-" + "co2TRSp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tr").addMarker("co2").addMarker("target").addMarker("his").addMarker("sp").setUnit("\u00B0ppm").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(co2);
-        Point sp = new Point.Builder().setDisplayName(equipDis + "-" + "staticPressureTRSp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tr").addMarker("staticPressure").addMarker("target").addMarker("his").addMarker("sp").setUnit("\u00B0inch wc").setTz(tz).build();
+        Point sp = new Point.Builder().setDisplayName(equipDis + "-" + "staticPressureTRSp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tr").addMarker("staticPressure").addMarker("target").addMarker("his").addMarker("sp").setUnit("\u00B0inH₂O").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(sp);
     }
     

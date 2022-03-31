@@ -11,6 +11,7 @@ public class PreferenceUtil {
     private static String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
     private static String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
+    private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     
     public static void setContext(Context c) {
         context= c;
@@ -171,6 +172,14 @@ public class PreferenceUtil {
     public static void setCleanUpDuplicateZoneSchedule() {
         setBooleanPreference(CLEAN_UP_DUPLICATE_ZONE_SCHEDULE, true);
     }
+    public static boolean isPressureUnitMigrationDone() {
+        return getBooleanPreference(PRESSURE_UNIT_MIGRATION);
+    }
+    public static void setPressureUnitMigrationDone() {
+        setBooleanPreference(PRESSURE_UNIT_MIGRATION, true);
+    }
+
+
 
     public static boolean isIduPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -184,3 +193,4 @@ public class PreferenceUtil {
         editor.apply();
     }
 }
+

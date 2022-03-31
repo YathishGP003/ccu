@@ -62,6 +62,25 @@ public class MigrationUtil {
             PreferenceUtil.setCCUHeartbeatMigrationStatus(true);
         }
 
+        if(!PreferenceUtil.isPressureUnitMigrationDone()){
+            pressureUnitMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setPressureUnitMigrationDone();
+        }
+
+    }
+
+    private static void pressureUnitMigration(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
+        equips.forEach(equipDetails -> {
+            Equip equip = new Equip.Builder().setHashMap(equipDetails).build();
+            ArrayList<HashMap<Object, Object>> pressurePoints = ccuHsApi.readAllEntities("point and (pressure or staticPressure) and equipRef == \"" + equip.getId() + "\"");
+            String updatedPressureUnit = "inH₂O";
+            for (HashMap<Object, Object> pressureMap : pressurePoints
+            ) {
+                Point updatedPoint = new Point.Builder().setHashMap(pressureMap).setUnit(updatedPressureUnit).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        });
     }
 
     private static boolean checkAppVersionUpgraded() {

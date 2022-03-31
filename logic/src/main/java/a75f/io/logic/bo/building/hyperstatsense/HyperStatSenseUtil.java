@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
+import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartStat;
@@ -253,18 +254,18 @@ public class HyperStatSenseUtil {
                 markers = null;
                 break;
             case 1:
-                shortDis = "Pressure Sensor (0-2)inches wc";
+                shortDis = "Pressure Sensor (0-2)inH₂O";
                 shortDisTarget = "Dynamic Target Pressure";
-                unit = "inch_of_water";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "2";
                 minVal = "0";
                 incrementVal = "0.1";
                 markers = new String[]{"pressure"};
                 break;
             case 2:
-                shortDis = "Differential Pressure Sensor (0-0.25)inches wc";
+                shortDis = "Differential Pressure Sensor (0-0.25)inH₂O";
                 shortDisTarget = "Dynamic Target Pressure Differential";
-                unit = "inch_of_water";
+                unit = Consts.PRESSURE_UNIT;
                 maxVal = "0.25";
                 minVal = "-0.25";
                 incrementVal = "0.01";

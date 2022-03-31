@@ -7,4 +7,5 @@ package a75f.io.logic.bo.building.definitions;
 public class Consts
 {
 	public static final int CIRCUIT_NAME_MAX_LENGTH = 20;
+	public static final String PRESSURE_UNIT = "inH₂O";
 }

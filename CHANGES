@@ -1,10 +1,10 @@
- - Merged PR 3446: Update floor locally on pubnub
- - Merged PR 3321: Bug 10055: th2 physical points are read and displayed in internal portal
- - Changed the progress message to Loading Schedule
- - Merged PR 3356: Adding additional tuners for vav profile
- - Merged PR 3279: -ve cumulative error for hyperst
- - Handle crash when non-primary CCU is upgraded first
- - Update floor locally on pubnub
- - Bug 10055: th2 physical points are read and displayed in internal portal
- - Bug 10055: th2 physical points are read and displayed in internal portal
- - Bug 10055: th2 physical points are read and displayed in internal portal
+ - Merged PR 3483: Handle deadzone during normalization
+ - Merged PR 3451: New PR for User Story 9308: Non-compliant pressure units
+ - Merged PR 3500: In refreshScreen(),calling updateUI in place of loadIntrinsicSchedule
+ - Merged PR 3497: README file draft
+ - Update the readme file
+ - README file draft
+ - Merged PR 3335: Bug 10096: the desied temperature is now being updated and read
+ - Handle deadzone during normalization
+ - Merged PR 3405: Support message based on Environment
+ - Bug 10096: the desied temperature is now being updated and read

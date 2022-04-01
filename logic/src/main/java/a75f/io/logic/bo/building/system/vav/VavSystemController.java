@@ -869,18 +869,19 @@ public class VavSystemController extends SystemController
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<String, Double> adjustedDamperOpeningMap = new HashMap<>();
         for (HashMap<Object, Object> equip : vavEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
-                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + equip.toString());
-                continue;
-            }
+            
             HashMap<Object, Object> damperPos = hayStack.readEntity("point and damper and normalized and cmd and equipRef " +
                                                               "== \""+ equip.get("id").toString()+"\""
             );
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
-            double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;
-            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
-            adjustedDamperOpeningMap.put(damperPos.get("id").toString() , adjustedDamperPos);
+            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
+                adjustedDamperOpeningMap.put(damperPos.get("id").toString() , damperPosVal);
+            } else {
+                double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;
+                adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+                adjustedDamperOpeningMap.put(damperPos.get("id").toString(), adjustedDamperPos);
+            }
         }
         return adjustedDamperOpeningMap;
     }

@@ -42,10 +42,16 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
     @Override
     public void doJob() {
-        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
+        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> ");
         watchdogMonitor = false;
         
         L.pingCloudServer();
+    
+        if (!CCUHsApi.getInstance().isCCUConfigured()) {
+            CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-BuildingProcessJob ");
+            return;
+        }
+        
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
             //Make sure his data in synced every other minute to avoid device appearing offline for long.
@@ -57,10 +63,6 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         if (jobLock.tryLock()) {
             try {
-                if (!CCUHsApi.getInstance().isCCUConfigured()) {
-                    CcuLog.d(L.TAG_CCU_JOB,"No Site/CCU configured ! <-BuildingProcessJob ");
-                    return;
-                }
                 
                 BuildingTunerCache.getInstance().updateTuners();
                 
@@ -141,7 +143,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             @Override
             public void run() {
                 try {
-                    CCUHsApi.getInstance().syncHisData();
+                    CCUHsApi.getInstance().syncHisDataWithPeriodicPurge();
                 } catch (Exception e) {
                     //This is bad. But the system could still continue to work in standalone mode controlling
                     //the hvac system even if there are failures in data synchronization with backend.

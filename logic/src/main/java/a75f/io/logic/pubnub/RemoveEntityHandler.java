@@ -41,7 +41,6 @@ public class RemoveEntityHandler
                 if (CCUHsApi.getInstance().entitySynced(uuid)) {
                     HashMap<Object, Object> removedEntity = CCUHsApi.getInstance().readMapById(uuid);
                     if (!removedEntity.isEmpty() && removedEntity.containsKey("schedule")){
-                        new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek();
                         UpdateScheduleHandler.refreshSchedulesScreen();
                         UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
                     }

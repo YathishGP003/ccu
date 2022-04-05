@@ -359,7 +359,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
             }
         });
-        SystemFragment.refreshIntrinsicSchedulesScreen();
     }
 
     private void hasTextViewChildren() {
@@ -710,7 +709,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         CCUHsApi.getInstance().syncEntityTree();
         updateUI();
         ScheduleProcessJob.updateSchedules();
-    
     }
     
     private HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(Schedule.Days d) {

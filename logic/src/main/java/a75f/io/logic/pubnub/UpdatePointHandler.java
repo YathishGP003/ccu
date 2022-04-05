@@ -183,6 +183,7 @@ public class UpdatePointHandler
     private static void updatePoints(Point p){
         String luid = p.getId();
         boolean updateZoneUi = false;
+        boolean isScheduleType = false;
 
         if (p.getMarkers().contains("desired")) {
             SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
@@ -192,6 +193,7 @@ public class UpdatePointHandler
         if (p.getMarkers().contains("scheduleType")) {
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
             updateZoneUi = true;
+            isScheduleType = true;
         }
     
         if (p.getMarkers().contains("his")) {
@@ -208,6 +210,9 @@ public class UpdatePointHandler
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);
             }
+        }
+        if(isScheduleType){
+            UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
         }
     }
     

@@ -136,6 +136,7 @@ public class TunerConstants
     public static final double OAO_ECONOMIZING_DRY_BULB_THRESHOLD = 55 ;
     
 	public static final String VAV_TUNER_GROUP = "VAV";
+    public static final String VAV_TAG ="vav";
     public static final String DAB_TUNER_GROUP = "DAB";
     public static final String TI_TUNER_GROUP = "TI";
     public static final String OAO_TUNER_GROUP = "OAO";
@@ -196,4 +197,8 @@ public class TunerConstants
     
     public static final double OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT = 50;
     public static final double OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT = 80;
+    public static final double AIR_FLOW_CFM_PROPORTIONAL_RANGE = 200.0;
+    public static final double AIR_FLOW_CFM_INTEGRAL_TIME = 30.0;
+    public static final double AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR = 0.5;
+    public static final double AIR_FLOW_CFM_INTEGRAL_K_FACTOR = 0.5;
 }

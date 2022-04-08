@@ -36,30 +36,6 @@
 
             </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textTempOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="@string/label_tempoffset"
-                    android:textAppearance="@style/label_values" />
-
-                <NumberPicker
-                    android:theme="?DefaultNumberPickerTheme"
-                    android:id="@+id/temperatureOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                   />
-            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -366,6 +342,56 @@
                     android:textOff=""
                     android:textOn="" />
 
+                <TextView
+                    android:id="@+id/textEnableCFM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableIAQ"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enable_cfm"
+                    android:textAppearance="@style/title_normal"
+                    />
+                <ToggleButton
+                    android:id="@+id/enableCFMControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/textEnableIAQ"
+                    android:layout_alignStart="@id/enableIAQControl"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:layout_toEndOf="@+id/textEnableIAQ"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn=""
+                    />
+                <TextView
+                    android:id="@+id/textKFactor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_below="@+id/textEnableIAQ"
+                    android:layout_alignStart="@+id/textZonePriority"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_k_factor"
+                    android:textAppearance="@style/title_normal"
+                    android:visibility="gone"/>
+                <Spinner
+                    android:id="@+id/spinKFactor"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="42dp"
+                    android:layout_below="@+id/textEnableIAQ"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_toEndOf="@+id/textKFactor"
+                    android:entries="@array/hvac_stage_selector"
+                    android:textAppearance="@style/title_normal"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:visibility="gone"/>
+
 
             </RelativeLayout>
 
@@ -379,10 +405,141 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textTempOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_tempoffset"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
+                        android:id="@+id/temperatureOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/maxCFMCooling"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="32dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                    <TextView
+                        android:id="@+id/textMaxCFMCooling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_max_cfm_cooling"
+                        android:textAppearance="@style/label_values" />
+
+
+                    <NumberPicker
+                        android:id="@+id/numMaxCFMCooling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:theme="?DefaultNumberPickerTheme" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/minCFMCooling"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="32dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                    <TextView
+                        android:id="@+id/textMinCFMCooling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_min_cfm_cooling"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/numMinCFMCooling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:theme="?DefaultNumberPickerTheme" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/maxCFMReheating"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="32dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                    <TextView
+                        android:id="@+id/textMaxCFMReheating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_max_cfm_reheating"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/numMaxCFMReheating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:theme="?DefaultNumberPickerTheme" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/minCFMReheating"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="32dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                    <TextView
+                        android:id="@+id/textMinCfFMReheating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_min_cfm_reheating"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/numMinCFMReheating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:theme="?DefaultNumberPickerTheme" />
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="42dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/maxDamperPosCooling">
 
 
                     <TextView
@@ -407,7 +564,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="42dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/minDamperPosCooling">
 
                     <TextView
                         android:id="@+id/textMinCool"
@@ -456,7 +614,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="42dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/minDamperPosHeating">
 
                     <TextView
                         android:id="@+id/textMinHeat"

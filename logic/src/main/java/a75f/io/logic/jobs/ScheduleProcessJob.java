@@ -1044,6 +1044,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
         double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
+        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and airflow and cfm and cmd and vav and equipRef == \""+equipID+"\"");
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {
@@ -1074,6 +1075,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             vavPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
             vavPoints.put("Discharge Airflow",0+" \u2109");
+        }
+        if (airflowCFM != 0.0)
+        {
+            vavPoints.put("Airflow CFM",String.format("%.0f", airflowCFM));
+        }else{
+            vavPoints.put("Airflow CFM",0);
         }
 
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);

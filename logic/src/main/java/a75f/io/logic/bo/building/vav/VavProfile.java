@@ -114,10 +114,10 @@ public abstract class VavProfile extends ZoneProfile {
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.init();
     }
-    
-    public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
+
+    public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config,String floorRef, String roomRef) {
         VavEquip deviceMap = vavDeviceMap.get(addr);
-        deviceMap.updateHaystackPoints(config);
+        deviceMap.updateHaystackPoints(config,floorRef, roomRef);
     
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);

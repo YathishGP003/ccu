@@ -24,4 +24,10 @@ public class VavProfileConfiguration extends BaseProfileConfiguration
     public int maxDamperHeating;
     
     public double temperaturOffset;
+    public int nuMaxCFMCooling;
+    public int  numMinCFMCooling;
+    public int  numMinCFMReheating;
+    public int numMaxCFMReheating;
+    public boolean enableCFMControl;
+    public double kFactor;
 }

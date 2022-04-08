@@ -708,6 +708,14 @@
     <string name="label_maxdamperheatpos">Max Damper Pos\nHeating</string>
     <string name="label_mindamperheatpos">Min Damper Pos\nHeating</string>
 
+    <string name="label_enable_cfm">Enable CFM</string>
+    <string name="label_k_factor">K Factor</string>
+    <string name="label_max_cfm_cooling">Max CFM   \n    Cooling</string>
+    <string name="label_min_cfm_cooling">Min CFM   \n    Cooling</string>
+    <string name="label_max_cfm_reheating">Max CFM  \n  Reheating</string>
+    <string name="label_min_cfm_reheating">Min CFM  \n  Reheating</string>
+    <string name="airflow_cfm">Airflow CFM :</string>
+
 
     <!--DAB Screen-->
     <string name="title_dabinput">DAB</string>

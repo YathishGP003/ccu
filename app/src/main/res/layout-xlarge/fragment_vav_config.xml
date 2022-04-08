@@ -432,7 +432,7 @@
                     android:id="@+id/maxCFMCooling"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="32dp"
+                    android:layout_marginStart="42dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -459,7 +459,7 @@
                     android:id="@+id/minCFMCooling"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="32dp"
+                    android:layout_marginStart="42dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -485,7 +485,7 @@
                     android:id="@+id/maxCFMReheating"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="32dp"
+                    android:layout_marginStart="42dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -511,7 +511,7 @@
                     android:id="@+id/minCFMReheating"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="32dp"
+                    android:layout_marginStart="42dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 

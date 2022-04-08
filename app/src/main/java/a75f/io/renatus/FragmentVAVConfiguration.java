@@ -420,7 +420,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         for (int i = 0; i < numberValues.length; i++) {
             numberValues[i] = String.valueOf(i * STEP);
         }
-        numMaxCFMCooling.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        numMaxCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMCooling.setMinValue(0);
         numMaxCFMCooling.setMaxValue(150);
         numMaxCFMCooling.setValue(defaultValue);
@@ -428,7 +428,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMaxCFMCooling.setWrapSelectorWheel(false);
 
         numMinCFMCooling = view.findViewById(R.id.numMinCFMCooling);
-        numMinCFMCooling.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        numMinCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMCooling.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMCooling.setMinValue(0);
         numMinCFMCooling.setMaxValue(50);
@@ -437,7 +437,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMCooling.setDisplayedValues(numberValues);
 
         numMinCFMReheating = view.findViewById(R.id.numMinCFMReheating);
-        numMinCFMReheating.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        numMinCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMReheating.setMinValue(0);
         numMinCFMReheating.setMaxValue(50);
         numMinCFMReheating.setValue(defaultValue);
@@ -445,7 +445,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMReheating.setDisplayedValues(numberValues);
 
         numMaxCFMReheating = view.findViewById(R.id.numMaxCFMReheating);
-        numMaxCFMReheating.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        numMaxCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMReheating.setMinValue(0);
         numMaxCFMReheating.setMaxValue(150);
         numMaxCFMReheating.setValue(defaultValue);

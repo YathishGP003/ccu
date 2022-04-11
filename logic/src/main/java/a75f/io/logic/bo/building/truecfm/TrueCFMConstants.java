@@ -1,6 +1,5 @@
-package a75f.io.logic.bo.building;
+package a75f.io.logic.bo.building.truecfm;
 
 public class TrueCFMConstants {
     public static final String VAV="VAV";
-    public static final String vav="vav";
 }

@@ -30,8 +30,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.TrueCFMConfigPoints;
-import a75f.io.logic.bo.building.TrueCFMConstants;
+import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
+import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -44,7 +44,6 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -219,10 +218,7 @@ public class VavEquip
                                                                tz));
         
         createVavConfigPoints(config, equipRef, floor, room);
-        if(config.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMConfigPoints( nodeAddr, config,null,  equipRef,  floor,  room, TrueCFMConstants.VAV,TrueCFMConstants.vav);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
-        }
+        
         List<HisItem> hisItems = new ArrayList<>();
         Point datPoint = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeAirTemp")
@@ -998,6 +994,16 @@ public class VavEquip
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
+    
+        Equip equip = HSUtil.getEquipInfo(equipRef);
+        TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
+                                                      config.enableCFMControl ? 1.0 : 0);
+    
+        if (config.enableCFMControl) {
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef,  config);
+            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
+        }
+        
     }
     
     public void setConfigNumVal(String tags,double val) {
@@ -1038,7 +1044,7 @@ public class VavEquip
         String tz= Objects.requireNonNull(equipMap.get("tz")).toString();
         HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enabled and cfm and equipRef== \"" + equipRef + "\"");
         if(config.enableCFMControl && ((enableCFMControl.get("id")==null)))  {
-            TrueCFMConfigPoints.createTrueCFMConfigPoints(nodeAddr,config,null, equipRef,  floorRef,  roomRef,TrueCFMConstants.VAV,TrueCFMConstants.vav);
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef, config);
             TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,roomRef,floorRef,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         }
         
@@ -1073,11 +1079,16 @@ public class VavEquip
         setHisVal("max and cfm and cooling",config.nuMaxCFMCooling);
         setConfigNumVal("max and cfm and heating",config.numMaxCFMReheating);
         setConfigNumVal("min and cfm and heating",config.numMinCFMReheating);
-        setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
-        setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+        
         setConfigNumVal("cfm and vav and config and kfactor",config.kFactor);
         setHisVal("cfm and vav and config and kfactor",config.kFactor);
-        deleteCFMPointsIfTrueCFMDisabled(config.enableCFMControl);
+        
+        boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
+        if (curTrueCfmEnabled && !config.enableCFMControl) {
+            TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equipRef);
+        }
+        setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+        setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
     }
 
     public void setHisVal(String tags,double val) {

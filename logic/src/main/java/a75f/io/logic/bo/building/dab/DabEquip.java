@@ -116,7 +116,7 @@ public class DabEquip
                                   .setProfile(profileType.name())
                                   .setPriority(config.getPriority().name())
                                   .addMarker("equip").addMarker("dab").addMarker("zone")
-                                  .setAhuRef(ahuRef)
+                                  .addMarker("smartnode").setAhuRef(ahuRef)
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());

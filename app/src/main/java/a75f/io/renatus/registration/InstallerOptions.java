@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -55,6 +56,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -68,6 +70,8 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -108,6 +112,8 @@ public class InstallerOptions extends Fragment {
 
     //BACnet Setup
     ToggleButton toggleBACnet;
+    ToggleButton toggleCelsius;
+    TextView textCelsiusEnable;
     RelativeLayout relativeLayoutBACnet;
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
@@ -211,6 +217,8 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
+        toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
+        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
@@ -239,6 +247,9 @@ public class InstallerOptions extends Fragment {
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
 
+        textCelsiusEnable.setVisibility(View.VISIBLE);
+        toggleCelsius.setVisibility(View.VISIBLE);
+
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
@@ -251,6 +262,8 @@ public class InstallerOptions extends Fragment {
             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
                 textBacnetEnable.setVisibility(View.VISIBLE);
                 toggleBACnet.setVisibility(View.VISIBLE);
+                textCelsiusEnable.setVisibility(View.VISIBLE);
+                toggleCelsius.setVisibility(View.VISIBLE);
             }else {
                 textBacnetEnable.setVisibility(View.GONE);
                 toggleBACnet.setVisibility(View.GONE);
@@ -383,6 +396,24 @@ public class InstallerOptions extends Fragment {
         });
 
         getTempValues();
+
+        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                HashMap useCelsius = CCUHsApi.getInstance().read("useCelsius");
+                if(isChecked) {
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+                } else {
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                }
+                getTempValues();
+            }
+        });
 
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

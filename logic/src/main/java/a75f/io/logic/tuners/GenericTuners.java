@@ -47,6 +47,21 @@ class GenericTuners {
         hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MIN, 0);
         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
     
+        Point useCelsius = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"useCelsius")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("useCelsius")
+                .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
+                .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0")
+                .setMaxVal("1")
+                .setTz(tz)
+                .build();
+        String useCelsiusId = hayStack.addPoint(useCelsius);
+        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED,TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
+        hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
+
         Point buildingLimitMax = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"buildingLimitMax")
                                      .setSiteRef(siteRef)

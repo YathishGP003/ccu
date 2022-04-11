@@ -429,7 +429,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
 
         numMinCFMCooling = view.findViewById(R.id.numMinCFMCooling);
         numMinCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        numMinCFMCooling.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMCooling.setMinValue(0);
         numMinCFMCooling.setMaxValue(50);
         numMinCFMCooling.setValue(defaultValue);
@@ -505,7 +504,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 numMinCFMReheating.setMaxValue((mProfileConfig.numMaxCFMReheating)/STEP);
                 numMaxCFMReheating.setValue((mProfileConfig.numMaxCFMReheating)/STEP);
                 //this converts value of KFactor to position
-                kFactor.setSelection((int) ((mProfileConfig.kFactor)*100)-100);
+                kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCoolingDamperPos.setValue(20);
                 maxCoolingDamperPos.setValue(20);
                 minHeatingDamperPos.setValue(20);

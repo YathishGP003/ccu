@@ -30,6 +30,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.TrueCFMConfigPoints;
+import a75f.io.logic.bo.building.TrueCFMConstants;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -218,7 +220,7 @@ public class VavEquip
         
         createVavConfigPoints(config, equipRef, floor, room);
         if(config.enableCFMControl) {
-            createTrueCFMConfigPoints( config,  equipRef,  floor,  room);
+            TrueCFMConfigPoints.createTrueCFMConfigPoints( nodeAddr, config,null,  equipRef,  floor,  room, TrueCFMConstants.VAV,TrueCFMConstants.vav);
             TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         }
         List<HisItem> hisItems = new ArrayList<>();
@@ -997,116 +999,6 @@ public class VavEquip
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
     }
-
-    public void createTrueCFMConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String equipDis = siteDis+"-VAV-"+nodeAddr;
-        String tz = siteMap.get("tz").toString();
-
-        String fanMarker = "";
-        if (profileType == ProfileType.VAV_SERIES_FAN) {
-            fanMarker = "series";
-        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
-            fanMarker = "parallel";
-        }
-
-        Point enableCFMControl = new Point.Builder()
-                .setDisplayName(equipDis+"-enableCFMControl")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("zone")
-                .addMarker("enabled").addMarker("cfm").addMarker("sp").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String enableCFMControlId = CCUHsApi.getInstance().addPoint(enableCFMControl);
-        CCUHsApi.getInstance().writeDefaultValById(enableCFMControlId, config.enableCFMControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCFMControlId, config.enableCFMControl == true ? 1.0 :0);
-
-        Point kFactor = new Point.Builder()
-                .setDisplayName(equipDis + "-kFactor")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker("cfm").addMarker("pos")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String kFactorId = CCUHsApi.getInstance().addPoint(kFactor);
-        CCUHsApi.getInstance().writeDefaultValById(kFactorId, config.kFactor);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(kFactorId, config.kFactor);
-
-
-
-        Point numMinCFMCooling = new Point.Builder()
-                .setDisplayName(equipDis + "-minCFMCooling")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("min")
-                .addMarker("cfm").addMarker("cooling")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String numMinCFMCoolingId = CCUHsApi.getInstance().addPoint(numMinCFMCooling);
-        CCUHsApi.getInstance().writeDefaultValById(numMinCFMCoolingId, (double) config.numMinCFMCooling);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(numMinCFMCoolingId, (double) config.numMinCFMCooling);
-
-        Point numMaxCFMCooling = new Point.Builder()
-                .setDisplayName(equipDis + "-maxCFMCooling")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("max")
-                .addMarker("cfm").addMarker("cooling")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String numMaxCFMCoolingId = CCUHsApi.getInstance().addPoint(numMaxCFMCooling);
-        CCUHsApi.getInstance().writeDefaultValById(numMaxCFMCoolingId, (double) config.nuMaxCFMCooling);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(numMaxCFMCoolingId, (double) config.nuMaxCFMCooling);
-
-        Point numMinCFMReheating = new Point.Builder()
-                .setDisplayName(equipDis + "-minCFMReheating")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("min")
-                .addMarker("cfm").addMarker("heating")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String numMinCFMReheatingId = CCUHsApi.getInstance().addPoint(numMinCFMReheating);
-        CCUHsApi.getInstance().writeDefaultValById(numMinCFMReheatingId, (double) config.numMinCFMReheating);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(numMinCFMReheatingId, (double) config.numMinCFMReheating);
-
-
-        Point numMaxCFMReheating = new Point.Builder()
-                .setDisplayName(equipDis + "-maxCFMReheating")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("max")
-                .addMarker("cfm").addMarker("heating")
-                .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String numMaxCFMReheatingId = CCUHsApi.getInstance().addPoint(numMaxCFMReheating);
-        CCUHsApi.getInstance().writeDefaultValById(numMaxCFMReheatingId, (double) config.numMaxCFMReheating);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(numMaxCFMReheatingId, (double) config.numMaxCFMReheating);
-    }
     
     public void setConfigNumVal(String tags,double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
@@ -1144,9 +1036,9 @@ public class VavEquip
         String siteRef= Objects.requireNonNull(equipMap.get("siteRef")).toString();
         String equipDis= Objects.requireNonNull(equipMap.get("dis")).toString();
         String tz= Objects.requireNonNull(equipMap.get("tz")).toString();
-        HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enabled and cfm and control and equipRef== \"" + equipRef + "\"");
+        HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enabled and cfm and equipRef== \"" + equipRef + "\"");
         if(config.enableCFMControl && ((enableCFMControl.get("id")==null)))  {
-            createTrueCFMConfigPoints(config,equipRef,  floorRef,  roomRef);
+            TrueCFMConfigPoints.createTrueCFMConfigPoints(nodeAddr,config,null, equipRef,  floorRef,  roomRef,TrueCFMConstants.VAV,TrueCFMConstants.vav);
             TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,roomRef,floorRef,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         }
         
@@ -1181,8 +1073,8 @@ public class VavEquip
         setHisVal("max and cfm and cooling",config.nuMaxCFMCooling);
         setConfigNumVal("max and cfm and heating",config.numMaxCFMReheating);
         setConfigNumVal("min and cfm and heating",config.numMinCFMReheating);
-        setConfigNumVal("cfm and enabled ",config.enableCFMControl == true ? 1.0 : 0);
-        setHisVal("cfm and enabled ",config.enableCFMControl == true ? 1.0 : 0);
+        setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+        setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
         setConfigNumVal("cfm and vav and config and kfactor",config.kFactor);
         setHisVal("cfm and vav and config and kfactor",config.kFactor);
         deleteCFMPointsIfTrueCFMDisabled(config.enableCFMControl);
@@ -1276,7 +1168,7 @@ public class VavEquip
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and group== \"" + nodeAddr + "\"");
         String equipRef = Objects.requireNonNull(equipMap.get("id")).toString();
         HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enable and cfm and equipRef== \"" + equipRef + "\"");
-        if(!enableTrueCFMControl && (!(enableCFMControl==null))){
+        if(!enableTrueCFMControl && (enableCFMControl!=null)){
             List<HashMap<Object, Object >> allCFMPoints =  CCUHsApi.getInstance().readAllEntities("point and cfm and equipRef== \"" + equipRef + "\"");
             for (HashMap<Object, Object> cfmPoints : allCFMPoints
             ) {

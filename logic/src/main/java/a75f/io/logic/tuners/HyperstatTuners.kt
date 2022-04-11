@@ -3,6 +3,7 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND
@@ -76,6 +77,7 @@ class HyperstatTuners {
                 // add common  markers
                 .addMarker("hyperstat").addMarker("tuner").addMarker("default").addMarker("sp")
                 .addMarker("writable").addMarker("his")
+                .addMarker(Tags.STANDALONE)
 
 
 
@@ -381,6 +383,7 @@ class HyperstatTuners {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .addMarker(Tags.STANDALONE)
                 .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)

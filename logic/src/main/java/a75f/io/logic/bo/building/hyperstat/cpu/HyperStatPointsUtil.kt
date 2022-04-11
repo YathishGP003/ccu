@@ -49,7 +49,7 @@ class HyperStatPointsUtil constructor(
                 .setFloorRef(floorRef)
                 .setProfile(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name)
                 .setPriority(priority)
-                .addMarker(HYPERSTAT).addMarker("equip")
+                .addMarker(HYPERSTAT).addMarker("equip").addMarker(Tags.STANDALONE)
                 .addMarker("zone").addMarker(profileName)
                 .setGatewayRef(gatewayRef)
                 .setTz(tz)
@@ -75,7 +75,7 @@ class HyperStatPointsUtil constructor(
             .setGroup(nodeAddress)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -98,7 +98,7 @@ class HyperStatPointsUtil constructor(
             .setEnums(enums)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -121,7 +121,7 @@ class HyperStatPointsUtil constructor(
             .setEnums(enums)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -145,7 +145,7 @@ class HyperStatPointsUtil constructor(
             .setUnit(unit)
             .setHisInterpolate("cov")
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -171,7 +171,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate("cov")
             .setShortDis(shortDis)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -198,7 +198,7 @@ class HyperStatPointsUtil constructor(
             .setUnit(unit)
             .setHisInterpolate(hisInterpolate)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -221,7 +221,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate("cov")
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -244,7 +244,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate(hisInterpolate)
             .setUnit(unit)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }

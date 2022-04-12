@@ -124,11 +124,8 @@ public class TrueCFMConfigPoints {
     }
     
     
-    public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, String equipRef,
+    public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, Equip equip,
                                                     VavProfileConfiguration vavProfileConfiguration) {
-        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        
         createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor );
     
         createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling );

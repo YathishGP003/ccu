@@ -31,7 +31,6 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -998,10 +997,10 @@ public class VavEquip
         Equip equip = HSUtil.getEquipInfo(equipRef);
         TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
                                                       config.enableCFMControl ? 1.0 : 0);
-    
+
         if (config.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef,  config);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip,  config);
+            TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
     }
@@ -1038,14 +1037,17 @@ public class VavEquip
             }
         }
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and group== \"" + nodeAddr + "\"");
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String equipRef = Objects.requireNonNull(equipMap.get("id")).toString();
-        String siteRef= Objects.requireNonNull(equipMap.get("siteRef")).toString();
-        String equipDis= Objects.requireNonNull(equipMap.get("dis")).toString();
-        String tz= Objects.requireNonNull(equipMap.get("tz")).toString();
-        HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enabled and cfm and equipRef== \"" + equipRef + "\"");
-        if(config.enableCFMControl && ((enableCFMControl.get("id")==null)))  {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef, config);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,roomRef,floorRef,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
+
+        /*checks whether CFM points are created or not
+        If CFM points are not created then creates and update*/
+        HashMap<Object, Object>  kFactor = CCUHsApi.getInstance().readEntity("point and group and kfactor and cfm and equipRef== \"" + equipRef + "\"");
+        if(config.enableCFMControl && (kFactor.get("id")==null))  {
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip, config);
+            TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
+                    config.enableCFMControl ? 1.0 : 0);
+            TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );

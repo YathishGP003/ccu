@@ -17,12 +17,15 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -34,6 +37,7 @@ import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 
 import android.util.Log;
+
 
 public class HyperStatMessageGenerator {
     
@@ -114,9 +118,11 @@ public class HyperStatMessageGenerator {
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
-                 "\n ConditioningMode"+getConditioningMode(settings,address).name());
+                 "\n ConditioningMode"+getConditioningMode(settings,address).name()+
+                 "\n occupancyMode :"+isInUnOccupiedMode(equipRef));
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
+        controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
 
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
@@ -240,6 +246,11 @@ public class HyperStatMessageGenerator {
             e.printStackTrace();
         }
         return HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_OFF;
+    }
+    private static boolean isInUnOccupiedMode(String equipRef){
+        double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equipRef+"\"");
+        Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
+        return curOccupancyMode == UNOCCUPIED || curOccupancyMode == AUTOAWAY;
     }
         private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
             try{

@@ -1,10 +1,13 @@
 package a75f.io.renatus.tuners;
 
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +48,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
     String tunerGroupType = "Building";
+    SharedPreferences mPreferences;
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
@@ -63,6 +68,10 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         });
     }
 
+    public Context getmContext() {
+        return mContext;
+    }
+
     private boolean isSection(int position) {
         return mDataArrayList.get(position) instanceof TunerGroupItem;
     }
@@ -75,6 +84,9 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
     @Override
     public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        mPreferences = mContext.getSharedPreferences("useCelsius",MODE_PRIVATE);
+        String useCelsius = mPreferences.getString("useCelsius","");
+        Log.d("TAG", "onBindViewHolder: useCelsius "+ useCelsius);
         switch (holder.viewType) {
             case VIEW_TYPE_ITEM:
                 childIndexPosition++;
@@ -108,6 +120,11 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     }
                 }
                 if (tunerItem.containsKey("unit")) {
+                    if (useCelsius.equals("true")) {
+                        if (tunerItem.get("unit").toString().equals("\u00B0F")) {
+                            tunerItem.put("unit", "\u00B0C");
+                        }
+                    }
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
                 } else {
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
@@ -226,6 +243,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         }else if (tunerGroupType.equalsIgnoreCase("Module")){
             level = 8;
         }
+        mPreferences = mContext.getSharedPreferences("useCelsius",MODE_PRIVATE);
+        String useCelsius = mPreferences.getString("useCelsius","");
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
@@ -233,6 +252,9 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
+                    if (useCelsius.equals("true")){
+                        return fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()));
+                    }
                     return Double.parseDouble(valMap.get("val").toString());
                 }
             }

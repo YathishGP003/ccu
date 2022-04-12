@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -92,6 +93,7 @@ public class InstallerOptions extends Fragment {
     String mSiteId;
     String addressBandSelected = "1000";
     Prefs prefs;
+    SharedPreferences sharedPreferences;
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
@@ -108,6 +110,7 @@ public class InstallerOptions extends Fragment {
 
     //BACnet Setup
     ToggleButton toggleBACnet;
+    ToggleButton toggleCelsius;
     RelativeLayout relativeLayoutBACnet;
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
@@ -119,6 +122,7 @@ public class InstallerOptions extends Fragment {
     RadioGroup radioGroupConfig;
     Button buttonSendIAM;
     TextView textBacnetEnable;
+    TextView textCelsiusEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
     
@@ -211,6 +215,7 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
+        toggleCelsius = rootView.findViewById(R.id.toggleCelsius);
         relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
@@ -220,6 +225,7 @@ public class InstallerOptions extends Fragment {
         radioGroupConfig = rootView.findViewById(R.id.radioGroupConfig);
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
         textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
+        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
@@ -239,6 +245,9 @@ public class InstallerOptions extends Fragment {
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
 
+        textCelsiusEnable.setVisibility(View.VISIBLE);
+        toggleCelsius.setVisibility(View.VISIBLE);
+
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
@@ -251,6 +260,8 @@ public class InstallerOptions extends Fragment {
             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
                 textBacnetEnable.setVisibility(View.VISIBLE);
                 toggleBACnet.setVisibility(View.VISIBLE);
+                textCelsiusEnable.setVisibility(View.VISIBLE);
+                toggleCelsius.setVisibility(View.VISIBLE);
             }else {
                 textBacnetEnable.setVisibility(View.GONE);
                 toggleBACnet.setVisibility(View.GONE);
@@ -383,6 +394,26 @@ public class InstallerOptions extends Fragment {
         });
 
         getTempValues();
+        sharedPreferences = mContext.getSharedPreferences("useCelsius", Context.MODE_PRIVATE);
+        SharedPreferences.Editor mEditor = sharedPreferences.edit();
+
+        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked){
+                    mEditor.putString("useCelsius","true");
+                    mEditor.commit();
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                } else {
+                    mEditor.putString("useCelsius","false");
+                    mEditor.commit();
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                }
+                getTempValues();
+                Log.d(TAG, "onCreateView: celsius key value " + prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY)));
+            }
+        });
+
 
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

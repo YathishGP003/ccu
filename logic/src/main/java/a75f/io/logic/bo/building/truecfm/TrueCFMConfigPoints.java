@@ -45,7 +45,6 @@ public class TrueCFMConfigPoints {
         String kFactorId = hayStack.addPoint(kFactor);
         hayStack.writeDefaultValById(kFactorId, initialVal);
         hayStack.writeHisValueByIdWithoutCOV(kFactorId, initialVal);
-    
     }
     
     private static void createTrueCFMCoolingMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {

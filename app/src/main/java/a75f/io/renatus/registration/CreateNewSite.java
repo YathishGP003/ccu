@@ -279,11 +279,16 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
                         };
+
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
-                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()) {
+                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                    && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+                ) {
+
                     ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
+
                     String siteZip = mSiteZip.getText().toString();
                     String siteAddress = mStreetAdd.getText().toString();
                     String siteState = mSiteState.getText().toString();
@@ -669,16 +674,21 @@ public class CreateNewSite extends Fragment {
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.editSitename:
-                    if (mSiteName.getText().length() > 0) {
-                        mTextInputSitename.setErrorEnabled(true);
-                        mTextInputSitename.setError(getString(R.string.input_sitename));
-                        mSiteName.setError(null);
+                    if (mSiteName.getText().toString().trim().length() > 0) {
+                        Log.i(TAG, "afterTextChanged: "+CCUUiUtil.isInvalidName(mSiteName.getText().toString()));
+                        if(CCUUiUtil.isInvalidName(mSiteName.getText().toString())){
+                            mSiteName.setError(getString(R.string.error_invalid_site_name));
+                        }else {
+                            mTextInputSitename.setErrorEnabled(true);
+                            mTextInputSitename.setError(getString(R.string.input_sitename));
+                            mSiteName.setError(null);
+                        }
                     } else {
                         mTextInputSitename.setError(getString(R.string.hint_sitename));
                     }
 
                 case R.id.editStreetAdd:
-                    if (mStreetAdd.getText().length() > 0) {
+                    if (mStreetAdd.getText().toString().trim().length() > 0) {
                         mTextInputStreetAdd.setErrorEnabled(true);
                         mTextInputStreetAdd.setError(" " + getString(R.string.input_streetadd));
                         mStreetAdd.setError(null);
@@ -687,7 +697,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCity:
-                    if (mSiteCity.getText().length() > 0) {
+                    if (mSiteCity.getText().toString().trim().length() > 0) {
                         mTextInputCity.setErrorEnabled(true);
                         mTextInputCity.setError(getString(R.string.input_city));
                         mSiteCity.setError(null);
@@ -696,16 +706,16 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editState:
-                    if (mSiteState.getText().length() > 0) {
+                    if (mSiteState.getText().toString().trim().length() > 0) {
                         mTextInputState.setErrorEnabled(true);
                         mTextInputState.setError(getString(R.string.input_state));
                         mSiteState.setError(null);
                     } else {
                         mTextInputState.setError("");
                     }
-
+                    break;
                 case R.id.editCountry:
-                    if (mSiteCountry.getText().length() > 0) {
+                    if (mSiteCountry.getText().toString().trim().length() > 0) {
                         mTextInputCountry.setErrorEnabled(true);
                         mTextInputCountry.setError(getString(R.string.input_country));
                         mSiteCountry.setError(null);
@@ -714,7 +724,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editZip:
-                    if (mSiteZip.getText().length() > 0) {
+                    if (mSiteZip.getText().toString().trim().length() > 0) {
                         mTextInputZip.setErrorEnabled(true);
                         mTextInputZip.setError(getString(R.string.input_zip));
                         mSiteZip.setError(null);
@@ -723,23 +733,29 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCCU:
-                    if (mSiteCCU.getText().length() > 0) {
-                        mTextInputCCU.setErrorEnabled(true);
-                        mTextInputCCU.setError(getString(R.string.input_ccuname));
-                        mSiteCCU.setError(null);
+                    if (mSiteCCU.getText().toString().trim().length() > 0) {
+                        if(CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())){
+                            mSiteCCU.setError(getString(R.string.error_invalid_ccu_name));
+                        }else {
+                            mTextInputCCU.setErrorEnabled(true);
+                            mTextInputCCU.setError(getString(R.string.input_ccuname));
+                            mSiteCCU.setError(null);
+                        }
                     } else {
                         mTextInputCCU.setError("");
                     }
+
                 case R.id.editFacilityOrganization:
-                    if (mSiteOrg.getText().length() > 0) {
+                    if (mSiteOrg.getText().toString().trim().length() > 0) {
                         mTextInputOrg.setErrorEnabled(true);
                         mTextInputOrg.setError(getString(R.string.input_facilityorg));
                         mSiteOrg.setError(null);
                     } else {
                         mTextInputOrg.setError("");
                     }
+
                 case R.id.editFacilityEmail:
-                    if (mSiteEmailId.getText().length() > 0) {
+                    if (mSiteEmailId.getText().toString().trim().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
                         mTextInputEmail.setError(getString(R.string.input_facilityemail));
                         mSiteEmailId.setError(null);
@@ -753,8 +769,9 @@ public class CreateNewSite extends Fragment {
                         mTextInputEmail.setError("");
                         mSiteEmailId.setError(null);
                     }
+
                 case R.id.editInstallerEmail:
-                    if (mSiteInstallerEmailId.getText().length() > 0) {
+                    if (mSiteInstallerEmailId.getText().toString().trim().length() > 0) {
                         mTextInputInstallerEmail.setErrorEnabled(true);
                         mTextInputInstallerEmail.setError(getString(R.string.input_installer_email));
                         mSiteInstallerEmailId.setError(null);
@@ -768,6 +785,7 @@ public class CreateNewSite extends Fragment {
                         mTextInputInstallerEmail.setError("");
                         mSiteInstallerEmailId.setError(null);
                     }
+
             }
         }
     }
@@ -779,7 +797,7 @@ public class CreateNewSite extends Fragment {
         for (int id : ids) {
             EditText et = (EditText) getView().findViewById(id);
 
-            if (TextUtils.isEmpty(et.getText().toString())) {
+            if (TextUtils.isEmpty(et.getText().toString().trim())) {
                 et.setError("Must enter Value");
                 isEmpty = true;
             }

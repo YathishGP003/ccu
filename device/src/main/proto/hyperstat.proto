@@ -201,6 +201,7 @@ message HyperStatControlsMessage_t {
   HyperStatAnalogOutputControl_t analogOut1 = 14; // output for PWM channel 1
   HyperStatAnalogOutputControl_t analogOut2 = 15; // output for PWM channel 2
   HyperStatAnalogOutputControl_t analogOut3 = 16; // output for PWM channel 3
+  bool unoccupiedMode = 17; // CCU in scheduled unoccupied mode
 }
 
 message SensorReadingPb_t {

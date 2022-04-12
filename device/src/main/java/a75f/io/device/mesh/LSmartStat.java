@@ -65,7 +65,7 @@ public class LSmartStat {
 
     /********************************CONTROLS MESSAGES*************************************/
 
-    public static Collection<CcuToCmOverUsbSmartStatControlsMessage_t> getControlMessages(Zone zone)
+    public static Collection<CcuToCmOverUsbSmartStatControlsMessage_t> getControlMessages()
     {
         HashMap<Short, CcuToCmOverUsbSmartStatControlsMessage_t> controlMessagesHash = new HashMap<>();
         
@@ -74,38 +74,7 @@ public class LSmartStat {
             ZoneProfile zp = it.next();
             if(zp.getProfileType().name().startsWith("SMARTSTAT")) {
                 for (short node : zp.getNodeAddresses()) {
-                    CcuToCmOverUsbSmartStatControlsMessage_t controlsMessage_t;
-                    if (controlMessagesHash.containsKey(node)) {
-                        controlsMessage_t = controlMessagesHash.get(node);
-                    } else {
-                        controlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
-                        controlMessagesHash.put(node, controlsMessage_t);
-                        controlsMessage_t.address.set(node);
-                        controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
-                    }
-
-                    CCUHsApi hayStack = CCUHsApi.getInstance();
-                    HashMap device = hayStack.read("device and addr == \"" + node + "\"");
-                    controlsMessage_t.controls.setTemperature.set((short) 144); //for Smartstat we always send desired temp as fixed value.
-                    controlsMessage_t.controls.fanSpeed.set(getOperationalMode("fan",zp.getEquip().getId()));
-                    controlsMessage_t.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",zp.getEquip().getId())]);
-                    if (device != null && device.size() > 0) {
-                        ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
-                        for (HashMap opPoint : physicalOpPoints) {
-                            if (opPoint.get("portEnabled").toString().equals("true")) {
-                                RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
-                                HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
-                                if (logicalOpPoint.get("id") != null) {
-                                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                                    short mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
-                                    hayStack.writeHisValById(p.getId(), (double) mappedVal);
-
-                                    LSmartStat.getSmartStatPort(controlsMessage_t.controls, p.getPort()).set(mappedVal);
-                                }
-
-                            }
-                        }
-                    }
+                    controlMessagesHash.put(node , getControlMessageforEquip(String.valueOf(node),CCUHsApi.getInstance()));
                 }
             }
         }
@@ -405,6 +374,46 @@ public class LSmartStat {
     private static boolean is2pfcuDevice(int address) {
         HashMap device = CCUHsApi.getInstance().read("device and addr == \"" + address + "\"");
         return device.containsKey("pipe2");
+    }
+
+    /*
+    This method returns the controlMessage for the given equip
+    param : String - node address
+    returns the control message if the node address exits
+    else null
+    */
+    public static CcuToCmOverUsbSmartStatControlsMessage_t getControlMessageforEquip(String node, CCUHsApi hayStack) {
+        CcuToCmOverUsbSmartStatControlsMessage_t controlsMessage;
+        controlsMessage = new CcuToCmOverUsbSmartStatControlsMessage_t();
+        controlsMessage.address.set(Short.parseShort(node));
+        controlsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+
+
+        HashMap<Object,Object> device = hayStack.readEntity("device and addr == \"" + node + "\"");
+       if ( device.size() > 0) {
+           String equipRef = device.get("equipRef").toString();
+           controlsMessage.controls.setTemperature.set((short) 144); //for Smartstat we always send desired temp as fixed value.
+           controlsMessage.controls.fanSpeed.set(getOperationalMode("fan",equipRef));
+           controlsMessage.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",equipRef)]);
+
+           ArrayList<HashMap<Object,Object>> physicalOpPoints = hayStack.readAllEntities("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
+            for (HashMap<Object,Object> opPoint : physicalOpPoints) {
+                if (opPoint.get("portEnabled").toString().equals("true")) {
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
+                    if (logicalOpPoint.get("id") != null) {
+                        double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                        short mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                        Struct.Unsigned8 smartStatPort = LSmartStat.getSmartStatPort(controlsMessage.controls, p.getPort());
+                        if(smartStatPort != null)
+                            smartStatPort.set(mappedVal);
+                    }
+
+                }
+            }
+        }
+       return  controlsMessage;
     }
     
 }

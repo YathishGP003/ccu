@@ -67,7 +67,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name())
                 .setPriority(config.getPriority().name())
-                .addMarker("equip").addMarker("sse").addMarker("zone")
+                .addMarker("equip").addMarker("sse").addMarker("zone").addMarker("smartnode")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));

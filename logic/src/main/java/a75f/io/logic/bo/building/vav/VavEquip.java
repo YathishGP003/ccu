@@ -1022,7 +1022,7 @@ public class VavEquip
     }
 
 
-    public void updateHaystackPoints(VavProfileConfiguration config,String floorRef, String roomRef)  {
+    public void updateHaystackPoints(VavProfileConfiguration config)  {
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:

@@ -124,17 +124,16 @@ public class TrueCFMConfigPoints {
     }
     
     
-    public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, Equip equip,
-                                                    VavProfileConfiguration vavProfileConfiguration) {
-        createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor );
+    public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, Equip equip) {
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, VavProfileConfiguration.kFactor);
     
-        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling );
+        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, VavProfileConfiguration.numMinCFMCooling);
     
-        createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.nuMaxCFMCooling );
+        createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, VavProfileConfiguration.nuMaxCFMCooling);
     
-        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating );
+        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, VavProfileConfiguration.numMinCFMReheating);
     
-        createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating );
+        createTrueCFMReheatMax(hayStack, equip, Tags.VAV, VavProfileConfiguration.numMaxCFMReheating);
     }
     
     /**

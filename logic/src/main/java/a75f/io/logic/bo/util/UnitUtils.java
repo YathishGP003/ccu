@@ -4,15 +4,15 @@ public class UnitUtils {
     
     /**
      * Convert celsius to Fahrenheit
-     * @param T
+     * @param temperature
      * @return
      */
-    public static double celsiusToFahrenheit(double T) {
-        return CCUUtils.roundToTwoDecimal((T * 9/5) + 32);
+    public static double celsiusToFahrenheit(double temperature) {
+        return CCUUtils.roundToTwoDecimal((temperature * 9/5) + 32);
     }
 
-    public static double fahrenheitToCelsius(double T) {
-        return CCUUtils.roundToTwoDecimal((T - 32) * 5/9);
+    public static double fahrenheitToCelsius(double temperature) {
+        return CCUUtils.roundToTwoDecimal((temperature - 32) * 5/9);
     }
 
 }

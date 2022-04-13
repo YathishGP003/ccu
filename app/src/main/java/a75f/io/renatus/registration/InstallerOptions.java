@@ -401,7 +401,7 @@ public class InstallerOptions extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                HashMap useCelsius = CCUHsApi.getInstance().read("useCelsius");
+                HashMap useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
                 if(isChecked) {
                     prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,

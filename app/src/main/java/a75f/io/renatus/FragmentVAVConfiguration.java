@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -455,13 +454,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         ArrayList<String> spinnerArray = new ArrayList<>();
 
         DecimalFormat df = new DecimalFormat("0.00");
-        for (double i = TrueCFMConstants.MIN_VAL_FOR_KFactor; i < TrueCFMConstants.MAX_VAL_FOR_KFactor; i = i + TrueCFMConstants.STEP_KFACTOR) {
+        for (double i = TrueCFMConstants.MIN_VAL_FOR_K_Factor; i < TrueCFMConstants.MAX_VAL_FOR_K_Factor; i = i + TrueCFMConstants.STEP_K_FACTOR) {
             spinnerArray.add(df.format(i));
         }
         kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
         kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         kFactor.setAdapter(kFactorValues);
-        kFactor.setSelection(TrueCFMConstants.DEFAULT_VAL_FOR_KFACTOR);
+        kFactor.setSelection(TrueCFMConstants.DEFAULT_VAL_FOR_K_FACTOR);
 
     }
 

@@ -996,10 +996,10 @@ public class VavEquip
     
         Equip equip = HSUtil.getEquipInfo(equipRef);
         TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                                                      VavProfileConfiguration.enableCFMControl ? 1.0 : 0);
+                                                      config.enableCFMControl ? 1.0 : 0);
 
-        if (VavProfileConfiguration.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip);
+        if (config.enableCFMControl) {
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip,  config);
             TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
@@ -1043,10 +1043,10 @@ public class VavEquip
         /*checks whether CFM points are created or not
         If CFM points are not created then creates and update*/
         HashMap<Object, Object>  kFactor = CCUHsApi.getInstance().readEntity("point and group and kfactor and cfm and equipRef== \"" + equipRef + "\"");
-        if(VavProfileConfiguration.enableCFMControl && (kFactor.get("id")==null))  {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip);
+        if(config.enableCFMControl && (kFactor.get("id")==null))  {
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip, config);
             TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                    VavProfileConfiguration.enableCFMControl ? 1.0 : 0);
+                    config.enableCFMControl ? 1.0 : 0);
             TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
@@ -1075,22 +1075,22 @@ public class VavEquip
         setHisVal("heating and min and damper and pos",config.minDamperHeating);
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
-        setConfigNumVal("min and cfm and cooling", VavProfileConfiguration.numMinCFMCooling);
-        setHisVal("min and cfm and cooling", VavProfileConfiguration.numMinCFMCooling);
-        setConfigNumVal("max and cfm and cooling", VavProfileConfiguration.nuMaxCFMCooling);
-        setHisVal("max and cfm and cooling", VavProfileConfiguration.nuMaxCFMCooling);
-        setConfigNumVal("max and cfm and heating", VavProfileConfiguration.numMaxCFMReheating);
-        setConfigNumVal("min and cfm and heating", VavProfileConfiguration.numMinCFMReheating);
+        setConfigNumVal("min and cfm and cooling",config.numMinCFMCooling);
+        setHisVal("min and cfm and cooling",config.numMinCFMCooling);
+        setConfigNumVal("max and cfm and cooling",config.nuMaxCFMCooling);
+        setHisVal("max and cfm and cooling",config.nuMaxCFMCooling);
+        setConfigNumVal("max and cfm and heating",config.numMaxCFMReheating);
+        setConfigNumVal("min and cfm and heating",config.numMinCFMReheating);
         
-        setConfigNumVal("cfm and vav and config and kfactor", VavProfileConfiguration.kFactor);
-        setHisVal("cfm and vav and config and kfactor", VavProfileConfiguration.kFactor);
+        setConfigNumVal("cfm and vav and config and kfactor",config.kFactor);
+        setHisVal("cfm and vav and config and kfactor",config.kFactor);
         
         boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
-        if (curTrueCfmEnabled && !VavProfileConfiguration.enableCFMControl) {
+        if (curTrueCfmEnabled && !config.enableCFMControl) {
             TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equipRef);
         }
-        setConfigNumVal("cfm and enabled ", VavProfileConfiguration.enableCFMControl ? 1.0 : 0);
-        setHisVal("cfm and enabled ", VavProfileConfiguration.enableCFMControl ? 1.0 : 0);
+        setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+        setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
     }
 
     public void setHisVal(String tags,double val) {
@@ -1129,12 +1129,12 @@ public class VavEquip
         //config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
         config.setPriority(ZonePriority.values()[(int) getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
-        VavProfileConfiguration.numMinCFMCooling =(int)getConfigNumVal("min and cfm and cooling");
-        VavProfileConfiguration.nuMaxCFMCooling = (int) getConfigNumVal("max and cfm and cooling");
-        VavProfileConfiguration.numMaxCFMReheating =(int)getConfigNumVal("max and cfm and heating");
-        VavProfileConfiguration.numMinCFMReheating =(int)getConfigNumVal("min and cfm and heating");
-        VavProfileConfiguration.enableCFMControl = getConfigNumVal("cfm and enabled") > 0;
-        VavProfileConfiguration.kFactor =getConfigNumVal("cfm and vav and config and kfactor");
+        config.numMinCFMCooling=(int)getConfigNumVal("min and cfm and cooling");
+        config.nuMaxCFMCooling= (int) getConfigNumVal("max and cfm and cooling");
+        config.numMaxCFMReheating=(int)getConfigNumVal("max and cfm and heating");
+        config.numMinCFMReheating=(int)getConfigNumVal("min and cfm and heating");
+        config.enableCFMControl = getConfigNumVal("cfm and enabled") > 0;
+        config.kFactor=getConfigNumVal("cfm and vav and config and kfactor");
         
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
         

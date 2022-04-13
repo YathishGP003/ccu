@@ -483,7 +483,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
             setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition()]);
 
-            enableCFMControl.setChecked(VavProfileConfiguration.enableCFMControl);
+            enableCFMControl.setChecked(mProfileConfig.enableCFMControl);
             if (!enableCFMControl.isChecked()) {
                 numMaxCFMCooling.setValue(50);
                 numMinCFMCooling.setValue(50);
@@ -491,14 +491,14 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 numMinCFMReheating.setValue(50);
                 kFactor.setSelection(100);
             } else {
-                numMinCFMCooling.setValue((VavProfileConfiguration.numMinCFMCooling)/STEP);
-                numMaxCFMCooling.setValue((VavProfileConfiguration.nuMaxCFMCooling)/STEP);
-                numMinCFMReheating.setValue((VavProfileConfiguration.numMinCFMReheating)/STEP);
-                numMinCFMCooling.setMaxValue((VavProfileConfiguration.nuMaxCFMCooling)/STEP);
-                numMinCFMReheating.setMaxValue((VavProfileConfiguration.numMaxCFMReheating)/STEP);
-                numMaxCFMReheating.setValue((VavProfileConfiguration.numMaxCFMReheating)/STEP);
+                numMinCFMCooling.setValue((mProfileConfig.numMinCFMCooling)/STEP);
+                numMaxCFMCooling.setValue((mProfileConfig.nuMaxCFMCooling)/STEP);
+                numMinCFMReheating.setValue((mProfileConfig.numMinCFMReheating)/STEP);
+                numMinCFMCooling.setMaxValue((mProfileConfig.nuMaxCFMCooling)/STEP);
+                numMinCFMReheating.setMaxValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMaxCFMReheating.setValue((mProfileConfig.numMaxCFMReheating)/STEP);
                 //this converts value of KFactor to position
-                kFactor.setSelection((int) Math.ceil(((VavProfileConfiguration.kFactor)*100)-100));
+                kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCoolingDamperPos.setValue(20);
                 maxCoolingDamperPos.setValue(20);
                 minHeatingDamperPos.setValue(20);
@@ -608,12 +608,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-        VavProfileConfiguration.numMinCFMCooling =numMinCFMCooling.getValue()*STEP;
-        VavProfileConfiguration.nuMaxCFMCooling =numMaxCFMCooling.getValue()*STEP;
-        VavProfileConfiguration.numMinCFMReheating =numMinCFMReheating.getValue()*STEP;
-        VavProfileConfiguration.numMaxCFMReheating =numMaxCFMReheating.getValue()*STEP;
-        VavProfileConfiguration.enableCFMControl =enableCFMControl.isChecked();
-        VavProfileConfiguration.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
+        vavConfig.numMinCFMCooling=numMinCFMCooling.getValue()*STEP;
+        vavConfig.nuMaxCFMCooling=numMaxCFMCooling.getValue()*STEP;
+        vavConfig.numMinCFMReheating=numMinCFMReheating.getValue()*STEP;
+        vavConfig.numMaxCFMReheating=numMaxCFMReheating.getValue()*STEP;
+        vavConfig.enableCFMControl=enableCFMControl.isChecked();
+        vavConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);

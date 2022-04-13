@@ -249,6 +249,15 @@ public class InstallerOptions extends Fragment {
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+
+        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+           toggleCelsius.setChecked(true);
+           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), true);
+        } else {
+           toggleCelsius.setChecked(false);
+           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), false);
+        }
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -262,8 +271,6 @@ public class InstallerOptions extends Fragment {
             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
                 textBacnetEnable.setVisibility(View.VISIBLE);
                 toggleBACnet.setVisibility(View.VISIBLE);
-                textCelsiusEnable.setVisibility(View.VISIBLE);
-                toggleCelsius.setVisibility(View.VISIBLE);
             }else {
                 textBacnetEnable.setVisibility(View.GONE);
                 toggleBACnet.setVisibility(View.GONE);
@@ -401,7 +408,6 @@ public class InstallerOptions extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                HashMap useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
                 if(isChecked) {
                     prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,

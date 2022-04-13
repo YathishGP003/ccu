@@ -95,7 +95,7 @@ public class TunerConstants
     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
 	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 7;
-    public static final double USE_CELSIUS_FLAG_ENABLED = 1;
+    public static final double USE_CELSIUS_FLAG_ENABLED = 1.0;
     public static final int USE_CELSIUS_FLAG_DISABLED = 0;
 
     public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)

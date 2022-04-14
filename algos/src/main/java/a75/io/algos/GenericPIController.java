@@ -157,13 +157,12 @@ public class GenericPIController
     }
     
     public void dump() {
-        CcuLog.d("CCU_ZONE","PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
-        " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
+        dumpWithTag("CCU_ZONE"); //Uses default tag.
     }
-    public void dumpHyperstat() {
-        CcuLog.d("CCU_HSCPU",
-                "PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
-                " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
+    public void dumpWithTag(String tag) {
+        CcuLog.d(tag,
+                 "PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
+                            " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
     }
     @Override
     public String toString() {

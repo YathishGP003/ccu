@@ -41,14 +41,6 @@ public class VavSeriesFanProfile extends VavProfile
     private boolean damperOverride = false;
     private int fanOnDelayCounter = 0;
     
-    ControlLoop coolingLoop;
-    ControlLoop heatingLoop;
-    CO2Loop co2Loop;
-    VOCLoop vocLoop;
-    GenericPIController valveController;
-    Damper damper;
-    Valve valve;
-    
     @Override
     public ProfileType getProfileType()
     {

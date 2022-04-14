@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Set;
 
+import a75.io.algos.CO2Loop;
+import a75.io.algos.ControlLoop;
+import a75.io.algos.GenericPIController;
+import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResetListener;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
@@ -51,6 +55,15 @@ public abstract class VavProfile extends ZoneProfile {
     boolean exceedsThreeDegree = false;
     boolean exceedsFiveDegree = false;
     
+    VavEquip           vavDevice;
+    ControlLoop         coolingLoop;
+    ControlLoop         heatingLoop;
+    CO2Loop             co2Loop;
+    VOCLoop             vocLoop;
+    GenericPIController valveController;
+    Damper              damper;
+    Valve valve;
+    ControlLoop cfmControlLoop;
     
     public VavProfile() {
         vavDeviceMap = new HashMap<>();

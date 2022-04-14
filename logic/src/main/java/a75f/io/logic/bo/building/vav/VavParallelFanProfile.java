@@ -36,14 +36,6 @@ public class VavParallelFanProfile extends VavProfile
 {
     private VavEquip vavDevice;
     
-    ControlLoop coolingLoop;
-    ControlLoop heatingLoop;
-    CO2Loop co2Loop;
-    VOCLoop vocLoop;
-    GenericPIController valveController;
-    Damper damper;
-    Valve valve;
-    
     @Override
     public ProfileType getProfileType()
     {

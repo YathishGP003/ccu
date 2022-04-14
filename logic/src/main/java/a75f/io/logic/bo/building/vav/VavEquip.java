@@ -84,6 +84,8 @@ public class VavEquip
     double voc;
     GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
+    ControlLoop cfmController;
+    
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
     public TrimResponseRequest spResetRequest;
@@ -141,15 +143,17 @@ public class VavEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             String equipId = equipMap.get("id").toString();
-            proportionalGain = TunerUtil.getProportionalGain(equipId);
-            integralGain = TunerUtil.getIntegralGain(equipId);
-            proportionalSpread = (int) TunerUtil.getProportionalSpread(equipId);
-            integralMaxTimeout = (int) TunerUtil.getIntegralTimeout(equipId);
+            proportionalGain = TunerUtil.readTunerValByQuery("pgain and not cfm",equipId);
+            integralGain = TunerUtil.readTunerValByQuery("igain and not cfm",equipId);
+            proportionalSpread = (int) TunerUtil.readTunerValByQuery("pspread and not cfm",equipId);
+            integralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and not cfm",equipId);
             
             co2Target = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and target and equipRef == \""+equipId+"\"");
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and threshold and equipRef == \""+equipId+"\"");
             vocTarget = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and target and equipRef == \""+equipId+"\"");
             vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and threshold and equipRef == \""+equipId+"\"");
+    
+            initializeCfmController(equipId);
         }
     
         coolingLoop.setProportionalGain(proportionalGain);
@@ -168,8 +172,21 @@ public class VavEquip
         co2Loop.setCo2Threshold(co2Threshold);
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
-        
     }
+    
+    private void initializeCfmController(String equipId) {
+        double cfmProportionalGain = TunerUtil.readTunerValByQuery("pgain and cfm",equipId);
+        double cfmIntegralGain = TunerUtil.readTunerValByQuery("igain and cfm",equipId);
+        int cfmProportionalSpread = (int) TunerUtil.readTunerValByQuery("pspread and cfm",equipId);
+        int cfmIntegralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and cfm",equipId);
+        
+        cfmController.setProportionalGain(cfmProportionalGain);
+        cfmController.setIntegralGain(cfmIntegralGain);
+        cfmController.setProportionalSpread(cfmProportionalSpread);
+        cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
+        cfmController.reset();
+    }
+    
     public void createHaystackPoints(VavProfileConfiguration config, String floor, String room) {
     
         //Create Logical points
@@ -1095,21 +1112,6 @@ public class VavEquip
         CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
-    public void deleteHaystackPoints() {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and vav and group == \""+nodeAddr+"\"");
-        if (equip != null)
-        {
-            hayStack.deleteEntityTree(equip.get("id").toString());
-        }
-        
-        HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
-        if (device != null)
-        {
-            hayStack.deleteEntityTree(device.get("id").toString());
-        }
-    }
-    
     public VavProfileConfiguration getProfileConfiguration() {
         VavProfileConfiguration config = new VavProfileConfiguration();
         config.minDamperCooling = ((int)getDamperLimit("cooling","min"));
@@ -1459,6 +1461,11 @@ public class VavEquip
     
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
+    public ControlLoop getCfmController()
+    {
+        return cfmController;
     }
     
     public void setStatus(double status, boolean emergency) {

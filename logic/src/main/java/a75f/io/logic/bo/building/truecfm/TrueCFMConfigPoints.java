@@ -37,7 +37,7 @@ public class TrueCFMConfigPoints {
                             .setFloorRef(equip.getFloorRef())
                             .setRoomRef(equip.getRoomRef())
                             .setSiteRef(equip.getSiteRef()).setHisInterpolate("cov")
-                            .addMarker("config").addMarker(profileTag).addMarker("cfm").addMarker("pos")
+                            .addMarker("config").addMarker(profileTag).addMarker("cfm")
                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
                             .setGroup(equip.getGroup())
                             .setTz(equip.getTz())

@@ -19,7 +19,9 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -30,6 +32,8 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import android.util.Log;
 
+import java.util.Objects;
+
 /**
  * Created by samjithsadasivan on 8/23/18.
  */
@@ -38,16 +42,6 @@ public class VavReheatProfile extends VavProfile
 {
   
     private boolean satCompensationEnabled = false;
-    
-    VavEquip    vavDevice;
-    ControlLoop coolingLoop;
-    ControlLoop heatingLoop;
-    CO2Loop co2Loop;
-    VOCLoop vocLoop;
-    VavUnit vavUnit;
-    GenericPIController valveController;
-    Damper damper;
-    Valve valve;
     
     @Override
     public ProfileType getProfileType()
@@ -85,16 +79,15 @@ public class VavReheatProfile extends VavProfile
                 vavDevice.setDesiredTemp(averageDesiredTemp);
             }
             
-            damper = vavUnit.vavDamper;
-            valve = vavUnit.reheatValve;
             setDamperLimits(node, damper);
             
             int loopOp = 0;
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+            Equip vavEquip = new Equip.Builder()
+                      .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + node + "\"")).build();
     
             if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
                 //Zone is in Cooling
@@ -137,11 +130,12 @@ public class VavReheatProfile extends VavProfile
                 updateReheatDuringSystemHeating(vavEquip);
             }
     
-            logLoopParams(node, roomTemp, loopOp);;
+            logLoopParams(node, roomTemp, loopOp);
             
             updateTRResponse(node);
     
             valve.applyLimits();
+            updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
             damper.applyLimits();
     
             vavDevice.setDamperPos(damper.currentPosition);
@@ -196,10 +190,11 @@ public class VavReheatProfile extends VavProfile
         heatingLoop = vavDevice.getHeatingLoop();
         co2Loop = vavDeviceMap.get(node).getCo2Loop();
         vocLoop = vavDeviceMap.get(node).getVOCLoop();
+        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
         valveController = vavDevice.getValveController();
         setTempCooling = vavDevice.getDesiredTempCooling();
         setTempHeating = vavDevice.getDesiredTempHeating();
-        vavUnit = vavDevice.getVavUnit();
+        VavUnit vavUnit = vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;
         setDamperLimits(node, damper);
@@ -317,5 +312,31 @@ public class VavReheatProfile extends VavProfile
     @Override
     public ZoneState getState() {
         return state;
+    }
+    
+    private void updateDamperPosForTrueCfm(CCUHsApi hayStack, SystemController.State systemState) {
+        
+        String equipId = getEquip().getId();
+        double currentCfm = TrueCFMUtil.getCalculatedCfm(hayStack, equipId);
+        //TODO - should check if system mode is off ?
+        if (state == COOLING && systemState == SystemController.State.COOLING) {
+            double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
+            double minCfmCooling = TrueCFMUtil.getMinCFMCooling(hayStack, equipId);
+            
+            if (currentCfm < minCfmCooling) {
+                double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmCooling, currentCfm);
+                damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+            } else if (currentCfm > maxCfmCooling) {
+                double cfmLoopOp = cfmControlLoop.getLoopOutput(currentCfm, maxCfmCooling);
+                damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+            }
+        } else if (state == COOLING && systemState == SystemController.State.HEATING) {
+            double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+            if (currentCfm < minCfmHeating) {
+                double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
+                damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+            }
+            
+        }
     }
 }

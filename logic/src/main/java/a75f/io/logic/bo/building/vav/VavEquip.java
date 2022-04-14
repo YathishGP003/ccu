@@ -996,10 +996,10 @@ public class VavEquip
     
         Equip equip = HSUtil.getEquipInfo(equipRef);
         TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                                                      config.enableCFMControl ? 1.0 : 0);
+                                                      config.enableCFMControl ? 1.0 : 0,fanMarker);
 
         if (config.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip,  config);
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip,  config,fanMarker);
             TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
@@ -1023,6 +1023,12 @@ public class VavEquip
 
 
     public void updateHaystackPoints(VavProfileConfiguration config)  {
+        String fanMarker = "";
+        if (profileType == ProfileType.VAV_SERIES_FAN) {
+            fanMarker = "series";
+        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
+            fanMarker = "parallel";
+        }
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
@@ -1044,9 +1050,9 @@ public class VavEquip
         If CFM points are not created then creates and update*/
         HashMap<Object, Object>  kFactor = CCUHsApi.getInstance().readEntity("point and group and kfactor and cfm and equipRef== \"" + equipRef + "\"");
         if(config.enableCFMControl && (kFactor.get("id")==null))  {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip, config);
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip, config,fanMarker);
             TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                    config.enableCFMControl ? 1.0 : 0);
+                    config.enableCFMControl ? 1.0 : 0, fanMarker);
             TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         

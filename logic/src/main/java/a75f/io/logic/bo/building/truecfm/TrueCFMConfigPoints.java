@@ -12,14 +12,14 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMConfigPoints {
     
-    public static void createTrueCFMControlPoint(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    public static void createTrueCFMControlPoint(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
         
         Point enableCFMControl = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName() + "-enableCFMControl")
                                      .setEquipRef(equip.getId())
                                      .setSiteRef(equip.getSiteRef())
                                      .setRoomRef(equip.getRoomRef())
-                                     .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                                     .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov").addMarker(fanMarker)
                                      .addMarker("config").addMarker(profileTag).addMarker("writable").addMarker("zone")
                                      .addMarker("enabled").addMarker("cfm").addMarker("sp").addMarker("his")
                                      .setGroup(equip.getGroup())
@@ -30,14 +30,14 @@ public class TrueCFMConfigPoints {
         hayStack.writeHisValueByIdWithoutCOV(enableCFMControlId, initialVal);
     }
     
-    private static void createTrueCFMKFactorPoint(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    private static void createTrueCFMKFactorPoint(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
         Point kFactor = new Point.Builder()
                             .setDisplayName(equip.getDisplayName() + "-kFactor")
                             .setEquipRef(equip.getId())
                             .setFloorRef(equip.getFloorRef())
-                            .setRoomRef(equip.getRoomRef())
+                            .setRoomRef(equip.getRoomRef()).addMarker(fanMarker)
                             .setSiteRef(equip.getSiteRef()).setHisInterpolate("cov")
-                            .addMarker("config").addMarker(profileTag).addMarker("cfm").addMarker("pos")
+                            .addMarker("config").addMarker(profileTag).addMarker("cfm").addMarker("pos").addMarker(fanMarker)
                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
                             .setGroup(equip.getGroup())
                             .setTz(equip.getTz())
@@ -47,7 +47,7 @@ public class TrueCFMConfigPoints {
         hayStack.writeHisValueByIdWithoutCOV(kFactorId, initialVal);
     }
     
-    private static void createTrueCFMCoolingMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    private static void createTrueCFMCoolingMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
     
         Point numMinCFMCooling = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName() + "-minCFMCooling")
@@ -56,7 +56,7 @@ public class TrueCFMConfigPoints {
                                      .setRoomRef(equip.getRoomRef())
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                      .addMarker("config").addMarker(profileTag).addMarker("min")
-                                     .addMarker("cfm").addMarker("cooling")
+                                     .addMarker("cfm").addMarker("cooling").addMarker(fanMarker)
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
@@ -67,7 +67,7 @@ public class TrueCFMConfigPoints {
     }
     
     
-    private static void createTrueCFMCoolingMax(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    private static void createTrueCFMCoolingMax(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
     
         Point numMaxCFMCooling = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName() + "-maxCFMCooling")
@@ -76,7 +76,7 @@ public class TrueCFMConfigPoints {
                                      .setRoomRef(equip.getRoomRef())
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                      .addMarker("config").addMarker(profileTag).addMarker("max")
-                                     .addMarker("cfm").addMarker("cooling")
+                                     .addMarker("cfm").addMarker("cooling").addMarker(fanMarker)
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
@@ -86,7 +86,7 @@ public class TrueCFMConfigPoints {
         hayStack.writeHisValueByIdWithoutCOV(numMaxCFMCoolingId, initialVal);
     }
     
-    private static void createTrueCFMReheatMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    private static void createTrueCFMReheatMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
     
         Point numMinCFMReheating = new Point.Builder()
                                        .setDisplayName(equip.getDisplayName() + "-minCFMReheating")
@@ -95,7 +95,7 @@ public class TrueCFMConfigPoints {
                                        .setRoomRef(equip.getRoomRef())
                                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                        .addMarker("config").addMarker(profileTag).addMarker("min")
-                                       .addMarker("cfm").addMarker("heating")
+                                       .addMarker("cfm").addMarker("heating").addMarker(fanMarker)
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
@@ -105,7 +105,7 @@ public class TrueCFMConfigPoints {
         hayStack.writeHisValueByIdWithoutCOV(numMinCFMReheatingId, initialVal);
     }
     
-    private static void createTrueCFMReheatMax(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal) {
+    private static void createTrueCFMReheatMax(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal, String fanMarker) {
         Point numMaxCFMReheating = new Point.Builder()
                                        .setDisplayName(equip.getDisplayName() + "-maxCFMReheating")
                                        .setEquipRef(equip.getId())
@@ -113,7 +113,7 @@ public class TrueCFMConfigPoints {
                                        .setRoomRef(equip.getRoomRef())
                                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                        .addMarker("config").addMarker(profileTag).addMarker("max")
-                                       .addMarker("cfm").addMarker("heating")
+                                       .addMarker("cfm").addMarker("heating").addMarker(fanMarker)
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
@@ -125,16 +125,16 @@ public class TrueCFMConfigPoints {
     
     
     public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, Equip equip,
-                                                    VavProfileConfiguration vavProfileConfiguration) {
-        createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor );
+                                                    VavProfileConfiguration vavProfileConfiguration, String fanMarker) {
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor, fanMarker);
     
-        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling );
+        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling, fanMarker );
     
-        createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.nuMaxCFMCooling );
+        createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.nuMaxCFMCooling, fanMarker );
     
-        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating );
+        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating, fanMarker );
     
-        createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating );
+        createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating, fanMarker );
     }
     
     /**

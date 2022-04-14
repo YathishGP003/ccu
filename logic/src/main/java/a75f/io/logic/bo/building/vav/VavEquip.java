@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
@@ -30,8 +29,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -42,6 +39,7 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TrueCFMTuners;
@@ -729,6 +727,16 @@ public class VavEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanId, 0.0);
         return fanId;
     }
+    
+    private String getFanMarker() {
+    
+        if (profileType == ProfileType.VAV_SERIES_FAN) {
+            return Tags.SERIES;
+        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
+            return Tags.PARALLEL;
+        }
+        return "";
+    }
 
     private void createFanTuner(String siteDis,
                                    String equipRef,
@@ -925,59 +933,8 @@ public class VavEquip
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(temperatureOffsetId, config.temperaturOffset);
-        
-        
-        Point damperMinCooling = new Point.Builder()
-                                         .setDisplayName(equipDis+"-minCoolingDamperPos")
-                                         .setEquipRef(equipRef)
-                                         .setSiteRef(siteRef)
-                                         .setRoomRef(room)
-                                         .setFloorRef(floor).setHisInterpolate("cov")
-                                         .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
-                                         .addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                                         .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("%")
-                                         .setTz(tz)
-                                         .build();
-        String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
-        CCUHsApi.getInstance().writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
     
-        Point damperMaxCooling = new Point.Builder()
-                                         .setDisplayName(equipDis+"-maxCoolingDamperPos")
-                                         .setEquipRef(equipRef)
-                                         .setSiteRef(siteRef)
-                                         .setRoomRef(room)
-                                         .setFloorRef(floor).setHisInterpolate("cov")
-                                         .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("max")
-                                         .addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                                         .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("%")
-                                         .setTz(tz)
-                                         .build();
-        String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
-        CCUHsApi.getInstance().writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
-    
-        Point damperMinHeating = new Point.Builder()
-                                         .setDisplayName(equipDis+"-minHeatingDamperPos")
-                                         .setEquipRef(equipRef)
-                                         .setSiteRef(siteRef)
-                                         .setRoomRef(room)
-                                         .setFloorRef(floor).setHisInterpolate("cov")
-                                         .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
-                                         .addMarker("heating").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                                         .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("%")
-                                         .setTz(tz)
-                                         .build();
-        String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
-        CCUHsApi.getInstance().writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
-    
+        //Damper max heating is required irrespective of trueCfm is enabled or not.
         Point damperMaxHeating = new Point.Builder()
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
                                          .setEquipRef(equipRef)
@@ -1002,8 +959,91 @@ public class VavEquip
         if (config.enableCFMControl) {
             TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef,  config);
             TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
+        } else {
+            createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         }
         
+    }
+    
+    /**
+     * Create damperSize configuration points when TrueCfm is disabled.
+     * @param hayStack
+     * @param equip
+     * @param config
+     * @param fanMarker
+     */
+    public void createNonCfmDamperConfigPoints(CCUHsApi hayStack, Equip equip, VavProfileConfiguration config,
+                                               String fanMarker) {
+        Point damperMinCooling = new Point.Builder()
+                                     .setDisplayName(equip.getDisplayName()+"-minCoolingDamperPos")
+                                     .setEquipRef(equip.getId())
+                                     .setSiteRef(equip.getSiteRef())
+                                     .setRoomRef(equip.getRoomRef())
+                                     .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                                     .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
+                                     .addMarker("cooling").addMarker("pos")
+                                     .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                     .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("%")
+                                     .setTz(equip.getTz())
+                                     .build();
+        String damperMinCoolingId = hayStack.addPoint(damperMinCooling);
+        hayStack.writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
+        hayStack.writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
+    
+        Point damperMaxCooling = new Point.Builder()
+                                     .setDisplayName(equip.getDisplayName()+"-maxCoolingDamperPos")
+                                     .setEquipRef(equip.getId())
+                                     .setSiteRef(equip.getSiteRef())
+                                     .setRoomRef(equip.getRoomRef())
+                                     .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                                     .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("max")
+                                     .addMarker("cooling").addMarker("pos")
+                                     .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                     .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("%")
+                                     .setTz(equip.getTz())
+                                     .build();
+        String damperMaxCoolingId = hayStack.addPoint(damperMaxCooling);
+        hayStack.writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
+        hayStack.writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
+    
+        Point damperMinHeating = new Point.Builder()
+                                     .setDisplayName(equip.getDisplayName()+"-minHeatingDamperPos")
+                                     .setEquipRef(equip.getId())
+                                     .setSiteRef(equip.getSiteRef())
+                                     .setRoomRef(equip.getRoomRef())
+                                     .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                                     .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
+                                     .addMarker("heating").addMarker("pos")
+                                     .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                     .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("%")
+                                     .setTz(equip.getTz())
+                                     .build();
+        String damperMinHeatingId = hayStack.addPoint(damperMinHeating);
+        hayStack.writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
+        hayStack.writeHisValueByIdWithoutCOV(damperMinHeatingId, (double)config.minDamperHeating);
+    }
+    
+    public void deleteNonCfmDamperPoints(CCUHsApi hayStack, String equipRef) {
+        HashMap<Object, Object> damperMinCooling = hayStack.readEntity("config and min and damper and pos and " +
+                                                                       "cooling and equipRef == \""+equipRef+"\"");
+        if (!damperMinCooling.isEmpty()) {
+            hayStack.deleteWritablePoint(damperMinCooling.get("id").toString());
+        }
+    
+        HashMap<Object, Object> damperMaxCooling = hayStack.readEntity("config and max and damper and pos and " +
+                                                                       "cooling and equipRef == \""+equipRef+"\"");
+        if (!damperMaxCooling.isEmpty()) {
+            hayStack.deleteWritablePoint(damperMaxCooling.get("id").toString());
+        }
+    
+        HashMap<Object, Object> damperMinHeating = hayStack.readEntity("config and min and damper and pos and " +
+                                                                       "heating and equipRef == \""+equipRef+"\"");
+        if (!damperMinHeating.isEmpty()) {
+            hayStack.deleteWritablePoint(damperMinHeating.get("id").toString());
+        }
     }
     
     public void setConfigNumVal(String tags,double val) {
@@ -1037,20 +1077,12 @@ public class VavEquip
                     break;
             }
         }
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and group== \"" + nodeAddr + "\"");
-        String equipRef = Objects.requireNonNull(equipMap.get("id")).toString();
-        String siteRef= Objects.requireNonNull(equipMap.get("siteRef")).toString();
-        String equipDis= Objects.requireNonNull(equipMap.get("dis")).toString();
-        String tz= Objects.requireNonNull(equipMap.get("tz")).toString();
-        HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enabled and cfm and equipRef== \"" + equipRef + "\"");
-        if(config.enableCFMControl && ((enableCFMControl.get("id")==null)))  {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef, config);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,roomRef,floorRef,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
-        }
         
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
+    
+        handleTrueCfmConfiguration(config);
         
         setConfigNumVal("damper and type",config.damperType);
         setConfigNumVal("damper and size",config.damperSize);
@@ -1065,32 +1097,55 @@ public class VavEquip
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
-        setDamperLimit("cooling","min",config.minDamperCooling);
-        setHisVal("cooling and min and damper and pos",config.minDamperCooling);
-        setDamperLimit("cooling","max",config.maxDamperCooling);
-        setHisVal("cooling and max and damper and pos",config.maxDamperCooling);
-        setDamperLimit("heating","min",config.minDamperHeating);
-        setHisVal("heating and min and damper and pos",config.minDamperHeating);
+        
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
-        setConfigNumVal("min and cfm and cooling",config.numMinCFMCooling);
-        setHisVal("min and cfm and cooling",config.numMinCFMCooling);
-        setConfigNumVal("max and cfm and cooling",config.nuMaxCFMCooling);
-        setHisVal("max and cfm and cooling",config.nuMaxCFMCooling);
-        setConfigNumVal("max and cfm and heating",config.numMaxCFMReheating);
-        setConfigNumVal("min and cfm and heating",config.numMinCFMReheating);
         
-        setConfigNumVal("cfm and vav and config and kfactor",config.kFactor);
-        setHisVal("cfm and vav and config and kfactor",config.kFactor);
-        
+        if (config.enableCFMControl) {
+            setConfigNumVal("min and cfm and cooling", config.numMinCFMCooling);
+            setHisVal("min and cfm and cooling", config.numMinCFMCooling);
+            setConfigNumVal("max and cfm and cooling", config.nuMaxCFMCooling);
+            setHisVal("max and cfm and cooling", config.nuMaxCFMCooling);
+            setConfigNumVal("max and cfm and heating", config.numMaxCFMReheating);
+            setConfigNumVal("min and cfm and heating", config.numMinCFMReheating);
+            setConfigNumVal("cfm and vav and config and kfactor", config.kFactor);
+            setHisVal("cfm and vav and config and kfactor", config.kFactor);
+            setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+            setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+        } else {
+            setDamperLimit("cooling","min",config.minDamperCooling);
+            setHisVal("cooling and min and damper and pos",config.minDamperCooling);
+            setDamperLimit("cooling","max",config.maxDamperCooling);
+            setHisVal("cooling and max and damper and pos",config.maxDamperCooling);
+            setDamperLimit("heating","min",config.minDamperHeating);
+            setHisVal("heating and min and damper and pos",config.minDamperHeating);
+        }
+    }
+    
+    private void handleTrueCfmConfiguration(VavProfileConfiguration config) {
+    
+        HashMap<Object, Object> equipMap = hayStack.readEntity("equip and group== \"" + nodeAddr + "\"");
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+    
+        String fanMarker = getFanMarker();
         boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
         if (curTrueCfmEnabled && !config.enableCFMControl) {
-            TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equipRef);
+            TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equip.getId());
+            createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
+        } else if (!curTrueCfmEnabled && config.enableCFMControl) {
+            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip.getId(), config);
+            TrueCFMTuners.createTrueCfmTuners(hayStack,
+                                              equip.getSiteRef(),
+                                              equip.getDisplayName(),
+                                              equip.getId(),
+                                              equip.getRoomRef(),
+                                              equip.getFloorRef(),
+                                              equip.getTz(),
+                                              Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
+            deleteNonCfmDamperPoints(hayStack, equip.getId());
         }
-        setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
-        setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
     }
-
+    
     public void setHisVal(String tags,double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
@@ -1175,19 +1230,6 @@ public class VavEquip
         }
         return config;
     }
-    public void deleteCFMPointsIfTrueCFMDisabled(boolean enableTrueCFMControl){
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readEntity("equip and group== \"" + nodeAddr + "\"");
-        String equipRef = Objects.requireNonNull(equipMap.get("id")).toString();
-        HashMap<Object, Object>  enableCFMControl = CCUHsApi.getInstance().readEntity("point and group and enable and cfm and equipRef== \"" + equipRef + "\"");
-        if(!enableTrueCFMControl && (enableCFMControl!=null)){
-            List<HashMap<Object, Object >> allCFMPoints =  CCUHsApi.getInstance().readAllEntities("point and cfm and equipRef== \"" + equipRef + "\"");
-            for (HashMap<Object, Object> cfmPoints : allCFMPoints
-            ) {
-                CCUHsApi.getInstance().deleteEntity(Objects.requireNonNull(cfmPoints.get("id")).toString());
-            }
-        }
-    }
-
 
     public double getCurrentTemp()
     {

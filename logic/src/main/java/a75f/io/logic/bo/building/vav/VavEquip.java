@@ -39,7 +39,7 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TrueCFMTuners;
@@ -621,30 +621,6 @@ public class VavEquip
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 10.0));
 
-        Point airflowCfm = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-airflowCfm")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("cmd").addMarker("cfm").addMarker(fanMarker)
-                .addMarker("airflow").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .build();
-        CCUHsApi.getInstance().addPoint(airflowCfm);
-
-        Point flowVelocity = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-flowVelocity")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("flow").addMarker("velocity").addMarker(fanMarker)
-                .addMarker("sp").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .build();
-        CCUHsApi.getInstance().addPoint(flowVelocity);
-
         Point pressure = new Point.Builder()
                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
                 .setEquipRef(equipRef)
@@ -653,8 +629,9 @@ public class VavEquip
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker(fanMarker)
                 .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(pressure);
+        String pressureId = CCUHsApi.getInstance().addPoint(pressure);
         
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "vav", tz, false));
@@ -711,7 +688,7 @@ public class VavEquip
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
         device.addSensor(Port.SENSOR_VOC, vocId);
-        
+        device.addSensor(Port.SENSOR_PRESSURE, pressureId);
         //Initialize write array for points, otherwise a read before write will throw exception
         setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
@@ -970,11 +947,11 @@ public class VavEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
     
         Equip equip = HSUtil.getEquipInfo(equipRef);
-        TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                                                      config.enableCFMControl ? 1.0 : 0);
+        TrueCFMPointsHandler.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
+                                                       config.enableCFMControl ? 1.0 : 0);
     
         if (config.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equipRef,  config);
+            TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equipRef, config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         } else {
             createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
@@ -1063,6 +1040,8 @@ public class VavEquip
         }
     }
     
+    
+    
     public void setConfigNumVal(String tags,double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
@@ -1147,10 +1126,10 @@ public class VavEquip
         String fanMarker = getFanMarker();
         boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
         if (curTrueCfmEnabled && !config.enableCFMControl) {
-            TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equip.getId());
+            TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
             createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         } else if (!curTrueCfmEnabled && config.enableCFMControl) {
-            TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip.getId(), config);
+            TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack,
                                               equip.getSiteRef(),
                                               equip.getDisplayName(),

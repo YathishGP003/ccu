@@ -122,7 +122,52 @@ public class TrueCFMConfigPoints {
         hayStack.writeDefaultValById(numMaxCFMReheatingId, initialVal);
         hayStack.writeHisValueByIdWithoutCOV(numMaxCFMReheatingId, initialVal);
     }
-    
+
+    private static void createAirflowCfmPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+        Point airflowCfm = new Point.Builder()
+                .setDisplayName(equip.getDisplayName() +"-airflowCfm")
+                .setEquipRef(equip.getId())
+                .setSiteRef(equip.getSiteRef())
+                .setRoomRef(equip.getRoomRef())
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                .addMarker("vav").addMarker("cmd").addMarker("cfm").addMarker(fanMarker)
+                .addMarker("airflow").addMarker("his").addMarker(profileTag)
+                .setGroup(equip.getGroup())
+                .build();
+        hayStack.addPoint(airflowCfm);
+    }
+
+    private static void createFlowVelocityPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+
+        Point flowVelocity = new Point.Builder()
+                .setDisplayName(equip.getDisplayName() +"-flowVelocity")
+                .setEquipRef(equip.getId())
+                .setSiteRef(equip.getSiteRef())
+                .setRoomRef(equip.getRoomRef())
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                .addMarker("vav").addMarker("flow").addMarker("velocity").addMarker(fanMarker)
+                .addMarker("sp").addMarker("his").addMarker(profileTag)
+                .setGroup(equip.getGroup())
+                .build();
+         hayStack.addPoint(flowVelocity);
+
+    }
+
+    private static void createPressurePoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+
+        Point pressure = new Point.Builder()
+                .setDisplayName(equip.getDisplayName() +"-pressure")
+                .setEquipRef(equip.getId())
+                .setSiteRef(equip.getSiteRef())
+                .setRoomRef(equip.getRoomRef())
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("vav")
+                .addMarker(fanMarker).addMarker(profileTag)
+                .setGroup(equip.getGroup())
+                .build();
+         hayStack.addPoint(pressure);
+
+    }
     
     public static void createTrueCFMVavConfigPoints(CCUHsApi hayStack, Equip equip,
                                                     VavProfileConfiguration vavProfileConfiguration, String fanMarker) {
@@ -135,6 +180,12 @@ public class TrueCFMConfigPoints {
         createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating, fanMarker );
     
         createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating, fanMarker );
+
+        createAirflowCfmPoint(hayStack, equip, Tags.VAV, fanMarker );
+
+        createFlowVelocityPoint(hayStack, equip, Tags.VAV, fanMarker );
+
+        createPressurePoint(hayStack, equip, Tags.VAV, fanMarker );
     }
     
     /**
@@ -142,7 +193,9 @@ public class TrueCFMConfigPoints {
      */
     public static void deleteTrueCFMPoints(CCUHsApi hayStack, String equipRef) {
         List<HashMap<Object, Object >>
-            allCFMPoints =  hayStack.readAllEntities("point and cfm and equipRef== \"" + equipRef + "\"");
+                allCFMPoints =  hayStack.readAllEntities("point and cfm and not enabled and equipRef== \"" + equipRef + "\"");
+        allCFMPoints.add(hayStack.readEntity("point and vav and flow and velocity and equipRef== \"" + equipRef + "\""));
+        allCFMPoints.add(hayStack.readEntity("point and vav and pressure and sensor and equipRef== \"" + equipRef + "\""));
         for (HashMap<Object, Object> cfmPoint : allCFMPoints) {
             hayStack.deleteEntity(Objects.requireNonNull(cfmPoint.get("id")).toString());
         }

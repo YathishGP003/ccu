@@ -605,40 +605,6 @@ public class VavEquip
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 10.0));
 
-        Point airflowCfm = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-airflowCfm")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("cmd").addMarker("cfm").addMarker(fanMarker)
-                .addMarker("airflow").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .build();
-        CCUHsApi.getInstance().addPoint(airflowCfm);
-
-        Point flowVelocity = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-flowVelocity")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("flow").addMarker("velocity").addMarker(fanMarker)
-                .addMarker("sp").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .build();
-        CCUHsApi.getInstance().addPoint(flowVelocity);
-
-        Point pressure = new Point.Builder()
-                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker(fanMarker)
-                .setGroup(String.valueOf(nodeAddr))
-                .build();
-        CCUHsApi.getInstance().addPoint(pressure);
         
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "vav", tz, false));
@@ -1048,11 +1014,9 @@ public class VavEquip
 
         /*checks whether CFM points are created or not
         If CFM points are not created then creates and update*/
-        HashMap<Object, Object>  kFactor = CCUHsApi.getInstance().readEntity("point and group and kfactor and cfm and equipRef== \"" + equipRef + "\"");
-        if(config.enableCFMControl && (kFactor.get("id")==null))  {
+        boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
+        if(config.enableCFMControl && (!curTrueCfmEnabled))   {
             TrueCFMConfigPoints.createTrueCFMVavConfigPoints( hayStack, equip, config,fanMarker);
-            TrueCFMConfigPoints.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                    config.enableCFMControl ? 1.0 : 0, fanMarker);
             TrueCFMTuners.createTrueCFMVavTunerPoints(hayStack,equip);
         }
         
@@ -1090,8 +1054,7 @@ public class VavEquip
         
         setConfigNumVal("cfm and vav and config and kfactor",config.kFactor);
         setHisVal("cfm and vav and config and kfactor",config.kFactor);
-        
-        boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
+
         if (curTrueCfmEnabled && !config.enableCFMControl) {
             TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equipRef);
         }

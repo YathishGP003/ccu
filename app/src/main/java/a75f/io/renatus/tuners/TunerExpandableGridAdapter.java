@@ -244,8 +244,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         }else if (tunerGroupType.equalsIgnoreCase("Module")){
             level = 8;
         }
-        mPreferences = mContext.getSharedPreferences("useCelsius",MODE_PRIVATE);
-        String useCelsius = mPreferences.getString("useCelsius","");
+        mPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY),MODE_PRIVATE);
+        useCelsius = mPreferences.getBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),false);
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
@@ -253,7 +253,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
-                    if (useCelsius.equals("true")){
+                    if (useCelsius){
                         return fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()));
                     }
                     return Double.parseDouble(valMap.get("val").toString());

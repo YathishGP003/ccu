@@ -12,7 +12,7 @@ public class PreferenceUtil {
     private static String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
-    private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
+    private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -179,12 +179,6 @@ public class PreferenceUtil {
     public static void setPressureUnitMigrationDone() {
         setBooleanPreference(PRESSURE_UNIT_MIGRATION, true);
     }
-    public static boolean isTrueCFMVAVMigrationDone() {
-        return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
-    }
-    public static void setTrueCFMVAVMigrationDone() {
-        setBooleanPreference(TRUE_CFM_VAV_MIGRATION, true);
-    }
 
 
 
@@ -199,5 +193,13 @@ public class PreferenceUtil {
         editor.putBoolean("iduMigration", isMigrated);
         editor.apply();
     }
-}
 
+    public static boolean getSNMigration() {
+        return getBooleanPreference(SMART_NODE_MIGRATION);
+    }
+
+    public static void setSmartNodeMigration() {
+        setBooleanPreference(SMART_NODE_MIGRATION, true);
+
+    }
+}

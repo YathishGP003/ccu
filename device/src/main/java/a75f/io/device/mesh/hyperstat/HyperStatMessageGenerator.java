@@ -2,7 +2,6 @@ package a75f.io.device.mesh.hyperstat;
 
 import com.google.protobuf.ByteString;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -18,12 +17,15 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -35,6 +37,7 @@ import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 
 import android.util.Log;
+
 
 public class HyperStatMessageGenerator {
     
@@ -48,7 +51,7 @@ public class HyperStatMessageGenerator {
      */
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
         HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
-        HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address, equipRef);
+        HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address, equipRef).build();
         HyperStat.HyperStatSettingsMessage2_t hyperStatSettingsMessage2_t = getSetting2Message(address, equipRef);
         HyperStat.HyperStatSettingsMessage3_t hyperStatSettingsMessage3_t = getSetting3Message(address, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
@@ -99,13 +102,13 @@ public class HyperStatMessageGenerator {
      * @param equipRef
      * @return
      */
-    public static HyperStatControlsMessage_t getControlMessage(int address, String equipRef) {
+    public static HyperStatControlsMessage_t.Builder getControlMessage(int address, String equipRef) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
 
         // Sense profile does not have control messages
-        if(device.containsKey("sense")) return HyperStat.HyperStatControlsMessage_t.newBuilder().build();
+        if(device.containsKey("sense")) return HyperStat.HyperStatControlsMessage_t.newBuilder();
 
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
         controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
@@ -115,9 +118,11 @@ public class HyperStatMessageGenerator {
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
-                 "\n ConditioningMode"+getConditioningMode(settings,address).name());
+                 "\n ConditioningMode"+getConditioningMode(settings,address).name()+
+                 "\n occupancyMode :"+isInUnOccupiedMode(equipRef));
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
+        controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
 
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
@@ -150,7 +155,7 @@ public class HyperStatMessageGenerator {
                       });
             Log.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
-        return controls.build();
+        return controls;
     }
     
     private static double getDesiredTempCooling(String equipRef) {
@@ -242,6 +247,11 @@ public class HyperStatMessageGenerator {
         }
         return HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_OFF;
     }
+    private static boolean isInUnOccupiedMode(String equipRef){
+        double curOccuMode = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equipRef+"\"");
+        Occupancy curOccupancyMode = Occupancy.values()[(int)curOccuMode];
+        return curOccupancyMode == UNOCCUPIED || curOccupancyMode == AUTOAWAY;
+    }
         private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
             try{
                 return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
@@ -293,8 +303,11 @@ public class HyperStatMessageGenerator {
         return  HyperStatSettingsUtil.Companion.getSetting3Message(address,equipRef);
     }
 
-    public static HyperStatControlsMessage_t getHyperstatRebootControl(){
-       return HyperStat.HyperStatControlsMessage_t.newBuilder().setReset(true).build();
+    public static HyperStatControlsMessage_t getHyperstatRebootControl(int address){
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstat and group == \"" + address + "\"");
+        String equipRef =equip.get("id").toString();
+        Log.d(L.TAG_CCU_SERIAL,"Reset set to true");
+        return getControlMessage(address,equipRef).setReset(true).build();
     }
 
 }

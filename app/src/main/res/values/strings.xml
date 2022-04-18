@@ -385,6 +385,8 @@
     <string name="notmandatory"> </string>
     <string name="input_sitename">Site Name</string>
     <string name="hint_sitename">A user friendly name (e.g., Renatus Tower)</string>
+    <string name="error_invalid_site_name">Special characters are not allowed for site name </string>
+    <string name="error_invalid_ccu_name">Special characters are not allowed for ccu name </string>
     <string name="input_timezone">Time Zone</string>
     <string name="input_streetadd">Street Address</string>
     <string name="input_streetadd2">Street Address 2</string>

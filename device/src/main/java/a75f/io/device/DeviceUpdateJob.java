@@ -48,23 +48,19 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     public void doJob()
     {
         watchdogMonitor = false;
+    
+        CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
+        if (!CCUHsApi.getInstance().isCCUConfigured()) {
+            CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-BuildingProcessJob ");
+            return;
+        }
+        
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-DeviceUpdateJob ");
             return;
         }
         if (jobLock.tryLock()) {
             try {
-                CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
-                HashMap site = CCUHsApi.getInstance().read("site");
-                if (site == null || site.size() == 0) {
-                    CcuLog.d(L.TAG_CCU_DEVICE, "No Site Registered ! <-DeviceUpdateJob ");
-                    return;
-                }
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                if (ccu.size() == 0) {
-                    CcuLog.d(L.TAG_CCU_JOB, "No CCU Registered ! <-DeviceUpdateJob ");
-                    return;
-                }
                 deviceNw.sendMessage();
                 deviceNw.sendSystemControl();
                 modbusNetwork.sendMessage();

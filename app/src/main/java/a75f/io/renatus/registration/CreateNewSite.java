@@ -12,15 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import com.google.android.material.textfield.TextInputLayout;
-
-import a75f.io.api.haystack.Schedule;
-import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.bo.util.RenatusLogicIntentActions;
-import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.RxjavaUtil;
-
-import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
@@ -40,13 +31,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGridBuilder;
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
-import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,19 +46,22 @@ import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-
-
+import a75f.io.renatus.util.RxjavaUtil;
+import androidx.fragment.app.Fragment;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -279,11 +271,16 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
                         };
+
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
-                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()) {
+                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                    && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+                ) {
+
                     ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
+
                     String siteZip = mSiteZip.getText().toString();
                     String siteAddress = mStreetAdd.getText().toString();
                     String siteState = mSiteState.getText().toString();
@@ -437,53 +434,61 @@ public class CreateNewSite extends Fragment {
 
         }
 
-        View.OnClickListener UnregisterSiteOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (CCUHsApi.getInstance().isCCURegistered()){
-                    showUnregisterAlertDialog();
-                } else {
-                    btnEditSite.setEnabled(true);
-                    btnUnregisterSite.setEnabled(false);
-                    //removeCCU api call would have already deleted this CCU entity from server
-                    //We just need to delete it locally before creating a new CCU device.
-                    CCUHsApi.getInstance().deleteEntityLocally(CCUHsApi.getInstance().getCcuRef().toString());
-
-                    String facilityManagerEmail = mSiteEmailId.getText().toString();
-                    String installerEmail = mSiteInstallerEmailId.getText().toString();
-                    String ccuName = mSiteCCU.getText().toString();
-                    HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail,diagEquip.get("id").toString(),facilityManagerEmail);
-                    L.ccu().setCCUName(ccuName);
-                    CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
-                    L.saveCCUState();
-                    CCUHsApi.getInstance().syncEntityTree();
-
-                    RxjavaUtil.executeBackgroundTask(
-                            () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
-                            () -> CCUHsApi.getInstance().registerCcu(installerEmail),
-                            ()-> {
-                                if (!CCUHsApi.getInstance().isCCURegistered()) {
-                                    Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
-                                } else {
-                                    btnUnregisterSite.setText("Unregister");
-                                    btnUnregisterSite.setEnabled(true);
-                                    btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-                                    imgUnregisterSite.setColorFilter(getResources().getColor(R.color.black_listviewtext), PorterDuff.Mode.SRC_IN);
-                                    setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                                    Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
-                                    CCUHsApi.getInstance().resetSync();
-                                }
-                                ProgressDialogUtils.hideProgressDialog();
-                            });
+        View.OnClickListener unregisterSiteOnClickListener = v -> {
+            if (CCUHsApi.getInstance().isCCURegistered()){
+                showUnregisterAlertDialog();
+            } else {
+                HashMap<Object, Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
+                if (diagEquip.isEmpty()) {
+                    Toast.makeText(getActivity(), "Can't register CCU now !", Toast.LENGTH_LONG).show();
+                    return;
                 }
+                btnEditSite.setEnabled(true);
+                btnUnregisterSite.setEnabled(false);
+                //removeCCU api call would have already deleted this CCU entity from server
+                //We just need to delete it locally before creating a new CCU device.
+                CCUHsApi.getInstance().deleteEntityLocally(CCUHsApi.getInstance().getCcuRef().toString());
+
+                String facilityManagerEmail = mSiteEmailId.getText().toString();
+                String installerEmail = mSiteInstallerEmailId.getText().toString();
+                String ccuName = mSiteCCU.getText().toString();
+                
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail,diagEquip.get("id").toString(),facilityManagerEmail);
+                L.ccu().setCCUName(ccuName);
+                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                L.saveCCUState();
+                CCUHsApi.getInstance().updateDeviceRefOfSettingPoints(localId);
+
+                handleRegistrationAsync(installerEmail);
             }
         };
-        btnUnregisterSite.setOnClickListener(UnregisterSiteOnClickListener);
-        imgUnregisterSite.setOnClickListener(UnregisterSiteOnClickListener);
+        btnUnregisterSite.setOnClickListener(unregisterSiteOnClickListener);
+        imgUnregisterSite.setOnClickListener(unregisterSiteOnClickListener);
         checkDebugPrepopulate();
 
         return rootView;
+    }
+    
+    private void handleRegistrationAsync(String installerEmail) {
+        
+        RxjavaUtil.executeBackgroundTask(
+            () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
+            () -> {
+                CCUHsApi.getInstance().registerCcu(installerEmail);
+                CCUHsApi.getInstance().resyncSiteTree(); },
+            ()-> {
+                if (!CCUHsApi.getInstance().isCCURegistered()) {
+                    Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
+                } else {
+                    btnUnregisterSite.setText("Unregister");
+                    btnUnregisterSite.setEnabled(true);
+                    btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+                    imgUnregisterSite.setColorFilter(getResources().getColor(R.color.black_listviewtext), PorterDuff.Mode.SRC_IN);
+                    setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+                    Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
+                }
+                ProgressDialogUtils.hideProgressDialog();
+            });
     }
 
     //1650 W 82nd St #200, Bloomington, MN 55431
@@ -539,10 +544,10 @@ public class CreateNewSite extends Fragment {
             ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
 
             String ccuUID = ccu.get("id").toString();
-            new Handler().postDelayed(() -> {
-                removeCCU(ccuUID);
-
-            }, 10000);
+            
+            //Not sure why we have the 10 seconds delay here.
+            //Probably protects against running into issues if register/unregister are done too quickly.
+            new Handler().postDelayed(() -> removeCCU(ccuUID, CCUHsApi.getInstance()), 10000);
 
             dialog.dismiss();
         });
@@ -556,7 +561,7 @@ public class CreateNewSite extends Fragment {
         alert.show();
     }
 
-    private void removeCCU(String ccuId) {
+    private void removeCCU(String ccuId, CCUHsApi hayStack) {
         //We would consider CCU unregistered from this point itself.
         //Otherwise pubnubs generated due to unregister may arrive before the response itself and CCU
         //handling it can lead to inconsistencies.
@@ -566,12 +571,7 @@ public class CreateNewSite extends Fragment {
 
             @Override
             protected String doInBackground(Void... voids) {
-
-                HDictBuilder b = new HDictBuilder()
-                        .add("ccuId", HRef.copy(ccuId));
-                HDict[] dictArr = {b.toDict()};
-                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-                return response;
+                return hayStack.removeCCURemote(ccuId);
             }
 
             @Override
@@ -669,16 +669,21 @@ public class CreateNewSite extends Fragment {
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.editSitename:
-                    if (mSiteName.getText().length() > 0) {
-                        mTextInputSitename.setErrorEnabled(true);
-                        mTextInputSitename.setError(getString(R.string.input_sitename));
-                        mSiteName.setError(null);
+                    if (mSiteName.getText().toString().trim().length() > 0) {
+                        Log.i(TAG, "afterTextChanged: "+CCUUiUtil.isInvalidName(mSiteName.getText().toString()));
+                        if(CCUUiUtil.isInvalidName(mSiteName.getText().toString())){
+                            mSiteName.setError(getString(R.string.error_invalid_site_name));
+                        }else {
+                            mTextInputSitename.setErrorEnabled(true);
+                            mTextInputSitename.setError(getString(R.string.input_sitename));
+                            mSiteName.setError(null);
+                        }
                     } else {
                         mTextInputSitename.setError(getString(R.string.hint_sitename));
                     }
 
                 case R.id.editStreetAdd:
-                    if (mStreetAdd.getText().length() > 0) {
+                    if (mStreetAdd.getText().toString().trim().length() > 0) {
                         mTextInputStreetAdd.setErrorEnabled(true);
                         mTextInputStreetAdd.setError(" " + getString(R.string.input_streetadd));
                         mStreetAdd.setError(null);
@@ -687,7 +692,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCity:
-                    if (mSiteCity.getText().length() > 0) {
+                    if (mSiteCity.getText().toString().trim().length() > 0) {
                         mTextInputCity.setErrorEnabled(true);
                         mTextInputCity.setError(getString(R.string.input_city));
                         mSiteCity.setError(null);
@@ -696,16 +701,16 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editState:
-                    if (mSiteState.getText().length() > 0) {
+                    if (mSiteState.getText().toString().trim().length() > 0) {
                         mTextInputState.setErrorEnabled(true);
                         mTextInputState.setError(getString(R.string.input_state));
                         mSiteState.setError(null);
                     } else {
                         mTextInputState.setError("");
                     }
-
+                    break;
                 case R.id.editCountry:
-                    if (mSiteCountry.getText().length() > 0) {
+                    if (mSiteCountry.getText().toString().trim().length() > 0) {
                         mTextInputCountry.setErrorEnabled(true);
                         mTextInputCountry.setError(getString(R.string.input_country));
                         mSiteCountry.setError(null);
@@ -714,7 +719,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editZip:
-                    if (mSiteZip.getText().length() > 0) {
+                    if (mSiteZip.getText().toString().trim().length() > 0) {
                         mTextInputZip.setErrorEnabled(true);
                         mTextInputZip.setError(getString(R.string.input_zip));
                         mSiteZip.setError(null);
@@ -723,23 +728,29 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCCU:
-                    if (mSiteCCU.getText().length() > 0) {
-                        mTextInputCCU.setErrorEnabled(true);
-                        mTextInputCCU.setError(getString(R.string.input_ccuname));
-                        mSiteCCU.setError(null);
+                    if (mSiteCCU.getText().toString().trim().length() > 0) {
+                        if(CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())){
+                            mSiteCCU.setError(getString(R.string.error_invalid_ccu_name));
+                        }else {
+                            mTextInputCCU.setErrorEnabled(true);
+                            mTextInputCCU.setError(getString(R.string.input_ccuname));
+                            mSiteCCU.setError(null);
+                        }
                     } else {
                         mTextInputCCU.setError("");
                     }
+
                 case R.id.editFacilityOrganization:
-                    if (mSiteOrg.getText().length() > 0) {
+                    if (mSiteOrg.getText().toString().trim().length() > 0) {
                         mTextInputOrg.setErrorEnabled(true);
                         mTextInputOrg.setError(getString(R.string.input_facilityorg));
                         mSiteOrg.setError(null);
                     } else {
                         mTextInputOrg.setError("");
                     }
+
                 case R.id.editFacilityEmail:
-                    if (mSiteEmailId.getText().length() > 0) {
+                    if (mSiteEmailId.getText().toString().trim().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
                         mTextInputEmail.setError(getString(R.string.input_facilityemail));
                         mSiteEmailId.setError(null);
@@ -753,8 +764,9 @@ public class CreateNewSite extends Fragment {
                         mTextInputEmail.setError("");
                         mSiteEmailId.setError(null);
                     }
+
                 case R.id.editInstallerEmail:
-                    if (mSiteInstallerEmailId.getText().length() > 0) {
+                    if (mSiteInstallerEmailId.getText().toString().trim().length() > 0) {
                         mTextInputInstallerEmail.setErrorEnabled(true);
                         mTextInputInstallerEmail.setError(getString(R.string.input_installer_email));
                         mSiteInstallerEmailId.setError(null);
@@ -768,6 +780,7 @@ public class CreateNewSite extends Fragment {
                         mTextInputInstallerEmail.setError("");
                         mSiteInstallerEmailId.setError(null);
                     }
+
             }
         }
     }
@@ -779,7 +792,7 @@ public class CreateNewSite extends Fragment {
         for (int id : ids) {
             EditText et = (EditText) getView().findViewById(id);
 
-            if (TextUtils.isEmpty(et.getText().toString())) {
+            if (TextUtils.isEmpty(et.getText().toString().trim())) {
                 et.setError("Must enter Value");
                 isEmpty = true;
             }

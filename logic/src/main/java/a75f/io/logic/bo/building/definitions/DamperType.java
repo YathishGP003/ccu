@@ -6,7 +6,7 @@ package a75f.io.logic.bo.building.definitions;
 
 public enum DamperType
 {
-    ZeroToTenV("0-10v"), TwoToTenV("2-10v"), TenToTwov("10-2v"), TenToZeroV("10-0v"), MAT ("MAT");
+    ZeroToTenV("0-10v"), TwoToTenV("2-10v"), TenToTwov("10-2v"), TenToZeroV("10-0v"), MAT ("Smart Damper");
     
     public String displayName;
     

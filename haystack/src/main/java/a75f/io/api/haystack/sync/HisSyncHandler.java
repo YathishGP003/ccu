@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -24,6 +26,7 @@ import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Kind;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -42,6 +45,10 @@ public class HisSyncHandler
     Lock syncLock = new ReentrantLock();
 
     private volatile boolean purgeStatus = false;
+    
+    Timer     mSyncTimer     = new Timer();
+    TimerTask mSyncTimerTask = null;
+    
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
@@ -62,17 +69,7 @@ public class HisSyncHandler
                 boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
-                    CcuLog.d(TAG,"Processing sync for equips and devices");
-                    //Device sync is initiated concurrently on Rx thread
-                    Observable.fromCallable(() -> {
-                                syncHistorizedDevicePoints(timeForQuarterHourSync);
-                                return true;
-                                })
-                              .subscribeOn(Schedulers.io())
-                              .subscribe();
-
-                    //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
-                    syncHistorizedEquipPoints(timeForQuarterHourSync);
+                   doSync(timeForQuarterHourSync);
                 }
 
                 if (entitySyncRequired) {
@@ -84,8 +81,26 @@ public class HisSyncHandler
         }
         CcuLog.d(TAG,"<- doHisSync");
     }
-
-    public void syncData() {
+    
+    private void doSync(boolean syncAllData) {
+        CcuLog.d(TAG,"Processing sync for equips and devices");
+        //Device sync is initiated concurrently on Rx thread
+        Observable.fromCallable(() -> {
+            syncHistorizedDevicePoints(syncAllData);
+            return true;
+        })
+                  .subscribeOn(Schedulers.io())
+                  .subscribe();
+    
+        //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
+        syncHistorizedEquipPoints(syncAllData);
+    }
+    
+    /**
+     * Must be invoked for regular period history data sync.
+     *
+     */
+    public void syncHisDataWithPurge() {
         if (syncLock.tryLock()) {
             try {
                 sync();
@@ -99,6 +114,24 @@ public class HisSyncHandler
             CcuLog.d(TAG,"No need to start HisSync. Already in progress.");
         }
 
+    }
+    
+    /**
+     * Does a one-time history sync of all data.
+     */
+    public void syncHisData() {
+        if (syncLock.tryLock()) {
+            try {
+                doSync(true);
+            } catch (Exception e) {
+                CcuLog.e(TAG,"HisSync Sync Failed ", e);
+            } finally {
+                syncLock.unlock();
+            }
+        } else {
+            CcuLog.d(TAG,"Cant do HisSync. Already in progress.");
+        }
+        
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
@@ -153,6 +186,13 @@ public class HisSyncHandler
             String pointDescription = pointToSync.get("dis").toString();
 
             String pointTimezone = pointToSync.get("tz").toString();
+    
+            String kind = pointToSync.get("kind").toString();
+            if (kind.equals(Kind.STRING.getValue())) {
+                //None of 'his' points are expected to have a string value.
+                continue;
+            }
+            
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
             unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
@@ -317,5 +357,20 @@ public class HisSyncHandler
             };
             purgeThread.start();
         }
+    }
+    
+    public void scheduleSync(boolean syncAll, long delaySeconds) {
+        if (mSyncTimerTask != null) {
+            return;
+        }
+        
+        mSyncTimerTask = new TimerTask() {
+            public void run() {
+                CcuLog.i(TAG, "His Sync Scheduled");
+                doSync(syncAll);
+                mSyncTimerTask = null;
+            }
+        };
+        mSyncTimer.schedule(mSyncTimerTask, delaySeconds);
     }
 }

@@ -9,7 +9,8 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class RxjavaUtil {
-    
+    private static final String ERROR_MSG = "Background task failed : ";
+
     /**
      * Simple background execution using rxjava threadpool.
      * @param function
@@ -49,13 +50,34 @@ public class RxjavaUtil {
                     })
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
-                  .doOnComplete(()-> postExecute.run())
+                  .doOnComplete(postExecute::run)
                   .subscribe(
                       () -> { },
-                      e -> CcuLog.e(L.TAG_CCU, "Background task failed : ")
+                      e -> CcuLog.e(L.TAG_CCU, ERROR_MSG)
                   );
     }
-    
+
+    /**
+     * RxJava based alternative to async task. (Risky !- Does not handle Disposable)
+     * @param backGroundFunction  - Executed using rx thread pool
+     * @param postExecute  - Executed on main thread.
+     */
+    public static void executeBackgroundTask( Runnable backGroundFunction,
+                                             Runnable postExecute) {
+        Completable.fromCallable(() -> {
+            backGroundFunction.run();
+            return true;
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(()-> postExecute.run())
+                .subscribe(
+                        () -> { },
+                        e -> CcuLog.e(L.TAG_CCU, ERROR_MSG)
+                );
+    }
+
+
     /**
      * RxJava based alternative to async task.
      * @param preExecuteFunction  - Executed on main/host thread
@@ -74,10 +96,10 @@ public class RxjavaUtil {
                         })
                       .subscribeOn(Schedulers.io())
                       .observeOn(AndroidSchedulers.mainThread())
-                      .doOnComplete(()-> postExecute.run())
+                      .doOnComplete(postExecute::run)
                       .subscribe(
                           () -> { },
-                          e -> CcuLog.e(L.TAG_CCU, "Background task failed : ")
+                          e -> CcuLog.e(L.TAG_CCU, ERROR_MSG)
                         );
     }
 }

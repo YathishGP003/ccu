@@ -263,6 +263,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		super.setUserVisibleHint(isVisibleToUser);
 		if(isVisibleToUser) {
 			UpdatePointHandler.setSystemDataInterface(this);
+			loadIntrinsicSchedule();
 		} else {
 			UpdatePointHandler.setSystemDataInterface(null);
 		}
@@ -373,16 +374,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void loadIntrinsicSchedule(){
-		RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
-				"Loading Schedule..."),
-				() ->
-					schedule = new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek(),
-				()-> {
-					ProgressDialogUtils.hideProgressDialog();
-					updateUI();
-				});
-
+		RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, this::updateUI);
 	}
+
+	private void buildIntrinsicSchedule(){
+		schedule = new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek();
+	}
+
 	private void drawCurrentTime() {
 
 		DateTime now = new DateTime(MockTime.getInstance().getMockTime());
@@ -613,9 +611,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return hr + ":" +min;
 	}
 
-	public void refreshScreen() {
+	public void updateIntrinsicSchedule() {
 		if(getActivity() != null) {
-			getActivity().runOnUiThread(this::updateUI);
+			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
 		}
 	}
 
@@ -827,7 +825,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
-		
+
 	}
 
 	private void checkForOao() {
@@ -1110,12 +1108,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 		return "Unoccupied";
-	}
-
-	public static void refreshIntrinsicSchedulesScreen() {
-		if (intrinsicScheduleListener != null) {
-			intrinsicScheduleListener.refreshScreen();
-		}
 	}
 
 	public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {

@@ -46,6 +46,8 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.mesh.LSmartNode;
+import a75f.io.device.mesh.LSmartStat;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
@@ -591,17 +593,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         for (Zone zone : HSUtil.getZones(floor.getId())) {
                             for(Device d : HSUtil.getDevices(zone.getId())) {
                                 if(d.getMarkers().contains("smartstat")) {
-                                    CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
-                                    ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
-                                    ssControlsMessage_t.address.set(Short.parseShort(d.getAddr()));
-                                    ssControlsMessage_t.controls.reset.set((short) 1);
-                                    MeshUtil.sendStructToNodes(ssControlsMessage_t);
-                                }else if(d.getMarkers().contains("smartnode")){
-                                    CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                                    snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-                                    snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
-                                    snControlsMessage_t.controls.reset.set((short) 1);
-                                    MeshUtil.sendStructToNodes(snControlsMessage_t);
+                                    sendSmartStatResetMsg(d.getAddr());
+                                }else if(d.getMarkers().contains("smartnode") ||
+                                        d.getMarkers().contains("bpos")){
+                                    sendSmarNodeResetMsg(d.getAddr());
                                 }else if (d.getMarkers().contains("hyperstat")) {
                                     HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                 }
@@ -612,17 +607,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 case "zone":
                     for(Device d : HSUtil.getDevices("@"+id)) {
                         if(d.getMarkers().contains("smartstat")) {
-                            CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
-                            ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
-                            ssControlsMessage_t.address.set(Short.parseShort(d.getAddr()));
-                            ssControlsMessage_t.controls.reset.set((short) 1);
-                            MeshUtil.sendStructToNodes(ssControlsMessage_t);
-                        }else if(d.getMarkers().contains("smartnode")) {
-                            CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                            snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-                            snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
-                            snControlsMessage_t.controls.reset.set((short) 1);
-                            MeshUtil.sendStructToNodes(snControlsMessage_t);
+                            sendSmartStatResetMsg(d.getAddr());
+                        }else if(d.getMarkers().contains("smartnode")  ||
+                                d.getMarkers().contains("bpos")) {
+                           sendSmarNodeResetMsg(d.getAddr());
                         }else if (d.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                         }
@@ -631,17 +619,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 case "module":
                     Equip equip = HSUtil.getEquipInfo("@"+id);
                     if(equip.getMarkers().contains("smartstat")) {
-                        CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
-                        ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
-                        ssControlsMessage_t.address.set(Short.parseShort(equip.getGroup()));
-                        ssControlsMessage_t.controls.reset.set((short) 1);
-                        MeshUtil.sendStructToNodes(ssControlsMessage_t);
-                    }else if(equip.getMarkers().contains("smartnode")){
-                        CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                        snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-                        snControlsMessage_t.smartNodeAddress.set(Short.parseShort(equip.getGroup()));
-                        snControlsMessage_t.controls.reset.set((short) 1);
-                        MeshUtil.sendStructToNodes(snControlsMessage_t);
+                        sendSmartStatResetMsg(equip.getGroup());
+                    }else if(equip.getMarkers().contains("smartnode") ||
+                            equip.getMarkers().contains("bpos")){
+                        sendSmarNodeResetMsg(equip.getGroup());
                     }
                     else if (equip.getMarkers().contains("hyperstat")) {
                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
@@ -674,4 +655,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }
         }
     };
+
+
+    private void sendSmartStatResetMsg(String address){
+        CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage =
+                LSmartStat.getControlMessageforEquip(address,CCUHsApi.getInstance());
+        ssControlsMessage.controls.reset.set((short)1);
+        MeshUtil.sendStructToNodes(ssControlsMessage);
+    }
+
+    private void sendSmarNodeResetMsg(String address){
+        CcuToCmOverUsbSnControlsMessage_t snControlsMessage =
+                LSmartNode.getControlMessageforEquip(address,CCUHsApi.getInstance());
+        snControlsMessage.controls.reset.set((short) 1);
+        MeshUtil.sendStructToNodes(snControlsMessage);
+    }
 }

@@ -394,19 +394,14 @@ public class InstallerOptions extends Fragment {
         });
 
         getTempValues();
-        sharedPreferences = mContext.getSharedPreferences("useCelsius", Context.MODE_PRIVATE);
+        sharedPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY), Context.MODE_PRIVATE);
         SharedPreferences.Editor mEditor = sharedPreferences.edit();
 
         toggleCelsius.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            if (isChecked){
-                mEditor.putString("useCelsius","true");
-                mEditor.commit();
-                prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
-            } else {
-                mEditor.putString("useCelsius","false");
-                mEditor.commit();
-                prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
-            }
+
+            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+            mEditor.putBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),isChecked);
+            mEditor.commit();
             getTempValues();
             Log.d(TAG, "onCreateView: celsius key value " + prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY)));
         });

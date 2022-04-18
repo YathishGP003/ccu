@@ -72,9 +72,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     LinearLayout layoutTitle;
     Prefs prefs;
     double defaultVal;
-    boolean absoluteValues;
-    boolean relativeValues;
-    boolean spValues;
 
 
     private void configureArguments(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {

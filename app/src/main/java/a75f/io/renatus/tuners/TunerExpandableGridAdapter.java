@@ -49,6 +49,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     TunerGroupItem previousOpenGroup = null;
     String tunerGroupType = "Building";
     SharedPreferences mPreferences;
+    boolean useCelsius;
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
@@ -84,8 +85,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
     @Override
     public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        mPreferences = mContext.getSharedPreferences("useCelsius",MODE_PRIVATE);
-        String useCelsius = mPreferences.getString("useCelsius","");
+        mPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY),MODE_PRIVATE);
+        useCelsius = mPreferences.getBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),false);
         Log.d("TAG", "onBindViewHolder: useCelsius "+ useCelsius);
         switch (holder.viewType) {
             case VIEW_TYPE_ITEM:
@@ -120,7 +121,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     }
                 }
                 if (tunerItem.containsKey("unit")) {
-                    if (useCelsius.equals("true")) {
+                    if (useCelsius) {
                         if (tunerItem.get("unit").toString().equals("\u00B0F")) {
                             tunerItem.put("unit", "\u00B0C");
                         }

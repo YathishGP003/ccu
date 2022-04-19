@@ -1,1 +1,11 @@
- - Merged PR 3534: CCU app issue resolved
+ - Merged PR 3583: Unregister refactor
+ - Merged PR 3173: Damper Type relabelled from "MAT" to "Smart Damper"
+ - Merged PR 3539: Site name and ccu name validation
+ - Merged PR 3450: New PR for User Story : New field in the HyperStat control message saying "Oc...
+ - Merged PR 3489: Reboot msg has been updated
+ - Merged PR 3401: Dab algorithm enhancement
+ - Unregister refactor
+ - Update weightedAverageConditioningLoad during emergench conditioning
+ - Update dynamic priority calculation
+ - WIP
+ - Damper Type relabelled from "MAT" to "Smart Damper"

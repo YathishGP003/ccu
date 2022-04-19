@@ -908,7 +908,10 @@ public class VavSystemController extends SystemController
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper " +
                                                    "and heating and equipRef == \""+equip.get("id").toString()+"\"");
             }
-            
+            //MaxLimit point does not exist when trueCFM is enabled.
+            if (maxLimit == 0) {
+                maxLimit = 100;
+            }
             double limitedNormalizedDamperPos = Math.min(normalizedDamperPos, maxLimit);
             limitedNormalizedDamperPos = Math.max(limitedNormalizedDamperPos, minLimit);
             

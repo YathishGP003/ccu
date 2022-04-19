@@ -502,14 +502,14 @@ public abstract class VavProfile extends ZoneProfile {
                 cfmControlLoop.reset();
             }
             double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmCooling, currentCfm);
-            damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+            updateDamperForMinCfm(cfmLoopOp);
         } else if (currentCfm > maxCfmCooling) {
             if (cfmLoopState != COOLING_COOLING_MAX) {
                 cfmLoopState = COOLING_COOLING_MAX;
                 cfmControlLoop.reset();
             }
             double cfmLoopOp = cfmControlLoop.getLoopOutput(currentCfm, maxCfmCooling);
-            damper.currentPosition -= damper.currentPosition * cfmLoopOp/100;
+            updateDamperForMaxCfm(cfmLoopOp);
         }
     }
     
@@ -522,14 +522,14 @@ public abstract class VavProfile extends ZoneProfile {
                 cfmControlLoop.reset();
             }
             double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
-            damper.currentPosition += damper.currentPosition * cfmLoopOp / 100;
+            updateDamperForMinCfm(cfmLoopOp);
         } else if (currentCfm > maxCfmHeating) {
             if (cfmLoopState != COOLING_HEATING_MAX) {
                 cfmLoopState = COOLING_HEATING_MAX;
                 cfmControlLoop.reset();
             }
             double cfmLoopOp = cfmControlLoop.getLoopOutput(currentCfm, maxCfmHeating);
-            damper.currentPosition -= damper.currentPosition * cfmLoopOp / 100;
+            updateDamperForMaxCfm(cfmLoopOp);
         }
     }
     
@@ -541,10 +541,25 @@ public abstract class VavProfile extends ZoneProfile {
                 cfmControlLoop.reset();
             }
             double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
-            damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+            updateDamperForMinCfm(cfmLoopOp);
         } else {
             cfmLoopState = HEATING_COOLING_MAX;
             cfmControlLoop.reset();
+        }
+    }
+    
+    private void updateDamperForMinCfm(double cfmLoopOp) {
+        if (damper.currentPosition > 0) {
+            damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+        } else {
+            damper.currentPosition = (int)cfmLoopOp;
+        }
+    }
+    
+    private void updateDamperForMaxCfm(double cfmLoopOp) {
+        cfmLoopOp = Math.max(cfmLoopOp, 100);
+        if (damper.currentPosition > 0) {
+            damper.currentPosition -= damper.currentPosition * cfmLoopOp/100;
         }
     }
     
@@ -569,6 +584,7 @@ public abstract class VavProfile extends ZoneProfile {
         } else if (systemState == SystemController.State.HEATING) {
             updateDamperSystemHeating(hayStack, equipId, currentCfm);
         }
+        damper.currentPosition = Math.min(damper.currentPosition, 100);
         CcuLog.i(L.TAG_CCU_ZONE,
                  " updateDamperPosForTrueCfm: currentPos "+damper.currentPosition+" cfmLoopState "+cfmLoopState
                  +" currentCfm "+currentCfm);

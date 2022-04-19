@@ -79,7 +79,7 @@ public class VavEquip
     ControlLoop         heatingLoop;
     CO2Loop             co2Loop;
     VOCLoop             vocLoop;
-    double voc;
+    
     GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
     ControlLoop cfmController;
@@ -132,6 +132,7 @@ public class VavEquip
         vavUnit.vavDamper.minPosition = (int)getDamperLimit("cooling", "min");
         vavUnit.vavDamper.maxPosition = (int)getDamperLimit("cooling", "max");
         //createHaystackPoints();
+        cfmController = new ControlLoop();
     }
     
     public void init() {
@@ -1351,7 +1352,11 @@ public class VavEquip
         HashMap point = CCUHsApi.getInstance().read("point and config and damper and pos and "+coolHeat+" and "+minMax+" and " +
                                         "group == \""+nodeAddr+"\"");
         if (point.isEmpty()) {
-            Log.e(L.TAG_CCU_ZONE,"Invalid getDamperLimit");
+            Log.e(L.TAG_CCU_ZONE,"Damper "+minMax+" point does not exist");
+            //Damper max/min config may not exist when trueCFM is active. Return default value in that case.
+            if (minMax.contains("max")) {
+                return 100 ;
+            }
             return 0;
         }
         
@@ -1362,11 +1367,11 @@ public class VavEquip
     {
         HashMap point = CCUHsApi.getInstance().read("point and damper and pos and "+coolHeat+" and "+minMax+" and " +
                                                    "group == \""+nodeAddr+"\"");
-        String id = point.get("id").toString();
-        if (id == null || id == "") {
+        if (point.isEmpty()) {
             Log.e(L.TAG_CCU_ZONE,"Invalid setDamperLimit");
             return;
         }
+        String id = point.get("id").toString();
         CCUHsApi.getInstance().writeDefaultValById(id, val);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, val);
     }

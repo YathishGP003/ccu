@@ -79,7 +79,7 @@ public class VavSeriesFanProfile extends VavProfile
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             int loopOp = getLoopOp(conditioning, roomTemp,vavEquip.getId());
             
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+            SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
                 valve.currentPosition = 0;
             }
@@ -92,7 +92,11 @@ public class VavSeriesFanProfile extends VavProfile
             } else {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-            
+    
+            if (systemMode != SystemMode.OFF) {
+                updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+            }
+    
             //When in the system is in heating, REHEAT control does not follow RP-1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip.getId());

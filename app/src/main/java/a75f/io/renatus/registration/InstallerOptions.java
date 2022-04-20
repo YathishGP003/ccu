@@ -56,6 +56,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -247,6 +248,15 @@ public class InstallerOptions extends Fragment {
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+
+        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            toggleCelsius.setChecked(true);
+            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), true);
+        } else {
+            toggleCelsius.setChecked(false);
+            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), false);
+        }
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -396,14 +406,24 @@ public class InstallerOptions extends Fragment {
         getTempValues();
         sharedPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY), Context.MODE_PRIVATE);
         SharedPreferences.Editor mEditor = sharedPreferences.edit();
+        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                mEditor.putBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),isChecked);
+                mEditor.commit();
 
-        toggleCelsius.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-
-            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
-            mEditor.putBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),isChecked);
-            mEditor.commit();
-            getTempValues();
-            Log.d(TAG, "onCreateView: celsius key value " + prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY)));
+                if(isChecked) {
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+                } else {
+                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                }
+                getTempValues();
+            }
         });
 
 

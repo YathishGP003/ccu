@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpandableGridAdapter.ViewHolder> {
 
@@ -85,8 +87,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
     @Override
     public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        mPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY),MODE_PRIVATE);
-        useCelsius = mPreferences.getBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),false);
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
         Log.d("TAG", "onBindViewHolder: useCelsius "+ useCelsius);
         switch (holder.viewType) {
             case VIEW_TYPE_ITEM:
@@ -121,7 +122,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     }
                 }
                 if (tunerItem.containsKey("unit")) {
-                    if (useCelsius) {
+                    if((double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                         if (tunerItem.get("unit").toString().equals("\u00B0F")) {
                             tunerItem.put("unit", "\u00B0C");
                         }
@@ -244,8 +245,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         }else if (tunerGroupType.equalsIgnoreCase("Module")){
             level = 8;
         }
-        mPreferences = mContext.getSharedPreferences(String.valueOf(R.string.USE_CELSIUS_KEY),MODE_PRIVATE);
-        useCelsius = mPreferences.getBoolean(String.valueOf(R.string.USE_CELSIUS_KEY),false);
+        HashMap<Object,Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
@@ -253,7 +253,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
-                    if (useCelsius){
+                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                         return fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()));
                     }
                     return Double.parseDouble(valMap.get("val").toString());

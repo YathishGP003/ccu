@@ -36,14 +36,12 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TunerNumberPicker;
-import a75f.io.renatus.views.MasterControl.MasterControlView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitUnitChange;
@@ -379,7 +377,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     }
 
     private String getTunerValue(String id, String level) {
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+        prefs = new Prefs(getContext().getApplicationContext());
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
@@ -387,7 +385,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
                     tunerVal = valMap.get("val").toString();
-                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                    if (prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY))){
                         if (doesPointNeedAbsoluteConversion()) {
                             tunerVal = String.valueOf(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString())));
                         } else if (doesPointNeedRelativeConversion()){
@@ -467,9 +465,9 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+//                prefs = new Prefs(getContext().getApplicationContext());
 
-                if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                if (prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY))) {
                     if (doesPointNeedAbsoluteConversion()) {
                         maxValueDb = Math.round(fahrenheitToCelsius(maxValueDb));
                         minValueDb = Math.round(fahrenheitToCelsius(minValueDb));
@@ -534,7 +532,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 );
                 buttonCancelAlert.setOnClickListener(v -> valueDialog.dismiss());
                 buttonSaveAlert.setOnClickListener(v -> {
-                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                    if (prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY))) {
                         if (doesPointNeedAbsoluteConversion()) {
                             selectedTunerValue = String.valueOf(celsiusToFahrenheit(Double.parseDouble(selectedTunerValue)));
                         } else if (doesPointNeedRelativeConversion()){

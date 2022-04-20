@@ -1,13 +1,14 @@
 package a75f.io.logic.pubnub;
 
 import com.google.gson.JsonObject;
+
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMVAVConfigHandler {
@@ -28,9 +29,10 @@ public class TrueCFMVAVConfigHandler {
                 vavProfileConfiguration.nuMaxCFMCooling = 500;
                 vavProfileConfiguration.numMinCFMReheating = 500;
                 vavProfileConfiguration.kFactor = 2;
-                TrueCFMConfigPoints.createTrueCFMVavConfigPoints(hayStack, equip, vavProfileConfiguration, fanMarker);
+                //TrueCFMPointsHandler.createTrueCFMVavConfigPoints(hayStack, equip, vavProfileConfiguration,
+                // fanMarker);
             } else {
-                TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equip.getId());
+                //TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equip.getId());
             }
         writePointFromJson(configPoint, msgObject, hayStack);
     }

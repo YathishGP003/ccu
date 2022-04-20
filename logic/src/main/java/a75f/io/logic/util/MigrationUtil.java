@@ -24,8 +24,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConfigPoints;
-import a75f.io.logic.tuners.TrueCFMTuners;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 
 public class MigrationUtil {
     
@@ -101,7 +100,7 @@ public class MigrationUtil {
     }
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        TrueCFMTuners.createTrueCFMVavTunerPoints(haystack,tunerEquip);
+        //TrueCFMTuners.createTrueCfmTuners(haystack,tunerEquip);
         vavEquips.forEach(vavEquip -> {
             HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enabled and point and cfm and equipRef== \"" + vavEquip.get("id") + "\"");
             if (enableCFMPoint.get("id")==null) {
@@ -112,8 +111,8 @@ public class MigrationUtil {
                 } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
                     fanMarker = "parallel";
                 }
-                TrueCFMConfigPoints.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
-                        0, fanMarker);
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
+                                                               0, fanMarker);
             }
         });
 

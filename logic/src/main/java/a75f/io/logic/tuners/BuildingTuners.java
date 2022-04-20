@@ -19,6 +19,7 @@ import a75f.io.logic.util.PreferenceUtil;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -131,5 +132,6 @@ public class BuildingTuners
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
         HyperstatTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         BPOSTuners.addDefaultBPOSTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, siteRef, equipRef, equipDis, tz, VAV_TUNER_GROUP);
     }
 }

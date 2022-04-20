@@ -491,12 +491,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 numMinCFMReheating.setValue(50);
                 kFactor.setSelection(100);
             } else {
-                numMinCFMCooling.setValue((mProfileConfig.numMinCFMCooling)/STEP);
                 numMaxCFMCooling.setValue((mProfileConfig.nuMaxCFMCooling)/STEP);
-                numMinCFMReheating.setValue((mProfileConfig.numMinCFMReheating)/STEP);
                 numMinCFMCooling.setMaxValue((mProfileConfig.nuMaxCFMCooling)/STEP);
-                numMinCFMReheating.setMaxValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMinCFMCooling.setValue((mProfileConfig.numMinCFMCooling)/STEP);
                 numMaxCFMReheating.setValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMinCFMReheating.setMaxValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMinCFMReheating.setValue((mProfileConfig.numMinCFMReheating)/STEP);
                 //this converts value of KFactor to position
                 kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCoolingDamperPos.setValue(20);
@@ -608,11 +608,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-        vavConfig.numMinCFMCooling=numMinCFMCooling.getValue()*STEP;
-        vavConfig.nuMaxCFMCooling=numMaxCFMCooling.getValue()*STEP;
-        vavConfig.numMinCFMReheating=numMinCFMReheating.getValue()*STEP;
-        vavConfig.numMaxCFMReheating=numMaxCFMReheating.getValue()*STEP;
-        vavConfig.enableCFMControl=enableCFMControl.isChecked();
+        vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
+        vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
+        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
+        vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
+        vavConfig.enableCFMControl = enableCFMControl.isChecked();
         vavConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);

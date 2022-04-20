@@ -275,10 +275,12 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     public double getConfigVal(String tags) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-        if((cdb != null) && (cdb.get("id") != null))
-            return hayStack.readPointPriorityVal(cdb.get("id").toString());
-        else return 0;
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            return 0;
+        }
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     
     public void setConfigVal(String tags, double val) {

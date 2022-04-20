@@ -35,6 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -106,14 +107,16 @@ public class UsbModbusService extends Service {
                     arg0.sendBroadcast(intent);
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
-                if (!serialPortConnected) {
+                UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
+                    Log.d(TAG,"Modbus Serial device connected ");
                      scheduleUsbConnectedEvent();
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                usbPortScanTimer.cancel();
                 // Usb device was disconnected. send an intent to the Main Activity
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
+                    usbPortScanTimer.cancel();
                     Log.d(TAG,"Modbus Serial device disconnected ");
                     if (serialPortConnected) {
                         serialPort.close();
@@ -133,6 +136,7 @@ public class UsbModbusService extends Service {
         usbPortScanTimer = new Timer();
         usbPortScanTimer.schedule(new TimerTask() {
             @Override public void run() {
+                Log.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
                 findModbusSerialPortDevice();
             }
         }, 1000);
@@ -480,49 +484,58 @@ public class UsbModbusService extends Service {
         }
 
         public void run() {
-            serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
-            Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
-                      +getModbusDataBits()+" "+getModbusStopBits());
-            if (serialPort != null) {
-                if (serialPort.open()) {
-                    serialPortConnected = true;
-                    serialPort.setBaudRate(getModbusBaudrate());
-                    serialPort.setModbusDevice(true);
-                    serialPort.setDataBits(getModbusDataBits());
-                    serialPort.setStopBits(getModbusStopBits());
-                    serialPort.setParity(getModbusParity());
-                    /**
-                     * Current flow control Options:
-                     * UsbSerialInterface.FLOW_CONTROL_OFF
-                     * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
-                     * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
-                     */
-                    
-                    serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                    serialPort.read(modbusCallback);
-                    serialPort.getCTS(ctsCallback);
-                    serialPort.getDSR(dsrCallback);
-
-                    try {
-                        //sleep(2000); // sleep some. YMMV with different chips.
-                        //this.wait(2000);
-                        Thread.currentThread().sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // Everything went as expected. Send an intent to MainActivity
-                    Intent intent = new Intent(ACTION_USB_MODBUS_READY);
-                    context.sendBroadcast(intent);
-                } else {
-                    Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
-                    context.sendBroadcast(intent);
+            try {
+                configureMbSerialPort();
+            } catch (Exception e) {
+                //Unstable USB connections would result in configuration failures.
+                CcuLog.e(TAG, "Modbus: configureMbSerialPort Failed ", e);
+                serialPortConnected = false;
+            }
+        }
+    }
+    
+    private void configureMbSerialPort() {
+        serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+        Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+        Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
+                  +getModbusDataBits()+" "+getModbusStopBits());
+        if (serialPort != null) {
+            if (serialPort.open()) {
+                serialPortConnected = true;
+                serialPort.setBaudRate(getModbusBaudrate());
+                serialPort.setModbusDevice(true);
+                serialPort.setDataBits(getModbusDataBits());
+                serialPort.setStopBits(getModbusStopBits());
+                serialPort.setParity(getModbusParity());
+                /**
+                 * Current flow control Options:
+                 * UsbSerialInterface.FLOW_CONTROL_OFF
+                 * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
+                 * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
+                 */
+            
+                serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+                serialPort.read(modbusCallback);
+                serialPort.getCTS(ctsCallback);
+                serialPort.getDSR(dsrCallback);
+                try {
+                    //sleep(2000); // sleep some. YMMV with different chips.
+                    //this.wait(2000);
+                    Thread.currentThread().sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                // Everything went as expected. Send an intent to MainActivity
+                Intent intent = new Intent(ACTION_USB_MODBUS_READY);
+                context.sendBroadcast(intent);
             } else {
-                // No driver for given device, even generic CDC driver could not be loaded
-                Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
+                Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
                 context.sendBroadcast(intent);
             }
+        } else {
+            // No driver for given device, even generic CDC driver could not be loaded
+            Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
+            context.sendBroadcast(intent);
         }
     }
     

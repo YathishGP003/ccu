@@ -1109,7 +1109,11 @@ public class CCUHsApi
     public void syncEntityWithPointWrite() {
         syncManager.syncEntitiesWithPointWrite();
     }
-
+    
+    public void syncEntityWithPointWriteDelayed(long delaySeconds) {
+        syncManager.syncEntitiesWithPointWriteWithDelay(delaySeconds);
+    }
+    
     public void syncPointArrays() {
         syncManager.syncPointArray();
     }

@@ -91,7 +91,10 @@ public class SyncManager {
      */
     public void syncEntitiesWithPointWrite() {
         CcuLog.d(TAG, "syncEntitiesWithPointWrite");
-        
+        syncEntitiesWithPointWriteWithDelay(0);
+    }
+    
+    public void syncEntitiesWithPointWriteWithDelay(long delaySeconds) {
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.e(TAG, "Skip Entity Sync : CCU Not registered");
             return;
@@ -108,14 +111,14 @@ public class SyncManager {
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
                                                                 ExistingWorkPolicy.REPLACE,
                                                                 getMigrationWorkRequest())
-                       .then(getSyncWorkRequest())
+                       .then(getSyncWorkRequestWithDelay(delaySeconds))
                        .then(getPointWriteWorkRequest())
                        .enqueue();
         } else {
             CcuLog.d(TAG, "Migration not Required");
             WorkManager.getInstance(appContext).beginUniqueWork(SYNC_WORK_TAG,
                                                                 ExistingWorkPolicy.REPLACE,
-                                                                getSyncWorkRequest())
+                                                                getSyncWorkRequestWithDelay(delaySeconds))
                        .then(getPointWriteWorkRequest())
                        .enqueue();
         }
@@ -143,16 +146,21 @@ public class SyncManager {
     }
     
     private OneTimeWorkRequest getSyncWorkRequest() {
-        
+        return getSyncWorkRequestBuilder().build();
+    }
+    
+    private OneTimeWorkRequest.Builder getSyncWorkRequestBuilder() {
         return new OneTimeWorkRequest.Builder(SyncWorker.class)
-                                        .setConstraints(getSyncConstraints())
-                                        .setBackoffCriteria(
-                                            BackoffPolicy.LINEAR,
-                                            OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                                            TimeUnit.MILLISECONDS)
-                                        .addTag(SYNC_WORK_TAG)
-                                        .build();
-        
+                   .setConstraints(getSyncConstraints())
+                   .setBackoffCriteria(
+                       BackoffPolicy.LINEAR,
+                       OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                       TimeUnit.MILLISECONDS)
+                   .addTag(SYNC_WORK_TAG);
+    }
+    
+    private OneTimeWorkRequest getSyncWorkRequestWithDelay(long delaySeconds) {
+        return getSyncWorkRequestBuilder().setInitialDelay(delaySeconds, TimeUnit.SECONDS).build();
     }
     
     private OneTimeWorkRequest getPointWriteWorkRequest() {

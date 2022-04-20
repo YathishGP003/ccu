@@ -110,6 +110,10 @@ public class UpdatePointHandler
             return;
         }
 
+        if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateConfigPoint(msgObject, localPoint, hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

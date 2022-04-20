@@ -8,6 +8,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -119,6 +122,28 @@ public class RegisterGatherCCUDetails extends Activity {
             }
         });
 
+        mCCUNameET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No implementation
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // No implementation
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(mCCUNameET.getText().toString().trim().length() == 0){
+                    mCCUNameET.setError("Enter CCU name");
+                }
+                if(CCUUiUtil.isInvalidName(mCCUNameET.getText().toString())) {
+                    mCCUNameET.setError(getString(R.string.error_invalid_ccu_name));
+                }
+            }
+        });
+
         mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,6 +152,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 String installerEmail = mInstallerEmailET.getText().toString();
                 String managerEmail = mManagerEmailET.getText().toString();
                 if (ccuName.trim().length() == 0) {
+
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
                     mCreateNewCCU.setEnabled(true);
                     return;

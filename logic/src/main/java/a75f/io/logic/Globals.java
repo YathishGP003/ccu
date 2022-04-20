@@ -55,6 +55,7 @@ import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.messaging.MessagingAckJob;
+import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
@@ -285,6 +286,12 @@ public class Globals {
         }
     }
 
+    private void migrateSNPoints(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            SmartNodeMigration.init();
+        }
+    }
+
     private void importTunersAndScheduleJobs() {
 
         new Thread()
@@ -301,6 +308,7 @@ public class Globals {
                 OAODamperOpenReasonMigration(site);
                 firmwareVersionPointMigration(site);
                 migrateIduPoints(site);
+                migrateSNPoints(site);
                 loadEquipProfiles();
 
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())

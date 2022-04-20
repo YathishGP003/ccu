@@ -18,6 +18,7 @@ import java.util.UUID;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class DefaultSchedules {
@@ -27,6 +28,13 @@ public class DefaultSchedules {
 
     public static String generateDefaultSchedule(boolean zone, String zoneId) {
 
+        if (!zone) {
+            ArrayList<Schedule> buildingSchedules = CCUHsApi.getInstance().getSystemSchedule(false);
+            if (!buildingSchedules.isEmpty()) {
+                Schedule buildingSchedule = buildingSchedules.get(0);
+                return buildingSchedule.getId();
+            }
+        }
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
 
         HDict[] days = new HDict[5];

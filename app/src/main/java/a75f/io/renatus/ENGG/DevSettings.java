@@ -201,7 +201,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             public void onClick(View view)
             {
                 Log.d("CCU"," forceSync site data ");
-                CCUHsApi.getInstance().forceSync();
+                
+                CCUHsApi.getInstance().resyncSiteTree();
             }
         });
 

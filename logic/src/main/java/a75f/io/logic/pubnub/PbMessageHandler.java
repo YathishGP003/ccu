@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -85,6 +86,13 @@ public class PbMessageHandler
     }
     
     public void handlePubnubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
+    
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.d(L.TAG_CCU_PUBNUB,"CCU does not have active registration, Ignore pubnub "
+                                                                            +receivedMessageObject);
+            return;
+        }
+        
         Message message = messageHandler.obtainMessage();
         PbMessage pbMessage = new PbMessage();
         try {

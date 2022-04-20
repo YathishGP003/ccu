@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncResponse;
@@ -1112,88 +1113,17 @@ public class CCUHsApi
     public void syncPointArrays() {
         syncManager.syncPointArray();
     }
-
-    //Force-writes local entities to the backend.
-    public void forceSync() {
-        syncStatusService.clearSyncStatus();
-        syncManager.syncEntitiesWithPointWrite();
-    }
-
-    //Reset CCU - Force-writes local entities to the backend.
-    @SuppressLint("StaticFieldLeak")
-    public void resetSync() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground( final Void ... params ) {
-
-                String ccuid = getCcuRef().toString();
-                String siteId = getSiteIdRef().toString();
-                ArrayList<Floor> floors = HSUtil.getFloors();
-                ConcurrentHashMap<String, String> removeMap = new ConcurrentHashMap<>();
-
-                // exclude ccu and site for force sync
-                for (ConcurrentHashMap.Entry<String, String> pair : tagsDb.idMap.entrySet()){
-                    if (ccuid.equals(pair.getKey()) || siteId.equals(pair.getKey())){
-                        continue;
-                    }
-
-                    removeMap.put(pair.getKey(),pair.getValue());
-                }
-
-                // exclude floors for force sync
-                for (ConcurrentHashMap.Entry<String,String> map : removeMap.entrySet()){
-
-                    for (Floor f: floors){
-
-                        if (f.getId().equals(map.getKey())){
-                            removeMap.remove(f.getId());
-                        }
-                    }
-
-                    // exclude building schedule for force sync
-                    HashMap<Object, Object> buildingSchedule = readEntity("schedule and building and not vacation");
-                    if (buildingSchedule.get("id").toString().contains(map.getKey())){
-                        removeMap.remove(map.getKey());
-                    }
-
-                    // exclude building tuners for force sync
-                    ArrayList<HashMap<Object, Object>> hQList = readAllEntities("equip");
-                    for (HashMap h: hQList){
-                        Equip equip = new Equip.Builder().setHashMap(h).build();
-
-                        if (equip.getMarkers().contains("tuner") && equip.getId().equals(map.getKey())){
-                            removeMap.remove(map.getKey());
-                        }
-                    }
-                }
-
-                // finally clear remaining id's for force sync
-                for (ConcurrentHashMap.Entry<String, String> removeKey : removeMap.entrySet()){
-                    tagsDb.idMap.remove(removeKey.getKey());
-                }
-
-                syncEntityWithPointWrite();
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
+    
     public void scheduleSync() {
         syncManager.scheduleSync();
     }
 
-    public void syncHisData() {
+    public void syncHisDataWithPeriodicPurge() {
         if (syncManager.isEntitySyncProgress()) {
             CcuLog.d("CCU_HS"," Skip his sync, entity sync in progress");
             return;
         }
-        hisSyncHandler.syncData();
+        hisSyncHandler.syncHisDataWithPurge();
     }
 
     public boolean syncExistingSite(String siteId) {
@@ -1933,6 +1863,7 @@ public class CCUHsApi
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
+        setCcuReady();
     }
 
     public void setCcuUnregistered() {
@@ -1940,6 +1871,7 @@ public class CCUHsApi
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("isCcuRegistered");
         editor.commit();
+        resetCcuReady();
     }
 
     public boolean isNetworkConnected() {
@@ -2282,7 +2214,9 @@ public class CCUHsApi
         return isCcuReady;
     }
     public void setCcuReady() {
-        isCcuReady = true;
+        if (isCCURegistered()) {
+            isCcuReady = true;
+        }
     }
     
     public void resetCcuReady() {
@@ -2294,6 +2228,7 @@ public class CCUHsApi
      * @return
      */
     public boolean isCCUConfigured() {
+        
         HashMap<Object, Object> site = readEntity("site");
         if (site.isEmpty()) {
             return false;
@@ -2301,5 +2236,53 @@ public class CCUHsApi
     
         HashMap<Object, Object> ccu = readEntity("ccu");
         return !ccu.isEmpty();
+    }
+    
+    /**
+     * Removes CCU Entity from backend.
+     * @param ccuId - ccu Ref
+     * @return Http response
+     */
+    public String removeCCURemote(String ccuId) {
+        HDictBuilder b = new HDictBuilder()
+                             .add("ccuId", HRef.copy(ccuId));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
+                                    HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+    }
+    
+    /**
+     * Re-sync all the entities on this CCU except site and ccu-device entities.
+     */
+    public void resyncSiteTree() {
+        
+        markItemsUnSynced(readAllEntities(Tags.DEVICE+" and not "+Tags.CCU));
+        markItemsUnSynced(readAllEntities(Tags.EQUIP));
+        markItemsUnSynced(readAllEntities(Tags.FLOOR));
+        markItemsUnSynced(readAllEntities(Tags.ROOM));
+        markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
+        markItemsUnSynced(readAllEntities(Tags.POINT));
+        
+        syncStatusService.saveSyncStatus();
+        syncEntityTree();
+        hisSyncHandler.scheduleSync(true, 60);
+    }
+    
+    private void markItemsUnSynced(List<HashMap<Object, Object>> entities) {
+        entities.forEach( entity -> {
+            String entityId = Objects.requireNonNull(entity.get(Tags.ID)).toString();
+            if (!entityId.isEmpty()) {
+                syncStatusService.addUnSyncedEntity(entityId);
+            }
+        });
+    }
+    
+    public void updateDeviceRefOfSettingPoints(String newCcuId) {
+        List<HashMap<Object, Object>> allSettingPoints = readAllEntities("point and setting");
+        allSettingPoints.forEach( pointMap -> {
+            SettingPoint settingPoint = new SettingPoint.Builder().setHashMap(pointMap).build();
+            settingPoint.setDeviceRef(newCcuId);
+            updateSettingPoint(settingPoint, settingPoint.getId());
+        });
     }
 }

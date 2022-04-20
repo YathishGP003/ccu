@@ -141,7 +141,7 @@ class DualDuctEquip {
                                               .setProfile(profileType.name())
                                               .setPriority(ZonePriority.NONE.name())
                                               .addMarker("equip").addMarker("dualDuct").addMarker("zone")
-                                              .setAhuRef(ahuRef)
+                                              .addMarker("smartnode").setAhuRef(ahuRef)
                                               .setTz(tz)
                                               .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(dualDuctEquip.build());

@@ -192,7 +192,8 @@ public class VavEquip
                           .setFloorRef(floor)
                           .setProfile(profileType.name())
                           .setPriority(config.getPriority().name())
-                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("singleDuct").addMarker("pressureDependent")
+                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("singleDuct")
+                          .addMarker("pressureDependent").addMarker("smartnode")
                           .addMarker(isElectric ? "elecReheat" : "hotWaterReheat")
                           .setAhuRef(ahuRef)
                           .setTz(tz)
@@ -603,7 +604,7 @@ public class VavEquip
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 10.0));
-
+        
         Point pressure = new Point.Builder()
                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
                 .setEquipRef(equipRef)
@@ -931,7 +932,7 @@ public class VavEquip
     
         Equip equip = HSUtil.getEquipInfo(equipRef);
         TrueCFMPointsHandler.createTrueCFMControlPoint(hayStack, equip, Tags.VAV,
-                                                       config.enableCFMControl ? 1.0 : 0);
+                                                       config.enableCFMControl ? 1.0 : 0, fanMarker);
     
         if (config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equipRef, config, fanMarker);
@@ -1042,7 +1043,13 @@ public class VavEquip
     }
 
 
-    public void updateHaystackPoints(VavProfileConfiguration config,String floorRef, String roomRef)  {
+    public void updateHaystackPoints(VavProfileConfiguration config)  {
+        String fanMarker = "";
+        if (profileType == ProfileType.VAV_SERIES_FAN) {
+            fanMarker = "series";
+        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
+            fanMarker = "parallel";
+        }
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
@@ -1079,7 +1086,7 @@ public class VavEquip
         
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
-        
+
         if (config.enableCFMControl) {
             setConfigNumVal("min and cfm and cooling", config.numMinCFMCooling);
             setHisVal("min and cfm and cooling", config.numMinCFMCooling);

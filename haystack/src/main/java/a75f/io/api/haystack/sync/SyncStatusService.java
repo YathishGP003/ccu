@@ -293,9 +293,6 @@ public class SyncStatusService {
     }
     
     private void putListString(String key, List<String> stringList) {
-        if (stringList.isEmpty()) {
-            return;
-        }
         long time = System.currentTimeMillis();
         String[] stringArr = stringList.toArray(new String[0]);
         preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).commit();

@@ -47,7 +47,7 @@ public abstract class DabSystemProfile extends SystemProfile
     
     private void addDabSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
+        Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageChangeOverLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().writeHisValById(CCUHsApi.getInstance().addPoint(weightedAverageLoadMA), 0.0);
         Point weightedAverageCoolingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().writeHisValById(CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadPostML), 0.0);

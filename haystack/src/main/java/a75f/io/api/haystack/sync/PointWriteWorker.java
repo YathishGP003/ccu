@@ -41,6 +41,11 @@ public class PointWriteWorker extends Worker {
     public Result doWork() {
         
         CcuLog.i(TAG, "doWork : PointWriteWorker");
+    
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.e(TAG, "Abort PointWrite : CCU Not registered");
+            return Result.failure();
+        }
         
         if (!sendPointArrays()) {
             return Result.retry();

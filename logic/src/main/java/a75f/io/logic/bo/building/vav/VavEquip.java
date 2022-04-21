@@ -936,7 +936,7 @@ public class VavEquip
     
         if (config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equipRef, config, fanMarker);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,siteRef,equipDis,equipRef,room,floor,tz,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
+            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         } else {
             createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         }
@@ -1120,14 +1120,7 @@ public class VavEquip
             createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         } else if (!curTrueCfmEnabled && config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), config, fanMarker);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,
-                                              equip.getSiteRef(),
-                                              equip.getDisplayName(),
-                                              equip.getId(),
-                                              equip.getRoomRef(),
-                                              equip.getFloorRef(),
-                                              equip.getTz(),
-                                              Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
+            TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
             deleteNonCfmDamperPoints(hayStack, equip.getId());
         }
     }

@@ -7,14 +7,14 @@ import a75f.io.api.haystack.Point;
 public class TrueCFMTuners {
     
     public static void createDefaultTrueCfmTuners(CCUHsApi hayStack, String siteRef, String equipDis, String equipRef,
-                                                                                        String tz, String tunerGroup){
+                                                                      String tz, String profileTag, String tunerGroup){
         
         Point airflowCFMProportionalRange  = new Point.Builder()
                                                  .setDisplayName(equipDis+"-"+"airflowCFMProportionalRange")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                                  .addMarker("tuner").addMarker("airflow").addMarker("writable").addMarker("his")
-                                                 .addMarker("prange").addMarker("cfm").addMarker("default")
+                                                 .addMarker("prange").addMarker("cfm").addMarker("default").addMarker(profileTag)
                                                  .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(tunerGroup)
                                                  .setTz(tz)
                                                  .build();
@@ -28,7 +28,8 @@ public class TrueCFMTuners {
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipRef).setHisInterpolate("cov")
                                             .addMarker("tuner").addMarker("airflow").addMarker("writable").addMarker("his")
-                                            .addMarker("zone").addMarker("cfm").addMarker("itimeout").addMarker("time").addMarker("default")
+                                            .addMarker("zone").addMarker("cfm").addMarker("itimeout").addMarker("time")
+                                            .addMarker("default").addMarker(profileTag)
                                             .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(tunerGroup)
                                             .setTz(tz)
                                             .build();
@@ -43,7 +44,8 @@ public class TrueCFMTuners {
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                                    .addMarker("tuner").addMarker("airflow").addMarker("writable").addMarker("his")
-                                                   .addMarker("cfm").addMarker("pgain").addMarker("default")
+                                                   .addMarker("cfm").addMarker("pgain")
+                                                   .addMarker("default").addMarker(profileTag)
                                                    .setMinVal("0").setMaxVal("1").setIncrementVal(".1").setTunerGroup(tunerGroup)
                                                    .setTz(tz)
                                                    .build();
@@ -58,7 +60,8 @@ public class TrueCFMTuners {
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("airflow").addMarker("writable").addMarker("his")
-                                               .addMarker("zone").addMarker("cfm").addMarker("igain").addMarker("default")
+                                               .addMarker("zone").addMarker("cfm").addMarker("igain")
+                                               .addMarker("default").addMarker(profileTag)
                                                .setMinVal("0").setMaxVal("1").setIncrementVal(".1").setTunerGroup(tunerGroup)
                                                .setTz(tz)
                                                .build();

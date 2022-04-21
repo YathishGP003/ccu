@@ -24,6 +24,7 @@ import a75f.io.logic.util.RxTask;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
 
 public class VavTuners {
     
@@ -658,6 +659,8 @@ public class VavTuners {
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"), 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneDischargeTempOffSetTunerId,
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
+    
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, siteRef, equipRef, equipDis, tz, Tags.VAV, VAV_TUNER_GROUP);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,

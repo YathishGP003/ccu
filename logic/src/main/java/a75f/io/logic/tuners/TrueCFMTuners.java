@@ -1,4 +1,5 @@
 package a75f.io.logic.tuners;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
@@ -82,7 +83,7 @@ public class TrueCFMTuners {
                 .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(tunerGroup)
                 .setTz(tz)
                 .build();
-        
+
         String airflowCFMProportionalRangeId = hayStack.addPoint(airflowCFMProportionalRange);
         BuildingTunerUtil.updateTunerLevels(airflowCFMProportionalRangeId, roomRef, hayStack);
         hayStack.writeHisValById(airflowCFMProportionalRangeId, HSUtil.getPriorityVal(airflowCFMProportionalRangeId));
@@ -130,7 +131,6 @@ public class TrueCFMTuners {
                 .setMinVal("0").setMaxVal("1").setIncrementVal(".1").setTunerGroup(tunerGroup)
                 .setTz(tz)
                 .build();
-        
         String airflowCFMIntegralKFactorId = hayStack.addPoint(airflowCFMIntegralKFactor);
         BuildingTunerUtil.updateTunerLevels(airflowCFMIntegralKFactorId, roomRef, hayStack);
         hayStack.writeHisValById(airflowCFMIntegralKFactorId, HSUtil.getPriorityVal(airflowCFMIntegralKFactorId));

@@ -69,7 +69,7 @@ public class LSmartNode
     {
         ArrayList<Struct> retVal = new ArrayList<>();
         //retVal.addAll(getSeedMessages(zone));
-        retVal.addAll(getControlMessages(zone));
+        retVal.addAll(getControlMessages());
         return retVal;
     }
     
@@ -91,74 +91,15 @@ public class LSmartNode
     
     /********************************CONTROLS MESSAGES*************************************/
     
-    public static Collection<CcuToCmOverUsbSnControlsMessage_t> getControlMessages(Zone zone)
+    public static Collection<CcuToCmOverUsbSnControlsMessage_t> getControlMessages()
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
-        
         for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
         {
             ZoneProfile zp = it.next();
-            //zp.updateZonePoints();
             for (short node : zp.getNodeAddresses())
             {
-                CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
-                if (controlMessagesHash.containsKey(node))
-                {
-                    controlsMessage_t = controlMessagesHash.get(node);
-                }
-                else
-                {
-                    controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                    controlMessagesHash.put(node, controlsMessage_t);
-                    controlsMessage_t.smartNodeAddress.set(node);
-                    controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-                }
-    
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                HashMap device = hayStack.read("device and addr == \""+node+"\"");
-                
-                if (device != null && device.size() > 0)
-                {
-                    ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
-                    
-                    for (HashMap opPoint : physicalOpPoints)
-                    {
-                        if (opPoint.get("portEnabled").toString().equals("true"))
-                        {
-                            RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
-                            HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
-                            if (logicalOpPoint.isEmpty()) {
-                                CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));
-                                continue;
-                            }
-                            double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                            short mappedVal = 0;
-                            if (isEquipType("vav", node))
-                            {
-                                //IN case of vav , relay-2 maps to stage-2
-                                mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
-                            } else {
-                                mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
-                            }
-                            if (!Globals.getInstance().isTemporaryOverrideMode())
-                                hayStack.writeHisValById(p.getId(), (double) mappedVal);
-                            
-                            if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
-                                mappedVal |= 0x80;
-                            }
-    
-                            if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
-                                controlsMessage_t.controls.damperPosition.set(mappedVal);
-                                mappedVal = 0;
-                            }
-                            Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                            LSmartNode.getSmartNodePort(controlsMessage_t.controls, p.getPort()).set(mappedVal);
-                            
-                        }
-                    }
-                    controlsMessage_t.controls.setTemperature.set((short) (getDesiredTemp(node) * 2));
-                    controlsMessage_t.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
-                }
+                controlMessagesHash.put(node , getControlMessageforEquip(String.valueOf(node),CCUHsApi.getInstance()));
             }
         }
         return controlMessagesHash.values();
@@ -517,5 +458,69 @@ public class LSmartNode
     }
     
     /********************************END SEED MESSAGES**************************************/
+
+
+
+    /*
+    This method returns the controlMessage for the given equip
+    param : String - node address
+    returns the control message if the node address exits
+    else nul
+     */
+    public static CcuToCmOverUsbSnControlsMessage_t getControlMessageforEquip(String node,CCUHsApi hayStack){
+
+        CcuToCmOverUsbSnControlsMessage_t controlsMessage;
+        controlsMessage = new CcuToCmOverUsbSnControlsMessage_t();
+        controlsMessage.smartNodeAddress.set(Short.parseShort(node));
+        controlsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+
+        HashMap<Object,Object> device = hayStack.readEntity("device and addr == \""+node+"\"");
+
+        if (device != null && device.size() > 0)
+        {
+            ArrayList<HashMap<Object, Object>> physicalOpPoints= hayStack.readAllEntities("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
+
+            for (HashMap<Object,Object> opPoint : physicalOpPoints)
+            {
+                if (opPoint.get("portEnabled").toString().equals("true"))
+                {
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
+                    if (logicalOpPoint.isEmpty()) {
+                        CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));
+                        continue;
+                    }
+                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                    short mappedVal = 0;
+                    if (isEquipType("vav", Short.parseShort(node)))
+                    {
+                        //IN case of vav , relay-2 maps to stage-2
+                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                    } else {
+                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                    }
+                    if (!Globals.getInstance().isTemporaryOverrideMode())
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+
+                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                        mappedVal |= 0x80;
+                    }
+
+                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                        controlsMessage.controls.damperPosition.set(mappedVal);
+                        mappedVal = 0;
+                    }
+                    Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
+                    Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p.getPort());
+                    if(smartNodePort != null)
+                        smartNodePort.set(mappedVal);
+
+                }
+            }
+            controlsMessage.controls.setTemperature.set((short) (getDesiredTemp(Short.parseShort(node)) * 2));
+            controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
+        }
+        return controlsMessage;
+    }
     
 }

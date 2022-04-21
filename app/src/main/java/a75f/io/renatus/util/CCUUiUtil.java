@@ -126,4 +126,9 @@ public class CCUUiUtil {
     public static boolean isDaikinEnvironment(Context context){
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
+
+    public static boolean isInvalidName(String enteredName){
+        return enteredName.contains(".") || enteredName.contains("\\")
+               || enteredName.contains("&") || enteredName.contains("#");
+    }
 }

@@ -102,7 +102,7 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address, equipRef);
+        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address, equipRef).build();
         
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
@@ -247,7 +247,7 @@ public class HyperStatMessageSender {
     }
 
     public static void sendRestartModuleCommand(int address){
-        writeControlMessage(HyperStatMessageGenerator.getHyperstatRebootControl(), address,
+        writeControlMessage(HyperStatMessageGenerator.getHyperstatRebootControl(address), address,
                 MessageType.HYPERSTAT_CONTROLS_MESSAGE,
                 false);
     }

@@ -16,6 +16,9 @@ public class Tags
     public static final String EQUIP = "equip";
     public static final String POINT = "point";
     public static final String DEVICE = "device";
+    public static final String FLOOR = "floor";
+    public static final String ROOM = "room";
+    public static final String SCHEDULE = "schedule";
     public static final String CONNECTION = "connection";
     public static final String ID = "id";
     public static final String DIS = "dis";

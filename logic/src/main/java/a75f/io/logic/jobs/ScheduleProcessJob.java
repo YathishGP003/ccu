@@ -188,19 +188,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> ");
         watchdogMonitor = false;
         
+        if (!CCUHsApi.getInstance().isCCURegistered() ||
+                            !CCUHsApi.getInstance().isCCUConfigured()) {
+            CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob <- CCU not configured ");
+            return;
+        }
+        
         if (jobLock.tryLock()) {
             try {
-                HashMap site = CCUHsApi.getInstance().read("site");
-                if (site.size() == 0) {
-                    CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
-                    return;
-                }
-    
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                if (ccu.size() == 0) {
-                    CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
-                    return;
-                }
                 processSchedules();
                 CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
             } catch (Exception e) {

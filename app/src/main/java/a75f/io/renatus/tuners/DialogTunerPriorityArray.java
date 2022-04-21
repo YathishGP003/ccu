@@ -74,6 +74,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     LinearLayout layoutTitle;
     Prefs prefs;
     double defaultVal;
+    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+
 
 
     private void configureArguments(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
@@ -272,6 +274,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
+        defaultVal = getTunerDefaultValue(tunerItemSelected.get("id").toString());
+
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
         tunerName = tunerItemSelected.get("dis").toString();
         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
@@ -316,7 +320,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     }
 
     public boolean doesPointNeedAbsoluteConversion() {
-        return tunerItemSelected.containsKey("temp") && !tunerItemSelected.containsKey("abnormal") || tunerItemSelected.containsKey(Tags.LOCKOUT) || (tunerItemSelected.containsKey("pipe2") && tunerItemSelected.containsKey("threshold")) || (tunerItemSelected.containsKey("economizing") && (tunerItemSelected.containsKey("threshold") || tunerItemSelected.containsKey("loop"))) || tunerItemSelected.containsKey("outside") || tunerItemSelected.containsKey("limit") && !tunerItemSelected.containsKey("timer") && !tunerItemSelected.containsKey("itimeout");
+        return tunerItemSelected.containsKey("temp") && !tunerItemSelected.containsKey("abnormal") || tunerItemSelected.containsKey(Tags.LOCKOUT) || (tunerItemSelected.containsKey("pipe2") && tunerItemSelected.containsKey("threshold")) || (tunerItemSelected.containsKey("economizing") && (tunerItemSelected.containsKey("threshold") || tunerItemSelected.containsKey("loop"))) || tunerItemSelected.containsKey("outside") || tunerItemSelected.containsKey("limit") && !tunerItemSelected.containsKey("timer") && !tunerItemSelected.containsKey("itimeout") && (!tunerItemSelected.containsKey("constant") && !tunerItemSelected.containsKey("time"));
     }
 
     public boolean doesPointNeedRelativeConversion() {
@@ -378,7 +382,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     }
 
     private String getTunerValue(String id, String level) {
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
@@ -466,9 +469,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
                 if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-                    if (prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY))) {
                         if (doesPointNeedAbsoluteConversion()) {
                             maxValueDb = Math.round(fahrenheitToCelsius(maxValueDb));
                             minValueDb = Math.round(fahrenheitToCelsius(minValueDb));
@@ -478,7 +479,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             maxValueDb = (fahrenheitToCelsiusUnitChange(maxValueDb));
                             currentValueDb = (fahrenheitToCelsiusUnitChange(currentValueDb));
                         }
-                    }
                 }
 
                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);

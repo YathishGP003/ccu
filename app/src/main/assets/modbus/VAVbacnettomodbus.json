@@ -155,7 +155,7 @@
             },
             {
               "tagName": "unit",
-              "value": "CFM"
+              "value": "cfm"
             },
             {
               "tagName": "kind",

@@ -272,9 +272,9 @@ public class HyperStatSenseUtil {
                 markers = new String[]{"pressure"};
                 break;
             case 3:
-                shortDis = "Airflow Sensor (0-1000)CFM";
+                shortDis = "Airflow Sensor (0-1000)cfm";
                 shortDisTarget = "Dynamic Target Airflow";
-                unit = "CFM";
+                unit = "cfm";
                 maxVal = "1000";
                 minVal = "0";
                 incrementVal = "10";

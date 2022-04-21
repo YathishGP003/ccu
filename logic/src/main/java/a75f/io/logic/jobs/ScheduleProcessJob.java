@@ -1039,7 +1039,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
         double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
-        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and airflow and cfm and cmd and vav and equipRef == \""+equipID+"\"");
+        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and airflow and trueCfm and cmd and vav and equipRef == \""+equipID+"\"");
         vavPoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {

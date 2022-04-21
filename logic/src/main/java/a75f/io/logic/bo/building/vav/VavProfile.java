@@ -570,7 +570,7 @@ public abstract class VavProfile extends ZoneProfile {
             CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not enabled "+equipId);
             return;
         }
-        double currentCfm = TrueCFMUtil.getCalculatedCfm(hayStack, equipId);
+        double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId);
         
         if (currentCfm == 0) {
             CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not active ! currentCfm "+currentCfm);
@@ -586,8 +586,7 @@ public abstract class VavProfile extends ZoneProfile {
         }
         damper.currentPosition = Math.min(damper.currentPosition, 100);
         CcuLog.i(L.TAG_CCU_ZONE,
-                 " updateDamperPosForTrueCfm: currentPos "+damper.currentPosition+" cfmLoopState "+cfmLoopState
-                 +" currentCfm "+currentCfm);
+                 " updateDamperPosForTrueCfm: currentPos "+damper.currentPosition+" cfmLoopState "+cfmLoopState);
         cfmControlLoop.dump();
     }
 }

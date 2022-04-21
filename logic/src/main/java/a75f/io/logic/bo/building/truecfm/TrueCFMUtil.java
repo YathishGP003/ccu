@@ -9,7 +9,7 @@ public class TrueCFMUtil {
     
     private static double getFlowVelocity(CCUHsApi hayStack, String equipRef) {
         
-        double kFactor = hayStack.readDefaultVal("cfm and kfactor and equipRef == \""+equipRef+"\"");
+        double kFactor = hayStack.readDefaultVal("trueCfm and kfactor and equipRef == \""+equipRef+"\"");
         double pressureInPascals = hayStack.readHisValByQuery("pressure and sensor and equipRef == \""+equipRef+"\"");
         CcuLog.i(L.TAG_CCU_ZONE,"kFactor " + kFactor + " pressureInPascals " + pressureInPascals);
         double pressureInWGUnit = pressureInPascals/248.84 ;
@@ -30,30 +30,34 @@ public class TrueCFMUtil {
     }
     
     public static boolean isTrueCfmEnabled(CCUHsApi hayStack, String equipRef) {
-        return hayStack.readDefaultVal("config and cfm and enabled and equipRef ==\""
+        return hayStack.readDefaultVal("config and trueCfm and enable and equipRef ==\""
                                                                 +equipRef+"\"").intValue() > 0;
     }
     
-    public static double getCalculatedCfm(CCUHsApi hayStack, String equipRef) {
+    public static double calculateAndUpdateCfm(CCUHsApi hayStack, String equipRef) {
         double flowVelocity = getFlowVelocity(hayStack, equipRef);
         double ductArea = getDuctCrossSectionArea(hayStack, equipRef);
-        CcuLog.i(L.TAG_CCU_ZONE,"flowVelocity " + flowVelocity + " ductArea " + ductArea);
-        return flowVelocity * ductArea;
+        double airflowCfm = flowVelocity * ductArea;
+        hayStack.writeHisValByQuery("air and velocity and equipRef == \""+equipRef+"\"", flowVelocity);
+        hayStack.writeHisValByQuery("air and flow and equipRef == \""+equipRef+"\"", airflowCfm);
+        CcuLog.i(L.TAG_CCU_ZONE,"flowVelocity " + flowVelocity + " ductArea "
+                                            + ductArea+" airflowCfm "+airflowCfm);
+        return airflowCfm;
     }
     
     public static double getMaxCFMCooling(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and max and cfm and cooling and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and max and trueCfm and cooling and equipRef == \""+equipId+"\"");
     }
     
     public static double getMinCFMCooling(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and min and cfm and cooling and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and min and trueCfm and cooling and equipRef == \""+equipId+"\"");
     }
     
     public static double getMaxCFMReheating(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and max and cfm and heating and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and max and trueCfm and heating and equipRef == \""+equipId+"\"");
     }
     
     public static double getMinCFMReheating(CCUHsApi hayStack, String equipId) {
-        return hayStack.readDefaultVal("config and min and cfm and heating and equipRef == \""+equipId+"\"");
+        return hayStack.readDefaultVal("config and min and trueCfm and heating and equipRef == \""+equipId+"\"");
     }
 }

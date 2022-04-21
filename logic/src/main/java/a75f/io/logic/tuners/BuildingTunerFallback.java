@@ -135,10 +135,10 @@ class BuildingTunerFallback {
         tagsValMap.put("discharge,air,temp,max", TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
         tagsValMap.put("discharge,air,temp,offset", TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
 
-        tagsValMap.put("cfm,airflow,prange",TunerConstants.AIR_FLOW_CFM_PROPORTIONAL_RANGE);
-        tagsValMap.put("cfm,airflow,igain",TunerConstants.AIR_FLOW_CFM_INTEGRAL_K_FACTOR);
-        tagsValMap.put("cfm,itimeout,airflow",TunerConstants.AIR_FLOW_CFM_INTEGRAL_TIME);
-        tagsValMap.put("cfm,airflow,pgain",TunerConstants.AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR);
+        tagsValMap.put("trueCfm,airflow,prange",TunerConstants.AIR_FLOW_CFM_PROPORTIONAL_RANGE);
+        tagsValMap.put("trueCfm,airflow,igain",TunerConstants.AIR_FLOW_CFM_INTEGRAL_K_FACTOR);
+        tagsValMap.put("trueCfm,itimeout,airflow",TunerConstants.AIR_FLOW_CFM_INTEGRAL_TIME);
+        tagsValMap.put("trueCfm,airflow,pgain",TunerConstants.AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR);
 
         return tagsValMap;
     }

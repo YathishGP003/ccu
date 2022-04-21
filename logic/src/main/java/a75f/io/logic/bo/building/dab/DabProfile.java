@@ -152,17 +152,20 @@ public class DabProfile extends ZoneProfile
         } else {
             if (state != DEADBAND) {
                 state = DEADBAND;
-                damperOpController.reset();
             }
-           
         }
         damperOpController.dump();
         setDamperLimits(damper);
     
         updateDamperIAQCompensation();
         
+        //Loop Output varies from 0-100% such that, it is 50% at 0 error, 0% at maxNegative error, 100% at maxPositive
+        //error
+        double midPointBalancedLoopOp = 50.0 +
+                              damperOpController.getControlVariable() * 50.0 / damperOpController.getMaxAllowedError();
+        
         damper.currentPosition =
-            (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
+            (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * midPointBalancedLoopOp / 100);
         
         double hisDamperPos = CCUHsApi.getInstance().readHisValByQuery("point and damper and base and cmd and primary"+
                                                                     " and group == \""+dabEquip.nodeAddr+"\"");

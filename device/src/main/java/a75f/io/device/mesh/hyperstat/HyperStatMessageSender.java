@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.BuildConfig;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
@@ -110,22 +111,33 @@ public class HyperStatMessageSender {
     
         writeControlMessage(controls, address, MessageType.HYPERSTAT_CONTROLS_MESSAGE, true);
     }
-    
-    
+
+
     public static void writeControlMessage(HyperStatControlsMessage_t message, int address,
-                                              MessageType msgType, boolean checkDuplicate) {
-        
+                                           MessageType msgType, boolean checkDuplicate) {
+
         CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
-        if (checkDuplicate) {
-            Integer messageHash = Arrays.hashCode(message.toByteArray());
-            if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName(),
-                                                                   messageHash)) {
-                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
-                                           " was already sent, returning , type "+msgType);
+        if (BuildConfig.BUILD_TYPE.equals("staging") ||
+                BuildConfig.BUILD_TYPE.equals("prod")) {
+            if (checkDuplicate && HyperStatMessageCache.getInstance().checkControlMessage(address
+                    , message)) {
+                CcuLog.d(L.TAG_CCU_SERIAL,
+                        HyperStatCcuToCmSerializedMessage_t.class.getSimpleName() +
+                        " was already sent, returning , type " + msgType);
                 return;
             }
+        } else if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperStatMessageCache.getInstance().checkAndInsert(address,
+                    HyperStatSettingsMessage_t.class.getSimpleName(),
+                    messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperStatSettingsMessage_t.class.getSimpleName() +
+                        " was already sent, returning , type " + msgType);
+                return;
+            }
+
         }
-        
+
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
     
@@ -173,7 +185,8 @@ public class HyperStatMessageSender {
     }
     
     private static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
-        
+        Log.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
+        HyperStatSettingsUtil.Companion.setCcuControlMessageTimer(System.currentTimeMillis());
         byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 2 + 1];
         //CM currently supports both legacy byte array and protobuf encoding. Message type is kept as raw byte at the start to help CM determine which type
         //of decoding to be used.

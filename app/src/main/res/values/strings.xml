@@ -745,6 +745,7 @@
     <string name="label_relay_2">Relay 2</string>
     <string name="label_threshold_relay2_on">Turn ON Relay 2</string>
     <string name="label_threshold_relay2_off">Turn OFF Relay 2</string>
+    <string name="cfm_unit">cfm</string>
 
     <!--ENERGY METER SCREEN-->
     <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node|Helio Node. Please wire up the meter as shown below.</string>

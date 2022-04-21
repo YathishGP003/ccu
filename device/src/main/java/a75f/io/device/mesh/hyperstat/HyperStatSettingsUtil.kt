@@ -302,5 +302,17 @@ class HyperStatSettingsUtil {
             )
         }
 
+
+        var  ccuControlMessageTimer :Long = 0
+            get() {
+            if (field == 0L){
+                ccuControlMessageTimer = System.currentTimeMillis()}
+            return field
+
+        }
+        set(value: Long) {
+            field = value
+        }
+
     }
 }

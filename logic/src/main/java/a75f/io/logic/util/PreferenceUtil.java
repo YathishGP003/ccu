@@ -13,7 +13,7 @@ public class PreferenceUtil {
     private static String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
-    private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
+    private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
 
 
     public static void setContext(Context c) {
@@ -181,14 +181,13 @@ public class PreferenceUtil {
     public static void setPressureUnitMigrationDone() {
         setBooleanPreference(PRESSURE_UNIT_MIGRATION, true);
     }
-
-    public static boolean isTrueCFMVAVMigrationDone() {
-        return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
-    }
-    public static void setTrueCFMVAVMigrationDone() {
-        setBooleanPreference(TRUE_CFM_VAV_MIGRATION, true);
+    public static boolean isAirflowVolumeUnitMigrationDone() {
+        return getBooleanPreference(AIRFLOW_UNIT_MIGRATION);
     }
 
+    public static void setAirflowVolumeUnitMigrationDone() {
+        setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
+    }
 
 
 

@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMVAVConfigHandler {
@@ -29,10 +30,10 @@ public class TrueCFMVAVConfigHandler {
                 vavProfileConfiguration.nuMaxCFMCooling = 500;
                 vavProfileConfiguration.numMinCFMReheating = 500;
                 vavProfileConfiguration.kFactor = 2;
-                //TrueCFMPointsHandler.createTrueCFMVavConfigPoints(hayStack, equip, vavProfileConfiguration,
-                // fanMarker);
+                TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), vavProfileConfiguration,
+                 fanMarker);
             } else {
-                //TrueCFMConfigPoints.deleteTrueCFMPoints(hayStack, equip.getId());
+                TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
             }
         writePointFromJson(configPoint, msgObject, hayStack);
     }

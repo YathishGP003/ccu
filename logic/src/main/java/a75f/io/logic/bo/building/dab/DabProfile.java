@@ -18,6 +18,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -47,6 +48,11 @@ public class DabProfile extends ZoneProfile
     double voc;
     
     Damper damper = new Damper();
+    
+    //State prior to changeover. User to identify the direction in which the PiLoop to be run while in deadband.
+    ZoneState prevState = DEADBAND;
+    
+    private int LOOP_OP_MIDPOINT = 50;
     
     public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef) {
         dabEquip = new DabEquip(getProfileType(), addr);
@@ -108,8 +114,8 @@ public class DabProfile extends ZoneProfile
     }
     
     @Override
-    public void updateZonePoints()
-    {
+    public void updateZonePoints() {
+        
         if (isZoneDead()) {
             updateZoneDead();
             return;
@@ -126,32 +132,34 @@ public class DabProfile extends ZoneProfile
         co2 = dabEquip.getCO2();
         voc = dabEquip.getVOC();
         
-        Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
+        Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if ((roomTemp > setTempCooling) && (conditioning == SystemController.State.COOLING) && (systemMode != SystemMode.OFF))
-        {
+        if (roomTemp > setTempCooling
+            && conditioning == SystemController.State.COOLING
+            && systemMode != SystemMode.OFF) {
+            
             //Zone is in Cooling
-            if (state != COOLING)
-            {
-                state = COOLING;
-                damperOpController.reset();
-            }
+            handleCoolingChangeOver(damperOpController);
             damperOpController.updateControlVariable(roomTemp, setTempCooling);
-        }
-        else if ((roomTemp < setTempHeating) && (conditioning == SystemController.State.HEATING) && (systemMode != SystemMode.OFF))
-        {
+        } else if (roomTemp < setTempHeating
+                 && conditioning == SystemController.State.HEATING
+                 && systemMode != SystemMode.OFF) {
+            
             //Zone is in heating
-            if (state != HEATING)
-            {
-                state = HEATING;
-                damperOpController.reset();
-            }
+            handleHeatingChangeOver(damperOpController);
             damperOpController.updateControlVariable(setTempHeating, roomTemp);
         } else {
             if (state != DEADBAND) {
                 state = DEADBAND;
+            }
+            if (systemMode == SystemMode.OFF) {
+               damperOpController.reset();
+            } if (prevState == COOLING) {
+                damperOpController.updateControlVariable(roomTemp, setTempCooling);
+            } else if (prevState == HEATING) {
+                damperOpController.updateControlVariable(setTempHeating, roomTemp);
             }
         }
         damperOpController.dump();
@@ -161,8 +169,11 @@ public class DabProfile extends ZoneProfile
         
         //Loop Output varies from 0-100% such that, it is 50% at 0 error, 0% at maxNegative error, 100% at maxPositive
         //error
-        double midPointBalancedLoopOp = 50.0 +
-                              damperOpController.getControlVariable() * 50.0 / damperOpController.getMaxAllowedError();
+        double midPointBalancedLoopOp = 0;
+        if (prevState != DEADBAND) {
+            midPointBalancedLoopOp = LOOP_OP_MIDPOINT +
+                         damperOpController.getControlVariable() * LOOP_OP_MIDPOINT / damperOpController.getMaxAllowedError();
+        }
         
         damper.currentPosition =
             (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * midPointBalancedLoopOp / 100);
@@ -176,9 +187,29 @@ public class DabProfile extends ZoneProfile
         
         dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                     : state == COOLING ? buildingLimitMaxBreached() : false));
-        CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState() + " ZoneState : " + getState() + " ,CV: " + damperOpController.getControlVariable() + " ,damper:" + damper.currentPosition);
-    
+        CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState()
+                                 + " ZoneState : " + getState()
+                                 + " ,CV: " + damperOpController.getControlVariable()
+                                 +" , midPointBalancedLoopOp "+midPointBalancedLoopOp
+                                 + " ,damper:" + damper.currentPosition);
     }
+    
+    private void handleCoolingChangeOver(GenericPIController damperOpController) {
+        if (state != COOLING) {
+            state = COOLING;
+            prevState = COOLING;
+            damperOpController.reset();
+        }
+    }
+    
+    private void handleHeatingChangeOver(GenericPIController damperOpController) {
+        if (state != HEATING) {
+            state = HEATING;
+            prevState = HEATING;
+            damperOpController.reset();
+        }
+    }
+    
     
     private void updateZoneDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());

@@ -181,15 +181,22 @@ public class ModbusPulse {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
-            }  else if (register.getParameterDefinitionType().equals("int64") ||
-                        register.getParameterDefinitionType().equals("unsigned long") ||
-                        register.getParameterDefinitionType().equals("long")) {
+            }  else if (register.getParameterDefinitionType().equals("int64")) {
                 
                 if (register.getParameters().size() > 0) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianInt64Val(response);
                     } else {
                         respVal = parseInt64Val(response);
+                    }
+                }
+            }else if(register.getParameterDefinitionType().equals("unsigned long") ||
+                    register.getParameterDefinitionType().equals("long")){
+                if (register.getParameters().size() > 0) {
+                    if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                        respVal = parseLittleEndianInt32Val(response);
+                    } else {
+                        respVal = parseInt32Val(response);
                     }
                 }
             }
@@ -252,7 +259,27 @@ public class ModbusPulse {
                            (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF) ;
         return responseVal;
     }
-    
+
+    public static long parseInt32Val(RtuMessageResponse response) {
+        long responseVal = 0;
+        for (int i = 0; i < 4; i++) {
+            responseVal <<= Long.BYTES;
+            responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
+        }
+        return responseVal;
+    }
+
+
+    public static long parseLittleEndianInt32Val(RtuMessageResponse response) {
+        long responseVal = ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) <<
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
+        return responseVal;
+    }
+
+
     public static long parseInt64Val(RtuMessageResponse response) {
         long responseVal = 0;
         for (int i = 0; i < Long.BYTES; i++) {

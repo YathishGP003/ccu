@@ -660,7 +660,7 @@ public class VavTuners {
         CCUHsApi.getInstance().writeHisValById(reheatZoneDischargeTempOffSetTunerId,
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
     
-        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, siteRef, equipRef, equipDis, tz, Tags.VAV, VAV_TUNER_GROUP);
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.VAV, VAV_TUNER_GROUP);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,

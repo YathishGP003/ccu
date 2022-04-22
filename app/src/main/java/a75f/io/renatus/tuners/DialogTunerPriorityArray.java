@@ -534,7 +534,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 );
                 buttonCancelAlert.setOnClickListener(v -> valueDialog.dismiss());
                 buttonSaveAlert.setOnClickListener(v -> {
-                    if (prefs.getBoolean(getString(R.string.USE_CELSIUS_KEY))) {
+                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                         if (doesPointNeedAbsoluteConversion()) {
                             selectedTunerValue = String.valueOf(celsiusToFahrenheit(Double.parseDouble(selectedTunerValue)));
                         } else if (doesPointNeedRelativeConversion()){

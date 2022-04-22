@@ -66,7 +66,20 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
+        if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
+            airflowUnitMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowVolumeUnitMigrationDone();
+        }
 
+    }
+
+    private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> airflowPoints = ccuHsApi.readAllEntities("point and airflow and sense and unit");
+        String updatedAirflowUnit = "cfm";
+        for (HashMap<Object, Object> airflow : airflowPoints) {
+            Point updatedPoint = new Point.Builder().setHashMap(airflow).setUnit(updatedAirflowUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
     }
 
     private static void pressureUnitMigration(CCUHsApi ccuHsApi) {

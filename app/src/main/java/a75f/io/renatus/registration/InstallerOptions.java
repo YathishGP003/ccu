@@ -70,6 +70,8 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -112,6 +114,7 @@ public class InstallerOptions extends Fragment {
     //BACnet Setup
     ToggleButton toggleBACnet;
     ToggleButton toggleCelsius;
+    TextView textCelsiusEnable;
     RelativeLayout relativeLayoutBACnet;
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
@@ -123,7 +126,6 @@ public class InstallerOptions extends Fragment {
     RadioGroup radioGroupConfig;
     Button buttonSendIAM;
     TextView textBacnetEnable;
-    TextView textCelsiusEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
     
@@ -216,7 +218,8 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
-        toggleCelsius = rootView.findViewById(R.id.toggleCelsius);
+        toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
+        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
@@ -226,7 +229,6 @@ public class InstallerOptions extends Fragment {
         radioGroupConfig = rootView.findViewById(R.id.radioGroupConfig);
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
         textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
-        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
@@ -250,12 +252,12 @@ public class InstallerOptions extends Fragment {
         toggleCelsius.setVisibility(View.VISIBLE);
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
 
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-            toggleCelsius.setChecked(true);
-            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), true);
+        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+           toggleCelsius.setChecked(true);
+           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), true);
         } else {
-            toggleCelsius.setChecked(false);
-            prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), false);
+           toggleCelsius.setChecked(false);
+           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), false);
         }
 
         if (ccuId != null) {
@@ -404,6 +406,7 @@ public class InstallerOptions extends Fragment {
         });
 
         getTempValues();
+
         toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

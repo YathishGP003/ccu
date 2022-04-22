@@ -8,8 +8,11 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.HyperStat;
 import a75f.io.device.daikin.IEDeviceHandler;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.mesh.hyperstat.HyperStatSettingsUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -19,7 +22,6 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -34,6 +36,7 @@ import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.logic.L.ccu;
 
 import android.util.Log;
+
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -55,6 +58,7 @@ public class MeshNetwork extends DeviceNetwork
         MeshUtil.sendHeartbeat((short)0);
         
         MeshUtil.tSleep(1000);
+        boolean sendControlMessage = (((System.currentTimeMillis() -  HyperStatSettingsUtil.Companion.getCcuControlMessageTimer())/ 1000) / 60)>20;
         boolean bSeedMessage = LSerial.getInstance().isReseedMessage();
         Log.i(L.TAG_CCU_DEVICE, "bSeedMessage: "+bSeedMessage);
 
@@ -171,6 +175,12 @@ public class MeshNetwork extends DeviceNetwork
                                     }
                                     else if (!equip.getMarkers().contains("sense")){
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Controls ===================== "+d.getAddr());
+                                        if(sendControlMessage){
+                                            HyperStat.HyperStatControlsMessage_t.Builder controls =
+                                                    HyperStatMessageGenerator.getControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                            HyperStatMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
+                                                    MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
+                                        }
                                         HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
                                     }
 

@@ -20,5 +20,5 @@ public class UnitUtils {
     public static double fahrenheitToCelsiusUnitChange(double T) {
         return CCUUtils.roundToTwoDecimal(T/1.8);
     }
-    
+
 }

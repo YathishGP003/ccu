@@ -132,6 +132,5 @@ public class BuildingTuners
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
         HyperstatTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         BPOSTuners.addDefaultBPOSTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equipRef, VAV_TUNER_GROUP);
     }
 }

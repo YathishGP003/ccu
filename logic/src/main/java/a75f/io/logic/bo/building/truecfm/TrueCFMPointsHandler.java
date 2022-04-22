@@ -21,7 +21,7 @@ public class TrueCFMPointsHandler {
                                      .setRoomRef(equip.getRoomRef())
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov").addMarker(fanMarker)
                                      .addMarker("config").addMarker(profileTag).addMarker("writable").addMarker("zone")
-                                     .addMarker("enabled").addMarker("cfm").addMarker("sp").addMarker("his")
+                                     .addMarker("enable").addMarker("trueCfm").addMarker("sp").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
                                      .build();
@@ -35,9 +35,9 @@ public class TrueCFMPointsHandler {
                             .setDisplayName(equip.getDisplayName() + "-kFactor")
                             .setEquipRef(equip.getId())
                             .setFloorRef(equip.getFloorRef())
-                            .setRoomRef(equip.getRoomRef()).addMarker(fanMarker)
+                            .setRoomRef(equip.getRoomRef())
                             .setSiteRef(equip.getSiteRef()).setHisInterpolate("cov")
-                            .addMarker("config").addMarker(profileTag).addMarker("cfm").addMarker("pos").addMarker(fanMarker)
+                            .addMarker("config").addMarker(profileTag).addMarker("trueCfm").addMarker(fanMarker)
                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
                             .setGroup(equip.getGroup())
                             .setTz(equip.getTz())
@@ -56,7 +56,7 @@ public class TrueCFMPointsHandler {
                                      .setRoomRef(equip.getRoomRef())
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                      .addMarker("config").addMarker(profileTag).addMarker("min")
-                                     .addMarker("cfm").addMarker("cooling").addMarker(fanType)
+                                     .addMarker("trueCfm").addMarker("cooling").addMarker(fanType)
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
@@ -76,7 +76,7 @@ public class TrueCFMPointsHandler {
                                      .setRoomRef(equip.getRoomRef())
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                      .addMarker("config").addMarker(profileTag).addMarker("max")
-                                     .addMarker("cfm").addMarker("cooling").addMarker(fanType)
+                                     .addMarker("trueCfm").addMarker("cooling").addMarker(fanType)
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
@@ -95,7 +95,7 @@ public class TrueCFMPointsHandler {
                                        .setRoomRef(equip.getRoomRef())
                                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                        .addMarker("config").addMarker(profileTag).addMarker("min")
-                                       .addMarker("cfm").addMarker("heating").addMarker(fanType)
+                                       .addMarker("trueCfm").addMarker("heating").addMarker(fanType)
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
@@ -114,7 +114,7 @@ public class TrueCFMPointsHandler {
                                        .setRoomRef(equip.getRoomRef())
                                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                        .addMarker("config").addMarker(profileTag).addMarker("max")
-                                       .addMarker("cfm").addMarker("heating").addMarker(fanType)
+                                       .addMarker("trueCfm").addMarker("heating").addMarker(fanType)
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
@@ -131,7 +131,7 @@ public class TrueCFMPointsHandler {
                 .setSiteRef(equip.getSiteRef())
                 .setRoomRef(equip.getRoomRef())
                 .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("cmd").addMarker("cfm").addMarker(fanMarker)
+                .addMarker("vav").addMarker("cmd").addMarker("trueCfm").addMarker(fanMarker)
                 .addMarker("airflow").addMarker("his").addMarker(profileTag)
                 .setGroup(equip.getGroup())
                 .build();
@@ -146,7 +146,7 @@ public class TrueCFMPointsHandler {
                 .setSiteRef(equip.getSiteRef())
                 .setRoomRef(equip.getRoomRef())
                 .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("flow").addMarker("velocity").addMarker(fanMarker)
+                .addMarker("vav").addMarker("air").addMarker("velocity").addMarker(fanMarker)
                 .addMarker("sp").addMarker("his").addMarker(profileTag)
                 .setGroup(equip.getGroup())
                 .build();
@@ -173,32 +173,34 @@ public class TrueCFMPointsHandler {
     public static void createTrueCfmSpPoints(CCUHsApi hayStack, Equip equip, String profileTag, String fanType) {
         
         Point airflowCfm = new Point.Builder()
-                               .setDisplayName(equip.getDisplayName()+"-airflowCfm")
+                               .setDisplayName(equip.getDisplayName()+"-airflow")
                                .setEquipRef(equip.getId())
                                .setSiteRef(equip.getSiteRef())
                                .setRoomRef(equip.getRoomRef())
                                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                               .addMarker(profileTag).addMarker("sp").addMarker("cfm")
-                               .addMarker("airflow").addMarker("his").addMarker(fanType)
+                               .addMarker(profileTag).addMarker("sp").addMarker("trueCfm")
+                               .addMarker("air").addMarker("flow").addMarker("his").addMarker(fanType)
                                .setGroup(equip.getGroup())
                                .setTz(equip.getTz())
+                               .setUnit("cfm")
                                .build();
         String airflowCfmId = hayStack.addPoint(airflowCfm);
         hayStack.writeHisValueByIdWithoutCOV(airflowCfmId, 0.0);
         
-        Point flowVelocity = new Point.Builder()
-                                 .setDisplayName(equip.getDisplayName()+"-flowVelocity")
+        Point airVelocity = new Point.Builder()
+                                 .setDisplayName(equip.getDisplayName()+"-airVelocity")
                                  .setEquipRef(equip.getId())
                                  .setSiteRef(equip.getSiteRef())
                                  .setRoomRef(equip.getRoomRef())
                                  .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                 .addMarker(profileTag).addMarker("flow").addMarker("velocity").addMarker("cfm")
+                                 .addMarker(profileTag).addMarker("air").addMarker("velocity").addMarker("trueCfm")
                                  .addMarker("sp").addMarker("his").addMarker(fanType)
                                  .setGroup(equip.getGroup())
                                  .setTz(equip.getTz())
+                                 .setUnit("ft/min")
                                  .build();
-        String flowVelocityId = hayStack.addPoint(flowVelocity);
-        hayStack.writeHisValById(flowVelocityId, 0.0);
+        String airVelocityId = hayStack.addPoint(airVelocity);
+        hayStack.writeHisValById(airVelocityId, 0.0);
     }
     
     public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,
@@ -224,7 +226,7 @@ public class TrueCFMPointsHandler {
      */
     public static void deleteTrueCFMPoints(CCUHsApi hayStack, String equipRef) {
         List<HashMap<Object, Object >>
-            allCFMPoints =  hayStack.readAllEntities("point and cfm and not enabled and equipRef== \""
+            allCFMPoints =  hayStack.readAllEntities("point and trueCfm and not enabled and equipRef== \""
                                                      + equipRef + "\"");
         for (HashMap<Object, Object> cfmPoint : allCFMPoints) {
             hayStack.deleteEntity(Objects.requireNonNull(cfmPoint.get("id")).toString());

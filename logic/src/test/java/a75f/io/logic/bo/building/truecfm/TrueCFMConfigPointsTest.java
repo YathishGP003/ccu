@@ -48,7 +48,7 @@ public class TrueCFMConfigPointsTest {
         String tag="vav";
         Double val=50.0;
         method.invoke(trueCFMConfigPoints,ccuHsApi,equip1,tag,val);
-        HashMap<Object, Object> testTrueCFMCoolingMaxPoint = hayStack.readEntity("cfm and cooling and max");
+        HashMap<Object, Object> testTrueCFMCoolingMaxPoint = hayStack.readEntity("trueCfm and cooling and max");
         Assert.assertFalse(testTrueCFMCoolingMaxPoint.isEmpty());
 
     }
@@ -62,7 +62,7 @@ public class TrueCFMConfigPointsTest {
         String tag="vav";
         Double val=150.0;
         method.invoke(trueCFMConfigPoints,ccuHsApi,equip1,tag,val);
-        HashMap<Object, Object> testTrueCFMKFactorPoint = hayStack.readEntity("cfm and kfactor ");
+        HashMap<Object, Object> testTrueCFMKFactorPoint = hayStack.readEntity("trueCfm and kfactor ");
         Assert.assertFalse(testTrueCFMKFactorPoint.isEmpty());
 
     }
@@ -76,7 +76,7 @@ public class TrueCFMConfigPointsTest {
         String tag="vav";
         Double val=50.0;
         method.invoke(trueCFMConfigPoints,ccuHsApi,equip1,tag,val);
-        HashMap<Object, Object> testTrueCFMCoolingMinPoint = hayStack.readEntity("cfm and cooling and min");
+        HashMap<Object, Object> testTrueCFMCoolingMinPoint = hayStack.readEntity("trueCfm and cooling and min");
         Assert.assertFalse(testTrueCFMCoolingMinPoint.isEmpty());
 
     }
@@ -90,7 +90,7 @@ public class TrueCFMConfigPointsTest {
         String tag="vav";
         Double val=50.0;
         method.invoke(trueCFMConfigPoints,ccuHsApi,equip1,tag,val);
-        HashMap<Object, Object> testTrueCFMReheatMinPoint = hayStack.readEntity("cfm and heating and min");
+        HashMap<Object, Object> testTrueCFMReheatMinPoint = hayStack.readEntity("trueCfm and heating and min");
         Assert.assertFalse(testTrueCFMReheatMinPoint.isEmpty());
 
     }
@@ -104,7 +104,7 @@ public class TrueCFMConfigPointsTest {
         String tag="vav";
         Double val=50.0;
         method.invoke(trueCFMConfigPoints,ccuHsApi,equip1,tag,val);
-        HashMap<Object, Object> testTrueCFMReheatMaxPoint = hayStack.readEntity("cfm and heating and max");
+        HashMap<Object, Object> testTrueCFMReheatMaxPoint = hayStack.readEntity("trueCfm and heating and max");
         Assert.assertFalse(testTrueCFMReheatMaxPoint.isEmpty());
 
     }

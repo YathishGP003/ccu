@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Set;
 
+import a75.io.algos.CO2Loop;
+import a75.io.algos.ControlLoop;
+import a75.io.algos.GenericPIController;
+import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResetListener;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
@@ -20,13 +24,17 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.bo.building.truecfm.TrueCfmLoopState;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
 
 /**
  *
@@ -51,7 +59,19 @@ public abstract class VavProfile extends ZoneProfile {
     boolean exceedsThreeDegree = false;
     boolean exceedsFiveDegree = false;
     
+    VavEquip           vavDevice;
+    ControlLoop         coolingLoop;
+    ControlLoop         heatingLoop;
+    CO2Loop             co2Loop;
+    VOCLoop             vocLoop;
+    GenericPIController valveController;
+    Damper              damper;
+    Valve valve;
+    ControlLoop cfmControlLoop;
     
+    private TrueCfmLoopState cfmLoopState;
+    
+        
     public VavProfile() {
         vavDeviceMap = new HashMap<>();
         satResetListener = new SatResetListener();
@@ -251,11 +271,7 @@ public abstract class VavProfile extends ZoneProfile {
         }
         
         Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
-    
         int damperLoopOp = d.currentPosition;
-        //if (d.maxPosition > d.iaqCompensatedMinPos) {
-        //    damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
-        //}
         
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {
@@ -389,46 +405,6 @@ public abstract class VavProfile extends ZoneProfile {
         return damperPos;
     }
     
-    @JsonIgnore
-    public int getMaxDamperCooliing() {
-        int damperPos = 0;
-        for (short nodeAddress : mProfileConfiguration.keySet()) {
-            VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || config.maxDamperCooling < damperPos) {
-                damperPos = config.maxDamperCooling;
-            }
-            
-        }
-        return damperPos;
-    }
-    
-    @JsonIgnore
-    public int getMinDamperHeating()
-    {
-        int damperPos = 0;
-        for (short nodeAddress : mProfileConfiguration.keySet()) {
-            VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || config.minDamperHeating > damperPos) {
-                damperPos = config.minDamperHeating;
-            }
-            
-        }
-        return damperPos;
-    }
-    
-    @JsonIgnore
-    public int getMaxDamperHeating() {
-        int damperPos = 0;
-        for (short nodeAddress : mProfileConfiguration.keySet()) {
-            VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || (config.maxDamperHeating < damperPos)) {
-                damperPos = config.maxDamperHeating;
-            }
-            
-        }
-        return damperPos;
-    }
-    
     class SatResetListener implements TrimResetListener {
         public void handleSystemReset() {
             Log.d("VAV","handleSATReset");
@@ -514,5 +490,103 @@ public abstract class VavProfile extends ZoneProfile {
         }
         
         return (int)(heatingLoop - REHEAT_THRESHOLD_HEATING_LOOP) * 2;
+    }
+    
+    private void updateDamperSystemCoolingZoneCooling(CCUHsApi hayStack, String equipId, double currentCfm) {
+        double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
+        double minCfmCooling = TrueCFMUtil.getMinCFMCooling(hayStack, equipId);
+    
+        if (currentCfm < minCfmCooling) {
+            if (cfmLoopState != COOLING_COOLING_MIN) {
+                cfmLoopState = COOLING_COOLING_MIN;
+                cfmControlLoop.reset();
+            }
+            double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmCooling, currentCfm);
+            updateDamperForMinCfm(cfmLoopOp);
+        } else if (currentCfm > maxCfmCooling) {
+            if (cfmLoopState != COOLING_COOLING_MAX) {
+                cfmLoopState = COOLING_COOLING_MAX;
+                cfmControlLoop.reset();
+            }
+            double cfmLoopOp = cfmControlLoop.getLoopOutput(currentCfm, maxCfmCooling);
+            updateDamperForMaxCfm(cfmLoopOp);
+        }
+    }
+    
+    private void updateDamperSystemCoolingZoneHeating(CCUHsApi hayStack, String equipId, double currentCfm) {
+        double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+        double maxCfmHeating = TrueCFMUtil.getMaxCFMReheating(hayStack, equipId);
+        if (currentCfm < minCfmHeating) {
+            if (cfmLoopState != COOLING_HEATING_MIN) {
+                cfmLoopState = COOLING_HEATING_MIN;
+                cfmControlLoop.reset();
+            }
+            double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
+            updateDamperForMinCfm(cfmLoopOp);
+        } else if (currentCfm > maxCfmHeating) {
+            if (cfmLoopState != COOLING_HEATING_MAX) {
+                cfmLoopState = COOLING_HEATING_MAX;
+                cfmControlLoop.reset();
+            }
+            double cfmLoopOp = cfmControlLoop.getLoopOutput(currentCfm, maxCfmHeating);
+            updateDamperForMaxCfm(cfmLoopOp);
+        }
+    }
+    
+    private void updateDamperSystemHeating(CCUHsApi hayStack, String equipId, double currentCfm) {
+        double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+        if (currentCfm < minCfmHeating) {
+            if (cfmLoopState != HEATING_COOLING_MIN) {
+                cfmLoopState = HEATING_COOLING_MIN;
+                cfmControlLoop.reset();
+            }
+            double cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
+            updateDamperForMinCfm(cfmLoopOp);
+        } else {
+            cfmLoopState = HEATING_COOLING_MAX;
+            cfmControlLoop.reset();
+        }
+    }
+    
+    private void updateDamperForMinCfm(double cfmLoopOp) {
+        if (damper.currentPosition > 0) {
+            damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
+        } else {
+            damper.currentPosition = (int)cfmLoopOp;
+        }
+    }
+    
+    private void updateDamperForMaxCfm(double cfmLoopOp) {
+        cfmLoopOp = Math.max(cfmLoopOp, 100);
+        if (damper.currentPosition > 0) {
+            damper.currentPosition -= damper.currentPosition * cfmLoopOp/100;
+        }
+    }
+    
+    public void updateDamperPosForTrueCfm(CCUHsApi hayStack, SystemController.State systemState) {
+        
+        String equipId = getEquip().getId();
+        if (!TrueCFMUtil.isTrueCfmEnabled(hayStack, equipId)) {
+            CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not enabled "+equipId);
+            return;
+        }
+        double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId);
+        
+        if (currentCfm == 0) {
+            CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not active ! currentCfm "+currentCfm);
+            return;
+        }
+        
+        if (systemState == SystemController.State.COOLING && state == COOLING) {
+            updateDamperSystemCoolingZoneCooling(hayStack, equipId, currentCfm);
+        } else if (systemState == SystemController.State.COOLING && state == HEATING) {
+            updateDamperSystemCoolingZoneHeating(hayStack, equipId, currentCfm);
+        } else if (systemState == SystemController.State.HEATING) {
+            updateDamperSystemHeating(hayStack, equipId, currentCfm);
+        }
+        damper.currentPosition = Math.min(damper.currentPosition, 100);
+        CcuLog.i(L.TAG_CCU_ZONE,
+                 " updateDamperPosForTrueCfm: currentPos "+damper.currentPosition+" cfmLoopState "+cfmLoopState);
+        cfmControlLoop.dump();
     }
 }

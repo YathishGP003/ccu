@@ -79,8 +79,10 @@ public class VavEquip
     ControlLoop         heatingLoop;
     CO2Loop             co2Loop;
     VOCLoop             vocLoop;
-    double voc;
+    
     GenericPIController valveController;// Use GenericPI as we need unmodulated op.
+    
+    ControlLoop cfmController;
     
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
@@ -130,6 +132,7 @@ public class VavEquip
         vavUnit.vavDamper.minPosition = (int)getDamperLimit("cooling", "min");
         vavUnit.vavDamper.maxPosition = (int)getDamperLimit("cooling", "max");
         //createHaystackPoints();
+        cfmController = new ControlLoop();
     }
     
     public void init() {
@@ -139,15 +142,17 @@ public class VavEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             String equipId = equipMap.get("id").toString();
-            proportionalGain = TunerUtil.getProportionalGain(equipId);
-            integralGain = TunerUtil.getIntegralGain(equipId);
-            proportionalSpread = (int) TunerUtil.getProportionalSpread(equipId);
-            integralMaxTimeout = (int) TunerUtil.getIntegralTimeout(equipId);
+            proportionalGain = TunerUtil.readTunerValByQuery("pgain and not trueCfm",equipId);
+            integralGain = TunerUtil.readTunerValByQuery("igain and not trueCfm",equipId);
+            proportionalSpread = (int) TunerUtil.readTunerValByQuery("pspread and not trueCfm",equipId);
+            integralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and not trueCfm",equipId);
             
             co2Target = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and target and equipRef == \""+equipId+"\"");
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and threshold and equipRef == \""+equipId+"\"");
             vocTarget = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and target and equipRef == \""+equipId+"\"");
             vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and threshold and equipRef == \""+equipId+"\"");
+    
+            initializeCfmController(equipId);
         }
     
         coolingLoop.setProportionalGain(proportionalGain);
@@ -166,8 +171,21 @@ public class VavEquip
         co2Loop.setCo2Threshold(co2Threshold);
         vocLoop.setVOCTarget(vocTarget);
         vocLoop.setVOCThreshold(vocThreshold);
-        
     }
+    
+    private void initializeCfmController(String equipId) {
+        double cfmProportionalGain = TunerUtil.readTunerValByQuery("pgain and trueCfm",equipId);
+        double cfmIntegralGain = TunerUtil.readTunerValByQuery("igain and trueCfm",equipId);
+        int cfmProportionalSpread = (int) TunerUtil.readTunerValByQuery("prange and trueCfm",equipId);
+        int cfmIntegralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and trueCfm",equipId);
+        
+        cfmController.setProportionalGain(cfmProportionalGain);
+        cfmController.setIntegralGain(cfmIntegralGain);
+        cfmController.setProportionalSpread(cfmProportionalSpread);
+        cfmController.setIntegralMaxTimeout(cfmIntegralMaxTimeout);
+        cfmController.reset();
+    }
+    
     public void createHaystackPoints(VavProfileConfiguration config, String floor, String room) {
     
         //Create Logical points
@@ -1044,12 +1062,7 @@ public class VavEquip
 
 
     public void updateHaystackPoints(VavProfileConfiguration config)  {
-        String fanMarker = "";
-        if (profileType == ProfileType.VAV_SERIES_FAN) {
-            fanMarker = "series";
-        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
-            fanMarker = "parallel";
-        }
+        
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
@@ -1088,16 +1101,14 @@ public class VavEquip
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
 
         if (config.enableCFMControl) {
-            setConfigNumVal("min and cfm and cooling", config.numMinCFMCooling);
-            setHisVal("min and cfm and cooling", config.numMinCFMCooling);
-            setConfigNumVal("max and cfm and cooling", config.nuMaxCFMCooling);
-            setHisVal("max and cfm and cooling", config.nuMaxCFMCooling);
-            setConfigNumVal("max and cfm and heating", config.numMaxCFMReheating);
-            setConfigNumVal("min and cfm and heating", config.numMinCFMReheating);
-            setConfigNumVal("cfm and vav and config and kfactor", config.kFactor);
-            setHisVal("cfm and vav and config and kfactor", config.kFactor);
-            setConfigNumVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
-            setHisVal("cfm and enabled ", config.enableCFMControl ? 1.0 : 0);
+            setConfigNumVal("min and trueCfm and cooling", config.numMinCFMCooling);
+            setHisVal("min and trueCfm and cooling", config.numMinCFMCooling);
+            setConfigNumVal("max and trueCfm and cooling", config.nuMaxCFMCooling);
+            setHisVal("max and trueCfm and cooling", config.nuMaxCFMCooling);
+            setConfigNumVal("max and trueCfm and heating", config.numMaxCFMReheating);
+            setConfigNumVal("min and trueCfm and heating", config.numMinCFMReheating);
+            setConfigNumVal("trueCfm and vav and config and kfactor", config.kFactor);
+            setHisVal("trueCfm and vav and config and kfactor", config.kFactor);
         } else {
             setDamperLimit("cooling","min",config.minDamperCooling);
             setHisVal("cooling and min and damper and pos",config.minDamperCooling);
@@ -1106,6 +1117,8 @@ public class VavEquip
             setDamperLimit("heating","min",config.minDamperHeating);
             setHisVal("heating and min and damper and pos",config.minDamperHeating);
         }
+        setConfigNumVal("trueCfm and enable ", config.enableCFMControl ? 1.0 : 0);
+        setHisVal("trueCfm and enable ", config.enableCFMControl ? 1.0 : 0);
     }
     
     private void handleTrueCfmConfiguration(VavProfileConfiguration config) {
@@ -1114,7 +1127,7 @@ public class VavEquip
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
     
         String fanMarker = getFanMarker();
-        boolean curTrueCfmEnabled = getConfigNumVal("cfm and enabled") > 0;
+        boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable") > 0;
         if (curTrueCfmEnabled && !config.enableCFMControl) {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
             createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
@@ -1123,25 +1136,11 @@ public class VavEquip
             TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
             deleteNonCfmDamperPoints(hayStack, equip.getId());
         }
+        hayStack.syncEntityTree();
     }
     
     public void setHisVal(String tags,double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
-    }
-    
-    public void deleteHaystackPoints() {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and vav and group == \""+nodeAddr+"\"");
-        if (equip != null)
-        {
-            hayStack.deleteEntityTree(equip.get("id").toString());
-        }
-        
-        HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
-        if (device != null)
-        {
-            hayStack.deleteEntityTree(device.get("id").toString());
-        }
     }
     
     public VavProfileConfiguration getProfileConfiguration() {
@@ -1161,12 +1160,12 @@ public class VavEquip
         //config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
         config.setPriority(ZonePriority.values()[(int) getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
-        config.numMinCFMCooling=(int)getConfigNumVal("min and cfm and cooling");
-        config.nuMaxCFMCooling= (int) getConfigNumVal("max and cfm and cooling");
-        config.numMaxCFMReheating=(int)getConfigNumVal("max and cfm and heating");
-        config.numMinCFMReheating=(int)getConfigNumVal("min and cfm and heating");
-        config.enableCFMControl = getConfigNumVal("cfm and enabled") > 0;
-        config.kFactor=getConfigNumVal("cfm and vav and config and kfactor");
+        config.numMinCFMCooling=(int)getConfigNumVal("min and trueCfm and cooling");
+        config.nuMaxCFMCooling= (int) getConfigNumVal("max and trueCfm and cooling");
+        config.numMaxCFMReheating=(int)getConfigNumVal("max and trueCfm and heating");
+        config.numMinCFMReheating=(int)getConfigNumVal("min and trueCfm and heating");
+        config.enableCFMControl = getConfigNumVal("trueCfm and enable") > 0;
+        config.kFactor=getConfigNumVal("trueCfm and vav and config and kfactor");
         
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
         
@@ -1349,7 +1348,11 @@ public class VavEquip
         HashMap point = CCUHsApi.getInstance().read("point and config and damper and pos and "+coolHeat+" and "+minMax+" and " +
                                         "group == \""+nodeAddr+"\"");
         if (point.isEmpty()) {
-            Log.e(L.TAG_CCU_ZONE,"Invalid getDamperLimit");
+            Log.e(L.TAG_CCU_ZONE,"Damper "+minMax+" point does not exist");
+            //Damper max/min config may not exist when trueCFM is active. Return default value in that case.
+            if (minMax.contains("max")) {
+                return 100 ;
+            }
             return 0;
         }
         
@@ -1360,11 +1363,11 @@ public class VavEquip
     {
         HashMap point = CCUHsApi.getInstance().read("point and damper and pos and "+coolHeat+" and "+minMax+" and " +
                                                    "group == \""+nodeAddr+"\"");
-        String id = point.get("id").toString();
-        if (id == null || id == "") {
+        if (point.isEmpty()) {
             Log.e(L.TAG_CCU_ZONE,"Invalid setDamperLimit");
             return;
         }
+        String id = point.get("id").toString();
         CCUHsApi.getInstance().writeDefaultValById(id, val);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, val);
     }
@@ -1480,6 +1483,11 @@ public class VavEquip
     
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
+    public ControlLoop getCfmController()
+    {
+        return cfmController;
     }
     
     public void setStatus(double status, boolean emergency) {

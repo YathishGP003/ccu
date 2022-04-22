@@ -125,5 +125,5 @@ public class Tags
     public static final String HEATVAL = "heatVal";
     public static final String SERIES = "series";
     public static final String PARALLEL = "parallel";
-    public static final String CFM = "cfm";
+    public static final String CFM = "trueCfm";
 }

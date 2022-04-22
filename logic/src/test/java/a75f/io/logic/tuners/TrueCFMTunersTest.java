@@ -51,7 +51,7 @@ public class TrueCFMTunersTest {
         String a="vav";
         String ab="VAV";
         method.invoke(trueCFMTuners,ccuHsApi,equip1,a,ab);
-        HashMap<Object, Object> testTrueCFMEnabledPoint = hayStack.readEntity("cfm and airflow and itimeout");
+        HashMap<Object, Object> testTrueCFMEnabledPoint = hayStack.readEntity("trueCfm and airflow and itimeout");
         Assert.assertFalse(testTrueCFMEnabledPoint.isEmpty());
 
     }
@@ -65,7 +65,7 @@ public class TrueCFMTunersTest {
         String a="vav";
         String ab="VAV";
         method.invoke(trueCFMTuners,ccuHsApi,equip1,a,ab);
-        HashMap<Object, Object> createTrueCFMAirflowCFMProportionalRangePoint = hayStack.readEntity("cfm and airflow and prange");
+        HashMap<Object, Object> createTrueCFMAirflowCFMProportionalRangePoint = hayStack.readEntity("trueCfm and airflow and prange");
         Assert.assertFalse(createTrueCFMAirflowCFMProportionalRangePoint.isEmpty());
 
     }
@@ -80,7 +80,7 @@ public class TrueCFMTunersTest {
         String a="vav";
         String ab="VAV";
         method.invoke(trueCFMTuners,ccuHsApi,equip1,a,ab);
-        HashMap<Object, Object> createTrueCFMAirflowCFMProportionalKFactorPoint = hayStack.readEntity("cfm and airflow and pgain");
+        HashMap<Object, Object> createTrueCFMAirflowCFMProportionalKFactorPoint = hayStack.readEntity("trueCfm and airflow and pgain");
         Assert.assertFalse(createTrueCFMAirflowCFMProportionalKFactorPoint.isEmpty());
 
     }
@@ -95,7 +95,7 @@ public class TrueCFMTunersTest {
         String a="vav";
         String ab="VAV";
         method.invoke(trueCFMTuners,ccuHsApi,equip1,a,ab);
-        HashMap<Object, Object> createTrueCFMAirflowCFMIntegralKFactorPoint = hayStack.readEntity("cfm and airflow and igain");
+        HashMap<Object, Object> createTrueCFMAirflowCFMIntegralKFactorPoint = hayStack.readEntity("trueCfm and airflow and igain");
         Assert.assertFalse(createTrueCFMAirflowCFMIntegralKFactorPoint.isEmpty());
 
     }

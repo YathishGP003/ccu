@@ -42,7 +42,7 @@ import a75f.io.logger.CcuLog;
  */
 public class UsbModbusService extends Service {
 
-    public static final String TAG = "CCU_SERIAL";
+    public static final String TAG = "CCU_USB_MODBUS";
     public static final String ACTION_USB_MODBUS_READY =
             "com.felhr.connectivityservices.USB_MODBUS_READY";
     public static final String ACTION_USB_ATTACHED =
@@ -109,7 +109,7 @@ public class UsbModbusService extends Service {
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
-                    Log.d(TAG,"Modbus Serial device connected ");
+                    Log.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
                      scheduleUsbConnectedEvent();
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
@@ -117,7 +117,7 @@ public class UsbModbusService extends Service {
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
                     usbPortScanTimer.cancel();
-                    Log.d(TAG,"Modbus Serial device disconnected ");
+                    Log.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
                     if (serialPortConnected) {
                         serialPort.close();
                         serialPort = null;
@@ -292,9 +292,9 @@ public class UsbModbusService extends Service {
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = false;
                         }
-                        Log.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
+                        Log.d(TAG, "Opened Serial MODBUS device "+device.toString());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
+                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.toString());
                     }
                 } else {
                     connection = null;

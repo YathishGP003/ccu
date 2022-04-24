@@ -43,7 +43,7 @@ import static java.lang.Thread.sleep;
  */
 public class UsbService extends Service
 {
-	private static final String  TAG  = "CCU_SERIAL";
+	private static final String  TAG  = "CCU_USB";
 
 	public static final byte ESC_BYTE = (byte) 0xD9;
 	public static final byte SOF_BYTE = 0x00;
@@ -130,7 +130,7 @@ public class UsbService extends Service
 				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 				
 				if (UsbSerialUtil.isCMDevice(detachedDevice, context)) {
-					Log.d(TAG,"CM Serial device disconnected ");
+					Log.d(TAG,"CM Serial device disconnected "+detachedDevice.toString());
 					usbPortScanTimer.cancel();
 					if (serialPortConnected) {
 						serialPort.close();
@@ -157,7 +157,7 @@ public class UsbService extends Service
 			@Override public void run() {
 				findSerialPortDevice();
 			}
-		}, 1000);
+		}, 500);
 	}
 	
 	/*
@@ -351,9 +351,9 @@ public class UsbService extends Service
 					connection = usbManager.openDevice(device);
 					if (success) {
 						new ConnectionThread().start();
-						Log.d(TAG, "Opened Serial CM device "+device.getDeviceName());
+						Log.d(TAG, "Opened Serial CM device "+device.toString());
 					} else {
-						Log.d(TAG, "Failed to open Serial CM device "+device.getDeviceName());
+						Log.d(TAG, "Failed to open Serial CM device "+device.toString());
 					}
 				}
 			}

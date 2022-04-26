@@ -14,6 +14,7 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
+import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -77,8 +78,7 @@ public class HyperStatMessageGenerator {
      * @return
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
-        //TODO - Proto file does not define profile bitmap, enabledRelay.
-        HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
+        return HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
             .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
             .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
@@ -91,9 +91,9 @@ public class HyperStatMessageGenerator {
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
              .setDisplayHumidity(true)
              .setDisplayCO2(true)
+             .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
-        return settings;
     }
     
     /**

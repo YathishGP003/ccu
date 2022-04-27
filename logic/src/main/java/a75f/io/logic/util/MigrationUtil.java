@@ -102,7 +102,7 @@ public class MigrationUtil {
         //        creating default tuners for vav
         //TrueCFMTuners.createTrueCfmTuners(haystack,tunerEquip);
         vavEquips.forEach(vavEquip -> {
-            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enabled and point and trueCfm and equipRef== \"" + vavEquip.get("id") + "\"");
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef== \"" + vavEquip.get("id") + "\"");
             if (enableCFMPoint.get("id")==null) {
                 Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
                 String fanMarker = "";

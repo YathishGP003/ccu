@@ -19,6 +19,7 @@ public class TrueCFMPointsHandler {
                                      .setEquipRef(equip.getId())
                                      .setSiteRef(equip.getSiteRef())
                                      .setRoomRef(equip.getRoomRef())
+                                     .addMarker("control").setEnums("false,true")
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov").addMarker(fanMarker)
                                      .addMarker("config").addMarker(profileTag).addMarker("writable").addMarker("zone")
                                      .addMarker("enable").addMarker("trueCfm").addMarker("sp").addMarker("his")

@@ -25,6 +25,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.tuners.TrueCFMTuners;
+import a75f.io.logic.tuners.TunerConstants;
 
 public class MigrationUtil {
     
@@ -49,12 +51,12 @@ public class MigrationUtil {
             removeDuplicateAlerts(AlertManager.getInstance());
             PreferenceUtil.removedDuplicateAlerts();
         }
-        
+
         if (!PreferenceUtil.getEnableZoneScheduleMigration()) {
             updateZoneScheduleTypes(CCUHsApi.getInstance());
             PreferenceUtil.setEnableZoneScheduleMigration();
         }
-    
+
         if (!PreferenceUtil.getCleanUpDuplicateZoneSchedule()) {
             cleanUpDuplicateZoneSchedules(CCUHsApi.getInstance());
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
@@ -69,18 +71,19 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
+
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
-    
+
         if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
 
     }
-    
+
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> airflowPoints = ccuHsApi.readAllEntities("point and airflow and sense and unit");
         String updatedAirflowUnit = "cfm";
@@ -108,14 +111,16 @@ public class MigrationUtil {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
         Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
-        doMigrationVav(haystack, vavEquips, tunerEquip);
+        if(!vavEquips.isEmpty()) {
+            doMigrationVav(haystack, vavEquips, tunerEquip);
+        }
 
     }
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        //TrueCFMTuners.createTrueCfmTuners(haystack,tunerEquip);
+        TrueCFMTuners.createTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
         vavEquips.forEach(vavEquip -> {
-            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef== \"" + vavEquip.get("id") + "\"");
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enabled and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
             if (enableCFMPoint.get("id")==null) {
                 Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
                 String fanMarker = "";

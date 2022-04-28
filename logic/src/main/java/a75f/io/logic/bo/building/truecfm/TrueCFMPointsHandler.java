@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Units;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMPointsHandler {
@@ -61,6 +62,7 @@ public class TrueCFMPointsHandler {
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
+                                     .setUnit(Units.CFM)
                                      .build();
         String numMinCFMCoolingId = hayStack.addPoint(numMinCFMCooling);
         hayStack.writeDefaultValById(numMinCFMCoolingId, initialVal);
@@ -81,6 +83,7 @@ public class TrueCFMPointsHandler {
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
+                                     .setUnit(Units.CFM)
                                      .build();
         String numMaxCFMCoolingId = hayStack.addPoint(numMaxCFMCooling);
         hayStack.writeDefaultValById(numMaxCFMCoolingId, initialVal);
@@ -100,6 +103,7 @@ public class TrueCFMPointsHandler {
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
+                                       .setUnit(Units.CFM)
                                        .build();
         String numMinCFMReheatingId = hayStack.addPoint(numMinCFMReheating);
         hayStack.writeDefaultValById(numMinCFMReheatingId, initialVal);
@@ -119,6 +123,7 @@ public class TrueCFMPointsHandler {
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
+                                       .setUnit(Units.CFM)
                                        .build();
         String numMaxCFMReheatingId = hayStack.addPoint(numMaxCFMReheating);
         hayStack.writeDefaultValById(numMaxCFMReheatingId, initialVal);
@@ -183,7 +188,7 @@ public class TrueCFMPointsHandler {
                                .addMarker("air").addMarker("flow").addMarker("his").addMarker(fanType)
                                .setGroup(equip.getGroup())
                                .setTz(equip.getTz())
-                               .setUnit("cfm")
+                               .setUnit(Units.CFM)
                                .build();
         String airflowCfmId = hayStack.addPoint(airflowCfm);
         hayStack.writeHisValueByIdWithoutCOV(airflowCfmId, 0.0);
@@ -198,7 +203,7 @@ public class TrueCFMPointsHandler {
                                  .addMarker("sp").addMarker("his").addMarker(fanType)
                                  .setGroup(equip.getGroup())
                                  .setTz(equip.getTz())
-                                 .setUnit("ft/min")
+                                 .setUnit(Units.FT_PER_MIN)
                                  .build();
         String airVelocityId = hayStack.addPoint(airVelocity);
         hayStack.writeHisValById(airVelocityId, 0.0);
@@ -227,7 +232,7 @@ public class TrueCFMPointsHandler {
      */
     public static void deleteTrueCFMPoints(CCUHsApi hayStack, String equipRef) {
         List<HashMap<Object, Object >>
-            allCFMPoints =  hayStack.readAllEntities("point and trueCfm and not enabled and equipRef== \""
+            allCFMPoints =  hayStack.readAllEntities("point and trueCfm and not enable and equipRef== \""
                                                      + equipRef + "\"");
         for (HashMap<Object, Object> cfmPoint : allCFMPoints) {
             hayStack.deleteEntity(Objects.requireNonNull(cfmPoint.get("id")).toString());

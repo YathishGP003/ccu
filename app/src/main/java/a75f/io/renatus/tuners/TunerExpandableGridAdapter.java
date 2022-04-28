@@ -1,7 +1,6 @@
 package a75f.io.renatus.tuners;
 
 
-import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -113,7 +112,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         String val = tunerItem.get("newValue").toString();
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (doesPointNeedAbsoluteConversion(tunerItem)) {
-                                val = String.valueOf(round(fahrenheitToCelsius(Double.parseDouble(val)),1));
+                                val = String.valueOf(roundToHalf(fahrenheitToCelsius(Double.parseDouble(val))));
                             } else if (doesPointNeedRelativeConversion(tunerItem)){
                                 val = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(val))));
                             }
@@ -131,7 +130,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         double val = (getTunerValue(tunerItem.get("id").toString()));
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (doesPointNeedAbsoluteConversion(tunerItem)) {
-                                val = round(fahrenheitToCelsius(val),1);
+                                val = roundToHalf(fahrenheitToCelsius(val));
                             } else if (doesPointNeedRelativeConversion(tunerItem)){
                                 val = roundToHalf(fahrenheitToCelsiusUnitChange(val));
                             }
@@ -208,11 +207,11 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         }
     }
 
-    private boolean doesPointNeedRelativeConversion(HashMap tunerItem) {
+    private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
         return tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") || tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") && tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) || tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") || tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") || tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") || tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") && tunerItem.containsKey("min") && tunerItem.containsKey("differential"));
     }
 
-    private boolean doesPointNeedAbsoluteConversion(HashMap tunerItem) {
+    private boolean doesPointNeedAbsoluteConversion(HashMap<Object,Object> tunerItem) {
         return tunerItem.containsKey("temp") && !tunerItem.containsKey("abnormal") || tunerItem.containsKey(Tags.LOCKOUT) || (tunerItem.containsKey("pipe2") && tunerItem.containsKey("threshold")) || (tunerItem.containsKey("economizing") && (tunerItem.containsKey("threshold") || tunerItem.containsKey("loop"))) || tunerItem.containsKey("outside") || tunerItem.containsKey("limit") && !tunerItem.containsKey("timer") && !tunerItem.containsKey("itimeout") && (!tunerItem.containsKey("constant") && !tunerItem.containsKey("time"));
     }
 

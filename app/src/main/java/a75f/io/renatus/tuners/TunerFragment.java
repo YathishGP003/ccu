@@ -67,8 +67,7 @@ import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitUnitChange;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusUnitChange;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 
 /**
@@ -335,9 +334,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 for (HashMap newTunerValueItem : updatedTunerValues) {
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
                         if (doesPointNeedAbsoluteConversion(newTunerValueItem)) {
-                            newTunerValueItem.replace("newValue", String.valueOf(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString()))));
+                            newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
                         } else if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                            newTunerValueItem.replace("newValue", String.valueOf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString()))));
+                            newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
                         }
                         prefs.setBoolean(newTunerValueItem.get("id").toString(),false);
                     }
@@ -492,11 +491,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         });
     }
 
-    private boolean doesPointNeedRelativeConversion(HashMap newTunerValueItem) {
+    private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> newTunerValueItem) {
         return newTunerValueItem.containsKey("deadband") || newTunerValueItem.containsKey("setback") || newTunerValueItem.containsKey("abnormal") || (newTunerValueItem.containsKey("spread") && newTunerValueItem.containsKey("user") && !newTunerValueItem.containsKey("multiplier")) || newTunerValueItem.containsKey("sat") && newTunerValueItem.containsKey("spmax") || newTunerValueItem.containsKey("spmin") || newTunerValueItem.containsKey("spres") || newTunerValueItem.containsKey("spinit") || newTunerValueItem.containsKey("sptrim") || newTunerValueItem.containsKey("spresmax") || (newTunerValueItem.containsKey("reheat") && newTunerValueItem.containsKey("min") && newTunerValueItem.containsKey("differential"));
     }
 
-    private boolean doesPointNeedAbsoluteConversion(HashMap newTunerValueItem) {
+    private boolean doesPointNeedAbsoluteConversion(HashMap<Object,Object> newTunerValueItem) {
         return newTunerValueItem.containsKey("temp") && !newTunerValueItem.containsKey("abnormal") || newTunerValueItem.containsKey(Tags.LOCKOUT) || (newTunerValueItem.containsKey("pipe2") && newTunerValueItem.containsKey("threshold")) || (newTunerValueItem.containsKey("economizing") && (newTunerValueItem.containsKey("threshold") || newTunerValueItem.containsKey("loop"))) || newTunerValueItem.containsKey("outside") || newTunerValueItem.containsKey("limit") && !newTunerValueItem.containsKey("timer") && !newTunerValueItem.containsKey("itimeout") && (!newTunerValueItem.containsKey("constant") && !newTunerValueItem.containsKey("time"));
     }
 

@@ -128,19 +128,19 @@ public class InstallerOptions extends Fragment {
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
-    
+
     private ToggleButton toggleCoolingLockout;
     private ToggleButton toggleHeatingLockout;
     private TextView textCoolingLockoutTemp;
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;
     private Spinner spinnerHeatingLockoutTemp;
-    
+
     private TextView textCoolingLockout;
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
     private TextView textHeatingLockoutDesc;
-    
+
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -232,7 +232,7 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-        
+
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
         textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
@@ -243,7 +243,7 @@ public class InstallerOptions extends Fragment {
         textUseCoolingLockoutDesc = rootView.findViewById(R.id.textUseCoolingLockoutDesc);
         textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
         textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
-        
+
         initializeTempLockoutUI(CCUHsApi.getInstance());
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
@@ -254,10 +254,8 @@ public class InstallerOptions extends Fragment {
 
         if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
            toggleCelsius.setChecked(true);
-           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), true);
         } else {
            toggleCelsius.setChecked(false);
-           prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), false);
         }
 
         if (ccuId != null) {
@@ -412,11 +410,9 @@ public class InstallerOptions extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 if(isChecked) {
-                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                             CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
                 } else {
-                    prefs.setBoolean(getString(R.string.USE_CELSIUS_KEY), isChecked);
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                             CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
                 }

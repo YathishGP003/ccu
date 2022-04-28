@@ -21,13 +21,17 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusUnitChange;
+import static a75f.io.logic.bo.util.UnitUtils.round;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpandableGridAdapter.ViewHolder> {
@@ -94,6 +98,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
+                Prefs prefs = new Prefs(getmContext().getApplicationContext());
                 
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
@@ -105,7 +110,15 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                             holder.imgBtnUndo.setVisibility(View.GONE);
                         }
                     } else {
-                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
+                        String val = tunerItem.get("newValue").toString();
+                        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
+                            if (doesPointNeedAbsoluteConversion(tunerItem)) {
+                                val = String.valueOf(round(fahrenheitToCelsius(Double.parseDouble(val)),1));
+                            } else if (doesPointNeedRelativeConversion(tunerItem)){
+                                val = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(val))));
+                            }
+                        }
+                        holder.itemTextValueView.setText(val);
                         if (tunerItem.containsKey("hideRefresh")){
                             holder.imgBtnUndo.setVisibility(View.GONE);
                         } else {
@@ -115,7 +128,15 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 } else {
                     holder.imgBtnUndo.setVisibility(View.GONE);
                     if (getTunerValue(tunerItem.get("id").toString()) != null){
-                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                        double val = (getTunerValue(tunerItem.get("id").toString()));
+                        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
+                            if (doesPointNeedAbsoluteConversion(tunerItem)) {
+                                val = round(fahrenheitToCelsius(val),1);
+                            } else if (doesPointNeedRelativeConversion(tunerItem)){
+                                val = roundToHalf(fahrenheitToCelsiusUnitChange(val));
+                            }
+                        }
+                        holder.itemTextValueView.setText(String.valueOf(val));
                     } else {
                         holder.itemTextValueView.setText("-");
                     }
@@ -185,6 +206,14 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             default:
                 throw new IllegalStateException("Unexpected value: " + holder.viewType);
         }
+    }
+
+    private boolean doesPointNeedRelativeConversion(HashMap tunerItem) {
+        return tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") || tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") && tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) || tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") || tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") || tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") || tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") && tunerItem.containsKey("min") && tunerItem.containsKey("differential"));
+    }
+
+    private boolean doesPointNeedAbsoluteConversion(HashMap tunerItem) {
+        return tunerItem.containsKey("temp") && !tunerItem.containsKey("abnormal") || tunerItem.containsKey(Tags.LOCKOUT) || (tunerItem.containsKey("pipe2") && tunerItem.containsKey("threshold")) || (tunerItem.containsKey("economizing") && (tunerItem.containsKey("threshold") || tunerItem.containsKey("loop"))) || tunerItem.containsKey("outside") || tunerItem.containsKey("limit") && !tunerItem.containsKey("timer") && !tunerItem.containsKey("itimeout") && (!tunerItem.containsKey("constant") && !tunerItem.containsKey("time"));
     }
 
     @Override

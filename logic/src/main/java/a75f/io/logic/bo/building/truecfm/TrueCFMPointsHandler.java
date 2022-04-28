@@ -22,7 +22,7 @@ public class TrueCFMPointsHandler {
                                      .addMarker("control").setEnums("false,true")
                                      .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov").addMarker(fanMarker)
                                      .addMarker("config").addMarker(profileTag).addMarker("writable").addMarker("zone")
-                                     .addMarker("enable").addMarker("trueCfm").addMarker("sp").addMarker("his")
+                                     .addMarker("enabled").addMarker("trueCfm").addMarker("sp").addMarker("his")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
                                      .build();

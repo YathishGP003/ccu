@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import a75f.io.device.mesh.LSerial;
@@ -69,6 +70,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     public static final String ID = FragmentVAVConfiguration.class.getSimpleName();
     
     static final int TEMP_OFFSET_LIMIT = 100;
+    static final int STEP = 10;
     
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -92,6 +94,21 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     ToggleButton enableOccupancyControl;
     ToggleButton enableCO2Control;
     ToggleButton enableIAQControl;
+    LinearLayout minCFMReheating;
+    LinearLayout maxCFMReheating;
+    LinearLayout maxCFMCooling;
+    LinearLayout minCFMCooling;
+    LinearLayout minDamperPosCooling;
+    LinearLayout maxDamperPosCooling;
+    LinearLayout minDamperPosHeating;
+    TextView textEnableCFM;
+    TextView textKFactor;
+    ToggleButton enableCFMControl;
+    NumberPicker numMaxCFMCooling;
+    NumberPicker numMinCFMCooling;
+    NumberPicker numMinCFMReheating;
+    NumberPicker numMaxCFMReheating;
+    Spinner kFactor;
     
     Damper mDamper;
     
@@ -104,6 +121,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     ArrayAdapter<String> reheatTypesAdapter;
     ArrayAdapter<CharSequence> damperSizeAdapter;
     ArrayAdapter<String> damperShapeAdapter;
+    ArrayAdapter<String> kFactorValues;
     
     DamperType damperTypeSelected;
     //int damperActuatorSelection;
@@ -230,10 +248,47 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
-        
-    
-        
-    
+
+        textEnableCFM=view.findViewById(R.id.textEnableCFM);
+        enableCFMControl=view.findViewById(R.id.enableCFMControl);
+        textKFactor=view.findViewById(R.id.textKFactor);
+        kFactor=view.findViewById(R.id.spinKFactor);
+        maxCFMCooling=view.findViewById(R.id.maxCFMCooling);
+        minCFMCooling=view.findViewById(R.id.minCFMCooling);
+        minCFMReheating=view.findViewById(R.id.minCFMReheating);
+        maxCFMReheating=view.findViewById(R.id.maxCFMReheating);
+        maxDamperPosCooling=view.findViewById(R.id.maxDamperPosCooling);
+        minDamperPosCooling=view.findViewById(R.id.minDamperPosCooling);
+        minDamperPosHeating=view.findViewById(R.id.minDamperPosHeating);
+
+        enableCFMControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (enableCFMControl.isChecked()) {
+                maxCFMReheating.setVisibility(View.VISIBLE);
+                maxCFMCooling.setVisibility(View.VISIBLE);
+                minCFMReheating.setVisibility(View.VISIBLE);
+                minCFMCooling.setVisibility(View.VISIBLE);
+                kFactor.setVisibility(View.VISIBLE);
+                textKFactor.setVisibility(View.VISIBLE);
+                minDamperPosHeating.setVisibility(View.GONE);
+                minDamperPosCooling.setVisibility(View.GONE);
+                maxDamperPosCooling.setVisibility(View.GONE);
+            } else {
+                maxCFMReheating.setVisibility(View.GONE);
+                maxCFMCooling.setVisibility(View.GONE);
+                minCFMReheating.setVisibility(View.GONE);
+                minCFMCooling.setVisibility(View.GONE);
+                kFactor.setVisibility(View.GONE);
+                textKFactor.setVisibility(View.GONE);
+                minDamperPosHeating.setVisibility(View.VISIBLE);
+                minDamperPosCooling.setVisibility(View.VISIBLE);
+                maxDamperPosCooling.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+
+
+
         damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -356,8 +411,59 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setMaxValue(100);
         minHeatingDamperPos.setValue(20);
         minHeatingDamperPos.setWrapSelectorWheel(false);
-    
-         }
+
+        numMaxCFMCooling = view.findViewById(R.id.numMaxCFMCooling);
+        String[] numberValues = new String[TrueCFMConstants.MAX_VAL - TrueCFMConstants.MIN_VAL + 1];
+        for (int i = 0; i < numberValues.length; i++) {
+            numberValues[i] = String.valueOf(i * STEP);
+        }
+        numMaxCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        numMaxCFMCooling.setMinValue(0);
+        numMaxCFMCooling.setMaxValue(150);
+        numMaxCFMCooling.setValue(TrueCFMConstants.DEFAULT_VALUE);
+        numMaxCFMCooling.setDisplayedValues(numberValues);
+        numMaxCFMCooling.setWrapSelectorWheel(false);
+
+        numMinCFMCooling = view.findViewById(R.id.numMinCFMCooling);
+        numMinCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        numMinCFMCooling.setMinValue(0);
+        numMinCFMCooling.setMaxValue(50);
+        numMinCFMCooling.setValue(TrueCFMConstants.DEFAULT_VALUE);
+        numMinCFMCooling.setWrapSelectorWheel(false);
+        numMinCFMCooling.setDisplayedValues(numberValues);
+
+        numMinCFMReheating = view.findViewById(R.id.numMinCFMReheating);
+        numMinCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        numMinCFMReheating.setMinValue(0);
+        numMinCFMReheating.setMaxValue(50);
+        numMinCFMReheating.setValue(TrueCFMConstants.DEFAULT_VALUE);
+        numMinCFMReheating.setWrapSelectorWheel(false);
+        numMinCFMReheating.setDisplayedValues(numberValues);
+
+        numMaxCFMReheating = view.findViewById(R.id.numMaxCFMReheating);
+        numMaxCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        numMaxCFMReheating.setMinValue(0);
+        numMaxCFMReheating.setMaxValue(150);
+        numMaxCFMReheating.setValue(TrueCFMConstants.DEFAULT_VALUE);
+        numMaxCFMReheating.setWrapSelectorWheel(false);
+        numMaxCFMReheating.setDisplayedValues(numberValues);
+
+        kFactor = view.findViewById(R.id.spinKFactor);
+        textKFactor=view.findViewById(R.id.textKFactor);
+        kFactor = view.findViewById(R.id.spinKFactor);
+        ArrayList<String> spinnerArray = new ArrayList<>();
+
+        DecimalFormat df = new DecimalFormat("0.00");
+        for (double i = TrueCFMConstants.MIN_VAL_FOR_K_Factor; i < TrueCFMConstants.MAX_VAL_FOR_K_Factor; i = i + TrueCFMConstants.STEP_K_FACTOR) {
+            spinnerArray.add(df.format(i));
+        }
+        kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+        kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        kFactor.setAdapter(kFactorValues);
+        kFactor.setSelection(TrueCFMConstants.DEFAULT_VAL_FOR_K_FACTOR);
+
+    }
+
     
     private void initializeViews() {
         if (mProfileConfig != null) {
@@ -376,6 +482,27 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
             setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition()]);
+
+            enableCFMControl.setChecked(mProfileConfig.enableCFMControl);
+            if (!enableCFMControl.isChecked()) {
+                numMaxCFMCooling.setValue(50);
+                numMinCFMCooling.setValue(50);
+                numMaxCFMReheating.setValue(50);
+                numMinCFMReheating.setValue(50);
+                kFactor.setSelection(100);
+            } else {
+                numMaxCFMCooling.setValue((mProfileConfig.nuMaxCFMCooling)/STEP);
+                numMinCFMCooling.setMaxValue((mProfileConfig.nuMaxCFMCooling)/STEP);
+                numMinCFMCooling.setValue((mProfileConfig.numMinCFMCooling)/STEP);
+                numMaxCFMReheating.setValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMinCFMReheating.setMaxValue((mProfileConfig.numMaxCFMReheating)/STEP);
+                numMinCFMReheating.setValue((mProfileConfig.numMinCFMReheating)/STEP);
+                //this converts value of KFactor to position
+                kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
+                minCoolingDamperPos.setValue(20);
+                maxCoolingDamperPos.setValue(20);
+                minHeatingDamperPos.setValue(20);
+            }
         
         } else {
             zonePriority.setSelection(2);//NORMAL
@@ -481,7 +608,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-    
+        vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
+        vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
+        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
+        vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
+        vavConfig.enableCFMControl = enableCFMControl.isChecked();
+        vavConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);

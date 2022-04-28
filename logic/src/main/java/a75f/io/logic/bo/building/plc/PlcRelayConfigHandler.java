@@ -751,7 +751,7 @@ public class PlcRelayConfigHandler {
             case 4:
                 shortDis = "Airflow";
                 shortDisTarget = "Target Airflow";
-                unit = "CFM";
+                unit = "cfm";
                 maxVal = "1000";
                 minVal = "0";
                 incrementVal = "10";
@@ -969,7 +969,7 @@ public class PlcRelayConfigHandler {
             case 3:
                 shortDis = "Airflow";
                 shortDisTarget = "Dynamic Target Airflow";
-                unit = "CFM";
+                unit = "cfm";
                 maxVal = "1000";
                 minVal = "0";
                 incrementVal = "10";

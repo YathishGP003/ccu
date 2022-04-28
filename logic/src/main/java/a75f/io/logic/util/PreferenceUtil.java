@@ -14,6 +14,7 @@ public class PreferenceUtil {
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
+    private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
 
 
     public static void setContext(Context c) {
@@ -180,6 +181,13 @@ public class PreferenceUtil {
     }
     public static void setPressureUnitMigrationDone() {
         setBooleanPreference(PRESSURE_UNIT_MIGRATION, true);
+    }
+    public static boolean isAirflowVolumeUnitMigrationDone() {
+        return getBooleanPreference(AIRFLOW_UNIT_MIGRATION);
+    }
+
+    public static void setAirflowVolumeUnitMigrationDone() {
+        setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
     }
 
     public static boolean isTrueCFMVAVMigrationDone() {

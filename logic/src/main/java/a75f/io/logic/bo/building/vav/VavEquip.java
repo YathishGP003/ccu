@@ -960,11 +960,11 @@ public class VavEquip
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equipRef, config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.VAV_TAG,TunerConstants.VAV_TUNER_GROUP);
         } else {
-            createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
+            TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         }
         
     }
-    
+
     /**
      * Create damperSize configuration points when TrueCfm is disabled.
      * @param hayStack
@@ -990,7 +990,7 @@ public class VavEquip
         String damperMinCoolingId = hayStack.addPoint(damperMinCooling);
         hayStack.writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
         hayStack.writeHisValueByIdWithoutCOV(damperMinCoolingId, (double)config.minDamperCooling);
-    
+
         Point damperMaxCooling = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName()+"-maxCoolingDamperPos")
                                      .setEquipRef(equip.getId())
@@ -1007,7 +1007,7 @@ public class VavEquip
         String damperMaxCoolingId = hayStack.addPoint(damperMaxCooling);
         hayStack.writeDefaultValById(damperMaxCoolingId, (double)config.maxDamperCooling);
         hayStack.writeHisValueByIdWithoutCOV(damperMaxCoolingId, (double)config.maxDamperCooling);
-    
+
         Point damperMinHeating = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName()+"-minHeatingDamperPos")
                                      .setEquipRef(equip.getId())
@@ -1134,11 +1134,11 @@ public class VavEquip
         boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable") > 0;
         if (curTrueCfmEnabled && !config.enableCFMControl) {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
-            createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
+            TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         } else if (!curTrueCfmEnabled && config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
-            deleteNonCfmDamperPoints(hayStack, equip.getId());
+            TrueCFMPointsHandler.deleteNonCfmDamperPoints(hayStack, equip.getId());
             initializeCfmController(equip.getId());
         }
         hayStack.syncEntityTree();

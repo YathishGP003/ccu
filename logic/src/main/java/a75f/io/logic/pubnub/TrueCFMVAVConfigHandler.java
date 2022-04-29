@@ -8,9 +8,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.logic.tuners.TrueCFMTuners;
+import a75f.io.logic.tuners.TunerConstants;
 
 public class TrueCFMVAVConfigHandler {
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -32,8 +35,12 @@ public class TrueCFMVAVConfigHandler {
                 vavProfileConfiguration.kFactor = 2;
                 TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), vavProfileConfiguration,
                  fanMarker);
+                TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV, TunerConstants.VAV_TUNER_GROUP);
+                TrueCFMPointsHandler.deleteNonCfmDamperPoints(hayStack, equip.getId());
+                TrueCFMPointsHandler.createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanMarker);
             } else {
                 TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
+                TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, vavProfileConfiguration, fanMarker);
             }
         writePointFromJson(configPoint, msgObject, hayStack);
     }

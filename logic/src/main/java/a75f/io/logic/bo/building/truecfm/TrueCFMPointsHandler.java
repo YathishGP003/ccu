@@ -274,7 +274,7 @@ public class TrueCFMPointsHandler {
                 .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
                 .addMarker("cooling").addMarker("pos")
                 .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(config.getNodeAddress()))
+                .setGroup(String.valueOf(equip.getGroup()))
                 .setUnit("%")
                 .setTz(equip.getTz())
                 .build();
@@ -291,7 +291,7 @@ public class TrueCFMPointsHandler {
                 .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("max")
                 .addMarker("cooling").addMarker("pos")
                 .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(config.getNodeAddress()))
+                .setGroup(String.valueOf(equip.getGroup()))
                 .setUnit("%")
                 .setTz(equip.getTz())
                 .build();
@@ -308,7 +308,7 @@ public class TrueCFMPointsHandler {
                 .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("damper").addMarker("min")
                 .addMarker("heating").addMarker("pos")
                 .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                .setGroup(String.valueOf(config.getNodeAddress()))
+                .setGroup(String.valueOf(equip.getGroup()))
                 .setUnit("%")
                 .setTz(equip.getTz())
                 .build();

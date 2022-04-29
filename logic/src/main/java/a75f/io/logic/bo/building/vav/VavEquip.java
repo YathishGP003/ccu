@@ -179,6 +179,10 @@ public class VavEquip
         int cfmProportionalSpread = (int) TunerUtil.readTunerValByQuery("prange and trueCfm",equipId);
         int cfmIntegralMaxTimeout = (int) TunerUtil.readTunerValByQuery("itimeout and trueCfm",equipId);
         
+        CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" cfmProportionalGain "+cfmProportionalGain
+                                +" cfmIntegralGain "+cfmIntegralGain
+                                +" cfmProportionalSpread "+cfmProportionalSpread
+                                +" cfmIntegralMaxTimeout "+cfmIntegralMaxTimeout);
         cfmController.setProportionalGain(cfmProportionalGain);
         cfmController.setIntegralGain(cfmIntegralGain);
         cfmController.setProportionalSpread(cfmProportionalSpread);
@@ -1135,6 +1139,7 @@ public class VavEquip
             TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), config, fanMarker);
             TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV,TunerConstants.VAV_TUNER_GROUP);
             deleteNonCfmDamperPoints(hayStack, equip.getId());
+            initializeCfmController(equip.getId());
         }
         hayStack.syncEntityTree();
     }

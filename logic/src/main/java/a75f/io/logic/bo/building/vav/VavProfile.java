@@ -550,6 +550,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     private void updateDamperForMinCfm(double cfmLoopOp) {
         if (damper.currentPosition > 0) {
+            CcuLog.d(L.TAG_CCU_ZONE,"updateDamperForMinCfm currentPosition"+damper.currentPosition+" cfmLoopOp "+cfmLoopOp);
             damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
         } else {
             damper.currentPosition = (int)cfmLoopOp;

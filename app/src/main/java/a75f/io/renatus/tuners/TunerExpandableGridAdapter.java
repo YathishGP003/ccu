@@ -112,7 +112,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         String val = tunerItem.get("newValue").toString();
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (doesPointNeedAbsoluteConversion(tunerItem)) {
-                                val = String.valueOf(roundToHalf(fahrenheitToCelsius(Double.parseDouble(val))));
+                                val = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(val))));
                             } else if (doesPointNeedRelativeConversion(tunerItem)){
                                 val = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(val))));
                             }
@@ -130,7 +130,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         double val = (getTunerValue(tunerItem.get("id").toString()));
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (doesPointNeedAbsoluteConversion(tunerItem)) {
-                                val = roundToHalf(fahrenheitToCelsius(val));
+                                val = Math.round(fahrenheitToCelsius(val));
                             } else if (doesPointNeedRelativeConversion(tunerItem)){
                                 val = roundToHalf(fahrenheitToCelsiusUnitChange(val));
                             }

@@ -334,7 +334,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 for (HashMap newTunerValueItem : updatedTunerValues) {
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
                         if (doesPointNeedAbsoluteConversion(newTunerValueItem)) {
-                            newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                            newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
                         } else if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                             newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
                         }

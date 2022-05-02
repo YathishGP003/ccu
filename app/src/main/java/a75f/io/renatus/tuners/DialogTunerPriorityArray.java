@@ -281,7 +281,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
 
             if (doesPointNeedAbsoluteConversion()) {
-                defaultVal = roundToHalf(fahrenheitToCelsius(defaultVal));
+                defaultVal = Math.round(fahrenheitToCelsius(defaultVal));
             } else if (doesPointNeedRelativeConversion()){
                 defaultVal = roundToHalf(fahrenheitToCelsiusUnitChange(defaultVal));
             }
@@ -391,7 +391,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     tunerVal = valMap.get("val").toString();
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                         if (doesPointNeedAbsoluteConversion()) {
-                            tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
+                            tunerVal = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
                         } else if (doesPointNeedRelativeConversion()){
                             tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(valMap.get("val").toString()))));
                         }
@@ -473,9 +473,9 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                     prefs.setBoolean(tunerItemSelected.get("id").toString(),true);
                         if (doesPointNeedAbsoluteConversion()) {
-                            maxValueDb = roundToHalf(fahrenheitToCelsius(maxValueDb));
-                            minValueDb = roundToHalf(fahrenheitToCelsius(minValueDb));
-                            currentValueDb = roundToHalf(fahrenheitToCelsius(currentValueDb));
+                            maxValueDb = Math.round(fahrenheitToCelsius(maxValueDb));
+                            minValueDb = Math.round(fahrenheitToCelsius(minValueDb));
+                            currentValueDb = Math.round(fahrenheitToCelsius(currentValueDb));
                         } else if (doesPointNeedRelativeConversion()) {
                             minValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(minValueDb));
                             maxValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(maxValueDb));

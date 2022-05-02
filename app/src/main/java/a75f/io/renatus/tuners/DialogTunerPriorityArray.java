@@ -279,11 +279,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
         tunerName = tunerItemSelected.get("dis").toString();
         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-
-            if (doesPointNeedAbsoluteConversion()) {
-                defaultVal = Math.round(fahrenheitToCelsius(defaultVal));
-            } else if (doesPointNeedRelativeConversion()){
-                defaultVal = roundToHalf(fahrenheitToCelsiusUnitChange(defaultVal));
+            if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                if (doesPointNeedRelativeConversion()) {
+                    defaultVal = roundToHalf(fahrenheitToCelsiusUnitChange(defaultVal));
+                } else {
+                    defaultVal = Math.round(fahrenheitToCelsius(defaultVal));
+                }
             }
         }
 
@@ -319,12 +320,9 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         buttonCancel.setOnClickListener(v -> dismiss());
     }
 
-    public boolean doesPointNeedAbsoluteConversion() {
-        return (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C"))  && tunerItemSelected.containsKey("temp") && !tunerItemSelected.containsKey("abnormal") || tunerItemSelected.containsKey(Tags.LOCKOUT) || (tunerItemSelected.containsKey("pipe2") && tunerItemSelected.containsKey("threshold")) || (tunerItemSelected.containsKey("economizing") && (tunerItemSelected.containsKey("threshold") || tunerItemSelected.containsKey("loop"))) || tunerItemSelected.containsKey("outside") || tunerItemSelected.containsKey("limit") && !tunerItemSelected.containsKey("timer") && !tunerItemSelected.containsKey("itimeout") && (!tunerItemSelected.containsKey("constant") && !tunerItemSelected.containsKey("time"));
-    }
 
     public boolean doesPointNeedRelativeConversion() {
-        return (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) && tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") || tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") && tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) || tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") || tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") || tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") || tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") && tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential"));
+        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") || tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") && tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) || tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") || tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") || tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") || tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") && tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) || tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
     }
 
 
@@ -390,11 +388,14 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
                     tunerVal = valMap.get("val").toString();
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-                        if (doesPointNeedAbsoluteConversion()) {
-                            tunerVal = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
-                        } else if (doesPointNeedRelativeConversion()){
-                            tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(valMap.get("val").toString()))));
+                        if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                            if (doesPointNeedRelativeConversion()) {
+                                tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(valMap.get("val").toString()))));
+                            } else {
+                                tunerVal = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
+                            }
                         }
+
                     }
                     return tunerVal;
                 }
@@ -471,16 +472,18 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
                 if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-                    prefs.setBoolean(tunerItemSelected.get("id").toString(),true);
-                        if (doesPointNeedAbsoluteConversion()) {
-                            maxValueDb = Math.round(fahrenheitToCelsius(maxValueDb));
-                            minValueDb = Math.round(fahrenheitToCelsius(minValueDb));
-                            currentValueDb = Math.round(fahrenheitToCelsius(currentValueDb));
-                        } else if (doesPointNeedRelativeConversion()) {
-                            minValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(minValueDb));
-                            maxValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(maxValueDb));
-                            currentValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(currentValueDb));
-                        }
+                    if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                        prefs.setBoolean(tunerItemSelected.get("id").toString(), true);
+                            if (doesPointNeedRelativeConversion()) {
+                                maxValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(maxValueDb));
+                                minValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(minValueDb));
+                                currentValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(currentValueDb));
+                            } else {
+                                minValueDb = roundToHalf(fahrenheitToCelsius(minValueDb));
+                                maxValueDb = roundToHalf(fahrenheitToCelsius(maxValueDb));
+                                currentValueDb = roundToHalf(fahrenheitToCelsius(currentValueDb));
+                            }
+                    }
                 }
 
                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);

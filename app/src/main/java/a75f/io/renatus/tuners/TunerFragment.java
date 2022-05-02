@@ -333,12 +333,14 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 prefs = new Prefs(getContext().getApplicationContext());
                 for (HashMap newTunerValueItem : updatedTunerValues) {
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
-                        if (doesPointNeedAbsoluteConversion(newTunerValueItem)) {
-                            newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
-                        } else if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                            newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                        if (newTunerValueItem.containsKey("unit") && newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                            if (doesPointNeedRelativeConversion(newTunerValueItem)) {
+                                newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                            } else {
+                                newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                            }
+                            prefs.setBoolean(newTunerValueItem.get("id").toString(), false);
                         }
-                        prefs.setBoolean(newTunerValueItem.get("id").toString(),false);
                     }
                         if ((newTunerValueItem.get("newLevel").toString().equals("16") || newTunerValueItem.get("newLevel").toString().equals("14")) && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB")) {
                         if (!newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())) {
@@ -492,12 +494,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     }
 
     private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> newTunerValueItem) {
-        return newTunerValueItem.containsKey("deadband") || newTunerValueItem.containsKey("setback") || newTunerValueItem.containsKey("abnormal") || (newTunerValueItem.containsKey("spread") && newTunerValueItem.containsKey("user") && !newTunerValueItem.containsKey("multiplier")) || newTunerValueItem.containsKey("sat") && newTunerValueItem.containsKey("spmax") || newTunerValueItem.containsKey("spmin") || newTunerValueItem.containsKey("spres") || newTunerValueItem.containsKey("spinit") || newTunerValueItem.containsKey("sptrim") || newTunerValueItem.containsKey("spresmax") || (newTunerValueItem.containsKey("reheat") && newTunerValueItem.containsKey("min") && newTunerValueItem.containsKey("differential"));
+        return  newTunerValueItem.containsKey("deadband") || newTunerValueItem.containsKey("setback") || newTunerValueItem.containsKey("abnormal") || (newTunerValueItem.containsKey("spread") && newTunerValueItem.containsKey("user") && !newTunerValueItem.containsKey("multiplier")) || newTunerValueItem.containsKey("sat") && newTunerValueItem.containsKey("spmax") || newTunerValueItem.containsKey("spmin") || newTunerValueItem.containsKey("spres") || newTunerValueItem.containsKey("spinit") || newTunerValueItem.containsKey("sptrim") || newTunerValueItem.containsKey("spresmax") || (newTunerValueItem.containsKey("reheat") && newTunerValueItem.containsKey("min") && newTunerValueItem.containsKey("differential")) || newTunerValueItem.containsKey("leeway") || newTunerValueItem.containsKey("proportional");
     }
 
-    private boolean doesPointNeedAbsoluteConversion(HashMap<Object,Object> newTunerValueItem) {
-        return newTunerValueItem.containsKey("temp") && !newTunerValueItem.containsKey("abnormal") || newTunerValueItem.containsKey(Tags.LOCKOUT) || (newTunerValueItem.containsKey("pipe2") && newTunerValueItem.containsKey("threshold")) || (newTunerValueItem.containsKey("economizing") && (newTunerValueItem.containsKey("threshold") || newTunerValueItem.containsKey("loop"))) || newTunerValueItem.containsKey("outside") || newTunerValueItem.containsKey("limit") && !newTunerValueItem.containsKey("timer") && !newTunerValueItem.containsKey("itimeout") && (!newTunerValueItem.containsKey("constant") && !newTunerValueItem.containsKey("time"));
-    }
 
 
 

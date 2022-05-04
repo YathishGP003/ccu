@@ -420,7 +420,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     public double getConfigVal(String tags) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and "+tags);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
         if (configPoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
             return 0;

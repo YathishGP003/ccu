@@ -492,52 +492,54 @@ public class UsbModbusService extends Service {
                 serialPortConnected = false;
             }
         }
-    }
     
-    private void configureMbSerialPort() {
-        serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-        Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
-        Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
-                  +getModbusDataBits()+" "+getModbusStopBits());
-        if (serialPort != null) {
-            if (serialPort.open()) {
-                serialPortConnected = true;
-                serialPort.setBaudRate(getModbusBaudrate());
-                serialPort.setModbusDevice(true);
-                serialPort.setDataBits(getModbusDataBits());
-                serialPort.setStopBits(getModbusStopBits());
-                serialPort.setParity(getModbusParity());
-                /**
-                 * Current flow control Options:
-                 * UsbSerialInterface.FLOW_CONTROL_OFF
-                 * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
-                 * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
-                 */
-            
-                serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                serialPort.read(modbusCallback);
-                serialPort.getCTS(ctsCallback);
-                serialPort.getDSR(dsrCallback);
-                try {
-                    //sleep(2000); // sleep some. YMMV with different chips.
-                    //this.wait(2000);
-                    Thread.currentThread().sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        private void configureMbSerialPort() {
+            serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+            Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
+                      +getModbusDataBits()+" "+getModbusStopBits());
+            if (serialPort != null) {
+                if (serialPort.open()) {
+                    serialPortConnected = true;
+                    serialPort.setBaudRate(getModbusBaudrate());
+                    serialPort.setModbusDevice(true);
+                    serialPort.setDataBits(getModbusDataBits());
+                    serialPort.setStopBits(getModbusStopBits());
+                    serialPort.setParity(getModbusParity());
+                    /**
+                     * Current flow control Options:
+                     * UsbSerialInterface.FLOW_CONTROL_OFF
+                     * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
+                     * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
+                     */
+                
+                    serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+                    serialPort.read(modbusCallback);
+                    serialPort.getCTS(ctsCallback);
+                    serialPort.getDSR(dsrCallback);
+                    try {
+                        //sleep(2000); // sleep some. YMMV with different chips.
+                        //this.wait(2000);
+                        Thread.currentThread().sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    // Everything went as expected. Send an intent to MainActivity
+                    Intent intent = new Intent(ACTION_USB_MODBUS_READY);
+                    context.sendBroadcast(intent);
+                } else {
+                    Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
+                    context.sendBroadcast(intent);
                 }
-                // Everything went as expected. Send an intent to MainActivity
-                Intent intent = new Intent(ACTION_USB_MODBUS_READY);
-                context.sendBroadcast(intent);
             } else {
-                Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
+                // No driver for given device, even generic CDC driver could not be loaded
+                Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
                 context.sendBroadcast(intent);
             }
-        } else {
-            // No driver for given device, even generic CDC driver could not be loaded
-            Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
-            context.sendBroadcast(intent);
         }
     }
+    
+    
     
     private int getModbusBaudrate() {
         return readIntPref("mb_baudrate", 9600);

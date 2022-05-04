@@ -116,7 +116,7 @@ public class Globals {
     private int tempOverCount = 0;
 
     private static long ccuUpdateTriggerTimeToken;
-    
+
     private Globals() {
     }
 

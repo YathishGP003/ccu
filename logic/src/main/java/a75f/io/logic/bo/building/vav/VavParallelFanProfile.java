@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.vav;
 
+import java.util.Objects;
+
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -114,6 +116,7 @@ public class VavParallelFanProfile extends VavProfile
         valveController = vavDevice.getValveController();
         setTempCooling = vavDevice.getDesiredTempCooling();
         setTempHeating = vavDevice.getDesiredTempHeating();
+        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
         ParallelFanVavUnit vavUnit = (ParallelFanVavUnit)vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;

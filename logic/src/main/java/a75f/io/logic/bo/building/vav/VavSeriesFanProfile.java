@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.vav;
 
+import java.util.Objects;
+
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -116,6 +118,7 @@ public class VavSeriesFanProfile extends VavProfile
         heatingLoop = vavDevice.getHeatingLoop();
         co2Loop = vavDeviceMap.get(node).getCo2Loop();
         vocLoop = vavDeviceMap.get(node).getVOCLoop();
+        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
         valveController = vavDevice.getValveController();
         setTempCooling = vavDevice.getDesiredTempCooling();
         setTempHeating = vavDevice.getDesiredTempHeating();

@@ -118,7 +118,7 @@ public class MigrationUtil {
     }
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        TrueCFMTuners.createTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
         vavEquips.forEach(vavEquip -> {
             HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
             if (enableCFMPoint.get("id")==null) {

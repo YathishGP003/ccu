@@ -486,9 +486,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             enableCFMControl.setChecked(mProfileConfig.enableCFMControl);
             if (!enableCFMControl.isChecked()) {
                 numMaxCFMCooling.setValue(50);
-                numMinCFMCooling.setValue(50);
+                numMinCFMCooling.setValue(10);
                 numMaxCFMReheating.setValue(50);
-                numMinCFMReheating.setValue(50);
+                numMinCFMReheating.setValue(10);
                 kFactor.setSelection(100);
             } else {
                 numMaxCFMCooling.setValue((mProfileConfig.nuMaxCFMCooling)/STEP);

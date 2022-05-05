@@ -52,7 +52,7 @@ public class DabProfile extends ZoneProfile
     //State prior to changeover. User to identify the direction in which the PiLoop to be run while in deadband.
     ZoneState prevState = DEADBAND;
     
-    private int LOOP_OP_MIDPOINT = 50;
+    private static final int LOOP_OP_MIDPOINT = 50;
     
     public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef) {
         dabEquip = new DabEquip(getProfileType(), addr);
@@ -156,7 +156,7 @@ public class DabProfile extends ZoneProfile
             }
             if (systemMode == SystemMode.OFF) {
                damperOpController.reset();
-            } if (prevState == COOLING) {
+            } else if (prevState == COOLING) {
                 damperOpController.updateControlVariable(roomTemp, setTempCooling);
             } else if (prevState == HEATING) {
                 damperOpController.updateControlVariable(setTempHeating, roomTemp);

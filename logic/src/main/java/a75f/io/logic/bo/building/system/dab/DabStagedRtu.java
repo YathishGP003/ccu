@@ -733,10 +733,14 @@ public class DabStagedRtu extends DabSystemProfile
     public double getConfigEnabled(String config) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
-        
     }
+    
     public void setConfigEnabled(String config, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
     }

@@ -586,8 +586,12 @@ public class VavIERtu extends VavSystemProfile
 
     public double getConfigVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and "+tags);
-        return !configPoint.isEmpty()? hayStack.readPointPriorityVal(configPoint.get("id").toString()) : 0;
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            return 0;
+        }
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
 
     public void setConfigVal(String tags, double val) {
@@ -596,13 +600,13 @@ public class VavIERtu extends VavSystemProfile
 
     public double getConfigEnabled(String config) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
-
     }
-    /*public void setConfigEnabled(String config, double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
-    }*/
 
     public void addTunerPoints(String equipref) {
         VavTRTuners.addSatTRTunerPoints(equipref);

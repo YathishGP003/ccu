@@ -8,7 +8,7 @@ public enum FirmwareDeviceType_t
 {
 	REMOTE_TEMPERATURE_SENSOR_DEVICE_TYPE(	null, 			null, 		null),
 	SMART_NODE_DEVICE_TYPE(					"SmartNode", 	"sn_fw/", 	"smartnode"),
-	CONTROL_MOTE_DEVICE_TYPE(				null, 			null, 		null),
+	CONTROL_MOTE_DEVICE_TYPE(				"CM4", 			"cm4_fw/", 		"cm"),
 	ITM_DEVICE_TYPE(						"itm", 		"itm_fw/", 	"smartstat"),
 	SMART_STAT_BACK_DEVICE_TYPE(			null, 			null, 		null),
 	HIA_DEVICE_TYPE(						null, 			null, 		null),

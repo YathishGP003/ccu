@@ -693,9 +693,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public double getConfigVal(String tags) {
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and "+tags);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     
@@ -739,9 +742,13 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     public double getConfigEnabled(String config) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        HashMap<Object, Object> configPoint =
+            hayStack.readEntity("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
-        
     }
 
     public void setConfigEnabled(String tags, double val) {

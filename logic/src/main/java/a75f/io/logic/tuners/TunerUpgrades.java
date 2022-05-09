@@ -44,6 +44,7 @@ public class TunerUpgrades {
         upgradeDcwbBuildingTuners(hayStack);
         createDefaultTempLockoutPoints(hayStack);
         addVavDischargeTempTuners(hayStack);
+        migrateCelsiusSupportConfiguration(hayStack);
     }
     
     /**
@@ -309,4 +310,38 @@ public class TunerUpgrades {
 
         }
 
-    }
+
+   private static void migrateCelsiusSupportConfiguration(CCUHsApi hayStack){
+       HashMap<Object, Object> tuner = hayStack.readEntity(TagQueries.TUNER_EQUIP);
+
+       if (tuner != null && tuner.size() > 0) {
+           String equipRef = tuner.get("id").toString();
+           String equipDis = tuner.get("dis").toString();
+           HashMap siteMap = hayStack.read(Tags.SITE);
+           String siteRef = siteMap.get(Tags.ID).toString();
+           String tz = siteMap.get("tz").toString();
+           HashMap useCelsiusPoint = CCUHsApi.getInstance().readEntity("displayUnit");
+            if(useCelsiusPoint.isEmpty()) {
+                Log.i("DEV_DEBUG", "migrateCelsiusSupportConfiguration: useCelsiusPoint Creating");
+                Point useCelsius = new Point.Builder()
+                        .setDisplayName(equipDis + "-" + "displayUnit")
+                        .setSiteRef(siteRef)
+                        .setEquipRef(equipRef).setHisInterpolate("cov")
+                        .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("displayUnit")
+                        .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
+                        .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                        .setMinVal("0")
+                        .setMaxVal("1")
+                        .setTz(tz)
+                        .build();
+                String useCelsiusId = hayStack.addPoint(useCelsius);
+                hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED, TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
+                hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
+                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint Point created ");
+            }else{
+                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint already present");
+            }
+       }
+
+   }
+}

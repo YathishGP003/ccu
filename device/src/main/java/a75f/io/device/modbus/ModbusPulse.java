@@ -126,6 +126,7 @@ public class ModbusPulse {
             case UsbModbusUtils.READ_INPUT_REGISTERS:
             case UsbModbusUtils.READ_HOLDING_REGISTERS:
             case UsbModbusUtils.READ_DISCRETE_INPUTS:
+            case UsbModbusUtils.READ_COILS:
                 formattedVal = getRegisterValFromResponse(readRegister, response);
                 hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
                 hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
@@ -135,6 +136,7 @@ public class ModbusPulse {
                 }
                 //startIndex +=2;
                 break;
+            case UsbModbusUtils.WRITE_COIL:
             case UsbModbusUtils.WRITE_REGISTER:
                 //Parsed only for logging.
                 formattedVal = (response.getMessageData()[MODBUS_DATA_START_INDEX+1] << 8)
@@ -154,7 +156,7 @@ public class ModbusPulse {
         double respVal = 0;
         Log.d("CCU_MODBUS","reg param type "+ register.getParameterDefinitionType());
 
-        if (register.registerType.equals("discreteInput")) {
+        if (register.registerType.equals("discreteInput") || register.registerType.equals("coil")) {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);
         } else if (register.registerType.equals("inputRegister") || register.registerType.equals("holdingRegister")) {

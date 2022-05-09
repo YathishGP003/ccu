@@ -8,13 +8,16 @@ import android.util.Log;
 
 public class PreferenceUtil {
     private static Context context;
-    private static String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
-    private static String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
-    private static String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
 
+
+
+    private static final String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
+    private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
+    private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
+    private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -206,6 +209,13 @@ public class PreferenceUtil {
     public static boolean getSNMigration() {
         return getBooleanPreference(SMART_NODE_MIGRATION);
     }
+    public static void setDamperFeedbackMigration() {
+        setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, false);
+    }
+    public static boolean getDamperFeedbackMigration() {
+        return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
+    }
+
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);

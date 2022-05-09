@@ -29,6 +29,8 @@ import static a75f.io.device.mesh.MeshUtil.sendStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
+import android.util.Log;
+
 public class DeviceUtil {
     
     public static boolean isAnalog(String port) {
@@ -185,5 +187,24 @@ public class DeviceUtil {
         msg.relayBitmap.set((short) relayBitmap);
         
         return msg;
+    }
+
+
+    public static double getPercentageFromVoltage(double physicalVoltage, String analogType) {
+        String [] arrOfStr = analogType.split("-");
+        if (arrOfStr.length == 2) {
+            if (arrOfStr[1].contains("v")) {
+                arrOfStr[1] = arrOfStr[1].replace("v", "");
+            }
+            double minVoltage =  Double.parseDouble(arrOfStr[0]);
+            double maxVoltage =  Double.parseDouble(arrOfStr[1]);
+
+            Log.i(L.TAG_CCU_DEVICE, "Feedback physicalVoltage"+physicalVoltage +"Min = "+minVoltage+" Max = "+maxVoltage);
+            double feedbackPercent = ((physicalVoltage - minVoltage) / (maxVoltage - minVoltage)) * 100;
+            Log.i(L.TAG_CCU_DEVICE, "Actual Feedback Result"+ feedbackPercent);
+            return feedbackPercent;
+        }
+        Log.i(L.TAG_CCU_DEVICE, "invalid analogType "+analogType);
+        return 0;
     }
 }

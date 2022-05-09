@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -147,6 +148,7 @@ public class Pulse
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
+				Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+Port.valueOf(phyPoint.get("port").toString()));
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
@@ -189,9 +191,11 @@ public class Pulse
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						Log.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						if (oldDisAnalogVal != curDisAnalogVal) {
 							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisAnalogVal);
 							if (currentTempInterface != null) {
@@ -374,7 +378,15 @@ public class Pulse
 	}
 	
 	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
+		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address "+ pp.get("group")+" Feedback  type"+pp.get("analogType"));
 		double analogVal = val/1000;
+		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address analogVal after devide "+analogVal);
+		if(lp.containsKey("vav") || lp.containsKey("dab") || lp.containsKey("dualDuct")) {
+			double damperPercent= DeviceUtil.getPercentageFromVoltage(analogVal,
+					Objects.requireNonNull(pp.get("analogType")).toString());
+			Log.i(L.TAG_CCU_DEVICE, "Feedback Reversed damper percent  : "+damperPercent);
+			return damperPercent;
+		}
 		Sensor analogSensor;
 		//If the analogType of physical point is set to one of the sensor types (Sensor.getSensorList) , corresponding sensor's
 		//conversion formula is applied. Otherwise the input value that is already divided by 1000 is just returned.
@@ -392,7 +404,8 @@ public class Pulse
 		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
-	
+
+
 	private static void updateDesiredTemp(int node, Double dt) {
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip q = new Equip.Builder().setHashMap(equipMap).build();
@@ -842,6 +855,7 @@ public class Pulse
 		}
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
+
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);

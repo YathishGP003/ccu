@@ -795,11 +795,13 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-
-        //return sysEquip.getConfigEnabled(config)? 1:0;
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
 
     }

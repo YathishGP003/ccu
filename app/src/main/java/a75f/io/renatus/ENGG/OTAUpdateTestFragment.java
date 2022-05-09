@@ -68,9 +68,10 @@ public class OTAUpdateTestFragment extends Fragment {
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_MESSAGE);
 
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + lwMeshAddress + "\"");
-        otaIntent.putExtra("id", equipMap.get("id").toString().replace("@",""));
+
+        otaIntent.putExtra("id", "ffdd16d5-1148-4f86-9700-df3d077b20ce");
         otaIntent.putExtra("firmwareVersion", firmwareInfo);
-        otaIntent.putExtra("cmdLevel", "equip");
+        otaIntent.putExtra("cmdLevel", "system");
 
         activity.sendBroadcast(otaIntent);
     }

@@ -845,11 +845,12 @@ public abstract class SystemProfile
                                                                 .addMarker("sp").addMarker("system").setHisInterpolate("cov")
                                                                 .addMarker("config").addMarker("writable")
                                                                 .addMarker("outsideTemp").addMarker("cooling")
-                                                                .addMarker("lockout").addMarker("enabled")
+                                                                .addMarker("lockout").addMarker("enabled").addMarker("his")
                                                                 .setEnums("false,true").setTz(tz).build();
             String useOutsideTempLockoutCoolingId = hayStack.addPoint(useOutsideTempLockoutCooling);
             double defaultVal = ccu().oaoProfile == null ? 0 : 1.0;
             hayStack.writeDefaultValById(useOutsideTempLockoutCoolingId, defaultVal);
+            hayStack.writeHisValueByIdWithoutCOV(useOutsideTempLockoutCoolingId, defaultVal);
         }
     
         if(!verifyPointsAvailability("config and outsideTemp and heating and lockout",equipref)) {
@@ -860,10 +861,11 @@ public abstract class SystemProfile
                                                                     .addMarker("sp").addMarker("system").setHisInterpolate("cov")
                                                                     .addMarker("config").addMarker("writable")
                                                                     .addMarker("outsideTemp").addMarker("heating")
-                                                                    .addMarker("lockout").addMarker("enabled")
+                                                                    .addMarker("lockout").addMarker("enabled").addMarker("his")
                                                                     .setEnums("false,true").setTz(tz).build();
             String useOutsideTempLockoutHeatingId = hayStack.addPoint(useOutsideTempLockoutHeating);
             hayStack.writeDefaultValById(useOutsideTempLockoutHeatingId, 0.0);
+            hayStack.writeHisValueByIdWithoutCOV(useOutsideTempLockoutHeatingId, 0.0);
         }
     
         if(!verifyPointsAvailability("mechanical and cooling and available",equipref)) {
@@ -966,11 +968,15 @@ public abstract class SystemProfile
     public void setOutsideTempCoolingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
         hayStack.writeDefaultVal("system and config and outsideTemp and cooling and lockout", enabled ?
                                                                                                   1.0: 0);
+        hayStack.writeHisValByQuery("system and config and outsideTemp and cooling and lockout", enabled ?
+                                                                                                     1.0: 0);
     }
     
     public void setOutsideTempHeatingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
         hayStack.writeDefaultVal("system and config and outsideTemp and heating and lockout", enabled ?
                                                                                                   1.0 : 0);
+        hayStack.writeHisValByQuery("system and config and outsideTemp and heating and lockout", enabled ?
+                                                                                                     1.0 : 0);
     }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {

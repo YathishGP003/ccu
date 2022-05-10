@@ -455,6 +455,12 @@
         <item name="buttonStyle">@style/buttonstyle</item>
     </style>
 
+    <style name="NewDialogStyleRenatus" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/WindowTextStyle_75f</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="buttonStyle">@style/buttonstyle</item>
+    </style>
+
     <style name="buttonstyle">
         <item name="android:textSize">@dimen/text_small</item>
     </style>

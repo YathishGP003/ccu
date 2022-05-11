@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -56,7 +55,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.BuildingTuners;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -94,7 +92,6 @@ public class InstallerOptions extends Fragment {
     String mSiteId;
     String addressBandSelected = "1000";
     Prefs prefs;
-    SharedPreferences sharedPreferences;
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
@@ -111,8 +108,6 @@ public class InstallerOptions extends Fragment {
 
     //BACnet Setup
     ToggleButton toggleBACnet;
-    ToggleButton toggleCelsius;
-    TextView textCelsiusEnable;
     RelativeLayout relativeLayoutBACnet;
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
@@ -126,19 +121,19 @@ public class InstallerOptions extends Fragment {
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
-
+    
     private ToggleButton toggleCoolingLockout;
     private ToggleButton toggleHeatingLockout;
     private TextView textCoolingLockoutTemp;
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;
     private Spinner spinnerHeatingLockoutTemp;
-
+    
     private TextView textCoolingLockout;
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
     private TextView textHeatingLockoutDesc;
-
+    
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -216,8 +211,6 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
-        toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
-        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
         relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
@@ -230,7 +223,7 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-
+        
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
         textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
@@ -241,20 +234,10 @@ public class InstallerOptions extends Fragment {
         textUseCoolingLockoutDesc = rootView.findViewById(R.id.textUseCoolingLockoutDesc);
         textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
         textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
-
+        
         initializeTempLockoutUI(CCUHsApi.getInstance());
 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
         String ccuUid = null;
-
-        textCelsiusEnable.setVisibility(View.VISIBLE);
-        toggleCelsius.setVisibility(View.VISIBLE);
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
-
-        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-           toggleCelsius.setChecked(true);
-        } else {
-           toggleCelsius.setChecked(false);
-        }
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -268,8 +251,6 @@ public class InstallerOptions extends Fragment {
             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
                 textBacnetEnable.setVisibility(View.VISIBLE);
                 toggleBACnet.setVisibility(View.VISIBLE);
-                textCelsiusEnable.setVisibility(View.VISIBLE);
-                toggleCelsius.setVisibility(View.VISIBLE);
             }else {
                 textBacnetEnable.setVisibility(View.GONE);
                 toggleBACnet.setVisibility(View.GONE);
@@ -402,18 +383,6 @@ public class InstallerOptions extends Fragment {
         });
 
         getTempValues();
-
-        toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-            if(isChecked) {
-                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                        CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
-            } else {
-                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                        CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
-            }
-            getTempValues();
-        });
 
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

@@ -126,6 +126,7 @@ public class ModbusPulse {
             case UsbModbusUtils.READ_INPUT_REGISTERS:
             case UsbModbusUtils.READ_HOLDING_REGISTERS:
             case UsbModbusUtils.READ_DISCRETE_INPUTS:
+            case UsbModbusUtils.READ_COILS:
                 formattedVal = getRegisterValFromResponse(readRegister, response);
                 hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
                 hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
@@ -135,6 +136,7 @@ public class ModbusPulse {
                 }
                 //startIndex +=2;
                 break;
+            case UsbModbusUtils.WRITE_COIL:
             case UsbModbusUtils.WRITE_REGISTER:
                 //Parsed only for logging.
                 formattedVal = (response.getMessageData()[MODBUS_DATA_START_INDEX+1] << 8)
@@ -154,7 +156,7 @@ public class ModbusPulse {
         double respVal = 0;
         Log.d("CCU_MODBUS","reg param type "+ register.getParameterDefinitionType());
 
-        if (register.registerType.equals("discreteInput")) {
+        if (register.registerType.equals("discreteInput") || register.registerType.equals("coil")) {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);
         } else if (register.registerType.equals("inputRegister") || register.registerType.equals("holdingRegister")) {
@@ -181,15 +183,22 @@ public class ModbusPulse {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
-            }  else if (register.getParameterDefinitionType().equals("int64") ||
-                        register.getParameterDefinitionType().equals("unsigned long") ||
-                        register.getParameterDefinitionType().equals("long")) {
+            }  else if (register.getParameterDefinitionType().equals("int64")) {
                 
                 if (register.getParameters().size() > 0) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianInt64Val(response);
                     } else {
                         respVal = parseInt64Val(response);
+                    }
+                }
+            }else if(register.getParameterDefinitionType().equals("unsigned long") ||
+                    register.getParameterDefinitionType().equals("long")){
+                if (register.getParameters().size() > 0) {
+                    if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                        respVal = parseLittleEndianInt32Val(response);
+                    } else {
+                        respVal = parseInt32Val(response);
                     }
                 }
             }
@@ -252,7 +261,27 @@ public class ModbusPulse {
                            (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF) ;
         return responseVal;
     }
-    
+
+    public static long parseInt32Val(RtuMessageResponse response) {
+        long responseVal = 0;
+        for (int i = 0; i < 4; i++) {
+            responseVal <<= Long.BYTES;
+            responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
+        }
+        return responseVal;
+    }
+
+
+    public static long parseLittleEndianInt32Val(RtuMessageResponse response) {
+        long responseVal = ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) <<
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
+        return responseVal;
+    }
+
+
     public static long parseInt64Val(RtuMessageResponse response) {
         long responseVal = 0;
         for (int i = 0; i < Long.BYTES; i++) {

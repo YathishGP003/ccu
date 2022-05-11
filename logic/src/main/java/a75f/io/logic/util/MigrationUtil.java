@@ -241,13 +241,16 @@ public class MigrationUtil {
             if (zoneSchedules.size() > 1) {
                 zoneSchedules.forEach( schedule -> {
                     CcuLog.i("MIGRATION_UTIL", " cleanUpDuplicateZoneSchedules Zone: "+zoneMap+" Schedule "+schedule);
-                    if (zone.getScheduleRef() == null) {
+                    HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                            "== " +zone.getId());
+                    Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                    if (scheduleById == null) {
                         CcuLog.i("MIGRATION_UTIL", " Not ideal , there is a zone without zone schedule !!!!!");
                         Schedule zoneSchedule = hayStack.getScheduleById(schedule.get("id").toString());
                         zone.setScheduleRef(schedule.get("id").toString());
                         hayStack.updateZone(zone, zone.getId());
                         hayStack.updateZoneSchedule(zoneSchedule, zone.getId());
-                    } else if (!schedule.get("id").toString().equals(zone.getScheduleRef())) {
+                    } else if (!schedule.get("id").toString().equals(scheduleById)) {
                         hayStack.deleteEntity(schedule.get("id").toString());
                     }
                 });

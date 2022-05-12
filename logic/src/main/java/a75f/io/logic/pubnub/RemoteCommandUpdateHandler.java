@@ -30,6 +30,7 @@ public class RemoteCommandUpdateHandler
     public static final String SAVE_CCU_LOGS = "save_ccu_logs";
     public static final String RESTART_MODULE = "restart_module";
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
+    public static final String OTA_UPDATE_CM = "ota_update_CM";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     /**
      * Maintain Queue request for all the OTA request and process one by one
@@ -68,6 +69,7 @@ public class RemoteCommandUpdateHandler
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
                             case OTA_UPDATE_HS:
+                            case OTA_UPDATE_CM:
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

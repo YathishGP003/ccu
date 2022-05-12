@@ -34,13 +34,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by rmatt isOn 7/30/2017.
  */
 public class UsbService extends Service
 {
-	private static final String  TAG  = "CCU_SERIAL";
+	private static final String  TAG  = "CCU_USB";
 
 	public static final byte ESC_BYTE = (byte) 0xD9;
 	public static final byte SOF_BYTE = 0x00;
@@ -102,7 +105,7 @@ public class UsbService extends Service
 		public void onReceive(Context arg0, Intent arg1)
 		{
 			if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-				Log.d("UsbService.java","OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
+				Log.d(TAG,"OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
 				boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
 				if (granted) {
 					// User accepted our USB connection. Try to open the device as a serial port
@@ -113,20 +116,22 @@ public class UsbService extends Service
 				} else {
 					// User not accepted our USB connection. Send an Intent to the Main Activity
 				
-					Log.d("UsbService.java","USB PERMISSION NOT GRANTED == "+arg1.getAction());
+					Log.d(TAG,"USB PERMISSION NOT GRANTED == "+arg1.getAction());
 					Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
 					arg0.sendBroadcast(intent);
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
-				if (!serialPortConnected) {
+				UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+				if (!serialPortConnected && UsbSerialUtil.isCMDevice(attachedDevice, context)) {
+					Log.d(TAG,"CM Serial device connected "+attachedDevice.toString());
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
 				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-				usbPortScanTimer.cancel();
 				
 				if (UsbSerialUtil.isCMDevice(detachedDevice, context)) {
-					Log.d(TAG,"CM Serial device disconnected ");
+					Log.d(TAG,"CM Serial device disconnected "+detachedDevice.toString());
+					usbPortScanTimer.cancel();
 					if (serialPortConnected) {
 						serialPort.close();
 						serialPort = null;
@@ -152,7 +157,7 @@ public class UsbService extends Service
 			@Override public void run() {
 				findSerialPortDevice();
 			}
-		}, 1000);
+		}, 500);
 	}
 	
 	/*
@@ -346,9 +351,9 @@ public class UsbService extends Service
 					connection = usbManager.openDevice(device);
 					if (success) {
 						new ConnectionThread().start();
-						Log.d(TAG, "Opened Serial CM device "+device.getDeviceName());
+						Log.d(TAG, "Opened Serial CM device "+device.toString());
 					} else {
-						Log.d(TAG, "Failed to open Serial CM device "+device.getDeviceName());
+						Log.d(TAG, "Failed to open Serial CM device "+device.toString());
 					}
 				}
 			}
@@ -482,7 +487,7 @@ public class UsbService extends Service
 							nOffset++;
 							Log.i(TAG, "Serial Message array length "+ (len + nOffset));
 							serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
-							Thread.sleep(300);
+							sleep(300);
 						}
 					}
 				} catch (Exception exception) {
@@ -539,59 +544,66 @@ public class UsbService extends Service
 	 * A simple thread to open a serial port.
 	 * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.
 	 */
-	private class ConnectionThread extends Thread
-	{
+	private class ConnectionThread extends Thread {
 		@Override
-		public void run()
-		{
-
-			serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-			if (serialPort != null) {
-				if (serialPort.open()) {
-					setDebug(false);
-					serialPortConnected = true;
-					UsbSerialWatchdog.getInstance().pet();
-					serialPort.setBaudRate(BAUD_RATE);
-					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
-					serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
-					serialPort.setParity(UsbSerialInterface.PARITY_NONE);
-					/**
-					 * Current flow control Options:
-					 * UsbSerialInterface.FLOW_CONTROL_OFF
-					 * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
-					 * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
-					 */
-					serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-					serialPort.read(mCallback);
-					serialPort.getCTS(ctsCallback);
-					serialPort.getDSR(dsrCallback);
-					//
-					// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
-					// to be uploaded or not
-					try {
-						sleep(2000); // sleep some. YMMV with different chips.
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					// Everything went as expected. Send an intent to MainActivity
-					Intent intent = new Intent(ACTION_USB_READY);
-					context.sendBroadcast(intent);
-				} else {
-					// Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
-					// Send an Intent to Main Activity
-					Intent intent;
-					if (serialPort instanceof CDCSerialDevice) {
-						intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
-					} else {
-						intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
-					}
-					context.sendBroadcast(intent);
+		public void run() {
+			try {
+				configureSerialPort();
+			} catch (Exception e) {
+				//Unstable USB connections would result in configuration failures.
+				CcuLog.e(TAG, "CM: configureSerialPort Failed ", e);
+				serialPortConnected = false;
+			}
+		}
+	}
+	
+	private void configureSerialPort() {
+		serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+		if (serialPort != null) {
+			if (serialPort.open()) {
+				setDebug(false);
+				serialPortConnected = true;
+				UsbSerialWatchdog.getInstance().pet();
+				serialPort.setBaudRate(BAUD_RATE);
+				serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
+				serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
+				serialPort.setParity(UsbSerialInterface.PARITY_NONE);
+				/**
+				 * Current flow control Options:
+				 * UsbSerialInterface.FLOW_CONTROL_OFF
+				 * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
+				 * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
+				 */
+				serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+				serialPort.read(mCallback);
+				serialPort.getCTS(ctsCallback);
+				serialPort.getDSR(dsrCallback);
+				//
+				// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
+				// to be uploaded or not
+				try {
+					sleep(2000); // sleep some. YMMV with different chips.
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
+				// Everything went as expected. Send an intent to MainActivity
+				Intent intent = new Intent(ACTION_USB_READY);
+				context.sendBroadcast(intent);
 			} else {
-				// No driver for given device, even generic CDC driver could not be loaded
-				Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
+				// Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
+				// Send an Intent to Main Activity
+				Intent intent;
+				if (serialPort instanceof CDCSerialDevice) {
+					intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
+				} else {
+					intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
+				}
 				context.sendBroadcast(intent);
 			}
+		} else {
+			// No driver for given device, even generic CDC driver could not be loaded
+			Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
+			context.sendBroadcast(intent);
 		}
 	}
 }

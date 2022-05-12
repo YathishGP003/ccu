@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,6 +89,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -757,10 +759,71 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
+        ArrayList<String> scheduleArray = new ArrayList<>();
+        scheduleArray.add("Building Schedule");
+        scheduleArray.add("Zone Schedule");
+        scheduleArray.add("Named Schedule");
 
-        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.schedule, R.layout.spinner_zone_item);
-        scheduleAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        List<HashMap<Object, Object>> namedScheds = CCUHsApi.getInstance().getAllNamedSchedules();
+        if(!namedScheds.isEmpty()){
+            for (HashMap<Object, Object> nameSched :
+                    namedScheds) {
+                scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+            }
+        }else{
+            scheduleArray.add("No Named Schedule available");
+        }
+
+        ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
+
+            @Override
+            public boolean isEnabled(int position) {
+                return position !=2 ;// As this option is a title for NamedSchedule
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent){
+                View v = convertView;
+                if (v == null) {
+                    Context mContext = this.getContext();
+                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                }
+
+                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
+                tv.setText(scheduleArray.get(position));
+
+                switch (position) {
+                    case 0:
+                    case 1:
+                        break;
+                    case 2:
+                        tv.setTextColor(Color.BLACK);
+                        break;
+                    case 3:
+                        tv.setPadding(50,12,50,12);
+                        if(namedScheds.isEmpty()) {
+                            v.setEnabled(false);
+                            v.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    //NO-OP: Just intercept click on disabled item
+                                }
+                            });
+                        }
+                        break;
+                    default:
+                        tv.setPadding(50,12,50,12);
+                        break;
+                }
+                return v;
+            }
+        };
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
@@ -820,7 +883,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             });
         });
 
-        scheduleSpinner.setSelection(mScheduleType, false);
+        if(mScheduleType >= 2){
+            int spinnerposition = 2;
+            for (HashMap<Object, Object> a:namedScheds) {
+                if((Objects.requireNonNull(Objects.requireNonNull(a.get("id"))).toString().substring(1)).equals
+                        (Schedule.getScheduleByEquipId(equipId[0]).getId())){
+                    spinnerposition = namedScheds.indexOf(a)+3;
+                }
+            }
+            scheduleSpinner.setSelection(spinnerposition,false);
+        }else{
+            scheduleSpinner.setSelection(mScheduleType, false);
+        }
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -838,6 +912,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING, zoneMap);
                         mScheduleTypeMap.put(equipId[0], ScheduleType.BUILDING.ordinal());
                     }
+                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                    Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                    if (zone != null) {
+                        zone.setScheduleRef(CCUHsApi.getInstance().getSystemSchedule(false).get(0).getId());
+                        CCUHsApi.getInstance().updateZone(zone, zoneId);
+                    }
+                    scheduleSpinner.setSelection(position);
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
@@ -852,9 +933,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
-                        Schedule scheduleById = null;
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                "== " +zone.getId());
+                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         if (zone.hasSchedule()) {
-                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
@@ -874,9 +957,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
-                            CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                         }
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                "== " +zone.getId());
+                        HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                        Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                        if (z != null) {
+                            z.setScheduleRef(schedule.get("id").toString());
+                            CCUHsApi.getInstance().updateZone(z, zoneId);
+                        }
+                        scheduleSpinner.setSelection(position);
                         scheduleImageButton.setTag(scheduleById.getId());
                         vacationImageButton.setTag(scheduleById.getId());
                         scheduleImageButton.setVisibility(View.VISIBLE);
@@ -889,9 +979,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                     }
                 } else if (position == 2 && (mScheduleType != -1)) {
-                    scheduleImageButton.setVisibility(View.GONE);
-                } else {
-                    //list named schedules
+                    //No operation as it is a Named Schedule
+                } else if (position >= 3 && (mScheduleType != -1)) {
+                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                    String namedScheduleId = namedScheds.get(position - 3).get("id").toString();
+                    if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
+                        NamedSchedule namedSchedule =
+                                NamedSchedule.getInstance(namedScheds.get(position - 3).get("id").toString(),
+                                zoneId, scheduleArray.get(position));
+                        FragmentManager childFragmentManager = getChildFragmentManager();
+                        namedSchedule.show(childFragmentManager, "dialog");
+                        scheduleSpinner.setSelection(position);
+
+                        namedSchedule.setOnExitListener(() -> {
+
+                            Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                        });
+                    }
+                    scheduleSpinner.setSelection(position);
+
+
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 scheduleImageButton.setTag(mSchedule.getId());
@@ -1213,7 +1320,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     }
 
-
     private void clearTempOverride(String equipId) {
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -1242,9 +1348,71 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
 
-        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.schedule, R.layout.spinner_zone_item);
-        scheduleAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        ArrayList<String> scheduleArray = new ArrayList<>();
+        scheduleArray.add("Building Schedule");
+        scheduleArray.add("Zone Schedule");
+        scheduleArray.add("Named Schedule");
+
+        List<HashMap<Object, Object>> namedScheds = CCUHsApi.getInstance().getAllNamedSchedules();
+        if(namedScheds.size() > 0){
+            for (HashMap<Object, Object> nameSched :
+                    namedScheds) {
+                scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+            }
+        }else{
+            scheduleArray.add("No Named Schedule available");
+        }
+
+        ArrayAdapter<String> scheduleAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_zone_item ,scheduleArray) {
+
+            @Override
+            public boolean isEnabled(int position) {
+                return position !=2 ;// As this option is a title for NamedSchedule
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent){
+                View v = convertView;
+                if (v == null) {
+                    Context mContext = this.getContext();
+                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                }
+
+                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
+                tv.setText(scheduleArray.get(position));
+
+                switch (position) {
+                    case 0:
+                    case 1:
+                        break;
+                    case 2:
+                        tv.setTextColor(Color.BLACK);
+                        break;
+                    case 3:
+                        tv.setPadding(50,12,50,12);
+                        if(namedScheds.isEmpty()) {
+                            v.setEnabled(false);
+                            v.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    //NO-OP: Just intercept click on disabled item
+                                }
+                            });
+                        }
+                        break;
+                    default:
+                        tv.setPadding(50,12,50,12);
+                        break;
+                }
+                return v;
+            }
+        };
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
@@ -1292,7 +1460,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 ScheduleProcessJob.updateSchedules(equipOpen);
             });
         });
-        scheduleSpinner.setSelection(mScheduleType, false);
+        if(mScheduleType >= 2){
+            int spinnerposition = 2;
+            for (HashMap<Object, Object> a:namedScheds) {
+                if((Objects.requireNonNull(Objects.requireNonNull(a.get("id"))).toString().substring(1)).equals
+                        (Schedule.getScheduleByEquipId(equipId).getId())){
+                    spinnerposition = namedScheds.indexOf(a) + 3;
+                }
+
+            }
+            scheduleSpinner.setSelection(spinnerposition,false);
+        }else{
+            scheduleSpinner.setSelection(mScheduleType, false);
+        }
         if (mSchedule.isZoneSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
         } else {
@@ -1313,7 +1493,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING, openZoneMap);
                         mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
-
+                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                    Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                    if (z != null) {
+                        z.setScheduleRef(CCUHsApi.getInstance().getSystemSchedule(false).get(0).getId());
+                        CCUHsApi.getInstance().updateZone(z, zoneId);
+                    }
                     CCUHsApi.getInstance().scheduleSync();
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
@@ -1330,7 +1515,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         Zone zone = Schedule.getZoneforEquipId(equipId);
                         Schedule scheduleById = null;
                         if (zone.hasSchedule()) {
-                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                    "== " +zone.getId());
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
@@ -1351,7 +1538,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                    "== " +zone.getId());
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                        }
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                "== " +zone.getId());
+                        HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                        Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                        if (z != null) {
+                            z.setScheduleRef(schedule.get("id").toString());
+                            CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
                         scheduleImageButton.setTag(scheduleById.getId());
                         vacationImageButton.setTag(scheduleById.getId());
@@ -1365,9 +1562,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
                 } else if (position == 2 && (mScheduleType != -1)) {
-                    scheduleImageButton.setVisibility(View.GONE);
-                } else {
-                    //list named schedules
+                    //No operation as it is a Named Schedule
+                } else if (position >= 3 && (mScheduleType != -1)) {
+                    HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                    String namedScheduleId = namedScheds.get(position - 3).get("id").toString();
+                    if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
+                        NamedSchedule namedSchedule =
+                                NamedSchedule.getInstance(namedScheduleId,
+                                        zoneId, scheduleArray.get(position));
+                        FragmentManager childFragmentManager = getChildFragmentManager();
+                        namedSchedule.show(childFragmentManager, "dialog");
+                        scheduleSpinner.setSelection(position);
+
+                        namedSchedule.setOnExitListener(() -> {
+                            Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                        });
+                    }
+                    scheduleSpinner.setSelection(position);
+
+
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 scheduleImageButton.setTag(mSchedule.getId());

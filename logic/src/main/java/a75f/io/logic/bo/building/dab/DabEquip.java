@@ -36,6 +36,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
 
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 
 /**
@@ -410,7 +411,13 @@ public class DabEquip
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
-        
+
+
+        String damperFeedbackID = createFeedbackPoint(CCUHsApi.getInstance(),nodeAddr,equipDis,equipRef,siteRef,
+                roomRef,floorRef,tz);
+        hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
+
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
@@ -424,11 +431,14 @@ public class DabEquip
         device.th2In.setEnabled(true);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
+        device.analog1In.setEnabled(true);
+        device.analog1In.setPointRef(damperFeedbackID);
 
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     device.analog1Out.setType(op.getAnalogActuatorType());
+                    device.analog1In.setType(op.getAnalogActuatorType());
                     break;
                 case ANALOG_OUT_TWO:
                     device.analog2Out.setType(op.getAnalogActuatorType());
@@ -725,6 +735,7 @@ public class DabEquip
                 case ANALOG_OUT_ONE:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, ANALOG_IN_ONE.toString(), op.getAnalogActuatorType());
                     break;
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
@@ -982,5 +993,27 @@ public class DabEquip
     public double getZonePriorityValue(){
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
         return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
+    }
+
+    public static String createFeedbackPoint(
+            CCUHsApi ccuHsApi, int nodeAddr, String siteDis, String equipRef,
+            String siteRef, String room, String floor, String tz
+    ){
+        // Create damper feedback point for analog1 in
+        Point damperFeedback = new Point.Builder()
+                .setDisplayName(siteDis+"-damperFeedback")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor).setHisInterpolate("cov").addMarker("analog1").addMarker("in")
+                .addMarker("damper").addMarker("dab")
+                .addMarker("temp").addMarker("sensor")
+                .addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+
+        return ccuHsApi.addPoint(damperFeedback);
     }
 }

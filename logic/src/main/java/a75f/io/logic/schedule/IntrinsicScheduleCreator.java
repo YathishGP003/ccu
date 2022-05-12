@@ -47,12 +47,44 @@ public class IntrinsicScheduleCreator {
     private void calculateIntrinsicScheduleWithZones(List<HashMap<Object, Object>> rooms, int dayNumber,
                                                      DateTime currentDateTime, List<HDict> intrinsicScheduleList){
         Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
-        for(HashMap<Object, Object> room : rooms){
-            if(isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room, currentDateTime)){
-                zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
+        if (!areAllZonesInVacation(rooms, currentDateTime)) {
+            for (HashMap<Object, Object> room : rooms) {
+                if (isZoneConsideredForIntrinsicSchedule(room) && isZoneOnNamedSchedule(room)
+                        && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
+                    zonesDayScheduleSet.addAll(getNamedSchedulesForDay(room, dayNumber));
+                } else if (isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
+                    zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
+                }
             }
         }
         calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, zonesDayScheduleSet);
+    }
+
+    private boolean areAllZonesInVacation(List<HashMap<Object, Object>> rooms,DateTime currentDateTime) {
+        for(HashMap<Object, Object> room : rooms){
+            if(!isZoneOnVacationForCurrentDay(room,currentDateTime))
+                return false;
+        }
+        return true;
+    }
+
+    private boolean isZoneOnNamedSchedule(HashMap<Object, Object> room) {
+        double schedType = CCUHsApi.getInstance().readHisValByQuery("point and scheduleType and roomRef ==\"" + room.get("id").toString() + "\"");
+        return schedType == 2;
+    }
+
+    private List<Schedule.Days> getNamedSchedulesForDay(HashMap<Object, Object> room, int dayNumber){
+        String scheduleRef = room.get("scheduleRef").toString();
+        Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleRef);
+        List<Schedule.Days> zoneDayScheduleList = new ArrayList<>();
+
+        for (Schedule.Days day : zoneSchedule.getDays()) {
+            if (day.getDay() == dayNumber) {
+                zoneDayScheduleList.add(day);
+            }
+        }
+
+        return zoneDayScheduleList;
     }
 
     private void calculateIntrinsicScheduleForDay(int dayNumber, List<HDict> intrinsicScheduleList, Set<Schedule.Days> dayScheduleSet) {
@@ -238,7 +270,7 @@ public class IntrinsicScheduleCreator {
                 dayNumber++;
                 continue;
             }
-            else if(isAnyZoneFollowingBuildingSchedule(zones)){
+            else if(isAnyZoneFollowingBuildingSchedule(zones) && !areAllZonesInVacation(zones,currentDateTime)){
                 calculateIntrinsicScheduleWithBuildingSchedule(buildingSchedule,dayNumber, intrinsicScheduleList);
             }
             else{

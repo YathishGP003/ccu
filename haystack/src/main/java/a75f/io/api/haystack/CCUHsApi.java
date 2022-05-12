@@ -1109,7 +1109,11 @@ public class CCUHsApi
     public void syncEntityWithPointWrite() {
         syncManager.syncEntitiesWithPointWrite();
     }
-
+    
+    public void syncEntityWithPointWriteDelayed(long delaySeconds) {
+        syncManager.syncEntitiesWithPointWriteWithDelay(delaySeconds);
+    }
+    
     public void syncPointArrays() {
         syncManager.syncPointArray();
     }
@@ -1151,6 +1155,9 @@ public class CCUHsApi
 
         //import building tuners
         importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+
+        //import Named schedule
+        importNamedSchedule(hClient);
 
         ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
                 .readAllEntities("point and writable");
@@ -1224,10 +1231,34 @@ public class CCUHsApi
         return true;
     }
 
+    private void importNamedSchedule(HClient hClient) {
+        Site site = CCUHsApi.getInstance().getSite();
+        if (site != null && site.getOrganization() != null) {
+            String org = site.getOrganization();
+            HDict zoneScheduleDict = new HDictBuilder().add("filter",
+                    "named and schedule and organization == \""+org+"\"").toDict();
+            HGrid zoneScheduleGrid = hClient.call("read",
+                    HGridBuilder.dictToGrid(zoneScheduleDict));
+
+            if (zoneScheduleGrid == null) {
+                CcuLog.d(TAG, "zoneScheduleGrid is null");
+                return;
+            }
+
+            Iterator it = zoneScheduleGrid.iterator();
+            while (it.hasNext()) {
+                HRow row = (HRow) it.next();
+                tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+                CcuLog.i(TAG, "Named schedule Imported");
+            }
+
+        }
+    }
+
 
     private void importBuildingSchedule(String siteId, HClient hClient){
 
-        HashMap currentBuildingSchedule = read("schedule and building");
+        HashMap currentBuildingSchedule = read("schedule and building and not named");
         if (!currentBuildingSchedule.isEmpty()) {
             //CCU already has a building schedule.
             CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
@@ -1236,7 +1267,7 @@ public class CCUHsApi
 
         try {
             HDict buildingDict =
-                    new HDictBuilder().add("filter", "building and schedule and siteRef == " + siteId).toDict();
+                    new HDictBuilder().add("filter", "building and schedule and not named and siteRef == " + siteId).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -1610,9 +1641,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and building and not vacation";
+            filter = "schedule and building and not named and not vacation";
         else
-            filter = "schedule and building and vacation";
+            filter = "schedule and building and not named and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
         for (int i = 0; i < scheduleHGrid.numRows(); i++)
@@ -1632,9 +1663,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and zone and not vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and not vacation and roomRef == "+zoneId;
         else
-            filter = "schedule and zone and vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and vacation and roomRef == "+zoneId;
 
         Log.d("CCU_HS"," getZoneSchedule : "+filter);
         if(filter != null) {
@@ -2284,5 +2315,14 @@ public class CCUHsApi
             settingPoint.setDeviceRef(newCcuId);
             updateSettingPoint(settingPoint, settingPoint.getId());
         });
+    }
+
+    public void updateNamedSchedule(String scheduleId, HDict scheduleDict){
+        tagsDb.addHDict(scheduleId,scheduleDict);
+    }
+
+    public List<HashMap<Object, Object>> getAllNamedSchedules(){
+        String query = "named and schedule";
+        return CCUHsApi.getInstance().readAllEntities(query);
     }
 }

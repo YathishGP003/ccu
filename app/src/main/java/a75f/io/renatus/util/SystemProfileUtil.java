@@ -6,6 +6,8 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import androidx.appcompat.app.AlertDialog;
+import static a75f.io.renatus.UtilityApplication.context;
+import a75f.io.renatus.BuildConfig;
 
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
@@ -16,7 +18,7 @@ public class SystemProfileUtil {
     }
     
     public static void showConditioningDisabledDialog(Activity context, SystemMode mode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.NewDialogStyle);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, getDialogStyle());
         String str = "Conditioning Mode changed from '" + mode.name() + "' to '" + SystemMode.OFF.name() + "' based " +
                      "on changed equipment selection.\nPlease select appropriate conditioning mode from System Settings.";
         builder.setCancelable(false)
@@ -27,5 +29,11 @@ public class SystemProfileUtil {
         AlertDialog dlg = builder.create();
         dlg.show();
         SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+    }
+    private static int getDialogStyle() {
+        if (BuildConfig.BUILD_TYPE.equals("daikin_prod") || CCUUiUtil.isDaikinThemeEnabled(context)) {
+            return R.style.NewDialogStyle;
+        }
+        return R.style.NewDialogStyleRenatus;
     }
 }

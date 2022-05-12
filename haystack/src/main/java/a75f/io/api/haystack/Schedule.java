@@ -37,7 +37,7 @@ public class Schedule extends Entity
 {
     public boolean isBuildingSchedule()
     {
-        return getMarkers().contains("building");
+        return getMarkers().contains("building") && !getMarkers().contains("named");
     }
 
     public boolean isZoneSchedule()

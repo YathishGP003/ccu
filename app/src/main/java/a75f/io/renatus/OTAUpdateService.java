@@ -46,8 +46,8 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.util.ByteArrayUtils;
-import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
 import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateService extends IntentService {
@@ -204,7 +204,8 @@ public class OTAUpdateService extends IntentService {
     private void handleNodeReboot(byte[] eventBytes) {
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
-        if ( (msg.smartNodeAddress.get() == mCurrentLwMeshAddress) && mUpdateInProgress) {
+        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE ||
+                (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
@@ -270,6 +271,11 @@ public class OTAUpdateService extends IntentService {
         } else if(firmwareVersion.startsWith("HyperStat_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.HYPER_STAT_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+        }else if(firmwareVersion.startsWith("CM_")){
+            mFirmwareDeviceType = FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE;
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+        }else{
+            otaRequestProcessInProgress = false;
         }
     }
 
@@ -308,6 +314,12 @@ public class OTAUpdateService extends IntentService {
             case "site":
             case "system":
                 //update everything
+                HashMap<Object, Object> deviceList= CCUHsApi.getInstance().readEntity("device and cm");
+
+                if(deviceList.containsKey( deviceType.getHsMarkerName())){
+                        mLwMeshAddresses.add(99+ L.ccu().getSmartNodeAddressBand());
+                    }
+
                 for(Floor floor : HSUtil.getFloors()) {
                     for(Zone zone : HSUtil.getZones(floor.getId())) {
                         for(Device device : HSUtil.getDevices(zone.getId())) {
@@ -367,6 +379,7 @@ public class OTAUpdateService extends IntentService {
      * @param versionMinor The expected minor version
      */
     private void runMetadataCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
         Log.d(TAG, "[METADATA] Running metadata check on file: " + filename);
@@ -427,7 +440,6 @@ public class OTAUpdateService extends IntentService {
 
         AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+
                 "started for "+deviceType.getUpdateFileName()+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor);
-
         mUpdateInProgress = true;
         mLastSentPacket = -1;
 
@@ -803,7 +815,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     void processOtaRequest(){
-        Log.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size());
+        Log.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size() + " otaRequestProcessInProgress"+otaRequestProcessInProgress );
         try{
             if(!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress){
                 handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));

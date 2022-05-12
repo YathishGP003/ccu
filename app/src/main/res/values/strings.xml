@@ -1178,4 +1178,27 @@
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
 
+
+    <!-- Named Schedule-->
+    <string name="monday">MONDAY</string>
+    <string name="tuesday">TUESDAY</string>
+    <string name="wednesday">WEDNESDAY</string>
+    <string name="thursday">THURSDAY</string>
+    <string name="friday">FRIDAY</string>
+    <string name="saturday">SATURDAY</string>
+    <string name="sunday">SUNDAY</string>
+    <string name="preview">Preview  </string>
+    <string name="warning_ns">WARNING</string>
+    <string name="warning_msg">Named Schedule is outside building schedule.This Named Schedule is outside by</string>
+    <string name="validation_title">Schedule Validation</string>
+    <string name="validation_msg">Validation in progress.Please wait…</string>
+    <string name="validation_toast">Validating Named Schedule in Progress…Please wait</string>
+    <string name="success_alert">Named Schedule set successfully</string>
+    <string name="pls_goback">Please go back to the NamedSchedule to edit OR Apply any other NamedSchedule</string>
+    <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
+    <string name="desiredTemp_warning">Desired temperatures of this NamedSChedule is outside the desired temperature limits of the building</string>
+
+
+
+
 </resources>

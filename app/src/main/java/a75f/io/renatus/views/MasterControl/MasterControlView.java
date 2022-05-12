@@ -276,9 +276,11 @@ public class MasterControlView extends LinearLayout {
             }
         } else {
             if (filterSchedules.size() > 0) {
-                for (Schedule filter:filterSchedules) {
-                    if(filter.isNamedSchedule())
-                        filterSchedules.remove(filter);
+                Iterator<Schedule> scheduleIterator = filterSchedules.iterator();
+                while (scheduleIterator.hasNext()) {
+                    Schedule schedule = scheduleIterator.next();
+                    if (schedule.isNamedSchedule())
+                        scheduleIterator.remove();
                 }
                 saveScheduleData(filterSchedules, dialog);
             } else {

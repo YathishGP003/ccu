@@ -1,25 +1,51 @@
- - Merged PR 3810: Handle USB disconnect crashes gracefully
- - Merged PR 3793: Add his tag to lockout config point
- - Merged PR 3831: Update DAB damper control PI logic
- - fix sonarqube warning
- - Merged PR 3603: Add standalone tag to hyperstat tuners
- - Merge branch 'master' into Bug/samjith/usb_crash_freeze
- - Fix sonarqube warnings
- - remove hyperstat tag from building tuner
- - Add his tag to lockout config point
- - Merged PR 3724: Revert 'US : [CCU]: Celsius support Configuration :'
- - Merged PR 3721: US : [CCU]: Celsius support Configuration :
- - US : [CCU]: Celsius support Configuration : created new building tuner "displayUnit" for celsius support and Verified point creation in internal portal.
- - Biskit mode fix
- - code restructure
- - Change damper PI loop to midpoint based
- - Merged PR 3588: Airflow volume unit migration
- - Merged PR 3556: 10710 - CCU profiles should send control message only when there is more than 5% change analog output
- - Handle USB disconnects gracefully
- - Merged PR 3673: Revert 'US : [CCU]: Celsius support Configuration'
- - Revert "Merged PR 3596: US : [CCU]: Celsius support Configuration
- - Merged PR 3596: US : [CCU]: Celsius support Configuration
- - Modified changes to accomodate "use Celsius flag" value at initialisation .
- - Changed code as per code review.
- - Add standalone tag to hyperstat tuners
- - US : [CCU]: Celsius support Configuration -Implemented celsius flag to enable / disable celsius feature -Verified this flag behaviour from tuners screen and settings screen. when enabled and disable from these to places values is updated in internal portal with DISPLAY NAME : BuildingTuner-useCelsius.
+ - Merged PR 3680: 10307 - Applying Named Schedule
+ - Merged PR 3710: Modbus handlerd write register for coil and handled long with 2 register count
+ - Merged PR 3888: Revert 'User Story 10647: [CCU]: Celsius support for tuners:'
+ - Revert "Merged PR 3608: User Story 10647: [CCU]: Celsius support for tuners:
+ - Merged PR 3608: User Story 10647: [CCU]: Celsius support for tuners:
+ - Merged PR 3707: Fix for: UX issue System Conditioning Mode pop-up appears in Blue Color on Re...
+ - updated with observations
+ - Merged PR 3502: Damper feedback
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/11611_11609_modbus_coil_and_long_type_issue
+ - Merged PR 3669: CM OTA support
+ - 3 points added to relative from absolute 1.zoneTemperatureDeadLeeway 2. standaloneTemperaturePropotionalRange 3. userSpreadLimit
+ - Round off value made used 0 based
+ - fixed sonarQube issues
+ - Relative and absolute values updated and decimal round off restructured
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - 1. changed long  and unsigned long to 2 register count
+ - crash resolved
+ - resolved merge conflict
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - resolved merge conflict
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - Made changes to the code (crash has been rectified)
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Used point value instead of shred preferences
+ - Used point value instead of shred preferences
+ - Used point value instead of shred preferences
+ - Used point value instead of shred preferences
+ - Used point value instead of shred preferences
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - comments resolved
+ - comments resolved
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - comments resolved - method added to absolute value and relative value conversion, made getTunerValue private.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
+ - User Story 10647: [CCU]: Celsius support for tuners: The values are displayed in celsius when the use celsius toggle is switched on from the master controller to all the points that read temperature values by following the appropriate conversion method for relative and absolute values seperately.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Updating fan mode only when we do fan related relay configurations

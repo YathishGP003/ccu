@@ -23,7 +23,8 @@ public class LModbus {
     public static final String MODBUS_REGISTER_INPUT = "inputRegister";
     public static final String MODBUS_REGISTER_READ_COIL = "readCoil";
     public static final String MODBUS_REGISTER_WRITE_COIL = "writeCoil";
-    
+    public static final String MODBUS_REGISTER_COIL = "coil";
+
     
     
     private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
@@ -38,7 +39,7 @@ public class LModbus {
             RtuMessageRequest rtuMessageRequest;
             try {
                  switch (registerType) {
-                    case MODBUS_REGISTER_READ_COIL:
+                    case MODBUS_REGISTER_COIL:
                          request = new ReadCoilsRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
@@ -82,7 +83,7 @@ public class LModbus {
             ModbusRequest request;
             if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
                 request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
-            } else if (register.getRegisterType().equals(MODBUS_REGISTER_DISCRETE_INPUT)) {
+            } else if (register.getRegisterType().equals(MODBUS_REGISTER_COIL)) {
                 request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0 ? true : false);
             } else {
                 CcuLog.d(L.TAG_CCU_MODBUS,

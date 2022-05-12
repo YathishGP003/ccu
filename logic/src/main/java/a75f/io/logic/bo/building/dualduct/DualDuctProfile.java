@@ -288,9 +288,13 @@ public class DualDuctProfile extends ZoneProfile {
             if (analog.equals("analog1")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                                   analogMin + "-" + analogMax + "v");
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_ONE.toString(),
+                        analogMin + "-" + analogMax + "v");
             } else if (analog.equals("analog2")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                                   analogMin + "-" + analogMax + "v");
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_TWO.toString(),
+                        analogMin + "-" + analogMax + "v");
             }
         
         } else if (state == HEATING) {
@@ -303,9 +307,13 @@ public class DualDuctProfile extends ZoneProfile {
             if (analog.equals("analog1")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                                   analogMin + "-" + analogMax + "v");
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_ONE.toString(),
+                        analogMin + "-" + analogMax + "v");
             } else if (analog.equals("analog2")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                                   analogMin + "-" + analogMax + "v");
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_TWO.toString(),
+                        analogMin + "-" + analogMax + "v");
             }
         
         } else if (state == DEADBAND) {
@@ -318,9 +326,13 @@ public class DualDuctProfile extends ZoneProfile {
             if (analog.equals("analog1")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                                   OutputAnalogActuatorType.ZeroToTenV.displayName);
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_ONE.toString(),
+                        OutputAnalogActuatorType.ZeroToTenV.displayName);
             } else if (analog.equals("analog2")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                                   OutputAnalogActuatorType.ZeroToTenV.displayName);
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_IN_TWO.toString(),
+                        OutputAnalogActuatorType.ZeroToTenV.displayName);
             }
         }
         CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: "+analog+" compositeDamperPos : "+compositeDamperPos);

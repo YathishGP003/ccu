@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.vav;
 
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -604,7 +607,11 @@ public class VavEquip
         
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "vav", tz, false));
-        
+
+        String damperFeedbackID = createFeedbackPoint(CCUHsApi.getInstance(),nodeAddr,equipDis,equipRef,siteRef,room,
+                floor,fanMarker,tz);
+        hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
+
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
@@ -617,7 +624,8 @@ public class VavEquip
         device.relay1.setPointRef(rhID);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
-
+        device.analog1In.setEnabled(true);
+        device.analog1In.setPointRef(damperFeedbackID);
 
         if (profileType != ProfileType.VAV_REHEAT) {
             createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);
@@ -636,6 +644,7 @@ public class VavEquip
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     device.analog1Out.setType(op.getAnalogActuatorType());
+                    device.analog1In.setType(op.getAnalogActuatorType());
                     break;
                 case ANALOG_OUT_TWO:
                     device.analog2Out.setType(op.getAnalogActuatorType());
@@ -648,7 +657,7 @@ public class VavEquip
                     break;
             }
         }
-        device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
+        device.analog1Out.setEnabled(config.isOpConfigured(ANALOG_OUT_ONE));
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
@@ -972,12 +981,14 @@ public class VavEquip
     public String getConfigStrVal(String tags) {
         return CCUHsApi.getInstance().readDefaultStrVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
     }
-    
+
     
     public void updateHaystackPoints(VavProfileConfiguration config) {
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
+                    SmartNode.updatePhysicalPointType(nodeAddr, ANALOG_IN_ONE.toString(), op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
@@ -1056,11 +1067,11 @@ public class VavEquip
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
         
         
-        RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString());
+        RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, ANALOG_OUT_ONE.toString());
         if (a1 != null && a1.getEnabled()) {
             Output analogOne = new Output();
             analogOne.setAddress((short)nodeAddr);
-            analogOne.setPort(Port.ANALOG_OUT_ONE);
+            analogOne.setPort(ANALOG_OUT_ONE);
             analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
             config.getOutputs().add(analogOne);
         }
@@ -1449,5 +1460,27 @@ public class VavEquip
     public double getZonePriorityValue(){
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
        return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
+    }
+     public static String createFeedbackPoint(CCUHsApi ccuHsApi,
+             int nodeAddr ,String siteDis, String equipRef, String siteRef, String room, String floor,
+             String fanMarker, String tz
+
+     ){
+        // Create damper feedback point for analog1 in
+         Point damperFeedback = new Point.Builder()
+                 .setDisplayName(siteDis+"-damperFeedback")
+                 .setEquipRef(equipRef)
+                 .setSiteRef(siteRef)
+                 .setRoomRef(room)
+                 .setFloorRef(floor).setHisInterpolate("cov")
+                 .addMarker("damper").addMarker("vav").addMarker(fanMarker).addMarker("zone")
+                 .addMarker("temp").addMarker("sensor").addMarker("analog1").addMarker("in")
+                 .addMarker("input").addMarker("his").addMarker("cur").addMarker("logical")
+                 .setGroup(String.valueOf(nodeAddr))
+                 .setUnit("%")
+                 .setTz(tz)
+                 .build();
+
+         return ccuHsApi.addPoint(damperFeedback);
     }
 }

@@ -361,6 +361,7 @@ public class RestoreCCU {
 
     private void getZoneSchedules(Set<String> roomRefSet){
         restoreCCUHsApi.importZoneSchedule(roomRefSet);
+        restoreCCUHsApi.importNamedSchedule();
     }
 
     public void syncExistingSite(String siteCode){

@@ -1,12 +1,7 @@
 package a75f.io.logic.util;
 
-import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,19 +16,17 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.dab.DabEquip;
-import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
-import a75f.io.logic.bo.building.vav.VavEquip;
-import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.tuners.TrueCFMTuners;
+import a75f.io.logic.tuners.TunerConstants;
 
 public class MigrationUtil {
     
@@ -58,12 +51,12 @@ public class MigrationUtil {
             removeDuplicateAlerts(AlertManager.getInstance());
             PreferenceUtil.removedDuplicateAlerts();
         }
-        
+
         if (!PreferenceUtil.getEnableZoneScheduleMigration()) {
             updateZoneScheduleTypes(CCUHsApi.getInstance());
             PreferenceUtil.setEnableZoneScheduleMigration();
         }
-    
+
         if (!PreferenceUtil.getCleanUpDuplicateZoneSchedule()) {
             cleanUpDuplicateZoneSchedules(CCUHsApi.getInstance());
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
@@ -78,16 +71,17 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
+
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
-        Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: check "+PreferenceUtil.getDamperFeedbackMigration());
-        if (!PreferenceUtil.getDamperFeedbackMigration()) {
-            Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: check ");
-            doDamperFeedbackMigration(CCUHsApi.getInstance());
-             PreferenceUtil.setDamperFeedbackMigration();
+
+        if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
+            trueCFMVAVMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
+
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
@@ -111,6 +105,35 @@ public class MigrationUtil {
                 CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
             }
         });
+    }
+
+    private static void trueCFMVAVMigration(CCUHsApi haystack) {
+       ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
+        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
+        if(!vavEquips.isEmpty()) {
+            doMigrationVav(haystack, vavEquips, tunerEquip);
+        }
+
+    }
+    private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
+        //        creating default tuners for vav
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        vavEquips.forEach(vavEquip -> {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id")==null) {
+                Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
+                String fanMarker = "";
+                if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                    fanMarker = "series";
+                } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                    fanMarker = "parallel";
+                }
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
+                                                               0, fanMarker);
+            }
+        });
+
     }
 
     private static boolean checkAppVersionUpgraded() {
@@ -241,16 +264,13 @@ public class MigrationUtil {
             if (zoneSchedules.size() > 1) {
                 zoneSchedules.forEach( schedule -> {
                     CcuLog.i("MIGRATION_UTIL", " cleanUpDuplicateZoneSchedules Zone: "+zoneMap+" Schedule "+schedule);
-                    HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                            "== " +zone.getId());
-                    Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
-                    if (scheduleById == null) {
+                    if (zone.getScheduleRef() == null) {
                         CcuLog.i("MIGRATION_UTIL", " Not ideal , there is a zone without zone schedule !!!!!");
                         Schedule zoneSchedule = hayStack.getScheduleById(schedule.get("id").toString());
                         zone.setScheduleRef(schedule.get("id").toString());
                         hayStack.updateZone(zone, zone.getId());
                         hayStack.updateZoneSchedule(zoneSchedule, zone.getId());
-                    } else if (!schedule.get("id").toString().equals(scheduleById)) {
+                    } else if (!schedule.get("id").toString().equals(zone.getScheduleRef())) {
                         hayStack.deleteEntity(schedule.get("id").toString());
                     }
                 });
@@ -279,146 +299,5 @@ public class MigrationUtil {
             }
         }
     }
-
-
-    private static void doDamperFeedbackMigration(CCUHsApi haystack){
-        Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: ");
-        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
-        ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
-        ArrayList<HashMap<Object, Object>> dualDuctEquips = haystack.readAllEntities("equip and dualDuct and not system");
-        Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: vavEquips "+vavEquips.size());
-        Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: dabEquips "+dabEquips.size());
-        Log.i(TAG_CCU_MIGRATION_UTIL, "doDamperFeedbackMigration: dualDuctEquips "+dualDuctEquips.size());
-        if(!vavEquips.isEmpty()){
-            doMigrateVav(vavEquips,haystack);
-        }
-        if(!dabEquips.isEmpty()){
-            doMigrateDAB(dabEquips,haystack);
-        }
-        if(!dualDuctEquips.isEmpty()){
-            doMigrateDualDuct(dualDuctEquips,haystack);
-        }
-    }
-
-
-    private static void doMigrateVav(ArrayList<HashMap<Object, Object>> vavEquips, CCUHsApi haystack){
-        vavEquips.forEach(equip -> {
-            Log.i(TAG_CCU_MIGRATION_UTIL, "Equip Id : "+equip.get("id"));
-            try{
-                HashMap<Object, Object> feedbackPoint =
-                        CCUHsApi.getInstance().readEntity
-                                ("point and damper and sensor and equipRef == \"" + equip.get("id")+"\"");
-                if(feedbackPoint.isEmpty()){
-
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "feedbackPoints not found ");
-                    Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
-
-                    String fanMarker = "";
-                    if (actualEquip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
-                        fanMarker = "series";
-                    } else if (actualEquip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
-                        fanMarker = "parallel";
-                    }
-
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "doMigrateVav  : doing fanMarker " +fanMarker);
-                    int nodeAddress = Integer.parseInt(actualEquip.getGroup());
-                    String damperFeedbackID = VavEquip.createFeedbackPoint(
-                            haystack,nodeAddress,actualEquip.getDisplayName(),actualEquip.getId()
-                            ,actualEquip.getSiteRef(),actualEquip.getRoomRef(),actualEquip.getFloorRef(),fanMarker,actualEquip.getTz());
-                    RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
-                    SmartNode.setPointEnabled(nodeAddress, Port.ANALOG_IN_ONE.name(),true);
-                    SmartNode.updatePhysicalPointRef(nodeAddress,Port.ANALOG_IN_ONE.name(),damperFeedbackID);
-                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_IN_ONE.name(),rawPoint.getType());
-                    haystack.writeHisValueByIdWithoutCOV(damperFeedbackID,0.0);
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "doMigrateVav  : Done "+actualEquip.getGroup());
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "doMigrateVav  : node.analog1Out.getType() "+rawPoint.getType());
-
-                }else
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "feedbackPoints vav are found ");
-            }catch (Exception e){
-                Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing vav migration  "+e.getMessage());
-            }
-
-        });
-    }
-
-
-    private static void doMigrateDAB(ArrayList<HashMap<Object, Object>> dabEquips, CCUHsApi haystack){
-        dabEquips.forEach(equip -> {
-            try{
-
-                HashMap<Object, Object> feedbackPoint =
-                        CCUHsApi.getInstance().readEntity
-                                ("point and damper and sensor and equipRef == \"" + equip.get("id")+"\"");
-                if(feedbackPoint.isEmpty()) {
-                    Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
-                    int nodeAddress = Integer.parseInt(actualEquip.getGroup());
-                    String damperFeedbackID = DabEquip.createFeedbackPoint(
-                            CCUHsApi.getInstance(), nodeAddress, actualEquip.getDisplayName(),
-                            actualEquip.getId(),
-                            actualEquip.getSiteRef(), actualEquip.getRoomRef(), actualEquip.getFloorRef(), actualEquip.getTz());
-                    SmartNode.setPointEnabled(nodeAddress, Port.ANALOG_IN_ONE.name(), true);
-                    SmartNode.updatePhysicalPointRef(nodeAddress, Port.ANALOG_IN_ONE.name(), damperFeedbackID);
-                    RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
-                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_IN_ONE.name(),rawPoint.getType());
-                    haystack.writeHisValueByIdWithoutCOV(damperFeedbackID, 0.0);
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "doMigrateVav  : Done " + actualEquip.getGroup());
-                }else
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "feedbackPoints dab are found ");
-            }catch (Exception e){
-                Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing dab migration  "+e.getMessage());
-            }
-
-        });
-    }
-    private static void doMigrateDualDuct(ArrayList<HashMap<Object, Object>> dualDuctEquips, CCUHsApi haystack){
-        dualDuctEquips.forEach(equip -> {
-            try{
-                HashMap<Object, Object> analog1FeedbackPoint =
-                        CCUHsApi.getInstance().readEntity
-                                ("point and damper and sensor and analog1 and equipRef == \"" + equip.get("id")+"\"");
-                HashMap<Object, Object> analog2FeedbackPoint =
-                        CCUHsApi.getInstance().readEntity
-                                ("point and damper and sensor and analog1 and equipRef == \"" + equip.get("id")+"\"");
-
-                Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
-                int nodeAddress = Integer.parseInt(actualEquip.getGroup());
-                if(analog1FeedbackPoint.isEmpty()) {
-
-                    RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
-                    if (rawPoint.getEnabled()) {
-                        String damperFeedbackID = DualDuctEquip.createFeedbackPoint(
-                                CCUHsApi.getInstance(), nodeAddress, actualEquip.getDisplayName(),
-                                actualEquip.getId(),
-                                actualEquip.getSiteRef(), actualEquip.getRoomRef(), actualEquip.getFloorRef(),
-                                actualEquip.getTz(), "analog1");
-                        SmartNode.setPointEnabled(nodeAddress, Port.ANALOG_IN_ONE.name(), true);
-                        SmartNode.updatePhysicalPointRef(nodeAddress, Port.ANALOG_IN_ONE.name(), damperFeedbackID);
-                        haystack.writeHisValueByIdWithoutCOV(damperFeedbackID, 0.0);
-                        SmartNode.updatePhysicalPointType(nodeAddress, Port.ANALOG_IN_ONE.name(), rawPoint.getType());
-                    }
-                }
-                if(analog2FeedbackPoint.isEmpty()){
-                    RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_TWO.toString());
-                    if (rawPoint.getEnabled()) {
-                        String damperFeedbackID = DualDuctEquip.createFeedbackPoint(
-                                CCUHsApi.getInstance(), nodeAddress, actualEquip.getDisplayName(),
-                                actualEquip.getId(),
-                                actualEquip.getSiteRef(), actualEquip.getRoomRef(), actualEquip.getFloorRef(),
-                                actualEquip.getTz(), "analog1");
-                        SmartNode.setPointEnabled(nodeAddress, Port.ANALOG_IN_TWO.name(), true);
-                        SmartNode.updatePhysicalPointRef(nodeAddress, Port.ANALOG_IN_TWO.name(), damperFeedbackID);
-                        haystack.writeHisValueByIdWithoutCOV(damperFeedbackID, 0.0);
-                        SmartNode.updatePhysicalPointType(nodeAddress, Port.ANALOG_IN_TWO.name(), rawPoint.getType());
-                    }
-
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "doMigrateDualDuct  : Done " + actualEquip.getGroup());
-                }else
-                    Log.i(TAG_CCU_MIGRATION_UTIL, "feedbackPoints DualDuct are found ");
-            }catch (Exception e){
-                Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing DualDuct migration  "+e.getMessage());
-            }
-        });
-    }
-
+    
 }

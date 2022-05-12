@@ -293,6 +293,11 @@ public class HSUtil
         return equipMap.containsKey(Tags.HPU);
     }
 
+    public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.ENABLE)&&(pointEntity.containsKey(Tags.CFM));
+    }
+
     public static double getSystemUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

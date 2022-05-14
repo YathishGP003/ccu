@@ -2181,6 +2181,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     }
 
     public void loadDABPointsUI(HashMap dabPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddress + "\"");
+        Equip updatedEquip = new Equip.Builder().setHashMap(equip).build();
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -2208,8 +2210,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
-        viewPointRow1.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow1);
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
+            View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
+            TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
+            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString());
+            linearLayoutZonePoints.addView(viewAirflowCFM);
+            viewAirflowCFM.setPadding(0, 0, 0, 40);
+        }else {
+            viewPointRow1.setPadding(0, 0, 0, 40);
+        }
     }
 
     public void loadDualDuctPointsUI(HashMap dualDuctPoints, LayoutInflater inflater,

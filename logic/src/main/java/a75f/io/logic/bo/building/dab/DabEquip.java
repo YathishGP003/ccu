@@ -13,6 +13,7 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Kind;
@@ -29,9 +30,11 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.DabTuners;
+import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
@@ -95,7 +98,7 @@ public class DabEquip
         }
     
     }
-    
+
     public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -681,6 +684,14 @@ public class DabEquip
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.maxDamperHeating);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(damperMaxHeatingId, (double) config.maxDamperHeating);
+
+        Equip equip = HSUtil.getEquipInfo(equipRef);
+        TrueCFMPointsHandler.createTrueCFMControlPoint(hayStack, equip, Tags.DAB,
+                config.enableCFMControl ? 1.0 : 0, null);
+        if (config.enableCFMControl) {
+            TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
+            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
+        }
     }
     
     public DabProfileConfiguration getProfileConfiguration() {
@@ -701,7 +712,12 @@ public class DabEquip
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal(IAQ_ENABLED) > 0;
-        
+
+        config.enableCFMControl = getConfigNumVal("enable and trueCfm and dab") > 0;
+        config.minCFMForIAQ= (int) getConfigNumVal("min and iaq and trueCfm and dab");
+        config.kFactor=getConfigNumVal("trueCfm and kfactor and dab");
+
+
         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
     
@@ -743,8 +759,15 @@ public class DabEquip
                     break;
             }
         }
-        
-    
+        Equip equip = HSUtil.getEquipInfo(equipRef);
+        boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable") > 0;
+        if(curTrueCfmEnabled && !config.enableCFMControl ) {
+            TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equipRef);
+        }else{
+            TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
+            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
+        }
+
         setConfigNumVal("damper and type and primary",config.damper1Type);
         setConfigNumVal("damper and size and primary",config.damper1Size);
         setConfigNumVal("damper and shape and primary",config.damper1Shape);
@@ -769,20 +792,27 @@ public class DabEquip
         setHisVal("heating and min and damper and pos",config.minDamperHeating);
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
+
+        setConfigNumVal("enable and trueCfm and dab",config.enableCFMControl == true ? 1.0 : 0);
+        setHisVal("enable and trueCfm and dab", config.enableCFMControl ? 1.0 : 0);
+        setConfigNumVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
+        setHisVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
+        setConfigNumVal("trueCfm and kfactor and dab",config.kFactor);
+        setHisVal("trueCfm and kfactor and dab",config.kFactor);
     }
-    
+
     public void setConfigNumVal(String tags,double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
-    
+
     public double getConfigNumVal(String tags) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"");
     }
-    
+
     public void setHisVal(String tags,double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
-    
+
     public double getCurrentTemp()
     {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"");
@@ -791,7 +821,7 @@ public class DabEquip
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"", roomTemp);
     }
-    
+
     public double getHumidity()
     {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and group == \""+nodeAddr+"\"");
@@ -800,7 +830,7 @@ public class DabEquip
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and humidity and sensor and current and group == \""+nodeAddr+"\"", humidity);
     }
-    
+
     public double getCO2()
     {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and group == \""+nodeAddr+"\"");
@@ -809,7 +839,7 @@ public class DabEquip
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and co2 and sensor and current and group == \""+nodeAddr+"\"", co2);
     }
-    
+
     public double getVOC()
     {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and voc and sensor and current and group == \""+nodeAddr+"\"");
@@ -818,7 +848,7 @@ public class DabEquip
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and voc and sensor and current and group == \""+nodeAddr+"\"", voc);
     }
-    
+
     public CO2Loop getCo2Loop()
     {
         return co2Loop;
@@ -827,7 +857,7 @@ public class DabEquip
     {
         return vocLoop;
     }
-    
+
     public double getDesiredTemp()
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \"" + nodeAddr + "\"");
@@ -847,7 +877,7 @@ public class DabEquip
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
-    
+
     public double getDesiredTempCooling()
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
@@ -878,7 +908,7 @@ public class DabEquip
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
-    
+
     public double getDesiredTempHeating()
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
@@ -898,7 +928,7 @@ public class DabEquip
         }
         return 0;
     }
-    
+
     public void setDesiredTempHeating(double desiredTemp)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
@@ -910,14 +940,14 @@ public class DabEquip
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
-    
+
     public double getDamperLimit(String coolHeat, String minMax)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
             return 0;
         }
-        
+
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();
@@ -935,7 +965,7 @@ public class DabEquip
         CCUHsApi.getInstance().writeDefaultValById(id, val);
         CCUHsApi.getInstance().writeHisValById(id, val);
     }
-    
+
     public double getDamperPos()
     {
         return damperPos;
@@ -945,22 +975,22 @@ public class DabEquip
         this.damperPos = damperPos;
         CCUHsApi.getInstance().writeHisValByQuery("point and damper and base and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
     }
-    
+
     public void setNormalizedDamperPos(double damperPos, String damper)
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and damper and normalized and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
     }
-    
+
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
-    
+
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status )
         {
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
         }
-    
+
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
@@ -973,14 +1003,14 @@ public class DabEquip
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             }
         }
-    
+
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
         if (!curStatus.equals(message))
         {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
         }
     }
-    
+
     public void setScheduleStatus(String status)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");

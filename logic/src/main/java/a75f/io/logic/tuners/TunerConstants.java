@@ -201,4 +201,6 @@ public class TunerConstants
     public static final double AIR_FLOW_CFM_INTEGRAL_TIME = 30.0;
     public static final double AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR = 0.5;
     public static final double AIR_FLOW_CFM_INTEGRAL_K_FACTOR = 0.5;
+
+    public static final String DAB = "dab";
 }

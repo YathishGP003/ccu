@@ -16,7 +16,7 @@ import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class TrueCFMVAVConfigHandler {
-    public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+    public static void updateVAVConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double value = msgObject.get("val").getAsDouble();

@@ -82,6 +82,11 @@ public class MigrationUtil {
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
 
+        if (!PreferenceUtil.isTrueCFMDABMigrationDone()) {
+            trueCFMDABMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCFMDABMigrationDone();
+        }
+
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
@@ -118,7 +123,7 @@ public class MigrationUtil {
     }
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        TrueCFMTuners.createDefaultTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
         vavEquips.forEach(vavEquip -> {
             HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
             if (enableCFMPoint.get("id")==null) {
@@ -131,6 +136,29 @@ public class MigrationUtil {
                 }
                 TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
                                                                0, fanMarker);
+            }
+        });
+
+    }
+
+    private static void trueCFMDABMigration(CCUHsApi haystack) {
+        ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
+        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
+        if(!dabEquips.isEmpty()) {
+            doMigrationDab(haystack, dabEquips, tunerEquip);
+        }
+
+    }
+    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips, Equip tunerEquip) {
+        //        creating default tuners for vav
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.DAB, TunerConstants.DAB_TUNER_GROUP);
+        dabEquips.forEach(dabEquip -> {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id")==null) {
+                Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB,
+                        0, null);
             }
         });
 

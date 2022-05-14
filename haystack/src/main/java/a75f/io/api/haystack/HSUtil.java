@@ -295,7 +295,12 @@ public class HSUtil
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.ENABLE)&&(pointEntity.containsKey(Tags.CFM));
+        return (pointEntity.containsKey(Tags.ENABLE) && pointEntity.containsKey(Tags.CFM) && pointEntity.containsKey(Tags.VAV));
+    }
+
+    public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
+        return (pointEntity.containsKey(Tags.ENABLE) && pointEntity.containsKey(Tags.CFM) && pointEntity.containsKey(Tags.DAB));
     }
 
     public static double getSystemUserIntentVal(String tags)

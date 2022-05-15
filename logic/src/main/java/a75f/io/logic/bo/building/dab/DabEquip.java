@@ -760,7 +760,7 @@ public class DabEquip
             }
         }
         Equip equip = HSUtil.getEquipInfo(equipRef);
-        boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable") > 0;
+        boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable and dab") > 0;
         if(curTrueCfmEnabled && !config.enableCFMControl ) {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equipRef);
         }else{

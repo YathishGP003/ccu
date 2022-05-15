@@ -26,7 +26,7 @@ public class TrueCFMDABConfigHandler {
             dabProfileConfiguration.kFactor = 2;
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equip.getId(), dabProfileConfiguration);
             TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.DAB, TunerConstants.DAB_TUNER_GROUP);
-            TrueCFMPointsHandler.createTrueCfmSpPoints(hayStack, equip, Tags.VAV, null);
+            TrueCFMPointsHandler.createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
         } else {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
         }

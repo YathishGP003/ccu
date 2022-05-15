@@ -214,14 +214,14 @@ public class TrueCFMPointsHandler {
         hayStack.writeHisValById(airVelocityId, 0.0);
     }
 
-    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, double minCFMForIaq) {
+    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, String profileTag,  double minCFMForIaq) {
         Point minCFMIAQ = new Point.Builder()
                 .setDisplayName(equip.getDisplayName() + "-minCFMIAQ")
                 .setEquipRef(equip.getId())
                 .setSiteRef(equip.getSiteRef())
                 .setRoomRef(equip.getRoomRef())
                 .setFloorRef(equip.getFloorRef()).setHisInterpolate(Tags.COV)
-                .addMarker(Tags.CONFIG).addMarker(Tags.DAB).addMarker(Tags.MIN)
+                .addMarker(Tags.CONFIG).addMarker(profileTag).addMarker(Tags.MIN)
                 .addMarker(Tags.CFM).addMarker(Tags.IAQ)
                 .setMinVal("0").setMaxVal("1500").setIncrementVal("10")
                 .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
@@ -231,23 +231,6 @@ public class TrueCFMPointsHandler {
         String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
         hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);
         hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
-    }
-
-    private static void createTrueCFMKFactorPoint(CCUHsApi hayStack, Equip equip, double kfactor) {
-        Point kFactor = new Point.Builder()
-                .setDisplayName(equip.getDisplayName() + "-kFactor")
-                .setEquipRef(equip.getId())
-                .setFloorRef(equip.getFloorRef())
-                .setRoomRef(equip.getRoomRef())
-                .setSiteRef(equip.getSiteRef()).setHisInterpolate(Tags.COV)
-                .addMarker(Tags.DAB).addMarker(Tags.CFM).addMarker(Tags.WRITABLE)
-                .addMarker(Tags.CONFIG).addMarker(Tags.ZONE).addMarker(Tags.HIS).addMarker(Tags.KFACTOR)
-                .setGroup(equip.getGroup())
-                .setTz(equip.getTz())
-                .build();
-        String kFactorId = hayStack.addPoint(kFactor);
-        hayStack.writeDefaultValById(kFactorId, kfactor);
-        hayStack.writeHisValueByIdWithoutCOV(kFactorId, kfactor);
     }
 
     public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,
@@ -273,9 +256,9 @@ public class TrueCFMPointsHandler {
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
-        createTrueCFMKFactorPoint(hayStack, equip, dabProfileConfiguration.kFactor);
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
 
-        createTrueCFMIaqMin(hayStack, equip, dabProfileConfiguration.minCFMForIAQ);
+        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
 
         createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
     }

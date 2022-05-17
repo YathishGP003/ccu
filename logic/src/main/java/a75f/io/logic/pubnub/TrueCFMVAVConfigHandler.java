@@ -29,9 +29,9 @@ public class TrueCFMVAVConfigHandler {
         VavProfileConfiguration vavProfileConfiguration = new VavProfileConfiguration();
             if (value > 0) {
                 vavProfileConfiguration.numMaxCFMReheating = 500;
-                vavProfileConfiguration.numMinCFMCooling = 500;
+                vavProfileConfiguration.numMinCFMCooling = 100;
                 vavProfileConfiguration.nuMaxCFMCooling = 500;
-                vavProfileConfiguration.numMinCFMReheating = 500;
+                vavProfileConfiguration.numMinCFMReheating = 100;
                 vavProfileConfiguration.kFactor = 2;
                 TrueCFMPointsHandler.createTrueCFMVavPoints(hayStack, equip.getId(), vavProfileConfiguration,
                  fanMarker);

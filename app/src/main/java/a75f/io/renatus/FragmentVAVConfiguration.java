@@ -500,7 +500,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 //this converts value of KFactor to position
                 kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCoolingDamperPos.setValue(20);
-                maxCoolingDamperPos.setValue(20);
+                maxCoolingDamperPos.setValue(100);
                 minHeatingDamperPos.setValue(20);
             }
         

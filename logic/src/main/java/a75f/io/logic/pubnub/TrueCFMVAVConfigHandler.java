@@ -41,7 +41,7 @@ public class TrueCFMVAVConfigHandler {
             } else {
                 vavProfileConfiguration.minDamperCooling = 20;
                 vavProfileConfiguration.minDamperHeating = 20;
-                vavProfileConfiguration.maxDamperCooling = 20;
+                vavProfileConfiguration.maxDamperCooling = 100;
                 TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
                 TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, vavProfileConfiguration, fanMarker);
             }

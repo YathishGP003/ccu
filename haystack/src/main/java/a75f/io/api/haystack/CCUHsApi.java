@@ -90,11 +90,10 @@ public class CCUHsApi
     private SyncManager       syncManager;
     
     private volatile boolean isCcuReady = false;
+    private long appAliveMinutes = 0;
     
-    public static CCUHsApi getInstance()
-    {
-        if (instance == null)
-        {
+    public static CCUHsApi getInstance() {
+        if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
         }
         return instance;
@@ -2324,5 +2323,21 @@ public class CCUHsApi
     public List<HashMap<Object, Object>> getAllNamedSchedules(){
         String query = "named and schedule";
         return CCUHsApi.getInstance().readAllEntities(query);
+    }
+    
+    /**
+     * This is currently called from BuildingProcessJob which gets scheduled every minute.
+     * Avoiding the need for an additional timer thread at the cost of a dependency on logic module.
+     */
+    public void incrementAppAliveCount() {
+        appAliveMinutes++;
+    }
+    
+    /**
+     * Returns the number of minutes the app has been alive.
+     * @return appAlive minutes
+     */
+    public long getAppAliveMinutes() {
+        return appAliveMinutes;
     }
 }

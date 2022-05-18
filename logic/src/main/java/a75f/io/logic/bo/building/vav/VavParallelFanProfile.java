@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.vav;
 
+import java.util.Objects;
+
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -35,14 +37,6 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 public class VavParallelFanProfile extends VavProfile
 {
     private VavEquip vavDevice;
-    
-    ControlLoop coolingLoop;
-    ControlLoop heatingLoop;
-    CO2Loop co2Loop;
-    VOCLoop vocLoop;
-    GenericPIController valveController;
-    Damper damper;
-    Valve valve;
     
     @Override
     public ProfileType getProfileType()
@@ -82,8 +76,8 @@ public class VavParallelFanProfile extends VavProfile
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             int loopOp = getLoopOp(conditioning, roomTemp, vavEquip);
             
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
+            SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+            if (systemMode == SystemMode.OFF || valveController.getControlVariable() == 0) {
                 valve.currentPosition = 0;
             }
             
@@ -95,7 +89,11 @@ public class VavParallelFanProfile extends VavProfile
             } else {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-            
+    
+            if (systemMode != SystemMode.OFF) {
+                updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+            }
+    
             //When in the system is in heating, REHEAT control does not follow RP-1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip.getId());
@@ -118,6 +116,7 @@ public class VavParallelFanProfile extends VavProfile
         valveController = vavDevice.getValveController();
         setTempCooling = vavDevice.getDesiredTempCooling();
         setTempHeating = vavDevice.getDesiredTempHeating();
+        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
         ParallelFanVavUnit vavUnit = (ParallelFanVavUnit)vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;

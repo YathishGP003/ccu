@@ -710,6 +710,14 @@
     <string name="label_maxdamperheatpos">Max Damper Pos\nHeating</string>
     <string name="label_mindamperheatpos">Min Damper Pos\nHeating</string>
 
+    <string name="label_enable_cfm">Enable CFM</string>
+    <string name="label_k_factor">K Factor</string>
+    <string name="label_max_cfm_cooling">Max CFM   \n    Cooling</string>
+    <string name="label_min_cfm_cooling">Min CFM   \n    Cooling</string>
+    <string name="label_max_cfm_reheating">Max CFM  \n  Reheating</string>
+    <string name="label_min_cfm_reheating">Min CFM  \n  Reheating</string>
+    <string name="airflow_cfm">Airflow CFM :</string>
+
 
     <!--DAB Screen-->
     <string name="title_dabinput">DAB</string>
@@ -1190,6 +1198,17 @@
     <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
     <string name="desiredTemp_warning">Desired temperatures of this NamedSChedule is outside the desired temperature limits of the building</string>
 
+    <!--True Cfm-->
+    <string name="label_min_cfm_for_iaq">Min CFM For\nIAQ</string>
+
+    <string name="min_val_for_iaq">0</string>
+    <string name="max_val_for_iaq">150</string>
+    <string name="step_for_iaq_values">10</string>
+    <string name="default_val_for_iaq">10</string>
+    <string name="min_val_for_kfactor">1.0</string>
+    <string name="max_val_for_kfactor">3.0</string>
+    <string name="step_for_kactor_values">.01</string>
+    <string name="default_val_for_kfactor">100</string>
 
 
 

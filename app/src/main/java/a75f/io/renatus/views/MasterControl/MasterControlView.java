@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,14 +34,16 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -193,7 +197,8 @@ public class MasterControlView extends LinearLayout {
         ArrayList<String> warningMessage = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
         ArrayList<Schedule> filterSchedules = new ArrayList<>();
-       StringBuilder namedSchedules = new StringBuilder();
+        ArrayList<String> namedSchedulesWarning = new ArrayList<>();
+        Set<String> namedSchedulesIds = new HashSet<String>();
 
         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
@@ -220,9 +225,8 @@ public class MasterControlView extends LinearLayout {
         for (Schedule schedule : filterSchedules) {
             CcuLog.d(LOG_PREFIX, "schedule ="+schedule);
             ArrayList<Schedule.Days> scheduleDaysList = schedule.getDays();
-            schedules.add(schedule);
-            if(schedule.isNamedSchedule())
-                namedSchedules.append("named");
+            if(!schedule.isNamedSchedule())
+                schedules.add(schedule);
 
             for (Schedule.Days days : scheduleDaysList) {
                 StringBuilder message = new StringBuilder(schedule.getDis() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020");
@@ -242,50 +246,140 @@ public class MasterControlView extends LinearLayout {
                     days.setCoolingVal(coolingDesiredTemperatureValue);
                 }
 
+
                 if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
                     message.append(coolValues).append(heatValues);
-                    warningMessage.add("\n" + message);
+                    if(schedule.isNamedSchedule() && isNamedScheduleAssignedToAnyZone(schedule.getId())) {
+                        namedSchedulesWarning.add("\n" + message);
+                        namedSchedulesIds.add(schedule.getId());
+                    }
+                    else if(!schedule.isNamedSchedule()){
+                        warningMessage.add("\n" + message);
+                    }
                 } else if (!TextUtils.isEmpty(coolValues) && TextUtils.isEmpty(heatValues)) {
                     message.append(coolValues);
-                    warningMessage.add("\n" + message);
+                    if(schedule.isNamedSchedule() && isNamedScheduleAssignedToAnyZone(schedule.getId())) {
+                        namedSchedulesWarning.add("\n" + message);
+                        namedSchedulesIds.add(schedule.getId());
+                    }
+                    else if(!schedule.isNamedSchedule()){
+                        warningMessage.add("\n" + message);
+                    }
                 } else if (TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
                     message.append(heatValues);
-                    warningMessage.add("\n" + message);
+                    if(schedule.isNamedSchedule() && isNamedScheduleAssignedToAnyZone(schedule.getId())) {
+                        namedSchedulesWarning.add("\n" + message);
+                        namedSchedulesIds.add(schedule.getId());
+                    }
+                    else if(!schedule.isNamedSchedule()){
+                        warningMessage.add("\n" + message);
+                    }
                 }
+
             }
 
         }
 
-        CcuLog.d(LOG_PREFIX, "namedSchedules ="+namedSchedules);
+        if (!namedSchedulesWarning.isEmpty() && showNamedScheduleError(namedSchedulesIds)) {
 
+            disPlayWarningMessagewithNamedSched(namedSchedulesWarning,warningMessage, dialog);
 
-        if (warningMessage.size() > 0) {
-            if (namedSchedules.toString().contains("named")) {
-                AlertDialog.Builder namedSchedBuilder = new AlertDialog.Builder(getContext());
-                namedSchedBuilder.setMessage("Named Schedule temps for below zone(s) is outside updated" +
-                        " building user limits which is not allowed\n")
-                        .setCancelable(false)
-                        .setTitle("Schedule Errors")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setPositiveButton("OKAY", (dialog1, id) -> dialog1.dismiss());
-
-                AlertDialog alert = namedSchedBuilder.create();
-                alert.show();
-            }else{
-                disPlayWarningMessage(warningMessage, dialog, schedules);
+        } else if (!warningMessage.isEmpty()) {
+            ArrayList<Schedule> filterNonNamedSchedules = new ArrayList<>();
+            for (Schedule schedule:schedules) {
+                if(!schedule.isNamedSchedule())
+                    filterNonNamedSchedules.add(schedule);
             }
+            disPlayWarningMessage(warningMessage, dialog, filterNonNamedSchedules);
         } else {
+            ArrayList<Schedule> filterNonNamedSchedules = new ArrayList<>();
             if (filterSchedules.size() > 0) {
-                for (Schedule filter:filterSchedules) {
-                    if(filter.isNamedSchedule())
-                        filterSchedules.remove(filter);
+                Iterator<Schedule> scheduleIterator = filterSchedules.iterator();
+                while (scheduleIterator.hasNext()) {
+                    Schedule schedule = scheduleIterator.next();
+                    if (schedule.isNamedSchedule())
+                        scheduleIterator.remove();
                 }
-                saveScheduleData(filterSchedules, dialog);
+                saveScheduleData(filterNonNamedSchedules, dialog);
             } else {
                 saveBuildingData(dialog);
             }
         }
 
+    }
+
+    private void disPlayWarningMessagewithNamedSched
+            (ArrayList<String> namedSchedulesWarning,ArrayList<String> ZoneAndBuildingWarning, Dialog masterDialog) {
+
+        String displayMessage = "Following schedules temps will need to be trimmed to be within the new user limits";
+        if(!ZoneAndBuildingWarning.isEmpty()){
+            displayMessage = displayMessage +
+                    "\n"+ZoneAndBuildingWarning.toString().replace("[", "").replace("]", "");
+        }
+        displayMessage = displayMessage+"\n\n\tImpacted Named Schedule\n"+
+                namedSchedulesWarning.toString().replace("[", "").replace("]", "")
+                + "\n\n";
+
+
+        AlertDialog.Builder namedSchedBuilder = new AlertDialog.Builder(getContext());
+        namedSchedBuilder.setMessage(displayMessage )
+                .setCancelable(false)
+                .setTitle("Schedule Errors")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Discard", (dialog1, id) -> {
+                    if(masterDialog !=null && masterDialog.isShowing())
+                        masterDialog.dismiss();
+                    dialog1.dismiss();
+                })
+        .setNegativeButton("Re-Edit", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog alert = namedSchedBuilder.create();
+        alert.show();
+    }
+
+    private boolean isNamedSheduleInActive(String scheduleId){
+        List<HashMap<Object, Object>> namedSchedules =
+                CCUHsApi.getInstance().getAllNamedSchedules();
+        ArrayList<String> namedScheduleIds = new ArrayList<String>();
+        for (HashMap<Object,Object> namedSchedule:namedSchedules){
+            namedScheduleIds.add(Objects.requireNonNull(namedSchedule.get("id")).toString().replace("@",""));
+        }
+        return namedScheduleIds.contains(scheduleId);
+    }
+    private boolean showNamedScheduleError(Set<String> namedScheduleIds){
+        if(isAnyZoneFollwingNamedSchedule()){
+            for  (String Id:namedScheduleIds) {
+                if(isNamedSheduleInActive(Id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isAnyZoneFollwingNamedSchedule(){
+        ArrayList<HashMap<Object, Object>> scheduleTypes  = CCUHsApi.getInstance().readAllEntities("point and scheduleType");
+        for (HashMap<Object,Object> scheduleType:scheduleTypes){
+            Log.d(LOG_PREFIX,"Schedule Type value"+CCUHsApi.getInstance().readDefaultValById(scheduleType.get("id").toString()).toString());
+            if((CCUHsApi.getInstance().readDefaultValById(scheduleType.get("id").toString()).toString()).equals("2.0")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isNamedScheduleAssignedToAnyZone(String namedScheduleId){
+        if(isAnyZoneFollwingNamedSchedule()){
+            ArrayList<HashMap<Object, Object>> rooms  = CCUHsApi.getInstance().readAllEntities("room");
+            if (!rooms.isEmpty()) {
+                ArrayList<String> roomScheduleIds = new ArrayList<>();
+                for (HashMap<Object, Object> room : rooms) {
+                    roomScheduleIds.add(room.get("scheduleRef").toString().replace("@",""));
+                }
+                return roomScheduleIds.contains(namedScheduleId.replace("@",""));
+            }
+        }
+        return false;
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -301,7 +395,7 @@ public class MasterControlView extends LinearLayout {
 
                 HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                Site site = CCUHsApi.getInstance().getSite();
+
                 HDict queryDictionary = new HDictBuilder().add("filter",
                         "named and schedule and organization == \""+
                                 Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization()+"\"").toDict();

@@ -35,6 +35,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincReader;
 
 import java.util.ArrayList;
@@ -841,6 +842,12 @@ public class CreateNewSite extends Fragment {
         ccuHsApi.log();
         L.ccu().systemProfile = new DefaultSystem();
         prefs.setString("SITE_ID", localSiteId);
+
+        new Handler().postDelayed(() -> CCUHsApi.getInstance().importNamedScheduleWithOrg(
+                new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),org), 30000);
+
+
         return localSiteId;
     }
 

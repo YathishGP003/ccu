@@ -47,6 +47,29 @@ public class TrueCFMVAVConfigHandler {
             }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
+
+    public static void updateMinCoolingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        double maxCfmValue = msgObject.get("val").getAsDouble();
+        Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and trueCfm and min and cooling and equipRef == \""+equip.getId()+"\"");
+        if (minCfmValue > maxCfmValue) {
+            CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
+        }
+        writePointFromJson(configPoint, msgObject, hayStack);
+    }
+
+    public static void updateMinReheatingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        double maxHeatingCfmValue = msgObject.get("val").getAsDouble();
+        Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and trueCfm and min and heating and equipRef == \""+equip.getId()+"\"");
+        if (minHeatingCfmValue > maxHeatingCfmValue) {
+            CCUHsApi.getInstance().writeDefaultVal("vav and trueCfm and min and heating and group == \""+equip.getGroup()+"\"", maxHeatingCfmValue);
+        }
+        writePointFromJson(configPoint, msgObject, hayStack);
+    }
+
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();

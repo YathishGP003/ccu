@@ -37,7 +37,6 @@ public class TrueCFMVAVConfigHandler {
                  fanMarker);
                 TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.VAV, TunerConstants.VAV_TUNER_GROUP);
                 TrueCFMPointsHandler.deleteNonCfmDamperPoints(hayStack, equip.getId());
-                TrueCFMPointsHandler.createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanMarker);
             } else {
                 vavProfileConfiguration.minDamperCooling = 20;
                 vavProfileConfiguration.minDamperHeating = 20;

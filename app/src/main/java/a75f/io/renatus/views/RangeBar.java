@@ -18,9 +18,15 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+
+import java.util.HashMap;
 
 
 /**
@@ -126,9 +132,14 @@ public class RangeBar extends View {
         } else {
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
         }
-
-        canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])),
-                xPos,(yPos - 10f), mTempIconPaint);
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            canvas.drawText(String.valueOf(roundToHalf((float) fahrenheitToCelsius((temps[stateReflected.ordinal()])))),
+                    xPos,(yPos - 10f), mTempIconPaint);
+        } else {
+            canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])),
+                    xPos, (yPos - 10f), mTempIconPaint);
+        }
     }
 
     private RangeBarState isHitBoxTouched(float x, float y) {

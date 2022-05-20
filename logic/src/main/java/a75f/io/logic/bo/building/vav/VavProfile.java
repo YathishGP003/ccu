@@ -571,7 +571,7 @@ public abstract class VavProfile extends ZoneProfile {
             CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not enabled "+equipId);
             return;
         }
-        double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId);
+        double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId,"");
         
         if (currentCfm == 0) {
             CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not active ! currentCfm "+currentCfm);

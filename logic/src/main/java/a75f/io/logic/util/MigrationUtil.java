@@ -144,6 +144,7 @@ public class MigrationUtil {
                 }
                 TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
                                                                0, fanMarker);
+                TrueCFMPointsHandler.pressurePointMigration(equip, fanMarker);
             }
         });
 

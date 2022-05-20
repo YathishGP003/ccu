@@ -767,7 +767,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         if(!namedScheds.isEmpty()){
             for (HashMap<Object, Object> nameSched :
                     namedScheds) {
-                scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
+                if(namedScheduledis.length() > 15){
+                    scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                }else{
+                    scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                }
             }
         }else{
             scheduleArray.add("No Named Schedule available");
@@ -985,7 +990,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheds.get(position - 3).get("id").toString(),
-                                zoneId, scheduleArray.get(position));
+                                zoneId, namedScheds.get(position - 3).get("dis").toString());
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
                         scheduleSpinner.setSelection(position);
@@ -1356,7 +1361,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         if(namedScheds.size() > 0){
             for (HashMap<Object, Object> nameSched :
                     namedScheds) {
-                scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
+                if(namedScheduledis.length() > 15){
+                    scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                }else{
+                    scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
+                }
             }
         }else{
             scheduleArray.add("No Named Schedule available");
@@ -1568,7 +1578,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
                         NamedSchedule namedSchedule =
                                 NamedSchedule.getInstance(namedScheduleId,
-                                        zoneId, scheduleArray.get(position));
+                                        zoneId,  namedScheds.get(position - 3).get("dis").toString());
                         FragmentManager childFragmentManager = getChildFragmentManager();
                         namedSchedule.show(childFragmentManager, "dialog");
                         scheduleSpinner.setSelection(position);

@@ -622,7 +622,7 @@ public class CreateNewSite extends Fragment {
         mSiteCCU.setEnabled(isEnable);
         mSiteEmailId.setEnabled(isEnable);
         mSiteInstallerEmailId.setEnabled(isEnable);
-        mSiteOrg.setEnabled(isEnable);
+        mSiteOrg.setEnabled(false);
     }
 
 

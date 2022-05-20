@@ -34,6 +34,7 @@ import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2332,6 +2333,16 @@ public class CCUHsApi
 
     public List<HashMap<Object, Object>> getAllNamedSchedules(){
         String query = "named and schedule";
-        return CCUHsApi.getInstance().readAllEntities(query);
+        List<HashMap<Object, Object>> sortedNamedSchedules = CCUHsApi.getInstance().readAllEntities(query);
+
+        Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
+        return sortedNamedSchedules;
+    }
+    
+    public void removeAllNamedSchedule(){
+        List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
+        for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
+            deleteEntity(namedSchedule.get("id").toString().replace("@",""));
+        }
     }
 }

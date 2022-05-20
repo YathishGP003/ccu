@@ -382,6 +382,9 @@ public class NamedSchedule extends DialogFragment {
 
 
             }
+
+            StringBuilder desiredTempWarning = new StringBuilder();
+            boolean isDesiredTempValid = true;
             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
                 if (!(namedSchedDay.getHeatingVal() < buildingTuner.getMaxHeatingUserLimit()
                 && namedSchedDay.getHeatingVal()> buildingTuner.getMinHeatingUserLimit()
@@ -389,20 +392,25 @@ public class NamedSchedule extends DialogFragment {
                 && namedSchedDay.getCoolingVal() > buildingTuner.getMinCoolingUserLimit())) {
                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
                             "Saturday","Sunday"};
-                    warningMessage.append("\n ").append(getText(R.string.desiredTemp_warning)).append("\n\t").append("Named schedule desired temperature : \n\t\t")
-                            .append(dayName[namedSchedDay.getDay()]).append("-")
+                    desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
                             .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
                             .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
                             .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(";")
-                            .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t")
-                            .append("Building desired temps limit : HDT - ")
-                            .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
-                            .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
-                    .append("\n\n");
+                            .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t");
                     isValid = false;
+                    isDesiredTempValid= false;
                 }
 
             }
+            if(!isDesiredTempValid) {
+                warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
+                        .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
+                        .append("Building desired temps limit : HDT - ")
+                        .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
+                        .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
+                        .append("\n\n");;
+            }
+
         }
         if (!isValid) {
             warningMessage.append("\n\n").append(getText(R.string.pls_goback));

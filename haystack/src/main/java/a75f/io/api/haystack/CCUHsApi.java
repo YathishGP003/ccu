@@ -2338,4 +2338,11 @@ public class CCUHsApi
         Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
         return sortedNamedSchedules;
     }
+    
+    public void removeAllNamedSchedule(){
+        List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
+        for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
+            deleteEntity(namedSchedule.get("id").toString().replace("@",""));
+        }
+    }
 }

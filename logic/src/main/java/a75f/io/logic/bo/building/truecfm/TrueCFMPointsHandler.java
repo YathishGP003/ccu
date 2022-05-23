@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Units;
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -215,6 +216,34 @@ public class TrueCFMPointsHandler {
                                  .build();
         String airVelocityId = hayStack.addPoint(airVelocity);
         hayStack.writeHisValById(airVelocityId, 0.0);
+    }
+
+    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, String profileTag,  double minCFMForIaq) {
+        Point minCFMIAQ = new Point.Builder()
+                .setDisplayName(equip.getDisplayName() + "-minCFMIAQ")
+                .setEquipRef(equip.getId())
+                .setSiteRef(equip.getSiteRef())
+                .setRoomRef(equip.getRoomRef())
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate(Tags.COV)
+                .addMarker(Tags.CONFIG).addMarker(profileTag).addMarker(Tags.MIN)
+                .addMarker(Tags.CFM).addMarker(Tags.IAQ)
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10")
+                .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
+                .setGroup(equip.getGroup())
+                .setTz(equip.getTz())
+                .build();
+        String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
+        hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);
+        hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
+    }
+
+    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
+                                              DabProfileConfiguration dabProfileConfiguration) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
+        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
+        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
     }
     
     public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,

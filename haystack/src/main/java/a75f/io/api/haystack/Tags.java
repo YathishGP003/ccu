@@ -127,4 +127,7 @@ public class Tags
     public static final String PARALLEL = "parallel";
     public static final String CFM = "trueCfm";
     public static final String MAX = "max";
+    public static final String IAQ = "iaq";
+    public static final String MIN ="min" ;
+    public static final String COV = "cov" ;
 }

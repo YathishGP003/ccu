@@ -91,6 +91,12 @@ public class MigrationUtil {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
+
+        if (!PreferenceUtil.isTrueCFMDABMigrationDone()) {
+            trueCFMDABMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCFMDABMigrationDone();
+        }
+
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -148,6 +154,27 @@ public class MigrationUtil {
             }
         });
 
+    }
+
+    private static void trueCFMDABMigration(CCUHsApi haystack) {
+        ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
+        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
+        if(!dabEquips.isEmpty()) {
+            doMigrationDab(haystack, dabEquips, tunerEquip);
+        }
+    }
+    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips, Equip tunerEquip) {
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.DAB, TunerConstants.DAB_TUNER_GROUP);
+        dabEquips.forEach(dabEquip -> {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id")==null) {
+                Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB,
+                        0, null);
+                TrueCFMPointsHandler.pressurePointMigration(equip, null);
+            }
+        });
     }
 
     private static boolean checkAppVersionUpgraded() {

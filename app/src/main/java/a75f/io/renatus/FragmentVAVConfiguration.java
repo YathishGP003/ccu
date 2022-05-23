@@ -500,7 +500,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 //this converts value of KFactor to position
                 kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCoolingDamperPos.setValue(20);
-                maxCoolingDamperPos.setValue(20);
+                maxCoolingDamperPos.setValue(100);
                 minHeatingDamperPos.setValue(20);
             }
         
@@ -608,12 +608,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-        vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
+//        vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
         vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
-        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
+//        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
         vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
         vavConfig.enableCFMControl = enableCFMControl.isChecked();
         vavConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
+        if(numMinCFMCooling.getValue() > numMaxCFMCooling.getValue()){
+            vavConfig.numMinCFMCooling = numMaxCFMCooling.getValue()*STEP;
+        }else {
+            vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
+        }
+
+        if((numMinCFMReheating.getValue() > numMaxCFMReheating.getValue())){
+            vavConfig.numMinCFMReheating = numMaxCFMReheating.getValue()*STEP;
+        }else {
+            vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
+        }
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);

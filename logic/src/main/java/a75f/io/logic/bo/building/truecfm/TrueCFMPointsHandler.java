@@ -10,7 +10,9 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Units;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 
 public class TrueCFMPointsHandler {
     
@@ -165,20 +167,22 @@ public class TrueCFMPointsHandler {
 
     }
 
-    private static void createPressurePoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+    public static void pressurePointMigration(Equip equip, String fanMarker) {
 
+        SmartNode device = new SmartNode(Integer.parseInt(equip.getGroup()), equip.getSiteRef(), equip.getFloorRef(), equip.getRoomRef(), equip.getId());
         Point pressure = new Point.Builder()
-                .setDisplayName(equip.getDisplayName() +"-pressure")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("vav")
-                .addMarker(fanMarker).addMarker(profileTag)
-                .setGroup(equip.getGroup())
-                .build();
-         hayStack.addPoint(pressure);
-
+                        .setDisplayName(equip.getDisplayName() +"-pressure")
+                        .setEquipRef(equip.getId())
+                        .setSiteRef(equip.getSiteRef())
+                        .setRoomRef(equip.getRoomRef())
+                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                        .addMarker("pressure").addMarker("his").addMarker("sensor")
+                        .addMarker(fanMarker)
+                        .setGroup(String.valueOf(equip.getGroup()))
+                        .setTz(equip.getTz())
+                        .build();
+        String pressureId = CCUHsApi.getInstance().addPoint(pressure);
+        device.addSensor(Port.SENSOR_PRESSURE, pressureId);
     }
     
     public static void createTrueCfmSpPoints(CCUHsApi hayStack, Equip equip, String profileTag, String fanType) {
@@ -233,6 +237,15 @@ public class TrueCFMPointsHandler {
         hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
     }
 
+    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
+                                              DabProfileConfiguration dabProfileConfiguration) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
+        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
+        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
+    }
+    
     public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,
                                                     VavProfileConfiguration vavProfileConfiguration, String fanType) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
@@ -250,19 +263,7 @@ public class TrueCFMPointsHandler {
     
         createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanType);
     }
-
-    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
-                                              DabProfileConfiguration dabProfileConfiguration) {
-        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-
-        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
-
-        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
-
-        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
-    }
-
+    
     /**
      * Deletes all true cfm related points, including the tuners.
      */

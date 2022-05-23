@@ -128,7 +128,7 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("equip and zone and (dab or dualDuct or " +
-                                                                            "ti or bpos");
+                                                                            "ti or bpos)");
     
         updateSystemTempHumidity(allEquips);
         
@@ -161,7 +161,7 @@ public class DabSystemController extends SystemController
         logAlgoVariables();
         
         ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
-                                                               .readAllEntities("equip and zone and (dab or dualDuct)");
+                                                               .readAllEntities("equip and zone and dab");
 
         if (isNormalizationRequired()) {
             HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
@@ -1099,7 +1099,7 @@ public class DabSystemController extends SystemController
                 DabTrueCfmHandler.getInstance().updateAirflowMAQueue(hayStack, equipRef, Tags.PRIMARY,
                                                                      primaryDamperPosPoint.get("id").toString());
                 
-                DabTrueCfmHandler.getInstance().updateDamperPosQueueMap(primaryDamperPosPoint.get("id").toString(),
+                DabTrueCfmHandler.getInstance().updateDamperPosQueueMap(secondoryDamperPosPoint.get("id").toString(),
                                                                         limitedSecondaryDamperPos);
                 DabTrueCfmHandler.getInstance().updateAirflowMAQueue(hayStack, equipRef, Tags.SECONDARY,
                                                                      secondoryDamperPosPoint.get("id").toString());

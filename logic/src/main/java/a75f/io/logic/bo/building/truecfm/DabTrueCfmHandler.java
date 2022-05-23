@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.OptionalDouble;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -16,8 +17,8 @@ public class DabTrueCfmHandler {
     
     private final int MOVING_AVERAGE_QUEUE_SIZE = 15;
     
-    private Map<String, EvictingQueue> damperPosMAQueueMap = new HashMap<>();
-    private Map<String, EvictingQueue> airflowMAQueueMap = new HashMap<>();
+    private       Map<String, EvictingQueue> damperPosMAQueueMap = new HashMap<>();
+    private final Map<String, EvictingQueue> airflowMAQueueMap   = new HashMap<>();
     
     private static DabTrueCfmHandler instance;
     
@@ -30,12 +31,11 @@ public class DabTrueCfmHandler {
         return instance;
     }
     
-    private EvictingQueue<Double> getDamperPosQueue(String equipRef) {
-        return damperPosMAQueueMap.get(equipRef);
-    }
-    
     private double getMovingAverageFromQueue(EvictingQueue<Double> movingAverageQueue) {
         
+        if (movingAverageQueue == null || movingAverageQueue.isEmpty()) {
+            return 0;
+        }
         OptionalDouble averageVal =  movingAverageQueue.stream()
                                                   .filter(val -> val != 0)
                                                   .mapToDouble( d ->d)
@@ -76,6 +76,7 @@ public class DabTrueCfmHandler {
         
         HashMap<String, Double> cfmAdjustedDamperMap = new HashMap<>();
         for (HashMap<Object, Object> dabEquip : dabEquips) {
+            CcuLog.i(L.TAG_CCU_SYSTEM, " UpdateCFMDamper for equip : "+dabEquip.get("dis"));
             String equipRef = Objects.requireNonNull(dabEquip.get("id")).toString();
             
             // If TrueCFM is not enabled, just copy the current damper pos and move to the
@@ -91,7 +92,8 @@ public class DabTrueCfmHandler {
                                                     + "and equipRef == \"" + equipRef + "\"");
             
             Double primaryDamperVal = getUpdatedDamperVal(hayStack, equipRef,
-                                                         primaryDamperPosPoint.get("id").toString());
+                                                          primaryDamperPosPoint.get("id").toString(), Tags.PRIMARY,
+                                                          normalizedDamperMap.get(primaryDamperPosPoint.get("id").toString()));
             
             if (primaryDamperVal != null) {
                 cfmAdjustedDamperMap.put(primaryDamperPosPoint.get("id").toString(), primaryDamperVal);
@@ -103,12 +105,14 @@ public class DabTrueCfmHandler {
                                                 "point and damper and normalized and secondary and cmd " +
                                                 "and equipRef == \"" + equipRef + "\"");
             Double secondaryDamperVal = getUpdatedDamperVal(hayStack, equipRef,
-                                                            secondaryDamperPosPoint.get("id").toString());
+                                                            Objects.requireNonNull(secondaryDamperPosPoint.get("id")).toString(),
+                                                            Tags.SECONDARY,
+                                                            normalizedDamperMap.get(secondaryDamperPosPoint.get("id").toString()));
             
             if (secondaryDamperVal != null) {
-                cfmAdjustedDamperMap.put(secondaryDamperPosPoint.get("id").toString(), secondaryDamperVal);
+                cfmAdjustedDamperMap.put(Objects.requireNonNull(secondaryDamperPosPoint.get("id")).toString(), secondaryDamperVal);
             } else {
-                copyDamperPos(secondaryDamperPosPoint.get("id").toString(), cfmAdjustedDamperMap, normalizedDamperMap);
+                copyDamperPos(Objects.requireNonNull(secondaryDamperPosPoint.get("id")).toString(), cfmAdjustedDamperMap, normalizedDamperMap);
             }
         }
         
@@ -119,26 +123,30 @@ public class DabTrueCfmHandler {
         
     }
     
-    private Double getUpdatedDamperVal(CCUHsApi hayStack, String equipRef, String damperPointId) {
+    private Double getUpdatedDamperVal(CCUHsApi hayStack, String equipRef, String damperPointId, String damperType,
+                                       double defaultDamperVal) {
         
         EvictingQueue<Double> damperValQueue = damperPosMAQueueMap.get(damperPointId);
-        if (damperValQueue == null || damperValQueue.isEmpty()) {
-            CcuLog.i(L.TAG_CCU_SYSTEM, "getUpdatedDamperVal: damperValQueue not initialized "+damperValQueue);
-            return null;
-        }
         double damperMAVal = getMovingAverageFromQueue(damperValQueue);
+        //Handle the case when queue is empty
+        if (damperMAVal == 0) {
+            damperMAVal = defaultDamperVal;
+            CcuLog.d(L.TAG_CCU_SYSTEM, "getUpdatedDamperVal: damperValQueue not initialized "+defaultDamperVal);
+        }
     
         EvictingQueue<Double> cfmValQueue = airflowMAQueueMap.get(damperPointId);
-        if (cfmValQueue == null || cfmValQueue.isEmpty()) {
-            CcuLog.i(L.TAG_CCU_SYSTEM, "getUpdatedDamperVal: cfmValQueue not initialized "+cfmValQueue);
-            return null;
-        }
         double cfmMAVal = getMovingAverageFromQueue(cfmValQueue);
+        //Handle the case when queue is empty
+        if (cfmMAVal == 0) {
+            cfmMAVal = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipRef, damperType);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "getUpdatedDamperVal: cfmValQueue not initialized cfmMAVal "+cfmMAVal);
+        }
     
         double minCfmIAQ = hayStack.readDefaultVal("min and trueCfm and iaq and config and equipRef == \"" +
                                                    ""+equipRef+ "\"");
     
-        CcuLog.i(L.TAG_CCU_SYSTEM, "getUpdatedDamperVal: cfmMAVal "+cfmMAVal+" damperMAVal "+damperMAVal);
+        CcuLog.i(L.TAG_CCU_SYSTEM,
+                 "getUpdatedDamperVal: minCfmIAQ "+minCfmIAQ+" cfmMAVal "+cfmMAVal+" damperMAVal "+damperMAVal);
         if (cfmMAVal != 0 && damperMAVal != 0 && cfmMAVal != minCfmIAQ) {
             return Math.min(minCfmIAQ * damperMAVal / cfmMAVal, 100);
         }

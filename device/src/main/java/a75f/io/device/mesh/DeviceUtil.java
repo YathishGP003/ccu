@@ -1,35 +1,24 @@
 package a75f.io.device.mesh;
 
-import java.util.HashMap;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+
+import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
-
-import android.util.Log;
 
 public class DeviceUtil {
     
@@ -206,5 +195,38 @@ public class DeviceUtil {
         }
         Log.i(L.TAG_CCU_DEVICE, "invalid analogType "+analogType);
         return 0;
+    }
+
+    public static String parseNodeStatusMessage(int data){
+
+        String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
+        int message = Integer.parseInt(binaryValue.substring(0,5),2);
+        int msgType = Integer.parseInt(binaryValue.substring(5),2);
+        if(msgType == 1) return getCause(message);
+        return DeviceFieldConstants.NO_INFO;
+    }
+
+    public static String  getCause(int msgType) {
+
+        switch (msgType) {
+            case 0:
+                return DeviceFieldConstants.CAUSE0;
+            case 1:
+                return DeviceFieldConstants.CAUSE1;
+            case 2:
+                return DeviceFieldConstants.CAUSE2;
+            case 3:
+                return DeviceFieldConstants.CAUSE3;
+            case 4:
+                return DeviceFieldConstants.CAUSE4;
+            case 5:
+                return DeviceFieldConstants.CAUSE5;
+            case 6:
+                return DeviceFieldConstants.CAUSE6;
+            case 7:
+                return DeviceFieldConstants.CAUSE7;
+            default:
+                return DeviceFieldConstants.NO_INFO;
+        }
     }
 }

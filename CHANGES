@@ -1,51 +1,8 @@
- - Merged PR 3680: 10307 - Applying Named Schedule
- - Merged PR 3710: Modbus handlerd write register for coil and handled long with 2 register count
- - Merged PR 3888: Revert 'User Story 10647: [CCU]: Celsius support for tuners:'
- - Revert "Merged PR 3608: User Story 10647: [CCU]: Celsius support for tuners:
- - Merged PR 3608: User Story 10647: [CCU]: Celsius support for tuners:
- - Merged PR 3707: Fix for: UX issue System Conditioning Mode pop-up appears in Blue Color on Re...
- - updated with observations
- - Merged PR 3502: Damper feedback
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/11611_11609_modbus_coil_and_long_type_issue
- - Merged PR 3669: CM OTA support
- - 3 points added to relative from absolute 1.zoneTemperatureDeadLeeway 2. standaloneTemperaturePropotionalRange 3. userSpreadLimit
- - Round off value made used 0 based
- - fixed sonarQube issues
- - Relative and absolute values updated and decimal round off restructured
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - 1. changed long  and unsigned long to 2 register count
- - crash resolved
- - resolved merge conflict
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - resolved merge conflict
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - Made changes to the code (crash has been rectified)
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Used point value instead of shred preferences
- - Used point value instead of shred preferences
- - Used point value instead of shred preferences
- - Used point value instead of shred preferences
- - Used point value instead of shred preferences
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - comments resolved
- - comments resolved
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - comments resolved - method added to absolute value and relative value conversion, made getTunerValue private.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into UserStory/bharath/10647_Cesius_support
- - User Story 10647: [CCU]: Celsius support for tuners: The values are displayed in celsius when the use celsius toggle is switched on from the master controller to all the points that read temperature values by following the appropriate conversion method for relative and absolute values seperately.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Updating fan mode only when we do fan related relay configurations
+ - Merged PR 3528: Bug 10703 : The unit for thermistor has been changed from Ohm to Kilo ohms
+ - Merged PR 3937: CCU: Named schedule discrepancies
+ - Merged PR 3960: Fix ConcurrentModification exception
+ - Merged PR 3916: Syncing of Named Schedule in CCU with Portal
+ - Merged PR 3940: Rename Issue discrepancy
+ - Merged PR 3617: Additional Feild for Reboot Status
+ - Fix ConcurrentModification exception
+ - Bug 10703 : The unit for thermistor has been changed from Ohm to Kilo ohms

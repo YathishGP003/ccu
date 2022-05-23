@@ -115,6 +115,6 @@
             android:paddingStart="@dimen/margin_20"
             android:maxLength="5"
             android:inputType="number"
-            android:hint="@string/enter_values_in_ohm"/>
+            android:hint="@string/enter_values_in_Kilo_Ohms"/>
     </LinearLayout>
 </LinearLayout>

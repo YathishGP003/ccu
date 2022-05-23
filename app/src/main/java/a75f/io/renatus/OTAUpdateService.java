@@ -212,15 +212,19 @@ public class OTAUpdateService extends IntentService {
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
             HashMap ccu = CCUHsApi.getInstance().read("ccu");
             String ccuName = ccu.get("dis").toString();
-            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+"ended for smart node"+" "+ +msg.smartNodeAddress.get()+" "+"with version"+" "+versionMajor + "." + versionMinor);
+            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
+                    "ended for smart device"+" "+ +msg.smartNodeAddress.get()+" "+"with version"+" "+versionMajor +
+                    // changed Smart node to Smart Device as it is indicating the general name (US:9387)
+                    "." + versionMinor);
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
-                        + " [SN:" + mCurrentLwMeshAddress + "]"
+                        + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
+                        // Node address is more generic and mCurrentLwMeshAddress contains generic node address (US:9387)
                         + " [PACKETS:" + mLastSentPacket
                         + "] Updated to target: " + versionMajor + "." + versionMinor);
             } else {
                 Log.d(TAG, "[UPDATE] [FAILED]"
-                        + " [SN:" + mCurrentLwMeshAddress + "]"
+                        + " [Node Address:" + mCurrentLwMeshAddress + "]"
                         + " [PACKETS:" + mLastSentPacket + "]"
                         + " [TARGET: " + mVersionMajor
                         + "." + mVersionMinor
@@ -629,7 +633,7 @@ public class OTAUpdateService extends IntentService {
         }
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mCurrentLwMeshAddress
+            Log.d(TAG, "[METADATA] [Node address:" + mCurrentLwMeshAddress
                     + "] [VER:" + mVersionMajor + "." + mVersionMinor
                     + "] [LEN:" + mUpdateLength
                     + "] [SIG:" + ByteArrayUtils.byteArrayToHexString(mFirmwareSignature, true) + "]");
@@ -655,7 +659,8 @@ public class OTAUpdateService extends IntentService {
 
         message.metadata.setSignature(mFirmwareSignature);
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+            Log.d(TAG,
+                    "[METADATA] [Node Address:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
         }
 
         try {
@@ -702,7 +707,8 @@ public class OTAUpdateService extends IntentService {
             mLastSentPacket = packetNumber;
             if (BuildConfig.DEBUG) {
                 if (packetNumber % 100 == 0) {
-                    Log.d(TAG, "[UPDATE] [SN:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
+                    Log.d(TAG,
+                            "[UPDATE] [Node Address:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
                             + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
                 }
             }
@@ -711,7 +717,7 @@ public class OTAUpdateService extends IntentService {
         try {
             MeshUtil.sendStructToCM(message);
         } catch (Exception e) {
-            Log.e(TAG, "[UPDATE] [SN:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
+            Log.e(TAG, "[UPDATE] [Node Address:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
         }
     }
 

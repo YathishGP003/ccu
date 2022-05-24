@@ -425,7 +425,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             enableTrueCFMControl.setChecked(mProfileConfig.enableCFMControl);
 
             if (!enableTrueCFMControl.isChecked()) {
-                minCFMForIAQPos.setValue(10);
+                minCFMForIAQPos.setValue(90);
                 KFactor.setSelection(100);
             } else {
                 KFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));

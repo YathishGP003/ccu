@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.pubnub.BuildingScheduleListener;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import androidx.annotation.NonNull;
@@ -650,7 +651,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             } else if (schedule.isBuildingSchedule()) {
                 StringBuilder spillZones = new StringBuilder();
                 StringBuilder spillNamedZones = new StringBuilder();
-                ArrayList<String> headers = new ArrayList<>();
+                ArrayList<String> namedheaders = new ArrayList<>();
+                ArrayList<String> zoneheaders = new ArrayList<>();
                 String schedules = "";
                 for (String zone : spillsMap.keySet())
                 {
@@ -660,60 +662,77 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         Floor f = new Floor.Builder().setHashMap(CCUHsApi.getInstance().readMapById(z.getFloorRef())).build();
                         if((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isNamedSchedule()){
                             schedules = schedules.concat("named");
-                            if (!headers.contains(f.getDisplayName())) {
-                                spillNamedZones.append(f.getDisplayName() + "\n");
-                                headers.add(f.getDisplayName());
+                            if (!namedheaders.contains(f.getDisplayName())) {
+                                spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                namedheaders.add(f.getDisplayName());
                             }
-                            spillNamedZones.append("Zone " + z.getDisplayName()+" "+ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
-                        }else{
-                            if (!headers.contains(f.getDisplayName())) {
-                                spillZones.append(f.getDisplayName() + "\n");
-                                headers.add(f.getDisplayName());
+                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                        }else if((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isZoneSchedule()){
+                            schedules = schedules.concat(Tags.ZONE);
+                            if (!zoneheaders.contains(f.getDisplayName())) {
+                                spillZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                zoneheaders.add(f.getDisplayName());
                             }
-                            spillZones.append("Zone " + z.getDisplayName()+" "+ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
                     }
                 }
 
-                if(schedules.contains("named")){
-                    AlertDialog.Builder namedSchedBuilder = new AlertDialog.Builder(getActivity());
-                    namedSchedBuilder.setMessage("Named Schedule for below zone(s) is outside updated building schedule.\n"
-                            +((spillNamedZones.toString()).equals("") ?"":"The Schedule is outside by \n"+spillNamedZones.toString()))
-                            .setCancelable(false)
-                            .setTitle("Schedule Errors")
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setPositiveButton("OKAY", (dialog, id) -> dialog.dismiss());
-
-                    AlertDialog alert = namedSchedBuilder.create();
-                    alert.show();
-                }else {
+                String namedSchedulesWarning = "" ;
+                String zoneSchedulesWarning = "" ;
+                if (schedules.contains("named")) {
+                    namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
+                            "building schedule.\n"
+                            + ((spillNamedZones.toString()).equals("") ? "" : "\tThe Schedule is " +
+                            "outside by \n\t" + spillNamedZones.toString()+"\n");
+                    if(schedules.contains("zone")){
+                        zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
+                                "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                                "is outside by \n\t" + spillZones.toString());
+                    }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Zone Schedule for below zone(s) is outside updated " +
-                            "building schedule.\n" + (spillZones.equals("") ? "" : "The Schedule " +
-                            "is outside by \n" + spillZones.toString()))
+                    builder.setMessage(namedSchedulesWarning + zoneSchedulesWarning)
                             .setCancelable(false)
                             .setTitle("Schedule Errors")
                             .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    if (removeEntry != null) {
-                                        showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
-                                    } else {
-                                        showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
-                                    }
-                                }
-                            })
-                            .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    schedule.getDays().addAll(daysArrayList);
-                                    ScheduleUtil.trimZoneSchedules(spillsMap);
-                                    doScheduleUpdate();
+                            .setNegativeButton("Re-Edit", (dialog, id) -> {
+                                if (removeEntry != null) {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                                } else {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
                                 }
                             });
 
                     AlertDialog alert = builder.create();
                     alert.show();
                 }
+                else if(schedules.contains("zone")){
+                    zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
+                            "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                            "is outside by \n\t" + spillZones.toString());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(zoneSchedulesWarning)
+                            .setCancelable(false)
+                            .setTitle("Schedule Errors")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setNegativeButton("Re-Edit", (dialog, id) -> {
+                                if (removeEntry != null) {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                                } else {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                                }
+                            })
+                            .setPositiveButton("Force-Trim", (dialog, id) -> {
+                                schedule.getDays().addAll(daysArrayList);
+                                ScheduleUtil.trimZoneSchedules(spillsMap);
+                                doScheduleUpdate();
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+
+
             }
             return true;
             

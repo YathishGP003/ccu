@@ -31,7 +31,7 @@ class HyperStatCpuEquip(val node: Short) {
     private val profileName = "cpu"
     private val profileTag = "hyperstatcpu"
     private var nodeAddress: Short = node
-    private var siteMap = haystack.read(Tags.SITE) as HashMap<Any, Any>
+    private var siteMap = haystack.readEntity(Tags.SITE) as HashMap<Any, Any>
     private var siteRef = siteMap[Tags.ID] as String
     private var masterPoints: HashMap<Any, String> = HashMap()
 
@@ -42,7 +42,7 @@ class HyperStatCpuEquip(val node: Short) {
     var equipRef: String? = null
     private var roomRef: String? = null
     private var floorRef: String? = null
-    private var systemEquip = haystack.read("equip and system") as HashMap<Any, Any>
+    private var systemEquip = haystack.readEntity("equip and system") as HashMap<Any, Any>
     private lateinit var hyperStatPointsUtil: HyperStatPointsUtil
     var hsHaystackUtil: HSHaystackUtil? = null
 
@@ -140,7 +140,7 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
     fun initEquipReference() {
-        val equip = haystack.read("equip and hyperstat and group == \"$nodeAddress\"")
+        val equip = haystack.readEntity("equip and hyperstat and group == \"$nodeAddress\"")
         if (equip.isEmpty()) {
             Log.i(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $nodeAddress ")
             return
@@ -862,19 +862,19 @@ class HyperStatCpuEquip(val node: Short) {
             && changeIn != AnalogOutChanges.ENABLED
             && changeIn != AnalogOutChanges.MAPPING) {
             if (fanHighPointId != null)
-                updatePointValueIfchangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
+                updatePointValueChangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
             if (fanMediumPointId != null)
-                updatePointValueIfchangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
+                updatePointValueChangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
             if (fanLowPointId != null)
-                updatePointValueIfchangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+                updatePointValueChangeRequired(fanLowPointId, analogOutState.perAtFanLow)
 
             if (minPointId != null) {
-                updatePointValueIfchangeRequired(minPointId, analogOutState.voltageAtMin)
+                updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
             if (maxPointId != null) {
-                updatePointValueIfchangeRequired(maxPointId, analogOutState.voltageAtMax)
+                updatePointValueChangeRequired(maxPointId, analogOutState.voltageAtMax)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
@@ -946,7 +946,7 @@ class HyperStatCpuEquip(val node: Short) {
             }
 
         }
-        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Anaalog $changeIn")
+        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Analog $changeIn")
         CcuLog.i(L.TAG_CCU_ZONE, "changeIn: ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
         if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
@@ -961,7 +961,7 @@ class HyperStatCpuEquip(val node: Short) {
 
 
     // Function to check the changes in the point and do the update with new value
-    private fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
+    private fun updatePointValueChangeRequired(pointId: String, newValue: Double){
         val presentValue = haystack.readDefaultValById(pointId)
         if(presentValue != newValue)
             hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)

@@ -160,30 +160,8 @@ public class DabSystemController extends SystemController
         
         logAlgoVariables();
         
-        ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
-                                                               .readAllEntities("equip and zone and dab");
-
-        if (isNormalizationRequired()) {
-            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
-                                                                                       getBaseDamperPosMap(dabEquips));
-            
-            HashMap<String, Double> cumulativeDamperAdjustedPosMap = getAdjustedDamperPosMap(dabEquips,
-                                                                           normalizedDamperPosMap,
-                                                                           systemProfile.getSystemEquipRef());
-    
-            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
-                                                                 .getCfMUpdatedDamperPosMap(dabEquips,
-                                                                 cumulativeDamperAdjustedPosMap,
-                                                                 CCUHsApi.getInstance());
-            
-            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
-        } else if (conditioningMode != SystemMode.OFF) {
-            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
-                                                                              .getCfMUpdatedDamperPosMap(dabEquips,
-                                                                             getBaseDamperPosMap(dabEquips),
-                                                                             CCUHsApi.getInstance());
-            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
-        }
+        updateDabZoneDamperPositions();
+        
     }
 
     private void initializeAlgoLoopVariables() {
@@ -796,6 +774,33 @@ public class DabSystemController extends SystemController
     @Override
     public State getSystemState() {
         return systemState;
+    }
+    
+    private void updateDabZoneDamperPositions() {
+        ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
+                                                               .readAllEntities("equip and zone and dab");
+    
+        if (isNormalizationRequired()) {
+            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
+                                                                                       getBaseDamperPosMap(dabEquips));
+        
+            HashMap<String, Double> cumulativeDamperAdjustedPosMap = getAdjustedDamperPosMap(dabEquips,
+                                                                                             normalizedDamperPosMap,
+                                                                                             systemProfile.getSystemEquipRef());
+        
+            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
+                                                                              .getCfMUpdatedDamperPosMap(dabEquips,
+                                                                                                         cumulativeDamperAdjustedPosMap,
+                                                                                                         CCUHsApi.getInstance());
+        
+            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
+        } else if (conditioningMode != SystemMode.OFF) {
+            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
+                                                                              .getCfMUpdatedDamperPosMap(dabEquips,
+                                                                                                         getBaseDamperPosMap(dabEquips),
+                                                                                                         CCUHsApi.getInstance());
+            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
+        }
     }
     
     /*

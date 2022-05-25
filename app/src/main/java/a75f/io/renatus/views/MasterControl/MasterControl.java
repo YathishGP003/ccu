@@ -473,7 +473,8 @@ public class MasterControl extends View {
                     coolTextColor = Color.parseColor("#5E000000");
                 }
 
-                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
+                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", mEnergySavingsSpacing - 18,
+                        temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
                         temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
                         Color.parseColor("#5E000000"),
                         coolTextColor);
@@ -485,7 +486,8 @@ public class MasterControl extends View {
                     heatTextColor = Color.parseColor("#5E000000");
                 }
 
-                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
+                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", mEnergySavingsSpacing - 18,
+                        (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
                         temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
                         Color.parseColor("#5E000000"),
                         heatTextColor);

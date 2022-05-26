@@ -414,8 +414,19 @@ public class DabEquip
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
-
-
+        
+        Point pressure = new Point.Builder()
+                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
+                             .setEquipRef(equipRef)
+                             .setSiteRef(siteRef)
+                             .setRoomRef(roomRef)
+                             .setFloorRef(floorRef).setHisInterpolate("cov")
+                             .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("dab")
+                             .setGroup(String.valueOf(nodeAddr))
+                             .setTz(tz)
+                             .build();
+        String pressureId = CCUHsApi.getInstance().addPoint(pressure);
+        
         String damperFeedbackID = createFeedbackPoint(CCUHsApi.getInstance(),nodeAddr,equipDis,equipRef,siteRef,
                 roomRef,floorRef,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
@@ -456,6 +467,7 @@ public class DabEquip
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
         device.addSensor(Port.SENSOR_VOC, vocId);
+        device.addSensor(Port.SENSOR_PRESSURE, pressureId);
         
         device.addPointsToDb();
         

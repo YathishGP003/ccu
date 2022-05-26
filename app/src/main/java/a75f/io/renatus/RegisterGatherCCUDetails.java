@@ -144,29 +144,21 @@ public class RegisterGatherCCUDetails extends Activity {
             }
         });
 
-        mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCreateNewCCU.setEnabled(false);
-                String ccuName = mCCUNameET.getText().toString();
-                String installerEmail = mInstallerEmailET.getText().toString();
-                String managerEmail = mManagerEmailET.getText().toString();
-                if (ccuName.trim().length() == 0) {
-
-                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
-                    mCreateNewCCU.setEnabled(true);
-                    return;
-                } else if (installerEmail.trim().length() == 0) {
-                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
-                    mCreateNewCCU.setEnabled(true);
-                    return;
-                } else if (managerEmail.trim().length() == 0) {
-                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
-                    mCreateNewCCU.setEnabled(true);
-                    return;
-                }
-
-
+        mCreateNewCCU.setOnClickListener(v -> {
+            String ccuName = mCCUNameET.getText().toString();
+            String installerEmail = mInstallerEmailET.getText().toString();
+            String managerEmail = mManagerEmailET.getText().toString();
+            if (ccuName.trim().length() == 0) {
+                Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (installerEmail.trim().length() == 0) {
+                Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (managerEmail.trim().length() == 0) {
+                Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!CCUUiUtil.isInvalidName(ccuName)) {
                 L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
@@ -175,12 +167,15 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                 SettingPoint snBand = new SettingPoint.Builder()
-                                                        .setDeviceRef(localId)
-                                                        .setSiteRef(siteMap.get("id").toString())
-                                                        .setDisplayName(ccuName+"-smartNodeBand")
-                                                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+                        .setDeviceRef(localId)
+                        .setSiteRef(siteMap.get("id").toString())
+                        .setDisplayName(ccuName + "-smartNodeBand")
+                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                 CCUHsApi.getInstance().addPoint(snBand);
                 next();
+            }else{
+                Toast.makeText(RegisterGatherCCUDetails.this, "Please provide proper details",
+                        Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -344,26 +339,20 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 builder
                         .setPositiveButton(
-                                "OK",
-                                new DialogInterface
-                                        .OnClickListener() {
+                                "Yes",
+                                (dialog, which) -> {
 
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which)
-                                    {
-
-                                        // When the user click yes button
-                                        // then app will close
-                                        Intent i = new Intent(RegisterGatherCCUDetails.this,
-                                                FreshRegistration.class);
-                                        i.putExtra("viewpager_position", 9);
-                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(i);
-                                        finish();
-                                    }
+                                    // When the user click yes button
+                                    // then app will close
+                                    Intent i = new Intent(RegisterGatherCCUDetails.this,
+                                            FreshRegistration.class);
+                                    i.putExtra("viewpager_position", 9);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                    finish();
                                 });
 
+                 builder.setNegativeButton("No",(dialog,which)->{ });
                 // Create the Alert dialog
                 AlertDialog alertDialog = builder.create();
 

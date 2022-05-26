@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.truecfm;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 
 public class TrueCFMUtil {
@@ -16,10 +17,12 @@ public class TrueCFMUtil {
         return 4005 * Math.sqrt(pressureInWGUnit/kFactor);
     }
     
-    private static double getDuctCrossSectionArea(CCUHsApi hayStack, String equipRef) {
+    private static double getDuctCrossSectionArea(CCUHsApi hayStack, String equipRef, String damperOrder) {
+        String damperOrderQuery = damperOrder+" and ";;
         
-        double damperSize = hayStack.readDefaultVal("damper and size and equipRef == \""+equipRef+"\"");
-        int damperShapeVal = hayStack.readDefaultVal("damper and shape and equipRef == \""+equipRef+"\"").intValue();
+        double damperSize = hayStack.readDefaultVal(damperOrderQuery+"damper and size and equipRef == \""+equipRef+"\"");
+        int damperShapeVal = hayStack.readDefaultVal(damperOrderQuery+"damper and shape and equipRef == \""+equipRef+
+                                                     "\"").intValue();
         DamperShape damperShape = DamperShape.values()[damperShapeVal];
         double damperSizeInFeet = damperSize/12;
         if (damperShape == DamperShape.ROUND) {
@@ -34,9 +37,9 @@ public class TrueCFMUtil {
                                                                 +equipRef+"\"").intValue() > 0;
     }
     
-    public static double calculateAndUpdateCfm(CCUHsApi hayStack, String equipRef) {
+    public static double calculateAndUpdateCfm(CCUHsApi hayStack, String equipRef, String damperOrder) {
         double flowVelocity = getFlowVelocity(hayStack, equipRef);
-        double ductArea = getDuctCrossSectionArea(hayStack, equipRef);
+        double ductArea = getDuctCrossSectionArea(hayStack, equipRef, damperOrder);
         double airflowCfm = flowVelocity * ductArea;
         hayStack.writeHisValByQuery("air and velocity and equipRef == \""+equipRef+"\"", flowVelocity);
         hayStack.writeHisValByQuery("air and flow and equipRef == \""+equipRef+"\"", airflowCfm);
@@ -59,5 +62,14 @@ public class TrueCFMUtil {
     
     public static double getMinCFMReheating(CCUHsApi hayStack, String equipId) {
         return hayStack.readDefaultVal("config and min and trueCfm and heating and equipRef == \""+equipId+"\"");
+    }
+    
+    public static boolean cfmControlNotRequired(CCUHsApi hayStack, String equipRef) {
+    
+        int occupancyMode = hayStack.readHisValByQuery("point and occupancy and mode and equipRef ==\""+equipRef+"\"")
+                                                    .intValue();
+        
+        return !TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)
+                                    || occupancyMode != Occupancy.OCCUPIED.ordinal();
     }
 }

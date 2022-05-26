@@ -78,18 +78,25 @@ public class DabTrueCfmHandler {
         for (HashMap<Object, Object> dabEquip : dabEquips) {
             CcuLog.i(L.TAG_CCU_SYSTEM, " UpdateCFMDamper for equip : "+dabEquip.get("dis"));
             String equipRef = Objects.requireNonNull(dabEquip.get("id")).toString();
+    
+            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
+                "point and damper and normalized and primary and cmd "
+                + "and equipRef == \"" + equipRef + "\"");
+    
+            HashMap<Object, Object> secondaryDamperPosPoint = hayStack.readEntity(
+                "point and damper and normalized and secondary and cmd " +
+                "and equipRef == \"" + equipRef + "\"");
             
             // If TrueCFM is not enabled, just copy the current damper pos and move to the
             // next equip.
             if (TrueCFMUtil.cfmControlNotRequired(hayStack, equipRef)) {
                 CcuLog.i(L.TAG_CCU_SYSTEM, " CfmUpdatedDamper: cfmControlNotRequired");
-                copyDamperPos(equipRef, cfmAdjustedDamperMap, normalizedDamperMap);
+                copyDamperPos(primaryDamperPosPoint.get("id").toString(), cfmAdjustedDamperMap, normalizedDamperMap);
+                copyDamperPos(secondaryDamperPosPoint.get("id").toString(), cfmAdjustedDamperMap, normalizedDamperMap);
                 continue;
             }
     
-            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
-                                                    "point and damper and normalized and primary and cmd "
-                                                    + "and equipRef == \"" + equipRef + "\"");
+            
             
             Double primaryDamperVal = getUpdatedDamperVal(hayStack, equipRef,
                                                           primaryDamperPosPoint.get("id").toString(), Tags.PRIMARY,
@@ -101,9 +108,6 @@ public class DabTrueCfmHandler {
                 copyDamperPos(primaryDamperPosPoint.get("id").toString(), cfmAdjustedDamperMap, normalizedDamperMap);
             }
             
-            HashMap<Object, Object> secondaryDamperPosPoint = hayStack.readEntity(
-                                                "point and damper and normalized and secondary and cmd " +
-                                                "and equipRef == \"" + equipRef + "\"");
             Double secondaryDamperVal = getUpdatedDamperVal(hayStack, equipRef,
                                                             Objects.requireNonNull(secondaryDamperPosPoint.get("id")).toString(),
                                                             Tags.SECONDARY,

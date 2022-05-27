@@ -2342,7 +2342,7 @@ public class CCUHsApi
     public void removeAllNamedSchedule(){
         List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
         for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
-            deleteEntity(namedSchedule.get("id").toString().replace("@",""));
+            deleteEntityLocally(namedSchedule.get("id").toString().replace("@",""));
         }
     }
 }

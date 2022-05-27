@@ -31,7 +31,7 @@ class HyperStatCpuEquip(val node: Short) {
     private val profileName = "cpu"
     private val profileTag = "hyperstatcpu"
     private var nodeAddress: Short = node
-    private var siteMap = haystack.readEntity(Tags.SITE) as HashMap<Any, Any>
+    private var siteMap = haystack.read(Tags.SITE) as HashMap<Any, Any>
     private var siteRef = siteMap[Tags.ID] as String
     private var masterPoints: HashMap<Any, String> = HashMap()
 
@@ -42,7 +42,7 @@ class HyperStatCpuEquip(val node: Short) {
     var equipRef: String? = null
     private var roomRef: String? = null
     private var floorRef: String? = null
-    private var systemEquip = haystack.readEntity("equip and system") as HashMap<Any, Any>
+    private var systemEquip = haystack.read("equip and system") as HashMap<Any, Any>
     private lateinit var hyperStatPointsUtil: HyperStatPointsUtil
     var hsHaystackUtil: HSHaystackUtil? = null
 
@@ -140,7 +140,7 @@ class HyperStatCpuEquip(val node: Short) {
     }
 
     fun initEquipReference() {
-        val equip = haystack.readEntity("equip and hyperstat and group == \"$nodeAddress\"")
+        val equip = haystack.read("equip and hyperstat and group == \"$nodeAddress\"")
         if (equip.isEmpty()) {
             Log.i(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $nodeAddress ")
             return

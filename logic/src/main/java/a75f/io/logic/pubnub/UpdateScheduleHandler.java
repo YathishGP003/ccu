@@ -96,8 +96,6 @@ public class UpdateScheduleHandler
                             public void run()
                             {
                                 CCUHsApi.getInstance().updateScheduleNoSync(s, null);
-                                refreshSchedulesScreen(s);
-                                refreshIntrinsicSchedulesScreen();
                                 trimZoneSchedules(s);
                                 CCUHsApi.getInstance().scheduleSync();
                             }

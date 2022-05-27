@@ -1203,10 +1203,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
     public void refreshScreen(Schedule updatedSchedule) {
-        if(getActivity() != null) {
-            if (!updatedSchedule.getId().equals(schedule.getId())) {
-                getActivity().runOnUiThread(() -> loadSchedule());
-            }
+        if(getActivity() != null && !updatedSchedule.getId().equals(schedule.getId())) {
+            getActivity().runOnUiThread(() -> loadSchedule());
         }
     }
 }

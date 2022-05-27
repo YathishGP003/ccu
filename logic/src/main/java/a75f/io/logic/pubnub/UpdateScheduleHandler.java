@@ -96,6 +96,8 @@ public class UpdateScheduleHandler
                             public void run()
                             {
                                 CCUHsApi.getInstance().updateScheduleNoSync(s, null);
+                                refreshSchedulesScreen(s);
+                                refreshIntrinsicSchedulesScreen();
                                 trimZoneSchedules(s);
                                 CCUHsApi.getInstance().scheduleSync();
                             }
@@ -136,7 +138,7 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
-        refreshSchedulesScreen();
+        refreshSchedulesScreen(Schedule.getScheduleByEquipId(uid));
         refreshIntrinsicSchedulesScreen();
     }
     
@@ -225,9 +227,9 @@ public class UpdateScheduleHandler
         }
     }
     
-    public static void refreshSchedulesScreen() {
+    public static void refreshSchedulesScreen(Schedule updatedSchedule) {
         if (scheduleListener != null) {
-            scheduleListener.refreshScreen();
+            scheduleListener.refreshScreen(updatedSchedule);
         }
     }
 

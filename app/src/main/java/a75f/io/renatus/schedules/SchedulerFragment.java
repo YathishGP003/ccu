@@ -324,7 +324,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSchedule()
     {
-        
+
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
@@ -525,7 +525,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     
     private void showDialog(int id, int position, ArrayList<Schedule.Days> days) {
-        
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         
         switch (id) {
@@ -550,7 +550,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         } else {
             removeEntry = null;
         }
-    
+
         Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
@@ -574,7 +574,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         for (Schedule.Days d : daysArrayList) {
             Log.d("CCU_UI", " daysArrayList  "+d);
         }
-    
+
         boolean intersection = schedule.checkIntersection(daysArrayList);
         if (intersection) {
             
@@ -1202,9 +1202,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen() {
+    public void refreshScreen(Schedule updatedSchedule) {
         if(getActivity() != null) {
-            getActivity().runOnUiThread(() -> loadSchedule());
+            if (!updatedSchedule.getId().equals(schedule.getId())) {
+                getActivity().runOnUiThread(() -> loadSchedule());
+            }
         }
     }
 }

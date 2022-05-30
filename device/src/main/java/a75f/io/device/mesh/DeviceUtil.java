@@ -126,7 +126,7 @@ public class DeviceUtil {
         if (calculateCoolingDesiredTemp <= maxCoolingUserLimit &&
                 calculateCoolingDesiredTemp >= minCoolingUserLimit)
             return desiredTemp + coolingDeadband;
-        else if (calculateCoolingDesiredTemp <= minCoolingUserLimit)
+        else if (calculateCoolingDesiredTemp < minCoolingUserLimit)
             return minCoolingUserLimit;
         else
             return maxCoolingUserLimit;
@@ -141,10 +141,10 @@ public class DeviceUtil {
         if (calculateHeatingDesiredTemp <= maxHeatingUserLimit &&
                 calculateHeatingDesiredTemp >= minHeatingUserLimit)
             return calculateHeatingDesiredTemp;
-        else if (calculateHeatingDesiredTemp <= minHeatingUserLimit)
+        else if (calculateHeatingDesiredTemp < minHeatingUserLimit)
             return minHeatingUserLimit;
         else
-            return minHeatingUserLimit;
+            return maxHeatingUserLimit;
     }
 
 

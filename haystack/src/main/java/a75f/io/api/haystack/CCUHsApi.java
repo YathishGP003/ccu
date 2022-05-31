@@ -34,6 +34,7 @@ import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1231,30 +1232,39 @@ public class CCUHsApi
         return true;
     }
 
-    private void importNamedSchedule(HClient hClient) {
+    public void importNamedSchedule(HClient hClient){
         Site site = CCUHsApi.getInstance().getSite();
+        importNamedSchedulebySite(hClient,site);
+    }
+    public void importNamedSchedulebySite(HClient hClient, Site site) {
         if (site != null && site.getOrganization() != null) {
             String org = site.getOrganization();
-            HDict zoneScheduleDict = new HDictBuilder().add("filter",
-                    "named and schedule and organization == \""+org+"\"").toDict();
-            HGrid zoneScheduleGrid = hClient.call("read",
-                    HGridBuilder.dictToGrid(zoneScheduleDict));
-
-            if (zoneScheduleGrid == null) {
-                CcuLog.d(TAG, "zoneScheduleGrid is null");
-                return;
-            }
-
-            Iterator it = zoneScheduleGrid.iterator();
-            while (it.hasNext()) {
-                HRow row = (HRow) it.next();
-                tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                CcuLog.i(TAG, "Named schedule Imported");
-            }
-
+            importNamedScheduleWithOrg(hClient,org);
         }
     }
 
+    public void importNamedScheduleWithOrg(HClient hClient,String org){
+        CcuLog.d(TAG, "org = "+org);
+        CcuLog.d(TAG, "hClient = "+hClient);
+        HDict nameScheduleDict = new HDictBuilder().add("filter",
+                "named and schedule and organization == \""+org+"\"").toDict();
+        CcuLog.d(TAG, "nameScheduleDict = "+nameScheduleDict);
+        HGrid nameScheduleGrid = hClient.call("read",
+                HGridBuilder.dictToGrid(nameScheduleDict));
+
+        if (nameScheduleGrid == null) {
+            CcuLog.d(TAG, "nameScheduleGrid is null");
+            return;
+        }
+
+        Iterator it = nameScheduleGrid.iterator();
+        while (it.hasNext()) {
+            HRow row = (HRow) it.next();
+            tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+            CcuLog.i(TAG, "Named schedule Imported");
+        }
+
+    }
 
     private void importBuildingSchedule(String siteId, HClient hClient){
 
@@ -2233,8 +2243,8 @@ public class CCUHsApi
     public void trimObjectBoxHisStore() {
         hisSyncHandler.doPurge(true);
     }
-    
-    
+
+
     /*
      * A flag used to indicate CCU is ready for CPU intensive processing of sensor events and hvac algorithms.
      * This could be used as a last ditch effort make CPU available for any fore-ground operation that
@@ -2249,26 +2259,26 @@ public class CCUHsApi
             isCcuReady = true;
         }
     }
-    
+
     public void resetCcuReady() {
         isCcuReady = false;
     }
-    
+
     /**
      * Checks if there is valid Site and CCU entities in database.
      * @return
      */
     public boolean isCCUConfigured() {
-        
+
         HashMap<Object, Object> site = readEntity("site");
         if (site.isEmpty()) {
             return false;
         }
-    
+
         HashMap<Object, Object> ccu = readEntity("ccu");
         return !ccu.isEmpty();
     }
-    
+
     /**
      * Removes CCU Entity from backend.
      * @param ccuId - ccu Ref
@@ -2281,24 +2291,24 @@ public class CCUHsApi
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
-    
+
     /**
      * Re-sync all the entities on this CCU except site and ccu-device entities.
      */
     public void resyncSiteTree() {
-        
+
         markItemsUnSynced(readAllEntities(Tags.DEVICE+" and not "+Tags.CCU));
         markItemsUnSynced(readAllEntities(Tags.EQUIP));
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
         markItemsUnSynced(readAllEntities(Tags.POINT));
-        
+
         syncStatusService.saveSyncStatus();
         syncEntityTree();
         hisSyncHandler.scheduleSync(true, 60);
     }
-    
+
     private void markItemsUnSynced(List<HashMap<Object, Object>> entities) {
         entities.forEach( entity -> {
             String entityId = Objects.requireNonNull(entity.get(Tags.ID)).toString();
@@ -2307,7 +2317,7 @@ public class CCUHsApi
             }
         });
     }
-    
+
     public void updateDeviceRefOfSettingPoints(String newCcuId) {
         List<HashMap<Object, Object>> allSettingPoints = readAllEntities("point and setting");
         allSettingPoints.forEach( pointMap -> {
@@ -2323,6 +2333,16 @@ public class CCUHsApi
 
     public List<HashMap<Object, Object>> getAllNamedSchedules(){
         String query = "named and schedule";
-        return CCUHsApi.getInstance().readAllEntities(query);
+        List<HashMap<Object, Object>> sortedNamedSchedules = CCUHsApi.getInstance().readAllEntities(query);
+
+        Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
+        return sortedNamedSchedules;
+    }
+    
+    public void removeAllNamedSchedule(){
+        List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
+        for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
+            deleteEntityLocally(namedSchedule.get("id").toString().replace("@",""));
+        }
     }
 }

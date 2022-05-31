@@ -31,10 +31,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincReader;
 
 import java.util.ArrayList;
@@ -61,7 +64,6 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import androidx.fragment.app.Fragment;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -254,10 +256,75 @@ public class CreateNewSite extends Fragment {
         mSiteOrg.addTextChangedListener(new EditTextWatcher(mSiteOrg));
 
 
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mNext.setEnabled(false);
+        mNext.setOnClickListener(v -> {
+            mNext.setEnabled(false);
+            int[] mandotaryIds = new int[]
+                    {
+                            R.id.editSitename,
+                            R.id.editStreetAdd,
+                            R.id.editCity,
+                            R.id.editState,
+                            R.id.editCountry,
+                            R.id.editZip,
+                            R.id.editCCU,
+                            R.id.editFacilityEmail,
+                            R.id.editFacilityOrganization,
+                            R.id.editInstallerEmail,
+                    };
+
+            if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
+                && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+            ) {
+
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
+                String siteName = mSiteName.getText().toString();
+                String siteCity = mSiteCity.getText().toString();
+
+                String siteZip = mSiteZip.getText().toString();
+                String siteAddress = mStreetAdd.getText().toString();
+                String siteState = mSiteState.getText().toString();
+                String siteCountry = mSiteCountry.getText().toString();
+
+                String managerEmail = mSiteEmailId.getText().toString();
+                String installerEmail = mSiteInstallerEmailId.getText().toString();
+                String installerOrg = mSiteOrg.getText().toString();
+                String ccuName = mSiteCCU.getText().toString();
+
+                if (site.size() > 0) {
+                    String siteId = site.get("id").toString();
+                    updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                } else {
+                    saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                }
+
+                if (ccu.size() > 0) {
+                    String ahuRef = ccu.get("ahuRef").toString();
+                    CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                    L.ccu().setCCUName(ccuName);
+                } else {
+                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                    L.ccu().setCCUName(ccuName);
+                    CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                }
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNext.setEnabled(true);
+                        ProgressDialogUtils.hideProgressDialog();
+                        goTonext();
+                    }
+                }, 1000);
+            } else {
+                mNext.setEnabled(true);
+            }
+        });
+        
+        View.OnClickListener editSiteOnClickListener = v -> {
+            if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
+                enableViews(true);
+                btnEditSite.setText(getResources().getString(R.string.title_save));
+            } else {
                 int[] mandotaryIds = new int[]
                         {
                                 R.id.editSitename,
@@ -271,121 +338,56 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
                         };
-
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
-                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
-                    && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+                        && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
+                        && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                 ) {
 
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
-
                     String siteZip = mSiteZip.getText().toString();
                     String siteAddress = mStreetAdd.getText().toString();
                     String siteState = mSiteState.getText().toString();
                     String siteCountry = mSiteCountry.getText().toString();
 
-                    String managerEmail = mSiteEmailId.getText().toString();
                     String installerEmail = mSiteInstallerEmailId.getText().toString();
+                    String facilityManagerEmail = mSiteEmailId.getText().toString();
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail, facilityManagerEmail);
                     }
 
+                    Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
+                    getContext().sendBroadcast(locationUpdateIntent);
+
                     if (ccu.size() > 0) {
-                        String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
-                        L.ccu().setCCUName(ccuName);
+                        if (!ccu.get("dis").toString().equals(ccuName) ||
+                                !ccu.get("installerEmail").toString().equals(installerEmail) ||
+                                !ccu.get("fmEmail").toString().equals(facilityManagerEmail)) {
+
+                            CcuLog.e(TAG, "Update CCU " + ccu);
+                            String ahuRef = ccu.get("ahuRef").toString();
+                            CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
+                            L.ccu().setCCUName(ccuName);
+                        }
+
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), facilityManagerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
-                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mNext.setEnabled(true);
-                            ProgressDialogUtils.hideProgressDialog();
-                            goTonext();
-                        }
-                    }, 1000);
-                } else {
-                    mNext.setEnabled(true);
-                }
-            }
-        });
-        
-        View.OnClickListener editSiteOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
-                    enableViews(true);
-                    btnEditSite.setText(getResources().getString(R.string.title_save));
-                } else {
-                    enableViews(false);
-                    btnEditSite.setText(getResources().getString(R.string.title_edit));
-                    int[] mandotaryIds = new int[]
-                            {
-                                    R.id.editSitename,
-                                    R.id.editStreetAdd,
-                                    R.id.editCity,
-                                    R.id.editState,
-                                    R.id.editCountry,
-                                    R.id.editZip,
-                                    R.id.editCCU,
-                                    R.id.editFacilityEmail,
-                                    R.id.editFacilityOrganization,
-                                    R.id.editInstallerEmail,
-                            };
-                    if (!validateEditText(mandotaryIds)) {
-                        String siteName = mSiteName.getText().toString();
-                        String siteCity = mSiteCity.getText().toString();
-                        String siteZip = mSiteZip.getText().toString();
-                        String siteAddress = mStreetAdd.getText().toString();
-                        String siteState = mSiteState.getText().toString();
-                        String siteCountry = mSiteCountry.getText().toString();
-
-                        String installerEmail = mSiteInstallerEmailId.getText().toString();
-                        String facilityManagerEmail = mSiteEmailId.getText().toString();
-                        String installerOrg = mSiteOrg.getText().toString();
-                        String ccuName = mSiteCCU.getText().toString();
-
-                        if (site.size() > 0) {
-                            String siteId = site.get("id").toString();
-                            updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail);
-                        } else {
-                            saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg, installerEmail,facilityManagerEmail);
-                        }
-    
-                        Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
-                        getContext().sendBroadcast(locationUpdateIntent);
-                        
-                        if (ccu.size() > 0) {
-                            if (!ccu.get("dis").toString().equals(ccuName) ||
-                                !ccu.get("installerEmail").toString().equals(installerEmail) ||
-                                !ccu.get("fmEmail").toString().equals(facilityManagerEmail) ) {
-                                
-                                CcuLog.e(TAG, "Update CCU "+ccu);
-                                String ahuRef = ccu.get("ahuRef").toString();
-                                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, facilityManagerEmail);
-                                L.ccu().setCCUName(ccuName);
-                            }
-                            
-                        } else {
-                            String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), facilityManagerEmail);
-                            L.ccu().setCCUName(ccuName);
-                            CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
-                        }
-                    }
                     L.saveCCUState();
                     CCUHsApi.getInstance().syncEntityTree();
-                    Toast.makeText(getActivity(),"Edited details saved successfully",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Edited details saved successfully", Toast.LENGTH_LONG).show();
+                    enableViews(false);
+                    btnEditSite.setText(getResources().getString(R.string.title_edit));
+                } else {
+                    Toast.makeText(getActivity(), "Please fill proper details", Toast.LENGTH_LONG).show();
                 }
             }
         };
@@ -552,10 +554,7 @@ public class CreateNewSite extends Fragment {
             dialog.dismiss();
         });
 
-        builder.setNegativeButton("NO", (dialog, which) -> {
-
-            dialog.dismiss();
-        });
+        builder.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
 
         AlertDialog alert = builder.create();
         alert.show();
@@ -621,7 +620,7 @@ public class CreateNewSite extends Fragment {
         mSiteCCU.setEnabled(isEnable);
         mSiteEmailId.setEnabled(isEnable);
         mSiteInstallerEmailId.setEnabled(isEnable);
-        mSiteOrg.setEnabled(isEnable);
+        mSiteOrg.setEnabled(false);
     }
 
 
@@ -841,6 +840,12 @@ public class CreateNewSite extends Fragment {
         ccuHsApi.log();
         L.ccu().systemProfile = new DefaultSystem();
         prefs.setString("SITE_ID", localSiteId);
+
+        new Handler().postDelayed(() -> CCUHsApi.getInstance().importNamedScheduleWithOrg(
+                new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),org), 30000);
+
+
         return localSiteId;
     }
 

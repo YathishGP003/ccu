@@ -441,14 +441,12 @@ public class Pulse
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
 		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
 		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
@@ -456,7 +454,6 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 		
 		SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), new Point.Builder().setHashMap(heatinDtPoint).build(), new Point.Builder().setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp, dt);
@@ -469,14 +466,6 @@ public class Pulse
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 		if( equip == null ) return;
-        double cdb = StandaloneTunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
-        double hdb = StandaloneTunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
-        String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-		if(occ != null) {
-			cdb = occ.getCoolingDeadBand();
-			hdb = occ.getHeatingDeadBand();
-		}
 
 		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
 		double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
@@ -499,7 +488,6 @@ public class Pulse
         if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
-	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
         try{
             CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
         }catch (Exception e){
@@ -510,7 +498,6 @@ public class Pulse
         if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
-	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
         try{
             CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
         }catch (Exception e){
@@ -521,8 +508,7 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
-		try {
+			try {
 		    CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
         }catch (Exception e){
 		    e.printStackTrace();
@@ -951,29 +937,16 @@ public class Pulse
 				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
-				switch (Port.valueOf(phyPoint.get("port").toString())) {
-					case DESIRED_TEMP:
-						//Compare with what was sent out.
-						double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
-						double desiredTemp = getDesredTempConversion(temp);
-						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp+","+curValue);
-						// boolean validDesiredTemp = DeviceUtil.validateDesiredTempUserLimits(nodeAddr, desiredTemp);
-						if (desiredTemp > 0 && (curValue != desiredTemp)) {
-							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-							updateDesiredTemp(nodeAddr, desiredTemp);
-							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartNode : desiredTemp updated" +curValue+"->"+ desiredTemp);
-						}/* else {
-							sendSetTemperatureAck(nodeAddr);
-							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartNode : desiredTemp not changed" +curValue+"->"+ desiredTemp);
-						}
-						if (!validDesiredTemp) {
-							CcuLog.d(L.TAG_CCU_DEVICE,
-							        "updateSetTempFromSmartNode "+nodeAddr+" : Invalid desiredTemp ignored "+ desiredTemp);
-							DeviceUtil.sendControlsMessage(nodeAddr, true);
-						}*/
-					break;
+				if (Port.valueOf(phyPoint.get("port").toString()) == Port.DESIRED_TEMP) {//Compare with what was sent out.
+					double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
+					double desiredTemp = getDesredTempConversion(temp);
+					CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp + "," + curValue);
+					if (desiredTemp > 0 && (curValue != desiredTemp)) {
+						hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+						updateDesiredTemp(nodeAddr, desiredTemp);
+						CcuLog.d(L.TAG_CCU_DEVICE,
+								"updateSetTempFromSmartNode : desiredTemp updated" + curValue + "->" + desiredTemp);
+					}
 				}
 			}
 		}

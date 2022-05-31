@@ -93,13 +93,13 @@ public class TempLimit extends View {
 
         int xPos;
         if (stateReflected == TempLimitState.LOWER_COOLING_LIMIT || stateReflected == TempLimitState.UPPER_HEATING_LIMIT) {
-            if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 20;
             } else {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 15;
             }
         } else {
-            if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 20;
             } else {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 15;
@@ -109,7 +109,7 @@ public class TempLimit extends View {
         int yPos = (direction == Direction.UP) ? getTempLineYLocation() - yDisplacemnet - 5 : getTempLineYLocation() + yDisplacemnet + 15;
 
         mTempIconPaint.setColor(color);
-        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             canvas.drawText(String.valueOf( fahrenheitToCelsius(buildingTemp)),
                     xPos, yPos, mTempIconPaint);
         } else {
@@ -264,19 +264,19 @@ public class TempLimit extends View {
         canvas.drawLine(getPXForTemp(mLowerHeatingTemp), (direction == Direction.UP) ? getTempLineYLocation() - 30 : getTempLineYLocation() + 30, getPXForTemp(mUpperHeatingTemp), (direction == Direction.UP) ? getTempLineYLocation() - 30 : getTempLineYLocation() + 30, mTempLinePaint);
     }
 
-    private void drawBuildingLimitCircle(Canvas canvas, TempLimitState controlState, float BuildingTemp) {
+    private void drawBuildingLimitCircle(Canvas canvas, TempLimitState controlState, float buildingTemp) {
         float temp = temps[controlState.ordinal()];
         mTempPaint.setColor(Color.BLACK);
 
         int xLoc = getPXForTemp(temp);
         int yLoc = getTempLineYLocation();
 
-        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-            canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(BuildingTemp) + " "),
-                    xLoc - 8, yLoc - 15, mTempPaint);
+        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(buildingTemp) + " "),
+                    xLoc - 8, yLoc - (float) 15, mTempPaint);
         } else {
             canvas.drawText(String.valueOf((int) temps[controlState.ordinal()]),
-                    xLoc - 8, yLoc - 15, mTempPaint);
+                    xLoc - 8, yLoc - (float) 15, mTempPaint);
         }
         canvas.drawCircle(xLoc, yLoc,
                 4, mTempPaint);

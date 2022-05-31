@@ -3,10 +3,6 @@ package a75f.io.logic.tuners;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -317,10 +313,10 @@ public class TunerUpgrades {
        if (tuner != null && tuner.size() > 0) {
            String equipRef = tuner.get("id").toString();
            String equipDis = tuner.get("dis").toString();
-           HashMap siteMap = hayStack.read(Tags.SITE);
+           HashMap<Object, Object> siteMap = hayStack.readEntity(Tags.SITE);
            String siteRef = siteMap.get(Tags.ID).toString();
            String tz = siteMap.get("tz").toString();
-           HashMap useCelsiusPoint = CCUHsApi.getInstance().readEntity("displayUnit");
+           HashMap<Object, Object> useCelsiusPoint = CCUHsApi.getInstance().readEntity("displayUnit");
             if(useCelsiusPoint.isEmpty()) {
                 Log.i("DEV_DEBUG", "migrateCelsiusSupportConfiguration: useCelsiusPoint Creating");
                 Point useCelsius = new Point.Builder()

@@ -69,8 +69,6 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -252,11 +250,7 @@ public class InstallerOptions extends Fragment {
         toggleCelsius.setVisibility(View.VISIBLE);
         useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
-        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-           toggleCelsius.setChecked(true);
-        } else {
-           toggleCelsius.setChecked(false);
-        }
+        toggleCelsius.setChecked(getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED);
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -403,19 +397,16 @@ public class InstallerOptions extends Fragment {
 
         getTempValues();
 
-        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
-                if(isChecked) {
-                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
-                } else {
-                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
-                }
-                getTempValues();
+            if(isChecked) {
+                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                        CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+            } else {
+                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                        CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
             }
+            getTempValues();
         });
 
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

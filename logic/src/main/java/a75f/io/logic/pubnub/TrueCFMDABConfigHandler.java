@@ -22,7 +22,7 @@ public class TrueCFMDABConfigHandler {
 
         DabProfileConfiguration dabProfileConfiguration = new DabProfileConfiguration();
         if (value > 0) {
-            dabProfileConfiguration.minCFMForIAQ = 900;
+            dabProfileConfiguration.minCFMForIAQ = 100;
             dabProfileConfiguration.kFactor = 2;
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equip.getId(), dabProfileConfiguration);
             TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.DAB, TunerConstants.DAB_TUNER_GROUP);

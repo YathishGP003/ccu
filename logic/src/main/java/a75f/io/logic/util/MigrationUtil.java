@@ -38,6 +38,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import a75f.io.logic.diag.DiagEquip;
 
 public class MigrationUtil {
     
@@ -302,16 +303,19 @@ public class MigrationUtil {
     private static void addCCUHeartbeatDiagPoint(){
         Map<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if(!diagEquip.isEmpty()){
-            Map<Object,Object> cloudConnectivityPoint = CCUHsApi.getInstance().readEntity("cloud and connectivity" +
+            Map<Object,Object> cloudConnectivityPoint = CCUHsApi.getInstance().readEntity("cloud and connectivity " +
                     " and diag and point");
-            if(cloudConnectivityPoint.isEmpty()){
-                CCUHsApi.getInstance().addPoint(new Point.Builder()
-                        .setDisplayName("DiagEquip-ccuHeartbeat")
-                        .setEquipRef(diagEquip.get("id").toString())
-                        .setSiteRef(diagEquip.get("siteRef").toString())
-                        .addMarker("diag").addMarker("cloud").addMarker("connectivity").addMarker("his")
-                        .setTz(diagEquip.get("tz").toString())
-                        .build());
+            if(!cloudConnectivityPoint.isEmpty()) {
+                CCUHsApi.getInstance().deleteEntity(cloudConnectivityPoint.get("id").toString());
+            }
+            Map<Object,Object> cloudConnectedPoint = CCUHsApi.getInstance().readEntity("cloud and connected" +
+                    " and diag and point");
+            if(cloudConnectedPoint.isEmpty()){
+                String equipRef = diagEquip.get("id").toString();
+                String equipDis = "DiagEquip";
+                String siteRef = diagEquip.get("siteRef").toString();
+                String tz = diagEquip.get("tz").toString();
+                CCUHsApi.getInstance().addPoint(DiagEquip.getDiagHeartbeatPoint(equipRef, equipDis, siteRef, tz));
             }
         }
     }

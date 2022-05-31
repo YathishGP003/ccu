@@ -135,13 +135,13 @@ public class PreferenceUtil {
 
     public static boolean isCCUHeartbeatMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("CCUHeartbeatMigration",false);
+        return sharedPreferences.getBoolean("CCUHeartbeatMigrationWithHisInterpolate", false);
     }
 
     public static void setCCUHeartbeatMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("CCUHeartbeatMigration", isMigrated);
+        editor.putBoolean("CCUHeartbeatMigrationWithHisInterpolate", isMigrated);
         editor.apply();
     }
 

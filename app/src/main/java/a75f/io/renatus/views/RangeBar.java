@@ -133,7 +133,7 @@ public class RangeBar extends View {
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
         }
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             canvas.drawText(String.valueOf(roundToHalf((float) fahrenheitToCelsius((temps[stateReflected.ordinal()])))),
                     xPos,(yPos - 10f), mTempIconPaint);
         } else {

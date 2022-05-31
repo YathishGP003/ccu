@@ -976,7 +976,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
             heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
         }

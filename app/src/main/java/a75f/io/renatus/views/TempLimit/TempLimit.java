@@ -273,10 +273,10 @@ public class TempLimit extends View {
 
         if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(buildingTemp) + " "),
-                    xLoc - 8, yLoc - (float) 15, mTempPaint);
+                    xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
         } else {
             canvas.drawText(String.valueOf((int) temps[controlState.ordinal()]),
-                    xLoc - 8, yLoc - (float) 15, mTempPaint);
+                    xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
         }
         canvas.drawCircle(xLoc, yLoc,
                 4, mTempPaint);

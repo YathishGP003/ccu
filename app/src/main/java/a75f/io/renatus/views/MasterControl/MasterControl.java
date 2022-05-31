@@ -158,11 +158,11 @@ public class MasterControl extends View {
         if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
                     xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
-                    (float) (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
+                    (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         } else {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
                     xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
-                    (float) (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
+                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         }
     }
 

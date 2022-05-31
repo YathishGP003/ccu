@@ -56,7 +56,7 @@ public class NotificationHandler {
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
         if(bIsConnected){
-            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connectivity",1.0);
+            CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
         }
         refreshCloudConnectivityLastUpdatedTime();
         mHandler.mServerConnectionStatus.setContentText(bIsConnected ? "Online" : "Offline");

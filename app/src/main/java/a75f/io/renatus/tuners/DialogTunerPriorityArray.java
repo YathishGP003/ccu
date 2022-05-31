@@ -5,10 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +20,10 @@ import android.widget.NumberPicker;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,11 +38,8 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
-
-
 
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
@@ -102,6 +99,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        TunerFragment.childSelected = -1;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

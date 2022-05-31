@@ -231,6 +231,7 @@ public class TrueCFMPointsHandler {
                 .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
                 .setGroup(equip.getGroup())
                 .setTz(equip.getTz())
+                .setUnit(Units.CFM)
                 .build();
         String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
         hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);

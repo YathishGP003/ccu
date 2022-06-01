@@ -12,6 +12,7 @@ public class PreferenceUtil {
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
 
 
 
@@ -193,11 +194,20 @@ public class PreferenceUtil {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
     }
 
+
     public static boolean isTrueCFMVAVMigrationDone() {
         return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
     }
     public static void setTrueCFMVAVMigrationDone() {
         setBooleanPreference(TRUE_CFM_VAV_MIGRATION, true);
+    }
+
+    public static boolean getAddedUnitToTuners() {
+        return getBooleanPreference(ADDED_UNIT_TO_TUNERS);
+    }
+
+    public static void setUnitAddedToTuners() {
+        setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
     }
 
 

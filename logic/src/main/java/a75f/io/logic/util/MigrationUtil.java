@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavEquip;
@@ -96,6 +97,11 @@ public class MigrationUtil {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
         }
+
+        if(!PreferenceUtil.getAddedUnitToTuners()){
+            addUnitToTuners(CCUHsApi.getInstance());
+            PreferenceUtil.setUnitAddedToTuners();
+        }
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
@@ -120,7 +126,7 @@ public class MigrationUtil {
             }
         });
     }
-
+    
     private static void trueCFMVAVMigration(CCUHsApi haystack) {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
@@ -128,14 +134,15 @@ public class MigrationUtil {
         if(!vavEquips.isEmpty()) {
             doMigrationVav(haystack, vavEquips, tunerEquip);
         }
-
     }
+    
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        TrueCFMTuners.createDefaultTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
         vavEquips.forEach(vavEquip -> {
-            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
-            if (enableCFMPoint.get("id")==null) {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                "enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id") == null) {
                 Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
                 String fanMarker = "";
                 if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
@@ -143,11 +150,39 @@ public class MigrationUtil {
                 } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
                     fanMarker = "parallel";
                 }
-                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
-                                                               0, fanMarker);
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV, 0, fanMarker);
             }
         });
+    }
+    private static void addUnitToTuners(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
+        equips.forEach(equipDetails -> {
+            Equip equip = new Equip.Builder().setHashMap(equipDetails).build();
+            ArrayList<HashMap<Object, Object>> temperatureProportionalRange = ccuHsApi.readAllEntities("pspread and not standalone and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> zonePrioritySpread = ccuHsApi.readAllEntities("zone and priority and spread and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> buildingToZoneDifferential = ccuHsApi.readAllEntities("zone and building and differential and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> userLimitSpread = ccuHsApi.readAllEntities("user and limit and spread and equipRef == \"" + equip.getId() + "\"");
 
+            for (HashMap<Object, Object> unitMap : temperatureProportionalRange) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : zonePrioritySpread) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : buildingToZoneDifferential) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : userLimitSpread) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        });
     }
 
     private static boolean checkAppVersionUpgraded() {

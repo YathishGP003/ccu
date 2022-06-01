@@ -2,6 +2,7 @@ package a75f.io.logic.tuners;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
+import a75f.io.logic.bo.building.definitions.Units;
 
 class GenericTuners {
     
@@ -68,7 +69,7 @@ class GenericTuners {
                                                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                                .addMarker("system").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp")
                                                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                               .setTz(tz)
+                                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                                .build();
         String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
         hayStack.writePointForCcuUser(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);

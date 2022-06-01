@@ -22,6 +22,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -217,9 +218,16 @@ public abstract class SystemProfile
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
 
-        Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
-                .setTz(tz).build();
+        Point userLimitSpread = new Point.Builder()
+                                    .setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread")
+                                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                                    .setHisInterpolate("cov").addMarker("system").addMarker("tuner")
+                                    .addMarker("writable").addMarker("his").addMarker("user").addMarker("limit")
+                                    .addMarker("spread").addMarker("sp")
+                                    .setMinVal("1").setMaxVal("20").setIncrementVal("1")
+                                    .setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                    .setTz(tz).setUnit(Units.FAHRENHEIT)
+                                    .build();
 
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
         HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");

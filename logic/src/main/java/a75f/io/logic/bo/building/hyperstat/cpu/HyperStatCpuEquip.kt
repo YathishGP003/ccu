@@ -862,19 +862,19 @@ class HyperStatCpuEquip(val node: Short) {
             && changeIn != AnalogOutChanges.ENABLED
             && changeIn != AnalogOutChanges.MAPPING) {
             if (fanHighPointId != null)
-                updatePointValueIfchangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
+                updatePointValueChangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
             if (fanMediumPointId != null)
-                updatePointValueIfchangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
+                updatePointValueChangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
             if (fanLowPointId != null)
-                updatePointValueIfchangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+                updatePointValueChangeRequired(fanLowPointId, analogOutState.perAtFanLow)
 
             if (minPointId != null) {
-                updatePointValueIfchangeRequired(minPointId, analogOutState.voltageAtMin)
+                updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
             if (maxPointId != null) {
-                updatePointValueIfchangeRequired(maxPointId, analogOutState.voltageAtMax)
+                updatePointValueChangeRequired(maxPointId, analogOutState.voltageAtMax)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
@@ -946,7 +946,7 @@ class HyperStatCpuEquip(val node: Short) {
             }
 
         }
-        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Anaalog $changeIn")
+        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Analog $changeIn")
         CcuLog.i(L.TAG_CCU_ZONE, "changeIn: ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
         if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
@@ -961,7 +961,7 @@ class HyperStatCpuEquip(val node: Short) {
 
 
     // Function to check the changes in the point and do the update with new value
-    private fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
+    private fun updatePointValueChangeRequired(pointId: String, newValue: Double){
         val presentValue = haystack.readDefaultValById(pointId)
         if(presentValue != newValue)
             hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)

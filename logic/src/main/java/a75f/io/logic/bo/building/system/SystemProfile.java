@@ -58,15 +58,7 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
-    private boolean coolingLockoutActive;
-    private boolean heatingLockoutActive;
     
-    public boolean isMechanicalCoolingAvailable() {
-        return mechanicalCoolingAvailable;
-    }
-    public boolean isMechanicalHeatingAvailable() {
-        return mechanicalHeatingAvailable;
-    }
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();
@@ -1007,29 +999,31 @@ public abstract class SystemProfile
     
     public void updateMechanicalConditioning(CCUHsApi hayStack) {
         double outsideAirTemp = getOutsideAirTemp(hayStack);
-        mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        } else {
+            mechanicalCoolingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
-        mechanicalHeatingAvailable =  outsideAirTemp < getHeatingLockoutVal();
+        if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal();
+        } else {
+            mechanicalHeatingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
-        
-        coolingLockoutActive = isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalCoolingAvailable;
-        
-        heatingLockoutActive = isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalHeatingAvailable;
-        
         CcuLog.i(L.TAG_CCU_SYSTEM,
                  "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+
-                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive "
-                 +coolingLockoutActive+" heatingLockoutActive "+heatingLockoutActive);
+                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive ");
     }
     
     public boolean isCoolingLockoutActive() {
-        return coolingLockoutActive;
+        return !mechanicalCoolingAvailable;
     }
     
     public boolean isHeatingLockoutActive() {
-        return heatingLockoutActive;
+        return !mechanicalHeatingAvailable;
     }
 }

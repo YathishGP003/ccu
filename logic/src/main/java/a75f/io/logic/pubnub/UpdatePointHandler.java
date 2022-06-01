@@ -114,6 +114,14 @@ public class UpdatePointHandler
             TrueCFMVAVConfigHandler.updateConfigPoint(msgObject, localPoint, hayStack);
         }
 
+        if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
+        }
+
+        if(HSUtil.isMaxCFMReheatingConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

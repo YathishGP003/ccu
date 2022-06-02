@@ -725,6 +725,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             .setPositiveButton("Force-Trim", (dialog, id) -> {
                                 schedule.getDays().addAll(daysArrayList);
                                 ScheduleUtil.trimZoneSchedules(spillsMap);
+                                if (schedule.getDays().contains(removeEntry)) {
+                                    schedule.getDays().remove(position);
+                                }
                                 doScheduleUpdate();
                             });
 
@@ -1203,7 +1206,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
     public void refreshScreen(Schedule updatedSchedule) {
-        if(getActivity() != null && !updatedSchedule.getId().equals(schedule.getId())) {
+        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

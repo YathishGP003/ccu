@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Units;
 
 import static a75f.io.logic.tuners.TunerConstants.DAB_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
@@ -41,7 +42,7 @@ public class DabTuners {
                                        .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_SPREAD, 0);
@@ -147,7 +148,7 @@ public class DabTuners {
                                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
@@ -381,7 +382,7 @@ public class DabTuners {
                                        .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
@@ -503,7 +504,7 @@ public class DabTuners {
                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);

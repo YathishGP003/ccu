@@ -54,7 +54,7 @@ public class CCUUtils
 
     public static Date getLastReceivedTimeForCloudConnectivity(){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntity("cloud and connectivity and diag and point");
+        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntity("cloud and connected and diag and point");
         if(cloudConnectivityPoint.isEmpty()){
             return null;
         }

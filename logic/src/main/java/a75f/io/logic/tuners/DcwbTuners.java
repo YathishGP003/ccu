@@ -9,6 +9,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Units;
 
 public class DcwbTuners {
 
@@ -56,7 +57,7 @@ public class DcwbTuners {
                 .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
                 .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
                 .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
+                .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);
         hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD, 0);
@@ -129,7 +130,7 @@ public class DcwbTuners {
                 .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
                 .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                 .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
+                .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);
         BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(chilledWaterTemperatureProportionalRange), hayStack);

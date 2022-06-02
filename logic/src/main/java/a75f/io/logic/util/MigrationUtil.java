@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavEquip;
@@ -38,6 +39,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import a75f.io.logic.diag.DiagEquip;
 
 public class MigrationUtil {
     
@@ -101,6 +103,11 @@ public class MigrationUtil {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
         }
+
+        if(!PreferenceUtil.getAddedUnitToTuners()){
+            addUnitToTuners(CCUHsApi.getInstance());
+            PreferenceUtil.setUnitAddedToTuners();
+        }
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
@@ -125,7 +132,7 @@ public class MigrationUtil {
             }
         });
     }
-
+    
     private static void trueCFMVAVMigration(CCUHsApi haystack) {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
@@ -167,12 +174,43 @@ public class MigrationUtil {
     private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips, Equip tunerEquip) {
         TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.DAB, TunerConstants.DAB_TUNER_GROUP);
         dabEquips.forEach(dabEquip -> {
-            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
-            if (enableCFMPoint.get("id")==null) {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                "enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id") == null) {
                 Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
-                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB,
-                        0, null);
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB, 0, null);
                 TrueCFMPointsHandler.pressurePointMigration(equip, null);
+            }
+        });
+    }
+    
+    private static void addUnitToTuners(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
+        equips.forEach(equipDetails -> {
+            Equip equip = new Equip.Builder().setHashMap(equipDetails).build();
+            ArrayList<HashMap<Object, Object>> temperatureProportionalRange = ccuHsApi.readAllEntities("pspread and not standalone and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> zonePrioritySpread = ccuHsApi.readAllEntities("zone and priority and spread and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> buildingToZoneDifferential = ccuHsApi.readAllEntities("zone and building and differential and equipRef == \"" + equip.getId() + "\"");
+            ArrayList<HashMap<Object, Object>> userLimitSpread = ccuHsApi.readAllEntities("user and limit and spread and equipRef == \"" + equip.getId() + "\"");
+
+            for (HashMap<Object, Object> unitMap : temperatureProportionalRange) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : zonePrioritySpread) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : buildingToZoneDifferential) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+
+            for (HashMap<Object, Object> unitMap : userLimitSpread) {
+                Point updatedPoint = new Point.Builder().setHashMap(unitMap).setUnit(Units.FAHRENHEIT).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
             }
         });
     }
@@ -330,16 +368,19 @@ public class MigrationUtil {
     private static void addCCUHeartbeatDiagPoint(){
         Map<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if(!diagEquip.isEmpty()){
-            Map<Object,Object> cloudConnectivityPoint = CCUHsApi.getInstance().readEntity("cloud and connectivity" +
+            Map<Object,Object> cloudConnectivityPoint = CCUHsApi.getInstance().readEntity("cloud and connectivity " +
                     " and diag and point");
-            if(cloudConnectivityPoint.isEmpty()){
-                CCUHsApi.getInstance().addPoint(new Point.Builder()
-                        .setDisplayName("DiagEquip-ccuHeartbeat")
-                        .setEquipRef(diagEquip.get("id").toString())
-                        .setSiteRef(diagEquip.get("siteRef").toString())
-                        .addMarker("diag").addMarker("cloud").addMarker("connectivity").addMarker("his")
-                        .setTz(diagEquip.get("tz").toString())
-                        .build());
+            if(!cloudConnectivityPoint.isEmpty()) {
+                CCUHsApi.getInstance().deleteEntity(cloudConnectivityPoint.get("id").toString());
+            }
+            Map<Object,Object> cloudConnectedPoint = CCUHsApi.getInstance().readEntity("cloud and connected" +
+                    " and diag and point");
+            if(cloudConnectedPoint.isEmpty()){
+                String equipRef = diagEquip.get("id").toString();
+                String equipDis = "DiagEquip";
+                String siteRef = diagEquip.get("siteRef").toString();
+                String tz = diagEquip.get("tz").toString();
+                CCUHsApi.getInstance().addPoint(DiagEquip.getDiagHeartbeatPoint(equipRef, equipDis, siteRef, tz));
             }
         }
     }

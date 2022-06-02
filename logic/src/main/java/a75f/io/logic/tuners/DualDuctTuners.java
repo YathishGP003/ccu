@@ -15,6 +15,7 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Units;
 
 public class DualDuctTuners {
     
@@ -34,7 +35,7 @@ public class DualDuctTuners {
                                        .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_SPREAD, 0);
@@ -140,7 +141,7 @@ public class DualDuctTuners {
                                .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         hayStack.writePointForCcuUser(pSpreadId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_PROPORTIONAL_SPREAD, 0);
@@ -235,7 +236,7 @@ public class DualDuctTuners {
                                        .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
@@ -358,7 +359,7 @@ public class DualDuctTuners {
                                .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);

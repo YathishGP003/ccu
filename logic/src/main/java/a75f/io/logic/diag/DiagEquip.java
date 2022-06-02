@@ -57,7 +57,16 @@ public class DiagEquip
         addPoints(equipRef, "DiagEquip");
         return equipRef;
     }
-    
+
+    public static Point getDiagHeartbeatPoint(String equipRef, String equipDis, String siteRef, String tz){
+        return new Point.Builder()
+                .setDisplayName(equipDis+"-ccuHeartbeat")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("linear")
+                .addMarker("diag").addMarker("cloud").addMarker("connected").addMarker("his")
+                .setTz(tz)
+                .build();
+    }
     public void addPoints(String equipRef, String equipDis) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         HashMap<Object,Object> siteMap = hsApi.readEntity(Tags.SITE);
@@ -102,13 +111,7 @@ public class DiagEquip
                                        .build();
         hsApi.addPoint(wifiRssi);
 
-        Point ccuHeartbeat = new Point.Builder()
-                .setDisplayName(equipDis+"-ccuHeartbeat")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef).setHisInterpolate("linear")
-                .addMarker("diag").addMarker("cloud").addMarker("connectivity").addMarker("his")
-                .setTz(tz)
-                .build();
+        Point ccuHeartbeat = getDiagHeartbeatPoint(equipRef, equipDis, siteRef, tz);
         hsApi.addPoint(ccuHeartbeat);
     
         Point wifiLinkSpeed = new Point.Builder()

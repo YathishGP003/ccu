@@ -11,6 +11,7 @@ public class PreferenceUtil {
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
 
 
 
@@ -134,13 +135,13 @@ public class PreferenceUtil {
 
     public static boolean isCCUHeartbeatMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("CCUHeartbeatMigration",false);
+        return sharedPreferences.getBoolean("CCUHeartbeatMigrationWithHisInterpolate", false);
     }
 
     public static void setCCUHeartbeatMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("CCUHeartbeatMigration", isMigrated);
+        editor.putBoolean("CCUHeartbeatMigrationWithHisInterpolate", isMigrated);
         editor.apply();
     }
 
@@ -191,6 +192,15 @@ public class PreferenceUtil {
     public static void setAirflowVolumeUnitMigrationDone() {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
     }
+
+    public static boolean getAddedUnitToTuners() {
+        return getBooleanPreference(ADDED_UNIT_TO_TUNERS);
+    }
+
+    public static void setUnitAddedToTuners() {
+        setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
+    }
+
 
 
 

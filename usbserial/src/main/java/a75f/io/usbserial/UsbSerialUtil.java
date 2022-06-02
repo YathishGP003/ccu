@@ -36,14 +36,12 @@ public class UsbSerialUtil {
     public static boolean isModbusDevice(UsbDevice device, Context context) {
         int deviceVID = device.getVendorId();
     
-        if (BuildConfig.BUILD_TYPE.equals("qa") ||
+        if ((BuildConfig.BUILD_TYPE.equals("qa") ||
             BuildConfig.BUILD_TYPE.equals("dev") ||
-            BuildConfig.BUILD_TYPE.equals("local")) {
-            if (deviceVID == DEVICE_ID_FTDI && !isBiskitModeEnabled(context)) {
-                return false;
-            }
+            BuildConfig.BUILD_TYPE.equals("local")) && (deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context))) {
+            return false;
         }
-        
+
         if (deviceVID == 4292 || deviceVID == DEVICE_ID_FTDI) {
             return true;
         }

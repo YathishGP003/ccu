@@ -169,8 +169,9 @@ class HSReconfigureUtil {
             if (pointData.markers.contains("his")) {
                 pointsUtil.addDefaultHisValueForPoint(pointId, defaultValue)
             }
-            pointsUtil.addDefaultValueForPoint(pointId, defaultValue)
-
+            if (pointData.markers.contains("writable")) {
+                pointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
             Log.i("CCU_HSC", "Read ${CCUHsApi.getInstance().readDefaultValById(pointId)}")
             return pointId
         }

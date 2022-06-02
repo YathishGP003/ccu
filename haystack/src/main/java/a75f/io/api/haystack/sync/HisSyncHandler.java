@@ -64,9 +64,8 @@ public class HisSyncHandler
 
             if (StringUtils.isNotBlank(siteUID)) {
                 CcuLog.d(TAG,"Site GUID" + siteUID + " is found");
-
-                DateTime now = new DateTime();
-                boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+                
+                boolean timeForQuarterHourSync = ccuHsApi.getAppAliveMinutes() % 15 == 0;
 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                    doSync(timeForQuarterHourSync);

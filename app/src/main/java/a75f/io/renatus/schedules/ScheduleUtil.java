@@ -23,14 +23,9 @@ public class ScheduleUtil {
         for (String zoneId : spillsMap.keySet()) {
 
             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
-
             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
                     "== " +z.getId());
             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
-
-            if(!zoneSchedule.isNamedSchedule())
-                zoneSchedule = CCUHsApi.getInstance().getScheduleById(z.getScheduleRef());
-
             ArrayList<Interval> spills = spillsMap.get(zoneId);
 
             Iterator daysIterator = zoneSchedule.getDays().iterator();

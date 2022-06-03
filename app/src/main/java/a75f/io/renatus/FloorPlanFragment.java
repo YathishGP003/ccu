@@ -897,7 +897,6 @@ public class FloorPlanFragment extends Fragment {
                                     }
 
                                 }
-                                Log.d("TAG", "handleFloorChange: here now");
                                 EquipsManager.getInstance().getAllMbEquips(zone.getId())
                                         .forEach( equip -> {
                                             equip.setFloorRef(floor.getId());

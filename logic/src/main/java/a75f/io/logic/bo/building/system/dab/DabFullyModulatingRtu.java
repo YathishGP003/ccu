@@ -146,7 +146,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
+        status.append((systemFanLoopOp > 0 || ControlMote.getRelay3()) ? " Fan ON ": "");
         status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? " | Heating ON ":"");
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
@@ -843,15 +843,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                             CCUHsApi.getInstance().deleteEntityTree(cmdOccu.get("id").toString());
                         }
                     }else {
-                        Point occupancySignal = new Point.Builder()
-                                .setDisplayName(equipDis+"-"+"occupancySignal")
-                                .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
-                                .setTz(tz)
-                                .build();
-                        String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
-                        CCUHsApi.getInstance().writeHisValById(cmdOccupancyPtId,0.0);
+                        if (val == 1) {
+                            Point occupancySignal = new Point.Builder()
+                                    .setDisplayName(equipDis+"-"+"occupancySignal")
+                                    .setSiteRef(siteRef)
+                                    .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
+                                    .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
+                                    .setTz(tz)
+                                    .build();
+                            String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
+                            CCUHsApi.getInstance().writeHisValById(cmdOccupancyPtId,0.0);
+                        }
                     }
                     break;
                 case "relay7":

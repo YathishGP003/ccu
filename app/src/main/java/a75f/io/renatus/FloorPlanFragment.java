@@ -63,6 +63,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
@@ -343,13 +344,13 @@ public class FloorPlanFragment extends Fragment {
         Collections.sort(roomList, new ZoneComparator());
         updateRooms(roomList);
     }
-    
+
     private void enableRoomBtn() {
         addZonelt.setVisibility(View.VISIBLE);
         addRoomBtn.setVisibility(View.VISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
     }
-    
+
     private void updateRooms(ArrayList<Zone> zones) {
         mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
         roomListView.setAdapter(mRoomListAdapter);
@@ -365,7 +366,7 @@ public class FloorPlanFragment extends Fragment {
             disableModuButton();
         }
     }
-    
+
     @SuppressLint("StaticFieldLeak")
     public void getBuildingFloorsZones(String enableKeyboard) {
         loadExistingZones();
@@ -749,7 +750,7 @@ public class FloorPlanFragment extends Fragment {
         }
         if (position == 3) {
             sysyemDeviceType = SysyemDeviceType.BTU_METER;
-           
+
             rl_modbus_btu_meter.setBackgroundResource(background);
             textModbusBTUMeter.setSelected(true);
             textModbusBTUMeter.setTextColor(Color.WHITE);
@@ -896,6 +897,12 @@ public class FloorPlanFragment extends Fragment {
                                     }
 
                                 }
+                                Log.d("TAG", "handleFloorChange: here now");
+                                EquipsManager.getInstance().getAllMbEquips(zone.getId())
+                                        .forEach( equip -> {
+                                            equip.setFloorRef(floor.getId());
+                                            EquipsManager.getInstance().saveProfile(equip);
+                                        });
                             }
 
                             refreshScreen();

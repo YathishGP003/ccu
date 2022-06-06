@@ -119,8 +119,8 @@ public class Globals {
     private boolean isTempOverride = false;
     private int tempOverCount = 0;
 
-    private static long ccuUpdateTriggerTimeToken;
-
+    private long ccuUpdateTriggerTimeToken;
+    
     private Globals() {
     }
 
@@ -630,4 +630,5 @@ public class Globals {
         if(heatDTMin > heatDTMax ||  heatDTMindf > heatDTMaxdf) return false;
         else return true;
     }
+    
 }

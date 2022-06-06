@@ -367,7 +367,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ": "");
+        status.append((systemFanLoopOp > 0 || ControlMote.getRelay3()) ? " Fan ON ": "");
         status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive())? " | Cooling ON ":"");
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive())? " | Heating ON ":"");
         

@@ -490,9 +490,13 @@ public class DabSystemController extends SystemController
     }
     
     private boolean isNormalizationRequired() {
-        return (systemState != OFF)
-               && (coolingSignal > 0 || heatingSignal > 0)
-               && (conditioningMode != SystemMode.OFF);
+        
+        if (conditioningMode == SystemMode.OFF) {
+            return false;
+        }
+        //This is not neat, but the only way to check current system status for all different types of DAB profiles.
+        String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+        return !status.equals("System OFF");
     }
     
     private HashMap<String, Double> getBaseDamperPosMap(ArrayList<HashMap<Object, Object>> dabEquips) {

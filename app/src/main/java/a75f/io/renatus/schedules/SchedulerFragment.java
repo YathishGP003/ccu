@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.usbserial.UsbModbusService.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -1169,11 +1171,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 int clickedPosition = (int)v.getTag();
                 //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
-                if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                if(mScheduleId != null) {
+                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                    ArrayList<Schedule.Days> days = schedule.getDays();
+                    try {
+                        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                        showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.d(TAG, "onClick: " + e.getMessage());
+                    }
+                }
             }
         });
     }

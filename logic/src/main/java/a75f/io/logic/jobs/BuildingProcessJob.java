@@ -42,10 +42,15 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
     @Override
     public void doJob() {
-        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance().getAppAliveMinutes());
+        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> ");
         watchdogMonitor = false;
     
         CCUHsApi.getInstance().incrementAppAliveCount();
+        CcuLog.d(L.TAG_CCU_JOB,"AppAliveMinutes : "+CCUHsApi.getInstance().getAppAliveMinutes());
+        if (CCUHsApi.getInstance().getAppAliveMinutes() % 15 == 0) {
+            CCUHsApi.getInstance().getHisSyncHandler().setNonCovSyncPending();
+        }
+        
         L.pingCloudServer();
         
         if (!CCUHsApi.getInstance().isCCUConfigured()) {

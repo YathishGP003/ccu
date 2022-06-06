@@ -11,7 +11,6 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HStr;
 import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
-import org.projecthaystack.UnknownRecException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,8 +20,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
@@ -49,6 +46,8 @@ public class HisSyncHandler
     Timer     mSyncTimer     = new Timer();
     TimerTask mSyncTimerTask = null;
     
+    private boolean nonCovSyncPending = false;
+    
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
@@ -65,10 +64,9 @@ public class HisSyncHandler
             if (StringUtils.isNotBlank(siteUID)) {
                 CcuLog.d(TAG,"Site GUID" + siteUID + " is found");
                 
-                boolean timeForQuarterHourSync = ccuHsApi.getAppAliveMinutes() % 15 == 0;
-
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
-                   doSync(timeForQuarterHourSync);
+                   doSync(nonCovSyncPending);
+                   nonCovSyncPending = false;
                 }
 
                 if (entitySyncRequired) {
@@ -82,7 +80,7 @@ public class HisSyncHandler
     }
     
     private void doSync(boolean syncAllData) {
-        CcuLog.d(TAG,"Processing sync for equips and devices");
+        CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData);
         //Device sync is initiated concurrently on Rx thread
         Observable.fromCallable(() -> {
             syncHistorizedDevicePoints(syncAllData);
@@ -372,4 +370,9 @@ public class HisSyncHandler
         };
         mSyncTimer.schedule(mSyncTimerTask, delaySeconds);
     }
+    
+    public void setNonCovSyncPending() {
+        nonCovSyncPending = true;
+    }
+    
 }

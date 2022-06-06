@@ -67,7 +67,7 @@ public class RestoreCCUHsApi {
 
         syncStatusService = SyncStatusService.getInstance(context);
 
-        hisSyncHandler = ccuHsApi.hisSyncHandler;
+        hisSyncHandler = ccuHsApi.getHisSyncHandler();
     }
 
     public void importZoneSchedule(Set<String> zoneRefSet){

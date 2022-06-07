@@ -1173,6 +1173,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 // force refresh schedule
                 if(mScheduleId != null) {
                     schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                }
                     ArrayList<Schedule.Days> days = schedule.getDays();
                     try {
                         Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
@@ -1181,7 +1182,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     } catch (ArrayIndexOutOfBoundsException e) {
                         Log.d(TAG, "onClick: " + e.getMessage());
                     }
-                }
+
             }
         });
     }

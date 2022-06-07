@@ -931,9 +931,7 @@ public class Pulse
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 
 			for(HashMap phyPoint : phyPoints) {
-				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
-					continue;
-				}
+				if (phyPoint.isEmpty()) continue;
 				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
 
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));

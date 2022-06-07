@@ -1508,7 +1508,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                     if (z != null) {
-                        z.setScheduleRef(CCUHsApi.getInstance().getSystemSchedule(false).get(0).getId());
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                "== " +z.getId());
+                        Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                        z.setScheduleRef(scheduleById.getId());
                         CCUHsApi.getInstance().updateZone(z, zoneId);
                     }
                     CCUHsApi.getInstance().scheduleSync();

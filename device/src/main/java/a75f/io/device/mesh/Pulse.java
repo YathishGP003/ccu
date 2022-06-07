@@ -1025,18 +1025,7 @@ public class Pulse
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
 							CcuLog.d(L.TAG_CCU_DEVICE,
 							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
-						} /*else {
-							sendSetTemperatureAck((short)nodeAddr);
-							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartStat : desiredTemp not changed" + desiredTemp+"->"+curValue);
 						}
-						
-						if (!validDesiredTemp) {
-							CcuLog.d(L.TAG_CCU_DEVICE,
-							         "updateSetTempFromSmartStat "+nodeAddr+" : Invalid desiredTemp ignored "+ desiredTemp);
-							DeviceUtil.sendControlsMessage(nodeAddr, false);
-						}
-*/
 						break;
 				}
 			}

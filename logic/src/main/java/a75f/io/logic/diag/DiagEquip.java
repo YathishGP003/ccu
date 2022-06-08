@@ -253,11 +253,6 @@ public class DiagEquip
         }
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
         boolean isAppRestart = spDefaultPrefs.getBoolean("APP_RESTART",false);
-        if (isAppRestart){
-            setDiagHisVal("app and restart",1);
-        } else{
-            setDiagHisVal("app and restart",0);
-        }
 
         PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
         PackageInfo pi;

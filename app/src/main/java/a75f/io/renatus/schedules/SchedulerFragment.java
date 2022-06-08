@@ -546,9 +546,13 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-            removeEntry = schedule.getDays().remove(position);
+            try {
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                removeEntry = schedule.getDays().remove(position);
+            }catch (ArrayIndexOutOfBoundsException e) {
+                Log.d(TAG, "onClickSave: " + e.getMessage());
+            }
         } else {
             removeEntry = null;
         }

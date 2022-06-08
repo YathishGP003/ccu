@@ -5,8 +5,6 @@ import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import io.objectbox.kotlin.inValues
 import org.apache.commons.lang3.StringUtils
 import java.lang.Exception

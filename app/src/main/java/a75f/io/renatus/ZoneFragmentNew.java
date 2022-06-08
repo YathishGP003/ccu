@@ -1499,6 +1499,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         mSchedule.setDisabled(true);
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                     }
+
                     scheduleImageButton.setVisibility(View.GONE);
 
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {

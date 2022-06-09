@@ -18,7 +18,7 @@ public class TrueCFMUtil {
     }
     
     private static double getDuctCrossSectionArea(CCUHsApi hayStack, String equipRef, String damperOrder) {
-        String damperOrderQuery = damperOrder+" and ";;
+        String damperOrderQuery = damperOrder.isEmpty() ? "" : damperOrder+" and ";
         
         double damperSize = hayStack.readDefaultVal(damperOrderQuery+"damper and size and equipRef == \""+equipRef+"\"");
         int damperShapeVal = hayStack.readDefaultVal(damperOrderQuery+"damper and shape and equipRef == \""+equipRef+

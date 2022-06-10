@@ -671,7 +671,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                                 namedheaders.add(f.getDisplayName());
                             }
                             spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
-                        }else if((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isZoneSchedule()){
+                        }else {
                             schedules = schedules.concat(Tags.ZONE);
                             if (!zoneheaders.contains(f.getDisplayName())) {
                                 spillZones.append("\t").append(f.getDisplayName()).append("->\n");

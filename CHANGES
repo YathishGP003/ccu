@@ -1,8 +1,17 @@
- - Merged PR 3528: Bug 10703 : The unit for thermistor has been changed from Ohm to Kilo ohms
- - Merged PR 3937: CCU: Named schedule discrepancies
- - Merged PR 3960: Fix ConcurrentModification exception
- - Merged PR 3916: Syncing of Named Schedule in CCU with Portal
- - Merged PR 3940: Rename Issue discrepancy
- - Merged PR 3617: Additional Feild for Reboot Status
- - Fix ConcurrentModification exception
- - Bug 10703 : The unit for thermistor has been changed from Ohm to Kilo ohms
+ - Merged PR 4164: Update mechanical cooling when lockout disabled
+ - Merged PR 4054: CCU : Named Schedule : Desired Temp Limits Validation
+ - Merged PR 4149: Use system conditioning while applying damper limits config
+ - Merged PR 4092: 12203
+ - Use system conditioning while applying damper limits config
+ - Merged PR 4055: Hyperstat Desired temp validation
+ - Removed commented code
+ - Removed commented code
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userstory/11485_Local_Control_settings_on_ITM_are_ignored_on_Renatus
+ - Merged PR 4097: DAB invalid system status and normalization fix
+ - Merged PR 3962: Randomize CCU 15 minutes his write
+ - Update mechanical cooling when lockout disabled
+ - DAB invalid system status and normalization fix
+ - Fixed some sonar cure changes
+ - Added Unit test cases for desired temp validation functions
+ - validating the single desired temperature point. If valid desired temp considering it. If invalid then setting to the nearest boundary limit and updating to desired temp
+ - Randomize CCU 15 minutes his write

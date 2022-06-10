@@ -285,7 +285,9 @@ class HyperStatPointsUtil constructor(
                 if(actualPoint.first.markers.contains("his")){
                     addDefaultHisValueForPoint(pointId, actualPoint.second)
                 }
-                addDefaultValueForPoint(pointId, actualPoint.second)
+                if(actualPoint.first.markers.contains("writable")) {
+                    addDefaultValueForPoint(pointId, actualPoint.second)
+                }
             }
         }
     }
@@ -302,7 +304,9 @@ class HyperStatPointsUtil constructor(
             if (it.first.markers.contains("his")) {
                 addDefaultHisValueForPoint(pointId, it.third)
             }
-            addDefaultValueForPoint(pointId, it.third)
+            if (it.first.markers.contains("writable")) {
+                addDefaultValueForPoint(pointId, it.third)
+            }
         }
         return pointsIdMap
     }
@@ -1634,15 +1638,13 @@ class HyperStatPointsUtil constructor(
             enums = operatingModePointEnums
         )
 
-
+        addPointToHaystack(point = occupancyModePoint)
         val occupancyDetectionPointId = addPointToHaystack(point = occupancyDetection)
-        addDefaultHisValueForPoint(occupancyDetectionPointId, 0.0)
-        addDefaultValueForPoint(occupancyDetectionPointId, 0.0)
-        addDefaultValueForPoint(addPointToHaystack(point = occupancyModePoint), 0.0)
-
         val operatingModeModePointId = addPointToHaystack(point = operatingModeModePoint)
+
         addDefaultHisValueForPoint(operatingModeModePointId, 0.0)
-        addDefaultValueForPoint(operatingModeModePointId, 0.0)
+        addDefaultHisValueForPoint(occupancyDetectionPointId, 0.0)
+
     }
 
 

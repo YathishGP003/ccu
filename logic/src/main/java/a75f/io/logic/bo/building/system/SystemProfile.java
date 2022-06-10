@@ -22,6 +22,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -57,15 +58,7 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
-    private boolean coolingLockoutActive;
-    private boolean heatingLockoutActive;
     
-    public boolean isMechanicalCoolingAvailable() {
-        return mechanicalCoolingAvailable;
-    }
-    public boolean isMechanicalHeatingAvailable() {
-        return mechanicalHeatingAvailable;
-    }
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();
@@ -217,9 +210,16 @@ public abstract class SystemProfile
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
 
-        Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
-                .setTz(tz).build();
+        Point userLimitSpread = new Point.Builder()
+                                    .setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread")
+                                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                                    .setHisInterpolate("cov").addMarker("system").addMarker("tuner")
+                                    .addMarker("writable").addMarker("his").addMarker("user").addMarker("limit")
+                                    .addMarker("spread").addMarker("sp")
+                                    .setMinVal("1").setMaxVal("20").setIncrementVal("1")
+                                    .setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                    .setTz(tz).setUnit(Units.FAHRENHEIT)
+                                    .build();
 
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
         HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");
@@ -999,29 +999,31 @@ public abstract class SystemProfile
     
     public void updateMechanicalConditioning(CCUHsApi hayStack) {
         double outsideAirTemp = getOutsideAirTemp(hayStack);
-        mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        } else {
+            mechanicalCoolingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
-        mechanicalHeatingAvailable =  outsideAirTemp < getHeatingLockoutVal();
+        if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal();
+        } else {
+            mechanicalHeatingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
-        
-        coolingLockoutActive = isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalCoolingAvailable;
-        
-        heatingLockoutActive = isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalHeatingAvailable;
-        
         CcuLog.i(L.TAG_CCU_SYSTEM,
                  "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+
-                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive "
-                 +coolingLockoutActive+" heatingLockoutActive "+heatingLockoutActive);
+                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive ");
     }
     
     public boolean isCoolingLockoutActive() {
-        return coolingLockoutActive;
+        return !mechanicalCoolingAvailable;
     }
     
     public boolean isHeatingLockoutActive() {
-        return heatingLockoutActive;
+        return !mechanicalHeatingAvailable;
     }
 }

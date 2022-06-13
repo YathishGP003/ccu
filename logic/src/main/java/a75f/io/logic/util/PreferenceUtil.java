@@ -19,6 +19,7 @@ public class PreferenceUtil {
     private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
+    private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
 
     public static void setContext(Context c) {
         context= c;

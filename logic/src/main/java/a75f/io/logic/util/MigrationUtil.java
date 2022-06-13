@@ -95,6 +95,36 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
+
+        doDiagPointsMigration(CCUHsApi.getInstance());
+    }
+
+    private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+
+        // approach is deleting all the daig point which does not have any gateway reff.
+        // Because in server we will never get to know these diag points are belongs which ccu
+        // Create create fresh daig points.
+
+        HashMap diag = ccuHsApi.read("equip and diag");
+
+        if (diag.size() == 0) {
+            // Diag points are not found locally
+            DiagEquip.getInstance().create();
+            Equip systemEquip = new Equip.Builder()
+                    .setHashMap(ccuHsApi.read("system and equip")).build();
+            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+            return;
+        }
+        Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+
+        if(!diagEquip.getMarkers().contains("gatewayRef ")){
+            Equip systemEquip = new Equip.Builder()
+                    .setHashMap(ccuHsApi.read("system and equip")).build();
+            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+        }
+
+
+
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {

@@ -1195,7 +1195,6 @@ public class DualDuctEquip {
                 .setUnit("%")
                 .setTz(tz)
                 .build();
-        Log.i("DEV_DEBUG", "createFeedbackPoint: ");
         return ccuHsApi.addPoint(damperFeedback);
     }
 

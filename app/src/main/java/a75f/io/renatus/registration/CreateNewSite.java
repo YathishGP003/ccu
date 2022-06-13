@@ -290,7 +290,6 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-
                 if (site.size() > 0) {
                     String siteId = site.get("id").toString();
                     updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
@@ -303,7 +302,8 @@ public class CreateNewSite extends Fragment {
                     CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                     L.ccu().setCCUName(ccuName);
                 } else {
-                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create() ,managerEmail);
+                    L.ccu().systemProfile = new DefaultSystem();
                     L.ccu().setCCUName(ccuName);
                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 }
@@ -838,7 +838,6 @@ public class CreateNewSite extends Fragment {
         //SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
-        L.ccu().systemProfile = new DefaultSystem();
         prefs.setString("SITE_ID", localSiteId);
 
         new Handler().postDelayed(() -> CCUHsApi.getInstance().importNamedScheduleWithOrg(

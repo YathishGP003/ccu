@@ -11,6 +11,10 @@ public class UnitUtils {
         return CCUUtils.roundToTwoDecimal((temperature * 9/5) + 32);
     }
 
+    public static double fahrenheitToCelsiusTwoDecimal(double temperature) {
+        return CCUUtils.roundToOneDecimal((temperature - 32) * 5/9);
+    }
+
     public static double fahrenheitToCelsius(double temperature) {
         double celsiusTemperature ;
         celsiusTemperature =((temperature - 32) * 5/9);

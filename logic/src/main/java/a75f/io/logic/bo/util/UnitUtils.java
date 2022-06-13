@@ -20,11 +20,11 @@ public class UnitUtils {
         celsiusTemperature =((temperature - 32) * 5/9);
         double decimalValue = celsiusTemperature -(long) celsiusTemperature;
 
-        if (decimalValue > 0.1 && decimalValue <= 0.3) {
+        if (decimalValue > 0.01 && decimalValue <= 0.3) {
             celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
         } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
             celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
-        } else if (decimalValue > 0.7 && decimalValue <= 0.9) {
+        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
             celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
         }
         return celsiusTemperature;

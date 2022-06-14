@@ -22,6 +22,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -105,7 +106,13 @@ public class MigrationUtil {
         // Because in server we will never get to know these diag points are belongs which ccu
         // Create create fresh daig points.
 
-        HashMap diag = ccuHsApi.read("equip and diag");
+        HashMap ccu = ccuHsApi.read("device and ccu");
+        RestoreCCUHsApi restoreCCUHsApi = RestoreCCUHsApi.getInstance();
+        if (ccu.size() == 0) {
+            return;
+        }
+
+      /*  HashMap diag = ccuHsApi.read("equip and diag");
 
         if (diag.size() == 0) {
             // Diag points are not found locally
@@ -117,14 +124,12 @@ public class MigrationUtil {
         }
         Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
 
-        if(!diagEquip.getMarkers().contains("gatewayRef ")){
+        if(!diagEquip.getMarkers().contains("gatewayRef")){
             Equip systemEquip = new Equip.Builder()
                     .setHashMap(ccuHsApi.read("system and equip")).build();
             ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
         }
-
-
-
+*/
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {

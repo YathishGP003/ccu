@@ -40,6 +40,7 @@ import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
+import a75f.io.device.serial.FirmwareComponentType_t;
 import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
@@ -72,7 +73,7 @@ public class OTAUpdateService extends IntentService {
 
     private static int mUpdateLength = -1;         //Binary length (bytes)
     private static byte[] mFirmwareSignature = {};
-    private static FirmwareDeviceType_t mFirmwareDeviceType;
+    private static FirmwareComponentType_t mFirmwareDeviceType;
 
     private static long mMetadataDownloadId = -1;
     private static long mBinaryDownloadId = -1;
@@ -204,7 +205,7 @@ public class OTAUpdateService extends IntentService {
     private void handleNodeReboot(byte[] eventBytes) {
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
-        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE ||
+        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
                 (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 
@@ -266,17 +267,17 @@ public class OTAUpdateService extends IntentService {
             return;
         }
         if(firmwareVersion.startsWith("SmartNode_")) {
-            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
+            mFirmwareDeviceType = FirmwareComponentType_t.SMART_NODE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
-            mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
+            mFirmwareDeviceType = FirmwareComponentType_t.ITM_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         } else if(firmwareVersion.startsWith("HyperStat_")) {
-            mFirmwareDeviceType = FirmwareDeviceType_t.HYPER_STAT_DEVICE_TYPE;
+            mFirmwareDeviceType = FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }else if(firmwareVersion.startsWith("CM_")){
-            mFirmwareDeviceType = FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE;
+            mFirmwareDeviceType = FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }else{
             otaRequestProcessInProgress = false;
@@ -293,7 +294,7 @@ public class OTAUpdateService extends IntentService {
      * @param versionMinor The minor version of the new firmware
      * @param deviceType   The type of device being updated
      */
-    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
         Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
         if (mUpdateInProgress) {
@@ -382,7 +383,7 @@ public class OTAUpdateService extends IntentService {
      * @param versionMajor The expected major version
      * @param versionMinor The expected minor version
      */
-    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
 
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
@@ -415,7 +416,7 @@ public class OTAUpdateService extends IntentService {
      *
      * @param dir The directory to search for the binary file
      */
-    private void runBinaryCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private void runBinaryCheck(File dir, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
         Log.d(TAG, "[BINARY] Running binary check on file: " + filename);
@@ -458,7 +459,7 @@ public class OTAUpdateService extends IntentService {
      * @param fileFormat The file extension type (e.g. ".meta" or ".bin")
      * @return The DownloadManager ID for this file
      */
-    private long startFileDownload(String filename, FirmwareDeviceType_t deviceType, String fileFormat) {
+    private long startFileDownload(String filename, FirmwareComponentType_t deviceType, String fileFormat) {
         String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
         String filePathUrl = DOWNLOAD_BASE_URL + deviceType.getUpdateUrlDirectory() + filename + fileFormat;
         Log.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
@@ -498,7 +499,7 @@ public class OTAUpdateService extends IntentService {
      * @param dir        The directory where OTA update files are downloaded
      * @param deviceType The type of device whose files are to be deleted
      */
-    private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
+    private void deleteFilesByDeviceType(File dir, FirmwareComponentType_t deviceType){
         try {
             for (File file : dir.listFiles()) {
                 if (file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
@@ -567,7 +568,7 @@ public class OTAUpdateService extends IntentService {
      * @param file       The file to be loaded and processed
      * @param deviceType The type of device being updated
      */
-    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
+    private void setUpdateFile(File file, FirmwareComponentType_t deviceType) {
         Log.d(TAG, "[STARTUP] Moving binary file to RAM");
         packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
 
@@ -646,7 +647,7 @@ public class OTAUpdateService extends IntentService {
      *
      * @param firmware The type of device being updated
      */
-    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
+    private void sendFirmwareMetadata(FirmwareComponentType_t firmware) {
         CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
 
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
@@ -748,7 +749,7 @@ public class OTAUpdateService extends IntentService {
         return (major >= 0) && (minor >= 0);
     }
 
-    private String makeFileName(int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private String makeFileName(int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
         return deviceType.getUpdateFileName() + "_v" + versionMajor + "." + versionMinor;
     }
 

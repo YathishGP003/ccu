@@ -8,8 +8,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import org.projecthaystack.HGrid;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +22,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -111,13 +108,13 @@ public class MigrationUtil {
         // Because in server we will never get to know these diag points are belongs which ccu
         // Create create fresh daig points.
 
-        HashMap ccu = ccuHsApi.readEntity("device and ccu");
+        HashMap<Object, Object> ccu = ccuHsApi.readEntity("device and ccu");
         if (ccu.isEmpty()) {
             Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
             return;
         }
 
-        HashMap diag = ccuHsApi.readEntity("equip and diag");
+        HashMap<Object, Object> diag = ccuHsApi.readEntity("equip and diag");
         if (!diag.isEmpty()) {
             Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
             // Diag are present so check with gatewayRef

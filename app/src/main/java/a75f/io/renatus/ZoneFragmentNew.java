@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static java.lang.Double.parseDouble;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -48,6 +49,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -77,6 +80,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -84,6 +88,7 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
@@ -111,7 +116,10 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
     private static final String LOG_TAG = " ZoneFragmentNew ";
@@ -127,6 +135,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     public DataArrayAdapter<Floor> mFloorListAdapter;
     ArrayList<Zone> roomList = new ArrayList();
 
+    private HashMap<Object, Object> useCelsius;
     private RelativeLayout weather_data = null;
     private TextView place;
     private TextView temperature;
@@ -197,6 +206,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
         parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
         return rootView;
@@ -362,7 +372,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
         }
     }
-    
+
+    public String StatusCelsiusVal(String temp)
+    {
+        ArrayList < Double > myDoubles = new ArrayList < Double >();
+        Matcher matcher = Pattern.compile( "[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?" ).matcher( temp );
+
+        while ( matcher.find() )
+        {
+            double element = Double.parseDouble( matcher.group() );
+            myDoubles.add( Math.abs(element) );
+        }
+        if(myDoubles.size() > 0) {
+            try {
+                return ("In Occupied mode, changes to Energy saving range of " + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
+            }  catch (Exception e) {
+               e.printStackTrace();
+               return (" ");
+            }
+        } else {
+            return (" ");
+        }
+    }
+
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
         if (getActivity() != null) {
             int i;
@@ -380,7 +412,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
-                            scheduleStatus.setText(status);
+                            try {
+                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                                scheduleStatus.setText(StatusCelsiusVal(status));
+                            } else {
+                                scheduleStatus.setText(status);
+                            }
+                            } catch (Exception e) {
+                            e.printStackTrace();
+                            }
 
                            /* if (vacationStatus.equals("Active Vacation"))
                             {
@@ -477,9 +517,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     public void UpdateWeatherData() {
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
 
-            temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
-            maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
-            minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
+            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                temperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
+                maximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
+                minimumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
+            } else {
+                temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
+                maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
+                minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
+            }
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
             double weatherHumidity = WeatherDataDownloadService.getHumidity();
@@ -832,10 +878,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
-        Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe(status -> scheduleStatus.setText(status));
+        try {
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
+        } else {
+            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(status -> scheduleStatus.setText(status));
+        }
+        } catch (Exception e) {
+        e.printStackTrace();
+        }
 
         Observable.fromCallable(() -> ScheduleProcessJob.getVacationStateString(zoneId))
                   .subscribeOn(Schedulers.io())
@@ -1428,10 +1485,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         scheduleSpinner.setAdapter(scheduleAdapter);
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
-        Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe(status -> scheduleStatus.setText(status));
+        try {
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
+        } else {
+            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(status -> scheduleStatus.setText(status));
+        }
+        } catch (Exception e) {
+        e.printStackTrace();
+        }
 
         Observable.fromCallable(() -> ScheduleProcessJob.getVacationStateString(zoneId))
                   .subscribeOn(Schedulers.io())
@@ -2012,9 +2080,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                                nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
+                                nonTempControl.setPiInputUnitText(" \u00B0C");
+                            } else {
+                                nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                                nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                            }
                             nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                            nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
                             } else {
@@ -2116,9 +2189,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
-        textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
+        }
         textViewLabel4.setText("Supply Airflow : ");
-        textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
+        }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
         linearLayoutZonePoints.addView(viewTitle);
@@ -2151,7 +2232,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewStatus.setText(ssePoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
-        textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(ssePoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
+        }
         if (!Boolean.TRUE.equals(ssePoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
 
@@ -2212,7 +2297,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel1.setText("Damper : ");
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
-        textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+        }
         if (!Boolean.TRUE.equals(dabPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
 
@@ -2249,16 +2338,35 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-        if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
-            textViewLabel1.setText("Cooling Supply Airflow : ");
-            textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
-        } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
-            textViewLabel1.setText("Heating Supply Airflow : ");
-            textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
+                textViewLabel1.setText("Cooling Supply Airflow : ");
+                textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("CoolingSupplyAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
+                textViewLabel1.setText("Heating Supply Airflow : ");
+                textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("HeatingSupplyAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            }
+        } else {
+            if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
+                textViewLabel1.setText("Cooling Supply Airflow : ");
+                textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
+            } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
+                textViewLabel1.setText("Heating Supply Airflow : ");
+                textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
+            }
         }
 
         textViewLabel2.setText("Discharge Airflow : ");
-        textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
+        try {
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
+        }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (dualDuctPoints.containsKey("CoolingDamper")) {
             textViewLabel3.setText("Cooling Damper : ");
@@ -2300,7 +2408,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
         CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(cpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
+        }
 
         if (!Boolean.TRUE.equals(cpuEquipPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
@@ -2530,7 +2642,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(conditionSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(hpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
+        }
         if (!Boolean.TRUE.equals(hpuEquipPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
 
@@ -2770,7 +2886,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
-        textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
+
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p2FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
+        }
 
         if (!Boolean.TRUE.equals(p2FCUPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
@@ -2930,7 +3051,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
-        textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p4FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+        } else {
+            textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
+        }
         if (!Boolean.TRUE.equals(p4FCUPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
 
@@ -3155,7 +3280,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
 
         double processValue = (double) plcPoints.get("Input Value");
-        textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
+        } else {
+            textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        }
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
 
@@ -3478,13 +3607,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
 
-            String label_string = sensePoints.get("Thermistor1").toString() +
-                     " ("+ getString(R.string.thermistor1_label)+") " + " : ";
-            String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
-                    "Unit3").toString());
+            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                String label_string = sensePoints.get("Thermistor1").toString() +
+                        " (" + getString(R.string.thermistor1_label) + ") " + " : ";
+                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
+                label.setText(label_string);
+                val.setText(val_string);
+            } else {
+                String label_string = sensePoints.get("Thermistor1").toString() +
+                        " (" + getString(R.string.thermistor1_label) + ") " + " : ";
+                String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
+                        "Unit3").toString());
 
-            label.setText(label_string);
-            val.setText(val_string);
+                label.setText(label_string);
+                val.setText(val_string);
+            }
 
             linearLayoutZonePoints.addView(viewPointRow1);
         }
@@ -3498,13 +3635,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
-            String label_string = sensePoints.get("Thermistor2").toString() +
-                   " (" + getString(R.string.thermistor2_label)+") " + " : ";
-            String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
-                    "Unit4").toString());
+            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                String label_string = sensePoints.get("Thermistor2").toString() +
+                        " (" + getString(R.string.thermistor2_label) + ") " + " : ";
+                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
+                label.setText(label_string);
+                val.setText(val_string);
+            } else {
+                String label_string = sensePoints.get("Thermistor2").toString() +
+                        " (" + getString(R.string.thermistor2_label)+") " + " : ";
+                String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
+                        "Unit4").toString());
 
-            label.setText(label_string);
-            val.setText(val_string);
+                label.setText(label_string);
+                val.setText(val_string);
+            }
 
             linearLayoutZonePoints.addView(viewPointRow1);
         }
@@ -3840,7 +3985,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(Float.parseFloat(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString().replaceAll("[^0-9\\.]",""))))))+ " \u00B0C");
+        } else {
+            textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
+        }
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);

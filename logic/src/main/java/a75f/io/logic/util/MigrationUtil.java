@@ -8,6 +8,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import org.projecthaystack.HGrid;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +38,7 @@ import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 
 public class MigrationUtil {
@@ -96,8 +99,10 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
-
-        doDiagPointsMigration(CCUHsApi.getInstance());
+        if(!PreferenceUtil.getDiagEquipMigration()){
+            doDiagPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDiagEquipMigration();
+        }
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
@@ -106,30 +111,32 @@ public class MigrationUtil {
         // Because in server we will never get to know these diag points are belongs which ccu
         // Create create fresh daig points.
 
-        HashMap ccu = ccuHsApi.read("device and ccu");
-        RestoreCCUHsApi restoreCCUHsApi = RestoreCCUHsApi.getInstance();
+        HashMap ccu = ccuHsApi.readEntity("device and ccu");
         if (ccu.size() == 0) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
             return;
         }
 
-      /*  HashMap diag = ccuHsApi.read("equip and diag");
-
-        if (diag.size() == 0) {
-            // Diag points are not found locally
-            DiagEquip.getInstance().create();
-            Equip systemEquip = new Equip.Builder()
-                    .setHashMap(ccuHsApi.read("system and equip")).build();
-            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
-            return;
+        HashMap diag = ccuHsApi.readEntity("equip and diag");
+        if (!diag.isEmpty()) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
+            // Diag are present so check with def
+            Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+            if(!diagEquip.getMarkers().contains("gatewayRef")){
+                // Update gateway reff
+                Log.i(TAG_CCU_MIGRATION_UTIL, "adding gateway reference");
+                Equip systemEquip = new Equip.Builder()
+                        .setHashMap(ccuHsApi.read("system and equip")).build();
+                ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+            }
+        }else{
+            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not avaiable Restoring daig equips");
+            // Locally diag points are missing check at silo
+            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
         }
-        Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
 
-        if(!diagEquip.getMarkers().contains("gatewayRef")){
-            Equip systemEquip = new Equip.Builder()
-                    .setHashMap(ccuHsApi.read("system and equip")).build();
-            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
-        }
-*/
+
+
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {

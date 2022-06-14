@@ -226,10 +226,16 @@ public class PreferenceUtil {
     public static boolean getDamperFeedbackMigration() {
         return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
     }
+    public static void setDiagEquipMigration() {
+        setBooleanPreference(DIAG_POINTS_MIGRATION, true);
+    }
+    public static boolean getDiagEquipMigration() {
+        return getBooleanPreference(DIAG_POINTS_MIGRATION);
+    }
 
 
     public static void setSmartNodeMigration() {
-        setBooleanPreference(SMART_NODE_MIGRATION, true);
+        setBooleanPreference(SMART_NODE_MIGRATION, false);
 
     }
 }

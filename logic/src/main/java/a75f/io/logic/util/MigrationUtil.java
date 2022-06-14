@@ -112,7 +112,7 @@ public class MigrationUtil {
         // Create create fresh daig points.
 
         HashMap ccu = ccuHsApi.readEntity("device and ccu");
-        if (ccu.size() == 0) {
+        if (ccu.isEmpty()) {
             Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
             return;
         }
@@ -120,19 +120,18 @@ public class MigrationUtil {
         HashMap diag = ccuHsApi.readEntity("equip and diag");
         if (!diag.isEmpty()) {
             Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
-            // Diag are present so check with def
+            // Diag are present so check with gatewayRef
             Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
             if(!diagEquip.getMarkers().contains("gatewayRef")){
                 // Update gateway reff
                 Log.i(TAG_CCU_MIGRATION_UTIL, "adding gateway reference");
-                Equip systemEquip = new Equip.Builder()
-                        .setHashMap(ccuHsApi.read("system and equip")).build();
-                ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+                ccuHsApi.updateDiagGatewayRef(ccu.get("gatewayRef").toString());
             }
         }else{
-            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not avaiable Restoring daig equips");
+            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not available Restoring daig equips");
             // Locally diag points are missing check at silo
             new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
+
         }
 
 

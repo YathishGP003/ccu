@@ -135,7 +135,7 @@ class HSReconfigureUtil {
         }
 
         // Get Equip Points Util
-        fun getEquipPointsUtil(equip: Equip, haystack: CCUHsApi): HyperStatPointsUtil {
+         fun getEquipPointsUtil(equip: Equip, haystack: CCUHsApi): HyperStatPointsUtil {
             return HyperStatPointsUtil(
                 profileName = CPU,
                 equipRef = equip.id,

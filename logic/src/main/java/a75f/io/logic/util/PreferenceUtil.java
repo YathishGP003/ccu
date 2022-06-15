@@ -203,9 +203,6 @@ public class PreferenceUtil {
         setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
     }
 
-
-
-
     public static boolean isIduPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("iduMigration",false);

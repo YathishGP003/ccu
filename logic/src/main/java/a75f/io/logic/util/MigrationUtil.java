@@ -104,6 +104,10 @@ public class MigrationUtil {
             PreferenceUtil.setVocPm2p5Migration();
         }
 
+        if(!PreferenceUtil.getDiagEquipMigration()){
+            doDiagPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDiagEquipMigration();
+        }
 
 
     }
@@ -146,10 +150,6 @@ public class MigrationUtil {
 
     private static boolean isPointExist(String query, CCUHsApi ccuHsApi){
       return !ccuHsApi.readEntity(query).isEmpty();
-        if(!PreferenceUtil.getDiagEquipMigration()){
-            doDiagPointsMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setDiagEquipMigration();
-        }
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {

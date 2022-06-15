@@ -767,6 +767,101 @@
 
 
             </LinearLayout>
+            <LinearLayout
+
+                android:paddingTop="@dimen/appbar_padding_top"
+                android:paddingBottom="@dimen/appbar_padding_top"
+                android:id="@+id/vocConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="48dp">
+
+
+                <TextView
+                    android:id="@+id/zoneVocThreshold"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textColor="@drawable/label_textselector"
+                    android:textAppearance="@style/label_values"
+                    android:gravity="left"
+                    android:text="@string/zoneVocThreshold" />
+
+                <Spinner
+                    android:id="@+id/zoneVocThresholdSpinner"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/zoneVocTarget"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textAppearance="@style/label_values"
+                    android:gravity="left"
+                    android:paddingLeft="@dimen/appbar_padding_top"
+                    android:text="@string/zoneVocTarget" />
+
+                <Spinner
+                    android:id="@+id/zoneVocTargetSpinner"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/appbar_padding_top"
+                android:paddingBottom="@dimen/appbar_padding_top"
+                android:id="@+id/pmConfig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="48dp"
+                >
+
+
+                <TextView
+                    android:id="@+id/zonepmThresholdLable"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textColor="@drawable/label_textselector"
+                    android:textAppearance="@style/label_values"
+                    android:gravity="left"
+                    android:text="@string/zonepmThreshold" />
+
+                <Spinner
+                    android:id="@+id/zonepmThresholdSpinner"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/zonepmtagertLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textAppearance="@style/label_values"
+                    android:gravity="left"
+                    android:paddingLeft="@dimen/appbar_padding_top"
+                    android:text="@string/zonepmTarget" />
+
+                <Spinner
+                    android:id="@+id/zonepmTargetSpinner"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent" />
+
+
+            </LinearLayout>
+
+
             <Button
                 android:id="@+id/setButton"
                 android:layout_width="wrap_content"

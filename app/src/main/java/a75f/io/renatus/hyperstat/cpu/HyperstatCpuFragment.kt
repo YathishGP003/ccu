@@ -15,7 +15,6 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
-import a75f.io.renatus.hyperstat.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
@@ -61,10 +60,10 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     lateinit var autoAwaySwitch: ToggleButton
 
     // 6 rows, 1 for each relay
-    lateinit var relayUIs: List<RelayWidgets>
+    private lateinit var relayUIs: List<RelayWidgets>
 
     // 3 rows, 1 for each analog out, plus damper voltage selectors
-    lateinit var analogOutUIs: List<AnalogOutWidgets>
+    private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
     lateinit var airflowSensorSwitch: ToggleButton
     lateinit var doorWindowSensorSwitch: ToggleButton
@@ -74,9 +73,15 @@ class HyperStatCpuFragment : BaseDialogFragment() {
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
-    lateinit var zoneCO2DamperOpeningRate: Spinner
-    lateinit var zoneCO2Threshold: Spinner
-    lateinit var zoneCO2Target: Spinner
+    private lateinit var zoneCO2DamperOpeningRate: Spinner
+    private lateinit var zoneCO2Threshold: Spinner
+    private lateinit var zoneCO2Target: Spinner
+
+    lateinit var zoneVOCThreshold: Spinner
+    lateinit var zoneVOCTarget: Spinner
+    lateinit var zonePMThreshold: Spinner
+    lateinit var zonePMTarget: Spinner
+
 
     /**
      * Test Signal Buttons
@@ -224,6 +229,11 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
 
+            zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
+            zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
+            zonePMThreshold = findViewById(R.id.zonepmThresholdSpinner)
+            zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
+
             setButton = findViewById(R.id.setButton)
 
             /**
@@ -295,9 +305,35 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             requireContext(), R.layout.larger_spinner_item,
             co2OpeningValues
         )
+
+        val vocAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
+            requireContext(), R.layout.larger_spinner_item,
+            vocValues()
+        )
+        val pmAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
+            requireContext(), R.layout.larger_spinner_item,
+            pmValues()
+        )
+
+
+
         zoneCO2DamperOpeningRate.adapter = co2OpeningAdapter
         zoneCO2Threshold.adapter = co2Adapter
         zoneCO2Target.adapter = co2Adapter
+
+        zoneVOCThreshold.adapter = vocAdapter
+        zoneVOCTarget.adapter = vocAdapter
+
+        zonePMThreshold.adapter = pmAdapter
+        zonePMTarget.adapter = pmAdapter
+
+
+        // set default values
+        zoneVOCThreshold.setSelection(zoneVOCThreshold.adapter.count -1)
+        zoneVOCTarget.setSelection(zoneVOCTarget.adapter.count -1)
+
+        zonePMThreshold.setSelection(zonePMThreshold.adapter.count -1)
+        zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
 
         analogOutUIs.forEach {
@@ -409,10 +445,19 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         zoneCO2Threshold.setOnItemSelected { position -> viewModel.zoneCO2ThresholdSelect(position) }
         zoneCO2Target.setOnItemSelected { position -> viewModel.zoneCO2TargetSelect(position) }
 
+        zoneVOCThreshold.setOnItemSelected { position ->viewModel.zoneVOCThresholdSelect(position)  }
+        zoneVOCTarget.setOnItemSelected { position ->viewModel.zoneVOCTargetSelect(position)  }
+        zonePMThreshold.setOnItemSelected { position ->viewModel.zonePmThresholdSelect(position)  }
+        zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
+
 
         // On Click save the CPU configuration
         setButton.setOnClickListener {
             setButton.isEnabled = false
+            Log.i("DEV_DEBUG", "zoneVOCThreshold: ${zoneVOCThreshold.selectedItem}")
+            Log.i("DEV_DEBUG", "zoneVOCTarget: ${zoneVOCTarget.selectedItem}")
+            Log.i("DEV_DEBUG", "zonePMThreshold: ${zonePMThreshold.selectedItem}")
+            Log.i("DEV_DEBUG", "zonePMTarget: ${zonePMTarget.selectedItem}")
             configurationDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
                     ProgressDialogUtils.showProgressDialog(activity, "Saving Hyperstat CPU Configuration")
@@ -487,7 +532,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 analogOutAtFanMedium.setSelection(analogOutState.perAtFanMediumPosition)
                 analogOutAtFanHigh.setSelection(analogOutState.perAtFanHighPosition)
 
-                if (analogOutState.association.ordinal == CpuAnalogOutAssociation.DCV_DAMPER.ordinal) {
+                if (analogOutState.enabled && analogOutState.association.ordinal == CpuAnalogOutAssociation.DCV_DAMPER.ordinal) {
                     isDampSelected = true
                 }
             }
@@ -503,10 +548,17 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 selector.setSelection(analogInState.association.ordinal)
             }
         }
+
         zoneCO2Layout.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
         zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
         zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)
+
+        zoneVOCThreshold.setSelection(viewState.zoneVocThresholdPos)
+        zoneVOCTarget.setSelection(viewState.zoneVocTargetPos)
+
+        zonePMThreshold.setSelection(viewState.zonePm2p5ThresholdPos)
+        zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
     }
 
 
@@ -516,7 +568,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         disposables.dispose()
         configurationDisposable.dispose()
         if (Globals.getInstance().isTestMode) {
-            Globals.getInstance().isTestMode = false;
+            Globals.getInstance().isTestMode = false
         }
     }
 

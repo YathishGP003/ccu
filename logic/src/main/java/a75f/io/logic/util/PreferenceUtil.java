@@ -20,6 +20,7 @@ public class PreferenceUtil {
     private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
+    private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
 
     public static void setContext(Context c) {
         context= c;
@@ -228,16 +229,25 @@ public class PreferenceUtil {
     public static boolean getSNMigration() {
         return getBooleanPreference(SMART_NODE_MIGRATION);
     }
-    public static void setDamperFeedbackMigration() {
-        setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, false);
-    }
-    public static boolean getDamperFeedbackMigration() {
-        return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
-    }
-
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
 
     }
+
+    public static void setDamperFeedbackMigration() {
+        setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, true);
+    }
+    public static boolean getDamperFeedbackMigration() {
+        return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
+    }
+    public static void setVocPm2p5Migration() {
+        setBooleanPreference(VOC_PM2P5_MIGRATION, true);
+    }
+    public static boolean getVocPm2p5Migration() {
+        return getBooleanPreference(VOC_PM2P5_MIGRATION);
+    }
+
+
+
 }

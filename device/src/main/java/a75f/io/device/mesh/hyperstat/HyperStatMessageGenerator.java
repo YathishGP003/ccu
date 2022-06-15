@@ -77,8 +77,7 @@ public class HyperStatMessageGenerator {
      * @return
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
-        //TODO - Proto file does not define profile bitmap, enabledRelay.
-        HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
+        return HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
             .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
             .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
@@ -89,11 +88,13 @@ public class HyperStatMessageGenerator {
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
-             .setDisplayHumidity(true)
-             .setDisplayCO2(true)
+            .setDisplayHumidity(true)
+            .setDisplayCO2(true)
+            .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
+            .setPm25AlertThreshold((int)readVocThresholdValue(equipRef))
+            .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
-        return settings;
     }
     
     /**
@@ -295,6 +296,22 @@ public class HyperStatMessageGenerator {
         }
 
     }
+    public static double readCo2ThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and co2 and threshold and equipRef == \""+equipRef+ "\"");
+    }
+    public static double readVocThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and voc and threshold and equipRef == \""+equipRef+ "\"");
+    }
+
+    public static double readPm2p5ThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and pm2p5 and threshold and equipRef == \""+equipRef+ "\"");
+    }
+
+
+
 
     public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
         return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());

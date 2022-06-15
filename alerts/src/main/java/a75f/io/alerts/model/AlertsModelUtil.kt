@@ -2,8 +2,6 @@ package a75f.io.alerts.model
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
-import a75f.io.logger.CcuLog
-import java.lang.StringBuilder
 
 /**
  * Miscellaneious data classes, typealiases, extensions, and utility functions for Alerts Kt
@@ -66,7 +64,6 @@ operator fun List<Alert>.minus(alertDefsState: AlertDefsState): AlertsStateChang
       .filter { ! this.contains(it) }
    val fixedAlerts = alertDefsState.getFixedAlerts()
       .filter { this.contains(it) } .map { this.find(it)!! }
-
    return AlertsStateChange(newAlerts = newAlerts, newlyFixedAlerts = fixedAlerts)
 }
 

@@ -116,8 +116,39 @@ public class DeviceUtil {
         }
         return true;
     }
-    
-    public static void sendSeedMessage(Short nodeAddr, boolean isSmartStat) {
+
+    public static double getValidDesiredCoolingTemp(double desiredTemp,
+                                                    double coolingDeadband,
+                                                    double maxCoolingUserLimit,
+                                                    double minCoolingUserLimit
+                                                    ) {
+        double calculateCoolingDesiredTemp = desiredTemp + coolingDeadband;
+        if (calculateCoolingDesiredTemp <= maxCoolingUserLimit &&
+                calculateCoolingDesiredTemp >= minCoolingUserLimit)
+            return desiredTemp + coolingDeadband;
+        else if (calculateCoolingDesiredTemp < minCoolingUserLimit)
+            return minCoolingUserLimit;
+        else
+            return maxCoolingUserLimit;
+
+    }
+    public static double getValidDesiredHeatingTemp(double desiredTemp,
+                                                    double heatingDeadband,
+                                                    double maxHeatingUserLimit,
+                                                    double minHeatingUserLimit) {
+
+        double calculateHeatingDesiredTemp = desiredTemp - heatingDeadband;
+        if (calculateHeatingDesiredTemp <= maxHeatingUserLimit &&
+                calculateHeatingDesiredTemp >= minHeatingUserLimit)
+            return calculateHeatingDesiredTemp;
+        else if (calculateHeatingDesiredTemp < minHeatingUserLimit)
+            return minHeatingUserLimit;
+        else
+            return maxHeatingUserLimit;
+    }
+
+
+        public static void sendSeedMessage(Short nodeAddr, boolean isSmartStat) {
         Equip equip = HSUtil.getEquipForModule(nodeAddr);
         if (equip == null) {
             return;

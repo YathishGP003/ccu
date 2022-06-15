@@ -37,6 +37,7 @@ class ConfigPointUpdateHandler {
     
     private static void updateConfigEnabled(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigEnabled "+configPoint.getDisplayName());
+        updatePhysicalConfigEnabled(msgObject, configPoint);
         writePointFromJson(configPoint.getId(), msgObject, hayStack);
         updateConditioningMode();
     }
@@ -56,10 +57,31 @@ class ConfigPointUpdateHandler {
         writePointFromJson(configPoint.getId(), msgObject, hayStack);
     }
     
+    /**
+     * Creates occupancy and humidifier logical points when config is enabled.
+     * @param msgObject
+     * @param configPoint
+     */
+    private static void updatePhysicalConfigEnabled(JsonObject msgObject, Point configPoint) {
+        String configType = getOutputTagFromConfig(configPoint);
+        if (configType == null) {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Invalid config point update "+configPoint);
+        }
+    
+        SystemProfile systemProfile = L.ccu().systemProfile;
+        double val = msgObject.get("val").getAsDouble();
+    
+        if (systemProfile instanceof DabFullyModulatingRtu) {
+            ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
+        } else if (systemProfile instanceof VavFullyModulatingRtu) {
+            ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
+        }
+    }
+    
     private static void updateConfigAssociation(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation "+configPoint.getDisplayName());
         
-        String relayType = getRelayTagFromConfig(configPoint);
+        String relayType = getOutputTagFromConfig(configPoint);
         if (relayType == null) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Invalid config point update "+configPoint.toString());
         }
@@ -119,21 +141,29 @@ class ConfigPointUpdateHandler {
         hayStack.writePointStrValLocal(id, level, who, val, duration);
     }
     
-    private static String getRelayTagFromConfig(Point configPoint) {
+    private static String getOutputTagFromConfig(Point configPoint) {
         
-        if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+        if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
+            return Tags.ANALOG1;
+        } else if (configPoint.getMarkers().contains(Tags.ANALOG2)) {
+            return Tags.ANALOG2;
+        } else if (configPoint.getMarkers().contains(Tags.ANALOG3)) {
+            return Tags.ANALOG3;
+        } else if (configPoint.getMarkers().contains(Tags.ANALOG4)) {
+            return Tags.ANALOG4;
+        } else if (configPoint.getMarkers().contains(Tags.RELAY1)) {
             return Tags.RELAY1;
-        } if (configPoint.getMarkers().contains(Tags.RELAY2)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY2)) {
             return Tags.RELAY2;
-        } if (configPoint.getMarkers().contains(Tags.RELAY3)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY3)) {
             return Tags.RELAY3;
-        } if (configPoint.getMarkers().contains(Tags.RELAY4)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY4)) {
             return Tags.RELAY4;
-        } if (configPoint.getMarkers().contains(Tags.RELAY5)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY5)) {
             return Tags.RELAY5;
-        } if (configPoint.getMarkers().contains(Tags.RELAY6)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY6)) {
             return Tags.RELAY6;
-        } if (configPoint.getMarkers().contains(Tags.RELAY7)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY7)) {
             return Tags.RELAY7;
         }
         return null;

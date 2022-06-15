@@ -136,7 +136,7 @@
     <string name="fan_enabled"> Fan Enabled </string>
     <string name="occupied_enabled"> Occupied Enabled </string>
     <string name="humidifier"> Humidifier </string>
-    <string name="dehumidifier"> De Humidifier </string>
+    <string name="dehumidifier"> DeHumidifier </string>
 
     <string-array name="hyperstat_stage_selector">
         <item>  @string/cooling_stage_1 </item>
@@ -473,12 +473,12 @@
     <string name="relay5">Relay 5</string>
     <string name="relay6">Relay 6</string>
     <string name="relay7">Relay 7</string>
-    <string name="analog1">Analog-out 1</string>
-    <string name="analog2">Analog-out 2</string>
-    <string name="analog3">Analog-out 3</string>
+    <string name="analog1">Analog-out1</string>
+    <string name="analog2">Analog-out2</string>
+    <string name="analog3">Analog-out3</string>
     <string name="door_window_sensor">Door/Window Sensor (Th2)</string>
-    <string name="analogin_1">Analog-in 1</string>
-    <string name="analogin_2">Analog-in 2</string>
+    <string name="analogin_1">Analog-in1</string>
+    <string name="analogin_2">Analog-in2</string>
 
     <string name="hyperstat_analog_out">Analog-out</string>
 
@@ -491,55 +491,55 @@
 
 
     <!--VAV Fully Modulating AHU Profile-->
-    <string name="label_analog1">Analog-out1</string>
-    <string name="label_analog2">Analog-out2</string>
-    <string name="label_analog3">Analog-out3</string>
-    <string name="label_analog4">Analog-out4</string>
+    <string name="label_analog1">Analog-Out1</string>
+    <string name="label_analog2">Analog-Out2</string>
+    <string name="label_analog3">Analog-Out3</string>
+    <string name="label_analog4">Analog-Out4</string>
     <string name="label_cooling">Cooling</string>
     <string name="label_fanspeed">Fan Speed</string>
     <string name="label_heating">Heating</string>
     <string name="label_outsideair">Outside Air</string>
     <string name="label_fanenable">Fan Enable</string>
-    <string name="label_mincooling">Analog-out1 at \nMin Cooling</string>
-    <string name="label_maxcooling">Analog-out1 at \nMax Cooling</string>
-    <string name="label_minpressure">Analog-out2 at \nMin Static Pressure</string>
-    <string name="label_maxpressure">Analog-out2 at \nMax Static Pressure</string>
-    <string name="label_minheating">Analog-out3 at \nMin Heating</string>
-    <string name="label_maxheating">Analog-out3 at \nMax Heating</string>
-    <string name="label_minfa">Analog-out4 at \nMin Fresh Air</string>
-    <string name="label_maxfa">Analog-out4 at \nMax Fresh Air</string>
+    <string name="label_mincooling">Analog-Out1 at \nMin Cooling</string>
+    <string name="label_maxcooling">Analog-Out1 at \nMax Cooling</string>
+    <string name="label_minpressure">Analog-Out2 at \nMin Static Pressure</string>
+    <string name="label_maxpressure">Analog-Out2 at \nMax Static Pressure</string>
+    <string name="label_minheating">Analog-Out3 at \nMin Heating</string>
+    <string name="label_maxheating">Analog-Out3 at \nMax Heating</string>
+    <string name="label_minfa">Analog-Out4 at \nMin Fresh Air</string>
+    <string name="label_maxfa">Analog-Out4 at \nMax Fresh Air</string>
 
 
     <!--VAV Staged RTU with VFD Fan Profile-->
-    <string name="label_economizer">Analog-out2 \nDuring Economizer</string>
-    <string name="label_recirculate">Analog-out2 \nDuring Recirculate</string>
-    <string name="label_coolstage1">Analog-out2 \nDuring Cool Stage 1</string>
-    <string name="label_coolstage2">Analog-out2 \nDuring Cool Stage 2</string>
-    <string name="label_coolstage3">Analog-out2 \nDuring Cool Stage 3</string>
-    <string name="label_coolstage4">Analog-out2 \nDuring Cool Stage 4</string>
-    <string name="label_coolstage5">Analog-out2 \nDuring Cool Stage 5</string>
-    <string name="label_heatstage1">Analog-out2 \nDuring Heat Stage 1</string>
-    <string name="label_heatstage2">Analog-out2 \nDuring Heat Stage 2</string>
-    <string name="label_heatstage3">Analog-out2 \nDuring Heat Stage 3</string>
-    <string name="label_heatstage4">Analog-out2 \nDuring Heat Stage 4</string>
-    <string name="label_heatstage5">Analog-out2 \nDuring Heat Stage 5</string>
+    <string name="label_economizer">Analog-Out2 \nDuring Economizer</string>
+    <string name="label_recirculate">Analog-Out2 \nDuring Recirculate</string>
+    <string name="label_coolstage1">Analog-Out2 \nDuring Cool Stage 1</string>
+    <string name="label_coolstage2">Analog-Out2 \nDuring Cool Stage 2</string>
+    <string name="label_coolstage3">Analog-Out2 \nDuring Cool Stage 3</string>
+    <string name="label_coolstage4">Analog-Out2 \nDuring Cool Stage 4</string>
+    <string name="label_coolstage5">Analog-Out2 \nDuring Cool Stage 5</string>
+    <string name="label_heatstage1">Analog-Out2 \nDuring Heat Stage 1</string>
+    <string name="label_heatstage2">Analog-Out2 \nDuring Heat Stage 2</string>
+    <string name="label_heatstage3">Analog-Out2 \nDuring Heat Stage 3</string>
+    <string name="label_heatstage4">Analog-Out2 \nDuring Heat Stage 4</string>
+    <string name="label_heatstage5">Analog-Out2 \nDuring Heat Stage 5</string>
 
 
-    <string name="label_vfd_analog2_min">Analog-out2 Default</string>
+    <string name="label_vfd_analog2_min">Analog-Out2 Default</string>
 
 
     <!--VAV Advanced Hybrid AHU Profile-->
     <string name="label_composite">Composite</string>
-    <string name="label_a1mincool">Analog-out1 \nAt Min Cooling</string>
-    <string name="label_a1maxcool">Analog-out1 \nAt Max Cooling</string>
-    <string name="label_a2minpres">Analog-out2 \nAt Min Static Pressure</string>
-    <string name="label_a2maxpres">Analog-out2 \nAt Max Static Pressure</string>
-    <string name="label_a3minheat">Analog-out3 \nAt Min Heating</string>
-    <string name="label_a3maxheat">Analog-out3 \nAt Max Heating</string>
-    <string name="label_a4mincool">Analog-out4 \nAt Min Cooling</string>
-    <string name="label_a4maxcool">Analog-out4 \nAt Max Cooling</string>
-    <string name="label_a4minheat">Analog-out4 \nAt Min Heating</string>
-    <string name="label_a4maxheat">Analog-out4 \nAt Max Heating</string>
+    <string name="label_a1mincool">Analog-Out1 \nAt Min Cooling</string>
+    <string name="label_a1maxcool">Analog-Out1 \nAt Max Cooling</string>
+    <string name="label_a2minpres">Analog-Out2 \nAt Min Static Pressure</string>
+    <string name="label_a2maxpres">Analog-Out2 \nAt Max Static Pressure</string>
+    <string name="label_a3minheat">Analog-Out3 \nAt Min Heating</string>
+    <string name="label_a3maxheat">Analog-Out3 \nAt Max Heating</string>
+    <string name="label_a4mincool">Analog-Out4 \nAt Min Cooling</string>
+    <string name="label_a4maxcool">Analog-Out4 \nAt Max Cooling</string>
+    <string name="label_a4minheat">Analog-Out4 \nAt Min Heating</string>
+    <string name="label_a4maxheat">Analog-Out4 \nAt Max Heating</string>
 
     <!---DCWB Profile-->
     <string name="label_dcwb_enable">DCWB Enable</string>
@@ -556,16 +556,16 @@
     <string name="label_chilled_water_max_flow_rate">Chilled water Max Flow rate (GPM) </string>
     <string name="label_analog_in1_at_valve_closed_position">Analog-In 1 at Valve Closed Position </string>
     <string name="label_analog_in1_at_valve_full_position">Analog-In 1 at Valve Full Position </string>
-    <string name="label_analog_out1_at_min_chw_valve">Analog-out 1 at Min CHW Valve </string>
-    <string name="label_analog_out1_at_max_chw_valve">Analog-out 1 at Max CHW Valve </string>
-    <string name="label_analog_out2_at_min_fan_speed">Analog-out 2 at Min Fan Speed </string>
-    <string name="label_analog_out2_at_max_fan_speed">Analog-out 2 at Max Fan Speed </string>
-    <string name="label_analog_out3_at_min_heating">Analog-out 3 at Min Heating </string>
-    <string name="label_analog_out3_at_max_heating">Analog-out 3 at Max Heating </string>
-    <string name="label_analog_out4_at_min_cooling">Analog-out 4 at Min Cooling Loop </string>
-    <string name="label_analog_out4_at_max_cooling">Analog-out 4 at Max Cooling Loop </string>
-    <string name="label_analog_out4_at_min_co2">Analog-out 4 at Min CO2 </string>
-    <string name="label_analog_out4_at_max_co2">Analog-out 4 at Max CO2 </string>
+    <string name="label_analog_out1_at_min_chw_valve">Analog-Out 1 at Min CHW Valve </string>
+    <string name="label_analog_out1_at_max_chw_valve">Analog-Out 1 at Max CHW Valve </string>
+    <string name="label_analog_out2_at_min_fan_speed">Analog-Out 2 at Min Fan Speed </string>
+    <string name="label_analog_out2_at_max_fan_speed">Analog-Out 2 at Max Fan Speed </string>
+    <string name="label_analog_out3_at_min_heating">Analog-Out 3 at Min Heating </string>
+    <string name="label_analog_out3_at_max_heating">Analog-Out 3 at Max Heating </string>
+    <string name="label_analog_out4_at_min_cooling">Analog-Out 4 at Min Cooling Loop </string>
+    <string name="label_analog_out4_at_max_cooling">Analog-Out 4 at Max Cooling Loop </string>
+    <string name="label_analog_out4_at_min_co2">Analog-Out 4 at Min CO2 </string>
+    <string name="label_analog_out4_at_max_co2">Analog-Out 4 at Max CO2 </string>
 
     <string name="label_configure_btu">Please Configure the BTU meter\'s \nModbus parameters.</string>
     <string-array name="dcwb_analog4_options">
@@ -730,8 +730,8 @@
     <string name="label_thin1">TH-in1 Input Sensor</string>
     <string name="label_useanalogin2">Use Analog-in2 for dynamic setpoint</string>
     <string name="label_analogin2">Analog-in2 Input Sensor</string>
-    <string name="label_analogout1min">Analog-out1 at Min Output</string>
-    <string name="label_analogout1max">Analog-out1 at Max Output</string>
+    <string name="label_analogout1min">Analog-Out1 at Min Output</string>
+    <string name="label_analogout1max">Analog-Out1 at Max Output</string>
     <string name="label_zeroerrormp">Expected Zero Error at Midpoint</string>
     <string name="label_targetvalue">Target Value</string>
     <string name="label_expectedError">Expected Error Range</string>
@@ -778,8 +778,8 @@
     <string name="label_co2alert">CO2 Alert Threshold</string>
     <string name="label_exfan_hysteresis">Exhaust Fan Hysteresis (%)</string>
     <string name="label_use_room_co2_sensing">Use Per Room CO2 Sensing</string>
-    <string name="label_oaoanalog1">Outside Air Damper Type\n(Analog-out 1)</string>
-    <string name="label_oaoanalog2">Return Air Damper Type\n(Analog-out 2)</string>
+    <string name="label_oaoanalog1">Outside Air Damper Type\n(Analog-Out 1)</string>
+    <string name="label_oaoanalog2">Return Air Damper Type\n(Analog-Out 2)</string>
     <string name="label_co2threshold">CO2 Threshold (ppm)</string>
     <string name="label_co2offset">CO2 Alert Offset Time</string>
     <string name="label_current_transformer_type">Current Transformer Type</string>
@@ -842,14 +842,14 @@
 
     <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temp</string>
 
-    <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-out1 at Min\n Damper Heating Pos</string>
-    <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-out1 at Max\n Damper Heating Pos</string>
-    <string name="dab_dual_duct_label_ao1_min_damp_cool_pos">Analog-out1 at Min\n Damper Cooling Pos</string>
-    <string name="dab_dual_duct_label_ao1_max_damp_cool_pos">Analog-out1 at Max\n Damper Cooling Pos</string>
-    <string name="dab_dual_duct_label_ao2_min_damp_heat_pos">Analog-out2 at Min\n Damper Heating Pos</string>
-    <string name="dab_dual_duct_label_ao2_max_damp_heat_pos">Analog-out2 at Max\n Damper Heating Pos</string>
-    <string name="dab_dual_duct_label_ao2_min_damp_cool_pos">Analog-out2 at Min\n Damper Cooling Pos</string>
-    <string name="dab_dual_duct_label_ao2_max_damp_cool_pos">Analog-out2 at Max\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-Out1 at Min\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-Out1 at Max\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao1_min_damp_cool_pos">Analog-Out1 at Min\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao1_max_damp_cool_pos">Analog-Out1 at Max\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao2_min_damp_heat_pos">Analog-Out2 at Min\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao2_max_damp_heat_pos">Analog-Out2 at Max\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao2_min_damp_cool_pos">Analog-Out2 at Min\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao2_max_damp_cool_pos">Analog-Out2 at Max\n Damper Cooling Pos</string>
 
     <string name="dab_dual_duct_label_co2_threshold">Zone CO2 Threshold</string>
     <string name="dab_dual_duct_label_co2_target">Zone CO2 Target</string>
@@ -1102,21 +1102,29 @@
     <string name="hello_world">Hello Square World!</string>
 
 
-    <string name="hyperstat_analog_out1_at_low_fan">Analog Out1 at\nFan Low</string>
-    <string name="hyperstat_analog_out1_at_medium_fan">Analog Out1 at\nFan Medium</string>
-    <string name="hyperstat_analog_out1_at_high_fan">Analog Out1 at\nFan High</string>
+    <string name="hyperstat_analog_out1_at_low_fan">Analog-out1 at\nFan Low</string>
+    <string name="hyperstat_analog_out1_at_medium_fan">Analog-out1 at\nFan Medium</string>
+    <string name="hyperstat_analog_out1_at_high_fan">Analog-out1 at\nFan High</string>
 
-    <string name="hyperstat_analog_out2_at_low_fan">Analog Out2 at\nFan Low</string>
-    <string name="hyperstat_analog_out2_at_medium_fan">Analog Out2 at\nFan Medium</string>
-    <string name="hyperstat_analog_out2_at_high_fan">Analog Out2 at\nFan High</string>
+    <string name="hyperstat_analog_out2_at_low_fan">Analog-out2 at\nFan Low</string>
+    <string name="hyperstat_analog_out2_at_medium_fan">Analog-out2 at\nFan Medium</string>
+    <string name="hyperstat_analog_out2_at_high_fan">Analog-out2 at\nFan High</string>
 
-    <string name="hyperstat_analog_out3_at_low_fan">Analog Out3 at\nFan Low</string>
-    <string name="hyperstat_analog_out3_at_medium_fan">Analog Out3 at\nFan Medium</string>
-    <string name="hyperstat_analog_out3_at_high_fan">Analog Out3 at\nFan High</string>
+    <string name="hyperstat_analog_out3_at_low_fan">Analog-out3 at\nFan Low</string>
+    <string name="hyperstat_analog_out3_at_medium_fan">Analog-out3 at\nFan Medium</string>
+    <string name="hyperstat_analog_out3_at_high_fan">Analog-out3 at\nFan High</string>
 
     <string name="zoneCO2DamperOpeningRate">CO2 Damper\nOpeningRate</string>
     <string name="zoneCO2Threshold">CO2 Threshold</string>
     <string name="zoneCO2Target">CO2 Target</string>
+
+    <string name="zoneVocThreshold">VOC Threshold</string>
+    <string name="zoneVocTarget">VOC Target</string>
+
+    <string name="zonepmThreshold">PM 2.5 Threshold</string>
+    <string name="zonepmTarget">PM 2.5 Target</string>
+
+
     <string-array name="hyperstate_medium_high_fanmode">
         <item>  Off </item>
         <item>  Auto </item>

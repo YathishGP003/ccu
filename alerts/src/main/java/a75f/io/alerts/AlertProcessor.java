@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +47,6 @@ public class AlertProcessor
      * Called from AlertRepo upon AlertProcessJob.doJob.
      */
     public List<AlertDefOccurrence> evaluateAlertDefinitions(List<AlertDefinition> alertDefs) {
-        CcuLog.d("CCU_ALERTS", "processAlerts with count " + alertDefs.size());
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
 
         for (AlertDefinition def : alertDefs) {
@@ -59,8 +57,10 @@ public class AlertProcessor
 
             Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
             def.evaluate(defaultSharedPrefs);
+
             if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
-                occurrences.addAll(processForEquips(def));
+                List<AlertDefOccurrence> retunredList = processForEquips(def);
+                occurrences.addAll(retunredList);
             } else {
                 occurrences.add(process(def));
             }
@@ -101,7 +101,6 @@ public class AlertProcessor
      */
     private List<AlertDefOccurrence> processForEquips(AlertDefinition def) {
         Map<String, String> equipToPoint = new HashMap<>();
-
         // Find all the equips spread across the conditionals and initialize the results map
         Map<String, Boolean> equipToResult = def.conditionals.stream()
                 .flatMap(c -> c.equipToStatus.keySet().stream())

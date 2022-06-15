@@ -1033,27 +1033,21 @@ public class DabSystemController extends SystemController
             double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
             limitedSecondaryDamperPos = CCUUtils.roundToTwoDecimal(limitedSecondaryDamperPos);
             
-            double minLimit = 0, maxLimit = 0;
-            if (getStatus(dabEquip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                
+            double minLimit, maxLimit;
+            if (systemState == COOLING) {
                 minLimit = hayStack.readDefaultVal(
                     "point and min and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
                     "point and max and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
                 );
-                
-            } else if (getStatus(dabEquip.get("group").toString()) == ZoneState.HEATING.ordinal()
-                       || getStatus(dabEquip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                       || getStatus(dabEquip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()){
-                
+            } else {
                 minLimit = hayStack.readDefaultVal(
                     "point and min and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
                     "point and max and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
                 );
-                
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      "setDamperLimits : Equip " + dabEquip.get("dis") + " minLimit " + minLimit + " maxLimit " + maxLimit);

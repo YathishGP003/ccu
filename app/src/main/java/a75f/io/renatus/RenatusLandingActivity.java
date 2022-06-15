@@ -19,14 +19,13 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,11 +33,9 @@ import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
-import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -70,15 +67,14 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
-import a75f.io.usbserial.UsbModbusService;
-import a75f.io.usbserial.UsbService;
+
 import a75f.io.usbserial.UsbServiceActions;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
@@ -91,11 +87,16 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
-import com.google.android.material.snackbar.Snackbar;
+
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
-    private static final String TAG = RenatusLandingActivity.class.getSimpleName();
+    private static final String TAG = "RenatusLandingActivityLog";
+    private static CountDownTimer countDownTimer;
+    private static final long DISCONNECT_TIMEOUT = 3000;
+    private static final long INTERVAL = 1000;
+    private long mStopTimeInFuture;
+    private static final long mMillisInFuture = 3600000;
     //TODO - refactor
     public boolean settingView = false;
     private TabItem pageSettingButton;
@@ -160,6 +161,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), 0);
             }
 
+
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
@@ -171,7 +173,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         tab.setIcon(R.drawable.ic_settings_orange);
                         mViewPager.setAdapter(mSettingPagerAdapter);
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-
+                        startCountDownTimer(INTERVAL);
                         menuToggle.setVisibility(View.GONE);
                         floorMenu.setVisibility(View.GONE);
 
@@ -227,7 +229,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 public void onClick(View v) {
 
                     Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-
                     if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
                         DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
                         LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
@@ -239,7 +240,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 mDrawerLayout.openDrawer(drawer_screen);
                             }
                         }
+                    }else{
+                        startCountDownTimer(INTERVAL);
                     }
+
+
                 }
             });
         }
@@ -249,6 +254,80 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
         registerReceiver(mUsbEventReceiver, filter);
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Created");
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        Log.d(TAG,"in userinteraction");
+        resetCountDownTimer();
+    }
+
+    private void resetCountDownTimer(){
+        Log.d(TAG,"in reset");
+        stopCountdownTimer();
+        startCountDownTimer(DISCONNECT_TIMEOUT);
+    }
+
+    @SuppressLint("LogNotTimber")
+    private void startCountDownTimer(long interval) {
+        Log.d(TAG,"in start");
+        mStopTimeInFuture = System.currentTimeMillis() + mMillisInFuture;
+        countDownTimer = new CountDownTimer(mMillisInFuture, interval) {
+            @Override
+            public void onTick(long l) {
+              /*
+              * No Operation on every second*/
+                Log.d(TAG,"in tick");
+
+            }
+
+            @Override
+            public void onFinish() {
+
+                final long millisLeft = mStopTimeInFuture - System.currentTimeMillis();
+                Log.d(TAG,"in onfinish - millisLeft="+millisLeft);
+                if (millisLeft <= 10000) {
+                    launchZoneFragment();
+                }
+                stopCountdownTimer();
+
+            }
+        };
+        countDownTimer.start();
+    }
+
+    private void launchZoneFragment() {
+
+        if( btnTabs.getSelectedTabPosition() != 0)
+            mViewPager.setAdapter(mStatusPagerAdapter);
+        btnTabs.getTabAt(1).select();
+        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+        FragmentManager fm = getSupportFragmentManager();
+        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+            fm.popBackStackImmediate(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if(fragment.getClass().toString().contains("CreateNewSite")){
+               getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            }
+        }
+    }
+
+
+    @SuppressLint("LogNotTimber")
+    private  void stopCountdownTimer() {
+        Log.d(TAG,"in stop");
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        resetCountDownTimer();
+        return super.onTouchEvent(event);
     }
 
     public void setViewPager() {
@@ -273,6 +352,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
                 } else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
                     if (isZonePassWordRequired()) {
                         showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
@@ -285,15 +365,18 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     }
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
                 }   else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SchedulerFragment){
                     if (isBuildingPassWordRequired()) {
                         showRequestPasswordAlert("Building Settings Authentication", getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), i);
                     }
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
                 }else {
                     floorMenu.setVisibility(View.GONE);
                     menuToggle.setVisibility(View.GONE);
+                    startCountDownTimer(INTERVAL);
                 }
             }
 

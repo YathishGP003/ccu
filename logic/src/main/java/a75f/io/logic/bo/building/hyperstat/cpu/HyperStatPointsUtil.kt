@@ -796,7 +796,64 @@ class HyperStatPointsUtil constructor(
     }
 
 
-    // Function which creates User Intent Points
+    // Function to create VOV and pm2.5 sensor points
+    fun createPointVOCPmConfigPoint(
+        equipDis: String,
+        zoneVOCThreshold: Double,
+        zoneVOCTarget: Double,
+        zonePm2p5Threshold: Double,
+        zonePm2p5Target: Double
+    ): MutableList<Pair<Point, Any>> {
+        val pointsList: MutableList<Pair<Point, Any>> = LinkedList()
+        //ppb
+        val vocMarkers: MutableList<String> = LinkedList()
+        val pm2p5Markers: MutableList<String> = LinkedList()
+
+        vocMarkers.addAll(arrayOf(
+            "zone","cov","air","voc","sensor","current","his","cur","logical","config", "writable", "his","threshold"))
+        pm2p5Markers.addAll(arrayOf(
+            "zone","cov","air","pm2p5","sensor","current","his","cur","logical","config", "writable", "his","threshold"))
+
+
+        val zoneVOCThresholdPoint = createHaystackPointWithUnit(
+            "$equipDis-zoneVOCThreshold",
+            vocMarkers.stream().toArray { arrayOfNulls(it) },
+            "","ppb"
+        )
+        vocMarkers.remove("threshold")
+        vocMarkers.add("target")
+        val zoneVOCTargetPoint = createHaystackPointWithUnit(
+            "$equipDis-zoneVOCTarget",
+            vocMarkers.stream().toArray { arrayOfNulls(it) },
+            "","ppb"
+        )
+
+        val zonePm2p5ThresholdPoint = createHaystackPointWithUnit(
+            "$equipDis-zonePm2p5Threshold",
+            pm2p5Markers.stream().toArray { arrayOfNulls(it) },
+            "","ug/\u33A5"
+        )
+
+        pm2p5Markers.remove("threshold")
+        pm2p5Markers.add("target")
+        val zonePm2p5TargetPoint = createHaystackPointWithUnit(
+            "$equipDis-zonePm2p5Target",
+            pm2p5Markers.stream().toArray { arrayOfNulls(it) },
+            "","ug/\u33A5"
+        )
+
+
+        pointsList.add(Pair(zoneVOCThresholdPoint, zoneVOCThreshold))
+        pointsList.add(Pair(zoneVOCTargetPoint, zoneVOCTarget))
+
+        pointsList.add(Pair(zonePm2p5ThresholdPoint, zonePm2p5Threshold))
+        pointsList.add(Pair(zonePm2p5TargetPoint, zonePm2p5Target))
+
+        return pointsList
+    }
+
+
+        // Function which creates User Intent Points
     fun createUserIntentPoints(hyperStatConfig: HyperStatCpuConfiguration): MutableList<Pair<Point, Any>> {
 
         val userIntentPointList: MutableList<Pair<Point, Any>> = LinkedList()
@@ -1696,6 +1753,7 @@ class HyperStatPointsUtil constructor(
         }
         return 0
     }
+
 
 }
 

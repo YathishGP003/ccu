@@ -6,6 +6,7 @@ import a75f.io.alerts.model.AlertDefProgress.Partial
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
+import android.util.Log
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -119,7 +120,7 @@ class AlertsRepository(
 
    // "Resolve" an alert
    fun fixAlert(alert: Alert) {
-      CcuLog.d("CCU_ALERTS", "Fix Alert!")
+
       alert.setEndTime(DateTime().millis)
       alert.setFixed(true)
       alert.setSyncStatus(false)
@@ -199,26 +200,29 @@ class AlertsRepository(
 
       // evaluate and raise alert conditions from alert defs
       alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs)
+      fixNewStateAlerts(alertDefOccurrences)
 
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
 
-      // Fix internal event alerts (i.e. "CCU RESTART", "CM_REINIT", etc.) that have been active for > 1 hour
-      fixExpiredEventAlerts()
 
-      CcuLog.d("CCU_ALERTS", "New AlertDefsState = ${alertDefsState.niceString()}")
+      // Fix internal event alerts (i.e. "CCU RESTART", "CM_REINIT", etc.) that have be
+      //
+      // en active for > 1 hour
+      fixExpiredEventAlerts()
 
       // update active alerts with new state
       val alertsStateChange = dataStore.getActiveAlerts() - alertDefsState
-
-      CcuLog.d("CCU_ALERTS", "New AlertsState = $alertsStateChange")
 
       // commit changes
       alertsStateChange.newAlerts
          .map { occurrence ->  occurrence.toAlert(haystack) }
          .forEach { alert -> addAlert(alert)
       }
-      alertsStateChange.newlyFixedAlerts.forEach { alert -> fixAlert(alert) }
+      alertsStateChange.newlyFixedAlerts.forEach { alert ->
+         Log.i("DEV_DEUG", "Hard Fix: $alert")
+              fixAlert(alert)
+      }
 
       // check for alert time-out
       clearElapsedAlerts()
@@ -227,7 +231,7 @@ class AlertsRepository(
       syncAlerts()
    }
 
-   // data structure used by AlertDefs dev settings fragment
+   // data structure used by AlertDefs dev settings fragment0
    fun getOffsetCounter(): Map<AlertDefOccurrence, Int> {
       val mapping = mutableMapOf<AlertDefOccurrence, Int>()
 
@@ -242,10 +246,21 @@ class AlertsRepository(
    fun getCurrentOccurrences() = alertDefOccurrences
 
 
+
+   private fun fixNewStateAlerts(alertDefList: List<AlertDefOccurrence> ){
+      alertDefList.forEach {
+         if(!it.testPositive && !it.alertDef.alert.isFixed){
+            fixAlert(it.alertDef.alert)
+         }
+      }
+   }
+
    /////   private   /////
 
    private fun fixExpiredEventAlerts() {
+      Log.i("CCU_ALERTS", "fixExpiredEventAlerts: ")
       val alerts = dataStore.getActiveInternalEventAlerts()
+      Log.i("CCU_ALERTS", "fixExpiredEventAlerts: $alerts")
       for (a in alerts) {
          if (!a.isFixed && (System.currentTimeMillis() - a.startTime) >= 3600000) {
             CcuLog.i("CCU_ALERTS", "Fixing expired event alert: $a")

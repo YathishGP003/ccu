@@ -1,14 +1,10 @@
 package a75f.io.logic.bo.building.oao;
 
-import android.content.Context;
-import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;

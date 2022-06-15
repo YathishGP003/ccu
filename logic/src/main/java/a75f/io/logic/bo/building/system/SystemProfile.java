@@ -921,7 +921,8 @@ public abstract class SystemProfile
     }
     
     public void updateOutsideWeatherParams() {
-        double externalTemp = 0, externalHumidity = 0;
+        double externalTemp = 0;
+        double externalHumidity = 0;
         try {
             if (Globals.getInstance().isWeatherTest()) {
                 externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

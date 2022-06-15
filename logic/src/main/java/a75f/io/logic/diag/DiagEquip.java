@@ -252,7 +252,6 @@ public class DiagEquip
             setDiagHisVal("low and memory",  mi.lowMemory? 1.0 :0);
         }
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
-        boolean isAppRestart = spDefaultPrefs.getBoolean("APP_RESTART",false);
 
         PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
         PackageInfo pi;

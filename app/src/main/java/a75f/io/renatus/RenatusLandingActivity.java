@@ -450,7 +450,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        prefs.setBoolean("APP_START", true);
         appRestarted();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();

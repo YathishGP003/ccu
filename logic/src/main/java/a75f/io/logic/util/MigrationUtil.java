@@ -43,6 +43,7 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import a75f.io.logic.diag.DiagEquip;
 import kotlin.Pair;
+import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
     
@@ -57,7 +58,12 @@ public class MigrationUtil {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
         }*/
-    
+        if(!PreferenceUtil.isSenseAndPILoopAnalogPointDisMigrationDone()){
+            updateAnalogInputDisplayNameForSense();
+            updateAnalogInputDisplayNameForPILOOP();
+            PreferenceUtil.setSenseAndPILoopAnalogPointDisMigrationDone(true);
+        }
+
         if (!PreferenceUtil.isBposAhuRefMigrationDone()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setBposAhuRefMigrationStatus(true);
@@ -87,17 +93,16 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
-
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
-        
+
         if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
-        
+
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -157,6 +162,20 @@ public class MigrationUtil {
       return !ccuHsApi.readEntity(query).isEmpty();
     }
 
+    private static void updateAnalogInputDisplayNameForSense(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG1);
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG2);
+        }
+    }
+
+    private static void updateAnalogInputDisplayNameForPILOOP(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
+            PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
+        }
+    }
+
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> airflowPoints = ccuHsApi.readAllEntities("point and airflow and sense and unit");
         String updatedAirflowUnit = "cfm";
@@ -179,7 +198,7 @@ public class MigrationUtil {
             }
         });
     }
-    
+
     private static void trueCFMVAVMigration(CCUHsApi haystack) {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
@@ -188,7 +207,7 @@ public class MigrationUtil {
             doMigrationVav(haystack, vavEquips, tunerEquip);
         }
     }
-    
+
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
         TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);

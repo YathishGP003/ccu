@@ -86,7 +86,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     ToggleButton enableOccupancyControl;
     ToggleButton enableCO2Control;
     ToggleButton enableIAQControl;
-    Spinner KFactor;
+    Spinner kFactor;
     NumberPicker minCFMForIAQPos;
     ToggleButton enableTrueCFMControl;
     TextView textKFactor;
@@ -297,7 +297,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
         textKFactor = view.findViewById(R.id.textKFactor);
-        KFactor = view.findViewById(R.id.enableKFactor);
+        kFactor = view.findViewById(R.id.enableKFactor);
         ArrayList<String> spinnerArray = new ArrayList<>();
         double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
         double MAX_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.max_val_for_kfactor));
@@ -309,36 +309,36 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         }
         kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
         kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        KFactor.setAdapter(kFactorValues);
-        KFactor.setSelection(defaultValue_kfactor);
+        kFactor.setAdapter(kFactorValues);
+        kFactor.setSelection(defaultValue_kfactor);
         enableTrueCFMControl = view.findViewById(R.id.enableCFMControl);
         enableTrueCFMControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (enableTrueCFMControl.isChecked()) {
                 minCFMForIAQ.setVisibility(View.VISIBLE);
                 textKFactor.setVisibility(View.VISIBLE);
-                KFactor.setVisibility(View.VISIBLE);
+                kFactor.setVisibility(View.VISIBLE);
             } else {
                 minCFMForIAQ.setVisibility(View.GONE);
                 textKFactor.setVisibility(View.GONE);
-                KFactor.setVisibility(View.GONE);
+                kFactor.setVisibility(View.GONE);
             }
         });
 
         minCFMForIAQPos = view.findViewById(R.id.numMinCFMForIAQ);
-        int MIN_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.min_val_for_iaq));
-        int MAX_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.max_val_for_iaq));
-        int STEP_IAQ = Integer.parseInt(getString(R.string.step_for_iaq_values));
-        int defaultValue_IAQ = Integer.parseInt(getString(R.string.default_val_for_iaq));
-        String[] numberValues = new String[MAX_VAL_FOR_IAQ - MIN_VAL_FOR_IAQ + 1];
+        int minValForIAQ = Integer.parseInt(getString(R.string.min_val_for_iaq));
+        int maxValForIAQ = Integer.parseInt(getString(R.string.max_val_for_iaq));
+        int stepIaq = Integer.parseInt(getString(R.string.step_for_iaq_values));
+        int defaultValueIAQ = Integer.parseInt(getString(R.string.default_val_for_iaq));
+        String[] numberValues = new String[maxValForIAQ - minValForIAQ + 1];
         for (int i = 0; i < numberValues.length; i++) {
-            numberValues[i] = String.valueOf(i * STEP_IAQ);
+            numberValues[i] = String.valueOf(i * stepIaq);
         }
-        minCFMForIAQPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        minCFMForIAQPos.setMinValue(MIN_VAL_FOR_IAQ);
-        minCFMForIAQPos.setMaxValue(MAX_VAL_FOR_IAQ);
+        minCFMForIAQPos.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        minCFMForIAQPos.setMinValue(minValForIAQ);
+        minCFMForIAQPos.setMaxValue(maxValForIAQ);
         minCFMForIAQPos.setWrapSelectorWheel(false);
         minCFMForIAQPos.setDisplayedValues(numberValues);
-        minCFMForIAQPos.setValue(defaultValue_IAQ);
+        minCFMForIAQPos.setValue(defaultValueIAQ);
 
 
         zonePriority = view.findViewById(R.id.zonePriority);
@@ -426,9 +426,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
             if (!enableTrueCFMControl.isChecked()) {
                 minCFMForIAQPos.setValue(10);
-                KFactor.setSelection(100);
+                kFactor.setSelection(100);
             } else {
-                KFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
+                kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCFMForIAQPos.setValue(mProfileConfig.minCFMForIAQ/STEP);
             }
 
@@ -497,7 +497,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         dabConfig.enableCFMControl = enableTrueCFMControl.isChecked();
         dabConfig.minCFMForIAQ = minCFMForIAQPos.getValue()*STEP;
-        dabConfig.kFactor = (((KFactor.getSelectedItemPosition()-100)*(.01))+2);
+        dabConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
 
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
@@ -551,6 +551,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         CCUUiUtil.setSpinnerDropDownColor(damper2Type,getContext());
         CCUUiUtil.setSpinnerDropDownColor(damper2Size,getContext());
         CCUUiUtil.setSpinnerDropDownColor(damper2Shape,getContext());
-        CCUUiUtil.setSpinnerDropDownColor(KFactor, getContext());
+        CCUUiUtil.setSpinnerDropDownColor(kFactor, getContext());
     }
 }

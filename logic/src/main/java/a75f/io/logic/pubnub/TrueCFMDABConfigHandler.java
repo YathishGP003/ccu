@@ -8,11 +8,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
-import a75f.io.logic.tuners.TrueCFMTuners;
-import a75f.io.logic.tuners.TunerConstants;
 
 public class TrueCFMDABConfigHandler {
     public static void updateDABConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -25,7 +22,6 @@ public class TrueCFMDABConfigHandler {
             dabProfileConfiguration.minCFMForIAQ = 100;
             dabProfileConfiguration.kFactor = 2;
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equip.getId(), dabProfileConfiguration);
-            TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.DAB, TunerConstants.DAB_TUNER_GROUP);
         } else {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
         }

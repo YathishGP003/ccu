@@ -34,7 +34,6 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.DabTuners;
-import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
@@ -702,7 +701,6 @@ public class DabEquip
                 config.enableCFMControl ? 1.0 : 0, null);
         if (config.enableCFMControl) {
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
         }
     }
     
@@ -771,13 +769,11 @@ public class DabEquip
                     break;
             }
         }
-        Equip equip = HSUtil.getEquipInfo(equipRef);
         boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable and dab") > 0;
         if(curTrueCfmEnabled && !config.enableCFMControl ) {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equipRef);
-        }else{
+        }else if(!curTrueCfmEnabled && config.enableCFMControl){
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
-            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
         }
 
         setConfigNumVal("damper and type and primary",config.damper1Type);
@@ -805,7 +801,7 @@ public class DabEquip
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
 
-        setConfigNumVal("enable and trueCfm and dab",config.enableCFMControl == true ? 1.0 : 0);
+        setConfigNumVal("enable and trueCfm and dab", config.enableCFMControl ? 1.0 : 0);
         setHisVal("enable and trueCfm and dab", config.enableCFMControl ? 1.0 : 0);
         setConfigNumVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
         setHisVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);

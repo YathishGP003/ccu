@@ -225,8 +225,6 @@ public class DabTuners {
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
 
         addDefaultDabSystemTuners(hayStack, siteRef, equipRef, equipDis, tz);
-
-        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.DAB, DAB_TUNER_GROUP);
     }
     
     public static void addDefaultDabSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,

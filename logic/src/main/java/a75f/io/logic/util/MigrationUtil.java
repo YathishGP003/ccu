@@ -43,7 +43,6 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.ccu.restore.RestoreCCU;
-import a75f.io.logic.diag.DiagEquip;
 import kotlin.Pair;
 import a75f.io.logic.migration.point.PointMigrationHandler;
 
@@ -273,14 +272,11 @@ public class MigrationUtil {
 
     private static void trueCFMDABMigration(CCUHsApi haystack) {
         ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
-        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
-        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
         if(!dabEquips.isEmpty()) {
-            doMigrationDab(haystack, dabEquips, tunerEquip);
+            doMigrationDab(haystack, dabEquips);
         }
     }
-    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips, Equip tunerEquip) {
-        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.DAB, TunerConstants.DAB_TUNER_GROUP);
+    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips) {
         dabEquips.forEach(dabEquip -> {
             HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
                 "enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");

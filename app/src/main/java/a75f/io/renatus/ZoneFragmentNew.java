@@ -80,6 +80,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -2158,12 +2159,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     }
 
     public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddress + "\"");
+        Equip updatedEquip = new Equip.Builder().setHashMap(equip).build();
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
-
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
         HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
@@ -2201,15 +2203,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
         }
         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
-
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow2.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow2);
-
+        if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
+            View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
+            TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
+            airFlowCFMValue.setText(vavPoints.get("Airflow CFM").toString());
+            linearLayoutZonePoints.addView(viewAirflowCFM);
+            viewAirflowCFM.setPadding(0, 0, 0, 40);
+        }else {
+            viewPointRow2.setPadding(0, 0, 0, 40);
+        }
     }
-
     public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);

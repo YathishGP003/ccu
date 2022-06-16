@@ -123,4 +123,8 @@ public class Tags
     public static final String ETMM = "etmm";
     public static final String COOLVAL = "coolVal";
     public static final String HEATVAL = "heatVal";
+    public static final String SERIES = "series";
+    public static final String PARALLEL = "parallel";
+    public static final String CFM = "trueCfm";
+    public static final String MAX = "max";
 }

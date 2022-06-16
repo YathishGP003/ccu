@@ -59,7 +59,7 @@ class HyperstatLoopController {
     }
 
     fun dumpLogs(){
-        heatingControlLoop.dumpHSLogs()
-        coolingControlLoop.dumpHSLogs()
+        heatingControlLoop.dumpWithTag("CCU_CPU-HS")
+        coolingControlLoop.dumpWithTag("CCU_CPU-HS")
     }
 }

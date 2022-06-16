@@ -41,6 +41,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -161,6 +162,7 @@ public class RegisterGatherCCUDetails extends Activity {
             if (!CCUUiUtil.isInvalidName(ccuName)) {
                 L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
+                L.ccu().systemProfile = new DefaultSystem();
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 CCUHsApi.getInstance().registerCcu(installerEmail);
                 prefs.setString("installerEmail", installerEmail);

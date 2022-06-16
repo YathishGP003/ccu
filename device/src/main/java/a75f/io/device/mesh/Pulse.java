@@ -873,9 +873,8 @@ public class Pulse
 
 		String cause = DeviceUtil.parseNodeStatusMessage(snRebootIndicationMsgs.nodeStatus.get());
 
-		Log.i("DEV_DEBUG",
-				"smartDevicesRebootMessage: Node Status "+cause);
-		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
+		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
+				", "+snRebootIndicationMsgs.rebootCause+ "Node Status "+cause);
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 		String firmwareVersion =

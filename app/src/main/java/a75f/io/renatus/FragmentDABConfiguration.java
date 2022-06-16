@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -59,6 +60,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     public static final String ID = FragmentDABConfiguration.class.getSimpleName();
     
     static final int TEMP_OFFSET_LIMIT = 100;
+    static final int STEP = 10;
     
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -84,6 +86,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     ToggleButton enableOccupancyControl;
     ToggleButton enableCO2Control;
     ToggleButton enableIAQControl;
+    Spinner KFactor;
+    NumberPicker minCFMForIAQPos;
+    ToggleButton enableTrueCFMControl;
+    TextView textKFactor;
+    LinearLayout minCFMForIAQ;
     
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;
@@ -92,6 +99,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
     ArrayAdapter<String> damper1TypesAdapter;
     ArrayAdapter<String> damper2TypesAdapter;
+    ArrayAdapter<String> kFactorValues;
     
     
     DamperType damper1TypeSelected = ZeroToTenV;
@@ -287,6 +295,52 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
+        minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
+        textKFactor = view.findViewById(R.id.textKFactor);
+        KFactor = view.findViewById(R.id.enableKFactor);
+        ArrayList<String> spinnerArray = new ArrayList<>();
+        double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
+        double MAX_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.max_val_for_kfactor));
+        double step_kfactor = Double.parseDouble(getString(R.string.step_for_kactor_values));
+        int defaultValue_kfactor = Integer.parseInt(getString(R.string.default_val_for_kfactor));
+        DecimalFormat df = new DecimalFormat("0.00");
+        for (double i = MIN_VAL_FOR_KFactor; i < MAX_VAL_FOR_KFactor; i = i + step_kfactor) {
+            spinnerArray.add(df.format(i));
+        }
+        kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+        kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        KFactor.setAdapter(kFactorValues);
+        KFactor.setSelection(defaultValue_kfactor);
+        enableTrueCFMControl = view.findViewById(R.id.enableCFMControl);
+        enableTrueCFMControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (enableTrueCFMControl.isChecked()) {
+                minCFMForIAQ.setVisibility(View.VISIBLE);
+                textKFactor.setVisibility(View.VISIBLE);
+                KFactor.setVisibility(View.VISIBLE);
+            } else {
+                minCFMForIAQ.setVisibility(View.GONE);
+                textKFactor.setVisibility(View.GONE);
+                KFactor.setVisibility(View.GONE);
+            }
+        });
+
+        minCFMForIAQPos = view.findViewById(R.id.numMinCFMForIAQ);
+        int MIN_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.min_val_for_iaq));
+        int MAX_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.max_val_for_iaq));
+        int STEP_IAQ = Integer.parseInt(getString(R.string.step_for_iaq_values));
+        int defaultValue_IAQ = Integer.parseInt(getString(R.string.default_val_for_iaq));
+        String[] numberValues = new String[MAX_VAL_FOR_IAQ - MIN_VAL_FOR_IAQ + 1];
+        for (int i = 0; i < numberValues.length; i++) {
+            numberValues[i] = String.valueOf(i * STEP_IAQ);
+        }
+        minCFMForIAQPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        minCFMForIAQPos.setMinValue(MIN_VAL_FOR_IAQ);
+        minCFMForIAQPos.setMaxValue(MAX_VAL_FOR_IAQ);
+        minCFMForIAQPos.setWrapSelectorWheel(false);
+        minCFMForIAQPos.setDisplayedValues(numberValues);
+        minCFMForIAQPos.setValue(defaultValue_IAQ);
+
+
         zonePriority = view.findViewById(R.id.zonePriority);
         ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
@@ -368,6 +422,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             maxCoolingDamperPos.setValue(mProfileConfig.maxDamperCooling);
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
+            enableTrueCFMControl.setChecked(mProfileConfig.enableCFMControl);
+
+            if (!enableTrueCFMControl.isChecked()) {
+                minCFMForIAQPos.setValue(10);
+                KFactor.setSelection(100);
+            } else {
+                KFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
+                minCFMForIAQPos.setValue(mProfileConfig.minCFMForIAQ/STEP);
+            }
+
             
             
         } else {
@@ -431,7 +495,10 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         dabConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         dabConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-        
+        dabConfig.enableCFMControl = enableTrueCFMControl.isChecked();
+        dabConfig.minCFMForIAQ = minCFMForIAQPos.getValue()*STEP;
+        dabConfig.kFactor = (((KFactor.getSelectedItemPosition()-100)*(.01))+2);
+
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
@@ -484,5 +551,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         CCUUiUtil.setSpinnerDropDownColor(damper2Type,getContext());
         CCUUiUtil.setSpinnerDropDownColor(damper2Size,getContext());
         CCUUiUtil.setSpinnerDropDownColor(damper2Shape,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(KFactor, getContext());
     }
 }

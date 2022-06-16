@@ -12,10 +12,8 @@ public class PreferenceUtil {
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String TRUE_CFM_DAB_MIGRATION="trueCfmDabMigration";
     private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
-
-
-
     private static final String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
     private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
@@ -207,8 +205,6 @@ public class PreferenceUtil {
     public static void setAirflowVolumeUnitMigrationDone() {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
     }
-
-
     public static boolean isTrueCFMVAVMigrationDone() {
         return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
     }
@@ -222,6 +218,13 @@ public class PreferenceUtil {
 
     public static void setUnitAddedToTuners() {
         setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
+    }
+
+    public static boolean isTrueCFMDABMigrationDone() {
+        return getBooleanPreference(TRUE_CFM_DAB_MIGRATION);
+    }
+    public static void setTrueCFMDABMigrationDone() {
+        setBooleanPreference(TRUE_CFM_DAB_MIGRATION, true);
     }
 
     public static boolean isIduPointsMigrationDone() {

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
@@ -17,6 +18,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 
+import static a75f.io.logic.tuners.TunerConstants.DAB_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
@@ -27,6 +29,7 @@ public class DabTuners {
                                            String tz){
     
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and dab");
+        Equip equip = HSUtil.getEquipInfo(equipRef);
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner points already exist");
             return;
@@ -222,6 +225,8 @@ public class DabTuners {
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
 
         addDefaultDabSystemTuners(hayStack, siteRef, equipRef, equipDis, tz);
+
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.DAB, DAB_TUNER_GROUP);
     }
     
     public static void addDefaultDabSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,

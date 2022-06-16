@@ -298,6 +298,11 @@ public class HSUtil
         return ((pointEntity.containsKey(Tags.ENABLE))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.VAV)));
     }
 
+    public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
+            HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
+            return (pointEntity.containsKey(Tags.ENABLE) && pointEntity.containsKey(Tags.CFM) && pointEntity.containsKey(Tags.DAB));
+        }
+
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object,Object> pointEntity = hayStack.readMapById(id);
         return ((pointEntity.containsKey(Tags.MAX))&&(pointEntity.containsKey(Tags.CFM))&&(pointEntity.containsKey(Tags.COOLING)));

@@ -26,4 +26,8 @@ public class DabProfileConfiguration extends BaseProfileConfiguration
     public int maxDamperHeating;
     
     public double temperaturOffset;
+
+    public int minCFMForIAQ;
+    public boolean enableCFMControl;
+    public double kFactor;
 }

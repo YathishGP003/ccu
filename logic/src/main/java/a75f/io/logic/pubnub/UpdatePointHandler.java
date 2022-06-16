@@ -22,7 +22,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 
 public class UpdatePointHandler
@@ -111,7 +110,11 @@ public class UpdatePointHandler
         }
 
         if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
-            TrueCFMVAVConfigHandler.updateConfigPoint(msgObject, localPoint, hayStack);
+            TrueCFMVAVConfigHandler.updateVAVConfigPoint(msgObject, localPoint, hayStack);
+        }
+
+        if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
+            TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
         }
 
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){

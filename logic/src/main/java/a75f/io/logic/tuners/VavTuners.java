@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
@@ -24,6 +25,7 @@ import a75f.io.logic.util.RxTask;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
 
 public class VavTuners {
     
@@ -31,6 +33,8 @@ public class VavTuners {
                                            String tz) {
 
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vav");
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default VAV Tuner points already exist");
             return;
@@ -656,7 +660,8 @@ public class VavTuners {
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"), 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneDischargeTempOffSetTunerId,
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
-
+    
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.VAV, VAV_TUNER_GROUP);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,

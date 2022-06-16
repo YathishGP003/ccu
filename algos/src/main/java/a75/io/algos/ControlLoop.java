@@ -84,8 +84,8 @@ public class ControlLoop
     public void dump() {
         piController.dump();
     }
-    public void dumpHSLogs() {
-        piController.dumpHyperstat();
+    public void dumpWithTag(String tag) {
+        piController.dumpWithTag(tag);
     }
     @Override
     public String toString() {

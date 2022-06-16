@@ -1,9 +1,5 @@
 package a75f.io.logic.util;
 
-import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -23,6 +19,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -33,10 +30,17 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
+import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.tuners.TrueCFMTuners;
+import a75f.io.logic.tuners.TunerConstants;
+
+import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import kotlin.Pair;
@@ -87,6 +91,11 @@ public class MigrationUtil {
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
+        }
+
+        if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
+            trueCFMVAVMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
 
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
@@ -208,6 +217,33 @@ public class MigrationUtil {
         });
     }
 
+    private static void trueCFMVAVMigration(CCUHsApi haystack) {
+       ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
+        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
+        if(!vavEquips.isEmpty()) {
+            doMigrationVav(haystack, vavEquips, tunerEquip);
+        }
+    }
+
+    private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
+        //        creating default tuners for vav
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        vavEquips.forEach(vavEquip -> {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                "enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id") == null) {
+                Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
+                String fanMarker = "";
+                if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
+                    fanMarker = "series";
+                } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
+                    fanMarker = "parallel";
+                }
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV, 0, fanMarker);
+            }
+        });
+    }
     private static void addUnitToTuners(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
         equips.forEach(equipDetails -> {

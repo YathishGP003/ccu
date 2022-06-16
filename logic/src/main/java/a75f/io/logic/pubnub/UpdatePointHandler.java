@@ -110,6 +110,18 @@ public class UpdatePointHandler
             return;
         }
 
+        if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateConfigPoint(msgObject, localPoint, hayStack);
+        }
+
+        if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
+        }
+
+        if(HSUtil.isMaxCFMReheatingConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

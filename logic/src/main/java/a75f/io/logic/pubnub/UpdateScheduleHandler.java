@@ -136,7 +136,7 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
-        refreshSchedulesScreen();
+        refreshSchedulesScreen(Schedule.getScheduleByEquipId(uid));
         refreshIntrinsicSchedulesScreen();
     }
     
@@ -225,9 +225,9 @@ public class UpdateScheduleHandler
         }
     }
     
-    public static void refreshSchedulesScreen() {
+    public static void refreshSchedulesScreen(Schedule updatedSchedule) {
         if (scheduleListener != null) {
-            scheduleListener.refreshScreen();
+            scheduleListener.refreshScreen(updatedSchedule);
         }
     }
 

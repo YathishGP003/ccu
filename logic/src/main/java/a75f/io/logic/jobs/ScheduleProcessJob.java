@@ -1538,7 +1538,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         clearTempOverrides(equip.getId());
                     } else if (prevStatus == AUTOFORCEOCCUPIED){
                         occupancyState = AUTOFORCEOCCUPIED;
-                    }else {
+                    } else if(prevStatus == FORCEDOCCUPIED) {
                         occupancyState = FORCEDOCCUPIED;
                     }
                 } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {

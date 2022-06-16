@@ -21,6 +21,7 @@ public class PreferenceUtil {
     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
+    private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -147,6 +148,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isSenseAndPILoopAnalogPointDisMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("SenseAndPILoopAnalogPointDisMigrationDone", false);
+    }
+
+    public static void setSenseAndPILoopAnalogPointDisMigrationDone(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("SenseAndPILoopAnalogPointDisMigrationDone", isMigrated);
+        editor.apply();
+    }
+
     public static boolean areDuplicateAlertsRemoved() {
         return getBooleanPreference(REMOVED_DUPLICATE_ALERTS);
     }
@@ -211,9 +224,6 @@ public class PreferenceUtil {
         setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
     }
 
-
-
-
     public static boolean isIduPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("iduMigration",false);
@@ -229,12 +239,6 @@ public class PreferenceUtil {
     public static boolean getSNMigration() {
         return getBooleanPreference(SMART_NODE_MIGRATION);
     }
-
-    public static void setSmartNodeMigration() {
-        setBooleanPreference(SMART_NODE_MIGRATION, true);
-
-    }
-
     public static void setDamperFeedbackMigration() {
         setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, true);
     }
@@ -247,7 +251,15 @@ public class PreferenceUtil {
     public static boolean getVocPm2p5Migration() {
         return getBooleanPreference(VOC_PM2P5_MIGRATION);
     }
+    public static void setDiagEquipMigration() {
+        setBooleanPreference(DIAG_POINTS_MIGRATION, true);
+    }
+    public static boolean getDiagEquipMigration() {
+        return getBooleanPreference(DIAG_POINTS_MIGRATION);
+    }
 
+    public static void setSmartNodeMigration() {
+        setBooleanPreference(SMART_NODE_MIGRATION, true);
 
-
+    }
 }

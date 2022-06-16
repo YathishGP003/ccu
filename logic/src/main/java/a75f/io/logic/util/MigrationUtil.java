@@ -41,8 +41,10 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import kotlin.Pair;
+import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
     
@@ -57,7 +59,12 @@ public class MigrationUtil {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
         }*/
-    
+        if(!PreferenceUtil.isSenseAndPILoopAnalogPointDisMigrationDone()){
+            updateAnalogInputDisplayNameForSense();
+            updateAnalogInputDisplayNameForPILOOP();
+            PreferenceUtil.setSenseAndPILoopAnalogPointDisMigrationDone(true);
+        }
+
         if (!PreferenceUtil.isBposAhuRefMigrationDone()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setBposAhuRefMigrationStatus(true);
@@ -87,17 +94,16 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
-
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
-        
+
         if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
-        
+
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -113,6 +119,10 @@ public class MigrationUtil {
             PreferenceUtil.setVocPm2p5Migration();
         }
 
+        if(!PreferenceUtil.getDiagEquipMigration()){
+            doDiagPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDiagEquipMigration();
+        }
 
 
     }
@@ -157,6 +167,53 @@ public class MigrationUtil {
       return !ccuHsApi.readEntity(query).isEmpty();
     }
 
+    private static void updateAnalogInputDisplayNameForSense(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG1);
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG2);
+        }
+    }
+
+    private static void updateAnalogInputDisplayNameForPILOOP(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
+            PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
+        }
+    }
+
+    private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+
+        // approach is deleting all the daig point which does not have any gateway reff.
+        // Because in server we will never get to know these diag points are belongs which ccu
+        // Create create fresh daig points.
+
+        HashMap<Object, Object> ccu = ccuHsApi.readEntity("device and ccu");
+        if (ccu.isEmpty()) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
+            return;
+        }
+
+        HashMap<Object, Object> diag = ccuHsApi.readEntity("equip and diag");
+        if (!diag.isEmpty()) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
+            // Diag are present so check with gatewayRef
+            Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+            if(!diagEquip.getMarkers().contains("gatewayRef")){
+                // Update gateway reff
+                Log.i(TAG_CCU_MIGRATION_UTIL, "adding gateway reference");
+                ccuHsApi.updateDiagGatewayRef(ccu.get("gatewayRef").toString());
+            }
+        }else{
+            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not available Restoring daig equips");
+            // Locally diag points are missing check at silo
+            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
+
+        }
+
+
+
+    }
+
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> airflowPoints = ccuHsApi.readAllEntities("point and airflow and sense and unit");
         String updatedAirflowUnit = "cfm";
@@ -179,7 +236,7 @@ public class MigrationUtil {
             }
         });
     }
-    
+
     private static void trueCFMVAVMigration(CCUHsApi haystack) {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
@@ -188,7 +245,7 @@ public class MigrationUtil {
             doMigrationVav(haystack, vavEquips, tunerEquip);
         }
     }
-    
+
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
         TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);

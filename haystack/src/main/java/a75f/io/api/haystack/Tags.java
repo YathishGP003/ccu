@@ -22,6 +22,8 @@ public class Tags
     public static final String CONNECTION = "connection";
     public static final String ID = "id";
     public static final String DIS = "dis";
+    public static final String SHORTDIS= "shortDis";
+    public static final String GROUP= "group";
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
     

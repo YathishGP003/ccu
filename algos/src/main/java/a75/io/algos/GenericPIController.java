@@ -57,7 +57,7 @@ public class GenericPIController
     }
     
     public void calculateProportionalError() {
-        proportionalError = limitedError * proportionalGain;
+        proportionalError = Math.max(limitedError * proportionalGain, 0);
     }
     
     public void calculateIntegralError() {

@@ -1,6 +1,7 @@
 package a75f.io.alerts;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,6 +122,7 @@ public class AlertManager
     }
 
     public void processAlerts() {
+        Log.i("CCU_ALERTS", "processAlerts: ");
         if (! repoCheck()) return;
         repo.processAlertDefs();
     }

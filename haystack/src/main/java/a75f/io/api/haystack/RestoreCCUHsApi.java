@@ -245,13 +245,6 @@ public class RestoreCCUHsApi {
         return hClient.call("read", HGridBuilder.dictToGrid(ccuDict));
     }
 
-    public HGrid getDiagEquip(String gatewayId){
-        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict ccuDict = new HDictBuilder().add("filter",
-                "diag and equip and gatewayRef == " + StringUtils.prependIfMissing(gatewayId, "@")).toDict();
-        return hClient.call("read", HGridBuilder.dictToGrid(ccuDict));
-    }
-
     public HGrid getZoneEquipWithGatewayRef(String gatewayRef){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
@@ -702,6 +695,13 @@ public class RestoreCCUHsApi {
                 CcuLog.i(TAG, "Named schedule Imported");
             }
         }
+    }
+
+    public HGrid getDiagEquipByEquipId(String equipId){
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(equipId, "@"))).toDict();
+
+        return hClient.call("read", HZincWriter.gridToString(HGridBuilder.dictToGrid(ccuDict)));
     }
 
 }

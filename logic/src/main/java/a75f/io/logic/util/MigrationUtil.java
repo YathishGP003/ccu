@@ -31,6 +31,8 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.TrueCFMTuners;
@@ -40,6 +42,10 @@ import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.logic.diag.DiagEquip;
+import kotlin.Pair;
+import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
     
@@ -54,7 +60,12 @@ public class MigrationUtil {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
         }*/
-    
+        if(!PreferenceUtil.isSenseAndPILoopAnalogPointDisMigrationDone()){
+            updateAnalogInputDisplayNameForSense();
+            updateAnalogInputDisplayNameForPILOOP();
+            PreferenceUtil.setSenseAndPILoopAnalogPointDisMigrationDone(true);
+        }
+
         if (!PreferenceUtil.isBposAhuRefMigrationDone()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setBposAhuRefMigrationStatus(true);
@@ -84,21 +95,21 @@ public class MigrationUtil {
             pressureUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setPressureUnitMigrationDone();
         }
-
         if(!PreferenceUtil.isAirflowVolumeUnitMigrationDone()){
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
+
         if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
-
+        
         if (!PreferenceUtil.isTrueCFMDABMigrationDone()) {
             trueCFMDABMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMDABMigrationDone();
         }
-
+        
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -108,6 +119,105 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
+
+        if(!PreferenceUtil.getVocPm2p5Migration()){
+            migrateVocPm2p5(CCUHsApi.getInstance());
+            PreferenceUtil.setVocPm2p5Migration();
+        }
+
+        if(!PreferenceUtil.getDiagEquipMigration()){
+            doDiagPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDiagEquipMigration();
+        }
+
+
+    }
+
+    private static void migrateVocPm2p5(CCUHsApi instance) {
+        ArrayList<HashMap<Object, Object>> hyperstatEquips = instance.readAllEntities("equip and hyperstat");
+        hyperstatEquips.forEach(rawEquip -> {
+            Equip equip = new Equip.Builder().setHashMap(rawEquip).build();
+
+            boolean isCovThresholdExist = isPointExist ("point and hyperstat and cov and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isCovTargetExist = isPointExist ("point and hyperstat and cov and target and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isPm2p5ThresholdExist = isPointExist ("point and hyperstat and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isPm2p5TargetExist = isPointExist ("point and hyperstat and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" ,instance);
+
+            HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip, instance);
+
+            List<Pair<Point, Object>> list = hyperStatPointsUtil.createPointVOCPmConfigPoint(
+                    equip.getDisplayName(), 1000, 1000, 1000, 1000
+            );
+            list.forEach(pointObjectPair -> {
+                if((pointObjectPair.getFirst().getDisplayName().contains("zoneVOCThreshold") && !isCovThresholdExist)
+                        ||(pointObjectPair.getFirst().getDisplayName().contains("zoneVOCTarget") && !isCovTargetExist)
+                        ||(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Threshold") && !isPm2p5ThresholdExist)
+                        ||(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Target") && !isPm2p5TargetExist)){
+                    pushPointToHS(hyperStatPointsUtil,pointObjectPair);
+                }
+            });
+        });
+    }
+
+    private static void pushPointToHS(HyperStatPointsUtil hyperStatPointsUtil, Pair<Point, Object> pointDetails ){
+        String pointId = hyperStatPointsUtil.addPointToHaystack(pointDetails.getFirst());
+        if (pointDetails.getFirst().getMarkers().contains("his")) {
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, pointDetails.getSecond());
+        }
+        if (pointDetails.getFirst().getMarkers().contains("writable")) {
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, pointDetails.getSecond());
+        }
+    }
+
+    private static boolean isPointExist(String query, CCUHsApi ccuHsApi){
+      return !ccuHsApi.readEntity(query).isEmpty();
+    }
+
+    private static void updateAnalogInputDisplayNameForSense(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG1);
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG2);
+        }
+    }
+
+    private static void updateAnalogInputDisplayNameForPILOOP(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
+            PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
+        }
+    }
+
+    private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+
+        // approach is deleting all the daig point which does not have any gateway reff.
+        // Because in server we will never get to know these diag points are belongs which ccu
+        // Create create fresh daig points.
+
+        HashMap<Object, Object> ccu = ccuHsApi.readEntity("device and ccu");
+        if (ccu.isEmpty()) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
+            return;
+        }
+
+        HashMap<Object, Object> diag = ccuHsApi.readEntity("equip and diag");
+        if (!diag.isEmpty()) {
+            Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
+            // Diag are present so check with gatewayRef
+            Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+            if(!diagEquip.getMarkers().contains("gatewayRef")){
+                // Update gateway reff
+                Log.i(TAG_CCU_MIGRATION_UTIL, "adding gateway reference");
+                ccuHsApi.updateDiagGatewayRef(ccu.get("gatewayRef").toString());
+            }
+        }else{
+            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not available Restoring daig equips");
+            // Locally diag points are missing check at silo
+            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
+
+        }
+
+
+
     }
 
     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
@@ -132,7 +242,7 @@ public class MigrationUtil {
             }
         });
     }
-    
+
     private static void trueCFMVAVMigration(CCUHsApi haystack) {
        ArrayList<HashMap<Object, Object>> vavEquips = haystack.readAllEntities("equip and vav and not system");
         HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
@@ -140,14 +250,15 @@ public class MigrationUtil {
         if(!vavEquips.isEmpty()) {
             doMigrationVav(haystack, vavEquips, tunerEquip);
         }
-
     }
+
     private static void doMigrationVav(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>vavEquips, Equip tunerEquip) {
         //        creating default tuners for vav
-        TrueCFMTuners.createDefaultTrueCfmTuners(haystack,tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
+        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.VAV_TAG, TunerConstants.VAV_TUNER_GROUP);
         vavEquips.forEach(vavEquip -> {
-            HashMap<Object, Object> enableCFMPoint = haystack.readEntity("enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
-            if (enableCFMPoint.get("id")==null) {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                "enable and point and trueCfm and equipRef == \"" + vavEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id") == null) {
                 Equip equip = new Equip.Builder().setHashMap(vavEquip).build();
                 String fanMarker = "";
                 if (equip.getProfile().equals(ProfileType.VAV_SERIES_FAN.name())) {
@@ -155,12 +266,9 @@ public class MigrationUtil {
                 } else if (equip.getProfile().equals(ProfileType.VAV_PARALLEL_FAN.name())) {
                     fanMarker = "parallel";
                 }
-                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV,
-                                                               0, fanMarker);
-                TrueCFMPointsHandler.pressurePointMigration(equip, fanMarker);
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.VAV, 0, fanMarker);
             }
         });
-
     }
 
     private static void trueCFMDABMigration(CCUHsApi haystack) {
@@ -179,11 +287,12 @@ public class MigrationUtil {
             if (enableCFMPoint.get("id") == null) {
                 Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
                 TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB, 0, null);
-                TrueCFMPointsHandler.pressurePointMigration(equip, null);
             }
         });
     }
     
+    
+
     private static void addUnitToTuners(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
         equips.forEach(equipDetails -> {

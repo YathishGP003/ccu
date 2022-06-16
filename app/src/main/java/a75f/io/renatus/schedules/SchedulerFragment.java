@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.usbserial.UsbModbusService.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -324,7 +326,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSchedule()
     {
-        
+
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
@@ -525,7 +527,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     
     private void showDialog(int id, int position, ArrayList<Schedule.Days> days) {
-        
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         
         switch (id) {
@@ -544,13 +546,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-            removeEntry = schedule.getDays().remove(position);
+            try {
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                removeEntry = schedule.getDays().remove(position);
+            }catch (ArrayIndexOutOfBoundsException e) {
+                Log.d(TAG, "onClickSave: " + e.getMessage());
+            }
         } else {
             removeEntry = null;
         }
-    
+
         Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
@@ -574,7 +580,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         for (Schedule.Days d : daysArrayList) {
             Log.d("CCU_UI", " daysArrayList  "+d);
         }
-    
+
         boolean intersection = schedule.checkIntersection(daysArrayList);
         if (intersection) {
             
@@ -667,7 +673,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                                 namedheaders.add(f.getDisplayName());
                             }
                             spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
-                        }else if((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isZoneSchedule()){
+                        }else {
                             schedules = schedules.concat(Tags.ZONE);
                             if (!zoneheaders.contains(f.getDisplayName())) {
                                 spillZones.append("\t").append(f.getDisplayName()).append("->\n");
@@ -725,6 +731,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             .setPositiveButton("Force-Trim", (dialog, id) -> {
                                 schedule.getDays().addAll(daysArrayList);
                                 ScheduleUtil.trimZoneSchedules(spillsMap);
+                                if (schedule.getDays().contains(removeEntry)) {
+                                    schedule.getDays().remove(position);
+                                }
                                 doScheduleUpdate();
                             });
 
@@ -1166,11 +1175,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 int clickedPosition = (int)v.getTag();
                 //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
-                if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                if(mScheduleId != null) {
+                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                }
+                    ArrayList<Schedule.Days> days = schedule.getDays();
+                    try {
+                        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                        showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.d(TAG, "onClick: " + e.getMessage());
+                    }
+
             }
         });
     }
@@ -1202,8 +1218,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen() {
-        if(getActivity() != null) {
+    public void refreshScreen(Schedule updatedSchedule) {
+        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

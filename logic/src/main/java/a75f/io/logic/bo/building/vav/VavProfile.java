@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCfmLoopState;
@@ -33,6 +34,7 @@ import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
 
@@ -560,13 +562,28 @@ public abstract class VavProfile extends ZoneProfile {
                  " updateDamperSystemHeating cfmLoopOp "+cfmLoopOp+" CFM allowed:"+minCfmHeating);
     }
     
+    private void updateDamperZoneDeadband(CCUHsApi hayStack, String equipId, double currentCfm, SystemController.State systemState) {
+        double minCfm = systemState == SystemController.State.COOLING ? TrueCFMUtil.getMinCFMCooling(hayStack, equipId) :
+                                                    TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+        double cfmLoopOp;
+        if (cfmLoopState != DEAD_BAND_CFM) {
+            cfmLoopState = DEAD_BAND_CFM;
+            cfmControlLoop.reset();
+        }
+        cfmLoopOp = cfmControlLoop.getLoopOutput(minCfm, currentCfm);
+        updateDamperForMinCfm(cfmLoopOp);
+        
+        CcuLog.i(L.TAG_CCU_ZONE,
+                 " updateDamperZoneDeadband cfmLoopOp "+cfmLoopOp+" CFM required:"+minCfm);
+    }
+    
     private void updateDamperForMinCfm(double cfmLoopOp) {
         if (damper.currentPosition > 0) {
             CcuLog.d(L.TAG_CCU_ZONE,
                      "updateDamperForMinCfm newDamperPos: "+damper.currentPosition+" cfmLoopOp "+cfmLoopOp);
             damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
         } else {
-            damper.currentPosition = (int)cfmLoopOp;
+            damper.currentPosition = Math.max((int)cfmLoopOp, 0);
         }
     }
     
@@ -597,6 +614,8 @@ public abstract class VavProfile extends ZoneProfile {
             updateDamperSystemCoolingZoneHeating(hayStack, equipId, currentCfm);
         } else if (systemState == SystemController.State.HEATING) {
             updateDamperSystemHeating(hayStack, equipId, currentCfm);
+        } else if (state == DEADBAND){
+            updateDamperZoneDeadband(hayStack, equipId, currentCfm, systemState);
         }
         damper.currentPosition = Math.min(damper.currentPosition, 100);
         CcuLog.i(L.TAG_CCU_ZONE,

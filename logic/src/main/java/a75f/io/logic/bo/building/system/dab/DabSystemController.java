@@ -486,9 +486,13 @@ public class DabSystemController extends SystemController
     }
     
     private boolean isNormalizationRequired() {
-        return (systemState != OFF)
-               && (coolingSignal > 0 || heatingSignal > 0)
-               && (conditioningMode != SystemMode.OFF);
+        
+        if (conditioningMode == SystemMode.OFF) {
+            return false;
+        }
+        //This is not neat, but the only way to check current system status for all different types of DAB profiles.
+        String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+        return !status.equals("System OFF");
     }
     
     private HashMap<String, Double> getBaseDamperPosMap(ArrayList<HashMap<Object, Object>> dabEquips) {
@@ -1053,27 +1057,21 @@ public class DabSystemController extends SystemController
             double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
             limitedSecondaryDamperPos = CCUUtils.roundToTwoDecimal(limitedSecondaryDamperPos);
             
-            double minLimit = 0, maxLimit = 0;
-            if (getStatus(dabEquip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                
+            double minLimit, maxLimit;
+            if (systemState == COOLING) {
                 minLimit = hayStack.readDefaultVal(
                     "point and min and damper and cooling and equipRef == \"" + equipRef + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
                     "point and max and damper and cooling and equipRef == \"" + equipRef + "\""
                 );
-                
-            } else if (getStatus(dabEquip.get("group").toString()) == ZoneState.HEATING.ordinal()
-                       || getStatus(dabEquip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                       || getStatus(dabEquip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()){
-                
+            } else {
                 minLimit = hayStack.readDefaultVal(
                     "point and min and damper and heating and equipRef == \"" + equipRef + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
                     "point and max and damper and heating and equipRef == \"" + equipRef + "\""
                 );
-                
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      "setDamperLimits : Equip " + dabEquip.get("dis") + " minLimit " + minLimit + " maxLimit " + maxLimit);

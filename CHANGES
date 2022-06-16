@@ -1,12 +1,17 @@
- - Merged PR 4036: Added unit for few temperature representing tuners
- - Merged PR 3989: Fix for Biskit is not seeding values
- - Merged PR 4015: Fix for hyperstat point write issue
- - Merged PR 4029: Cloud Connected point tag correction and migration task
- - Fixed the observations
- - Merged PR 3979: Organisation rename with named  schedule  updated
- - Updated the point write function. Calling point write only for writable points Resolved sonar cube issues
- - Updated the point write function. Calling point write only for writable points
- - Merged PR 3952: added configuration tuner value in UI
- - Merged PR 3954: Tuner multiple dailog issue
- - Merged PR 3956: special char while updating the site details
- - Merged PR 3969: CCU: When change the organization from CCU / Portals, old Named schedules are still listing at zone level in CCU
+ - Merged PR 4164: Update mechanical cooling when lockout disabled
+ - Merged PR 4054: CCU : Named Schedule : Desired Temp Limits Validation
+ - Merged PR 4149: Use system conditioning while applying damper limits config
+ - Merged PR 4092: 12203
+ - Use system conditioning while applying damper limits config
+ - Merged PR 4055: Hyperstat Desired temp validation
+ - Removed commented code
+ - Removed commented code
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userstory/11485_Local_Control_settings_on_ITM_are_ignored_on_Renatus
+ - Merged PR 4097: DAB invalid system status and normalization fix
+ - Merged PR 3962: Randomize CCU 15 minutes his write
+ - Update mechanical cooling when lockout disabled
+ - DAB invalid system status and normalization fix
+ - Fixed some sonar cure changes
+ - Added Unit test cases for desired temp validation functions
+ - validating the single desired temperature point. If valid desired temp considering it. If invalid then setting to the nearest boundary limit and updating to desired temp
+ - Randomize CCU 15 minutes his write

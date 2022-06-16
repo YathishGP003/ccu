@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
@@ -290,7 +291,6 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-
                 if (site.size() > 0) {
                     String siteId = site.get("id").toString();
                     updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
@@ -298,12 +298,14 @@ public class CreateNewSite extends Fragment {
                     saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                 }
 
+                HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
+                Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
                 if (ccu.size() > 0) {
                     String ahuRef = ccu.get("ahuRef").toString();
                     CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                     L.ccu().setCCUName(ccuName);
                 } else {
-                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.getId() ,managerEmail);
                     L.ccu().setCCUName(ccuName);
                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 }
@@ -836,9 +838,10 @@ public class CreateNewSite extends Fragment {
         CCUHsApi.getInstance().setPrimaryCcu(true);
         BuildingTuners.getInstance().updateBuildingTuners();
         //SystemEquip.getInstance();
+        DiagEquip.getInstance().create();
+        L.ccu().systemProfile = new DefaultSystem();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
-        L.ccu().systemProfile = new DefaultSystem();
         prefs.setString("SITE_ID", localSiteId);
 
         new Handler().postDelayed(() -> CCUHsApi.getInstance().importNamedScheduleWithOrg(

@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 public class FirmwareMetdata_t extends Struct
 {
 	
-	public final Enum8<FirmwareDeviceType_t> deviceType = new Enum8<>(FirmwareDeviceType_t.values()); /* Type of device to be updated */
+	public final Enum8<FirmwareComponentType_t> deviceType = new Enum8<>(FirmwareComponentType_t.values()); /* Type of device to be updated */
 	
 	public final Unsigned8 majorVersion = new Unsigned8(); /* The major version of the new firmware */
 	

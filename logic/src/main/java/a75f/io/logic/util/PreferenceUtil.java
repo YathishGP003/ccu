@@ -148,6 +148,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isSenseAndPILoopAnalogPointDisMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("SenseAndPILoopAnalogPointDisMigrationDone", false);
+    }
+
+    public static void setSenseAndPILoopAnalogPointDisMigrationDone(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("SenseAndPILoopAnalogPointDisMigrationDone", isMigrated);
+        editor.apply();
+    }
+
     public static boolean areDuplicateAlertsRemoved() {
         return getBooleanPreference(REMOVED_DUPLICATE_ALERTS);
     }

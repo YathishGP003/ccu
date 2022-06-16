@@ -727,7 +727,7 @@ public class PlcEquip {
         String[] markers = bundle.getStringArray("markers");
 
         Point.Builder dynamicTargetValueTag = new Point.Builder()
-                .setDisplayName(equipDis + "-dynamicTargetValue-" + dynamicTargetTag)
+                .setDisplayName(equipDis + "-dynamicTargetValue-" + dynamicTargetTag.replace("-" , ":"))
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)

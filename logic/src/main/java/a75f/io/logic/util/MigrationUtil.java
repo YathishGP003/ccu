@@ -44,6 +44,7 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import kotlin.Pair;
+import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
     
@@ -58,7 +59,12 @@ public class MigrationUtil {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setMigrationVersion()
         }*/
-    
+        if(!PreferenceUtil.isSenseAndPILoopAnalogPointDisMigrationDone()){
+            updateAnalogInputDisplayNameForSense();
+            updateAnalogInputDisplayNameForPILOOP();
+            PreferenceUtil.setSenseAndPILoopAnalogPointDisMigrationDone(true);
+        }
+
         if (!PreferenceUtil.isBposAhuRefMigrationDone()) {
             updateAhuRefForBposEquips(CCUHsApi.getInstance());
             PreferenceUtil.setBposAhuRefMigrationStatus(true);
@@ -68,12 +74,12 @@ public class MigrationUtil {
             removeDuplicateAlerts(AlertManager.getInstance());
             PreferenceUtil.removedDuplicateAlerts();
         }
-        
+
         if (!PreferenceUtil.getEnableZoneScheduleMigration()) {
             updateZoneScheduleTypes(CCUHsApi.getInstance());
             PreferenceUtil.setEnableZoneScheduleMigration();
         }
-    
+
         if (!PreferenceUtil.getCleanUpDuplicateZoneSchedule()) {
             cleanUpDuplicateZoneSchedules(CCUHsApi.getInstance());
             PreferenceUtil.setCleanUpDuplicateZoneSchedule();
@@ -100,7 +106,7 @@ public class MigrationUtil {
 
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
-             PreferenceUtil.setDamperFeedbackMigration();
+            PreferenceUtil.setDamperFeedbackMigration();
         }
 
         if(!PreferenceUtil.getAddedUnitToTuners()){
@@ -159,6 +165,20 @@ public class MigrationUtil {
 
     private static boolean isPointExist(String query, CCUHsApi ccuHsApi){
       return !ccuHsApi.readEntity(query).isEmpty();
+    }
+
+    private static void updateAnalogInputDisplayNameForSense(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG1);
+            PointMigrationHandler.updateSenseAnalogInputUnitPointDisplayName(Tags.ANALOG2);
+        }
+    }
+
+    private static void updateAnalogInputDisplayNameForPILOOP(){
+        if(!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
+            PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
+        }
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {

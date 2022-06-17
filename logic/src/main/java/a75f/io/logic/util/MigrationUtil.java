@@ -41,8 +41,8 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.ccu.restore.RestoreCCU;
 import kotlin.Pair;
 import a75f.io.logic.migration.point.PointMigrationHandler;
 
@@ -103,7 +103,12 @@ public class MigrationUtil {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
-
+        
+        if (!PreferenceUtil.isTrueCFMDABMigrationDone()) {
+            trueCFMDABMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTrueCFMDABMigrationDone();
+        }
+        
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -264,6 +269,26 @@ public class MigrationUtil {
             }
         });
     }
+
+    private static void trueCFMDABMigration(CCUHsApi haystack) {
+        ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
+        if(!dabEquips.isEmpty()) {
+            doMigrationDab(haystack, dabEquips);
+        }
+    }
+    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips) {
+        dabEquips.forEach(dabEquip -> {
+            HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                "enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
+            if (enableCFMPoint.get("id") == null) {
+                Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
+                TrueCFMPointsHandler.createTrueCFMControlPoint(haystack, equip, Tags.DAB, 0, null);
+            }
+        });
+    }
+    
+    
+
     private static void addUnitToTuners(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
         equips.forEach(equipDetails -> {

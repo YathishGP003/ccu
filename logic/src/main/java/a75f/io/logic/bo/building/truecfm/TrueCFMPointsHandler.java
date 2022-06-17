@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Units;
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class TrueCFMPointsHandler {
@@ -134,50 +135,24 @@ public class TrueCFMPointsHandler {
         hayStack.writeHisValueByIdWithoutCOV(numMaxCFMReheatingId, initialVal);
     }
 
-    private static void createAirflowCfmPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
-        Point airflowCfm = new Point.Builder()
-                .setDisplayName(equip.getDisplayName() +"-airflowCfm")
+    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, String profileTag,  double minCFMForIaq) {
+        Point minCFMIAQ = new Point.Builder()
+                .setDisplayName(equip.getDisplayName() + "-minCFMIAQ")
                 .setEquipRef(equip.getId())
                 .setSiteRef(equip.getSiteRef())
                 .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("cmd").addMarker("trueCfm").addMarker(fanMarker)
-                .addMarker("airflow").addMarker("his").addMarker(profileTag)
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate(Tags.COV)
+                .addMarker(Tags.CONFIG).addMarker(profileTag).addMarker(Tags.MIN)
+                .addMarker(Tags.CFM).addMarker(Tags.IAQ)
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10")
+                .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
                 .setGroup(equip.getGroup())
+                .setTz(equip.getTz())
+                .setUnit(Units.CFM)
                 .build();
-        hayStack.addPoint(airflowCfm);
-    }
-
-    private static void createFlowVelocityPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
-
-        Point flowVelocity = new Point.Builder()
-                .setDisplayName(equip.getDisplayName() +"-flowVelocity")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("vav").addMarker("air").addMarker("velocity").addMarker(fanMarker)
-                .addMarker("sp").addMarker("his").addMarker(profileTag)
-                .setGroup(equip.getGroup())
-                .build();
-         hayStack.addPoint(flowVelocity);
-
-    }
-
-    private static void createPressurePoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
-
-        Point pressure = new Point.Builder()
-                .setDisplayName(equip.getDisplayName() +"-pressure")
-                .setEquipRef(equip.getId())
-                .setSiteRef(equip.getSiteRef())
-                .setRoomRef(equip.getRoomRef())
-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("vav")
-                .addMarker(fanMarker).addMarker(profileTag)
-                .setGroup(equip.getGroup())
-                .build();
-         hayStack.addPoint(pressure);
-
+        String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
+        hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);
+        hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
     }
     
     public static void createTrueCfmSpPoints(CCUHsApi hayStack, Equip equip, String profileTag, String fanType) {
@@ -229,6 +204,18 @@ public class TrueCFMPointsHandler {
         createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating, fanType);
     
         createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanType);
+    }
+
+    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
+                                              DabProfileConfiguration dabProfileConfiguration) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
+
+        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
+
+        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
     }
     
     /**

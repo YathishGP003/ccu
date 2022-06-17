@@ -969,6 +969,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and damper and normalized and cmd and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and primary and equipRef == \""+equipID+"\"");
+        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and air and flow and trueCfm and dab and equipRef == \""+equipID+"\"");
         dabPoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {
@@ -987,6 +988,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
             dabPoints.put("Discharge Airflow",0+" \u2109");
+        }
+        if (airflowCFM != 0.0)
+        {
+            dabPoints.put("Airflow CFM",String.format("%.0f", airflowCFM));
+        }else{
+            dabPoints.put("Airflow CFM",0);
         }
         return dabPoints;
     }

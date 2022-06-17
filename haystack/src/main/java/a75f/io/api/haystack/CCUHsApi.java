@@ -75,7 +75,7 @@ public class CCUHsApi
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
 
-    public HisSyncHandler    hisSyncHandler;
+    private HisSyncHandler    hisSyncHandler;
 
     public boolean testHarnessEnabled = false;
 
@@ -2359,5 +2359,9 @@ public class CCUHsApi
      */
     public long getAppAliveMinutes() {
         return appAliveMinutes;
+    }
+    
+    public HisSyncHandler getHisSyncHandler() {
+        return hisSyncHandler;
     }
 }

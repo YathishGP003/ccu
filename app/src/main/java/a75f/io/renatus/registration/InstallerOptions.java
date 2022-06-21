@@ -250,10 +250,12 @@ public class InstallerOptions extends Fragment {
         toggleCelsius.setVisibility(View.VISIBLE);
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
 
+        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+
         if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-            toggleCelsius.setChecked(true);
+           toggleCelsius.setChecked(true);
         } else {
-            toggleCelsius.setChecked(false);
+           toggleCelsius.setChecked(false);
         }
 
         if (ccuId != null) {
@@ -403,16 +405,19 @@ public class InstallerOptions extends Fragment {
 
         getTempValues();
 
-        toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-            if(isChecked) {
-                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                        CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
-            } else {
-                CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                        CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                if(isChecked) {
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+                } else {
+                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                }
+                getTempValues();
             }
-            getTempValues();
         });
 
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

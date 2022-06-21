@@ -49,10 +49,10 @@ class GenericTuners {
         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
 
         Point useCelsius = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"useCelsius")
+                .setDisplayName(equipDis+"-"+"displayUnit")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("useCelsius")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("displayUnit")
                 .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
                 .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setMinVal("0")

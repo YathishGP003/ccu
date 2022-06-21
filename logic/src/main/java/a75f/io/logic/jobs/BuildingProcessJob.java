@@ -44,9 +44,15 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> ");
         watchdogMonitor = false;
+    
+        CCUHsApi.getInstance().incrementAppAliveCount();
+        CcuLog.d(L.TAG_CCU_JOB,"AppAliveMinutes : "+CCUHsApi.getInstance().getAppAliveMinutes());
+        if (CCUHsApi.getInstance().getAppAliveMinutes() % 15 == 0) {
+            CCUHsApi.getInstance().getHisSyncHandler().setNonCovSyncPending();
+        }
         
         L.pingCloudServer();
-    
+        
         if (!CCUHsApi.getInstance().isCCUConfigured()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-BuildingProcessJob ");
             return;
@@ -125,14 +131,13 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
     private void handleSync() {
         doHisSync();
-        DateTime now = new DateTime();
-        boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0;
+        long appAliveMinutes = CCUHsApi.getInstance().getAppAliveMinutes();
+        boolean timeForEntitySync = appAliveMinutes % 15 == 0;
         if (timeForEntitySync) {
-            L.saveCCUState();
             CCUHsApi.getInstance().scheduleSync();
         }
         //Save CCU state every other minute. This could be expensive if the local entity count is high.
-        if (now.getMinuteOfDay() % 2 == 0) {
+        if (appAliveMinutes % 2 == 0) {
             L.saveCCUState();
         }
     }

@@ -35,13 +35,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by rmatt isOn 7/30/2017.
  */
 public class UsbModbusService extends Service {
 
-    public static final String TAG = "CCU_SERIAL";
+    public static final String TAG = "CCU_USB_MODBUS";
     public static final String ACTION_USB_MODBUS_READY =
             "com.felhr.connectivityservices.USB_MODBUS_READY";
     public static final String ACTION_USB_ATTACHED =
@@ -106,15 +107,17 @@ public class UsbModbusService extends Service {
                     arg0.sendBroadcast(intent);
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
-                if (!serialPortConnected) {
+                UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
+                    Log.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
                      scheduleUsbConnectedEvent();
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                usbPortScanTimer.cancel();
                 // Usb device was disconnected. send an intent to the Main Activity
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
-                    Log.d(TAG,"Modbus Serial device disconnected ");
+                    usbPortScanTimer.cancel();
+                    Log.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
                     if (serialPortConnected) {
                         serialPort.close();
                         serialPort = null;
@@ -133,6 +136,7 @@ public class UsbModbusService extends Service {
         usbPortScanTimer = new Timer();
         usbPortScanTimer.schedule(new TimerTask() {
             @Override public void run() {
+                Log.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
                 findModbusSerialPortDevice();
             }
         }, 1000);
@@ -288,9 +292,9 @@ public class UsbModbusService extends Service {
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = false;
                         }
-                        Log.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
+                        Log.d(TAG, "Opened Serial MODBUS device "+device.toString());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
+                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.toString());
                     }
                 } else {
                     connection = null;
@@ -480,6 +484,16 @@ public class UsbModbusService extends Service {
         }
 
         public void run() {
+            try {
+                configureMbSerialPort();
+            } catch (Exception e) {
+                //Unstable USB connections would result in configuration failures.
+                CcuLog.e(TAG, "Modbus: configureMbSerialPort Failed ", e);
+                serialPortConnected = false;
+            }
+        }
+    
+        private void configureMbSerialPort() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
             Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
             Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
@@ -498,12 +512,11 @@ public class UsbModbusService extends Service {
                      * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
-                    
+                
                     serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                     serialPort.read(modbusCallback);
                     serialPort.getCTS(ctsCallback);
                     serialPort.getDSR(dsrCallback);
-
                     try {
                         //sleep(2000); // sleep some. YMMV with different chips.
                         //this.wait(2000);
@@ -525,6 +538,8 @@ public class UsbModbusService extends Service {
             }
         }
     }
+    
+    
     
     private int getModbusBaudrate() {
         return readIntPref("mb_baudrate", 9600);

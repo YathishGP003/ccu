@@ -88,7 +88,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     TunerGroupItem tunerGroupOpened = null;
     final int DIALOG_TUNER_PRIORITY = 10;
     TunerExpandableLayoutHelper tunerExpandableLayoutHelper;
-    int childSelected = 0;
+    public static int childSelected = -1;
     ArrayList<HashMap> updatedTunerValues;
     private Button saveTunerValues;
     private Button cancelTunerUpdate;
@@ -674,22 +674,22 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void itemClicked(HashMap item, int position) {
-        //Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" + " minValue:" + item.get("minVal") + " maxValue:" + item.get("maxVal") + " incrementBy:" + item.get("incrementVal"), Toast.LENGTH_SHORT).show();
-        childSelected = position;
-        Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
-
-        if (radioBtnBuilding.isChecked()) {
-            tunerGroupType = "Building";
-        } else if (radioButtonSystem.isChecked()) {
-            tunerGroupType = "System";
-        } else if (radioButtonZone.isChecked()) {
-            tunerGroupType = "Zone";
-        } else if (radioButtonModule.isChecked()) {
-            tunerGroupType = "Module";
+        if(childSelected == -1) {
+            childSelected = position;
+            Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
+            if (radioBtnBuilding.isChecked()) {
+                tunerGroupType = "Building";
+            } else if (radioButtonSystem.isChecked()) {
+                tunerGroupType = "System";
+            } else if (radioButtonZone.isChecked()) {
+                tunerGroupType = "Zone";
+            } else if (radioButtonModule.isChecked()) {
+                tunerGroupType = "Module";
+            }
+            DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
+            tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
+            showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
         }
-        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
-        tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
-        showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
     }
 
     @Override

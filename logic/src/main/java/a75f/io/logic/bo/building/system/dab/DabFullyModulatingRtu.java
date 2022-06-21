@@ -146,7 +146,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append((systemFanLoopOp > 0 || getCmdSignal("occupancy") > 0) ? " Fan ON ":"");
+        status.append((systemFanLoopOp > 0 || ControlMote.getRelay3()) ? " Fan ON ": "");
         status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive()) ? " | Cooling ON ":"");
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive()) ? " | Heating ON ":"");
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
@@ -693,9 +693,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public double getConfigVal(String tags) {
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and "+tags);
+        HashMap<Object, Object> configPoint = hayStack.readEntity("point and system and config and "+tags);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+tags);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     
@@ -739,9 +742,13 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     public double getConfigEnabled(String config) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        HashMap<Object, Object> configPoint =
+            hayStack.readEntity("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config enable point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
-        
     }
 
     public void setConfigEnabled(String tags, double val) {
@@ -836,15 +843,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                             CCUHsApi.getInstance().deleteEntityTree(cmdOccu.get("id").toString());
                         }
                     }else {
-                        Point occupancySignal = new Point.Builder()
-                                .setDisplayName(equipDis+"-"+"occupancySignal")
-                                .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
-                                .setTz(tz)
-                                .build();
-                        String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
-                        CCUHsApi.getInstance().writeHisValById(cmdOccupancyPtId,0.0);
+                        if (val == 1) {
+                            Point occupancySignal = new Point.Builder()
+                                    .setDisplayName(equipDis+"-"+"occupancySignal")
+                                    .setSiteRef(siteRef)
+                                    .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
+                                    .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
+                                    .setTz(tz)
+                                    .build();
+                            String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
+                            CCUHsApi.getInstance().writeHisValById(cmdOccupancyPtId,0.0);
+                        }
                     }
                     break;
                 case "relay7":

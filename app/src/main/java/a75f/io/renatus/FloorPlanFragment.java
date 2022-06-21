@@ -11,20 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import a75f.io.api.haystack.Device;
-import a75f.io.api.haystack.Point;
-import a75f.io.logger.CcuLog;
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
-import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuViewModel;
-import a75f.io.renatus.util.NetworkUtil;
-import a75f.io.renatus.util.ProgressDialogUtils;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -40,7 +26,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.renovo.bacnet4j.npdu.Network;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
@@ -58,23 +47,31 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
+import a75f.io.renatus.util.NetworkUtil;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -116,7 +113,6 @@ public class FloorPlanFragment extends Fragment {
     ListView roomListView;
     @BindView(R.id.moduleList)
     ListView moduleListView;
-    Short[] smartNodeAddresses;
 
     @BindView(R.id.lt_addfloor)
     LinearLayout addFloorlt;
@@ -148,8 +144,8 @@ public class FloorPlanFragment extends Fragment {
     @BindView(R.id.textModbusBTUMeter)
     TextView textModbusBTUMeter;
 
-    ArrayList<Floor> floorList = new ArrayList();
-    ArrayList<Zone> roomList = new ArrayList();
+    ArrayList<Floor> floorList = new ArrayList<>();
+    ArrayList<Zone> roomList = new ArrayList<>();
     //
     private Zone roomToRename;
     private Floor floorToRename;
@@ -160,55 +156,40 @@ public class FloorPlanFragment extends Fragment {
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-
-                case ACTION_BLE_PAIRING_COMPLETED:
-                    Log.i("Test", "onReceive: " + ACTION_BLE_PAIRING_COMPLETED);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //TODO Commented this out for seed messages
-                            //if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
-                            //	LSerial.getInstance().setResetSeedMessage(true);
-                            try {
-                                if (mFloorListAdapter.getSelectedPostion() == -1) {
-                                    if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
-                                        getActivity().runOnUiThread(() -> onEnergyMeterClick());
-                                    }
-                                    if (sysyemDeviceType == SysyemDeviceType.OAO) {
-                                        updateOAOModule();
-                                    }
-                                    if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                onBTUMeterClick();
-                                            }
-                                        });
-                                    }
+            if (ACTION_BLE_PAIRING_COMPLETED.equals(intent.getAction())) {
+                new Thread(() -> {
+                    try {
+                        if (mFloorListAdapter.getSelectedPostion() == -1) {
+                            if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
+                                requireActivity().runOnUiThread(FloorPlanFragment.this::onEnergyMeterClick);
+                            }
+                            if (sysyemDeviceType == SysyemDeviceType.OAO) {
+                                updateOAOModule();
+                            }
+                            if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
+                                requireActivity().runOnUiThread(FloorPlanFragment.this::onBTUMeterClick);
+                            }
 
 
-                                } else {
-                                    updateModules(getSelectedZone());
-                                    setScheduleType(getSelectedZone().getId());
-                                    //Update BACnet Database Revision by adding new module to zone
-                                    ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
-                                    if (zoneEquips.size() == 1) {
-                                        if (!zoneEquips.get(0).getMarkers().contains("pid") && !zoneEquips.get(0).getMarkers().contains("emr")) {
-                                            BACnetUtils.updateDatabaseRevision();
-                                        }
-                                    }
+                        } else {
+                            updateModules(getSelectedZone());
+                            setScheduleType(getSelectedZone().getId());
+                            //Update BACnet Database Revision by adding new module to zone
+                            ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+                            if (zoneEquips.size() == 1) {
+                                if (!zoneEquips.get(0).getMarkers().contains("pid") && !zoneEquips.get(0).getMarkers().contains("emr")) {
+                                    BACnetUtils.updateDatabaseRevision();
                                 }
-                                //Crash here because of activity null while moving to other fragment and return back here after edit config
-                                if ((getActivity() != null) && (mPairingReceiver != null))
-                                    getActivity().unregisterReceiver(mPairingReceiver);
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
                         }
-                    }).start();
-                    break;
+                        //Crash here because of activity null while moving to other fragment and return back here after edit config
+                        if ((getActivity() != null) && (mPairingReceiver != null))
+                            getActivity().unregisterReceiver(mPairingReceiver);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             }
         }
     };
@@ -216,7 +197,7 @@ public class FloorPlanFragment extends Fragment {
     /**
      * Holding privious selection to Enable/disable the Selection between OAO/EneryMeter/BTUMeter
      */
-    int priviousSelectedDevice = 0;
+    int previousSelectedDevice = 0;
 
     private void setScheduleType(String zoneId) {
 
@@ -270,8 +251,6 @@ public class FloorPlanFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.floorplan, container, false);
         ButterKnife.bind(this, rootView);
-
-        //getBuildingFloorsZones();
         return rootView;
     }
 
@@ -287,14 +266,12 @@ public class FloorPlanFragment extends Fragment {
     public void onStart() {
         super.onStart();
         floorListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-
         floorListActionMenuListener = new FloorListActionMenuListener(this);
         floorListView.setMultiChoiceModeListener(floorListActionMenuListener);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
         moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         moduleListView.setMultiChoiceModeListener(new ModuleListActionMenuListener(this));
-        //EventBus.getDefault().register();
     }
 
 
@@ -339,7 +316,6 @@ public class FloorPlanFragment extends Fragment {
     private void updateFloors() {
 
         mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, floorList);
-        //mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.id.textData,floorList);
         floorListView.setAdapter(mFloorListAdapter);
         enableFloorButton();
         if (mFloorListAdapter.getCount() > 0) {
@@ -368,13 +344,13 @@ public class FloorPlanFragment extends Fragment {
         Collections.sort(roomList, new ZoneComparator());
         updateRooms(roomList);
     }
-    
+
     private void enableRoomBtn() {
         addZonelt.setVisibility(View.VISIBLE);
         addRoomBtn.setVisibility(View.VISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
     }
-    
+
     private void updateRooms(ArrayList<Zone> zones) {
         mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
         roomListView.setAdapter(mRoomListAdapter);
@@ -390,11 +366,10 @@ public class FloorPlanFragment extends Fragment {
             disableModuButton();
         }
     }
-    
+
     @SuppressLint("StaticFieldLeak")
     public void getBuildingFloorsZones(String enableKeyboard) {
         loadExistingZones();
-        //	ProgressDialogUtils.showProgressDialog(getContext(), "Fetching floors and zones...");
         new AsyncTask<String, Void, Void>() {
 
             @Override
@@ -450,24 +425,11 @@ public class FloorPlanFragment extends Fragment {
 
                 } catch (CallException e) {
                     Log.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
-                    //ProgressDialogUtils.hideProgressDialog();
                     e.printStackTrace();
                 }
 
 
                 return null;
-            }
-
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-				/*ProgressDialogUtils.hideProgressDialog();
-				if (!TextUtils.isEmpty(enableKeyboard) && (enableKeyboard.contains("room") || enableKeyboard.contains("floor"))){
-					InputMethodManager mgr =
-							(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-					mgr.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
-				}*/
-                super.onPostExecute(aVoid);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -633,29 +595,27 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
-
+        floorToRename = null;
         if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
             Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.",
                            Toast.LENGTH_LONG)
                  .show();
             return;
         }
+
         enableFloorEdit();
         addFloorEdit.setText("");
         addFloorEdit.requestFocus();
-        InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+        showKeyboard(addFloorEdit);
     }
 
     @OnClick(R.id.lt_addfloor)
     public void addFloorBtn() {
+        floorToRename = null;
         enableFloorEdit();
         addFloorEdit.setText("");
         addFloorEdit.requestFocus();
-        InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+        showKeyboard(addFloorEdit);
     }
 
 
@@ -790,13 +750,13 @@ public class FloorPlanFragment extends Fragment {
         }
         if (position == 3) {
             sysyemDeviceType = SysyemDeviceType.BTU_METER;
-           
+
             rl_modbus_btu_meter.setBackgroundResource(background);
             textModbusBTUMeter.setSelected(true);
             textModbusBTUMeter.setTextColor(Color.WHITE);
             rl_modbus_btu_meter.setEnabled(false);
         }
-        if (position != priviousSelectedDevice)
+        if (position != previousSelectedDevice)
             disablePreviousSelection(position);
         roomListView.setVisibility(View.GONE);
         moduleListView.setVisibility(View.GONE);
@@ -811,37 +771,34 @@ public class FloorPlanFragment extends Fragment {
         /**
          * Disable previous selection
          */
-        if (priviousSelectedDevice != 0) {
-            if (priviousSelectedDevice == 1) {
+        if (previousSelectedDevice != 0) {
+            if (previousSelectedDevice == 1) {
                 rl_oao.setBackgroundColor(Color.WHITE);
                 textViewOAO.setSelected(false);
                 textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
                 rl_oao.setEnabled(true);
             }
-            if (priviousSelectedDevice == 2) {
+            if (previousSelectedDevice == 2) {
                 rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
                 textModbusEnergyMeter.setSelected(false);
                 textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
                 rl_modbus_energy_meter.setEnabled(true);
             }
-            if (priviousSelectedDevice == 3) {
+            if (previousSelectedDevice == 3) {
                 rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
                 textModbusBTUMeter.setSelected(false);
                 textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
                 rl_modbus_btu_meter.setEnabled(true);
             }
         }
-        priviousSelectedDevice = position;
+        previousSelectedDevice = position;
     }
 
 
     private void closeAddZoneEditViews() {
         addZonelt.setVisibility(View.VISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
-
-        InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
+        hideKeyboard();
     }
 
     private void setSystemUnselection() {
@@ -884,7 +841,7 @@ public class FloorPlanFragment extends Fragment {
         moduleListView.setVisibility(View.VISIBLE);
         addZonelt.setEnabled(true);
         addRoomBtn.setEnabled(true);
-        priviousSelectedDevice = 0;
+        previousSelectedDevice = 0;
     }
 
     private void enableFloorEdit() {
@@ -894,18 +851,12 @@ public class FloorPlanFragment extends Fragment {
         getBuildingFloorsZones("floor");
     }
 
-
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             if (floorToRename != null) {
-
                 floorList.remove(floorToRename);
-                for (Floor f : new ArrayList<>(siteFloorList)) {
-                    if (f.getDisplayName().equals(floorToRename.getDisplayName())) {
-                        siteFloorList.remove(f);
-                    }
-                }
+                siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName()));
                 Floor hsFloor = new Floor.Builder()
                         .setDisplayName(addFloorEdit.getText().toString())
                         .setSiteRef(floorToRename.getSiteRef())
@@ -946,14 +897,15 @@ public class FloorPlanFragment extends Fragment {
                                     }
 
                                 }
+                                EquipsManager.getInstance().getAllMbEquips(zone.getId())
+                                        .forEach( equip -> {
+                                            equip.setFloorRef(floor.getId());
+                                            EquipsManager.getInstance().saveProfile(equip);
+                                        });
                             }
 
                             refreshScreen();
-
-                            InputMethodManager mgr = (InputMethodManager) getActivity()
-                                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-                            mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-
+                            hideKeyboard();
                             floorToRename = null;
                             L.saveCCUState();
                             CCUHsApi.getInstance().syncEntityTree();
@@ -961,12 +913,8 @@ public class FloorPlanFragment extends Fragment {
                             dialog.dismiss();
                         });
                         adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
-                            InputMethodManager mgr = (InputMethodManager) getActivity()
-                                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-                            mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-
+                            hideKeyboard();
                             refreshScreen();
-
                             dialog.dismiss();
                         });
                         adb.show();
@@ -978,15 +926,10 @@ public class FloorPlanFragment extends Fragment {
                 floorList.add(hsFloor);
                 CCUHsApi.getInstance().updateFloor(hsFloor, floorToRename.getId());
                 refreshScreen();
-
-                InputMethodManager mgr = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-
+                hideKeyboard();
                 floorToRename = null;
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
-
                 siteFloorList.add(hsFloor);
                 return true;
             }
@@ -1009,27 +952,19 @@ public class FloorPlanFragment extends Fragment {
                                         StringUtils.stripStart(floor.getId(), "@")));
                                 CCUHsApi.getInstance().setSynced(hsFloor.getId());
                             }
+
                             refreshScreen();
-
-                            InputMethodManager mgr = (InputMethodManager) getActivity()
-                                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-                            mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-
+                            hideKeyboard();
                             floorToRename = null;
                             L.saveCCUState();
                             CCUHsApi.getInstance().syncEntityTree();
-
                             siteFloorList.add(hsFloor);
-
                             dialog.dismiss();
                         });
+
                         adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
-                            InputMethodManager mgr = (InputMethodManager) getActivity()
-                                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-                            mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-
+                            hideKeyboard();
                             refreshScreen();
-
                             dialog.dismiss();
                         });
                         adb.show();
@@ -1046,9 +981,7 @@ public class FloorPlanFragment extends Fragment {
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
 
-                InputMethodManager mgr = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+                hideKeyboard();
                 Toast.makeText(getActivity().getApplicationContext(),
                         "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
                 siteFloorList.add(hsFloor);
@@ -1067,55 +1000,6 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-
-    @OnClick(R.id.addRoomBtn)
-    public void handleRoomBtn() {
-        enableRoomEdit();
-        addRoomEdit.setText("");
-        addRoomEdit.requestFocus();
-        InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
-    }
-
-
-    @OnClick(R.id.lt_addzone)
-    public void addRoomBtn() {
-        enableRoomEdit();
-        addRoomEdit.setText("");
-        addRoomEdit.requestFocus();
-        InputMethodManager mgr =
-                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
-    }
-
-    private void enableRoomEdit() {
-        addZonelt.setVisibility(View.INVISIBLE);
-        addRoomBtn.setVisibility(View.INVISIBLE);
-        addRoomEdit.setVisibility(View.VISIBLE);
-        getBuildingFloorsZones("room");
-    }
-
-
-    @OnFocusChange(R.id.addRoomEdit)
-    public void handleRoomFocus(View v, boolean hasFocus) {
-        if (!hasFocus) {
-            enableRoomBtn();
-        }
-    }
-
-    public void renameZone(Zone zone) {
-        roomToRename = zone;
-        enableRoomEdit();
-        addRoomEdit.setText(zone.getDisplayName());
-        addRoomEdit.requestFocus();
-        addRoomEdit.setSelection(zone.getDisplayName().length());
-
-        InputMethodManager mgr =
-                    (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
-    }
-
     public void renameFloor(Floor floor) {
         if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
             Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.",
@@ -1128,10 +1012,50 @@ public class FloorPlanFragment extends Fragment {
         addFloorEdit.setText(floor.getDisplayName());
         addFloorEdit.requestFocus();
         addFloorEdit.setSelection(floor.getDisplayName().length());
+        showKeyboard(addFloorEdit);
+    }
 
-        InputMethodManager mgr =
-                    (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+    @OnClick(R.id.addRoomBtn)
+    public void handleRoomBtn() {
+        roomToRename = null;
+        enableRoomEdit();
+        addRoomEdit.setText("");
+        addRoomEdit.requestFocus();
+        showKeyboard(addRoomEdit);
+    }
+
+
+    @OnClick(R.id.lt_addzone)
+    public void addRoomBtn() {
+        roomToRename = null;
+        enableRoomEdit();
+        addRoomEdit.setText("");
+        addRoomEdit.requestFocus();
+        showKeyboard(addRoomEdit);
+    }
+
+    private void enableRoomEdit() {
+        addZonelt.setVisibility(View.INVISIBLE);
+        addRoomBtn.setVisibility(View.INVISIBLE);
+        addRoomEdit.setVisibility(View.VISIBLE);
+        getBuildingFloorsZones("room");
+    }
+
+    @OnFocusChange(R.id.addRoomEdit)
+    public void handleRoomFocus(View v, boolean hasFocus) {
+        if (!hasFocus) {
+            enableRoomBtn();
+            roomToRename = null;
+        }
+    }
+
+    public void renameZone(Zone zone) {
+        roomToRename = zone;
+        enableRoomEdit();
+        addRoomEdit.setText(zone.getDisplayName());
+        addRoomEdit.requestFocus();
+        addRoomEdit.setSelection(zone.getDisplayName().length());
+        showKeyboard(addRoomEdit);
     }
 
     @OnEditorAction(R.id.addRoomEdit)
@@ -1162,11 +1086,7 @@ public class FloorPlanFragment extends Fragment {
                 Collections.sort(roomList, new ZoneComparator());
                 updateRooms(roomList);
                 selectRoom(roomList.indexOf(hsZone));
-
-                InputMethodManager mgr = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
-
+                hideKeyboard();
                 roomToRename = null;
                 if (!siteRoomList.contains(addRoomEdit.getText().toString())) {
                     siteRoomList.add(addRoomEdit.getText().toString());
@@ -1187,8 +1107,6 @@ public class FloorPlanFragment extends Fragment {
                 Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
-                //Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-
                 Zone hsZone = new Zone.Builder()
                         .setDisplayName(addRoomEdit.getText().toString())
                         .setFloorRef(floor.getId())
@@ -1206,19 +1124,7 @@ public class FloorPlanFragment extends Fragment {
                 updateRooms(roomList);
                 selectRoom(roomList.indexOf(hsZone));
 
-                InputMethodManager mgr = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
-
-				/*//TODO: update default building data
-				Schedule buildingSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-				Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(hsZone.getScheduleRef());
-				for (Schedule.Days days : zoneSchedule.getDays()) {
-					days.setHeatingVal(buildingSchedule.getCurrentValues().getHeatingVal());
-					days.setCoolingVal(buildingSchedule.getCurrentValues().getCoolingVal());
-				}
-
-				CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());*/
+                hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString());
                 return true;
             } else {
@@ -1232,11 +1138,11 @@ public class FloorPlanFragment extends Fragment {
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
         addModulelt.setEnabled(false);
-        disableForMiliSeconds();
+        disableForMilliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
-            if (priviousSelectedDevice == 1) {
+            if (previousSelectedDevice == 1) {
 
                 if (L.ccu().oaoProfile != null) {
                     Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
@@ -1251,7 +1157,7 @@ public class FloorPlanFragment extends Fragment {
             /**
              * Modbus energy meter selection
              **/
-            if (priviousSelectedDevice == 2) {
+            if (previousSelectedDevice == 2) {
                 //only one energymeter module is allowed.
                 boolean isPaired = false;
                 if (L.ccu().zoneProfiles.size() > 0) {
@@ -1271,7 +1177,7 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
                 }
             }
-            if (priviousSelectedDevice == 3) {
+            if (previousSelectedDevice == 3) {
                 /**
                  * Modbus BTU meter selection
                  */
@@ -1354,7 +1260,6 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-
     private void showDialogFragment(DialogFragment dialogFragment, String id) {
 
         FragmentTransaction ft = getParentFragmentManager().beginTransaction();
@@ -1363,7 +1268,6 @@ public class FloorPlanFragment extends Fragment {
             getParentFragmentManager().beginTransaction().remove(prev).commitAllowingStateLoss();
         }
         ft.addToBackStack(null);
-        //TODO: no broadcast recievers
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_BLE_PAIRING_COMPLETED));
         // Create and show the dialog.
         dialogFragment.show(ft, id);
@@ -1380,126 +1284,120 @@ public class FloorPlanFragment extends Fragment {
         setSystemUnselection();
     }
 
-
     @OnItemClick(R.id.roomList)
     public void setRoomListView(AdapterView<?> parent, View view, int position, long id) {
         selectRoom(position);
     }
-
 
     @OnItemClick(R.id.moduleList)
     public void setModuleListView(AdapterView<?> parent, View view, int position, long id) {
         selectModule(position);
         //disabling moduleListView to avoid multiple view creation
         moduleListView.setEnabled(false);
-        disableModuleListForMiliSeconds();
+        disableModuleListForMilliSeconds();
     }
 
 
     private boolean isFloorAdded() {
-        if (((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) &&
+        return ((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) &&
                 (mRoomListAdapter != null && mRoomListAdapter.getSelectedPostion() != -1)) ||
-                (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1))
-            return true;
-        return false;
+                (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1);
     }
 
     private void selectModule(int position) {
         mModuleListAdapter.setSelectedItem(position);
-        String nodeAddr = mModuleListAdapter.getItem(position);
-        Log.i("Test", "selectModule: " + sysyemDeviceType);
-        Log.i("Test", "selectModule: " + mFloorListAdapter.getSelectedPostion());
+        String nodeAddress = mModuleListAdapter.getItem(position);
 
         if (isFloorAdded()) {
             if (sysyemDeviceType == SysyemDeviceType.OAO) {
-                DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
+                DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM");
                 showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.BTU_METER) {
                 showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
             }
             if (sysyemDeviceType == SysyemDeviceType.ENERGY_METER) {
                 showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                        .newInstance(Short.parseShort(nodeAddress), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
             }
             return;
         }
 
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-        ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
+        ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddress));
         if (profile != null) {
 
             switch (profile.getProfileType()) {
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
-                    VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+                    VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddress));
                     showDialogFragment(FragmentVAVConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
                     break;
                 case PLC:
                     showDialogFragment(FragmentPLCConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
                     break;
                 case DAB:
                     showDialogFragment(FragmentDABConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentDABConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentDABConfiguration.ID);
                     break;
                 case DUAL_DUCT:
                     showDialogFragment(FragmentDABDualDuctConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE,
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE,
                                     floor.getId(), profile.getProfileType()), FragmentDABDualDuctConfiguration.ID
                     );
                     break;
                 case EMR:
                     showDialogFragment(FragmentEMRConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentEMRConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentEMRConfiguration.ID);
                     break;
                 case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                     showDialogFragment(FragmentCPUConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
                     break;
                 case SMARTSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(FragmentHeatPumpConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentHeatPumpConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentHeatPumpConfiguration.ID);
                     break;
                 case SMARTSTAT_TWO_PIPE_FCU:
                     showDialogFragment(Fragment2PipeFanCoilUnitConfig
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment2PipeFanCoilUnitConfig.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment2PipeFanCoilUnitConfig.ID);
                     break;
                 case SMARTSTAT_FOUR_PIPE_FCU:
                     showDialogFragment(Fragment4PipeFanCoilUnitConfig
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment4PipeFanCoilUnitConfig.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment4PipeFanCoilUnitConfig.ID);
                     break;
                 case TEMP_INFLUENCE:
                     showDialogFragment(FragmentTempInfConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
                     break;
                 case SSE:
                     showDialogFragment(FragmentSSEConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
                 case MODBUS_EMR_ZONE:
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
                 case HYPERSTAT_SENSE:
-                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
+                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
                 case BPOS:
-                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddr),
+                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
                             zone.getId(), floor.getId(), profile.getProfileType()),FragmentBPOSTempInfConfiguration.ID);
                     break;
                 case HYPERSTAT_VRV:
-                    showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddr)
+                    showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
                         , zone.getId(), floor.getId()), HyperStatSenseFragment.ID);
                     break;
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddr)
+                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
                             HyperStatSenseFragment.ID);
                     break;
@@ -1523,7 +1421,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_VAV_BACnet:
                 case MODBUS_DEFAULT:
                     showDialogFragment(FragmentModbusConfiguration
-                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;
 
             }
@@ -1533,21 +1431,21 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
-    class FloorComparator implements Comparator<Floor> {
+    static class FloorComparator implements Comparator<Floor> {
         @Override
         public int compare(Floor a, Floor b) {
             return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
     }
 
-    class ZoneComparator implements Comparator<Zone> {
+    static class ZoneComparator implements Comparator<Zone> {
         @Override
         public int compare(Zone a, Zone b) {
             return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
     }
 
-    class ModuleComparator implements Comparator<Equip> {
+    static class ModuleComparator implements Comparator<Equip> {
         @Override
         public int compare(Equip a, Equip b) {
             return a.getGroup().compareToIgnoreCase(b.getGroup());
@@ -1555,14 +1453,24 @@ public class FloorPlanFragment extends Fragment {
     }
 
 
-    //Disabling the Pair button for 2 seconds thenenabling to avoid double click on pair module
-    public void disableForMiliSeconds(){
+    //Disabling the Pair button for 2 seconds the enabling to avoid double click on pair module
+    public void disableForMilliSeconds(){
         int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
         new Handler(Looper.getMainLooper()).postDelayed(()->{addModulelt.setEnabled(true);addModulelt.setVisibility(View.VISIBLE);},delay);
     }
 
-    private void disableModuleListForMiliSeconds(){
+    private void disableModuleListForMilliSeconds(){
         int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
         new Handler(Looper.getMainLooper()).postDelayed(()->moduleListView.setEnabled(true), delay);
+    }
+
+    private void showKeyboard(EditText editTextView){
+        ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .showSoftInput(editTextView, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    private void hideKeyboard(){
+        ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(requireView().getWindowToken(), 0);
     }
 }

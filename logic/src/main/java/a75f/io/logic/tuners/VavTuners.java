@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
@@ -19,10 +20,12 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Consts;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.util.RxTask;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
 
 public class VavTuners {
     
@@ -30,6 +33,8 @@ public class VavTuners {
                                            String tz) {
 
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vav");
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default VAV Tuner points already exist");
             return;
@@ -43,7 +48,7 @@ public class VavTuners {
                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_SPREAD, 0);
@@ -149,7 +154,7 @@ public class VavTuners {
                                .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
@@ -655,7 +660,8 @@ public class VavTuners {
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"), 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneDischargeTempOffSetTunerId,
                 BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
-
+    
+        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.VAV, VAV_TUNER_GROUP);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -776,7 +782,7 @@ public class VavTuners {
                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                        .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                                       .setTz(tz)
+                                       .setTz(tz).setUnit(Units.FAHRENHEIT)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
@@ -898,7 +904,7 @@ public class VavTuners {
                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                               .setTz(tz)
+                               .setTz(tz).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);

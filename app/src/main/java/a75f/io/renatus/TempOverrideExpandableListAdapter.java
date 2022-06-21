@@ -546,7 +546,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     } else if (expandedListText.startsWith("Th")) {
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
-                        expandedListTextVal.setText("" + value + " " + CCUHsApi.getInstance().readMapById(equipId).get("unit"));
+                        expandedListTextVal.setText("" + value + " " + "Kilo ohms");
                         etThermistor.setVisibility(View.VISIBLE);
                         if (!Strings.isNullOrEmpty(thOver) && thEquipDetails.equals(equipId + expandedListText.substring(2, 3)))
                             etThermistor.setText(thOver);

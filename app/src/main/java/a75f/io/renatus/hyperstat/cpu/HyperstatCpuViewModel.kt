@@ -1,6 +1,5 @@
 package a75f.io.renatus.hyperstat.cpu
 
-import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.Output
@@ -15,7 +14,6 @@ import a75f.io.logic.bo.building.hyperstat.cpu.CpuAnalogOutAssociation.*
 import a75f.io.logic.bo.building.hyperstat.cpu.CpuRelayAssociation.*
 import a75f.io.renatus.R
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
@@ -70,6 +68,8 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
         if (config.analogOut2State.enabled) config.outputs.add(constructOutputAnalogOut(address, Port.ANALOG_OUT_TWO))
         if (config.analogOut3State.enabled) config.outputs.add(constructOutputAnalogOut(address, Port.ANALOG_OUT_THREE))
 
+
+
         hscProfile?.profileConfiguration?.put(address, config)
 
         if (hscConfiguration == null) {
@@ -89,7 +89,7 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
         address: Short,
         port: Port
     ): Output {
-        var outputRelay = Output()
+        val outputRelay = Output()
         outputRelay.address = address
         outputRelay.port = port
         outputRelay.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen
@@ -185,18 +185,6 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
             index, analogOuts[index].copy(association = CpuAnalogOutAssociation.values()[position])
         )
         newAnalogOuts[index].enabled
-        viewState.onNext(
-            currentState.copy(
-                analogOutUis = newAnalogOuts
-            )
-        )
-    }
-
-    fun analogOutTestSignalSelected(index: Int, position: Int) {
-        val analogOuts = currentState.analogOutUis
-        val newAnalogOuts = analogOuts.updated(
-            index, analogOuts[index].copy(testSignalPosition = position)
-        )
         viewState.onNext(
             currentState.copy(
                 analogOutUis = newAnalogOuts
@@ -310,6 +298,39 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
             )
         )
     }
+
+
+    fun zoneVOCThresholdSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                zoneVocThresholdPos = position
+            )
+        )
+    }
+    fun zoneVOCTargetSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                zoneVocTargetPos = position
+            )
+        )
+    }
+
+
+    fun zonePmThresholdSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                zonePm2p5ThresholdPos = position
+            )
+        )
+    }
+    fun zonePmTargetSelect(position: Int) {
+        viewState.onNext(
+            currentState.copy(
+                zonePm2p5TargetPos = position
+            )
+        )
+    }
+
 }
 
 // Dropdown choice value ranges
@@ -337,6 +358,14 @@ private val CO2Max = 2000
 
 private val INC = 10
 
+private val VOC_INC = 100
+private val PM_INC = 5
+
+private val VOCMin = 0
+private val VOCMax = 10000
+
+private val PMMin = 0
+private val PMMax = 1000
 
 private fun tempOffsetIndexFromValue(tempOffset: Double) =
     offsetIndexFromValue(TEMP_OFFSET_LIMIT_MIN, TEMP_OFFSET_INC, tempOffset)
@@ -377,37 +406,57 @@ private fun analogFanSpeedIndexFromValue(percent: Double) =
     offsetIndexFromValue(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, percent)
 
 private fun analogFanSpeedFromIndex(index: Int) =
-    offsetFromIndex(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC.toDouble(), index)
+    offsetFromIndex(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, index)
 
 fun analogFanLevelSpeedValue(): Array<String?> {
     return offsetSpinnerValues(
         ANALOG_FAN_MAX_SPEED, ANALOG_FAN_MIN_SPEED,
-        ANALOG_FAN_SPEED_INC.toDouble(), true, "%"
+        ANALOG_FAN_SPEED_INC, true, "%"
     )
 }
 
 private fun co2DCVDamperValueFromIndex(index: Int) = offsetFromIndex(CO2Min, INC.toDouble(), index)
 private fun OpeningDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
 
+private fun vocValueFromIndex(index: Int) = offsetFromIndex(VOCMin, VOC_INC.toDouble(), index)
+private fun pm25ValueFromIndex(index: Int) = offsetFromIndex(PMMin, PM_INC.toDouble(), index)
+
 
 private fun co2DCVDamperSetIndexFromValue(value: Double) = offsetIndexFromValue(CO2Min, INC.toDouble(), value)
 private fun co2DCVOpeningDamperSetIndexFromValue(value: Double) =
     offsetIndexFromValue(OpeningRateMin, INC.toDouble(), value)
 
+private fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
+private fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
+
 
 fun co2DCVDamperValue(): Array<String?> {
     return offsetSpinnerValues(
         CO2Max, CO2Min,
-        INC.toDouble(), true, "ppm"
+        INC.toDouble(), true, " ppm"
     )
 }
 
 fun co2DCVOpeningDamperValue(): Array<String?> {
     return offsetSpinnerValues(
         OpeningRateMax, OpeningRateMin,
-        INC.toDouble(), true, "%"
+        INC.toDouble(), true, " %"
     )
 }
+
+fun vocValues(): Array<String?> {
+    return offsetSpinnerValues(
+        VOCMax, VOCMin,
+        VOC_INC.toDouble(), true, " ppb"
+    )
+}
+fun pmValues(): Array<String?> {
+    return offsetSpinnerValues(
+        PMMax, PMMin,
+        PM_INC.toDouble(), true, " ug/㎥"
+    )
+}
+
 
 
 private fun offsetSpinnerValues(
@@ -426,7 +475,7 @@ private fun offsetSpinnerValues(
     for (nNum in 0 until count) {
         var rawValue = (nNum + offsetFromZeroCount).toDouble() * inc
         if (displayAsInt) {
-            nums[nNum] = String.format("%.1f", rawValue) + suffix
+            nums[nNum] = String.format("%d", rawValue.toInt()) + suffix
         } else {
             nums[nNum] = String.format("%.1f", rawValue) + suffix
         }
@@ -487,6 +536,10 @@ data class CpuViewState(
     var zoneCO2DamperOpeningRatePos: Int,
     var zoneCO2ThresholdPos: Int,
     var zoneCO2TargetPos: Int,
+    var zoneVocThresholdPos: Int,
+    var zoneVocTargetPos: Int,
+    var zonePm2p5ThresholdPos: Int,
+    var zonePm2p5TargetPos: Int,
 
     ) {
 
@@ -514,6 +567,11 @@ data class CpuViewState(
             zoneCO2DamperOpeningRatePos = co2DCVOpeningDamperSetIndexFromValue(config.zoneCO2DamperOpeningRate),
             zoneCO2ThresholdPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Threshold),
             zoneCO2TargetPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Target),
+            zoneVocThresholdPos =  vocSetIndexFromValue(config.zoneVOCThreshold),
+            zoneVocTargetPos =  vocSetIndexFromValue(config.zoneVOCTarget),
+            zonePm2p5ThresholdPos =  pmSetIndexFromValue(config.zonePm2p5Threshold),
+            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target)
+
         )
     }
 
@@ -541,6 +599,10 @@ data class CpuViewState(
             zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
             zoneCO2Threshold = OpeningDamperValueFromIndex(zoneCO2ThresholdPos)
             zoneCO2Target = OpeningDamperValueFromIndex(zoneCO2TargetPos)
+            zoneVOCThreshold = vocValueFromIndex(zoneVocThresholdPos)
+            zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
+            zonePm2p5Threshold = pm25ValueFromIndex(zonePm2p5ThresholdPos)
+            zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
         }
     }
 }

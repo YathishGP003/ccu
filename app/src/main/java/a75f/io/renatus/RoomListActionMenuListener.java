@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -136,7 +137,6 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	
 	private void renameSelectedRoom()
 	{
-		//L.ccu().getFloors().get(0).mZoneList.remove(selectedRoom.get(0));
 		L.saveCCUState();
 		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)
 		{

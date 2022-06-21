@@ -22,6 +22,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -57,15 +58,7 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
-    private boolean coolingLockoutActive;
-    private boolean heatingLockoutActive;
     
-    public boolean isMechanicalCoolingAvailable() {
-        return mechanicalCoolingAvailable;
-    }
-    public boolean isMechanicalHeatingAvailable() {
-        return mechanicalHeatingAvailable;
-    }
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();
@@ -217,9 +210,16 @@ public abstract class SystemProfile
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
 
-        Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
-                .setTz(tz).build();
+        Point userLimitSpread = new Point.Builder()
+                                    .setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread")
+                                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                                    .setHisInterpolate("cov").addMarker("system").addMarker("tuner")
+                                    .addMarker("writable").addMarker("his").addMarker("user").addMarker("limit")
+                                    .addMarker("spread").addMarker("sp")
+                                    .setMinVal("1").setMaxVal("20").setIncrementVal("1")
+                                    .setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                    .setTz(tz).setUnit(Units.FAHRENHEIT)
+                                    .build();
 
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
         HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");
@@ -767,10 +767,12 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
 
         Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(outsideTemperature);
-
+        String outsideTempId = CCUHsApi.getInstance().addPoint(outsideTemperature);
+        CCUHsApi.getInstance().writeHisValById(outsideTempId, 0.0);
+        
         Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(outsideHumidity);
+        String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
+        CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
     }
 
     //VAV & DAB System profile common points are added here.
@@ -845,11 +847,12 @@ public abstract class SystemProfile
                                                                 .addMarker("sp").addMarker("system").setHisInterpolate("cov")
                                                                 .addMarker("config").addMarker("writable")
                                                                 .addMarker("outsideTemp").addMarker("cooling")
-                                                                .addMarker("lockout").addMarker("enabled")
+                                                                .addMarker("lockout").addMarker("enabled").addMarker("his")
                                                                 .setEnums("false,true").setTz(tz).build();
             String useOutsideTempLockoutCoolingId = hayStack.addPoint(useOutsideTempLockoutCooling);
             double defaultVal = ccu().oaoProfile == null ? 0 : 1.0;
             hayStack.writeDefaultValById(useOutsideTempLockoutCoolingId, defaultVal);
+            hayStack.writeHisValueByIdWithoutCOV(useOutsideTempLockoutCoolingId, defaultVal);
         }
     
         if(!verifyPointsAvailability("config and outsideTemp and heating and lockout",equipref)) {
@@ -860,10 +863,11 @@ public abstract class SystemProfile
                                                                     .addMarker("sp").addMarker("system").setHisInterpolate("cov")
                                                                     .addMarker("config").addMarker("writable")
                                                                     .addMarker("outsideTemp").addMarker("heating")
-                                                                    .addMarker("lockout").addMarker("enabled")
+                                                                    .addMarker("lockout").addMarker("enabled").addMarker("his")
                                                                     .setEnums("false,true").setTz(tz).build();
             String useOutsideTempLockoutHeatingId = hayStack.addPoint(useOutsideTempLockoutHeating);
             hayStack.writeDefaultValById(useOutsideTempLockoutHeatingId, 0.0);
+            hayStack.writeHisValueByIdWithoutCOV(useOutsideTempLockoutHeatingId, 0.0);
         }
     
         if(!verifyPointsAvailability("mechanical and cooling and available",equipref)) {
@@ -917,7 +921,8 @@ public abstract class SystemProfile
     }
     
     public void updateOutsideWeatherParams() {
-        double externalTemp, externalHumidity;
+        double externalTemp = 0;
+        double externalHumidity = 0;
         try {
             if (Globals.getInstance().isWeatherTest()) {
                 externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -929,15 +934,23 @@ public abstract class SystemProfile
                 externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
-            externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
-
-            Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity , Disable Economizing");
+            Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
+        }
+        
+        //This can happen when weather service is down or CCU is not connected to network.
+        //Skip updating OAO weather point and update system outside temp with Local OAT value.
+        if (externalTemp == 0 && ccu().oaoProfile != null) {
+            externalTemp = ccu().oaoProfile.getOAOEquip().getHisVal("outside and air and temp");
+        } else if (ccu().oaoProfile != null) {
+            //Successfully read weather info. Update to OAO weather point
+            ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and temp", externalTemp);
+            ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and humidity", externalHumidity);
         }
 
-        CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
-        CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+        if (externalTemp != 0) {
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+        }
     }
     
     /**
@@ -966,11 +979,15 @@ public abstract class SystemProfile
     public void setOutsideTempCoolingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
         hayStack.writeDefaultVal("system and config and outsideTemp and cooling and lockout", enabled ?
                                                                                                   1.0: 0);
+        hayStack.writeHisValByQuery("system and config and outsideTemp and cooling and lockout", enabled ?
+                                                                                                     1.0: 0);
     }
     
     public void setOutsideTempHeatingLockoutEnabled(CCUHsApi hayStack, boolean enabled) {
         hayStack.writeDefaultVal("system and config and outsideTemp and heating and lockout", enabled ?
                                                                                                   1.0 : 0);
+        hayStack.writeHisValByQuery("system and config and outsideTemp and heating and lockout", enabled ?
+                                                                                                     1.0 : 0);
     }
     
     public double getOutsideAirTemp(CCUHsApi hayStack) {
@@ -993,29 +1010,31 @@ public abstract class SystemProfile
     
     public void updateMechanicalConditioning(CCUHsApi hayStack) {
         double outsideAirTemp = getOutsideAirTemp(hayStack);
-        mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal();
+        } else {
+            mechanicalCoolingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
-        mechanicalHeatingAvailable =  outsideAirTemp < getHeatingLockoutVal();
+        if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
+            mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal();
+        } else {
+            mechanicalHeatingAvailable = true;
+        }
         hayStack.writeHisValByQuery("system and mechanical and heating and available", mechanicalHeatingAvailable ?
                                                                                            1.0 : 0);
-        
-        coolingLockoutActive = isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalCoolingAvailable;
-        
-        heatingLockoutActive = isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance()) && !mechanicalHeatingAvailable;
-        
         CcuLog.i(L.TAG_CCU_SYSTEM,
                  "outsideAirTemp "+outsideAirTemp+ " mechanicalCoolingAvailable "+mechanicalCoolingAvailable+
-                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive "
-                 +coolingLockoutActive+" heatingLockoutActive "+heatingLockoutActive);
+                                  " mechanicalHeatingAvailable "+mechanicalHeatingAvailable+" coolingLockoutActive ");
     }
     
     public boolean isCoolingLockoutActive() {
-        return coolingLockoutActive;
+        return !mechanicalCoolingAvailable;
     }
     
     public boolean isHeatingLockoutActive() {
-        return heatingLockoutActive;
+        return !mechanicalHeatingAvailable;
     }
 }

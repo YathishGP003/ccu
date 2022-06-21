@@ -134,6 +134,17 @@ public class RestoreCCU {
         }
         return null;
     }
+    private String getEquipRefFromCCU(String ccuId, String siteCode){
+        HGrid ccuGrid = getCcuHGrid(siteCode);
+        Iterator ccuGridIterator = ccuGrid.iterator();
+        while (ccuGridIterator.hasNext()) {
+            HRow ccuRow = (HRow) ccuGridIterator.next();
+            if(ccuId.equals(ccuRow.get("id").toString())){
+                return ccuRow.get("equipRef").toString();
+            }
+        }
+        return null;
+    }
 
     public void getSystemProfileOfCCU(String ccuId, String siteCode){
         Log.i(TAG, "Restoring system profile of CCU started");
@@ -166,9 +177,12 @@ public class RestoreCCU {
     }
 
     public void getDiagEquipOfCCU(String ccuId, String siteCode){
+        getDiagEquipOfCCU(getEquipRefFromCCU(ccuId, siteCode));
+    }
+
+    public void getDiagEquipOfCCU(String equipRef){
         Log.i(TAG, "Restoring Diag equip is started");
-        String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode);
-        HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquip(gatewayRef);
+        HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquipByEquipId(equipRef);
         if(diagEquipGrid == null){
             throw new NullHGridException("Null occurred while fetching diag equip.");
         }
@@ -178,6 +192,7 @@ public class RestoreCCU {
             getEquipAndPoints(diagEquipRow);
         }
         Log.i(TAG, "Restoring Diag equip is completed");
+
     }
 
     public void getZoneEquipsOfCCU(String ccuId, String siteCode, int deviceCount,
@@ -361,6 +376,7 @@ public class RestoreCCU {
 
     private void getZoneSchedules(Set<String> roomRefSet){
         restoreCCUHsApi.importZoneSchedule(roomRefSet);
+        restoreCCUHsApi.importNamedSchedule();
     }
 
     public void syncExistingSite(String siteCode){

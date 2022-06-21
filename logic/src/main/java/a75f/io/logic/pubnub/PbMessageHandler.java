@@ -111,8 +111,8 @@ public class PbMessageHandler
     private void handlePbMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
-            case FloorUpdateHandler.CMD:
-               FloorUpdateHandler.updateFloor(msg);
+            case UpdateEntityHandler.CMD:
+               UpdateEntityHandler.updateEntity(msg);
                 break;
             case UpdatePointHandler.CMD:
                 UpdatePointHandler.handleMessage(msg);
@@ -121,7 +121,11 @@ public class PbMessageHandler
                 SiteSyncHandler.handleMessage(msg, context);
                 break;
             case UpdateScheduleHandler.CMD:
+            case UpdateScheduleHandler.ADD_SCHEDULE:
                 UpdateScheduleHandler.handleMessage(msg);
+                break;
+            case UpdateScheduleHandler.DELETE_SCHEDULE:
+                CCUHsApi.getInstance().removeEntity(msg.get("id").getAsString());
                 break;
             case RemoveEntityHandler.CMD:
                 RemoveEntityHandler.handleMessage(msg);

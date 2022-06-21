@@ -4,6 +4,8 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.projecthaystack.client.HClient;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -16,7 +18,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.RestoreCCUHsApi;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -115,7 +119,7 @@ public class Globals {
     private boolean isTempOverride = false;
     private int tempOverCount = 0;
 
-    private static long ccuUpdateTriggerTimeToken;
+    private long ccuUpdateTriggerTimeToken;
     
     private Globals() {
     }
@@ -310,6 +314,9 @@ public class Globals {
                 migrateIduPoints(site);
                 migrateSNPoints(site);
                 loadEquipProfiles();
+                Site siteObject = new Site.Builder().setHashMap(site).build();
+                CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                        HayStackConstants.USER, HayStackConstants.PASS),siteObject);
 
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
@@ -335,7 +342,7 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
 
-                CCUHsApi.getInstance().syncEntityWithPointWrite();
+                CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(300);
                 CCUHsApi.getInstance().trimObjectBoxHisStore();
 
             }
@@ -623,4 +630,5 @@ public class Globals {
         if(heatDTMin > heatDTMax ||  heatDTMindf > heatDTMaxdf) return false;
         else return true;
     }
+    
 }

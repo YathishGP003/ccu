@@ -34,6 +34,7 @@ import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,7 +75,7 @@ public class CCUHsApi
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
 
-    public HisSyncHandler    hisSyncHandler;
+    private HisSyncHandler    hisSyncHandler;
 
     public boolean testHarnessEnabled = false;
 
@@ -90,11 +91,10 @@ public class CCUHsApi
     private SyncManager       syncManager;
     
     private volatile boolean isCcuReady = false;
+    private long appAliveMinutes = 0;
     
-    public static CCUHsApi getInstance()
-    {
-        if (instance == null)
-        {
+    public static CCUHsApi getInstance() {
+        if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
         }
         return instance;
@@ -1109,7 +1109,11 @@ public class CCUHsApi
     public void syncEntityWithPointWrite() {
         syncManager.syncEntitiesWithPointWrite();
     }
-
+    
+    public void syncEntityWithPointWriteDelayed(long delaySeconds) {
+        syncManager.syncEntitiesWithPointWriteWithDelay(delaySeconds);
+    }
+    
     public void syncPointArrays() {
         syncManager.syncPointArray();
     }
@@ -1151,6 +1155,9 @@ public class CCUHsApi
 
         //import building tuners
         importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+
+        //import Named schedule
+        importNamedSchedule(hClient);
 
         ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
                 .readAllEntities("point and writable");
@@ -1224,10 +1231,43 @@ public class CCUHsApi
         return true;
     }
 
+    public void importNamedSchedule(HClient hClient){
+        Site site = CCUHsApi.getInstance().getSite();
+        importNamedSchedulebySite(hClient,site);
+    }
+    public void importNamedSchedulebySite(HClient hClient, Site site) {
+        if (site != null && site.getOrganization() != null) {
+            String org = site.getOrganization();
+            importNamedScheduleWithOrg(hClient,org);
+        }
+    }
+
+    public void importNamedScheduleWithOrg(HClient hClient,String org){
+        CcuLog.d(TAG, "org = "+org);
+        CcuLog.d(TAG, "hClient = "+hClient);
+        HDict nameScheduleDict = new HDictBuilder().add("filter",
+                "named and schedule and organization == \""+org+"\"").toDict();
+        CcuLog.d(TAG, "nameScheduleDict = "+nameScheduleDict);
+        HGrid nameScheduleGrid = hClient.call("read",
+                HGridBuilder.dictToGrid(nameScheduleDict));
+
+        if (nameScheduleGrid == null) {
+            CcuLog.d(TAG, "nameScheduleGrid is null");
+            return;
+        }
+
+        Iterator it = nameScheduleGrid.iterator();
+        while (it.hasNext()) {
+            HRow row = (HRow) it.next();
+            tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+            CcuLog.i(TAG, "Named schedule Imported");
+        }
+
+    }
 
     private void importBuildingSchedule(String siteId, HClient hClient){
 
-        HashMap currentBuildingSchedule = read("schedule and building");
+        HashMap currentBuildingSchedule = read("schedule and building and not named");
         if (!currentBuildingSchedule.isEmpty()) {
             //CCU already has a building schedule.
             CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
@@ -1236,7 +1276,7 @@ public class CCUHsApi
 
         try {
             HDict buildingDict =
-                    new HDictBuilder().add("filter", "building and schedule and siteRef == " + siteId).toDict();
+                    new HDictBuilder().add("filter", "building and schedule and not named and siteRef == " + siteId).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -1610,9 +1650,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and building and not vacation";
+            filter = "schedule and building and not named and not vacation";
         else
-            filter = "schedule and building and vacation";
+            filter = "schedule and building and not named and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
         for (int i = 0; i < scheduleHGrid.numRows(); i++)
@@ -1632,9 +1672,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and zone and not vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and not vacation and roomRef == "+zoneId;
         else
-            filter = "schedule and zone and vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and vacation and roomRef == "+zoneId;
 
         Log.d("CCU_HS"," getZoneSchedule : "+filter);
         if(filter != null) {
@@ -2202,8 +2242,8 @@ public class CCUHsApi
     public void trimObjectBoxHisStore() {
         hisSyncHandler.doPurge(true);
     }
-    
-    
+
+
     /*
      * A flag used to indicate CCU is ready for CPU intensive processing of sensor events and hvac algorithms.
      * This could be used as a last ditch effort make CPU available for any fore-ground operation that
@@ -2218,26 +2258,26 @@ public class CCUHsApi
             isCcuReady = true;
         }
     }
-    
+
     public void resetCcuReady() {
         isCcuReady = false;
     }
-    
+
     /**
      * Checks if there is valid Site and CCU entities in database.
      * @return
      */
     public boolean isCCUConfigured() {
-        
+
         HashMap<Object, Object> site = readEntity("site");
         if (site.isEmpty()) {
             return false;
         }
-    
+
         HashMap<Object, Object> ccu = readEntity("ccu");
         return !ccu.isEmpty();
     }
-    
+
     /**
      * Removes CCU Entity from backend.
      * @param ccuId - ccu Ref
@@ -2250,24 +2290,24 @@ public class CCUHsApi
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
-    
+
     /**
      * Re-sync all the entities on this CCU except site and ccu-device entities.
      */
     public void resyncSiteTree() {
-        
+
         markItemsUnSynced(readAllEntities(Tags.DEVICE+" and not "+Tags.CCU));
         markItemsUnSynced(readAllEntities(Tags.EQUIP));
         markItemsUnSynced(readAllEntities(Tags.FLOOR));
         markItemsUnSynced(readAllEntities(Tags.ROOM));
         markItemsUnSynced(readAllEntities(Tags.SCHEDULE+" and "+Tags.ZONE));
         markItemsUnSynced(readAllEntities(Tags.POINT));
-        
+
         syncStatusService.saveSyncStatus();
         syncEntityTree();
         hisSyncHandler.scheduleSync(true, 60);
     }
-    
+
     private void markItemsUnSynced(List<HashMap<Object, Object>> entities) {
         entities.forEach( entity -> {
             String entityId = Objects.requireNonNull(entity.get(Tags.ID)).toString();
@@ -2276,7 +2316,7 @@ public class CCUHsApi
             }
         });
     }
-    
+
     public void updateDeviceRefOfSettingPoints(String newCcuId) {
         List<HashMap<Object, Object>> allSettingPoints = readAllEntities("point and setting");
         allSettingPoints.forEach( pointMap -> {
@@ -2284,5 +2324,44 @@ public class CCUHsApi
             settingPoint.setDeviceRef(newCcuId);
             updateSettingPoint(settingPoint, settingPoint.getId());
         });
+    }
+
+    public void updateNamedSchedule(String scheduleId, HDict scheduleDict){
+        tagsDb.addHDict(scheduleId,scheduleDict);
+    }
+
+    public List<HashMap<Object, Object>> getAllNamedSchedules(){
+        String query = "named and schedule";
+        List<HashMap<Object, Object>> sortedNamedSchedules = CCUHsApi.getInstance().readAllEntities(query);
+
+        Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
+        return sortedNamedSchedules;
+    }
+    
+    public void removeAllNamedSchedule(){
+        List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
+        for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
+            deleteEntityLocally(namedSchedule.get("id").toString().replace("@",""));
+        }
+    }
+    
+    /**
+     * This is currently called from BuildingProcessJob which gets scheduled every minute.
+     * Avoiding the need for an additional timer thread at the cost of a dependency on logic module.
+     */
+    public void incrementAppAliveCount() {
+        appAliveMinutes++;
+    }
+    
+    /**
+     * Returns the number of minutes the app has been alive.
+     * @return appAlive minutes
+     */
+    public long getAppAliveMinutes() {
+        return appAliveMinutes;
+    }
+    
+    public HisSyncHandler getHisSyncHandler() {
+        return hisSyncHandler;
     }
 }

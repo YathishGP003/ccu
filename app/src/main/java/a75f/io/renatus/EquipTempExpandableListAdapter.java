@@ -195,7 +195,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             Schedule scheduleById = null;
                             if (zone.hasSchedule())
                             {
-                                scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                        "== " +zone.getId());
+                                scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
                                 Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                                 scheduleById.setDisabled(false);
                                 if (checkContainment(scheduleById))
@@ -208,7 +210,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                                        "== " +zone.getId());
+                                scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
                             }
                             scheduleImageButton.setTag(scheduleById.getId());
                             scheduleImageButton.setVisibility(View.VISIBLE);

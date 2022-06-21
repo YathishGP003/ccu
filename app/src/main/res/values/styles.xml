@@ -455,6 +455,12 @@
         <item name="buttonStyle">@style/buttonstyle</item>
     </style>
 
+    <style name="NewDialogStyleRenatus" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/WindowTextStyle_75f</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="buttonStyle">@style/buttonstyle</item>
+    </style>
+
     <style name="buttonstyle">
         <item name="android:textSize">@dimen/text_small</item>
     </style>
@@ -617,7 +623,7 @@
     </style>
 
     <style name="DamperPositionLabel_HyperStat">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">250dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">20dp</item>
         <item name="android:layout_marginTop">14dp</item>
@@ -655,6 +661,27 @@
         <item name="android:dropDownWidth">match_parent</item>
     </style>
     <style name="Damper_HyperStat" parent="Widget.AppCompat.Spinner">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1.5</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">end|top</item>
+        <item name="android:dropDownWidth">match_parent</item>
+    </style>
+
+    <style name="VocLabel_HyperStat">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:textAppearance">@style/label_values</item>
+        <item name="android:textColor">@drawable/label_textselector</item>
+    </style>
+    <style name="VocHyperStat" parent="Widget.AppCompat.Spinner">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1.5</item>
         <item name="android:layout_marginBottom">20dp</item>

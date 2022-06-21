@@ -712,7 +712,7 @@ public class PlcRelayConfigHandler {
 
     public static Bundle getAnalog1Bundle(int analog1InputSensor) {
         Bundle mBundle = new Bundle();
-        String shortDis = "Generic 0-10 Voltage";
+        String shortDis = "Generic 0:10 Voltage";
         String shortDisTarget = "Target Voltage";
         String unit = "V";
         String maxVal = "10";
@@ -722,7 +722,7 @@ public class PlcRelayConfigHandler {
         switch (analog1InputSensor) {
             case 0:
             case 1:
-                shortDis = "Generic 0-10 Voltage";
+                shortDis = "Generic 0:10 Voltage";
                 shortDisTarget = "Target Voltage";
                 unit = "V";
                 maxVal = "10";
@@ -731,7 +731,7 @@ public class PlcRelayConfigHandler {
                 markers = null;
                 break;
             case 2:
-                shortDis = "Pressure [0-2 in.]";
+                shortDis = "Pressure [0:2 in.]";
                 shortDisTarget = "Target Pressure";
                 unit = Consts.PRESSURE_UNIT;
                 maxVal = "2";
@@ -740,7 +740,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"pressure"};
                 break;
             case 3:
-                shortDis = "Pressure[0-0.25 in. Differential]";
+                shortDis = "Pressure[0:0.25 in. Differential]";
                 shortDisTarget = "Target Pressure Differential";
                 unit = Consts.PRESSURE_UNIT;
                 maxVal = "0.25";
@@ -751,7 +751,7 @@ public class PlcRelayConfigHandler {
             case 4:
                 shortDis = "Airflow";
                 shortDisTarget = "Target Airflow";
-                unit = "CFM";
+                unit = "cfm";
                 maxVal = "1000";
                 minVal = "0";
                 incrementVal = "10";
@@ -794,7 +794,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"no2"};
                 break;
             case 9:
-                shortDis = "Current Drawn[CT 0-10]";
+                shortDis = "Current Drawn[CT 0:10]";
                 shortDisTarget = "Target Current Draw";
                 unit = "amps";
                 maxVal = "10";
@@ -803,7 +803,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 10:
-                shortDis = "Current Drawn[CT 0-20]";
+                shortDis = "Current Drawn[CT 0:20]";
                 shortDisTarget = "Target Current Draw";
                 unit = "amps";
                 maxVal = "20";
@@ -812,7 +812,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 11:
-                shortDis = "Current Drawn[CT 0-50]";
+                shortDis = "Current Drawn[CT 0:50]";
                 shortDisTarget = "Target Current Draw";
                 unit = "amps";
                 maxVal = "50";
@@ -931,7 +931,7 @@ public class PlcRelayConfigHandler {
 
     public static Bundle getAnalog2Bundle(int dynamicInputSensor) {
         Bundle mBundle = new Bundle();
-        String shortDis = "Generic 0-10 Voltage";
+        String shortDis = "Generic 0:10 Voltage";
         String shortDisTarget = "Dynamic Target Voltage";
         String unit = "V";
         String maxVal = "10";
@@ -940,7 +940,7 @@ public class PlcRelayConfigHandler {
         String[] markers = null;
         switch (dynamicInputSensor) {
             case 0:
-                shortDis = "Generic 0-10 Voltage";
+                shortDis = "Generic 0:10 Voltage";
                 shortDisTarget = "Dynamic Target Voltage";
                 unit = "V";
                 maxVal = "10";
@@ -949,7 +949,7 @@ public class PlcRelayConfigHandler {
                 markers = null;
                 break;
             case 1:
-                shortDis = "Pressure [0-2 in.]";
+                shortDis = "Pressure [0:2 in.]";
                 shortDisTarget = "Dynamic Target Pressure";
                 unit = Consts.PRESSURE_UNIT;
                 maxVal = "2";
@@ -958,7 +958,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"pressure"};
                 break;
             case 2:
-                shortDis = "Pressure[0-0.25 in. Differential]";
+                shortDis = "Pressure[0:0.25 in. Differential]";
                 shortDisTarget = "Dynamic Target Pressure Differential";
                 unit = Consts.PRESSURE_UNIT;
                 maxVal = "0.25";
@@ -969,7 +969,7 @@ public class PlcRelayConfigHandler {
             case 3:
                 shortDis = "Airflow";
                 shortDisTarget = "Dynamic Target Airflow";
-                unit = "CFM";
+                unit = "cfm";
                 maxVal = "1000";
                 minVal = "0";
                 incrementVal = "10";
@@ -1012,7 +1012,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"no2"};
                 break;
             case 8:
-                shortDis = "Current Drawn[CT 0-10]";
+                shortDis = "Current Drawn[CT 0:10]";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "10";
@@ -1021,7 +1021,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 9:
-                shortDis = "Current Drawn[CT 0-20]";
+                shortDis = "Current Drawn[CT 0:20]";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "20";
@@ -1030,7 +1030,7 @@ public class PlcRelayConfigHandler {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 10:
-                shortDis = "Current Drawn[CT 0-50]";
+                shortDis = "Current Drawn[CT 0:50]";
                 shortDisTarget = "Dynamic Target Current Draw";
                 unit = "amps";
                 maxVal = "50";

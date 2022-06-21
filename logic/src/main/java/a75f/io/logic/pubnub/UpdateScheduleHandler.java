@@ -18,6 +18,7 @@ import org.projecthaystack.io.HZincWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
@@ -30,6 +31,8 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 public class UpdateScheduleHandler
 {
     public static final String CMD = "updateSchedule";
+    public static final String ADD_SCHEDULE = "addSchedule";
+    public static final String DELETE_SCHEDULE = "deleteSchedule";
     private static BuildingScheduleListener scheduleListener = null;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
     
@@ -53,9 +56,25 @@ public class UpdateScheduleHandler
         Iterator it = sGrid.iterator();
         while (it.hasNext())
         {
+
             HRow r = (HRow) it.next();
             if (CCUHsApi.getInstance().isEntityExisting("@" + uid))
             {
+                HDict scheduleDict = new HDictBuilder().add(r).toDict();
+                CcuLog.d(L.TAG_CCU_PUBNUB,"scheduleDict = "+ scheduleDict);
+                if(scheduleDict.has("named")){
+                    CCUHsApi.getInstance().updateNamedSchedule(uid,scheduleDict);
+
+                    List<HashMap<Object, Object>> scheds =  CCUHsApi.getInstance().getAllNamedSchedules();
+
+                    for (HashMap<Object, Object> a:
+                            scheds ) {
+                        CcuLog.d(L.TAG_CCU_PUBNUB, "named sched = " + a.get("dis"));
+                    }
+
+
+                    return;
+                }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setId(uid);
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
@@ -92,6 +111,16 @@ public class UpdateScheduleHandler
             else
             {
                 //New schedule/vacation added by apps.
+                HDict scheduleDict = new HDictBuilder().add(r).toDict();
+                if(scheduleDict.has("named")){
+                    CCUHsApi.getInstance().updateNamedSchedule(uid,scheduleDict);
+                    List<HashMap<Object, Object>> scheds =  CCUHsApi.getInstance().getAllNamedSchedules();
+                    for (HashMap<Object, Object> a:
+                            scheds ) {
+                        CcuLog.d(L.TAG_CCU_PUBNUB, "named sched = " + a.get("dis"));
+                    }
+                    return;
+                }
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                 s.setId(uid);
@@ -107,7 +136,7 @@ public class UpdateScheduleHandler
             }
             ScheduleProcessJob.updateSchedules();
         }
-        refreshSchedulesScreen();
+        refreshSchedulesScreen(Schedule.getScheduleByEquipId(uid));
         refreshIntrinsicSchedulesScreen();
     }
     
@@ -196,9 +225,9 @@ public class UpdateScheduleHandler
         }
     }
     
-    public static void refreshSchedulesScreen() {
+    public static void refreshSchedulesScreen(Schedule updatedSchedule) {
         if (scheduleListener != null) {
-            scheduleListener.refreshScreen();
+            scheduleListener.refreshScreen(updatedSchedule);
         }
     }
 
@@ -215,4 +244,5 @@ public class UpdateScheduleHandler
     public static void setIntrinsicScheduleListener(IntrinsicScheduleListener listener) {
         intrinsicScheduleListener = listener;
     }
+
 }

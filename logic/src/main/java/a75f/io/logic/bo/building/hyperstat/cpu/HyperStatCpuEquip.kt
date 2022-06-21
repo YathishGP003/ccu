@@ -287,6 +287,16 @@ class HyperStatCpuEquip(val node: Short) {
             .createPointCO2ConfigPoint(
                 hyperStatConfig = hyperStatConfig
             )
+        val vocPmPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createPointVOCPmConfigPoint(
+                equipDis = equipDis!!,
+                zonePm2p5Target = hyperStatConfig.zonePm2p5Target,
+                zonePm2p5Threshold = hyperStatConfig.zonePm2p5Threshold,
+                zoneVOCTarget = hyperStatConfig.zoneVOCTarget,
+                zoneVOCThreshold = hyperStatConfig.zoneVOCThreshold
+            )
+
+
         val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints()
 
         val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createIsRelayEnabledConfigPoints(
@@ -311,7 +321,8 @@ class HyperStatCpuEquip(val node: Short) {
 
         val allConfigPoints = arrayOf(
             configPointsList, relayConfigPoints, analogOutConfigPoints,
-            analogInConfigPoints, thConfigPointsList, userIntentPointsList, co2ConfigPointsList, loopOutputPoints
+            analogInConfigPoints, thConfigPointsList, userIntentPointsList,
+            co2ConfigPointsList, loopOutputPoints,vocPmPointsList
         )
         Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
@@ -361,83 +372,29 @@ class HyperStatCpuEquip(val node: Short) {
     fun updateConfigPoints(updatedHyperStatConfig: HyperStatCpuConfiguration) {
 
         val presetConfiguration = getConfiguration()
+        Log.i(L.TAG_CCU_HSCPU, "===========Hyperstat profile Update  ============")
+        updateGeneralConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAutoAwayConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAutoAForceOccupyConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAirFlowTempSensorConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateDoorWindowSensorConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
+        haystack.syncEntityTree()
 
-        if (updatedHyperStatConfig.temperatureOffset != presetConfiguration.temperatureOffset) {
-            val tempOffId = hsHaystackUtil!!.readPointID("temperature and offset") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(tempOffId, (updatedHyperStatConfig.temperatureOffset * 10))
-        }
-        if (updatedHyperStatConfig.zoneCO2DamperOpeningRate != presetConfiguration.zoneCO2DamperOpeningRate) {
-            val pointId = hsHaystackUtil!!.readPointID("co2 and opening and rate") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2DamperOpeningRate)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2DamperOpeningRate)
-        }
-        if (updatedHyperStatConfig.zoneCO2Threshold != presetConfiguration.zoneCO2Threshold) {
-            val pointId = hsHaystackUtil!!.readPointID("co2 and threshold") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Threshold)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Threshold)
-        }
-        if (updatedHyperStatConfig.zoneCO2Target != presetConfiguration.zoneCO2Target) {
-            val pointId = hsHaystackUtil!!.readPointID("co2 and target") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Target)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, updatedHyperStatConfig.zoneCO2Target)
-        }
-
-
-        if (updatedHyperStatConfig.isEnableAutoForceOccupied != presetConfiguration.isEnableAutoForceOccupied) {
-            val autoForceOccupiedEnabledId = hsHaystackUtil!!.readPointID(
-                "config and auto and occupancy and forced and control"
-            ) as String
-            hyperStatPointsUtil.addDefaultValueForPoint(
-                autoForceOccupiedEnabledId, if (updatedHyperStatConfig.isEnableAutoForceOccupied) 1.0 else 0.0
-            )
-            hyperStatPointsUtil.addDefaultHisValueForPoint(
-                autoForceOccupiedEnabledId,if (updatedHyperStatConfig.isEnableAutoForceOccupied) 1.0 else 0.0
-            )
-        }
-
-        if (updatedHyperStatConfig.isEnableAutoAway != presetConfiguration.isEnableAutoAway) {
-            val autoAwayEnabledId = hsHaystackUtil!!.readPointID(
-                "config and  auto and away"
-            ) as String
-            hyperStatPointsUtil.addDefaultValueForPoint(
-                autoAwayEnabledId, if (updatedHyperStatConfig.isEnableAutoAway) 1.0 else 0.0
-            )
-            hyperStatPointsUtil.addDefaultHisValueForPoint(
-                autoAwayEnabledId,if (updatedHyperStatConfig.isEnableAutoAway) 1.0 else 0.0
-            )
-            hsHaystackUtil!!.reWriteOccupancy(equipRef!!)
-        }
-        if (updatedHyperStatConfig.isEnableAirFlowTempSensor != presetConfiguration.isEnableAirFlowTempSensor) {
-            val enabledId = hsHaystackUtil!!.readPointID(
-                "config and airflow and temp and th1"
-            ) as String
-            hyperStatPointsUtil.addDefaultValueForPoint(
-                enabledId, if (updatedHyperStatConfig.isEnableAirFlowTempSensor) 1.0 else 0.0
-            )
-            val logicalPointId: String? = hsHaystackUtil!!.readPointID(
-                "th1 and airflow and discharge and logical"
-            )
-            if (logicalPointId != null) {
-                hsHaystackUtil!!.removePoint(logicalPointId)
-            }
-            if (updatedHyperStatConfig.isEnableAirFlowTempSensor) {
-                val pointData: Point = hyperStatPointsUtil.createPointForAirflowTempSensor()
-                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
-                if (pointData.markers.contains("his")) {
-                    hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
-                }
-                hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                DeviceUtil.setPointEnabled(nodeAddress.toInt(), Port.TH1_IN.name, true)
-                DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), Port.TH1_IN.name, pointId)
-            }
-
-        }
-        if (updatedHyperStatConfig.isEnableDoorWindowSensor != presetConfiguration.isEnableDoorWindowSensor) {
+    }
+    // Function to update DoorWindowSensor configuration
+    private fun updateDoorWindowSensorConfiguration(
+        newConfiguration: HyperStatCpuConfiguration,
+        existingConfiguration: HyperStatCpuConfiguration){
+        if (newConfiguration.isEnableDoorWindowSensor != existingConfiguration.isEnableDoorWindowSensor) {
             val enabledId = hsHaystackUtil!!.readPointID(
                 "config and window and sensor and th2"
             ) as String
             hyperStatPointsUtil.addDefaultValueForPoint(
-                enabledId, if (updatedHyperStatConfig.isEnableDoorWindowSensor) 1.0 else 0.0
+                enabledId, if (newConfiguration.isEnableDoorWindowSensor) 1.0 else 0.0
             )
             val logicalPointId: String? = hsHaystackUtil!!.readPointID(
                 "th2 and window and sensor and logical"
@@ -445,7 +402,7 @@ class HyperStatCpuEquip(val node: Short) {
             if (logicalPointId != null) {
                 hsHaystackUtil!!.removePoint(logicalPointId)
             }
-            if (updatedHyperStatConfig.isEnableDoorWindowSensor) {
+            if (newConfiguration.isEnableDoorWindowSensor) {
                 val pointData: Point = hyperStatPointsUtil.createPointForDoorWindowSensor("th2")
                 val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
                 if (pointData.markers.contains("his")) {
@@ -460,15 +417,121 @@ class HyperStatCpuEquip(val node: Short) {
                 )
             }
         }
-        Log.i(L.TAG_CCU_HSCPU, "===========Hyperstat profile Update  ============")
-        updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
-        haystack.syncEntityTree()
+    }
+
+    // Function to update AirFlowTempSensor configuration
+    private fun updateAirFlowTempSensorConfiguration(
+        newConfiguration: HyperStatCpuConfiguration,
+        existingConfiguration: HyperStatCpuConfiguration) {
+        if (newConfiguration.isEnableAirFlowTempSensor != existingConfiguration.isEnableAirFlowTempSensor) {
+            val enabledId = hsHaystackUtil!!.readPointID(
+                "config and airflow and temp and th1"
+            ) as String
+            hyperStatPointsUtil.addDefaultValueForPoint(
+                enabledId, if (newConfiguration.isEnableAirFlowTempSensor) 1.0 else 0.0
+            )
+            val logicalPointId: String? = hsHaystackUtil!!.readPointID(
+                "th1 and airflow and discharge and logical"
+            )
+            if (logicalPointId != null) {
+                hsHaystackUtil!!.removePoint(logicalPointId)
+            }
+            if (newConfiguration.isEnableAirFlowTempSensor) {
+                val pointData: Point = hyperStatPointsUtil.createPointForAirflowTempSensor()
+                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+                if (pointData.markers.contains("his")) {
+                    hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+                }
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+                DeviceUtil.setPointEnabled(nodeAddress.toInt(), Port.TH1_IN.name, true)
+                DeviceUtil.updatePhysicalPointRef(nodeAddress.toInt(), Port.TH1_IN.name, pointId)
+            }
+        }
+    }
+
+    // Function to update Auto Force Occupy configuration
+    private fun updateAutoAForceOccupyConfiguration(
+        newConfiguration: HyperStatCpuConfiguration,
+        existingConfiguration: HyperStatCpuConfiguration) {
+        if (newConfiguration.isEnableAutoForceOccupied != existingConfiguration.isEnableAutoForceOccupied) {
+            val autoForceOccupiedEnabledId = hsHaystackUtil!!.readPointID(
+                "config and auto and occupancy and forced and control"
+            ) as String
+            hyperStatPointsUtil.addDefaultValueForPoint(
+                autoForceOccupiedEnabledId, if (newConfiguration.isEnableAutoForceOccupied) 1.0 else 0.0
+            )
+            hyperStatPointsUtil.addDefaultHisValueForPoint(
+                autoForceOccupiedEnabledId,if (newConfiguration.isEnableAutoForceOccupied) 1.0 else 0.0
+            )
+        }
 
     }
 
+    // Function to update AutoAway configuration
+    private fun updateAutoAwayConfiguration(
+    newConfiguration: HyperStatCpuConfiguration,
+    existingConfiguration: HyperStatCpuConfiguration) {
+        if (newConfiguration.isEnableAutoAway != existingConfiguration.isEnableAutoAway) {
+            val autoAwayEnabledId = hsHaystackUtil!!.readPointID(
+                "config and  auto and away"
+            ) as String
+            hyperStatPointsUtil.addDefaultValueForPoint(
+                autoAwayEnabledId, if (newConfiguration.isEnableAutoAway) 1.0 else 0.0
+            )
+            hyperStatPointsUtil.addDefaultHisValueForPoint(
+                autoAwayEnabledId,if (newConfiguration.isEnableAutoAway) 1.0 else 0.0
+            )
+            hsHaystackUtil!!.reWriteOccupancy(equipRef!!)
+        }
+    }
+
+    // function to update (If change in configuration)
+    // Temp Off set , CO2 threshold and target, VOC threshold and target, pm2.5 threshold and target
+    private fun updateGeneralConfiguration(
+        newConfiguration: HyperStatCpuConfiguration,
+        existingConfiguration: HyperStatCpuConfiguration){
+
+        if (newConfiguration.temperatureOffset != existingConfiguration.temperatureOffset) {
+            val tempOffId = hsHaystackUtil!!.readPointID("temperature and offset") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(tempOffId, (newConfiguration.temperatureOffset * 10))
+        }
+        if (newConfiguration.zoneCO2DamperOpeningRate != existingConfiguration.zoneCO2DamperOpeningRate) {
+            val pointId = hsHaystackUtil!!.readPointID("co2 and opening and rate") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zoneCO2DamperOpeningRate)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zoneCO2DamperOpeningRate)
+        }
+        if (newConfiguration.zoneCO2Threshold != existingConfiguration.zoneCO2Threshold) {
+            val pointId = hsHaystackUtil!!.readPointID("co2 and threshold") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zoneCO2Threshold)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zoneCO2Threshold)
+        }
+        if (newConfiguration.zoneCO2Target != existingConfiguration.zoneCO2Target) {
+            val pointId = hsHaystackUtil!!.readPointID("co2 and target") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zoneCO2Target)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zoneCO2Target)
+        }
+        if (newConfiguration.zoneVOCThreshold != existingConfiguration.zoneVOCThreshold) {
+            val pointId = hsHaystackUtil!!.readPointID("voc and threshold") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zoneVOCThreshold)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zoneVOCThreshold)
+        }
+        if (newConfiguration.zoneVOCTarget != existingConfiguration.zoneVOCTarget) {
+            val pointId = hsHaystackUtil!!.readPointID("voc and target") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zoneVOCTarget)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zoneVOCTarget)
+        }
+        if (newConfiguration.zonePm2p5Threshold != existingConfiguration.zonePm2p5Threshold) {
+            val pointId = hsHaystackUtil!!.readPointID("pm2p5 and threshold") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zonePm2p5Threshold)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zonePm2p5Threshold)
+        }
+        if (newConfiguration.zonePm2p5Target != existingConfiguration.zonePm2p5Target) {
+            val pointId = hsHaystackUtil!!.readPointID("pm2p5 and target") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zonePm2p5Target)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zonePm2p5Target)
+        }
+
+    }
 
     // collect the existing profile configurations
     fun getConfiguration(): HyperStatCpuConfiguration {
@@ -510,6 +573,22 @@ class HyperStatCpuEquip(val node: Short) {
 
         config.zoneCO2Target = haystack.readDefaultVal(
             "point and hyperstat and co2 and target and equipRef == \"$equipRef\""
+        )
+
+        config.zoneVOCThreshold = haystack.readDefaultVal(
+            "point and hyperstat and voc and threshold and air and equipRef == \"$equipRef\""
+        )
+
+        config.zoneVOCTarget = haystack.readDefaultVal(
+            "point and hyperstat and voc and target and air and equipRef == \"$equipRef\""
+        )
+
+        config.zonePm2p5Threshold = haystack.readDefaultVal(
+            "point and hyperstat and pm2p5 and threshold and air and equipRef == \"$equipRef\""
+        )
+
+        config.zonePm2p5Target = haystack.readDefaultVal(
+            "point and hyperstat and pm2p5 and target and air and equipRef == \"$equipRef\""
         )
 
         return config
@@ -862,19 +941,19 @@ class HyperStatCpuEquip(val node: Short) {
             && changeIn != AnalogOutChanges.ENABLED
             && changeIn != AnalogOutChanges.MAPPING) {
             if (fanHighPointId != null)
-                updatePointValueIfchangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
+                updatePointValueChangeRequired(fanHighPointId, analogOutState.perAtFanHigh)
             if (fanMediumPointId != null)
-                updatePointValueIfchangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
+                updatePointValueChangeRequired(fanMediumPointId, analogOutState.perAtFanMedium)
             if (fanLowPointId != null)
-                updatePointValueIfchangeRequired(fanLowPointId, analogOutState.perAtFanLow)
+                updatePointValueChangeRequired(fanLowPointId, analogOutState.perAtFanLow)
 
             if (minPointId != null) {
-                updatePointValueIfchangeRequired(minPointId, analogOutState.voltageAtMin)
+                updatePointValueChangeRequired(minPointId, analogOutState.voltageAtMin)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
             if (maxPointId != null) {
-                updatePointValueIfchangeRequired(maxPointId, analogOutState.voltageAtMax)
+                updatePointValueChangeRequired(maxPointId, analogOutState.voltageAtMax)
                 val pointType = "${analogOutState.voltageAtMin.toInt()}-${analogOutState.voltageAtMax.toInt()}v"
                 DeviceUtil.updatePhysicalPointType(nodeAddress.toInt(), physicalPort.name, pointType)
             }
@@ -946,7 +1025,7 @@ class HyperStatCpuEquip(val node: Short) {
             }
 
         }
-        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Anaalog $changeIn")
+        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Analog $changeIn")
         CcuLog.i(L.TAG_CCU_ZONE, "changeIn: ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
         if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
@@ -961,7 +1040,7 @@ class HyperStatCpuEquip(val node: Short) {
 
 
     // Function to check the changes in the point and do the update with new value
-    private fun updatePointValueIfchangeRequired(pointId: String, newValue: Double){
+    private fun updatePointValueChangeRequired(pointId: String, newValue: Double){
         val presentValue = haystack.readDefaultValById(pointId)
         if(presentValue != newValue)
             hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)

@@ -3,6 +3,7 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND
@@ -61,7 +62,7 @@ class HyperstatTuners {
         // function which create tuner point
         private fun createTunerPoint(
             displayName: String, markers: Array<String>,
-            min: String, max: String, incValue: String, unit: String
+            min: String, max: String, incValue: String, unit: String, buildingDefault : Boolean = false
         ): Point {
             val point = Point.Builder()
                 .setDisplayName("$equipDis-standalone$displayName")
@@ -74,10 +75,13 @@ class HyperstatTuners {
                 .setTz(tz)
 
                 // add common  markers
-                .addMarker("hyperstat").addMarker("tuner").addMarker("default").addMarker("sp")
+                .addMarker("tuner").addMarker("default").addMarker("sp")
                 .addMarker("writable").addMarker("his")
+                .addMarker(Tags.STANDALONE)
 
-
+            if (!buildingDefault) {
+                point.addMarker("hyperstat")
+            }
 
             if (!roomRef.isNullOrEmpty()) point.setRoomRef(roomRef)
             if (!floorRef.isNullOrEmpty()) point.setFloorRef(floorRef)
@@ -117,7 +121,7 @@ class HyperstatTuners {
             // min = 0 , max = 5.0 , Default = 0.5 inc 0.1 unit = ?
             val hsCoolingDeadbandMultiplierMarkers = arrayOf("cooling", "deadband", "multiplier")
             val hsCoolingDeadbandMultiplierPoint = createTunerPoint(
-                HYPERSTAT_COOLING_DEADBAND_MULTIPLIER, hsCoolingDeadbandMultiplierMarkers, "0", "5.0", "0.1", ""
+                HYPERSTAT_COOLING_DEADBAND_MULTIPLIER, hsCoolingDeadbandMultiplierMarkers, "0", "5.0", "0.1", "", true
             )
             listOfTunerPoints[hsCoolingDeadbandMultiplierPoint] = HYPERSTAT_COOLING_DEADBAND_MULTIPLIER_DEFAULT
 
@@ -126,14 +130,14 @@ class HyperstatTuners {
             // min = 0 , max = 10 default = 2 , inc = 1 , unit = "\u00B0F"
             val tempProportionalRangeMarkers = arrayOf("temp", "proportional", "pspread")
             val tempProportionalRangePoint = createTunerPoint(
-                HYPERSTAT_TEMPERATURE_PROPORTIONAL_RANGE, tempProportionalRangeMarkers, "0", "10.0", "1", "\u00B0F"
+                HYPERSTAT_TEMPERATURE_PROPORTIONAL_RANGE, tempProportionalRangeMarkers, "0", "10.0", "1", "\u00B0F", true
             )
             listOfTunerPoints[tempProportionalRangePoint] = HYPERSTAT_TEMPERATURE_PROPORTIONAL_RANGE_DEFAULT
             // proportionalKFactor = 0.5
             // min 0.1 , max = 1.0 default = 0.5 , inc = 0.1 unit = ?
             val proportionalKFactorMarkers = arrayOf("proportional", "pgain")
             val proportionalKFactorPoint = createTunerPoint(
-                HYPERSTAT_PROPORTIONAL_KFACTOR, proportionalKFactorMarkers, "0.1", "1.0", "0.1", ""
+                HYPERSTAT_PROPORTIONAL_KFACTOR, proportionalKFactorMarkers, "0.1", "1.0", "0.1", "", true
             )
             listOfTunerPoints[proportionalKFactorPoint] = HYPERSTAT_PROPORTIONAL_KFACTOR_DEFAULT
 
@@ -141,7 +145,7 @@ class HyperstatTuners {
             //  Min = 0 , max = 100 , Default = 10 , inc = 1  unit = %
             val relayActivationHysteresisMarkers = arrayOf("relay", "activation", "hysteresis")
             val relayActivationHysteresisPoint = createTunerPoint(
-                HYPERSTAT_RELAY_ACTIVATION_HISTERESIS, relayActivationHysteresisMarkers, "0", "100", "1", "%"
+                HYPERSTAT_RELAY_ACTIVATION_HISTERESIS, relayActivationHysteresisMarkers, "0", "100", "1", "%", true
             )
             listOfTunerPoints[relayActivationHysteresisPoint] = HYPERSTAT_RELAY_ACTIVATION_HISTERESIS_DEFAULT
 
@@ -149,7 +153,7 @@ class HyperstatTuners {
             //  min = 0.1 , max = 3.0 default = 1 , inc = 0.1  unit = ?
             val analogFanSpeedMultiplierMarkers = arrayOf("analog", "fan", "multiplier", "speed")
             val analogFanSpeedMultiplierPoint = createTunerPoint(
-                HYPERSTAT_ANALOG_SPEED_MULTIPLIER, analogFanSpeedMultiplierMarkers, "0.1", "3.0", "0.1", ""
+                HYPERSTAT_ANALOG_SPEED_MULTIPLIER, analogFanSpeedMultiplierMarkers, "0.1", "3.0", "0.1", "", true
             )
             listOfTunerPoints[analogFanSpeedMultiplierPoint] = HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
 
@@ -157,7 +161,7 @@ class HyperstatTuners {
             // min 0 , max = 100 , Default = 5 , inc = 1  unit = %
             val humidityHysteresisMarkers = arrayOf("humidity", "hysteresis")
             val humidityHysteresisPoint = createTunerPoint(
-                HYPERSTAT_HUMIDITY_HISTERESIS, humidityHysteresisMarkers, "0", "100", "1", "%"
+                HYPERSTAT_HUMIDITY_HISTERESIS, humidityHysteresisMarkers, "0", "100", "1", "%", true
             )
             listOfTunerPoints[humidityHysteresisPoint] = HYPERSTAT_HUMIDITY_HISTERESIS_DEFAULT
 
@@ -183,13 +187,13 @@ class HyperstatTuners {
             */
             val heatingDeadbandMultiplierMarkers = arrayOf("heating", "deadband", "multiplier")
             val heatingDeadbandMultiplierPoint = createTunerPoint(
-                HYPERSTAT_HEATING_DEADBAND_MULTIPLIER, heatingDeadbandMultiplierMarkers, "0", "5.0", "0.1", ""
+                HYPERSTAT_HEATING_DEADBAND_MULTIPLIER, heatingDeadbandMultiplierMarkers, "0", "5.0", "0.1", "", true
             )
             listOfTunerPoints[heatingDeadbandMultiplierPoint] = HYPERSTAT_HEATING_DEADBAND_MULTIPLIER_DEFAULT
 
             val temperatureIntegralTimeMarkers = arrayOf("temp", "integral", "time", "itimeout")
             val temperatureIntegralTimePoint = createTunerPoint(
-                HYPERSTAT_TEMPERATURE_INTEGRAL_TIME, temperatureIntegralTimeMarkers, "1", "60", "1", "m"
+                HYPERSTAT_TEMPERATURE_INTEGRAL_TIME, temperatureIntegralTimeMarkers, "1", "60", "1", "m", true
             )
             listOfTunerPoints[temperatureIntegralTimePoint] = HYPERSTAT_TEMPERATURE_INTEGRAL_TIME_DEFAULT
 
@@ -197,7 +201,7 @@ class HyperstatTuners {
             // min = 0.1 , max = 1.0 inc = 0.1 default = 0.5 unit = ?
             val integralKFactorMarkers = arrayOf("proportional", "integral", "igain")
             val integralKFactorPoint = createTunerPoint(
-                HYPERSTAT_INTEGRAL_KFACTOR, integralKFactorMarkers, "0.1", "1.0", "0.1", ""
+                HYPERSTAT_INTEGRAL_KFACTOR, integralKFactorMarkers, "0.1", "1.0", "0.1", "", true
             )
             listOfTunerPoints[integralKFactorPoint] = HYPERSTAT_INTEGRAL_KFACTOR_DEFAULT
 
@@ -381,6 +385,7 @@ class HyperstatTuners {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .addMarker(Tags.STANDALONE)
                 .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)

@@ -49,7 +49,7 @@ class HyperStatPointsUtil constructor(
                 .setFloorRef(floorRef)
                 .setProfile(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name)
                 .setPriority(priority)
-                .addMarker(HYPERSTAT).addMarker("equip")
+                .addMarker(HYPERSTAT).addMarker("equip").addMarker(Tags.STANDALONE)
                 .addMarker("zone").addMarker(profileName)
                 .setGatewayRef(gatewayRef)
                 .setTz(tz)
@@ -75,7 +75,7 @@ class HyperStatPointsUtil constructor(
             .setGroup(nodeAddress)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -98,7 +98,7 @@ class HyperStatPointsUtil constructor(
             .setEnums(enums)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -121,7 +121,7 @@ class HyperStatPointsUtil constructor(
             .setEnums(enums)
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -145,7 +145,7 @@ class HyperStatPointsUtil constructor(
             .setUnit(unit)
             .setHisInterpolate("cov")
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -171,7 +171,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate("cov")
             .setShortDis(shortDis)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -198,7 +198,7 @@ class HyperStatPointsUtil constructor(
             .setUnit(unit)
             .setHisInterpolate(hisInterpolate)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -221,7 +221,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate("cov")
 
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -244,7 +244,7 @@ class HyperStatPointsUtil constructor(
             .setHisInterpolate(hisInterpolate)
             .setUnit(unit)
             // add common  markers
-            .addMarker(HYPERSTAT).addMarker(profileName)
+            .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -285,7 +285,9 @@ class HyperStatPointsUtil constructor(
                 if(actualPoint.first.markers.contains("his")){
                     addDefaultHisValueForPoint(pointId, actualPoint.second)
                 }
-                addDefaultValueForPoint(pointId, actualPoint.second)
+                if(actualPoint.first.markers.contains("writable")) {
+                    addDefaultValueForPoint(pointId, actualPoint.second)
+                }
             }
         }
     }
@@ -302,7 +304,9 @@ class HyperStatPointsUtil constructor(
             if (it.first.markers.contains("his")) {
                 addDefaultHisValueForPoint(pointId, it.third)
             }
-            addDefaultValueForPoint(pointId, it.third)
+            if (it.first.markers.contains("writable")) {
+                addDefaultValueForPoint(pointId, it.third)
+            }
         }
         return pointsIdMap
     }
@@ -792,7 +796,64 @@ class HyperStatPointsUtil constructor(
     }
 
 
-    // Function which creates User Intent Points
+    // Function to create VOV and pm2.5 sensor points
+    fun createPointVOCPmConfigPoint(
+        equipDis: String,
+        zoneVOCThreshold: Double,
+        zoneVOCTarget: Double,
+        zonePm2p5Threshold: Double,
+        zonePm2p5Target: Double
+    ): MutableList<Pair<Point, Any>> {
+        val pointsList: MutableList<Pair<Point, Any>> = LinkedList()
+        //ppb
+        val vocMarkers: MutableList<String> = LinkedList()
+        val pm2p5Markers: MutableList<String> = LinkedList()
+
+        vocMarkers.addAll(arrayOf(
+            "zone","cov","air","voc","sensor","current","his","cur","logical","config", "writable", "his","threshold"))
+        pm2p5Markers.addAll(arrayOf(
+            "zone","cov","air","pm2p5","sensor","current","his","cur","logical","config", "writable", "his","threshold"))
+
+
+        val zoneVOCThresholdPoint = createHaystackPointWithUnit(
+            "$equipDis-zoneVOCThreshold",
+            vocMarkers.stream().toArray { arrayOfNulls(it) },
+            "","ppb"
+        )
+        vocMarkers.remove("threshold")
+        vocMarkers.add("target")
+        val zoneVOCTargetPoint = createHaystackPointWithUnit(
+            "$equipDis-zoneVOCTarget",
+            vocMarkers.stream().toArray { arrayOfNulls(it) },
+            "","ppb"
+        )
+
+        val zonePm2p5ThresholdPoint = createHaystackPointWithUnit(
+            "$equipDis-zonePm2p5Threshold",
+            pm2p5Markers.stream().toArray { arrayOfNulls(it) },
+            "","ug/\u33A5"
+        )
+
+        pm2p5Markers.remove("threshold")
+        pm2p5Markers.add("target")
+        val zonePm2p5TargetPoint = createHaystackPointWithUnit(
+            "$equipDis-zonePm2p5Target",
+            pm2p5Markers.stream().toArray { arrayOfNulls(it) },
+            "","ug/\u33A5"
+        )
+
+
+        pointsList.add(Pair(zoneVOCThresholdPoint, zoneVOCThreshold))
+        pointsList.add(Pair(zoneVOCTargetPoint, zoneVOCTarget))
+
+        pointsList.add(Pair(zonePm2p5ThresholdPoint, zonePm2p5Threshold))
+        pointsList.add(Pair(zonePm2p5TargetPoint, zonePm2p5Target))
+
+        return pointsList
+    }
+
+
+        // Function which creates User Intent Points
     fun createUserIntentPoints(hyperStatConfig: HyperStatCpuConfiguration): MutableList<Pair<Point, Any>> {
 
         val userIntentPointList: MutableList<Pair<Point, Any>> = LinkedList()
@@ -1634,15 +1695,13 @@ class HyperStatPointsUtil constructor(
             enums = operatingModePointEnums
         )
 
-
+        addPointToHaystack(point = occupancyModePoint)
         val occupancyDetectionPointId = addPointToHaystack(point = occupancyDetection)
-        addDefaultHisValueForPoint(occupancyDetectionPointId, 0.0)
-        addDefaultValueForPoint(occupancyDetectionPointId, 0.0)
-        addDefaultValueForPoint(addPointToHaystack(point = occupancyModePoint), 0.0)
-
         val operatingModeModePointId = addPointToHaystack(point = operatingModeModePoint)
+
         addDefaultHisValueForPoint(operatingModeModePointId, 0.0)
-        addDefaultValueForPoint(operatingModeModePointId, 0.0)
+        addDefaultHisValueForPoint(occupancyDetectionPointId, 0.0)
+
     }
 
 
@@ -1694,6 +1753,7 @@ class HyperStatPointsUtil constructor(
         }
         return 0
     }
+
 
 }
 

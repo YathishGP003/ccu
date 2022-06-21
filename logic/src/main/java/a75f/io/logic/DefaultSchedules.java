@@ -3,12 +3,14 @@ package a75f.io.logic;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HTime;
 import org.projecthaystack.HTimeZone;
 
 import java.util.ArrayList;
@@ -89,7 +91,6 @@ public class DefaultSchedules {
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
-        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
 
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
@@ -97,10 +98,6 @@ public class DefaultSchedules {
         else {
             localId = HRef.make(id);
         }
-
-        HDict hDict = new HDictBuilder()
-                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
-                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
 
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
@@ -110,7 +107,7 @@ public class DefaultSchedules {
                 .add("vacation")
                 .add("cooling")
                 .add("heating")
-                .add("range", hDict)
+                .add("range", buildVacationHDictRange(startDate, endDate))
                 .add("dis", vacationName)
                 .add("siteRef", siteId)
                 .toDict();
@@ -122,25 +119,33 @@ public class DefaultSchedules {
             CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
         }
     }
+
+    private static HDict buildVacationHDictRange(DateTime startDate, DateTime endDate){
+        String timeZoneFromHS = CCUHsApi.getInstance().readEntity("site").get("tz").toString();
+
+        HDate startHdate = HDate.make(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth());
+        HTime startHTime = HTime.make(startDate.getHourOfDay(), startDate.getMinuteOfHour(),
+                startDate.getSecondOfMinute());
+
+        HDate endHdate = HDate.make(endDate.getYear(), endDate.getMonthOfYear(), endDate.getDayOfMonth());
+        HTime endHTime = HTime.make(endDate.getHourOfDay(), endDate.getMinuteOfHour(), endDate.getSecondOfMinute());
+
+        return new HDictBuilder()
+                .add("stdt", HDateTime.make(startHdate, startHTime, HTimeZone.make(timeZoneFromHS)))
+                .add("etdt", HDateTime.make(endHdate, endHTime, HTimeZone.make(timeZoneFromHS))).toDict();
+    }
     
     public static void upsertZoneVacation(String id, String vacationName, DateTime startDate, DateTime endDate, String roomRef)
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
-        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
-        
+
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
         }
         else {
             localId = HRef.make(id);
         }
-
-
-        HDict hDict = new HDictBuilder()
-                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
-                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
-
 
         HDict defaultSchedule = new HDictBuilder()
                                         .add("id", localId)
@@ -150,7 +155,7 @@ public class DefaultSchedules {
                                         .add("vacation")
                                         .add("cooling")
                                         .add("heating")
-                                        .add("range", hDict)
+                                        .add("range", buildVacationHDictRange(startDate, endDate))
                                         .add("dis", vacationName)
                                         .add("siteRef", siteId)
                                         .add("roomRef", HRef.copy(roomRef))

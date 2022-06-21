@@ -42,7 +42,8 @@ public class SnRebootIndicationMessage_t extends Struct
 	public final Unsigned8 smartNodeContractManufacturerCode = new Unsigned8();
 	
 	public final Unsigned8[] smartNodeManufactureDate = array(new Unsigned8[MessageConstants.SN_MANUFACTURE_DATE_LENGTH]);
-	
+
+	public final Unsigned8 nodeStatus = new Unsigned8();
 	@Override
 	public ByteOrder byteOrder()
 	{

@@ -12,6 +12,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Units;
 
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_COOLING_LOCKOUT_DEFAULT;
 import static a75f.io.logic.tuners.TunerConstants.OUTSIDE_TEMP_HEATING_LOCKOUT_DEFAULT;
@@ -63,7 +64,7 @@ public class SystemTuners {
                                .addMarker("tuner").addMarker(typeTag).addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp").addMarker("system")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(tunerGroup)
-                               .setTz(hayStack.getTimeZone())
+                               .setTz(hayStack.getTimeZone()).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(propSpread), hayStack);

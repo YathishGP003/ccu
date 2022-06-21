@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.usbserial.UsbModbusService.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -8,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.pubnub.BuildingScheduleListener;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import androidx.annotation.NonNull;
@@ -323,7 +326,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSchedule()
     {
-        
+
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
@@ -524,7 +527,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     
     private void showDialog(int id, int position, ArrayList<Schedule.Days> days) {
-        
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         
         switch (id) {
@@ -543,13 +546,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-            removeEntry = schedule.getDays().remove(position);
+            try {
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                removeEntry = schedule.getDays().remove(position);
+            }catch (ArrayIndexOutOfBoundsException e) {
+                Log.d(TAG, "onClickSave: " + e.getMessage());
+            }
         } else {
             removeEntry = null;
         }
-    
+
         Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
@@ -573,7 +580,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         for (Schedule.Days d : daysArrayList) {
             Log.d("CCU_UI", " daysArrayList  "+d);
         }
-    
+
         boolean intersection = schedule.checkIntersection(daysArrayList);
         if (intersection) {
             
@@ -649,45 +656,92 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 alert.show();
             } else if (schedule.isBuildingSchedule()) {
                 StringBuilder spillZones = new StringBuilder();
-                ArrayList<String> headers = new ArrayList<>();
+                StringBuilder spillNamedZones = new StringBuilder();
+                ArrayList<String> namedheaders = new ArrayList<>();
+                ArrayList<String> zoneheaders = new ArrayList<>();
+                String schedules = "";
                 for (String zone : spillsMap.keySet())
                 {
                     for (Interval i : spillsMap.get(zone))
                     {
                         Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zone)).build();
                         Floor f = new Floor.Builder().setHashMap(CCUHsApi.getInstance().readMapById(z.getFloorRef())).build();
-                        if (!headers.contains(f.getDisplayName())) {
-                            spillZones.append(f.getDisplayName() + "\n");
-                            headers.add(f.getDisplayName());
+                        if((CCUHsApi.getInstance().getScheduleById(z.getScheduleRef())).isNamedSchedule()){
+                            schedules = schedules.concat("named");
+                            if (!namedheaders.contains(f.getDisplayName())) {
+                                spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                namedheaders.add(f.getDisplayName());
+                            }
+                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                        }else {
+                            schedules = schedules.concat(Tags.ZONE);
+                            if (!zoneheaders.contains(f.getDisplayName())) {
+                                spillZones.append("\t").append(f.getDisplayName()).append("->\n");
+                                zoneheaders.add(f.getDisplayName());
+                            }
+                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
-                        spillZones.append("Zone " + z.getDisplayName()+" "+ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
                     }
                 }
-                
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Zone Schedule for below zone(s) is outside updated building schedule.\n"+(spillZones.equals("") ?"":"The Schedule is outside by \n"+spillZones.toString()))
-                       .setCancelable(false)
-                       .setTitle("Schedule Errors")
-                       .setIcon(android.R.drawable.ic_dialog_alert)
-                       .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
-                           public void onClick(DialogInterface dialog, int id) {
-                               if (removeEntry != null) {
-                                   showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
-                               } else {
-                                   showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
-                               }
-                           }
-                       })
-                       .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                           public void onClick(DialogInterface dialog, int id) {
-                               schedule.getDays().addAll(daysArrayList);
-                               ScheduleUtil.trimZoneSchedules(spillsMap);
-                               doScheduleUpdate();
-                           }
-                       });
-    
-                AlertDialog alert = builder.create();
-                alert.show();
+
+                String namedSchedulesWarning = "" ;
+                String zoneSchedulesWarning = "" ;
+                if (schedules.contains("named")) {
+                    namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
+                            "building schedule.\n"
+                            + ((spillNamedZones.toString()).equals("") ? "" : "\tThe Schedule is " +
+                            "outside by \n\t" + spillNamedZones.toString()+"\n");
+                    if(schedules.contains("zone")){
+                        zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
+                                "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                                "is outside by \n\t" + spillZones.toString());
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(namedSchedulesWarning + zoneSchedulesWarning)
+                            .setCancelable(false)
+                            .setTitle("Schedule Errors")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setNegativeButton("Re-Edit", (dialog, id) -> {
+                                if (removeEntry != null) {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                                } else {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                                }
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+                else if(schedules.contains("zone")){
+                    zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
+                            "building schedule.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
+                            "is outside by \n\t" + spillZones.toString());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(zoneSchedulesWarning)
+                            .setCancelable(false)
+                            .setTitle("Schedule Errors")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setNegativeButton("Re-Edit", (dialog, id) -> {
+                                if (removeEntry != null) {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                                } else {
+                                    showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                                }
+                            })
+                            .setPositiveButton("Force-Trim", (dialog, id) -> {
+                                schedule.getDays().addAll(daysArrayList);
+                                ScheduleUtil.trimZoneSchedules(spillsMap);
+                                if (schedule.getDays().contains(removeEntry)) {
+                                    schedule.getDays().remove(position);
+                                }
+                                doScheduleUpdate();
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+
+
             }
             return true;
             
@@ -1121,11 +1175,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 int clickedPosition = (int)v.getTag();
                 //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
-                if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                if(mScheduleId != null) {
+                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                }
+                    ArrayList<Schedule.Days> days = schedule.getDays();
+                    try {
+                        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                        showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.d(TAG, "onClick: " + e.getMessage());
+                    }
+
             }
         });
     }
@@ -1157,8 +1218,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen() {
-        if(getActivity() != null) {
+    public void refreshScreen(Schedule updatedSchedule) {
+        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

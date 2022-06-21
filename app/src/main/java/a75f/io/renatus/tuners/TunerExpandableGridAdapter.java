@@ -54,7 +54,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     TunerGroupItem previousOpenGroup = null;
     String tunerGroupType = "Building";
     SharedPreferences mPreferences;
-    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,

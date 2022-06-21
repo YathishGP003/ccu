@@ -248,7 +248,7 @@ public class InstallerOptions extends Fragment {
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+        HashMap<Object, Object> useCelsius;
 
         useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
@@ -408,6 +408,7 @@ public class InstallerOptions extends Fragment {
         toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
                 if(isChecked) {
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,

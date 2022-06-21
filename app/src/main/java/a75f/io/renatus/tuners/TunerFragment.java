@@ -127,7 +127,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         cancelTunerUpdate = view.findViewById(R.id.buttonCancel);
         editChangeReason = view.findViewById(R.id.editChangeReason);
         editTunerSearch = view.findViewById(R.id.editTunerSearch);
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("useCelsius");
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         //TODO: revert building tuners

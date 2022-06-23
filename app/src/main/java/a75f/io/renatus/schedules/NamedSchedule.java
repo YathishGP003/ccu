@@ -1,6 +1,9 @@
 package a75f.io.renatus.schedules;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -53,6 +56,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.FontManager;
@@ -62,6 +66,7 @@ public class NamedSchedule extends DialogFragment {
     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final String PARAM_SCHED_NAME = "PARAM_SCHED_NAME";
     private static final String TAG = "NAMED_SCHEDULE";
+    private HashMap<Object, Object> useCelsius;
 
     TextView textViewMonday;
     TextView textViewTuesday;
@@ -163,7 +168,7 @@ public class NamedSchedule extends DialogFragment {
         //Scheduler Layout
         initialiseViews(rootView);
 
-
+        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         setButton = rootView.findViewById(R.id.setButton);
         setButton.setOnClickListener(v -> {
             if (validateNamedSchedule()) {
@@ -631,6 +636,10 @@ public class NamedSchedule extends DialogFragment {
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
 
+        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            coolingTemp =(fahrenheitToCelsiusTwoDecimal(coolingTemp));
+            heatingTemp=(fahrenheitToCelsiusTwoDecimal(heatingTemp));
+        }
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 

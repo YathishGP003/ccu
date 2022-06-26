@@ -42,7 +42,7 @@ public class TrueCFMPointsHandler {
                             .setSiteRef(equip.getSiteRef()).setHisInterpolate("cov")
                             .addMarker("config").addMarker(profileTag).addMarker("trueCfm").addMarker(fanMarker)
                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
-                            .setMinVal("0").setMaxVal("3.00").setIncrementVal("0.01")
+                            .setMinVal("1.00").setMaxVal("3.00").setIncrementVal("0.01")
                             .setGroup(equip.getGroup())
                             .setTz(equip.getTz())
                             .build();

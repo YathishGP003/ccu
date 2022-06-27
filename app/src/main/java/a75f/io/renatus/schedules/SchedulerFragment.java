@@ -68,6 +68,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
@@ -976,9 +977,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private String getDayString(Schedule.Days day) {
         return ScheduleUtil.getDayString(day.getDay()+1);
     }
+    private static float roundToHalf(float d) {
+        return Math.round(d * 2) / 2.0f;
+    }
     
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+
+        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
+            heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
+        }
 
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);

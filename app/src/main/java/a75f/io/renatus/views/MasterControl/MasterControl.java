@@ -415,7 +415,7 @@ public class MasterControl extends View {
         mDegreeIncremntPX = (int) (suggestedWidth / visibleDegrees);
         mPaddingPX = (int) (PADDING_LEFT_RIGHT_PX * displayMetrics.density);
         mTextPadding = (int) (TEXT_PADDING_LEFT_RIGHT_DP * displayMetrics.density);
-        mViewWidth = Math.round((mUpperBound - mLowerBound) * mDegreeIncremntPX + (mPaddingPX) * 2);
+        mViewWidth = Math.round((mUpperBound - mLowerBound) * mDegreeIncremntPX + (mPaddingPX) * 10);
         mArrowImageWidth = (int) (ARROW_IMAGE_WIDTH * displayMetrics.density);
         mBuildingLimitSpacing = (int) (SETTLED_BUILDING_LIMITS_H * displayMetrics.density);
         mEnergySavingsSpacing = (int) (SETTLED_ENERGY_SAVINGS_LIMITS_H * displayMetrics.density);
@@ -757,7 +757,7 @@ public class MasterControl extends View {
             canvas.drawLine(i, mViewHeight / 3.0f, i, mViewHeight / 2.0f + 24.0f, mDelimeterPaint);
         }
 
-        for (int i = (int) (5 * (Math.ceil(Math.abs((int) mLowerBound / 5)))); i <= 5 * (Math.floor(Math.abs((int) mUpperBound / 5))); i += 5) {
+        for (int i = (int) (5 * (Math.ceil(Math.abs((int) (mLowerBound+3) / 5)))); i <= 5 * (Math.floor(Math.abs((int) mUpperBound / 5))); i += 5) {
             String temp = String.valueOf(i);
 
             mDebugTextPaint.setTextSize(mArrowTextSize);

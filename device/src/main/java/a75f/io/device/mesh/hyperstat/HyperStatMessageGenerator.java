@@ -15,6 +15,7 @@ import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -89,6 +90,9 @@ public class HyperStatMessageGenerator {
             .setTemperatureOffset((int) (DeviceHSUtil.getTempOffset(address)))
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
+            .setDisplayHumidity(true)
+            .setDisplayCO2(true)
+            .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
              .setDisplayHumidity(true)
              .setDisplayCO2(true)
              .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
@@ -99,6 +103,7 @@ public class HyperStatMessageGenerator {
             .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
+
     }
     
     /**
@@ -313,6 +318,9 @@ public class HyperStatMessageGenerator {
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and hyperstat and pm2p5 and threshold and equipRef == \""+equipRef+ "\"");
     }
+
+
+
 
     public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
         return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());

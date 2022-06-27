@@ -300,6 +300,19 @@ public class HyperStatMessageGenerator {
         }
 
     }
+    public static double readCo2ThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and co2 and threshold and equipRef == \""+equipRef+ "\"");
+    }
+    public static double readVocThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and voc and threshold and equipRef == \""+equipRef+ "\"");
+    }
+
+    public static double readPm2p5ThresholdValue(String equipRef) {
+        return CCUHsApi.getInstance().readDefaultVal(
+                "point and hyperstat and pm2p5 and threshold and equipRef == \""+equipRef+ "\"");
+    }
 
     public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
         return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());

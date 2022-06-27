@@ -92,6 +92,11 @@ public class HyperStatMessageGenerator {
              .setDisplayHumidity(true)
              .setDisplayCO2(true)
              .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
+            .setDisplayHumidity(true)
+            .setDisplayCO2(true)
+            .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
+            .setPm25AlertThreshold((int)readVocThresholdValue(equipRef))
+            .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
     }

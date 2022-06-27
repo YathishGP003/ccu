@@ -6,10 +6,12 @@ import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
@@ -22,6 +24,8 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
+import a75f.io.logic.bo.building.truecfm.DabTrueCfmHandler;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
@@ -42,6 +46,7 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 
 public class DabSystemController extends SystemController
 {
+    private static final int MOVING_AVERAGE_QUEUE_SIZE = 15;
     int    integralMaxTimeout = 15;
     int proportionalSpread = 2;
     double proportionalGain = 0.5;
@@ -54,7 +59,7 @@ public class DabSystemController extends SystemController
     int coolingSignal;
     int heatingSignal;
     
-    EvictingQueue<Double> weightedAverageChangeOverLoadQueue = EvictingQueue.create(15);
+    EvictingQueue<Double> weightedAverageChangeOverLoadQueue = EvictingQueue.create(MOVING_AVERAGE_QUEUE_SIZE);
     
     
     int ciDesired;
@@ -91,7 +96,7 @@ public class DabSystemController extends SystemController
     
     
     private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
-
+    
     private DabSystemController()
     {
         proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
@@ -119,11 +124,8 @@ public class DabSystemController extends SystemController
 
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
-                                                           .readAllEntities("(equip and zone and dab) or " +
-                                                                            "(equip and zone and dualDuct) or " +
-                                                                            "(equip and zone and ti) or "+
-                                                                   "(equip and zone and bpos)"
-        );
+                                                           .readAllEntities("equip and zone and (dab or dualDuct or " +
+                                                                            "ti or bpos)");
     
         updateSystemTempHumidity(allEquips);
         
@@ -155,17 +157,8 @@ public class DabSystemController extends SystemController
         
         logAlgoVariables();
         
-        ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
-                                                               .readAllEntities("equip and zone and dab");
-
-        if (isNormalizationRequired()) {
-            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
-                                                                                       getBaseDamperPosMap(dabEquips));
-            HashMap<String, Double> damperPosMap = getAdjustedDamperPosMap(dabEquips,
-                                                                           normalizedDamperPosMap,
-                                                                           systemProfile.getSystemEquipRef());
-            applyLimitsAndSetDamperPosition(dabEquips, damperPosMap);
-        }
+        updateDabZoneDamperPositions();
+        
     }
 
     private void initializeAlgoLoopVariables() {
@@ -784,6 +777,33 @@ public class DabSystemController extends SystemController
         return systemState;
     }
     
+    private void updateDabZoneDamperPositions() {
+        ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
+                                                               .readAllEntities("equip and zone and dab");
+    
+        if (isNormalizationRequired()) {
+            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
+                                                                                       getBaseDamperPosMap(dabEquips));
+        
+            HashMap<String, Double> cumulativeDamperAdjustedPosMap = getAdjustedDamperPosMap(dabEquips,
+                                                                                             normalizedDamperPosMap,
+                                                                                             systemProfile.getSystemEquipRef());
+        
+            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
+                                                                              .getCfMUpdatedDamperPosMap(dabEquips,
+                                                                                                         cumulativeDamperAdjustedPosMap,
+                                                                                                         CCUHsApi.getInstance());
+        
+            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
+        } else if (conditioningMode != SystemMode.OFF) {
+            HashMap<String, Double> cfmUpdatedDamperPosMap = DabTrueCfmHandler.getInstance()
+                                                                              .getCfMUpdatedDamperPosMap(dabEquips,
+                                                                                                         getBaseDamperPosMap(dabEquips),
+                                                                                                         CCUHsApi.getInstance());
+            applyLimitsAndSetDamperPosition(dabEquips, cfmUpdatedDamperPosMap);
+        }
+    }
+    
     /*
      * Of all the zones, find the zone with the largest damperPosition. If this is not 100, then proportionally
      * increase damper positions in all zones such that this chosen one  has 100% damper opening.  Eg. if there are
@@ -830,14 +850,15 @@ public class DabSystemController extends SystemController
                 normalizedSecondaryDamperPos = (secondaryDamperPos + secondaryDamperPos * targetPercent / 100);
             }
             
-            normalizedDamperPosMap.put(normalizedPrimaryDamper.get("id").toString(), normalizedPrimaryDamperPos);
+            normalizedDamperPosMap.put(Objects.requireNonNull(normalizedPrimaryDamper.get("id")).toString(), normalizedPrimaryDamperPos);
             normalizedDamperPosMap.put(normalizedSecondaryamper.get("id").toString(), normalizedSecondaryDamperPos);
     
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      "normalizeAirflow" + " Equip: " +
                      dabEquip.get("dis") + " ,damperPos :" + primaryDamperPos
                      + " targetPercent: " + targetPercent +
-                     " normalizedDamperPos: " + normalizedPrimaryDamperPos
+                     " normalizedPrimaryDamperPos: " + normalizedPrimaryDamperPos+
+                     " normalizedSecondaryDamperPos: "+normalizedSecondaryDamperPos
             );
     
         }
@@ -852,20 +873,20 @@ public class DabSystemController extends SystemController
             }
             HashMap<Object, Object> damper = CCUHsApi.getInstance()
                                      .readEntity("point and damper and base and primary and cmd and equipRef == \"" +
-                                                 dabEquip.get("id").toString() + "\""
+                                                 Objects.requireNonNull(dabEquip.get("id")) + "\""
             );
             
-            double damperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
+            double damperPos = CCUHsApi.getInstance().readHisValById(Objects.requireNonNull(damper.get("id")).toString());
             if (damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
             }
     
             damper = CCUHsApi.getInstance()
                              .readEntity("point and damper and base and secondary and cmd and equipRef == \"" +
-                                         dabEquip.get("id").toString() + "\""
+                                         Objects.requireNonNull(dabEquip.get("id")) + "\""
             );
     
-            damperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
+            damperPos = CCUHsApi.getInstance().readHisValById(Objects.requireNonNull(damper.get("id")).toString());
             if (damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
             }
@@ -902,7 +923,7 @@ public class DabSystemController extends SystemController
             weightedDamperOpening = getWeightedDamperOpening(dabEquips, normalizedDamperPosMap);
             CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening +
                                        " cumulativeDamperTarget : " + cumulativeDamperTarget +
-                                        "damperAdjPercent : "+damperAdjPercent);
+                                        " damperAdjPercent : "+damperAdjPercent);
             return adjustedDamperPosMap;
         }
         return normalizedDamperPosMap;
@@ -1016,10 +1037,10 @@ public class DabSystemController extends SystemController
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         for (HashMap<Object, Object> dabEquip : dabEquips) {
-            
+            String equipRef = dabEquip.get("id").toString();
             HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
                                                 "point and damper and normalized and primary and cmd "
-                                                + "and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                                                + "and equipRef == \"" + equipRef + "\""
             );
             
             double limitedPrimaryDamperPos = normalizedDamperPosMap.get(primaryDamperPosPoint.get("id").toString());
@@ -1027,7 +1048,7 @@ public class DabSystemController extends SystemController
             
             HashMap<Object, Object> secondoryDamperPosPoint = hayStack.readEntity(
                                                 "point and damper and normalized and secondary and cmd " +
-                                                "and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                                                "and equipRef == \"" + equipRef + "\""
             );
             
             double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
@@ -1036,17 +1057,17 @@ public class DabSystemController extends SystemController
             double minLimit, maxLimit;
             if (systemState == COOLING) {
                 minLimit = hayStack.readDefaultVal(
-                    "point and min and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                    "point and min and damper and cooling and equipRef == \"" + equipRef + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
-                    "point and max and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                    "point and max and damper and cooling and equipRef == \"" + equipRef + "\""
                 );
             } else {
                 minLimit = hayStack.readDefaultVal(
-                    "point and min and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                    "point and min and damper and heating and equipRef == \"" + equipRef + "\""
                 );
                 maxLimit = hayStack.readDefaultVal(
-                    "point and max and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                    "point and max and damper and heating and equipRef == \"" + equipRef + "\""
                 );
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,
@@ -1070,6 +1091,19 @@ public class DabSystemController extends SystemController
                      " limitedPrimaryDamperPos : " + limitedPrimaryDamperPos + ",  " +
                      "limitedSecondaryDamperPos : " + limitedSecondaryDamperPos
             );
+            
+            if (TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, "UpdateTrueCfm moving average queue "+dabEquip.get("dis"));
+                DabTrueCfmHandler.getInstance().updateDamperPosQueueMap(primaryDamperPosPoint.get("id").toString(),
+                                                                        limitedPrimaryDamperPos);
+                DabTrueCfmHandler.getInstance().updateAirflowMAQueue(hayStack, equipRef, Tags.PRIMARY,
+                                                                     primaryDamperPosPoint.get("id").toString());
+                
+                DabTrueCfmHandler.getInstance().updateDamperPosQueueMap(secondoryDamperPosPoint.get("id").toString(),
+                                                                        limitedSecondaryDamperPos);
+                DabTrueCfmHandler.getInstance().updateAirflowMAQueue(hayStack, equipRef, Tags.SECONDARY,
+                                                                     secondoryDamperPosPoint.get("id").toString());
+            }
         }
     }
     

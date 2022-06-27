@@ -10,15 +10,16 @@ public class PreferenceUtil {
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
+    private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String TRUE_CFM_DAB_MIGRATION="trueCfmDabMigration";
     private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
-
-
-
     private static final String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
     private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
+    private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
+    private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -145,6 +146,18 @@ public class PreferenceUtil {
         editor.apply();
     }
 
+    public static boolean isSenseAndPILoopAnalogPointDisMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("SenseAndPILoopAnalogPointDisMigrationDone", false);
+    }
+
+    public static void setSenseAndPILoopAnalogPointDisMigrationDone(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("SenseAndPILoopAnalogPointDisMigrationDone", isMigrated);
+        editor.apply();
+    }
+
     public static boolean areDuplicateAlertsRemoved() {
         return getBooleanPreference(REMOVED_DUPLICATE_ALERTS);
     }
@@ -192,6 +205,12 @@ public class PreferenceUtil {
     public static void setAirflowVolumeUnitMigrationDone() {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
     }
+    public static boolean isTrueCFMVAVMigrationDone() {
+        return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
+    }
+    public static void setTrueCFMVAVMigrationDone() {
+        setBooleanPreference(TRUE_CFM_VAV_MIGRATION, true);
+    }
 
     public static boolean getAddedUnitToTuners() {
         return getBooleanPreference(ADDED_UNIT_TO_TUNERS);
@@ -201,8 +220,12 @@ public class PreferenceUtil {
         setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
     }
 
-
-
+    public static boolean isTrueCFMDABMigrationDone() {
+        return getBooleanPreference(TRUE_CFM_DAB_MIGRATION);
+    }
+    public static void setTrueCFMDABMigrationDone() {
+        setBooleanPreference(TRUE_CFM_DAB_MIGRATION, true);
+    }
 
     public static boolean isIduPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -220,12 +243,23 @@ public class PreferenceUtil {
         return getBooleanPreference(SMART_NODE_MIGRATION);
     }
     public static void setDamperFeedbackMigration() {
-        setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, false);
+        setBooleanPreference(DAMPER_FEEDBACK_MIGRATION, true);
     }
     public static boolean getDamperFeedbackMigration() {
         return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
     }
-
+    public static void setVocPm2p5Migration() {
+        setBooleanPreference(VOC_PM2P5_MIGRATION, true);
+    }
+    public static boolean getVocPm2p5Migration() {
+        return getBooleanPreference(VOC_PM2P5_MIGRATION);
+    }
+    public static void setDiagEquipMigration() {
+        setBooleanPreference(DIAG_POINTS_MIGRATION, true);
+    }
+    public static boolean getDiagEquipMigration() {
+        return getBooleanPreference(DIAG_POINTS_MIGRATION);
+    }
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);

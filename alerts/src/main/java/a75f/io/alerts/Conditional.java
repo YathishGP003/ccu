@@ -382,7 +382,6 @@ public class Conditional
                     
                     HisItem reading1 = hisItems.get(hisItems.size() - 2);
                     HisItem reading2 = hisItems.get(hisItems.size() - 1);
-    
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \"" + equipRef + "\""));
                                                     sb.append("\nval (RHS): ").append(val).append("  -- recalculated for this zone");
@@ -393,10 +392,8 @@ public class Conditional
                         reading1 = reading2 ;
                                                     sb.append("\nOlder his reading is more than 65 sec old, so setting readings to the same");
                     }
-
                     resVal = reading1.getVal() - reading2.getVal();
                                                sb.append("\n   resVal (LHS): ").append(resVal).append("  -- difference between readinngs.");
-
                     Expression expression = new Expression(resVal+ " "+condition+" " + val);
                     CcuLog.d("CCU_ALERTS", " expression "+expression.toString());
                                                 sb.append("\n").append(expression).append(": ");
@@ -404,6 +401,7 @@ public class Conditional
                     boolean status = expression.eval().intValue() > 0;
                     equipToPoint.put(equipRef, pointRef);
                     equipToStatus.put(equipRef, status);
+
                     if (status) {
                                                     sb.append("TRUE");
                         CcuLog.d("CCU_ALERTS", " Add to pointList");
@@ -413,7 +411,7 @@ public class Conditional
                         lastValue.add(new PointVal(pointRef, reading1.getVal()));
                         presentValue.add(new PointVal(pointRef, reading2.getVal()));
                     } else {
-                                                    sb.append("FALSE");
+                        sb.append("FALSE");
                     }
                 }
                                             sb.append("\nAfter Equips, have point list size ").append(pointList.size());

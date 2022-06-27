@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
@@ -126,8 +127,8 @@ public class EmrEquip
     
     public void setEquipStatus(String status)
     {
-        hayStack.writeDefaultVal("point and status and message and equipRef == \""+equipRef+"\"", status);
-        
+        hayStack.writeDefaultVal("point and status and message and equipRef == \""+equipRef+"\"",
+                StringUtil.processMessageForNumberFormatting(status));
     }
     
     public void setHisVal(String query, double val)

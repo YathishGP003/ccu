@@ -1,12 +1,10 @@
 package a75f.io.logic.bo.building.oao;
 
-import android.content.Context;
 import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
@@ -189,25 +187,9 @@ public class OAOProfile
         }
     }
     public void doEconomizing() {
-        
-        double externalTemp = 0, externalHumidity = 0;
-        try {
-            if (Globals.getInstance().isWeatherTest()) {
-                externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                                      .getInt("outside_temp", 0);
-                externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                                      .getInt("outside_humidity", 0);
-            } else {
-                externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
-                externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity");
-        }
-        oaoEquip.setHisVal("outsideWeather and air and temp", externalTemp);
-        oaoEquip.setHisVal("outsideWeather and air and humidity", externalHumidity);
-        
+    
+        double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+        double externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
         
         double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
         
@@ -449,5 +431,9 @@ public class OAOProfile
         outsideAirCalculatedMinDamper = CCUHsApi.getInstance().readDefaultVal("enhanced and ventilation and outside and damper and pos and min and open and equipRef ==\""+oaoEquip.equipRef+"\"");
         CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.ENHANCED_VENTILATION.ordinal());
         Log.d(L.TAG_CCU_OAO, "System occupied, check enhanced ventilation = "+outsideAirCalculatedMinDamper+","+epidemicState.name());
+    }
+    
+    public OAOEquip getOAOEquip() {
+        return oaoEquip;
     }
 }

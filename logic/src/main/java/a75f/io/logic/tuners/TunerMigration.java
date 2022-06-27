@@ -89,6 +89,10 @@ class TunerMigration {
         valueObjMap.put("standaloneRelayActivationHysteresis", new ValueObj("0", "100", "1"));
         valueObjMap.put("standaloneAnalogFanSpeedMultiplier", new ValueObj("0.1", "3.0", "0.1"));
         valueObjMap.put("standaloneHumidityHysteresis", new ValueObj("0", "100", "1"));
+        valueObjMap.put("AIR_FLOW_CFM_PROPORTIONAL_RANGE",new ValueObj("0","1500","10"));
+        valueObjMap.put("AIR_FLOW_CFM_INTEGRAL_TIME",new ValueObj("1","60","1"));
+        valueObjMap.put("AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR",new ValueObj("0","1",".1"));
+        valueObjMap.put("AIR_FLOW_CFM_INTEGRAL_K_FACTOR",new ValueObj("0","1",".1"));
         return valueObjMap;
     }
 }

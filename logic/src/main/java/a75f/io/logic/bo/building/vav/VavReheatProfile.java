@@ -1,9 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import a75.io.algos.CO2Loop;
-import a75.io.algos.ControlLoop;
-import a75.io.algos.GenericPIController;
-import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -14,8 +10,6 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -30,6 +24,8 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import android.util.Log;
 
+import java.util.Objects;
+
 /**
  * Created by samjithsadasivan on 8/23/18.
  */
@@ -37,18 +33,6 @@ import android.util.Log;
 public class VavReheatProfile extends VavProfile
 {
   
-    private boolean satCompensationEnabled = false;
-    
-    VavEquip    vavDevice;
-    ControlLoop coolingLoop;
-    ControlLoop heatingLoop;
-    CO2Loop co2Loop;
-    VOCLoop vocLoop;
-    VavUnit vavUnit;
-    GenericPIController valveController;
-    Damper damper;
-    Valve valve;
-    
     @Override
     public ProfileType getProfileType()
     {
@@ -85,16 +69,13 @@ public class VavReheatProfile extends VavProfile
                 vavDevice.setDesiredTemp(averageDesiredTemp);
             }
             
-            damper = vavUnit.vavDamper;
-            valve = vavUnit.reheatValve;
-            setDamperLimits(node, damper);
-            
             int loopOp = 0;
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+            Equip vavEquip = new Equip.Builder()
+                      .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + node + "\"")).build();
     
             if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
                 //Zone is in Cooling
@@ -137,13 +118,15 @@ public class VavReheatProfile extends VavProfile
                 updateReheatDuringSystemHeating(vavEquip);
             }
     
-            logLoopParams(node, roomTemp, loopOp);;
+            logLoopParams(node, roomTemp, loopOp);
             
             updateTRResponse(node);
     
             valve.applyLimits();
-            damper.applyLimits();
-    
+            if (systemMode != SystemMode.OFF) {
+                updateDamperPosForTrueCfm(CCUHsApi.getInstance(), conditioning);
+            }
+            
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
             CcuLog.d(L.TAG_CCU_ZONE, "buildingLimitMaxBreached "+buildingLimitMaxBreached()+" buildingLimitMinBreached "+buildingLimitMinBreached());
@@ -196,10 +179,11 @@ public class VavReheatProfile extends VavProfile
         heatingLoop = vavDevice.getHeatingLoop();
         co2Loop = vavDeviceMap.get(node).getCo2Loop();
         vocLoop = vavDeviceMap.get(node).getVOCLoop();
+        cfmControlLoop = Objects.requireNonNull(vavDeviceMap.get(node)).getCfmController();
         valveController = vavDevice.getValveController();
         setTempCooling = vavDevice.getDesiredTempCooling();
         setTempHeating = vavDevice.getDesiredTempHeating();
-        vavUnit = vavDevice.getVavUnit();
+        VavUnit vavUnit = vavDevice.getVavUnit();
         damper = vavUnit.vavDamper;
         valve = vavUnit.reheatValve;
         setDamperLimits(node, damper);
@@ -235,9 +219,9 @@ public class VavReheatProfile extends VavProfile
         double heatingLoopOffset = TunerUtil.readTunerValByQuery("offset  and discharge and air and temp", vavEquip);
         double dischargeTemp = vavDevice.getDischargeTemp();
         double supplyAirTemp = vavDevice.getSupplyAirTemp();
-        double datMax = (roomTemp + heatingLoopOffset) > maxDischargeTemp ? maxDischargeTemp : (roomTemp + heatingLoopOffset);
+        double datMax = Math.min((roomTemp + heatingLoopOffset), maxDischargeTemp);
         
-        if (!isSupplyAirTempValid(supplyAirTemp, dischargeTemp)) {
+        if (!isSupplyAirTempValid(supplyAirTemp)) {
             CcuLog.d(L.TAG_CCU_ZONE, "updateReheatDuringSystemCooling : Invalid SAT , Use roomTemp "+roomTemp);
             supplyAirTemp = roomTemp;
         }
@@ -251,7 +235,7 @@ public class VavReheatProfile extends VavProfile
                  "updateReheatDuringSystemCooling :  supplyAirTemp: " + supplyAirTemp +  " datMax: " + datMax+
                  " dischargeTemp: " + dischargeTemp +" dischargeSp "+dischargeSp);
         
-        valve.currentPosition = valvePosition < 0 ? 0 : valvePosition > 100 ? 100 : valvePosition;
+        valve.currentPosition = valvePosition < 0 ? 0 : Math.min(valvePosition, 100);
     }
     
     /**
@@ -259,12 +243,8 @@ public class VavReheatProfile extends VavProfile
      * Avoid running the loop when the air temps are outside a reasonable range to make sure they are not picked by the
      * algorithm.
      */
-    private boolean isSupplyAirTempValid(double sat, double dat) {
-        if (sat < 0 || sat > 200) {
-            return false;
-        }
-        
-        return true;
+    private boolean isSupplyAirTempValid(double sat) {
+        return !(sat < 0) && !(sat > 200);
     }
     
     private void updateReheatDuringSystemHeating(Equip vavEquip) {

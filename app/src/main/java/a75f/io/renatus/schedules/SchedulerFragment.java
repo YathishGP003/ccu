@@ -3,6 +3,8 @@ package a75f.io.renatus.schedules;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 
+import static a75f.io.usbserial.UsbModbusService.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -66,7 +68,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
@@ -548,9 +549,13 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-            removeEntry = schedule.getDays().remove(position);
+            try {
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                removeEntry = schedule.getDays().remove(position);
+            }catch (ArrayIndexOutOfBoundsException e) {
+                Log.d(TAG, "onClickSave: " + e.getMessage());
+            }
         } else {
             removeEntry = null;
         }
@@ -729,6 +734,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             .setPositiveButton("Force-Trim", (dialog, id) -> {
                                 schedule.getDays().addAll(daysArrayList);
                                 ScheduleUtil.trimZoneSchedules(spillsMap);
+                                if (schedule.getDays().contains(removeEntry)) {
+                                    schedule.getDays().remove(position);
+                                }
                                 doScheduleUpdate();
                             });
 
@@ -968,18 +976,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private String getDayString(Schedule.Days day) {
         return ScheduleUtil.getDayString(day.getDay()+1);
     }
-    private static float roundToHalf(float d) {
-        return Math.round(d * 2) / 2.0f;
-    }
     
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
-        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-            coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
-            heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
-        }
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
@@ -1178,11 +1178,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 int clickedPosition = (int)v.getTag();
                 //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
-                if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                if(mScheduleId != null) {
+                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+                }
+                    ArrayList<Schedule.Days> days = schedule.getDays();
+                    try {
+                        Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                        Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                        showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.d(TAG, "onClick: " + e.getMessage());
+                    }
+
             }
         });
     }
@@ -1214,8 +1221,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen() {
-        if(getActivity() != null) {
+    public void refreshScreen(Schedule updatedSchedule) {
+        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

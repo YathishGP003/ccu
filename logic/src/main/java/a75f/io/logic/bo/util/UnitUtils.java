@@ -30,4 +30,19 @@ public class UnitUtils {
         return celsiusTemperature;
     }
 
+    public static double fahrenheitToCelsiusRelative(double temperature) {
+        double celsiusTemperature ;
+        celsiusTemperature =(temperature/ 1.8);
+        double decimalValue = celsiusTemperature -(long) celsiusTemperature;
+
+        if (decimalValue > 0.01 && decimalValue <= 0.3) {
+            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
+        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
+            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
+        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
+            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
+        }
+        return celsiusTemperature;
+    }
+
 }

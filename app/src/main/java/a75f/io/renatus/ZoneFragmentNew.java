@@ -757,6 +757,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(scheduleSpinner,getContext());
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
+        ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
         ArrayList<String> scheduleArray = new ArrayList<>();
@@ -851,6 +852,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         mScheduleTypeMap.put(equipId[0], mScheduleType);
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
+        specialScheduleImageButton.setTag(mSchedule.getId());
 
         if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
@@ -859,18 +861,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         }
 
         scheduleImageButton.setOnClickListener(v ->
-        {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
-            FragmentManager childFragmentManager = getFragmentManager();
-            childFragmentManager.beginTransaction();
-            schedulerFragment.show(childFragmentManager, "dialog");
-
-            schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
-                ScheduleProcessJob.updateSchedules(equipOpen);
-            });
-        });
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
 
         vacationImageButton.setOnClickListener(v ->
         {
@@ -887,6 +878,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             });
         });
+        specialScheduleImageButton.setOnClickListener(v ->
+                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
 
         if(mScheduleType >= 2){
             int spinnerposition = 2;
@@ -920,8 +913,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                     if (zone != null) {
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                "== " +zone.getId());
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and roomRef " + "== " +zone.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         zone.setScheduleRef(scheduleById.getId());
                         CCUHsApi.getInstance().updateZone(zone, zoneId);
@@ -929,6 +922,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     scheduleSpinner.setSelection(position);
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
+                    specialScheduleImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId[0]);
@@ -938,11 +932,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
+                        specialScheduleImageButton.setTag(mSchedule.getId());
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                "== " +zone.getId());
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and roomRef " + "== " +zone.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         if (zone.hasSchedule()) {
 
@@ -956,8 +951,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
                              * still created a schedule. Handle it before creating a new schedule again.
                              */
-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                                                                                 "== " +zone.getId());
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+                                    "not special and roomRef " + "== " +zone.getId());
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
                                 zone.setScheduleRef(schedule.get("id").toString());
@@ -966,8 +961,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                         }
-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                "== " +zone.getId());
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and roomRef " + "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null) {
@@ -1011,6 +1006,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 scheduleImageButton.setTag(mSchedule.getId());
                 vacationImageButton.setTag(mSchedule.getId());
+                specialScheduleImageButton.setTag(mSchedule.getId());
             }
 
             @Override
@@ -1328,6 +1324,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     }
 
+    private void imageButtonClickListener(View v, String zoneId, String[] equipId,
+                                        FragmentManager childFragmentManager2) {
+        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+        FragmentManager childFragmentManager = childFragmentManager2;
+        childFragmentManager.beginTransaction();
+        schedulerFragment.show(childFragmentManager, "dialog");
+
+        schedulerFragment.setOnExitListener(() -> {
+            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
+            ScheduleProcessJob.updateSchedules(equipOpen);
+        });
+    }
+
+
     private void clearTempOverride(String equipId) {
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -1353,6 +1364,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         Spinner scheduleSpinner = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
+        ImageButton specilaScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
 
@@ -1447,6 +1459,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
+        specilaScheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setOnClickListener(v ->
         {
             SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
@@ -1464,6 +1477,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         {
             SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager, "dialog");
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules(equipOpen);
+            });
+        });
+        specilaScheduleImageButton.setOnClickListener(v ->
+        {
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            FragmentManager childFragmentManager = getChildFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
 
@@ -1510,8 +1536,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                     if (z != null) {
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                "== " +z.getId());
+                        HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and roomRef " + "== " +z.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         z.setScheduleRef(scheduleById.getId());
                         CCUHsApi.getInstance().updateZone(z, zoneId);
@@ -1519,6 +1545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     CCUHsApi.getInstance().scheduleSync();
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
+                    specilaScheduleImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
@@ -1527,13 +1554,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
+                        specilaScheduleImageButton.setTag(mSchedule.getId());
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId);
                         Schedule scheduleById = null;
                         if (zone.hasSchedule()) {
-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                    "== " +zone.getId());
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
+                                    "not special and roomRef " + "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
@@ -1545,8 +1573,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
                              * still created a schedule. Handle it before creating a new schedule again.
                              */
-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                                                                                 "== " +zone.getId());
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+                                    "not special and roomRef " + "== " +zone.getId());
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
                                 zone.setScheduleRef(schedule.get("id").toString());
@@ -1555,12 +1583,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                    "== " +zone.getId());
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
+                                    "not special and roomRef " + "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                         }
-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                                "== " +zone.getId());
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+                                "not special and roomRef " + "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null) {
@@ -1602,6 +1630,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 scheduleImageButton.setTag(mSchedule.getId());
                 vacationImageButton.setTag(mSchedule.getId());
+                specilaScheduleImageButton.setTag(mSchedule.getId());
             }
 
             @Override

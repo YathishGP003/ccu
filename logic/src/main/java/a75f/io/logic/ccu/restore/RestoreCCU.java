@@ -72,13 +72,21 @@ public class RestoreCCU {
         List<CCU> ccuList = new ArrayList<>();
         for (int index = 0; index < ccuArray.length(); index++) {
             try {
+                boolean isCCUOnline = false;
                 JSONObject ccuDetails = ccuArray.getJSONObject(index);
-                Date lastUpdatedDatetime = new Date(HDateTime.make(ccuDetails.getString("lastUpdatedDatetime")).millis());
+                String lastUpdatedDatetimeString = ccuDetails.getString("lastUpdatedDatetime").trim();
+                if(!lastUpdatedDatetimeString.isEmpty()){
+                    Date lastUpdatedDatetime = new Date(HDateTime.make(lastUpdatedDatetimeString).millis());
+                    lastUpdatedDatetimeString =
+                            new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime);
+                    isCCUOnline = isCCUOnline(lastUpdatedDatetime);
+
+                }else{
+                    lastUpdatedDatetimeString = "n/a";
+                }
                 String ccuId = ccuDetails.getString("deviceId");
                 ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
-                        ccuVersionMap.get(ccuIdMap.get(ccuId)),
-                        new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime),
-                        isCCUOnline(lastUpdatedDatetime)));
+                        ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -377,6 +385,7 @@ public class RestoreCCU {
     private void getZoneSchedules(Set<String> roomRefSet){
         restoreCCUHsApi.importZoneSchedule(roomRefSet);
         restoreCCUHsApi.importNamedSchedule();
+        restoreCCUHsApi.importZoneSpecialSchedule(roomRefSet);
     }
 
     public void syncExistingSite(String siteCode){

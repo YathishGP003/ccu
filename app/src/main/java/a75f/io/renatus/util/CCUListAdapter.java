@@ -1,8 +1,6 @@
 package a75f.io.renatus.util;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 import a75f.io.logic.ccu.restore.CCU;
-import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.CCUSelect;
 
@@ -37,9 +36,14 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
         return new CCUView(itemView);
     }
 
-    private boolean isCCUReplacable(int position){
-        return ((CCUUiUtil.getCurrentCCUVersion().contains(ccuList.get(position).getVersion())) &&
-                (!ccuList.get(position).isOnline()));
+    private boolean isCCUReplaceable(int position){
+        String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
+        String ccuVersion = ccuList.get(position).getVersion();
+        String lastUpdatedDateTime = ccuList.get(position).getLastUpdated();
+        if(StringUtils.isEmpty(ccuCurrVersion) || StringUtils.isEmpty(ccuVersion) || lastUpdatedDateTime.equalsIgnoreCase("n/a")){
+            return false;
+        }
+        return ((ccuCurrVersion.contains(ccuVersion)) && (!ccuList.get(position).isOnline()));
     }
     @Override
     public void onBindViewHolder(@NonNull CCUView holder, int position) {
@@ -51,7 +55,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
         if(!ccuList.get(position).isOnline()){
             holder.status.setText("OFFLINE");
         }
-        if(isCCUReplacable(position)){
+        if(isCCUReplaceable(position)){
            holder.isOffline.setBackgroundColor(CCUUiUtil.getPrimaryThemeColor(context));
            holder.itemView.setEnabled(true);
            holder.name.setTextColor(Color.BLACK);

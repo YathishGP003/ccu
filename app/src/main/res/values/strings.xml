@@ -1185,6 +1185,7 @@
     <string name="success_msg">Device session activated successfully</string>
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
+    <string name="desired_temperature">Desired Temperature</string>
 
 
     <!-- Named Schedule-->

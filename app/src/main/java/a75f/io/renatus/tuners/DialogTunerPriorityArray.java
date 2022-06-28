@@ -326,8 +326,17 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         buttonCancel.setOnClickListener(v -> dismiss());
     }
     public boolean doesPointNeedRelativeConversion() {
-        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") || tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") && tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) || tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") || tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") || tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") || tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") && tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) || tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
+        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") ||
+                tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") &&
+                tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) ||
+                tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") ||
+                tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") ||
+                tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") ||
+                tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") &&
+                tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) ||
+                tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
     }
+
 
 
     public double getTunerValue(String id) {

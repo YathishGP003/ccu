@@ -53,7 +53,6 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
     String tunerGroupType = "Building";
-    SharedPreferences mPreferences;
     HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
@@ -211,7 +210,15 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     }
 
     private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
-        return  tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") || tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") && tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) || tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") || tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") || tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") || tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") && tunerItem.containsKey("min") && tunerItem.containsKey("differential")) || tunerItem.containsKey("leeway") || tunerItem.containsKey("proportional");
+        return  tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") ||
+                tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") &&
+                tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) ||
+                tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") ||
+                tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") ||
+                tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") ||
+                tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") &&
+                tunerItem.containsKey("min") && tunerItem.containsKey("differential")) ||
+                tunerItem.containsKey("leeway") || tunerItem.containsKey("proportional");
     }
 
     @Override

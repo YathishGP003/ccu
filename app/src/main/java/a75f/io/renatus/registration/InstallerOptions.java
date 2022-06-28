@@ -94,7 +94,6 @@ public class InstallerOptions extends Fragment {
     String mSiteId;
     String addressBandSelected = "1000";
     Prefs prefs;
-    SharedPreferences sharedPreferences;
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;

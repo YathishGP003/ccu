@@ -75,7 +75,7 @@ public class EmrProfile extends ZoneProfile
         int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
         if (timeDiffMins < 1) {
             double curRate = emrEquip.getHisVal("current and rate");
-            emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+curRate+"KW");
+            emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh"+" Current Rate "+curRate+" KW");
             return;
         }
         double readingDiff = 100 * (reading1.getVal() - reading2.getVal());
@@ -85,7 +85,7 @@ public class EmrProfile extends ZoneProfile
         ratekWh = Math.round(ratekWh * 100)/100;
         
         emrEquip.setHisVal("current and rate", ratekWh);
-        emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+ratekWh+"KW");
+        emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+ratekWh+" KW");
     
         CcuLog.d(L.TAG_CCU_ZONE, "EmrProfile, Total Energy Consumed "+reading1.getVal()+" currentRate "+ratekWh);
         

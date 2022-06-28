@@ -599,6 +599,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 	}
 	private String convertIntHourMinsToString(int hour, int minute){
+		if(hour == 23 && minute == 59){
+			return "24:00";
+		}
 		String hr = String.valueOf(hour);
 		String min = String.valueOf(minute);
 		String zero = "0";

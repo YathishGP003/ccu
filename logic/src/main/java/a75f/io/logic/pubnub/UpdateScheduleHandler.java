@@ -23,6 +23,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -33,7 +34,7 @@ public class UpdateScheduleHandler
     public static final String CMD = "updateSchedule";
     public static final String ADD_SCHEDULE = "addSchedule";
     public static final String DELETE_SCHEDULE = "deleteSchedule";
-    private static BuildingScheduleListener scheduleListener = null;
+    private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
     
     public static void handleMessage(JsonObject msgObject)
@@ -74,6 +75,10 @@ public class UpdateScheduleHandler
 
 
                     return;
+                }
+                if(scheduleDict.has(Tags.SPECIAL)){
+                    CCUHsApi.getInstance().updateSpecialScheduleNoSync(uid, scheduleDict);
+                    break;
                 }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setId(uid);
@@ -120,6 +125,11 @@ public class UpdateScheduleHandler
                         CcuLog.d(L.TAG_CCU_PUBNUB, "named sched = " + a.get("dis"));
                     }
                     return;
+                }
+                if(scheduleDict.has(Tags.SPECIAL)){
+                    CCUHsApi.getInstance().addSchedule(uid, scheduleDict);
+                    CCUHsApi.getInstance().setSynced("@" + uid);
+                    break;
                 }
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());

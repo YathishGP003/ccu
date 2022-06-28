@@ -70,6 +70,7 @@ public class Tags
     public static final String USERINTENT = "userIntent";
     
     public static final String ZONE = "zone";
+    public static final String BUILDING = "building";
     public static final String SYSTEM = "system";
     public static final String DEFAULT = "default";
     public static final String TUNER = "tuner";
@@ -119,6 +120,8 @@ public class Tags
     public static final String CLOUD = "cloud";
 
     public static final String DAY = "day";
+    public static final String STDT = "stdt";
+    public static final String ETDT = "etdt";
     public static final String STHH = "sthh";
     public static final String STMM = "stmm";
     public static final String ETHH = "ethh";
@@ -132,4 +135,6 @@ public class Tags
     public static final String IAQ = "iaq";
     public static final String MIN ="min" ;
     public static final String COV = "cov" ;
+    public static final String RANGE = "range";
+    public static final String SPECIAL = "special";
 }

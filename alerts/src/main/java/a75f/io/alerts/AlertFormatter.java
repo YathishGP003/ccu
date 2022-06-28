@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.logger.CcuLog;
 
 /***
@@ -58,6 +59,7 @@ public class AlertFormatter
                 }
             }
         }
+        message = StringUtil.processMessageForNumberFormatting(message);
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
@@ -71,6 +73,7 @@ public class AlertFormatter
                 message = replaceToken(message, token, def, pointId);
             }
         }
+        message = StringUtil.processMessageForNumberFormatting(message);
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }

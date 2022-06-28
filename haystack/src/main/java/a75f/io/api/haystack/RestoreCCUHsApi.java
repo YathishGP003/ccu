@@ -70,6 +70,38 @@ public class RestoreCCUHsApi {
         hisSyncHandler = ccuHsApi.getHisSyncHandler();
     }
 
+    public void importZoneSpecialSchedule(Set<String> zoneRefSet){
+        StringBuilder zoneRefString = new StringBuilder("(");
+        int index = 0;
+        for(String zoneRef : zoneRefSet){
+            zoneRefString.append("roomRef == ");
+            zoneRefString.append(StringUtils.prependIfMissing(zoneRef, "@"));
+            if(index == zoneRefSet.size()-1){
+                zoneRefString.append(" ) ");
+            }
+            else{
+                zoneRefString.append(" or ");
+            }
+            index++;
+        }
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict zoneScheduleDict = new HDictBuilder().add("filter",
+                "schedule and zone and special and " + zoneRefString).toDict();
+        HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
+        if (zoneScheduleGrid == null) {
+            return;
+        }
+        Iterator it = zoneScheduleGrid.iterator();
+        while (it.hasNext()) {
+            HRow row = (HRow) it.next();
+            String scheduleId = row.get("id").toString();
+            tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
+            syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
+            ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
+            CcuLog.i(TAG,"Zone Special schedule Imported");
+        }
+    }
+
     public void importZoneSchedule(Set<String> zoneRefSet){
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;
@@ -86,7 +118,7 @@ public class RestoreCCUHsApi {
         }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict zoneScheduleDict = new HDictBuilder().add("filter",
-                "schedule and zone and " + zoneRefString).toDict();
+                "schedule and zone and not special and " + zoneRefString).toDict();
         HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
         if (zoneScheduleGrid == null) {
             return;
@@ -478,7 +510,8 @@ public class RestoreCCUHsApi {
         try {
             HDict buildingDict =
                     new HDictBuilder().add("filter",
-                            "building and schedule and not special and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                            "building and schedule and not special and siteRef == " +
+                                    StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -497,11 +530,45 @@ public class RestoreCCUHsApi {
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
         } catch (UnknownRecException e) {
-            Log.i(TAG, "Exception occured while Importing building schedule "+e.getMessage());
+            Log.i(TAG, "Exception occurred while Importing building schedule "+e.getMessage());
             e.printStackTrace();
         }
         Log.i(TAG, "Import building schedule completed");
     }
+
+    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
+
+        HashMap<Object, Object>  currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and special");
+        if (!currentBuildingSchedule.isEmpty()) {
+            //CCU already has a building special schedule.
+            CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
+            return;
+        }
+
+        try {
+            HDict buildingDict =
+                    new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
+                            + siteId).toDict();
+            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
+            if (buildingSch == null) {
+                return;
+            }
+
+            Iterator it = buildingSch.iterator();
+            while (it.hasNext()) {
+                HRow row = (HRow) it.next();
+                String scheduleId = row.get("id").toString();
+                tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
+                syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
+                ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
+                CcuLog.i(TAG,"Building Special schedule Imported");
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * copied from CCuHsApi
@@ -605,6 +672,9 @@ public class RestoreCCUHsApi {
 
         //import building schedule data
         importBuildingSchedule(siteId, hClient);
+
+        //import building special schedule
+        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
         //import building tuners
         importBuildingTuners(siteId, hClient);

@@ -16,13 +16,16 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,6 +36,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
@@ -56,6 +60,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.pubnub.ZoneDataInterface;
+import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -207,6 +212,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob<- Job instance running ");
         }
     }
+    private static boolean isCurrentMinuteUnderSpecialSchedule(Set<Schedule.Days> combinedSpecialSchedules){
+        boolean isSpecialScheduleMin = false;
+        for(Schedule.Days specialSchedule : combinedSpecialSchedules){
+            DateTime dateTime = new DateTime();
+            DateTime beginTime = new DateTime().withTime(specialSchedule.getSthh(), specialSchedule.getStmm(),0,0);
+            DateTime endTime = new DateTime().withTime(specialSchedule.getEthh(), specialSchedule.getEtmm(),59,0);
+            if(dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() && dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
+                isSpecialScheduleMin = true;
+                break;
+            }
+        }
+        return isSpecialScheduleMin;
+    }
 
     public static void processSchedules() {
 
@@ -228,15 +246,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if(equip != null) {
 
                 Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
-                Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
+                Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""), false);
                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
                     CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
                     continue;
                 }
-
+                Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
+                        replace("@", ""));
+                if(isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
+                    writePointsForEquip(equip, equipSchedule, null);
+                }
                 //If building vacation is not active, check zone vacations.
-                if (activeSystemVacation == null )
+                else if (activeSystemVacation == null )
                 {
                     Log.e(TAG_CCU_SCHEDULER, "processSchedules: "+equip.getRoomRef() );
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
@@ -255,6 +277,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
+        deleteExpiredSpecialSchedules();
 
         try {
             deleteExpiredVacation();
@@ -265,13 +288,38 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     /*This method will delete expired vacation from the internal portal as well, done by Aniket*/
     private static void deleteExpiredVacation() throws ParseException {
+        DateTime now = new DateTime();
+        //by below check, outdated vacations are deleted once in an hour
+        if((now.getMinuteOfDay() % 60) != 0){
+            return;
+        }
         ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
         for (int i=0; i<getAllVacationSchedules.size(); i++){
             if (getAllVacationSchedules.get(i).getEndDate().getMillis() < System.currentTimeMillis()){
                 CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
             }
         }
-        CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void deleteExpiredSpecialSchedules(){
+        DateTime now = new DateTime();
+        //by below check, outdated special schedules are deleted once in an hour
+        if((now.getMinuteOfDay() % 60) != 0){
+            return;
+        }
+        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getAllSpecialSchedules();
+        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
+            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
+            DateTime endDateTime = SpecialSchedule.SS_DATE_TIME_FORMATTER
+                    .parseDateTime(range.get(Tags.ETDT).toString())
+                    .withHourOfDay(SpecialSchedule.getInt(range.get(Tags.ETHH).toString()))
+                    .withMinuteOfHour(SpecialSchedule.getInt(range.get(Tags.ETMM).toString()));
+            if(endDateTime.getMillis() < System.currentTimeMillis()){
+                CCUHsApi.getInstance().deleteEntity(specialSchedule.get(Tags.ID).toString());
+            }
+        }
+        CCUHsApi.getInstance().scheduleSync();
     }
 
     public static void processZoneEquipSchedule(Equip equip){
@@ -279,7 +327,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
 
-            Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
+            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""), false);
 
             if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
             {
@@ -287,8 +335,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return;
             }
 
+            Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
+                    replace("@", ""));
+            if(isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
+                writePointsForEquip(equip, equipSchedule, null);
+            }
             //If building vacation is not active, check zone vacations.
-            if (activeSystemVacation == null )
+            else if (activeSystemVacation == null )
             {
                 ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                 Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
@@ -422,7 +475,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
-            Schedule currentSchedule = Schedule.getScheduleForZone(zoneId.replace("@", ""), false);
+            Schedule currentSchedule = Schedule.getScheduleForZoneScheduleProcessing(zoneId.replace("@", ""), false);
             Log.d(L.TAG_CCU_SCHEDULER, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
             if (currentSchedule.getDays().size() == 0) {
                 return "No schedule configured";

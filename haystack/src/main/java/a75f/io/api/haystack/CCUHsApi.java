@@ -1153,6 +1153,9 @@ public class CCUHsApi
         //import building schedule data
         importBuildingSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
+        //import building special schedule
+        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
+
         //import building tuners
         importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
 
@@ -1267,7 +1270,7 @@ public class CCUHsApi
 
     private void importBuildingSchedule(String siteId, HClient hClient){
 
-        HashMap currentBuildingSchedule = read("schedule and building and not named");
+        HashMap currentBuildingSchedule = read("schedule and building and not named and not special");
         if (!currentBuildingSchedule.isEmpty()) {
             //CCU already has a building schedule.
             CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
@@ -1276,7 +1279,8 @@ public class CCUHsApi
 
         try {
             HDict buildingDict =
-                    new HDictBuilder().add("filter", "building and schedule and not named and siteRef == " + siteId).toDict();
+                    new HDictBuilder().add("filter",
+                            "building and schedule and not named and not special and siteRef == " + siteId).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -1292,6 +1296,36 @@ public class CCUHsApi
                 buildingSchedule.setmSiteId(siteId);
                 CCUHsApi.getInstance().addSchedule(guid, buildingSchedule.getScheduleHDict());
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
+
+        HashMap<Object, Object>  currentBuildingSchedule = readEntity("schedule and building and special");
+        if (!currentBuildingSchedule.isEmpty()) {
+            //CCU already has a building special schedule.
+            CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
+            return;
+        }
+
+        try {
+            HDict buildingDict =
+                    new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
+                            + siteId).toDict();
+            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
+            if (buildingSch == null) {
+                return;
+            }
+
+            Iterator it = buildingSch.iterator();
+            while (it.hasNext()) {
+                HRow row = (HRow) it.next();
+                tagsDb.addHDict(row.get("id").toString(), row);
+                CcuLog.i(TAG,"Building Special schedule Imported");
             }
         } catch (UnknownRecException e) {
             e.printStackTrace();
@@ -1645,14 +1679,27 @@ public class CCUHsApi
         return ccuId != null ? ccuId.toString() : null;
     }
 
+    private String getHSQueryToReadSpecialSchedule(String zoneId){
+        String query = "schedule and building and special";
+        if(!StringUtils.isEmpty(zoneId)){
+            query = "schedule and special and zone and roomRef == "+zoneId;
+        }
+        return query;
+    }
+
+    public List<HashMap<Object, Object>> getSpecialSchedules(String zoneId){
+        String query = getHSQueryToReadSpecialSchedule(zoneId);
+        return CCUHsApi.getInstance().readAllEntities(query);
+    }
+
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and building and not named and not vacation";
+            filter = "schedule and building and not named and not special and not vacation";
         else
-            filter = "schedule and building and not named and vacation";
+            filter = "schedule and building and not named and not special and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
         for (int i = 0; i < scheduleHGrid.numRows(); i++)
@@ -1663,18 +1710,14 @@ public class CCUHsApi
         return schedules;
     }
 
-    public Schedule getIntrinsicSchedule(){
-        return new Schedule.Builder().setHDict(tagsDb.read("intrinsic and schedule")).build();
-    }
-
     public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and zone and not named and not vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and not special and not vacation and roomRef == "+zoneId;
         else
-            filter = "schedule and zone and not named and vacation and roomRef == "+zoneId;
+            filter = "schedule and zone and not named and not special and vacation and roomRef == "+zoneId;
 
         Log.d("CCU_HS"," getZoneSchedule : "+filter);
         if(filter != null) {
@@ -1696,6 +1739,11 @@ public class CCUHsApi
             schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
         }
         return schedules;
+    }
+
+    public List<HashMap<Object, Object>> getAllSpecialSchedules(){
+        String query = "special and schedule";
+        return CCUHsApi.getInstance().readAllEntities(query);
     }
 
     public void addSchedule(String localId, HDict scheduleDict)
@@ -1732,6 +1780,10 @@ public class CCUHsApi
         Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
 
+    public void updateSpecialScheduleNoSync(String entityId, HDict scheduleDict){
+        tagsDb.addHDict(entityId, scheduleDict);
+    }
+
     public Schedule getScheduleById(String scheduleRef)
     {
         if (scheduleRef == null)
@@ -1740,6 +1792,13 @@ public class CCUHsApi
         HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
         //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
+    }
+
+    public HDict getScheduleDictById(String scheduleId){
+        if(scheduleId == null){
+            return null;
+        }
+        return tagsDb.readById(HRef.copy(scheduleId));
     }
 
     public double getPredictedPreconRate(String ahuRef) {
@@ -2337,7 +2396,7 @@ public class CCUHsApi
         Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
         return sortedNamedSchedules;
     }
-    
+
     public void removeAllNamedSchedule(){
         List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
         for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {

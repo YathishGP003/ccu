@@ -4,6 +4,8 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -20,9 +22,13 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import a75f.io.logger.CcuLog;
 
@@ -35,6 +41,8 @@ import a75f.io.logger.CcuLog;
  */
 public class Schedule extends Entity
 {
+    private static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
+
     public boolean isBuildingSchedule()
     {
         return getMarkers().contains("building") && !getMarkers().contains("named");
@@ -75,14 +83,136 @@ public class Schedule extends Entity
 
     }
 
+    private static int getInt(String intString){
+        if(intString.contains(".")){
+            String[] numerics = intString.split("\\.");
+            return Integer.parseInt(numerics[0]);
+        }
+        return Integer.parseInt(intString);
+    }
+
+    private static Date getWeekStartDate() {
+        Calendar calendar = Calendar.getInstance();
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            calendar.add(Calendar.DATE, -1);
+        }
+        return calendar.getTime();
+    }
+    private static Date getWeekEndDate() {
+        Calendar calendar = Calendar.getInstance();
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            calendar.add(Calendar.DATE, 1);
+        }
+        return calendar.getTime();
+    }
+
+    /**
+     *
+     * @param roomRef roomRef = null is building otherwise for a zone
+     */
+    private static List<Schedule.Days> getSpecialScheduleDaysForRunningWeek(String roomRef){
+        List<Schedule.Days> daysList = new ArrayList<>();
+        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(roomRef);
+        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
+            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
+            String beginDate = range.get(Tags.STDT).toString();
+            int beginHour = getInt(range.get(Tags.STHH).toString());
+            int beginMin = getInt(range.get(Tags.STMM).toString());
+            String endDate = range.get(Tags.ETDT).toString();
+            int endHour = getInt(range.get(Tags.ETHH).toString());
+            endHour  = endHour == 24 ? 23 : endHour;
+            int endMin = getInt(range.get(Tags.ETMM).toString());
+            endMin = endHour == 24 ? 59 : endMin;
+
+            DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
+                    .withHourOfDay(beginHour)
+                    .withMinuteOfHour(beginMin);
+            DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
+                    .withHourOfDay(endHour)
+                    .withMinuteOfHour(endMin);
+
+            int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
+
+            Date weekStartDate = getWeekStartDate();
+            Calendar calendar = Calendar.getInstance();
+            while(weekStartDate.before(getWeekEndDate())){
+                calendar.setTime(weekStartDate);
+                DateTime currentDateTime = new DateTime(weekStartDate);
+                calendar.add(Calendar.DATE, 1);
+                weekStartDate = calendar.getTime();
+                if(currentDateTime.getDayOfYear() >= beginDateTime.getDayOfYear() &&
+                        currentDateTime.getDayOfYear() <= endDateTime.getDayOfYear()){
+                    HDictBuilder hDictDay = new HDictBuilder()
+                            .add(Tags.DAY, HNum.make(dayNumber))
+                            .add(Tags.STHH, HNum.make(beginHour))
+                            .add(Tags.STMM, HNum.make(beginMin))
+                            .add(Tags.ETHH, HNum.make(endHour))
+                            .add(Tags.ETMM, HNum.make(endMin))
+                            .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
+                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
+                        daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
+
+                }
+                dayNumber++;
+            }
+        }
+        return daysList;
+    }
+
+    private static List<Schedule.Days> getSpecialScheduleDaysForZone(String zoneId){
+        return getSpecialScheduleDaysForRunningWeek(zoneId);
+    }
+
+    private static List<Schedule.Days> getSpecialScheduleDaysForBuilding(){
+        return getSpecialScheduleDaysForRunningWeek(null);
+    }
+
+    private static Schedule createScheduleForSpecialSchedule(List<Schedule.Days> specialScheduleForZone, boolean isZone){
+        Schedule specialSchedule = null;
+        if(specialScheduleForZone.size() > 0){
+            Schedule.Days[] zonesDaySchedule = new Schedule.Days[specialScheduleForZone.size()];
+            zonesDaySchedule = specialScheduleForZone.toArray(zonesDaySchedule);
+            List<HDict> specialScheduleList = new ArrayList<>();
+            for(int i=0; i < specialScheduleForZone.size(); i++){
+                HDictBuilder hDictDay = new HDictBuilder()
+                        .add(Tags.DAY, HNum.make(zonesDaySchedule[i].getDay()))
+                        .add(Tags.STHH, HNum.make(zonesDaySchedule[i].getSthh()))
+                        .add(Tags.STMM, HNum.make(zonesDaySchedule[i].getStmm()))
+                        .add(Tags.ETHH, HNum.make(zonesDaySchedule[i].getEthh()))
+                        .add(Tags.ETMM, HNum.make(zonesDaySchedule[i].getEtmm()))
+                        .add(Tags.COOLVAL, HNum.make(zonesDaySchedule[i].getCoolingVal()))
+                        .add(Tags.HEATVAL, HNum.make(zonesDaySchedule[i].getHeatingVal()));
+                specialScheduleList.add(hDictDay.toDict());
+            }
+            HList hList = HList.make(specialScheduleList);
+            HDictBuilder hDictBuilder = new HDictBuilder()
+                    .add(Tags.ID, UUID.randomUUID().toString())
+                    .add("kind", "Number")
+                    .add("temp")
+                    .add("heating")
+                    .add("cooling")
+                    .add("specialschedule")
+                    .add("dis", "Special Schedule")
+                    .add("days", hList)
+                    .add("siteRef", CCUHsApi.getInstance().getSiteIdRef());
+            if(isZone){
+                hDictBuilder.add("zone");
+            }
+            else{
+                hDictBuilder.add("building");
+            }
+            specialSchedule = new Schedule.Builder().setHDict(hDictBuilder.toDict()).build();
+        }
+        return specialSchedule;
+    }
+
     public static Schedule getScheduleForZone(String zoneId, boolean vacation)
     {
-        
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
 
-        String ref = null;
+        String ref;
         if (vacation)
             ref = build.getVacationRef();
         else
@@ -110,6 +240,273 @@ public class Schedule extends Entity
         return null;
     }
 
+    private static boolean isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(Schedule.Days lessPrioritySchedule,
+                                                                                  Set<Schedule.Days> morePriorityScheduleList){
+        boolean isPresent = false;
+        for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
+            if(morePrioritySchedule.getDay() == lessPrioritySchedule.getDay()){
+                isPresent = true;
+                break;
+            }
+        }
+        return isPresent;
+    }
+
+    private static boolean isScheduleColliding(Schedule.Days morePrioritySchedule, Schedule.Days lessPrioritySchedule){
+        /*In Schedule Entity days are stored in 0-6(Monday to Sunday) and in Joda time, it is 1-7(Monday to Sunday).
+        Hence +1*/
+        int dayAdjustConst = 1;
+        DateTime morePriorityScheduleBeginTime =
+                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getSthh(),
+                morePrioritySchedule.getStmm(),
+                0, 0);
+        DateTime morePriorityScheduleEndTime =
+                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getEthh(),
+                morePrioritySchedule.getEtmm(),
+                0, 0);
+        Interval morePriorityScheduleInterval = new Interval(morePriorityScheduleBeginTime,
+                morePriorityScheduleEndTime);
+
+        DateTime lessPriorityScheduleBeginTime =
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getSthh(),
+                lessPrioritySchedule.getStmm(),
+                0, 0);
+        DateTime lessPriorityScheduleEndTime =
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getEthh(),
+                lessPrioritySchedule.getEtmm(),
+                0, 0);
+        Interval lessPriorityScheduleInterval = new Interval(lessPriorityScheduleBeginTime,
+                lessPriorityScheduleEndTime);
+        return morePriorityScheduleInterval.overlaps(lessPriorityScheduleInterval);
+    }
+
+    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
+                                                             Set<Schedule.Days> lessPriorityScheduleList){
+        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
+        daysList.addAll(morePriorityScheduleList);
+        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
+        for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
+            for(Schedule.Days lessPrioritySchedule : lessPriorityScheduleList){
+                if (!isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(lessPrioritySchedule,
+                        morePriorityScheduleList)) {
+                    daysList.add(lessPrioritySchedule);
+                }
+                else if(morePrioritySchedule.getDay() == lessPrioritySchedule.getDay()){
+                    boolean scheduleCollision = isScheduleColliding(morePrioritySchedule, lessPrioritySchedule);
+                    if(scheduleCollision && isLessPriorityScheduleWithinMorePrioritySchedule(morePrioritySchedule,
+                            lessPrioritySchedule)){
+                        continue;
+                    }
+                    else if(scheduleCollision && isLessPriorityScheduleBeginsBeforeMorePrioritySchedule(
+                            morePrioritySchedule, lessPrioritySchedule)){
+                        Schedule.Days firstSplitSchedule = new Schedule.Days();
+                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
+                        firstSplitSchedule.setSthh(lessPrioritySchedule.getSthh());
+                        firstSplitSchedule.setStmm(lessPrioritySchedule.getStmm());
+                        firstSplitSchedule.setEthh(morePrioritySchedule.getSthh());
+                        firstSplitSchedule.setEtmm(morePrioritySchedule.getStmm());
+                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
+                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
+                        intermediateScheduleList.add(firstSplitSchedule);
+                    }
+                    else if(scheduleCollision && isLessPriorityScheduleEndsAfterMorePrioritySchedule(
+                            morePrioritySchedule, lessPrioritySchedule)){
+                        Schedule.Days firstSplitSchedule = new Schedule.Days();
+                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
+                        firstSplitSchedule.setSthh(morePrioritySchedule.getEthh());
+                        firstSplitSchedule.setStmm(morePrioritySchedule.getEtmm());
+                        firstSplitSchedule.setEthh(lessPrioritySchedule.getEthh());
+                        firstSplitSchedule.setEtmm(lessPrioritySchedule.getEtmm());
+                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
+                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
+                        intermediateScheduleList.add(firstSplitSchedule);
+                    }
+                    else if(scheduleCollision && isLessPriorityScheduleBeginsBeforeAndEndsAfterMorePrioritySchedule(
+                            morePrioritySchedule, lessPrioritySchedule)){
+                        Schedule.Days firstSplitSchedule = new Schedule.Days();
+                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
+                        firstSplitSchedule.setSthh(lessPrioritySchedule.getSthh());
+                        firstSplitSchedule.setStmm(lessPrioritySchedule.getStmm());
+                        firstSplitSchedule.setEthh(morePrioritySchedule.getSthh());
+                        firstSplitSchedule.setEtmm(morePrioritySchedule.getStmm());
+                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
+                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
+                        intermediateScheduleList.add(firstSplitSchedule);
+                        Schedule.Days secondSplitSchedule = new Schedule.Days();
+                        secondSplitSchedule.setDay(lessPrioritySchedule.getDay());
+                        secondSplitSchedule.setSthh(morePrioritySchedule.getEthh());
+                        secondSplitSchedule.setStmm(morePrioritySchedule.getEtmm());
+                        secondSplitSchedule.setEthh(lessPrioritySchedule.getEthh());
+                        secondSplitSchedule.setEtmm(lessPrioritySchedule.getEtmm());
+                        secondSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
+                        secondSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
+                        intermediateScheduleList.add(secondSplitSchedule);
+                    }
+                    else if(!isScheduleColliding(morePriorityScheduleList, lessPrioritySchedule)){
+                        daysList.add(lessPrioritySchedule);
+                    }
+
+                }
+            }
+        }
+        for(Schedule.Days intermediateSchedule : intermediateScheduleList){
+            if(!isScheduleColliding(morePriorityScheduleList, intermediateSchedule)){
+                daysList.add(intermediateSchedule);
+            }
+        }
+       return daysList;
+    }
+    private static boolean isScheduleColliding(Set<Days> morePriorityScheduleList, Days lessPrioritySchedule){
+        boolean scheduleCollision = false;
+        for(Days morePrioritySchedule : morePriorityScheduleList){
+            scheduleCollision = isScheduleColliding(morePrioritySchedule, lessPrioritySchedule);
+            if(scheduleCollision){
+                break;
+            }
+        }
+        return scheduleCollision;
+    }
+
+    private static boolean isLessPriorityScheduleWithinMorePrioritySchedule(Days morePrioritySchedule,
+                                                                            Days lessPrioritySchedule) {
+        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
+                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
+                || lessPrioritySchedule.getSthh() > morePrioritySchedule.getSthh())
+                &&
+                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
+                lessPrioritySchedule.getEtmm() <= morePrioritySchedule.getEtmm())
+                || lessPrioritySchedule.getEthh() < morePrioritySchedule.getEthh());
+    }
+
+    private static boolean isLessPriorityScheduleBeginsBeforeMorePrioritySchedule(Days morePrioritySchedule,
+                                                                             Days lessPrioritySchedule) {
+        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
+                lessPrioritySchedule.getStmm() < morePrioritySchedule.getStmm())
+                || lessPrioritySchedule.getSthh() < morePrioritySchedule.getSthh())
+                &&
+                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
+                        lessPrioritySchedule.getEtmm() <= morePrioritySchedule.getEtmm())
+                        || lessPrioritySchedule.getEthh() < morePrioritySchedule.getEthh());
+
+    }
+
+    private static boolean isLessPriorityScheduleEndsAfterMorePrioritySchedule(Days morePrioritySchedule,
+                                                                            Days lessPrioritySchedule) {
+        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
+                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
+                || lessPrioritySchedule.getSthh() > morePrioritySchedule.getSthh())
+                &&
+                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
+                lessPrioritySchedule.getEtmm() >= morePrioritySchedule.getEtmm())
+                ||(lessPrioritySchedule.getEthh() > morePrioritySchedule.getEthh()));
+    }
+
+    private static boolean isLessPriorityScheduleBeginsBeforeAndEndsAfterMorePrioritySchedule(Days morePrioritySchedule,
+                                                                                              Days lessPrioritySchedule) {
+        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
+                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
+                || lessPrioritySchedule.getSthh() < morePrioritySchedule.getSthh())
+                &&
+                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
+                        lessPrioritySchedule.getEtmm() >= morePrioritySchedule.getEtmm())
+                        || lessPrioritySchedule.getEthh() > morePrioritySchedule.getEthh());
+    }
+
+    private static Comparator<Schedule.Days> sortSchedules() {
+        return (o1, o2) -> {
+            int dayResult = o1.getDay() - o2.getDay();
+            if (dayResult == 0) {
+                int startHour = o1.getSthh() - o2.getSthh();
+                if (startHour == 0) {
+                    int startMin = o1.getStmm() - o2.getStmm();
+                    if (startMin == 0) {
+                        int endHour = o1.getEthh() - o2.getEthh();
+                        if (endHour == 0) {
+                            return o1.getEtmm() - o2.getEtmm();
+                        }
+                        return endHour;
+                    }
+                    return startMin;
+                }
+                return startHour;
+            }
+            return dayResult;
+        };
+    }
+    public static Set<Schedule.Days> combineSpecialSchedules(String zoneId){
+        Set<Schedule.Days> specialScheduleForZone = new TreeSet<>(sortSchedules());
+        specialScheduleForZone.addAll(getSpecialScheduleDaysForZone(zoneId.startsWith("@")? zoneId : "@"+zoneId));
+
+        Set<Schedule.Days> specialScheduleForBuilding =  new TreeSet<>(sortSchedules());
+        specialScheduleForBuilding.addAll(getSpecialScheduleDaysForBuilding());
+
+        Set<Schedule.Days> combinedSpecialSchedules =  new TreeSet<>(sortSchedules());
+        if(!specialScheduleForZone.isEmpty() && !specialScheduleForBuilding.isEmpty()){
+            combinedSpecialSchedules.addAll(schedulesWithPriority(specialScheduleForZone, specialScheduleForBuilding));
+        }
+        else if(specialScheduleForZone.isEmpty()){
+            combinedSpecialSchedules.addAll(specialScheduleForBuilding);
+        }
+        else if(specialScheduleForBuilding.isEmpty()){
+            combinedSpecialSchedules.addAll(specialScheduleForZone);
+        }
+        return combinedSpecialSchedules;
+    }
+
+    public static Schedule getScheduleForZoneScheduleProcessing(String zoneId, boolean vacation)
+    {
+        Set<Schedule.Days> combinedSpecialSchedules =  combineSpecialSchedules(zoneId);
+        HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        String ref;
+        if (vacation)
+            ref = build.getVacationRef();
+        else
+            ref = build.getScheduleRef();
+
+        if (ref != null && !ref.equals(""))
+        {
+            Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
+            {
+                schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
+                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
+                        + schedule.toString());
+                return schedule;
+            }
+        }
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
+        if (retVal != null && retVal.size() > 0) {
+            Schedule schedule = retVal.get(0);
+            schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
+            CcuLog.d("Schedule", "Building Schedule with special schedule:  "+schedule);
+            return schedule;
+        }
+        return null;
+    }
+
+    private static Schedule mergeSpecialScheduleWithZoneSchedule(Set<Schedule.Days> combinedSpecialSchedules,
+                                                                 Schedule zoneSchedule, boolean isZone){
+        Set<Schedule.Days> zoneScheduleDays = new TreeSet<>(sortSchedules());
+        zoneScheduleDays.addAll(zoneSchedule.getDays());
+        /*
+        The below loop is to handle overnight schedule
+         */
+        for(Schedule.Days days : zoneScheduleDays){
+            if(days.getEthh() < days.getSthh() || (days.getEthh() == days.getSthh() && days.getEtmm() < days.getStmm())){
+                days.setEthh(23);
+                days.setEtmm(59);
+            }
+        }
+
+        if(!combinedSpecialSchedules.isEmpty()){
+            List<Schedule.Days> intrinsicScheduleDays = new ArrayList<>();
+            intrinsicScheduleDays.addAll(schedulesWithPriority(combinedSpecialSchedules, zoneScheduleDays));
+            zoneSchedule = createScheduleForSpecialSchedule(intrinsicScheduleDays, isZone);
+        }
+        return zoneSchedule;
+    }
     public static Zone getZoneforEquipId(String equipId)
     {
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
@@ -315,20 +712,21 @@ public class Schedule extends Entity
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
+                    boolean isLastHour = daysSorted.get(i-1).getEthh() == 24;
                     if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
-                                .withSecondOfMinute(0);
+                                .withSecondOfMinute(isLastHour ? 59 : 0);
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
 					}else {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
                                 .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
-                                .withSecondOfMinute(0);
+                                .withSecondOfMinute(isLastHour ? 59 : 0);
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
                     }
@@ -355,11 +753,12 @@ public class Schedule extends Entity
                     .withSecondOfMinute(0);
             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 
+            boolean isLastHour = daysSorted.get(j).getEthh() == 24;
             DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                    .withHourOfDay(daysSorted.get(j).getEthh())
-                    .withMinuteOfHour(daysSorted.get(j).getEtmm())
+                    .withHourOfDay(isLastHour? 23 : daysSorted.get(j).getEthh())
+                    .withMinuteOfHour(isLastHour? 59 : daysSorted.get(j).getEtmm())
                     .withDayOfWeek(daysSorted.get(j).getDay() + 1)
-                    .withSecondOfMinute(0);
+                    .withSecondOfMinute(isLastHour? 59 : 0);
             occupied.setPreviouslyOccupiedSchedule(daysSorted.get(j));
             occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() - endDateTime.getMillis());
             
@@ -568,12 +967,14 @@ public class Schedule extends Entity
                     .withDayOfWeek(day.getDay() + 1)
                     .withSecondOfMinute(0)
                     .withMillisOfSecond(0);
+            boolean isLastHour = day.getEthh() == 24;
             DateTime endDateTime = new DateTime(now)
-                    .withHourOfDay(day.getEthh())
-                    .withMinuteOfHour(day.getEtmm())
-                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
+                    .withHourOfDay(isLastHour ? 23 : day.getEthh())
+                    .withMinuteOfHour(isLastHour? 59 :day.getEtmm())
+                    .withSecondOfMinute(isLastHour ? 59 :0).withMillisOfSecond(0).withDayOfWeek(
                             day.getDay() +
                                     1);
+
             Interval scheduledInterval = null;
             if (startDateTime.isAfter(endDateTime))
             {
@@ -1177,7 +1578,7 @@ public class Schedule extends Entity
             return days;
         }
 
-        private static Days parseSingleDay(HDict hDict)
+        public static Days parseSingleDay(HDict hDict)
         {
             Days days = new Days();
 

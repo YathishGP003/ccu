@@ -28,7 +28,6 @@ import a75f.io.device.serial.SmartStatControls_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.device.serial.SmartStatSettings_t;
-import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
@@ -181,7 +180,7 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay4.set(getConfigEnabled(Port.RELAY_FOUR.name(),address));
         settings_t.enabledRelaysBitmap.relay5.set(getConfigEnabled(Port.RELAY_FIVE.name(),address));
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
-        settings_t.otherBitMaps.centigrade.set((short) (DeviceConfigurationUtil.Companion.getUserConfiguration()));
+        settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
         if (!is2pfcuDevice(address)) {
             settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(), address));

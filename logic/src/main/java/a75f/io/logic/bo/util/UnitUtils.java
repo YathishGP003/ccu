@@ -46,4 +46,22 @@ public class UnitUtils {
         return celsiusTemperature;
     }
 
+    public static double celsiusToFahrenheitRelativeChange(double temperature) {
+        double fahrenheitTemperature ;
+        fahrenheitTemperature = (temperature * 1.8);
+        double decimalValue = fahrenheitTemperature - (long) fahrenheitTemperature;
+
+        if (decimalValue > 0.01 && decimalValue <= 0.3) {
+            fahrenheitTemperature = (Math.round(fahrenheitTemperature- decimalValue));
+        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
+            fahrenheitTemperature = (Math.round(fahrenheitTemperature- decimalValue) + 0.5);
+        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
+            fahrenheitTemperature = (Math.round(fahrenheitTemperature - decimalValue) + 1.0);
+        }
+        return fahrenheitTemperature;
+
+    }
+
+
+
 }

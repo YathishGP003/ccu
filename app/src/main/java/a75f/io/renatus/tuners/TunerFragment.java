@@ -66,8 +66,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitUnitChange;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 
 
 
@@ -336,7 +335,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED  || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
                         if (newTunerValueItem.containsKey("unit") && newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                                newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitUnitChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                                newTunerValueItem.replace("newValue", String.valueOf(celsiusToFahrenheitRelativeChange(Double.parseDouble(newTunerValueItem.get("newValue").toString()))));
                             } else {
                                 newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
                             }

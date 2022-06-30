@@ -47,7 +47,7 @@ class GenericTuners {
         String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
         hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MIN, 0);
         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
-    
+
         Point useCelsius = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"displayUnit")
                 .setSiteRef(siteRef)

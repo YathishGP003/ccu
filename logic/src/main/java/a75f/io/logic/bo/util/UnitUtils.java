@@ -1,7 +1,7 @@
 package a75f.io.logic.bo.util;
 
 public class UnitUtils {
-
+    
     /**
      * Convert celsius to Fahrenheit
      *
@@ -31,19 +31,19 @@ public class UnitUtils {
         return celsiusTemperature;
     }
 
-        public static double celsiusToFahrenheitUnitChange ( double temperature){
-            return CCUUtils.roundToTwoDecimal(temperature * 1.8);
+    public static double fahrenheitToCelsiusRelative(double temperature) {
+        double celsiusTemperature ;
+        celsiusTemperature =(temperature/ 1.8);
+        double decimalValue = celsiusTemperature -(long) celsiusTemperature;
+
+        if (decimalValue > 0.01 && decimalValue <= 0.3) {
+            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
+        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
+            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
+        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
+            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
         }
-        public static double fahrenheitToCelsiusUnitChange ( double temperature){
-            return CCUUtils.roundToTwoDecimal(temperature / 1.8);
-        }
-        public static double round ( double value, int precision){
-            int scale = (int) Math.pow(10, precision);
-            return (double) Math.round(value * scale) / scale;
-        }
-        public static double roundToHalf ( double d)
-        {
-            return 0.5 * Math.round(d * 2);
-        }
+        return celsiusTemperature;
+    }
 
 }

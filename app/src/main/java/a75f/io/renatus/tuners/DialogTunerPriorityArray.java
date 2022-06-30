@@ -51,9 +51,7 @@ import a75f.io.renatus.views.MasterControl.MasterControlView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusUnitChange;
-import static a75f.io.logic.bo.util.UnitUtils.round;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -287,7 +285,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
             if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
                 if (doesPointNeedRelativeConversion()) {
-                    defaultVal = roundToHalf(fahrenheitToCelsiusUnitChange(defaultVal));
+                    defaultVal = fahrenheitToCelsiusRelative(defaultVal);
                 } else {
                     defaultVal = Math.round(fahrenheitToCelsius(defaultVal));
                 }
@@ -403,7 +401,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
                         if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
                             if (doesPointNeedRelativeConversion()) {
-                                tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(valMap.get("val").toString()))));
+                                tunerVal = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(valMap.get("val").toString())));
                             } else {
                                 tunerVal = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
                             }
@@ -488,13 +486,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
                         prefs.setBoolean(tunerItemSelected.get("id").toString(), true);
                         if (doesPointNeedRelativeConversion()) {
-                            maxValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(maxValueDb));
-                            minValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(minValueDb));
-                            currentValueDb = roundToHalf(fahrenheitToCelsiusUnitChange(currentValueDb));
+                            maxValueDb = (fahrenheitToCelsiusRelative(maxValueDb));
+                            minValueDb = (fahrenheitToCelsiusRelative(minValueDb));
+                            currentValueDb = (fahrenheitToCelsiusRelative(currentValueDb));
                         } else {
-                            minValueDb = roundToHalf(fahrenheitToCelsius(minValueDb));
-                            maxValueDb = roundToHalf(fahrenheitToCelsius(maxValueDb));
-                            currentValueDb = roundToHalf(fahrenheitToCelsius(currentValueDb));
+                            minValueDb = (fahrenheitToCelsius(minValueDb));
+                            maxValueDb = (fahrenheitToCelsius(maxValueDb));
+                            currentValueDb = (fahrenheitToCelsius(currentValueDb));
                         }
                     }
                 }

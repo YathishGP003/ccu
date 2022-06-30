@@ -18,9 +18,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusUnitChange;
-import static a75f.io.logic.bo.util.UnitUtils.round;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,7 +110,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (tunerItem.containsKey("unit") && tunerItem.get("unit").toString().equals("\u00B0F") || tunerItem.get("unit").toString().equals("\u00B0C")) {
                                 if (doesPointNeedRelativeConversion(tunerItem)) {
-                                    val = String.valueOf(roundToHalf(fahrenheitToCelsiusUnitChange(Double.parseDouble(val))));
+                                    val = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(val)));
                                 } else {
                                     val = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(val))));
                                 }
@@ -131,7 +130,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
                             if (tunerItem.containsKey("unit") && tunerItem.get("unit").toString().equals("\u00B0F") || tunerItem.get("unit").toString().equals("\u00B0C")) {
                                 if (doesPointNeedRelativeConversion(tunerItem)) {
-                                    val = roundToHalf(fahrenheitToCelsiusUnitChange(val));
+                                    val = fahrenheitToCelsiusRelative(val);
                                 } else {
                                     val = Math.round(fahrenheitToCelsius(val));
                                 }

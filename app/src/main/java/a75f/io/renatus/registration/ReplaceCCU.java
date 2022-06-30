@@ -284,18 +284,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                         () -> {
                                 try {
                                     initRestoreCCUProcess(ccu);
-                                    List<HashMap> devices = CCUHsApi.getInstance().readAll("device and addr");
-                                    int pairingAddress = 1000;
-                                    for(HashMap device : devices){
-                                        int devicePairingAddress  = Integer.parseInt(device.get("addr").toString());
-                                        if(devicePairingAddress > pairingAddress){
-                                            pairingAddress = devicePairingAddress;
-                                        }
-                                    }
-                                    pairingAddress = (pairingAddress/100) * 100;
-                                    L.ccu().setSmartNodeAddressBand((short)pairingAddress);
-                                }
-                                catch(NullHGridException nullHGridException){
+                                } catch(NullHGridException nullHGridException){
                                     success.set(false);
                                     Log.i(TAG, nullHGridException.getMessage());
                                     nullHGridException.printStackTrace();
@@ -364,6 +353,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         restoreCCU.getCCUEquip(ccu.getCcuId());
         final int[] deviceCount = {restoreCCU.equipCountsInCCU(ccu.getCcuId(), ccu.getSiteCode())};
         restoreCCU.syncExistingSite(ccu.getSiteCode());
+        restoreCCU.getSettingPointsByCCUId(ccu.getCcuId());
         restoreCCU.getSystemProfileOfCCU(ccu.getCcuId(), ccu.getSiteCode());
         restoreCCU.getCMDeviceOfCCU(ccu.getCcuId(), ccu.getSiteCode());
         restoreCCU.getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode());
@@ -381,7 +371,11 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         restoreCCU.getModbusSystemEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getZoneEquipsOfCCU(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getOAOEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
+        HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
+        int address = Integer.parseInt(pointMaps.get("val").toString());
+        L.ccu().setSmartNodeAddressBand((short)address);
         L.saveCCUState();
+
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){

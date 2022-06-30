@@ -394,4 +394,9 @@ public class RestoreCCU {
         Log.i(TAG, "Saving site details completed");
     }
 
+    public void getSettingPointsByCCUId(String ccuDeviceID){
+        Log.i(TAG, "Saving site details started");
+        restoreCCUHsApi.restoreSNBandPointByCCUId(ccuDeviceID);
+        Log.i(TAG, "Saving site details completed");
+    }
 }

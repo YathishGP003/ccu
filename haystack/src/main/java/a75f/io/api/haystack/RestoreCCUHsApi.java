@@ -766,6 +766,33 @@ public class RestoreCCUHsApi {
             }
         }
     }
+    public void restoreSNBandPointByCCUId(String ccuDeviceID){
+
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict settingPoints = new HDictBuilder().add("filter",
+                "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
+        HGrid settingPointsGrid =  hClient.call("read", HGridBuilder.dictToGrid(settingPoints));
+
+        List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
+
+        pointMaps.forEach(pointMap -> {
+            Point pointDetails = new Point.Builder().setHashMap(pointMap).build();
+            String pointId = StringUtils.prependIfMissing(pointDetails.getId(), "@");
+            HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
+            if (point.isEmpty()) {
+                String pointLuid = ccuHsApi.addRemotePoint(pointDetails, pointDetails.getId().replace("@", ""));
+                ccuHsApi.setSynced(pointLuid);
+            } else {
+                CcuLog.i(TAG, "Point already imported "+pointDetails.getId());
+            }
+
+            Log.i(TAG, "restoreSNBandPointByCCUId: ");
+            SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(pointMaps.get(0));
+            sp.setVal(pointMaps.get(0).get("val").toString());
+            SettingPoint snBand = sp.build();
+            CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
+        });
+    }
 
     public HGrid getDiagEquipByEquipId(String equipId){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);

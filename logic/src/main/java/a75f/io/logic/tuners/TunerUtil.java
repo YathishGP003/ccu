@@ -307,19 +307,4 @@ public class TunerUtil
         }
         return 0;
     }
-
-    public static double getTuner(String id) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> values = hayStack.readPoint(id);
-        if (values != null && !values.isEmpty()) {
-            for (int l = 1; l <= values.size(); l++) {
-                HashMap<Object,Object> valMap =  values.get(l - 1);
-                if (valMap.containsKey("val")) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-
 }

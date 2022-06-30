@@ -46,8 +46,7 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="Schedule:"
-            android:textAppearance="@style/title_normal">
-        </TextView>
+            android:textAppearance="@style/title_normal"/>
 
         <Spinner
             android:id="@+id/schedule_spinner"
@@ -55,8 +54,7 @@
             android:layout_height="wrap_content"
             android:spinnerMode="dropdown"
             style="@style/Widget.AppCompat.Spinner.Underlined"
-            android:layout_gravity="center_vertical"
-            />
+            android:layout_gravity="center_vertical" />
 
         <ImageButton android:id="@+id/schedule_edit_button"
             android:layout_width="48dp"
@@ -65,54 +63,85 @@
             app:srcCompat="@drawable/ic_edit"
             android:background="@null"
             android:padding="8dp"
-            android:layout_gravity="center_vertical">
-
-        </ImageButton>
-
+            android:layout_gravity="center_vertical"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:layout_marginLeft="20dp"
-            android:text="Vacation:"
+            android:text="Special Schedule:"
             android:textAppearance="@style/title_normal"
-            android:layout_gravity="center_vertical">
-
-        </TextView>
+            android:layout_gravity="center_vertical"/>
 
         <TextView
-            android:id="@+id/vacation_status"
+            android:id="@+id/special_status_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="No Vacation Scheduled"
+            android:text="No Special Scheduled"
             style="@style/Widget.AppCompat.EditText"
             android:fontFamily="@font/lato_regular"
             android:layout_gravity="center_vertical"
             android:textSize="22sp"
-            android:textColor="@color/hint_textcolor"
-            >
-
-        </TextView>
+            android:textColor="@color/hint_textcolor"/>
 
         <ImageButton
-            android:id="@+id/vacation_edit_button"
+            android:id="@+id/special_status_edit_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_edit"
             android:background="@null"
             android:padding="8dp"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/vc_schedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/lt_schedule"
+        android:layout_marginLeft="100dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Vacations:"
+            android:textAppearance="@style/title_normal"/>
+
+        <TextView
+            android:id="@+id/vacation_status"
+            style="@style/Widget.AppCompat.EditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:padding="10dp"
+            android:text="No Vacation Scheduled"
+            android:textColor="@color/hint_textcolor"
+            android:textSize="22sp" />
+
+        <ImageButton
+            android:id="@+id/vacation_edit_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:background="@null"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_edit" />
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/lt_profilepoints"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lt_schedule"
-        android:layout_alignLeft="@+id/lt_schedule"
+        android:layout_below="@+id/vc_schedule"
+        android:layout_alignLeft="@+id/vc_schedule"
         android:orientation="vertical">
 
     </LinearLayout>
@@ -124,7 +153,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_below="@+id/lt_profilepoints"
-        android:layout_alignLeft="@+id/lt_schedule"
+        android:layout_alignLeft="@+id/vc_schedule"
         android:visibility="gone"
         >
         <LinearLayout

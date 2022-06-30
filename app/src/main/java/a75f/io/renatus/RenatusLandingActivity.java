@@ -450,7 +450,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        prefs.setBoolean("APP_START", true);
+        appRestarted();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
@@ -465,6 +465,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             // already unregistered
         }
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent RenatusLandingActivity Destroyed");
+    }
+
+    private void appRestarted() {
+        CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
     }
 
     @Override

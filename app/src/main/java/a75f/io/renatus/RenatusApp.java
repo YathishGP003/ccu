@@ -35,7 +35,6 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		mContext = getApplicationContext();
-		checkForRestart();
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 		//Fabric.with(this, new Crashlytics());
 	}
@@ -141,14 +140,5 @@ public class RenatusApp extends UtilityApplication
 		NotificationHandler.clearAllNotifications();
 		android.os.Process.killProcess(android.os.Process.myPid());
 		System.exit(0);
-	}
-
-	private void checkForRestart() {
-		Prefs prefs = new Prefs(this);
-		if (prefs.getBoolean("APP_START")){
-			prefs.setBoolean("APP_RESTART", true);
-		} else {
-			prefs.setBoolean("APP_RESTART", false);
-		}
 	}
 }

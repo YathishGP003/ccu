@@ -1,5 +1,9 @@
 package a75f.io.device.mesh.hyperstat;
 
+import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+
+import android.util.Log;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.nio.ByteBuffer;
@@ -7,15 +11,16 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
+import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
-import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
@@ -27,23 +32,20 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode;
+import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
-
-import static a75f.io.device.mesh.Pulse.getHumidityConversion;
-
-import android.util.Log;
 
 public class HyperStatMsgReceiver {
     
@@ -127,10 +129,23 @@ public class HyperStatMsgReceiver {
         updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
         updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
 
+        ZoneProfile profile = L.getProfile((short) nodeAddress);
+        runProfileAlgo(profile,(short) nodeAddress);
+
         /** send the updated control  message*/
         HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
         sendAcknowledge(nodeAddress);
     }
+
+    private static void runProfileAlgo(ZoneProfile profile,short nodeAddress){
+        // We have multiple profile for Hyperstat device to handle
+
+        if (profile instanceof HyperStatCpuProfile) {
+            HyperStatCpuProfile hyperStatCpuProfile = (HyperStatCpuProfile) profile;
+            hyperStatCpuProfile.runHyperstatCPUAlgorithm(Objects.requireNonNull(hyperStatCpuProfile.getHsCpuEquip(nodeAddress)));
+        }
+    }
+
     
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,

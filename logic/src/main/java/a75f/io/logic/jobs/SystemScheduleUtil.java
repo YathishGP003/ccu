@@ -358,13 +358,13 @@ public class SystemScheduleUtil {
             return;
         }
         Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
-        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                "== " +zone.getId());
+        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not special and " +
+                "roomRef == " +zone.getId());
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
         
         if (schedule == null) {
-            HashMap<Object, Object> zoneScheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
-                    "== " +zone.getId());
+            HashMap<Object, Object> zoneScheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
+                    "special and roomRef == " +zone.getId());
             Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(zoneScheduleHashMap.get("id").toString());
             CcuLog.d(L.TAG_CCU_SCHEDULER, "Failed to read schedule : schedule type update cannot be completed for "
                      +zone+" scheduleRef "+scheduleById);

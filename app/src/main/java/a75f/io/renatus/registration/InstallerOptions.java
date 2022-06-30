@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -69,8 +70,6 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -138,8 +137,6 @@ public class InstallerOptions extends Fragment {
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
     private TextView textHeatingLockoutDesc;
-
-    private HashMap<Object, Object> useCelsius;
     
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
@@ -250,6 +247,8 @@ public class InstallerOptions extends Fragment {
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
+        HashMap<Object, Object> useCelsius;
+
         useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
         if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
@@ -270,6 +269,8 @@ public class InstallerOptions extends Fragment {
             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
                 textBacnetEnable.setVisibility(View.VISIBLE);
                 toggleBACnet.setVisibility(View.VISIBLE);
+                textCelsiusEnable.setVisibility(View.VISIBLE);
+                toggleCelsius.setVisibility(View.VISIBLE);
             }else {
                 textBacnetEnable.setVisibility(View.GONE);
                 toggleBACnet.setVisibility(View.GONE);
@@ -406,6 +407,7 @@ public class InstallerOptions extends Fragment {
         toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
                 if(isChecked) {
                     CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,

@@ -4,26 +4,27 @@ public class UnitUtils {
     
     /**
      * Convert celsius to Fahrenheit
+     *
      * @param temperature
      * @return
      */
     public static double celsiusToFahrenheit(double temperature) {
-        return CCUUtils.roundToTwoDecimal((temperature * 9/5) + 32);
+        return CCUUtils.roundToTwoDecimal((temperature * 9 / 5) + 32);
     }
 
     public static double fahrenheitToCelsiusTwoDecimal(double temperature) {
-        return CCUUtils.roundToOneDecimal((temperature - 32) * 5/9);
+        return CCUUtils.roundToOneDecimal((temperature - 32) * 5 / 9);
     }
 
     public static double fahrenheitToCelsius(double temperature) {
-        double celsiusTemperature ;
-        celsiusTemperature =((temperature - 32) * 5/9);
-        double decimalValue = celsiusTemperature -(long) celsiusTemperature;
+        double celsiusTemperature;
+        celsiusTemperature = ((temperature - 32) * 5 / 9);
+        double decimalValue = celsiusTemperature - (long) celsiusTemperature;
 
         if (decimalValue > 0.01 && decimalValue <= 0.3) {
-            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
+            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue));
         } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
-            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
+            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 0.5);
         } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
             celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
         }

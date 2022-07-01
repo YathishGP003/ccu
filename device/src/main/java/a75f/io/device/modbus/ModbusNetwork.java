@@ -1,9 +1,14 @@
+
 package a75f.io.device.modbus;
 
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
@@ -32,14 +37,28 @@ public class ModbusNetwork extends DeviceNetwork
             try {
                 Short slaveId = Short.parseShort(equip.get("group").toString());
                 EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
+                LModbus.setHeartbeatUpdateReceived(false);
                 for (Register register : modbusDevice.getRegisters()) {
                     LModbus.readRegister(slaveId, register, getRegisterCount(register));
+                    LModbus.setHeartbeatUpdateReceived(true);
+                }
+                if (LModbus.getHeartbeatUpdateReceived()){
+                    updateHeartBeat(slaveId,CCUHsApi.getInstance());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
             }
         }
+    }
+
+    private static void updateHeartBeat (int slaveId, CCUHsApi hayStack){
+        HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
+        HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
+        if(heartBeatPoint.size() == 0){
+            return;
+        }
+        hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(),  1.0);
     }
 
     private int getRegisterCount(Register register) {

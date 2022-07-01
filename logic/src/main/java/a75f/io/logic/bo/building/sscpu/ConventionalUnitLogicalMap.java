@@ -566,7 +566,9 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode")
+                .addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setTz(tz)
                 .build();
@@ -578,7 +580,10 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
+                .setGroup(String.valueOf(nodeAddr))
+                .addMarker("standalone").addMarker("temp")
+                .addMarker("operating").addMarker("mode").addMarker("his")
+                .addMarker("sp").addMarker("zone").addMarker("cpu")
                 .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
@@ -1112,7 +1117,7 @@ public class ConventionalUnitLogicalMap {
                 .setFloorRef(floor)
                 .setRoomRef(room).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
-                .addMarker("cpu").addMarker("zone")
+                .addMarker("cpu").addMarker("zone").setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,low,high")
                 .setTz(tz)
                 .build();
@@ -1129,7 +1134,7 @@ public class ConventionalUnitLogicalMap {
                 .setRoomRef(room)
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
-                .addMarker("cpu").addMarker("temp")
+                .addMarker("cpu").addMarker("temp").setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();
@@ -1141,19 +1146,29 @@ public class ConventionalUnitLogicalMap {
 
 
         Point targetDehumidifier = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "targetDehumidifier")
-                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("his")
-                .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
+                                    .setDisplayName(equipDis + "-" + "targetDehumidifier")
+                                    .setSiteRef(siteRef).setEquipRef(equipref)
+                                    .setHisInterpolate("cov")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                                    .addMarker("target").addMarker("his")
+                                    .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
+
         String targetDehumidifierId = CCUHsApi.getInstance().addPoint(targetDehumidifier);
+
         CCUHsApi.getInstance().writePointForCcuUser(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
         CCUHsApi.getInstance().writeHisValById(targetDehumidifierId, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER);
+
         Point targetHumidty = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "targetHumidity")
-                .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("humidity").addMarker("sp")
-                .addMarker("his").setTz(tz).build();
+                                    .setDisplayName(equipDis + "-" + "targetHumidity")
+                                    .setSiteRef(siteRef).setEquipRef(equipref)
+                                    .setHisInterpolate("cov").setGroup(String.valueOf(nodeAddr))
+                                    .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                                    .addMarker("target").addMarker("humidity").addMarker("sp")
+                                    .addMarker("his").setTz(tz).build();
+
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
+
         CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
     }

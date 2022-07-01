@@ -541,6 +541,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
                 .setTz(tz)
                 .build();
@@ -553,7 +554,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
-                .setEnums("off,cooling,heating,tempdead")
+                .setEnums("off,cooling,heating,tempdead").setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         String condModeId = CCUHsApi.getInstance().addPoint(fourPfcuConditioningMode);
@@ -1050,7 +1051,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
-                .addMarker("fcu").addMarker("pipe4").addMarker("zone")
+                .addMarker("fcu").addMarker("pipe4").addMarker("zone").setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
                 .build();
@@ -1067,7 +1068,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
-                .addMarker("pipe4").addMarker("fcu").addMarker("temp")
+                .addMarker("pipe4").addMarker("fcu").addMarker("temp").addMarker("zone").setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();

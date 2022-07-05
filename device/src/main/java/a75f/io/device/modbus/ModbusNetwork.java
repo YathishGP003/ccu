@@ -1,14 +1,10 @@
 
 package a75f.io.device.modbus;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
@@ -43,7 +39,9 @@ public class ModbusNetwork extends DeviceNetwork
                     LModbus.setHeartbeatUpdateReceived(true);
                 }
                 if (LModbus.getHeartbeatUpdateReceived()){
-                    updateHeartBeat(slaveId,CCUHsApi.getInstance());
+                    updateHeartBeat(slaveId,CCUHsApi.getInstance(),true);
+                } else {
+                    updateHeartBeat(slaveId,CCUHsApi.getInstance(), false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -52,13 +50,17 @@ public class ModbusNetwork extends DeviceNetwork
         }
     }
 
-    private static void updateHeartBeat (int slaveId, CCUHsApi hayStack){
+    private static void updateHeartBeat(int slaveId, CCUHsApi hayStack, boolean messageRead){
         HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
         HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
         if(heartBeatPoint.size() == 0){
             return;
         }
-        hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(),  1.0);
+        if (messageRead) {
+            hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+        } else {
+            hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 0.0);
+        }
     }
 
     private int getRegisterCount(Register register) {

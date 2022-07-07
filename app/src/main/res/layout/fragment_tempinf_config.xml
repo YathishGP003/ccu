@@ -36,82 +36,154 @@
             </RelativeLayout>
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@+id/layoutHeader"
-            android:layout_marginTop="46dp"
-            android:paddingLeft="200dp"
-            android:paddingRight="200dp">
-
-
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="36dp">
-                <TextView
-                    android:id="@+id/textZonePriority"
+                android:orientation="vertical"
+                android:layout_below="@+id/layoutHeader"
+                android:layout_marginTop="46dp"
+                android:paddingLeft="200dp"
+                android:paddingRight="200dp"
+                android:layout_marginBottom="100dp">
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textZonePriority"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:text="@string/label_zonepriority"
+                        android:textAppearance="@style/title_normal"
+                        tools:ignore="RelativeOverlap" />
+
+                    <Spinner
+                        android:id="@+id/zonePriority"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_alignParentLeft="true"
-                    android:text="@string/label_zonepriority"
-                    android:textAppearance="@style/title_normal" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="72dp"
+                    android:layout_gravity="center_horizontal">
+                    <TextView
+                        android:id="@+id/textTempOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:text="@string/label_tempoffsetnp"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
 
-                <Spinner
-                    android:id="@+id/zonePriority"
-                    android:layout_width="160dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentRight="true"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"/>
-            </RelativeLayout>
+                    <NumberPicker
+                        android:id="@+id/temperatureOffset"
+                        android:theme="?DefaultNumberPickerTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textTempOffset"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="#202020"
+                        android:textSize="30sp"/>
+                </RelativeLayout>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp">
+                    <TextView
+                        android:id="@+id/textmainsensor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:paddingEnd="240dp"
+                        android:text="@string/mainsensor"
+                        android:textAppearance="@style/title_normal"
+                        tools:ignore="RtlSymmetry" />
 
-            <RelativeLayout
+                    <ToggleButton
+                        android:id="@+id/tooglemainsensor"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="20dp">
+                    <TextView
+                        android:id="@+id/textth1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:paddingEnd="330dp"
+                        android:text="@string/thermistor1"
+                        android:textAppearance="@style/title_normal"
+                        tools:ignore="RtlSymmetry" />
+
+                    <ToggleButton
+                        android:id="@+id/toogleth1"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="20dp">
+                    <TextView
+                        android:id="@+id/textth2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:paddingEnd="330dp"
+                        android:text="@string/thermistor2"
+                        android:textAppearance="@style/title_normal"
+                        tools:ignore="RtlSymmetry" />
+
+                    <ToggleButton
+                        android:id="@+id/toogleth2"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/setBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="72dp"
-                android:layout_gravity="center_horizontal">
-                <TextView
-                    android:id="@+id/textTempOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:text="@string/label_tempoffsetnp"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:textAppearance="@style/label_values" />
-
-                <NumberPicker
-                    android:id="@+id/temperatureOffset"
-                    android:theme="?DefaultNumberPickerTheme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textTempOffset"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="#202020"
-                    android:textSize="30sp"/>
-            </RelativeLayout>
-
-        </LinearLayout>
-
-
-        <Button
-            android:id="@+id/setBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="24dp"
-            android:layout_marginBottom="24dp"
-            android:background="@null"
-            android:button="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="@string/button_set"
-            android:textAllCaps="true"
-            android:textColor="?orange_75f"
-            android:textSize="19.5dp" />
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="?orange_75f"
+                android:textSize="19.5sp" />
         </RelativeLayout>
     </ScrollView>
 </LinearLayout>

@@ -47,6 +47,7 @@ import kotlin.Pair;
 import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
+    private static final String TAG = "MIGRATION_UTIL";
     
     /**
      * All the migration tasks needed to be run during an application version upgrade should be called from here.
@@ -129,7 +130,12 @@ public class MigrationUtil {
             PreferenceUtil.setDiagEquipMigration();
         }
 
-
+        if(!isTIThermisterMigrated()){
+            Log.d(TAG,"isTIThermisterMigrated return true");
+            addTIThermisters(CCUHsApi.getInstance());
+        }else{
+            Log.d(TAG,"isTIThermisterMigrated is false");
+        }
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -184,6 +190,29 @@ public class MigrationUtil {
             PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
             PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
         }
+    }
+
+    private static void addTIThermisters(CCUHsApi ccuHsApi) {
+        Log.d(TAG,"addTIThermisters++");
+        HashMap<Object,Object> tiEquip = ccuHsApi.readEntity("equip and ti");
+        if(!tiEquip.isEmpty()) {
+            Log.d(TAG,"ti isnt empty");
+            String tiEquipRef = tiEquip.get("id").toString();
+            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
+                    "temp and equipRef == \"" + tiEquipRef + "\"");
+            String nodeAddress = currentTemp.get("group").toString();
+            createTIThermisterPoints(tiEquipRef,nodeAddress);
+        }
+
+    }
+
+    private static boolean isTIThermisterMigrated() {
+        Log.d(TAG,"isTIThermisterMigrated");
+        HashMap<Object,Object> th1Config = CCUHsApi.getInstance().readEntity("point and ti and " +
+                "config and th1");
+        HashMap<Object,Object> th2Config = CCUHsApi.getInstance().readEntity("point and ti and " +
+                "config and th2");
+        return !th1Config.isEmpty() && !th2Config.isEmpty();
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
@@ -629,6 +658,52 @@ public class MigrationUtil {
                 Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing DualDuct migration  "+e.getMessage());
             }
         });
+    }
+
+    private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
+        Log.d("TIThermistor","createTIThermisterPoints");
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = siteMap.get(Tags.ID).toString();
+        String siteDis = siteMap.get("dis").toString();
+        String equipDis = siteDis + "-TI-" + nodeAddress;
+        String tz = siteMap.get("tz").toString();
+        Point mainSensor = new Point.Builder()
+                .setDisplayName(equipDis+"-mainTemperatureSensor")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
+        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, 1.0);
+
+        Point th1Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th1")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th1").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
+        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, 0.0);
+
+        Point th2Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th2")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th2").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
+        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, 0.0);
+
+        Log.d("TIThermistor","createTIThermisterPoints completed");
     }
 
 }

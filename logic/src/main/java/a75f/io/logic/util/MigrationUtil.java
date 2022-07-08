@@ -47,7 +47,8 @@ import kotlin.Pair;
 import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
-    
+    private static final String TAG = "MIGRATION_UTIL";
+
     /**
      * All the migration tasks needed to be run during an application version upgrade should be called from here.
      *
@@ -129,7 +130,24 @@ public class MigrationUtil {
             PreferenceUtil.setDiagEquipMigration();
         }
 
+        if(!isTIThermisterMigrated()){
+            Log.d(TAG,"isTIThermisterMigrated return true");
+            addTIThermisters(CCUHsApi.getInstance());
+        }else{
+            Log.d(TAG,"isTIThermisterMigrated is false");
+        }
 
+        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
+                updateScheduleRefForZones(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefForZoneMigration();
+        }
+
+
+
+        if(!PreferenceUtil.getScheduleRefUpdateMigration()){
+            updateScheduleRefs(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefUpdateMigration();
+       }
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -184,6 +202,29 @@ public class MigrationUtil {
             PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
             PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
         }
+    }
+
+    private static void addTIThermisters(CCUHsApi ccuHsApi) {
+        Log.d(TAG,"addTIThermisters++");
+        HashMap<Object,Object> tiEquip = ccuHsApi.readEntity("equip and ti");
+        if(!tiEquip.isEmpty()) {
+            Log.d(TAG,"ti isnt empty");
+            String tiEquipRef = tiEquip.get("id").toString();
+            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
+                    "temp and equipRef == \"" + tiEquipRef + "\"");
+            String nodeAddress = currentTemp.get("group").toString();
+            createTIThermisterPoints(tiEquipRef,nodeAddress);
+        }
+
+    }
+
+    private static boolean isTIThermisterMigrated() {
+        Log.d(TAG,"isTIThermisterMigrated");
+        HashMap<Object,Object> th1Config = CCUHsApi.getInstance().readEntity("point and ti and " +
+                "config and th1");
+        HashMap<Object,Object> th2Config = CCUHsApi.getInstance().readEntity("point and ti and " +
+                "config and th2");
+        return !th1Config.isEmpty() && !th2Config.isEmpty();
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
@@ -629,6 +670,104 @@ public class MigrationUtil {
                 Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing DualDuct migration  "+e.getMessage());
             }
         });
+    }
+
+    private static void updateScheduleRefs(CCUHsApi hayStack) {
+        CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs ");
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+
+        rooms.forEach( zoneMap -> {
+            Zone zone = new Zone.Builder().setHashMap(zoneMap).build();
+            if (zone.getScheduleRef() == null) {
+                CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs : for Zone "+zone.getDisplayName());
+                Map<Object,Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
+                                                                                      "roomRef == "+zone.getId());
+                if (!zoneScheduleMap.isEmpty()) {
+                    zone.setScheduleRef(zoneScheduleMap.get("id").toString());
+                    hayStack.updateZone(zone, zone.getId());
+                }
+            }
+        });
+    }
+
+    private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
+        Log.d("TIThermistor","createTIThermisterPoints");
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = siteMap.get(Tags.ID).toString();
+        String siteDis = siteMap.get("dis").toString();
+        String equipDis = siteDis + "-TI-" + nodeAddress;
+        String tz = siteMap.get("tz").toString();
+        Point mainSensor = new Point.Builder()
+                .setDisplayName(equipDis+"-mainTemperatureSensor")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
+        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, 1.0);
+
+        Point th1Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th1")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th1").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
+        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, 0.0);
+
+        Point th2Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th2")
+                .setEquipRef(tiEquipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th2").addMarker("sp").addMarker("enable")
+                .setGroup((nodeAddress))
+                .setTz(tz)
+                .build();
+        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
+        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, 0.0);
+
+        Log.d("TIThermistor","createTIThermisterPoints completed");
+    }
+
+    private static void updateScheduleRefForZones(CCUHsApi hayStack){
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, " updating scheduleRef for room entity ");
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        List<HashMap<Object,Object>> scheduleTypes = hayStack.readAllEntities("scheduleType and point");
+        for(HashMap<Object,Object> room : rooms){
+            for(HashMap<Object,Object> scheduleType : scheduleTypes){
+                if(room.containsKey("scheduleRef") && isRefEqualsToId(scheduleType.get("roomRef").toString(),
+                        room.get("id").toString()) &&
+                        !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
+                    HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
+                            "roomRef == " +room.get("id"));
+                    Schedule zoneSchedule =
+                            CCUHsApi.getInstance().getScheduleById(zoneScheduleMap.get("id").toString());
+                    Zone zone = new Zone.Builder().setHashMap(room).build();
+                    zone.setScheduleRef(zoneSchedule.getId());
+                    hayStack.updateZone(zone, zone.getId());
+                }
+            }
+            if(!room.containsKey("scheduleRef")){
+                CcuLog.i(TAG_CCU_MIGRATION_UTIL, room.get("id").toString() +" does not have scheduleRef");
+            }
+        }
+    }
+
+    private static boolean isZoneFollowingNamedSchedule(CCUHsApi hayStack, HashMap<Object,Object> scheduleType){
+        return hayStack.readHisValById(scheduleType.get("id").toString()).intValue() == ScheduleType.NAMED.ordinal();
+    }
+
+    private static boolean isRefEqualsToId(String ref, String id){
+        ref = ref.startsWith("@")? ref.substring(1) : ref;
+        id = id.startsWith("@")? id.substring(1) : id;
+        return ref.equals(id);
     }
 
 }

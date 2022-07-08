@@ -245,6 +245,10 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if(getCmdSignal("cooling and stage2",node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
+                        if(isFanStage1Enabled && getCmdSignal("fan and stage1", node) == 0) {
+                                setCmdSignal("fan and stage1", 1, node);
+                                relayStages.put("FanStage1",1);
+                        }
                         if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || isFanSpeedHigh) ) ||  (occupied && enableFanStage1DuringOccupied && isFanSpeedHigh))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2",node) == 0)

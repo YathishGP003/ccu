@@ -16,14 +16,25 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.apache.commons.lang3.StringUtils;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
+import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Action;
@@ -40,7 +51,9 @@ public class AlertsFragment extends Fragment
 	ListView         listView;
 	private static AlertAdapter adapter;
 	private Disposable alertDeleteDisposable;
-	
+	private HashMap<Object, Object> useCelsius;
+
+
 	public static AlertsFragment newInstance()
 	{
 
@@ -68,8 +81,17 @@ public class AlertsFragment extends Fragment
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				
 				Alert a = alertList.get(position);
+				String message = a.getmMessage();
+
+				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+
+				if (message.contains("\u00B0")) {
+					if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+						message = formatMessageToCelsius(message);
+					}
+				}
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				builder.setMessage(a.getmTitle() + "\n\n" + a.getmMessage() + "\n"
+				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
 				                   + "\n Alert Generated at " + getFormattedDate(a.getStartTime())
 				                   + "\n Alert Fixed at "+getFormattedDate(a.getEndTime()))
 				       .setCancelable(false)
@@ -121,6 +143,26 @@ public class AlertsFragment extends Fragment
 		});
 		CcuLog.i("UI_PROFILING","AlertsFragment.onViewCreated Done");
 		
+	}
+
+	String formatMessageToCelsius(String alertMessage){
+		String reverse = StringUtils.reverse(alertMessage);
+		String[] temp = StringUtils.substringsBetween(reverse,"\u00B0 "," ");
+		for (String s : temp) {
+			try {
+				DecimalFormat f = new DecimalFormat("##.00");
+				String celsiusVal = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Float.valueOf(StringUtils.reverse(s)))));
+				Pattern fahrenheitVal = Pattern.compile(StringUtils.reverse(s));
+				Matcher tempVal = fahrenheitVal.matcher(alertMessage);
+				alertMessage = tempVal.replaceAll(celsiusVal);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		Pattern fahrenheitUnit = Pattern.compile("\u00B0F");
+		Matcher tempUnit = fahrenheitUnit.matcher(alertMessage);
+		alertMessage = tempUnit.replaceAll("\u00B0C");
+		return alertMessage;
 	}
 	
 	String getFormattedDate(long millis) {

@@ -803,6 +803,7 @@ public class CCUTagsDb extends HServer {
                                  .add("dis", z.getDisplayName())
                                  .add("room", HMarker.VAL)
                                  .add("siteRef", z.getSiteRef())
+                                 .add("scheduleRef", z.getScheduleRef())
                                  .add("floorRef", z.getFloorRef());
         if (z.getScheduleRef() != null) {
             b.add("scheduleRef", z.getScheduleRef());

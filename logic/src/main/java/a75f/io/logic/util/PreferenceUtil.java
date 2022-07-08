@@ -22,6 +22,8 @@ public class PreferenceUtil {
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
     private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefForZoneMigration";
 
+    private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -272,5 +274,13 @@ public class PreferenceUtil {
     }
     public static boolean getScheduleRefForZoneMigration() {
         return getBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION);
+    }
+
+    public static boolean getScheduleRefUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_REFS);
+    }
+
+    public static void setScheduleRefUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_REFS, true);
     }
 }

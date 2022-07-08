@@ -20,7 +20,8 @@ public class PreferenceUtil {
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
-
+    private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
+    
     public static void setContext(Context c) {
         context= c;
     }
@@ -263,6 +264,13 @@ public class PreferenceUtil {
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
-
+    }
+    
+    public static boolean getScheduleRefUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_REFS);
+    }
+    
+    public static void setScheduleRefUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_REFS, true);
     }
 }

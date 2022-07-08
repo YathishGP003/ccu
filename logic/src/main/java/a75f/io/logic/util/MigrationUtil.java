@@ -128,8 +128,11 @@ public class MigrationUtil {
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
         }
-
-
+    
+        if(!PreferenceUtil.getScheduleRefUpdateMigration()){
+            updateScheduleRefs(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefUpdateMigration();
+       }
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -627,6 +630,24 @@ public class MigrationUtil {
                     Log.i(TAG_CCU_MIGRATION_UTIL, "feedbackPoints DualDuct are found ");
             }catch (Exception e){
                 Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing DualDuct migration  "+e.getMessage());
+            }
+        });
+    }
+    
+    private static void updateScheduleRefs(CCUHsApi hayStack) {
+        CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs ");
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        
+        rooms.forEach( zoneMap -> {
+            Zone zone = new Zone.Builder().setHashMap(zoneMap).build();
+            if (zone.getScheduleRef() == null) {
+                CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs : for Zone "+zone.getDisplayName());
+                Map<Object,Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
+                                                                                      "roomRef == "+zone.getId());
+                if (!zoneScheduleMap.isEmpty()) {
+                    zone.setScheduleRef(zoneScheduleMap.get("id").toString());
+                    hayStack.updateZone(zone, zone.getId());
+                }
             }
         });
     }

@@ -1076,6 +1076,7 @@ public class FloorPlanFragment extends Fragment {
                         .setDisplayName(addRoomEdit.getText().toString())
                         .setFloorRef(roomToRename.getFloorRef())
                         .setSiteRef(roomToRename.getSiteRef())
+                        .setScheduleRef(roomToRename.getScheduleRef())
                         .build();
 
                 hsZone.setId(roomToRename.getId());

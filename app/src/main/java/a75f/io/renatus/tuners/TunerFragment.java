@@ -53,15 +53,21 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 
-
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 
 /**
@@ -90,6 +96,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     Spinner spinnerSelection;
     ArrayList<HashMap> tuners = new ArrayList<>();
     String tunerGroupType = "Building";
+    Prefs prefs;
     public TunerFragment() {
     }
 
@@ -119,6 +126,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         cancelTunerUpdate = view.findViewById(R.id.buttonCancel);
         editChangeReason = view.findViewById(R.id.editChangeReason);
         editTunerSearch = view.findViewById(R.id.editTunerSearch);
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         //TODO: revert building tuners
@@ -322,7 +330,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             Button buttonApplyTuners = dialogView.findViewById(R.id.buttonApplyTuner);
             Button buttonCancelTuners = dialogView.findViewById(R.id.buttonCancelTuner);
             buttonApplyTuners.setOnClickListener(dialogV -> {
+                prefs = new Prefs(getContext().getApplicationContext());
                 for (HashMap newTunerValueItem : updatedTunerValues) {
+                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED  || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
+                        if (newTunerValueItem.containsKey("unit") && newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                            if (doesPointNeedRelativeConversion(newTunerValueItem)) {
+                                newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitRelativeChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                            } else {
+                                newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
+                            }
+                            prefs.setBoolean(newTunerValueItem.get("id").toString(), false);
+                        }
+                    }
                     if ((newTunerValueItem.get("newLevel").toString().equals("16") || newTunerValueItem.get("newLevel").toString().equals("14")) && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB")) {
                         if (!newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())) {
                             continue;
@@ -472,6 +491,19 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 filter(editable.toString());
             }
         });
+    }
+
+
+    private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> newTunerValueItem) {
+        return  newTunerValueItem.containsKey("deadband") || newTunerValueItem.containsKey("setback") ||
+                newTunerValueItem.containsKey("abnormal") || (newTunerValueItem.containsKey("spread") &&
+                newTunerValueItem.containsKey("user") && !newTunerValueItem.containsKey("multiplier")) ||
+                newTunerValueItem.containsKey("sat") && newTunerValueItem.containsKey("spmax") ||
+                newTunerValueItem.containsKey("spmin") || newTunerValueItem.containsKey("spres") ||
+                newTunerValueItem.containsKey("spinit") || newTunerValueItem.containsKey("sptrim") ||
+                newTunerValueItem.containsKey("spresmax") || (newTunerValueItem.containsKey("reheat") &&
+                newTunerValueItem.containsKey("min") && newTunerValueItem.containsKey("differential")) ||
+                newTunerValueItem.containsKey("leeway") || newTunerValueItem.containsKey("proportional");
     }
 
 

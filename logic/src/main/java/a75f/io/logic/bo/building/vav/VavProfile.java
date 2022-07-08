@@ -578,13 +578,9 @@ public abstract class VavProfile extends ZoneProfile {
     }
     
     private void updateDamperForMinCfm(double cfmLoopOp) {
-        if (damper.currentPosition > 0) {
-            CcuLog.d(L.TAG_CCU_ZONE,
-                     "updateDamperForMinCfm newDamperPos: "+damper.currentPosition+" cfmLoopOp "+cfmLoopOp);
-            damper.currentPosition += damper.currentPosition * cfmLoopOp/100;
-        } else {
-            damper.currentPosition = Math.max((int)cfmLoopOp, 0);
-        }
+        CcuLog.d(L.TAG_CCU_ZONE,
+                 "updateDamperForMinCfm newDamperPos: "+damper.currentPosition+" cfmLoopOp "+cfmLoopOp);
+        damper.currentPosition = Math.min( (int)(damper.currentPosition + cfmLoopOp), 100);
     }
     
     private void updateDamperForMaxCfm(double cfmLoopOp) {
@@ -602,11 +598,6 @@ public abstract class VavProfile extends ZoneProfile {
             return;
         }
         double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId,"");
-        
-        if (currentCfm == 0) {
-            CcuLog.d(L.TAG_CCU_ZONE,"TrueCFM not active ! currentCfm "+currentCfm);
-            return;
-        }
         
         if (systemState == SystemController.State.COOLING && state == COOLING) {
             updateDamperSystemCoolingZoneCooling(hayStack, equipId, currentCfm);

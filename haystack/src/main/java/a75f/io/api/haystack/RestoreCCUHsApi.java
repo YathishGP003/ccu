@@ -103,6 +103,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importZoneSchedule(Set<String> zoneRefSet){
+        Log.i(TAG, " Importing Zone  schedule started");
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -131,6 +132,7 @@ public class RestoreCCUHsApi {
             ccuHsApi.addSchedule(guid, zoneSchedule.getZoneScheduleHDict(zoneSchedule.getRoomRef()));
             ccuHsApi.setSynced(StringUtils.prependIfMissing(guid, "@"));
         }
+        Log.i(TAG, " Importing Zone  schedule completed");
     }
 
     public HGrid getAllCCUs(String siteId){
@@ -150,6 +152,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importFloors(Set<String> floorRefSet) {
+        Log.i(TAG, " Importing floor started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[floorRefSet.size()];
         int index = 0;
@@ -166,9 +169,11 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteFloor(floor, floor.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
+        Log.i(TAG, " Importing floor completed");
     }
 
     public void importZones(Set<String> zoneRefSet){
+        Log.i(TAG, " Importing Zone started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[zoneRefSet.size()];
         int index = 0;
@@ -185,6 +190,7 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteZone(zone, zone.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
+        Log.i(TAG, " Importing Zone completed");
     }
 
     public Map<String, String> getCCUVersion(List<String> equipRefs){
@@ -306,6 +312,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importEquip(HRow equipRow){
+        Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
         equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
@@ -332,9 +339,11 @@ public class RestoreCCUHsApi {
                 CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
             }
         }
+        Log.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
     }
 
     public void importDevice(HRow deviceRow){
+        Log.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
         List<Device> devices = new ArrayList<>();
         List<HashMap> deviceMap = ccuHsApi.HGridToList(deviceRow.grid());
         deviceMap.forEach(equip -> devices.add(new Device.Builder().setHashMap(equip).build()));
@@ -360,11 +369,13 @@ public class RestoreCCUHsApi {
                 CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
             }
         }
+        Log.i(TAG, "Import device completed for "+deviceRow.get("dis").toString());
     }
 
     private void addDeviceAndPoints(List<Device> devices, List<RawPoint> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Device device : devices) {
+            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteDevice(device, device.getId().replace("@", ""));
             hsApi.setSynced(StringUtils.prependIfMissing(equipLuid, "@"));
             //Points
@@ -380,12 +391,14 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
+            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" completed");
         }
     }
 
     private void addEquipAndPoints(List<Equip> equips, List<Point> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Equip equip : equips) {
+            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteEquip(equip, equip.getId().replace("@", ""));
             hsApi.setSynced(equipLuid);
             //Points
@@ -401,13 +414,16 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
+            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
     private void writeValueToDevicePoints(List<Device> devices, HClient hClient) {
         for(Device device : devices){
+            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" started");
             List<HDict> devicePoints = getDevicePoints(device);
             writeValueToPoints(devicePoints, hClient);
+            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" completed");
         }
     }
 
@@ -465,8 +481,10 @@ public class RestoreCCUHsApi {
 
     private void writeValueToEquipPoints(List<Equip> equips, HClient hClient) {
         for(Equip equip : equips){
+            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" started");
             List<HDict> equipPoints = getEquipPoints(equip);
             writeValueToPoints(equipPoints, hClient);
+            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
@@ -744,6 +762,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importNamedSchedule() {
+        Log.i(TAG, " Import Named schedule started");
         Site site = CCUHsApi.getInstance().getSite();
         HClient hClient =new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (site != null && site.getOrganization() != null) {
@@ -762,7 +781,7 @@ public class RestoreCCUHsApi {
             while (it.hasNext()) {
                 HRow row = (HRow) it.next();
                 tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                CcuLog.i(TAG, "Named schedule Imported");
+                CcuLog.i(TAG, "Import Named schedule Imported");
             }
         }
     }

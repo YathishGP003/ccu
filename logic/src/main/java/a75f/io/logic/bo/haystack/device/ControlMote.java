@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.haystack.device;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -405,4 +407,42 @@ public class ControlMote
     public static boolean getRelay7() {
         return ControlMote.getRelayState(Tags.RELAY7) > 0.01;
     }
+
+
+    public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
+        Log.d("CCU"," Update Physical point "+port);
+
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+
+        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+                "point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        RawPoint p = new RawPoint.Builder().setHashMap(point).setPointRef(pointRef).build();
+        CCUHsApi.getInstance().updatePoint(p,p.getId());
+    }
+
+    public static void setPointEnabled(int addr, String port, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+
+        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
+                "point and physical and deviceRef == \"" + device.get("id").toString() +
+                        "\""+" and port == \""+port+"\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+        }
+    }
+
 }

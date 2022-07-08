@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -17,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 
@@ -53,6 +55,18 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
 
     @BindView(R.id.setBtn)
     Button setButton;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.togglemainsensor)
+    ToggleButton mainSensor;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.toggleth1)
+    ToggleButton toggleTh1;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.toggleth2)
+    ToggleButton toggleTh2;
 
     private ProfileType             mProfileType;
     private CazProfile              mCcuAsZoneProfile;
@@ -146,11 +160,22 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
         CCUUiUtil.setSpinnerDropDownColor(zonePriority,getContext());
+        mainSensor.setChecked(true);
+        mainSensor.setEnabled(false);
+        toggleTh1.setChecked(false);
+        toggleTh2.setChecked(false);
+
+        toggleTh1.setOnCheckedChangeListener((compoundButton, checked) -> handleTH1SenorChange(checked));
+
+        toggleTh2.setOnCheckedChangeListener((compoundButton, checked) -> handleTH2SenorChange(checked));
 
         if(mProfileConfig != null) {
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
             int offsetIndex = (int) mProfileConfig.temperaturOffset + TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
+            mainSensor.setChecked(mProfileConfig.isEnableMain);
+            toggleTh1.setChecked(mProfileConfig.enableThermistor1);
+            toggleTh2.setChecked(mProfileConfig.enableThermistor2 );
         }else {
             zonePriority.setSelection(2);
         }
@@ -189,6 +214,27 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         });
     }
 
+    private void handleTH2SenorChange(boolean checked) {
+        if(checked){
+            mainSensor.setChecked(false);
+            toggleTh1.setChecked(false);
+        }else{
+            if(!toggleTh1.isChecked())
+                mainSensor.setChecked(true);
+        }
+    }
+
+    private void handleTH1SenorChange(boolean checked) {
+        if(checked){
+            mainSensor.setChecked(false);
+            toggleTh2.setChecked(false);
+        }else{
+            if(!toggleTh2.isChecked())
+                mainSensor.setChecked(true);
+        }
+    }
+
+
     private void setupCcuAsZoneProfile() {
 
         CazProfileConfig cazConfig = new CazProfileConfig();
@@ -197,7 +243,9 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         cazConfig.setNodeAddress(mSmartNodeAddress);
         cazConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
         cazConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-
+        cazConfig.isEnableMain = mainSensor.isChecked();
+        cazConfig.enableThermistor1 = toggleTh1.isChecked();
+        cazConfig.enableThermistor2 = toggleTh2.isChecked();
 
         mCcuAsZoneProfile.getProfileConfiguration().put(mSmartNodeAddress, cazConfig);
         if (mProfileConfig == null) {

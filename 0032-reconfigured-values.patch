@@ -1,0 +1,25 @@
+From b4c8cf7a64c2f298e27d5927cfaa19b34adbe8d8 Mon Sep 17 00:00:00 2001
+From: Amaresh C <achannalli@75f.io>
+Date: Sun, 26 Jun 2022 22:06:54 +0530
+Subject: [PATCH 32/50] reconfigured values
+
+---
+ .../a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+index 4c3257e8c..1993099ec 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+@@ -42,7 +42,7 @@ public class TrueCFMPointsHandler {
+                             .setSiteRef(equip.getSiteRef()).setHisInterpolate("cov")
+                             .addMarker("config").addMarker(profileTag).addMarker("trueCfm").addMarker(fanMarker)
+                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("kfactor")
+-                            .setMinVal("0").setMaxVal("3.0").setIncrementVal(".01")
++                            .setMinVal("0").setMaxVal("3.00").setIncrementVal("0.01")
+                             .setGroup(equip.getGroup())
+                             .setTz(equip.getTz())
+                             .build();
+-- 
+2.31.0.windows.1
+

@@ -1,0 +1,45 @@
+From 82db61c8f66c0bbaaa48d3d47e68cfe691f557c8 Mon Sep 17 00:00:00 2001
+From: Manjunath Kundaragi <mkundaragi@75f.io>
+Date: Thu, 16 Jun 2022 15:53:28 +0530
+Subject: [PATCH 05/35] Resolved issue while add new ccu for existing site also
+
+---
+ app/src/main/java/a75f/io/renatus/RegisterGatherCCUDetails.java | 2 ++
+ .../main/java/a75f/io/renatus/registration/AddtoExisting.java   | 1 -
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/RegisterGatherCCUDetails.java b/app/src/main/java/a75f/io/renatus/RegisterGatherCCUDetails.java
+index 32ecc969a..80b0f221f 100644
+--- a/app/src/main/java/a75f/io/renatus/RegisterGatherCCUDetails.java
++++ b/app/src/main/java/a75f/io/renatus/RegisterGatherCCUDetails.java
+@@ -41,6 +41,7 @@ import a75f.io.api.haystack.Tags;
+ import a75f.io.logic.DefaultSchedules;
+ import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
++import a75f.io.logic.bo.building.system.DefaultSystem;
+ import a75f.io.logic.diag.DiagEquip;
+ import a75f.io.logic.tuners.BuildingTuners;
+ import a75f.io.renatus.registration.FreshRegistration;
+@@ -161,6 +162,7 @@ public class RegisterGatherCCUDetails extends Activity {
+             if (!CCUUiUtil.isInvalidName(ccuName)) {
+                 L.ccu().setCCUName(ccuName);
+                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
++                L.ccu().systemProfile = new DefaultSystem();
+                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                 CCUHsApi.getInstance().registerCcu(installerEmail);
+                 prefs.setString("installerEmail", installerEmail);
+diff --git a/app/src/main/java/a75f/io/renatus/registration/AddtoExisting.java b/app/src/main/java/a75f/io/renatus/registration/AddtoExisting.java
+index 9080a18e7..b37c11869 100644
+--- a/app/src/main/java/a75f/io/renatus/registration/AddtoExisting.java
++++ b/app/src/main/java/a75f/io/renatus/registration/AddtoExisting.java
+@@ -549,7 +549,6 @@ public class AddtoExisting extends Fragment {
+                     retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
+                     Globals.getInstance().setSiteAlreadyCreated(true);
+                     CCUHsApi.getInstance().setPrimaryCcu(false);
+-                    L.ccu().systemProfile = new DefaultSystem();
+                 }
+                 return retVal;
+             }
+-- 
+2.31.0.windows.1
+

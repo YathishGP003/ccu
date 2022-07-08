@@ -1,0 +1,64 @@
+From d95db78d10f7d94c61bdf5d08d448c8a013821d4 Mon Sep 17 00:00:00 2001
+From: Samjith Sadasivan <samjith@75f.io>
+Date: Wed, 22 Jun 2022 15:59:16 -0500
+Subject: [PATCH 11/35] Disable test mode during screen switch
+
+---
+ .../a75f/io/renatus/RenatusLandingActivity.java  | 16 +++++-----------
+ 1 file changed, 5 insertions(+), 11 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/RenatusLandingActivity.java b/app/src/main/java/a75f/io/renatus/RenatusLandingActivity.java
+index 0ad37f65a..ba820b44e 100644
+--- a/app/src/main/java/a75f/io/renatus/RenatusLandingActivity.java
++++ b/app/src/main/java/a75f/io/renatus/RenatusLandingActivity.java
+@@ -96,7 +96,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
+     private static final long DISCONNECT_TIMEOUT = 3000;
+     private static final long INTERVAL = 1000;
+     private long mStopTimeInFuture;
+-    private static final long mMillisInFuture = 3600000;
++    private static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
+     //TODO - refactor
+     public boolean settingView = false;
+     private TabItem pageSettingButton;
+@@ -271,27 +271,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
+ 
+     @SuppressLint("LogNotTimber")
+     private void startCountDownTimer(long interval) {
+-        Log.d(TAG,"in start");
+-        mStopTimeInFuture = System.currentTimeMillis() + mMillisInFuture;
+-        countDownTimer = new CountDownTimer(mMillisInFuture, interval) {
++        mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
++        countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, interval) {
+             @Override
+             public void onTick(long l) {
+-              /*
+-              * No Operation on every second*/
+-                Log.d(TAG,"in tick");
+-
+             }
+ 
+             @Override
+             public void onFinish() {
+-
+                 final long millisLeft = mStopTimeInFuture - System.currentTimeMillis();
+-                Log.d(TAG,"in onfinish - millisLeft="+millisLeft);
+                 if (millisLeft <= 10000) {
+                     launchZoneFragment();
+                 }
+                 stopCountdownTimer();
+-
+             }
+         };
+         countDownTimer.start();
+@@ -299,6 +291,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
+ 
+     private void launchZoneFragment() {
+ 
++        Globals.getInstance().setTestMode(false);
++        Globals.getInstance().setTemporaryOverrideMode(false);
+         if( btnTabs.getSelectedTabPosition() != 0)
+             mViewPager.setAdapter(mStatusPagerAdapter);
+         btnTabs.getTabAt(1).select();
+-- 
+2.31.0.windows.1
+

@@ -1,0 +1,95 @@
+From 334326071856247a4aab0df647691dfda10fb8af Mon Sep 17 00:00:00 2001
+From: Manjunath Kundaragi <mkundaragi@75f.io>
+Date: Tue, 14 Jun 2022 11:44:42 +0530
+Subject: [PATCH 07/50] Migration draft
+
+---
+ .../io/renatus/registration/CreateNewSite.java    |  8 ++++++--
+ .../java/a75f/io/logic/util/MigrationUtil.java    | 15 ++++++++++-----
+ 2 files changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/registration/CreateNewSite.java b/app/src/main/java/a75f/io/renatus/registration/CreateNewSite.java
+index 095e98888..b44c8b72c 100644
+--- a/app/src/main/java/a75f/io/renatus/registration/CreateNewSite.java
++++ b/app/src/main/java/a75f/io/renatus/registration/CreateNewSite.java
+@@ -48,6 +48,7 @@ import java.util.List;
+ import java.util.TimeZone;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.HayStackConstants;
+ import a75f.io.api.haystack.Schedule;
+ import a75f.io.api.haystack.Site;
+@@ -297,13 +298,14 @@ public class CreateNewSite extends Fragment {
+                     saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                 }
+ 
++                HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
++                Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
+                 if (ccu.size() > 0) {
+                     String ahuRef = ccu.get("ahuRef").toString();
+                     CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                     L.ccu().setCCUName(ccuName);
+                 } else {
+-                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create() ,managerEmail);
+-                    L.ccu().systemProfile = new DefaultSystem();
++                    String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.getId() ,managerEmail);
+                     L.ccu().setCCUName(ccuName);
+                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                 }
+@@ -836,6 +838,8 @@ public class CreateNewSite extends Fragment {
+         CCUHsApi.getInstance().setPrimaryCcu(true);
+         BuildingTuners.getInstance().updateBuildingTuners();
+         //SystemEquip.getInstance();
++        DiagEquip.getInstance().create();
++        L.ccu().systemProfile = new DefaultSystem();
+         Log.i(TAG, "LocalSiteID: " + localSiteId);
+         ccuHsApi.log();
+         prefs.setString("SITE_ID", localSiteId);
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index ef941329f..007e1a4a8 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -22,6 +22,7 @@ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.Point;
+ import a75f.io.api.haystack.RawPoint;
++import a75f.io.api.haystack.RestoreCCUHsApi;
+ import a75f.io.api.haystack.Schedule;
+ import a75f.io.api.haystack.Zone;
+ import a75f.io.logger.CcuLog;
+@@ -105,7 +106,13 @@ public class MigrationUtil {
+         // Because in server we will never get to know these diag points are belongs which ccu
+         // Create create fresh daig points.
+ 
+-        HashMap diag = ccuHsApi.read("equip and diag");
++        HashMap ccu = ccuHsApi.read("device and ccu");
++        RestoreCCUHsApi restoreCCUHsApi = RestoreCCUHsApi.getInstance();
++        if (ccu.size() == 0) {
++            return;
++        }
++
++      /*  HashMap diag = ccuHsApi.read("equip and diag");
+ 
+         if (diag.size() == 0) {
+             // Diag points are not found locally
+@@ -117,14 +124,12 @@ public class MigrationUtil {
+         }
+         Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+ 
+-        if(!diagEquip.getMarkers().contains("gatewayRef ")){
++        if(!diagEquip.getMarkers().contains("gatewayRef")){
+             Equip systemEquip = new Equip.Builder()
+                     .setHashMap(ccuHsApi.read("system and equip")).build();
+             ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+         }
+-
+-
+-
++*/
+     }
+ 
+     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
+-- 
+2.31.0.windows.1
+

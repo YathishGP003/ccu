@@ -1,0 +1,24 @@
+From 7103094a30227a5169f5eea23046129f82218471 Mon Sep 17 00:00:00 2001
+From: Amaresh C <achannalli@75f.io>
+Date: Sun, 26 Jun 2022 22:01:56 +0530
+Subject: [PATCH 15/35] Added min,Max  and increment values to K-Factor
+
+---
+ .../a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java  | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+index 4c3257e8c..35682232f 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+@@ -49,6 +49,7 @@ public class TrueCFMPointsHandler {
+         String kFactorId = hayStack.addPoint(kFactor);
+         hayStack.writeDefaultValById(kFactorId, initialVal);
+         hayStack.writeHisValueByIdWithoutCOV(kFactorId, initialVal);
++
+     }
+     
+     private static void createTrueCFMCoolingMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal,
+-- 
+2.31.0.windows.1
+

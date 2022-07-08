@@ -1,0 +1,66 @@
+From 3b631d3176cc3e184a077ccbb364d3f005763f7c Mon Sep 17 00:00:00 2001
+From: Manjunath Kundaragi <mkundaragi@75f.io>
+Date: Mon, 13 Jun 2022 16:57:38 +0530
+Subject: [PATCH 04/50] Added migration for missing Daig Points
+
+---
+ .../a75f/io/logic/util/MigrationUtil.java     | 30 +++++++++++++++++++
+ .../a75f/io/logic/util/PreferenceUtil.java    |  1 +
+ 2 files changed, 31 insertions(+)
+
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 6ca4a9495..ef941329f 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -95,6 +95,36 @@ public class MigrationUtil {
+             addUnitToTuners(CCUHsApi.getInstance());
+             PreferenceUtil.setUnitAddedToTuners();
+         }
++
++        doDiagPointsMigration(CCUHsApi.getInstance());
++    }
++
++    private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
++
++        // approach is deleting all the daig point which does not have any gateway reff.
++        // Because in server we will never get to know these diag points are belongs which ccu
++        // Create create fresh daig points.
++
++        HashMap diag = ccuHsApi.read("equip and diag");
++
++        if (diag.size() == 0) {
++            // Diag points are not found locally
++            DiagEquip.getInstance().create();
++            Equip systemEquip = new Equip.Builder()
++                    .setHashMap(ccuHsApi.read("system and equip")).build();
++            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
++            return;
++        }
++        Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
++
++        if(!diagEquip.getMarkers().contains("gatewayRef ")){
++            Equip systemEquip = new Equip.Builder()
++                    .setHashMap(ccuHsApi.read("system and equip")).build();
++            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
++        }
++
++
++
+     }
+ 
+     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
+diff --git a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+index 674a84f01..ebe3a16aa 100644
+--- a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+@@ -19,6 +19,7 @@ public class PreferenceUtil {
+     private static final String ENABLE_ZONE_SCHEDULE_MIGRATION = "enableZoneScheduleMigration";
+     private static final String CLEAN_UP_DUPLICATE_ZONE_SCHEDULE = "cleanUpDuplicateZoneSchedule";
+     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
++    private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
+ 
+     public static void setContext(Context c) {
+         context= c;
+-- 
+2.31.0.windows.1
+

@@ -1,0 +1,370 @@
+From fdff20d6c58a90a8a59c9021bdba04708d769790 Mon Sep 17 00:00:00 2001
+From: achannalli <achannalli@75f.io>
+Date: Thu, 16 Jun 2022 14:13:08 +0000
+Subject: [PATCH 06/35] Merged PR 4251: True CFM Implementation for DAB
+
+Related work items: #5326
+---
+ .../io/renatus/FragmentDABConfiguration.java  | 40 ++++----
+ .../io/logic/bo/building/dab/DabEquip.java    |  8 +-
+ .../system/dab/DabSystemController.java       |  3 -
+ .../truecfm/TrueCFMPointsHandler.java         | 93 +++++--------------
+ .../logic/pubnub/TrueCFMDABConfigHandler.java |  4 -
+ .../java/a75f/io/logic/tuners/DabTuners.java  |  2 -
+ .../a75f/io/logic/util/MigrationUtil.java     |  8 +-
+ 7 files changed, 49 insertions(+), 109 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/FragmentDABConfiguration.java b/app/src/main/java/a75f/io/renatus/FragmentDABConfiguration.java
+index 47e612199..3fd334c0b 100644
+--- a/app/src/main/java/a75f/io/renatus/FragmentDABConfiguration.java
++++ b/app/src/main/java/a75f/io/renatus/FragmentDABConfiguration.java
+@@ -86,7 +86,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+     ToggleButton enableOccupancyControl;
+     ToggleButton enableCO2Control;
+     ToggleButton enableIAQControl;
+-    Spinner KFactor;
++    Spinner kFactor;
+     NumberPicker minCFMForIAQPos;
+     ToggleButton enableTrueCFMControl;
+     TextView textKFactor;
+@@ -297,7 +297,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+         enableIAQControl = view.findViewById(R.id.enableIAQControl);
+         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
+         textKFactor = view.findViewById(R.id.textKFactor);
+-        KFactor = view.findViewById(R.id.enableKFactor);
++        kFactor = view.findViewById(R.id.enableKFactor);
+         ArrayList<String> spinnerArray = new ArrayList<>();
+         double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
+         double MAX_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.max_val_for_kfactor));
+@@ -309,36 +309,36 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+         }
+         kFactorValues = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+         kFactorValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+-        KFactor.setAdapter(kFactorValues);
+-        KFactor.setSelection(defaultValue_kfactor);
++        kFactor.setAdapter(kFactorValues);
++        kFactor.setSelection(defaultValue_kfactor);
+         enableTrueCFMControl = view.findViewById(R.id.enableCFMControl);
+         enableTrueCFMControl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+             if (enableTrueCFMControl.isChecked()) {
+                 minCFMForIAQ.setVisibility(View.VISIBLE);
+                 textKFactor.setVisibility(View.VISIBLE);
+-                KFactor.setVisibility(View.VISIBLE);
++                kFactor.setVisibility(View.VISIBLE);
+             } else {
+                 minCFMForIAQ.setVisibility(View.GONE);
+                 textKFactor.setVisibility(View.GONE);
+-                KFactor.setVisibility(View.GONE);
++                kFactor.setVisibility(View.GONE);
+             }
+         });
+ 
+         minCFMForIAQPos = view.findViewById(R.id.numMinCFMForIAQ);
+-        int MIN_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.min_val_for_iaq));
+-        int MAX_VAL_FOR_IAQ = Integer.parseInt(getString(R.string.max_val_for_iaq));
+-        int STEP_IAQ = Integer.parseInt(getString(R.string.step_for_iaq_values));
+-        int defaultValue_IAQ = Integer.parseInt(getString(R.string.default_val_for_iaq));
+-        String[] numberValues = new String[MAX_VAL_FOR_IAQ - MIN_VAL_FOR_IAQ + 1];
++        int minValForIAQ = Integer.parseInt(getString(R.string.min_val_for_iaq));
++        int maxValForIAQ = Integer.parseInt(getString(R.string.max_val_for_iaq));
++        int stepIaq = Integer.parseInt(getString(R.string.step_for_iaq_values));
++        int defaultValueIAQ = Integer.parseInt(getString(R.string.default_val_for_iaq));
++        String[] numberValues = new String[maxValForIAQ - minValForIAQ + 1];
+         for (int i = 0; i < numberValues.length; i++) {
+-            numberValues[i] = String.valueOf(i * STEP_IAQ);
++            numberValues[i] = String.valueOf(i * stepIaq);
+         }
+-        minCFMForIAQPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+-        minCFMForIAQPos.setMinValue(MIN_VAL_FOR_IAQ);
+-        minCFMForIAQPos.setMaxValue(MAX_VAL_FOR_IAQ);
++        minCFMForIAQPos.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
++        minCFMForIAQPos.setMinValue(minValForIAQ);
++        minCFMForIAQPos.setMaxValue(maxValForIAQ);
+         minCFMForIAQPos.setWrapSelectorWheel(false);
+         minCFMForIAQPos.setDisplayedValues(numberValues);
+-        minCFMForIAQPos.setValue(defaultValue_IAQ);
++        minCFMForIAQPos.setValue(defaultValueIAQ);
+ 
+ 
+         zonePriority = view.findViewById(R.id.zonePriority);
+@@ -426,9 +426,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+ 
+             if (!enableTrueCFMControl.isChecked()) {
+                 minCFMForIAQPos.setValue(10);
+-                KFactor.setSelection(100);
++                kFactor.setSelection(100);
+             } else {
+-                KFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
++                kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
+                 minCFMForIAQPos.setValue(mProfileConfig.minCFMForIAQ/STEP);
+             }
+ 
+@@ -497,7 +497,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+         dabConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+         dabConfig.enableCFMControl = enableTrueCFMControl.isChecked();
+         dabConfig.minCFMForIAQ = minCFMForIAQPos.getValue()*STEP;
+-        dabConfig.kFactor = (((KFactor.getSelectedItemPosition()-100)*(.01))+2);
++        dabConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
+ 
+         Output analog1Op = new Output();
+         analog1Op.setAddress(mSmartNodeAddress);
+@@ -551,6 +551,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
+         CCUUiUtil.setSpinnerDropDownColor(damper2Type,getContext());
+         CCUUiUtil.setSpinnerDropDownColor(damper2Size,getContext());
+         CCUUiUtil.setSpinnerDropDownColor(damper2Shape,getContext());
+-        CCUUiUtil.setSpinnerDropDownColor(KFactor, getContext());
++        CCUUiUtil.setSpinnerDropDownColor(kFactor, getContext());
+     }
+ }
+\ No newline at end of file
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/dab/DabEquip.java b/logic/src/main/java/a75f/io/logic/bo/building/dab/DabEquip.java
+index b1fbe9a99..c27767d26 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/dab/DabEquip.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/dab/DabEquip.java
+@@ -34,7 +34,6 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+ import a75f.io.logic.bo.haystack.device.SmartNode;
+ import a75f.io.logic.jobs.ScheduleProcessJob;
+ import a75f.io.logic.tuners.DabTuners;
+-import a75f.io.logic.tuners.TrueCFMTuners;
+ import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.logic.tuners.TunerUtil;
+ import a75f.io.logic.util.RxTask;
+@@ -702,7 +701,6 @@ public class DabEquip
+                 config.enableCFMControl ? 1.0 : 0, null);
+         if (config.enableCFMControl) {
+             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
+-            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
+         }
+     }
+     
+@@ -771,13 +769,11 @@ public class DabEquip
+                     break;
+             }
+         }
+-        Equip equip = HSUtil.getEquipInfo(equipRef);
+         boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable and dab") > 0;
+         if(curTrueCfmEnabled && !config.enableCFMControl ) {
+             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equipRef);
+-        }else{
++        }else if(!curTrueCfmEnabled && config.enableCFMControl){
+             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
+-            TrueCFMTuners.createTrueCfmTuners(hayStack,equip,TunerConstants.DAB,TunerConstants.DAB_TUNER_GROUP);
+         }
+ 
+         setConfigNumVal("damper and type and primary",config.damper1Type);
+@@ -805,7 +801,7 @@ public class DabEquip
+         setDamperLimit("heating","max",config.maxDamperHeating);
+         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
+ 
+-        setConfigNumVal("enable and trueCfm and dab",config.enableCFMControl == true ? 1.0 : 0);
++        setConfigNumVal("enable and trueCfm and dab", config.enableCFMControl ? 1.0 : 0);
+         setHisVal("enable and trueCfm and dab", config.enableCFMControl ? 1.0 : 0);
+         setConfigNumVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
+         setHisVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/system/dab/DabSystemController.java b/logic/src/main/java/a75f/io/logic/bo/building/system/dab/DabSystemController.java
+index f555bdea4..71871a027 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/system/dab/DabSystemController.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/system/dab/DabSystemController.java
+@@ -6,10 +6,7 @@ import com.google.common.collect.EvictingQueue;
+ 
+ import java.util.ArrayList;
+ import java.util.HashMap;
+-import java.util.List;
+-import java.util.Map;
+ import java.util.Objects;
+-import java.util.stream.Collectors;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+index 0c91f6103..30c4d12fb 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/truecfm/TrueCFMPointsHandler.java
+@@ -135,50 +135,24 @@ public class TrueCFMPointsHandler {
+         hayStack.writeHisValueByIdWithoutCOV(numMaxCFMReheatingId, initialVal);
+     }
+ 
+-    private static void createAirflowCfmPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+-        Point airflowCfm = new Point.Builder()
+-                .setDisplayName(equip.getDisplayName() +"-airflowCfm")
+-                .setEquipRef(equip.getId())
+-                .setSiteRef(equip.getSiteRef())
+-                .setRoomRef(equip.getRoomRef())
+-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+-                .addMarker("vav").addMarker("cmd").addMarker("trueCfm").addMarker(fanMarker)
+-                .addMarker("airflow").addMarker("his").addMarker(profileTag)
+-                .setGroup(equip.getGroup())
+-                .build();
+-        hayStack.addPoint(airflowCfm);
+-    }
+-
+-    private static void createFlowVelocityPoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+-
+-        Point flowVelocity = new Point.Builder()
+-                .setDisplayName(equip.getDisplayName() +"-flowVelocity")
+-                .setEquipRef(equip.getId())
+-                .setSiteRef(equip.getSiteRef())
+-                .setRoomRef(equip.getRoomRef())
+-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+-                .addMarker("vav").addMarker("air").addMarker("velocity").addMarker(fanMarker)
+-                .addMarker("sp").addMarker("his").addMarker(profileTag)
+-                .setGroup(equip.getGroup())
+-                .build();
+-         hayStack.addPoint(flowVelocity);
+-
+-    }
+-
+-    private static void createPressurePoint(CCUHsApi hayStack, Equip equip, String profileTag, String fanMarker) {
+-
+-        Point pressure = new Point.Builder()
+-                .setDisplayName(equip.getDisplayName() +"-pressure")
++    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, String profileTag,  double minCFMForIaq) {
++        Point minCFMIAQ = new Point.Builder()
++                .setDisplayName(equip.getDisplayName() + "-minCFMIAQ")
+                 .setEquipRef(equip.getId())
+                 .setSiteRef(equip.getSiteRef())
+                 .setRoomRef(equip.getRoomRef())
+-                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+-                .addMarker("pressure").addMarker("his").addMarker("sensor").addMarker("vav")
+-                .addMarker(fanMarker).addMarker(profileTag)
++                .setFloorRef(equip.getFloorRef()).setHisInterpolate(Tags.COV)
++                .addMarker(Tags.CONFIG).addMarker(profileTag).addMarker(Tags.MIN)
++                .addMarker(Tags.CFM).addMarker(Tags.IAQ)
++                .setMinVal("0").setMaxVal("1500").setIncrementVal("10")
++                .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
+                 .setGroup(equip.getGroup())
++                .setTz(equip.getTz())
++                .setUnit(Units.CFM)
+                 .build();
+-         hayStack.addPoint(pressure);
+-
++        String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
++        hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);
++        hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
+     }
+     
+     public static void createTrueCfmSpPoints(CCUHsApi hayStack, Equip equip, String profileTag, String fanType) {
+@@ -213,35 +187,6 @@ public class TrueCFMPointsHandler {
+         String airVelocityId = hayStack.addPoint(airVelocity);
+         hayStack.writeHisValById(airVelocityId, 0.0);
+     }
+-
+-    private static void createTrueCFMIaqMin(CCUHsApi hayStack, Equip equip, String profileTag,  double minCFMForIaq) {
+-        Point minCFMIAQ = new Point.Builder()
+-                .setDisplayName(equip.getDisplayName() + "-minCFMIAQ")
+-                .setEquipRef(equip.getId())
+-                .setSiteRef(equip.getSiteRef())
+-                .setRoomRef(equip.getRoomRef())
+-                .setFloorRef(equip.getFloorRef()).setHisInterpolate(Tags.COV)
+-                .addMarker(Tags.CONFIG).addMarker(profileTag).addMarker(Tags.MIN)
+-                .addMarker(Tags.CFM).addMarker(Tags.IAQ)
+-                .setMinVal("0").setMaxVal("1500").setIncrementVal("10")
+-                .addMarker(Tags.WRITABLE).addMarker(Tags.ZONE).addMarker(Tags.HIS)
+-                .setGroup(equip.getGroup())
+-                .setTz(equip.getTz())
+-                .setUnit(Units.CFM)
+-                .build();
+-        String minCFMIAQId = hayStack.addPoint(minCFMIAQ);
+-        hayStack.writeDefaultValById(minCFMIAQId, minCFMForIaq);
+-        hayStack.writeHisValueByIdWithoutCOV(minCFMIAQId, minCFMForIaq);
+-    }
+-
+-    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
+-                                              DabProfileConfiguration dabProfileConfiguration) {
+-        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+-        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
+-        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
+-        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
+-    }
+     
+     public static void createTrueCFMVavPoints(CCUHsApi hayStack, String equipRef,
+                                                     VavProfileConfiguration vavProfileConfiguration, String fanType) {
+@@ -260,6 +205,18 @@ public class TrueCFMPointsHandler {
+     
+         createTrueCfmSpPoints(hayStack, equip, Tags.VAV, fanType);
+     }
++
++    public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
++                                              DabProfileConfiguration dabProfileConfiguration) {
++        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
++        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
++
++        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
++
++        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
++
++        createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
++    }
+     
+     /**
+      * Deletes all true cfm related points, including the tuners.
+diff --git a/logic/src/main/java/a75f/io/logic/pubnub/TrueCFMDABConfigHandler.java b/logic/src/main/java/a75f/io/logic/pubnub/TrueCFMDABConfigHandler.java
+index 772fe4aa5..5a4f2fcd3 100644
+--- a/logic/src/main/java/a75f/io/logic/pubnub/TrueCFMDABConfigHandler.java
++++ b/logic/src/main/java/a75f/io/logic/pubnub/TrueCFMDABConfigHandler.java
+@@ -8,11 +8,8 @@ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.HayStackConstants;
+ import a75f.io.api.haystack.Point;
+-import a75f.io.api.haystack.Tags;
+ import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
+ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+-import a75f.io.logic.tuners.TrueCFMTuners;
+-import a75f.io.logic.tuners.TunerConstants;
+ 
+ public class TrueCFMDABConfigHandler {
+     public static void updateDABConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+@@ -25,7 +22,6 @@ public class TrueCFMDABConfigHandler {
+             dabProfileConfiguration.minCFMForIAQ = 100;
+             dabProfileConfiguration.kFactor = 2;
+             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equip.getId(), dabProfileConfiguration);
+-            TrueCFMTuners.createTrueCfmTuners(hayStack, equip, Tags.DAB, TunerConstants.DAB_TUNER_GROUP);
+         } else {
+             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
+         }
+diff --git a/logic/src/main/java/a75f/io/logic/tuners/DabTuners.java b/logic/src/main/java/a75f/io/logic/tuners/DabTuners.java
+index 1c2f2f3c5..6c37702dc 100644
+--- a/logic/src/main/java/a75f/io/logic/tuners/DabTuners.java
++++ b/logic/src/main/java/a75f/io/logic/tuners/DabTuners.java
+@@ -225,8 +225,6 @@ public class DabTuners {
+         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
+ 
+         addDefaultDabSystemTuners(hayStack, siteRef, equipRef, equipDis, tz);
+-
+-        TrueCFMTuners.createDefaultTrueCfmTuners(hayStack, equip, Tags.DAB, DAB_TUNER_GROUP);
+     }
+     
+     public static void addDefaultDabSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 5c8e06229..68af3ce3c 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -43,7 +43,6 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+ import a75f.io.logic.diag.DiagEquip;
+ import a75f.io.logic.ccu.restore.RestoreCCU;
+-import a75f.io.logic.diag.DiagEquip;
+ import kotlin.Pair;
+ import a75f.io.logic.migration.point.PointMigrationHandler;
+ 
+@@ -273,14 +272,11 @@ public class MigrationUtil {
+ 
+     private static void trueCFMDABMigration(CCUHsApi haystack) {
+         ArrayList<HashMap<Object, Object>> dabEquips = haystack.readAllEntities("equip and dab and not system");
+-        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
+-        Equip tunerEquip = new Equip.Builder().setHashMap(tuner).build();
+         if(!dabEquips.isEmpty()) {
+-            doMigrationDab(haystack, dabEquips, tunerEquip);
++            doMigrationDab(haystack, dabEquips);
+         }
+     }
+-    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips, Equip tunerEquip) {
+-        TrueCFMTuners.createDefaultTrueCfmTuners(haystack, tunerEquip, TunerConstants.DAB, TunerConstants.DAB_TUNER_GROUP);
++    private static void doMigrationDab(CCUHsApi haystack, ArrayList<HashMap<Object,Object>>dabEquips) {
+         dabEquips.forEach(dabEquip -> {
+             HashMap<Object, Object> enableCFMPoint = haystack.readEntity(
+                 "enable and point and trueCfm and dab and equipRef == \"" + dabEquip.get("id") + "\"");
+-- 
+2.31.0.windows.1
+

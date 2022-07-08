@@ -1,0 +1,3510 @@
+From 7549b8a2fc24e5aa78b3ce86acc9c552b913fa51 Mon Sep 17 00:00:00 2001
+From: jtheertha <jtheertha@75f.io>
+Date: Tue, 28 Jun 2022 08:03:46 +0000
+Subject: [PATCH 37/50] Merged PR 3601: Special Schedule - Create, View, Edit
+ and Update
+
+Special schedule create and view both at zone and building level.
+Deleting outdated special schedules
+
+Related work items: #10262, #10264, #10276, #10277, #10289, #10813, #11642, #12298, #12334
+---
+ app/build.gradle                              |   1 +
+ .../java/a75f/io/renatus/SystemFragment.java  |   3 +
+ .../java/a75f/io/renatus/ZoneFragmentNew.java |  89 ++--
+ .../renatus/schedules/SchedulerFragment.java  | 131 +++++-
+ .../schedules/SpecialScheduleAdapter.java     | 112 +++++
+ .../SpecialScheduleCalendarFragment.java      | 101 ++++
+ .../SpecialScheduleDialogFragment.java        | 337 ++++++++++++++
+ .../a75f/io/renatus/util/CCUListAdapter.java  |  18 +-
+ .../ic_baseline_calendar_today_24.xml         |   5 +
+ .../res/layout-xlarge/fragment_scheduler.xml  | 112 ++++-
+ .../fragment_special_schedule_dialog.xml      | 178 ++++++++
+ .../main/res/layout-xlarge/temp_schedule.xml  |  36 ++
+ .../fragment_special_schedule_calendar.xml    |  60 +++
+ .../fragment_special_schedule_dialog.xml      | 178 ++++++++
+ .../main/res/layout/item_special_schedule.xml |  61 +++
+ .../main/res/layout/zones_item_details.xml    |  75 ++-
+ app/src/main/res/values/strings.xml           |   1 +
+ .../java/a75f/io/api/haystack/CCUHsApi.java   |  81 +++-
+ .../a75f/io/api/haystack/RestoreCCUHsApi.java |  76 ++-
+ .../java/a75f/io/api/haystack/Schedule.java   | 431 +++++++++++++++++-
+ .../main/java/a75f/io/api/haystack/Tags.java  |   5 +
+ logic/build.gradle                            |   1 +
+ .../a75f/io/logic/ccu/restore/RestoreCCU.java |  17 +-
+ .../io/logic/jobs/ScheduleProcessJob.java     |  67 ++-
+ .../io/logic/jobs/SystemScheduleUtil.java     |   8 +-
+ .../logic/pubnub/UpdateScheduleHandler.java   |  12 +-
+ .../schedule/IntrinsicScheduleCreator.java    |  69 +--
+ .../io/logic/schedule/SpecialSchedule.java    | 233 ++++++++++
+ 28 files changed, 2355 insertions(+), 143 deletions(-)
+ create mode 100644 app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleAdapter.java
+ create mode 100644 app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleCalendarFragment.java
+ create mode 100644 app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleDialogFragment.java
+ create mode 100644 app/src/main/res/drawable/ic_baseline_calendar_today_24.xml
+ create mode 100644 app/src/main/res/layout-xlarge/fragment_special_schedule_dialog.xml
+ create mode 100644 app/src/main/res/layout/fragment_special_schedule_calendar.xml
+ create mode 100644 app/src/main/res/layout/fragment_special_schedule_dialog.xml
+ create mode 100644 app/src/main/res/layout/item_special_schedule.xml
+ create mode 100644 logic/src/main/java/a75f/io/logic/schedule/SpecialSchedule.java
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 6a190374b..18027870f 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -215,6 +215,7 @@ dependencies {
+ 
+     implementation "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
+     implementation 'com.github.vihtarb:tooltip:0.1.9'
++    implementation 'org.apache.commons:commons-collections4:4.4'
+ }
+ 
+ 
+diff --git a/app/src/main/java/a75f/io/renatus/SystemFragment.java b/app/src/main/java/a75f/io/renatus/SystemFragment.java
+index 5fccc8299..adc4b9d48 100644
+--- a/app/src/main/java/a75f/io/renatus/SystemFragment.java
++++ b/app/src/main/java/a75f/io/renatus/SystemFragment.java
+@@ -599,6 +599,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
+ 		});
+ 	}
+ 	private String convertIntHourMinsToString(int hour, int minute){
++		if(hour == 23 && minute == 59){
++			return "24:00";
++		}
+ 		String hr = String.valueOf(hour);
+ 		String min = String.valueOf(minute);
+ 		String zero = "0";
+diff --git a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+index 8669c8fa8..3fd299a37 100644
+--- a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
++++ b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+@@ -757,6 +757,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         CCUUiUtil.setSpinnerDropDownColor(scheduleSpinner,getContext());
+         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
++        ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
+         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+ 
+         ArrayList<String> scheduleArray = new ArrayList<>();
+@@ -851,6 +852,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         mScheduleTypeMap.put(equipId[0], mScheduleType);
+         scheduleImageButton.setTag(mSchedule.getId());
+         vacationImageButton.setTag(mSchedule.getId());
++        specialScheduleImageButton.setTag(mSchedule.getId());
+ 
+         if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule()) {
+             scheduleImageButton.setVisibility(View.VISIBLE);
+@@ -859,18 +861,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         }
+ 
+         scheduleImageButton.setOnClickListener(v ->
+-        {
+-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+-            FragmentManager childFragmentManager = getFragmentManager();
+-            childFragmentManager.beginTransaction();
+-            schedulerFragment.show(childFragmentManager, "dialog");
+-
+-            schedulerFragment.setOnExitListener(() -> {
+-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+-                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
+-                ScheduleProcessJob.updateSchedules(equipOpen);
+-            });
+-        });
++                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+ 
+         vacationImageButton.setOnClickListener(v ->
+         {
+@@ -887,6 +878,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+             });
+         });
++        specialScheduleImageButton.setOnClickListener(v ->
++                imageButtonClickListener(v, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager()));
+ 
+         if(mScheduleType >= 2){
+             int spinnerposition = 2;
+@@ -920,8 +913,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                     Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                     if (zone != null) {
+-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                "== " +zone.getId());
++                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
++                                "not special and roomRef " + "== " +zone.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         zone.setScheduleRef(scheduleById.getId());
+                         CCUHsApi.getInstance().updateZone(zone, zoneId);
+@@ -929,6 +922,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     scheduleSpinner.setSelection(position);
+                     scheduleImageButton.setTag(mSchedule.getId());
+                     vacationImageButton.setTag(mSchedule.getId());
++                    specialScheduleImageButton.setTag(mSchedule.getId());
+                     CCUHsApi.getInstance().scheduleSync();
+                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
+                   //  clearTempOverride(equipId[0]);
+@@ -938,11 +932,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                         scheduleImageButton.setTag(mSchedule.getId());
+                         vacationImageButton.setTag(mSchedule.getId());
++                        specialScheduleImageButton.setTag(mSchedule.getId());
+                     } else {
+ 
+                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
+-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                "== " +zone.getId());
++                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
++                                "not special and roomRef " + "== " +zone.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         if (zone.hasSchedule()) {
+ 
+@@ -956,8 +951,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                              * There might have been an error scenario that prevented attaching the scheduleRef, but
+                              * still created a schedule. Handle it before creating a new schedule again.
+                              */
+-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                                                                                 "== " +zone.getId());
++                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                    "not special and roomRef " + "== " +zone.getId());
+                             if (!schedule.isEmpty()) {
+                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                 zone.setScheduleRef(schedule.get("id").toString());
+@@ -966,8 +961,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                             }
+                         }
+-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                "== " +zone.getId());
++                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                "not special and roomRef " + "== " +zone.getId());
+                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                         if (z != null) {
+@@ -1011,6 +1006,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                 mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
+                 scheduleImageButton.setTag(mSchedule.getId());
+                 vacationImageButton.setTag(mSchedule.getId());
++                specialScheduleImageButton.setTag(mSchedule.getId());
+             }
+ 
+             @Override
+@@ -1328,6 +1324,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+     }
+ 
++    private void imageButtonClickListener(View v, String zoneId, String[] equipId,
++                                        FragmentManager childFragmentManager2) {
++        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
++        FragmentManager childFragmentManager = childFragmentManager2;
++        childFragmentManager.beginTransaction();
++        schedulerFragment.show(childFragmentManager, "dialog");
++
++        schedulerFragment.setOnExitListener(() -> {
++            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
++            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
++            ScheduleProcessJob.updateSchedules(equipOpen);
++        });
++    }
++
++
+     private void clearTempOverride(String equipId) {
+         new Handler().postDelayed(new Runnable() {
+             @Override
+@@ -1353,6 +1364,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         Spinner scheduleSpinner = zoneDetails.findViewById(R.id.schedule_spinner);
+         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
++        ImageButton specilaScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
+         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+ 
+ 
+@@ -1447,6 +1459,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+         scheduleImageButton.setTag(mSchedule.getId());
+         vacationImageButton.setTag(mSchedule.getId());
++        specilaScheduleImageButton.setTag(mSchedule.getId());
+         vacationImageButton.setOnClickListener(v ->
+         {
+             SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+@@ -1473,6 +1486,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                 ScheduleProcessJob.updateSchedules(equipOpen);
+             });
+         });
++        specilaScheduleImageButton.setOnClickListener(v ->
++        {
++            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
++            FragmentManager childFragmentManager = getChildFragmentManager();
++            childFragmentManager.beginTransaction();
++            schedulerFragment.show(childFragmentManager, "dialog");
++
++            schedulerFragment.setOnExitListener(() -> {
++                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
++                mSchedule = Schedule.getScheduleByEquipId(equipId);
++                ScheduleProcessJob.updateSchedules(equipOpen);
++            });
++        });
+         if(mScheduleType >= 2){
+             int spinnerposition = 2;
+             for (HashMap<Object, Object> a:namedScheds) {
+@@ -1510,8 +1536,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                     if (z != null) {
+-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                "== " +z.getId());
++                        HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
++                                "not special and roomRef " + "== " +z.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         z.setScheduleRef(scheduleById.getId());
+                         CCUHsApi.getInstance().updateZone(z, zoneId);
+@@ -1519,6 +1545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     CCUHsApi.getInstance().scheduleSync();
+                     scheduleImageButton.setTag(mSchedule.getId());
+                     vacationImageButton.setTag(mSchedule.getId());
++                    specilaScheduleImageButton.setTag(mSchedule.getId());
+                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
+                   //  clearTempOverride(equipId);
+                     boolean isContainment = true;
+@@ -1527,13 +1554,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                         scheduleImageButton.setTag(mSchedule.getId());
+                         vacationImageButton.setTag(mSchedule.getId());
++                        specilaScheduleImageButton.setTag(mSchedule.getId());
+                     } else {
+ 
+                         Zone zone = Schedule.getZoneforEquipId(equipId);
+                         Schedule scheduleById = null;
+                         if (zone.hasSchedule()) {
+-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                    "== " +zone.getId());
++                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
++                                    "not special and roomRef " + "== " +zone.getId());
+                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
+                             scheduleById.setDisabled(false);
+@@ -1545,8 +1573,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                              * There might have been an error scenario that prevented attaching the scheduleRef, but
+                              * still created a schedule. Handle it before creating a new schedule again.
+                              */
+-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                                                                                 "== " +zone.getId());
++                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                    "not special and roomRef " + "== " +zone.getId());
+                             if (!schedule.isEmpty()) {
+                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                 zone.setScheduleRef(schedule.get("id").toString());
+@@ -1555,12 +1583,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                             }
+                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
+-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                    "== " +zone.getId());
++                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
++                                    "not special and roomRef " + "== " +zone.getId());
+                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                         }
+-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                "== " +zone.getId());
++                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                "not special and roomRef " + "== " +zone.getId());
+                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                         if (z != null) {
+@@ -1602,6 +1630,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                 mSchedule = Schedule.getScheduleByEquipId(equipId);
+                 scheduleImageButton.setTag(mSchedule.getId());
+                 vacationImageButton.setTag(mSchedule.getId());
++                specilaScheduleImageButton.setTag(mSchedule.getId());
+             }
+ 
+             @Override
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java b/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
+index 982da13f0..79f7af3e5 100644
+--- a/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
++++ b/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
+@@ -43,11 +43,12 @@ import android.widget.ImageButton;
+ import android.widget.ImageView;
+ import android.widget.Space;
+ import android.widget.TextView;
+-import android.widget.Toast;
+ 
++import org.apache.commons.lang3.StringUtils;
+ import org.javolution.annotations.Nullable;
+ import org.joda.time.DateTime;
+ import org.joda.time.Interval;
++import org.projecthaystack.HDict;
+ 
+ import java.util.ArrayList;
+ import java.util.Collections;
+@@ -65,12 +66,13 @@ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.DefaultSchedules;
+ import a75f.io.logic.L;
+ import a75f.io.logic.jobs.ScheduleProcessJob;
++import a75f.io.logic.schedule.SpecialSchedule;
+ import a75f.io.renatus.R;
+-import a75f.io.renatus.SystemFragment;
+ import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
+ import a75f.io.renatus.util.FontManager;
+ import a75f.io.renatus.util.Marker;
+ import a75f.io.renatus.util.ProgressDialogUtils;
++import a75f.io.renatus.util.RxjavaUtil;
+ 
+ public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
+ 
+@@ -99,6 +101,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+     TextView textViewaddEntryIcon;
+     TextView textViewVacations;
+     Button textViewaddVacations;
++    Button textViewAddSpecialSchedule;
+     Schedule schedule;
+     ConstraintLayout constraintScheduler;
+     ArrayList<View> viewTimeLines;
+@@ -109,6 +112,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+     NestedScrollView scheduleScrollView;
+     private OnExitListener mOnExitListener;
+     private VacationAdapter mVacationAdapter;
++    private RecyclerView specialScheduleRecycler;
+ 
+     @Override
+     public void onStop() {
+@@ -200,6 +204,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+ 
+         Typeface iconFont = FontManager.getTypeface(getActivity(), FontManager.FONTAWESOME);
+ 
++        specialScheduleRecycler = rootView.findViewById(R.id.specialScheduleRecycler);
++
+         //Scheduler Layout
+         constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
+         mVacationRecycler = rootView.findViewById(R.id.vacationRecycler);
+@@ -214,10 +220,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+ 
+ 
+         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
+-         textViewaddVacations= rootView.findViewById(R.id.addVacations);
+-
++        textViewaddVacations= rootView.findViewById(R.id.addVacations);
++        textViewAddSpecialSchedule = rootView.findViewById(R.id.addSpecialSchedule);
+ 
+         textViewaddVacations.setOnClickListener(v -> showVacationDialog());
++        textViewAddSpecialSchedule.setOnClickListener( specialSchedule -> showSpecialScheduleDialog(null));
+         mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
+         mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
+         mDrawableTimeMarker = AppCompatResources.getDrawable(getContext(), R.drawable.ic_time_marker_svg);
+@@ -341,6 +348,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+         }
+         
+         loadVacations();
++        loadSpecialSchedules();
+         updateUI();
+     }
+ 
+@@ -398,6 +406,45 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+         showVacationDialog(null);
+     }
+ 
++    private void showSpecialScheduleDialog(String specialScheduleId){
++        String roomRef = "";
++        if (getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)) {
++            roomRef = getArguments().getString(PARAM_ROOM_REF);
++        }
++        showSpecialScheduleDialog(roomRef, specialScheduleId);
++    }
++
++    private void showSpecialScheduleDialog(String roomRef, String specialScheduleId){
++        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
++        Fragment specialScheduleFragment = getChildFragmentManager().findFragmentByTag("popup");
++        if(specialScheduleFragment != null){
++            fragmentTransaction.remove(specialScheduleFragment);
++        }
++        SpecialScheduleDialogFragment  specialScheduleDialogFragment =
++                new SpecialScheduleDialogFragment(specialScheduleId, roomRef,
++                        (scheduleName, startDate, endDate, coolVal, heatVal) -> {
++                            ProgressDialogUtils.showProgressDialog(SchedulerFragment.this.getActivity(),
++                                    "Adding Special Schedule...");
++                            if (StringUtils.isEmpty(roomRef)) {
++                                SpecialSchedule.createSpecialSchedule(specialScheduleId, scheduleName, startDate,
++                                        endDate, coolVal, heatVal, false, null);
++                            } else {
++                                SpecialSchedule.createSpecialSchedule(specialScheduleId, scheduleName, startDate,
++                                        endDate, coolVal, heatVal, true, roomRef);
++                            }
++
++                            CCUHsApi.getInstance().saveTagsData();
++                            ScheduleProcessJob.updateSchedules();
++                            CCUHsApi.getInstance().syncEntityTree();
++
++                            new Handler(Looper.getMainLooper()).post(() -> {
++                                SchedulerFragment.this.loadSpecialSchedules();
++                                ProgressDialogUtils.hideProgressDialog();
++                            });
++                        });
++        specialScheduleDialogFragment.show(fragmentTransaction, "popup");
++    }
++
+     private void showVacationDialog(String vacationId)
+     {
+         FragmentTransaction ft = getFragmentManager().beginTransaction();
+@@ -459,6 +506,30 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+             showDeleteVacationAlert(id);
+     };
+ 
++    private void showDeleteSpecialScheduleAlert(String scheduleId){
++        HDict specialSchedule = CCUHsApi.getInstance().getScheduleDictById(scheduleId);
++        final Dialog alertDialog = new Dialog(getActivity());
++        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
++        alertDialog.setCancelable(false);
++        alertDialog.setContentView(R.layout.dialog_delete_schedule);
++        TextView messageTv = alertDialog.findViewById(R.id.tvMessage);
++        messageTv.setText("Are you sure you want to delete the Special Schedule: " + specialSchedule.get(Tags.DIS)+"?");
++        alertDialog.findViewById(R.id.btnCancel).setOnClickListener(view -> alertDialog.dismiss());
++        alertDialog.findViewById(R.id.btnProceed).setOnClickListener(view -> {
++            ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting special Schedule...");
++
++            CCUHsApi.getInstance().deleteEntity(scheduleId);
++            ScheduleProcessJob.updateSchedules();
++            CCUHsApi.getInstance().syncEntityTree();
++            alertDialog.dismiss();
++
++            new Handler(Looper.getMainLooper()).post(() -> {
++                SchedulerFragment.this.loadSpecialSchedules();
++                ProgressDialogUtils.hideProgressDialog();
++            });
++        });
++        alertDialog.show();
++    }
+     private void showDeleteVacationAlert(String vacationId) {
+         Schedule vacationSchedule = CCUHsApi.getInstance().getScheduleById(vacationId);
+         final Dialog alertDialog = new Dialog(getActivity());
+@@ -484,7 +555,59 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+ 
+         alertDialog.show();
+     }
++    private List<HashMap<Object, Object>> getSpecialSchedule(){
++        List<HashMap<Object, Object>> specialScheduleList;
++        if (getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)) {
++            String roomRef = getArguments().getString(PARAM_ROOM_REF);
++            specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(roomRef);
++        }
++        else{
++            specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(null);
++        }
++        if(specialScheduleList != null){
++            Collections.sort(specialScheduleList, (lhss, rhss) -> {
++                HDict lhrange = (HDict) lhss.get(Tags.RANGE);
++                HDict rhrange = (HDict) rhss.get(Tags.RANGE);
++                String lhStartDate = lhrange.get(Tags.STDT).toString();
++                String rhStartDate = rhrange.get(Tags.STDT).toString();
++                if(lhStartDate.equals(rhStartDate)){
++                    int lhStartHour = SpecialSchedule.getInt(lhrange.get(Tags.STHH).toString());
++                    int rhStartHour = SpecialSchedule.getInt(rhrange.get(Tags.STHH).toString());
++                    if(lhStartHour == rhStartHour){
++                        return SpecialSchedule.getInt(lhrange.get(Tags.STMM).toString()) -
++                                SpecialSchedule.getInt((rhrange.get(Tags.STMM).toString()));
++                    }
++                    return lhStartHour - rhStartHour;
++                }
++                return lhrange.get(Tags.STDT).toString().compareTo(rhrange.get(Tags.STDT).toString());
++            });
++        }
++        return specialScheduleList;
++    }
++
++    private void setSpecialScheduleAdapter(List<HashMap<Object, Object>> specialScheduleList){
++        if(specialScheduleList != null){
++            SpecialScheduleAdapter specialScheduleAdapter = new SpecialScheduleAdapter(specialScheduleList,
++                    view -> {
++                        String id = view.getTag().toString();
++                        showDeleteSpecialScheduleAlert(id);
++                    },
++                    view -> {
++                        String id = view.getTag().toString();
++                        showSpecialScheduleDialog(id);
++                    });
++            specialScheduleRecycler.setAdapter(specialScheduleAdapter);
++            specialScheduleRecycler.setLayoutManager(new LinearLayoutManager(this.getContext()));
++        }
++    }
++
++    private void loadSpecialSchedules(){
++        final List<HashMap<Object, Object>>[] specialScheduleList = new List[]{null};
++        RxjavaUtil.executeBackgroundTask(() -> specialScheduleList[0] = SchedulerFragment.this.getSpecialSchedule(),
++                ()-> setSpecialScheduleAdapter(specialScheduleList[0]));
+ 
++
++    }
+     private void loadVacations() {
+         
+         ArrayList<Schedule> vacations;
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleAdapter.java b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleAdapter.java
+new file mode 100644
+index 000000000..dc2494f58
+--- /dev/null
++++ b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleAdapter.java
+@@ -0,0 +1,112 @@
++package a75f.io.renatus.schedules;
++
++import android.content.Context;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.view.ViewGroup;
++import android.widget.ImageButton;
++import android.widget.TextView;
++
++import androidx.annotation.NonNull;
++import androidx.recyclerview.widget.RecyclerView;
++
++import org.joda.time.DateTime;
++import org.joda.time.format.DateTimeFormat;
++import org.joda.time.format.DateTimeFormatter;
++import org.projecthaystack.HDict;
++
++import java.util.HashMap;
++import java.util.List;
++import a75f.io.api.haystack.Tags;
++import a75f.io.logic.schedule.SpecialSchedule;
++import a75f.io.renatus.R;
++
++public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialScheduleAdapter.ViewHolder>{
++
++    private List<HashMap<Object, Object>> specialSchedules;
++    private ImageButton.OnClickListener editOnClickListener;
++    private ImageButton.OnClickListener deleteOnClickListener;
++    private static final DateTimeFormatter OUTPUT_DATE_FORMAT = DateTimeFormat.forPattern("dd MMM YYYY | HH:mm");
++    private static final DateTimeFormatter OUTPUT_DATE_FORMAT_1 = DateTimeFormat.forPattern("dd MMM YYYY | ");
++    private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
++
++
++    public SpecialScheduleAdapter(List<HashMap<Object, Object>> schedules,
++                                  ImageButton.OnClickListener deleteOnClickListener,
++                                  ImageButton.OnClickListener editOnClickListener) {
++        this.specialSchedules = schedules;
++        this.deleteOnClickListener = deleteOnClickListener;
++        this.editOnClickListener = editOnClickListener;
++
++    }
++
++    @NonNull
++    @Override
++    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
++        Context context  = parent.getContext();
++        LayoutInflater inflater = LayoutInflater.from(context);
++        View specialScheduleView = inflater.inflate(R.layout.item_special_schedule, parent, false);
++        return new SpecialScheduleAdapter.ViewHolder(specialScheduleView);
++    }
++
++    @Override
++    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
++        HashMap<Object, Object> specialSchedule = specialSchedules.get(position);
++        viewHolder.specialScheduleName.setText(specialSchedule.get(Tags.DIS).toString());
++        HDict range = (HDict) specialSchedule.get(Tags.RANGE);
++        DateTime beginDate = INPUT_DATE_FORMAT.parseDateTime(range.get(Tags.STDT).toString())
++                .withHourOfDay(SpecialSchedule.getInt(range.get(Tags.STHH).toString()))
++                .withMinuteOfHour(SpecialSchedule.getInt(range.get(Tags.STMM).toString()));
++
++        viewHolder.startDate.setText(beginDate.toString(OUTPUT_DATE_FORMAT));
++
++        int endHour = SpecialSchedule.getInt(range.get(Tags.ETHH).toString());
++        int endMin = SpecialSchedule.getInt(range.get(Tags.ETMM).toString());
++        if(endHour == 24){
++            DateTime endDate = INPUT_DATE_FORMAT.parseDateTime(range.get(Tags.ETDT).toString());
++            viewHolder.endDate.setText(endDate.toString(OUTPUT_DATE_FORMAT_1) +"24:00");
++        }
++        else {
++            DateTime endDate = INPUT_DATE_FORMAT.parseDateTime(range.get(Tags.ETDT).toString()).withHourOfDay(endHour)
++                    .withMinuteOfHour(endMin);
++
++            viewHolder.endDate.setText(endDate.toString(OUTPUT_DATE_FORMAT));
++        }
++
++    }
++
++    @Override
++    public int getItemCount() {
++        return specialSchedules.size();
++    }
++
++    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
++        private TextView specialScheduleName;
++        private TextView startDate;
++        private TextView endDate;
++        private ImageButton specialScheduleEdit;
++        private ImageButton specialScheduleDelete;
++
++        public ViewHolder(View itemView) {
++            super(itemView);
++            specialScheduleName = itemView.findViewById(R.id.specialScheduleTitle);
++            startDate = itemView.findViewById(R.id.specialScheduleStartDate);
++            endDate = itemView.findViewById(R.id.specialScheduleEndDate);
++            specialScheduleEdit = itemView.findViewById(R.id.specialScheduleEditButton);
++            specialScheduleEdit.setOnClickListener(this);
++            specialScheduleDelete = itemView.findViewById(R.id.specialScheduleDeleteButton);
++            specialScheduleDelete.setOnClickListener(this);
++        }
++
++        @Override
++        public void onClick(View view) {
++            view.setTag(specialSchedules.get(getAdapterPosition()).get(Tags.ID));
++            if(view.getId() == R.id.specialScheduleDeleteButton){
++                deleteOnClickListener.onClick(view);
++            }
++            else if(view.getId() == R.id.specialScheduleEditButton){
++                editOnClickListener.onClick(view);
++            }
++        }
++    }
++}
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleCalendarFragment.java b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleCalendarFragment.java
+new file mode 100644
+index 000000000..f84281dff
+--- /dev/null
++++ b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleCalendarFragment.java
+@@ -0,0 +1,101 @@
++package a75f.io.renatus.schedules;
++
++import android.app.Dialog;
++import android.os.Bundle;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.widget.Button;
++import android.widget.Toast;
++
++import androidx.appcompat.app.AlertDialog;
++import androidx.fragment.app.DialogFragment;
++
++import com.prolificinteractive.materialcalendarview.CalendarDay;
++import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
++
++import org.joda.time.DateTime;
++import org.projecthaystack.HDict;
++import org.threeten.bp.LocalDate;
++
++import java.util.List;
++
++import a75f.io.api.haystack.Tags;
++import a75f.io.logic.schedule.SpecialSchedule;
++import a75f.io.renatus.R;
++
++public class SpecialScheduleCalendarFragment extends DialogFragment{
++    private static final int SPECIAL_SCHEDULE_DAYS_LIMIT = 7;
++    private MaterialCalendarView calendarView;
++    private HDict specialScheduleHDict;
++
++    public interface SpecialScheduleDateListener{
++        void getSpecialScheduleDate(List<CalendarDay> selectedDates);
++    }
++
++    private SpecialScheduleDateListener specialScheduleDateListener;
++
++    public SpecialScheduleCalendarFragment(HDict specialScheduleHDict, SpecialScheduleDateListener specialScheduleDateListener){
++        this.specialScheduleDateListener = specialScheduleDateListener;
++        this.specialScheduleHDict = specialScheduleHDict;
++    }
++
++    @Override
++    public Dialog onCreateDialog(Bundle savedInstanceState) {
++        LayoutInflater inflater = LayoutInflater.from(getActivity());
++        View view = inflater.inflate(R.layout.fragment_special_schedule_calendar, null);
++        calendarView = view.findViewById(R.id.calendarView);
++        Button buttonSave = view.findViewById(R.id.buttonSave);
++        Button buttonCancel = view.findViewById(R.id.buttonCancel);
++
++        calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
++        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT-1l)).commit();
++        calendarView.setSelectedDate(CalendarDay.today());
++        buttonSave.setOnClickListener(saveClick -> processCalendar());
++        buttonCancel.setOnClickListener(cancelClick -> dismiss());
++
++        displaySelectedDates();
++        return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
++                .setView(view)
++                .setCancelable(false)
++                .create();
++    }
++
++    private void displaySelectedDates(){
++        if(specialScheduleHDict == null){
++            return;
++        }
++        HDict range = (HDict) specialScheduleHDict.get(Tags.RANGE);
++        DateTime beginDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.STDT).toString());
++        DateTime endDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.ETDT).toString());
++        if(beginDateTime.isBeforeNow()) {
++            calendarView.state().edit().setMinimumDate(CalendarDay.from(beginDateTime.getYear(),
++                    beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth())).commit();
++        }
++        else{
++            calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
++        }
++        CalendarDay startDay = CalendarDay.from(beginDateTime.getYear(), beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth());
++        CalendarDay endDay = CalendarDay.from(endDateTime.getYear(), endDateTime.getMonthOfYear(), endDateTime.getDayOfMonth());
++        calendarView.selectRange(startDay, endDay);
++        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT-1l)).commit();
++    }
++
++    private void processCalendar(){
++        List<CalendarDay>  selectedDates = calendarView.getSelectedDates();
++        if(selectedDates.isEmpty()){
++            Toast.makeText(SpecialScheduleCalendarFragment.this.getContext(), "Please select date for Special " +
++                            "Schedule.",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++        if(selectedDates.size() > SPECIAL_SCHEDULE_DAYS_LIMIT){
++            Toast.makeText(SpecialScheduleCalendarFragment.this.getContext(), "Special schedule can be applied for " +
++                            "seven days only.",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++        specialScheduleDateListener.getSpecialScheduleDate(selectedDates);
++        dismiss();
++    }
++
++}
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleDialogFragment.java b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleDialogFragment.java
+new file mode 100644
+index 000000000..07ae0fa68
+--- /dev/null
++++ b/app/src/main/java/a75f/io/renatus/schedules/SpecialScheduleDialogFragment.java
+@@ -0,0 +1,337 @@
++package a75f.io.renatus.schedules;
++
++import android.app.Dialog;
++import android.os.Bundle;
++import android.os.CountDownTimer;
++import android.util.Log;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.widget.Button;
++import android.widget.EditText;
++import android.widget.NumberPicker;
++import android.widget.Toast;
++
++import androidx.appcompat.app.AlertDialog;
++import androidx.fragment.app.DialogFragment;
++import androidx.fragment.app.Fragment;
++import androidx.fragment.app.FragmentTransaction;
++
++import com.prolificinteractive.materialcalendarview.CalendarDay;
++
++import org.apache.commons.collections4.MultiValuedMap;
++import org.apache.commons.lang3.StringUtils;
++import org.joda.time.DateTime;
++import org.projecthaystack.HDict;
++
++import java.lang.reflect.InvocationTargetException;
++import java.lang.reflect.Method;
++import java.text.ParseException;
++import java.text.SimpleDateFormat;
++import java.util.ArrayList;
++import java.util.Calendar;
++import java.util.Date;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Locale;
++import java.util.Map;
++
++import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.api.haystack.Schedule;
++import a75f.io.api.haystack.Tags;
++import a75f.io.logic.jobs.ScheduleProcessJob;
++import a75f.io.logic.schedule.SpecialSchedule;
++import a75f.io.renatus.R;
++import a75f.io.renatus.util.TimeUtils;
++import a75f.io.renatus.views.RangeBarView;
++
++public class SpecialScheduleDialogFragment extends DialogFragment {
++    private NumberPicker npStartTime;
++    private NumberPicker npEndTime;
++    private RangeBarView rangeSeekBarView;
++    private EditText specialScheduleName;
++    private EditText textSpecialScheduleDate;
++
++    private static final String TAG = "SPECIAL_SCHEDULE_UI";
++    private int nMinVal = 0;
++    private int nMaxVal = 96;
++    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM dd,yyyy", Locale.ENGLISH);
++    private List<CalendarDay> selectedDates;
++    private String roomRef;
++    private HDict specialScheduleHDict;
++    private String specialScheduleId;
++    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
++
++    public SpecialScheduleDialogFragment(String specialScheduleId, String roomRef,
++                                         SpecialScheduleDialogListener specialScheduleDialogListener){
++        selectedDates = new ArrayList<>();
++        selectedDates.add(CalendarDay.today());
++        this.roomRef = roomRef;
++        this.specialScheduleDialogListener = specialScheduleDialogListener;
++        this.specialScheduleId = specialScheduleId;
++        specialScheduleHDict = null;
++        if(!StringUtils.isEmpty(specialScheduleId)){
++            specialScheduleHDict = CCUHsApi.getInstance().getScheduleDictById(specialScheduleId);
++            selectedDates.clear();
++        }
++    }
++    private Schedule getScheduleForSpecialSchedule(String roomRef){
++        if(!StringUtils.isEmpty(roomRef)){
++            return CCUHsApi.getInstance().getZoneSchedule(roomRef, false).get(0);
++        }
++        return CCUHsApi.getInstance().getSystemSchedule(false).get(0);
++    }
++    public interface SpecialScheduleDialogListener{
++        void onClickSave(String scheduleName, DateTime startDate, DateTime endDate,
++                         double coolVal, double heatVal);
++    }
++
++    private SpecialScheduleDialogListener specialScheduleDialogListener;
++
++    @Override
++    public Dialog onCreateDialog(Bundle savedInstanceState) {
++        LayoutInflater inflater = LayoutInflater.from(getActivity());
++        View view = inflater.inflate(R.layout.fragment_special_schedule_dialog, null);
++        npStartTime = view.findViewById(R.id.np1);
++        npEndTime = view.findViewById(R.id.np2);
++        Button calendarSpecialSchedule = view.findViewById(R.id.calendarSpecialSchedule);
++        Button buttonSave = view.findViewById(R.id.buttonSave);
++        rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
++        rangeSeekBarView.setZoneSchedule(getScheduleForSpecialSchedule(roomRef));
++        specialScheduleName = view.findViewById(R.id.editText_specialScheduleName);
++        Button buttonCancel = view.findViewById(R.id.buttonCancel);
++        textSpecialScheduleDate = view.findViewById(R.id.textSpecialScheduleDate);
++        textSpecialScheduleDate.setEnabled(false);
++
++        calendarSpecialSchedule.setOnClickListener(specialScheduleCal -> showSpecialScheduleCalDialog());
++        buttonSave.setOnClickListener(saveClick -> saveSpecialSchedule());
++        buttonCancel.setOnClickListener(cancelClick -> dismiss());
++
++        npStartTime.setMinValue(nMinVal);
++        npStartTime.setMaxValue(nMaxVal);
++
++        npStartTime.setValue(32);
++        npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
++        npStartTime.setVisibility(View.VISIBLE);
++        npStartTime.setWrapSelectorWheel(false);
++        npStartTime.setFormatter(TimeUtils::valToTime);
++        npStartTime.setOnLongClickListener(view13 -> true);
++        npStartTime.setOnTouchListener((view16, motionEvent) -> false);
++        npStartTime.setOnClickListener(view15 -> {});
++
++        try {
++            Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
++            method.setAccessible(true);
++            method.invoke(npStartTime, true);
++        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
++            Log.e(TAG, "Reflection error for start time");
++        }
++
++        npEndTime.setMinValue(nMinVal);
++        npEndTime.setMaxValue(nMaxVal);
++        npEndTime.setValue(70);
++        npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
++        npEndTime.setVisibility(View.VISIBLE);
++        npEndTime.setWrapSelectorWheel(false);
++        npEndTime.setOnLongClickListener(view13 -> true);
++        npEndTime.setOnTouchListener((view14, motionEvent) -> false);
++        npEndTime.setOnClickListener(view15 -> {});
++        npEndTime.setFormatter(TimeUtils::valToTime);
++        Date date =Calendar.getInstance().getTime();
++        String beginDateString = simpleDateFormat.format(date);
++        textSpecialScheduleDate.setText(beginDateString +" to "+ beginDateString);
++
++        try {
++            Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
++            method.setAccessible(true);
++            method.invoke(npEndTime, true);
++        }  catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
++            Log.e(TAG, "Reflection error for end time");
++        }
++
++        displaySelectedSpecialSchedule();
++        return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
++                .setView(view)
++                .setCancelable(false)
++                .create();
++    }
++
++    private void displaySelectedSpecialSchedule(){
++        if(specialScheduleHDict == null){
++            return;
++        }
++        displaySelectedSpecialScheduleName();
++        HDict range = (HDict) specialScheduleHDict.get(Tags.RANGE);
++        displaySelectedTemperatures(range);
++        displaySelectedTime(range);
++        displaySelectedDate(range);
++    }
++
++    private void displaySelectedSpecialScheduleName(){
++        String scheduleName = specialScheduleHDict.get(Tags.DIS).toString();
++        specialScheduleName.setText(scheduleName);
++        specialScheduleName.setSelection(scheduleName.length());
++    }
++
++    private void displaySelectedTemperatures(HDict range){
++        new CountDownTimer(150, 150) {
++            @Override
++            public void onTick(long l) {
++
++            }
++
++            @Override
++            public void onFinish() {
++                rangeSeekBarView.setLowerCoolingTemp(Float.parseFloat(range.get(Tags.COOLVAL).toString()));
++                rangeSeekBarView.setLowerHeatingTemp(Float.parseFloat(range.get(Tags.HEATVAL).toString()));
++            }
++        }.start();
++    }
++
++    private void displaySelectedTime(HDict range){
++        npStartTime.setValue(SpecialSchedule.getInt(range.get(Tags.STHH).toString()) * 4 + SpecialSchedule.getInt(range.get(Tags.STMM).toString()) / 15);
++        npEndTime.setValue(SpecialSchedule.getInt(range.get(Tags.ETHH).toString()) * 4 + SpecialSchedule.getInt(range.get(Tags.ETMM).toString()) / 15);
++    }
++    private void displaySelectedDate(HDict range){
++        String beginDateString = range.get(Tags.STDT).toString();
++        String endDateString = range.get(Tags.ETDT).toString();
++        DateTime beginDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(beginDateString);
++        DateTime endDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(endDateString);
++        CalendarDay startDay = CalendarDay.from(beginDateTime.getYear(), beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth());
++        CalendarDay endDay = CalendarDay.from(endDateTime.getYear(), endDateTime.getMonthOfYear(), endDateTime.getDayOfMonth());
++        selectedDates.add(startDay);
++        selectedDates.add(endDay);
++        try {
++            textSpecialScheduleDate.setText(simpleDateFormat.format(dateFormat.parse(beginDateString)) +
++                    " to "+ simpleDateFormat.format(dateFormat.parse(endDateString)));
++        } catch (ParseException e) {
++            e.printStackTrace();
++        }
++
++    }
++
++    private void displaySpecialScheduleDate(List<CalendarDay> selectedDates){
++        this.selectedDates = selectedDates;
++        int selectedDatesSize = selectedDates.size();
++        Calendar calendar = Calendar.getInstance();
++        calendar.set(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth()-1,
++                selectedDates.get(0).getDay());
++        Date date =calendar.getTime();
++        String beginDateString = simpleDateFormat.format(date);
++        if(selectedDates.size() == 1){
++            textSpecialScheduleDate.setText(beginDateString +" to "+ beginDateString);
++        }
++        if(selectedDates.size() > 1){
++            calendar.set(selectedDates.get(selectedDatesSize-1).getYear(),
++                    selectedDates.get(selectedDatesSize-1).getMonth()-1,
++                    selectedDates.get(selectedDatesSize-1).getDay());
++            date =calendar.getTime();
++            textSpecialScheduleDate.setText(beginDateString +" to "+ simpleDateFormat.format(date));
++        }
++    }
++    private void showSpecialScheduleCalDialog(){
++        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
++        Fragment specialScheduleCalFragment = getChildFragmentManager().findFragmentByTag("popup");
++        if(specialScheduleCalFragment != null){
++            fragmentTransaction.remove(specialScheduleCalFragment);
++        }
++        SpecialScheduleCalendarFragment specialScheduleCalendarFragment =
++                new SpecialScheduleCalendarFragment(specialScheduleHDict,
++                        SpecialScheduleDialogFragment.this::displaySpecialScheduleDate);
++        specialScheduleCalendarFragment.show(fragmentTransaction, "popup");
++    }
++
++    private boolean isSpecialScheduleNameModified(String scheduleName){
++        if(specialScheduleHDict == null){
++            return false;
++        }
++        return specialScheduleHDict.get(Tags.DIS).toString().equalsIgnoreCase(scheduleName);
++    }
++    AlertDialog alert;
++    private void saveSpecialSchedule(){
++        String scheduleName  = specialScheduleName.getText().toString().trim();
++        if(scheduleName.isEmpty()){
++            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "Please provide Special Schedule Name.",
++                    Toast.LENGTH_SHORT).show();
++           return;
++        }
++
++        int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
++        int startMinutes = (npStartTime.getValue() % 4) * 15;
++
++        int endHour = (npEndTime.getValue() - (npEndTime.getValue() % 4)) / 4;
++        int endMinutes = (npEndTime.getValue() % 4) * 15;
++
++        if ((endHour < startHour) || (endHour == startHour && endMinutes <= startMinutes)) {
++            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "End time should be greater than Start " +
++                            "time",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++        if(textSpecialScheduleDate.getText().toString().isEmpty()){
++            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "Please provide date for Special Schedule",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++        if(endHour == 24){
++            endHour = 23;
++            endMinutes = 59;
++        }
++        DateTime startDate = new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(),
++                selectedDates.get(0).getDay()).withTime(startHour, startMinutes, 0, 0);
++        DateTime endDate =  new DateTime().withDate(selectedDates.get(selectedDates.size() - 1).getYear(),
++                selectedDates.get(selectedDates.size() - 1).getMonth(),
++                selectedDates.get(selectedDates.size() - 1).getDay()).withTime(endHour, endMinutes, 0, 0);
++
++        if(endDate.getMillis() < new Date().getTime()){
++            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "End time cannot be lesser than current time",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(roomRef);
++        if(!isSpecialScheduleNameModified(scheduleName) && !SpecialSchedule.isSpecialScheduleNameAvailable(scheduleName,
++                specialScheduleList)){
++            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "Special Schedule name exists.",
++                    Toast.LENGTH_SHORT).show();
++            return;
++        }
++
++        if(!StringUtils.isEmpty(specialScheduleId)){
++            boolean found = false;
++            int index = 0;
++            for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++                if(specialSchedule.get(Tags.ID).toString().equals(specialScheduleId)){
++                    found = true;
++                    break;
++                }
++                index++;
++            }
++            if(found){
++                specialScheduleList.remove(index);
++            }
++        }
++
++        MultiValuedMap<String, String> overlapSchedules = SpecialSchedule.getListOfOverlapSpecialSchedules(startDate,
++                endDate, specialScheduleList);
++        if(!overlapSchedules.isEmpty()){
++            StringBuilder overlapMessage = new StringBuilder();
++            for (Map.Entry<String, String> overlapEntry: overlapSchedules.entries()) {
++                overlapMessage.append(overlapEntry.getKey()+" : "+overlapEntry.getValue());
++                overlapMessage.append("\n");
++            }
++            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
++
++            builder.setMessage("The special schedule "+scheduleName+" cannot be applied as it is overlapping with " +
++                    "the below special schedules." +"\n\n"+overlapMessage.toString())
++                    .setCancelable(false)
++                    .setTitle("Special Schedule Overlaps")
++                    .setIcon(android.R.drawable.ic_dialog_alert)
++                    .setPositiveButton("OK", (dialogInterface, i) -> alert.dismiss());
++            alert = builder.create();
++            alert.show();
++            return;
++        }
++        specialScheduleDialogListener.onClickSave(scheduleName, startDate, endDate,
++                rangeSeekBarView.getCoolValue(), rangeSeekBarView.getHeatValue());
++        dismiss();
++    }
++}
+\ No newline at end of file
+diff --git a/app/src/main/java/a75f/io/renatus/util/CCUListAdapter.java b/app/src/main/java/a75f/io/renatus/util/CCUListAdapter.java
+index d2c923f0e..ac0de7ede 100644
+--- a/app/src/main/java/a75f/io/renatus/util/CCUListAdapter.java
++++ b/app/src/main/java/a75f/io/renatus/util/CCUListAdapter.java
+@@ -1,8 +1,6 @@
+ package a75f.io.renatus.util;
+ 
+ import android.content.Context;
+-import android.content.pm.PackageInfo;
+-import android.content.pm.PackageManager;
+ import android.graphics.Color;
+ import android.view.LayoutInflater;
+ import android.view.View;
+@@ -12,10 +10,11 @@ import android.widget.TextView;
+ import androidx.annotation.NonNull;
+ import androidx.recyclerview.widget.RecyclerView;
+ 
++import org.apache.commons.lang3.StringUtils;
++
+ import java.util.List;
+ 
+ import a75f.io.logic.ccu.restore.CCU;
+-import a75f.io.logic.ccu.restore.RestoreCCU;
+ import a75f.io.renatus.R;
+ import a75f.io.renatus.registration.CCUSelect;
+ 
+@@ -37,9 +36,14 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
+         return new CCUView(itemView);
+     }
+ 
+-    private boolean isCCUReplacable(int position){
+-        return ((CCUUiUtil.getCurrentCCUVersion().contains(ccuList.get(position).getVersion())) &&
+-                (!ccuList.get(position).isOnline()));
++    private boolean isCCUReplaceable(int position){
++        String ccuCurrVersion = CCUUiUtil.getCurrentCCUVersion();
++        String ccuVersion = ccuList.get(position).getVersion();
++        String lastUpdatedDateTime = ccuList.get(position).getLastUpdated();
++        if(StringUtils.isEmpty(ccuCurrVersion) || StringUtils.isEmpty(ccuVersion) || lastUpdatedDateTime.equalsIgnoreCase("n/a")){
++            return false;
++        }
++        return ((ccuCurrVersion.contains(ccuVersion)) && (!ccuList.get(position).isOnline()));
+     }
+     @Override
+     public void onBindViewHolder(@NonNull CCUView holder, int position) {
+@@ -51,7 +55,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
+         if(!ccuList.get(position).isOnline()){
+             holder.status.setText("OFFLINE");
+         }
+-        if(isCCUReplacable(position)){
++        if(isCCUReplaceable(position)){
+            holder.isOffline.setBackgroundColor(CCUUiUtil.getPrimaryThemeColor(context));
+            holder.itemView.setEnabled(true);
+            holder.name.setTextColor(Color.BLACK);
+diff --git a/app/src/main/res/drawable/ic_baseline_calendar_today_24.xml b/app/src/main/res/drawable/ic_baseline_calendar_today_24.xml
+new file mode 100644
+index 000000000..bd77fd818
+--- /dev/null
++++ b/app/src/main/res/drawable/ic_baseline_calendar_today_24.xml
+@@ -0,0 +1,5 @@
++<vector android:height="24dp" android:tint="?orange_75f"
++    android:viewportHeight="24" android:viewportWidth="24"
++    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
++    <path android:fillColor="@android:color/white" android:pathData="M20,3h-1L19,1h-2v2L7,3L7,1L5,1v2L4,3c-1.1,0 -2,0.9 -2,2v16c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2L22,5c0,-1.1 -0.9,-2 -2,-2zM20,21L4,21L4,8h16v13z"/>
++</vector>
+diff --git a/app/src/main/res/layout-xlarge/fragment_scheduler.xml b/app/src/main/res/layout-xlarge/fragment_scheduler.xml
+index c4f08bde7..0175f035f 100644
+--- a/app/src/main/res/layout-xlarge/fragment_scheduler.xml
++++ b/app/src/main/res/layout-xlarge/fragment_scheduler.xml
+@@ -655,6 +655,108 @@
+ 
+             </androidx.constraintlayout.widget.ConstraintLayout>
+ 
++
++            <TextView
++                android:id="@+id/SpecialScheduleTitle"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:textSize="28sp"
++                android:layout_marginTop="50dp"
++                android:fontFamily="@font/lato_bold"
++                android:text="Special Schedule"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                android:textStyle="bold"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
++
++            <Button
++                android:id="@+id/addSpecialSchedule"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="50dp"
++                android:background="@color/transparent"
++                android:clickable="true"
++                android:textSize="28sp"
++                android:enabled="true"
++                android:fontFamily="@font/lato_bold"
++                android:text="Add Special Schedule"
++                android:drawablePadding="12dp"
++                android:drawableEnd="@drawable/ic_baseline_add_24"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintRight_toRightOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
++
++            <androidx.constraintlayout.widget.ConstraintLayout
++                android:id="@+id/constraintLtSpecialSchedule"
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:layout_marginTop="30dp"
++                app:layout_constraintTop_toBottomOf="@+id/SpecialScheduleTitle">
++
++
++                <LinearLayout
++                    android:id="@+id/specail_schedule_header_wrapper"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:paddingTop="10dp"
++                    android:paddingBottom="10dp"
++                    android:layout_marginLeft="40dp"
++                    android:layout_marginRight="24dp"
++                    app:layout_constraintLeft_toLeftOf="parent"
++                    app:layout_constraintTop_toTopOf="parent">
++
++                    <TextView
++                        android:id="@+id/specialScheduleTitleHeader"
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content"
++                        android:layout_weight="1"
++                        android:textSize="25sp"
++                        android:text="Title"
++                        />
++
++
++                    <TextView
++                        android:id="@+id/specailScheduleStartDateHeader"
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content"
++                        android:layout_weight="1"
++                        android:text="Start Date"
++                        android:textSize="25sp"
++                        />
++
++                    <TextView
++                        android:id="@+id/specialScheduleEndDateHeader"
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content"
++                        android:layout_weight="1"
++                        android:text="End Date"
++                        android:textSize="25sp"
++                        />
++
++                    <LinearLayout
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content" android:layout_weight="1"></LinearLayout>
++
++                </LinearLayout>
++
++                <androidx.recyclerview.widget.RecyclerView
++
++                    android:id="@+id/specialScheduleRecycler"
++                    android:layout_width="match_parent"
++                    android:layout_marginLeft="40dp"
++                    android:layout_marginRight="24dp"
++                    android:layout_height="wrap_content"
++                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
++                    app:layout_constraintLeft_toLeftOf="parent"
++                    app:layout_constraintTop_toBottomOf="@+id/specail_schedule_header_wrapper"
++                    android:visibility="visible"/>
++
++
++            </androidx.constraintlayout.widget.ConstraintLayout>
++
++
++
+             <TextView
+                 android:id="@+id/vacationsTitle"
+                 android:layout_width="wrap_content"
+@@ -666,7 +768,7 @@
+                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                 android:textStyle="bold"
+                 app:layout_constraintLeft_toLeftOf="parent"
+-                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
++                app:layout_constraintTop_toBottomOf="@+id/constraintLtSpecialSchedule" />
+ 
+             <Button
+                 android:id="@+id/addVacations"
+@@ -683,7 +785,7 @@
+                 android:drawableEnd="@drawable/ic_baseline_add_24"
+                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                 app:layout_constraintRight_toRightOf="parent"
+-                app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
++                app:layout_constraintTop_toBottomOf="@+id/constraintLtSpecialSchedule" />
+ 
+             <androidx.constraintlayout.widget.ConstraintLayout
+                 android:id="@+id/constraintLt_Vacations"
+@@ -710,7 +812,7 @@
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+-                        android:textSize="28sp"
++                        android:textSize="25sp"
+                         android:text="Vacation Title"
+                          />
+ 
+@@ -721,7 +823,7 @@
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="Start Date"
+-                        android:textSize="28sp"
++                        android:textSize="25sp"
+                          />
+ 
+                     <TextView
+@@ -730,7 +832,7 @@
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="End Date"
+-                        android:textSize="28sp"
++                        android:textSize="25sp"
+                          />
+ 
+                     <LinearLayout
+diff --git a/app/src/main/res/layout-xlarge/fragment_special_schedule_dialog.xml b/app/src/main/res/layout-xlarge/fragment_special_schedule_dialog.xml
+new file mode 100644
+index 000000000..cef159a07
+--- /dev/null
++++ b/app/src/main/res/layout-xlarge/fragment_special_schedule_dialog.xml
+@@ -0,0 +1,178 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:padding="32dp">
++
++    <ScrollView
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintRight_toRightOf="parent">
++
++
++        <androidx.constraintlayout.widget.ConstraintLayout
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++
++            <EditText
++                android:id="@+id/editText_specialScheduleName"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:layout_marginStart="8dp"
++                android:layout_marginTop="8dp"
++                android:layout_marginEnd="8dp"
++                android:layout_marginBottom="8dp"
++                android:hint="Special Schedule Name"
++                android:inputType="textPersonName"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toTopOf="parent"/>
++
++            <TextView
++                android:id="@+id/desiredTemp"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginStart="8dp"
++                android:layout_marginTop="20dp"
++                android:layout_marginEnd="8dp"
++                android:layout_marginBottom="8dp"
++                android:text="@string/desired_temperature"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/editText_specialScheduleName" />
++
++
++            <a75f.io.renatus.views.RangeBarView
++                android:id="@+id/rangeSeekBar"
++                android:layout_width="match_parent"
++                android:layout_height="100dp"
++                android:layout_centerInParent="true"
++                android:layout_gravity="center"
++                android:layout_marginTop="10dp"
++                android:gravity="center"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/desiredTemp" />
++
++            <TextView
++                android:id="@+id/textViewSetSchedule"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:text="Set Schedule"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
++
++            <LinearLayout
++                android:id="@+id/ltNumberPicker"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/textViewSetSchedule">
++
++                <NumberPicker
++                    android:id="@+id/np1"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:gravity="center_vertical|center_horizontal"
++                    android:minWidth="150dp"
++                    android:theme="?DefaultNumberPickerTheme" />
++
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_gravity="center_vertical"
++                    android:layout_marginLeft="50dp"
++                    android:layout_marginRight="50dp"
++                    android:text="TO"
++                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
++
++                <NumberPicker
++                    android:id="@+id/np2"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:gravity="center_vertical|center_horizontal"
++                    android:minWidth="150dp"
++                    android:theme="?DefaultNumberPickerTheme" />
++
++            </LinearLayout>
++
++            <TextView
++                android:id="@+id/textViewAppliesto"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="1dp"
++                android:text="Applies To"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />
++
++            <LinearLayout
++                android:id="@+id/radioGrp"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:orientation="horizontal"
++                android:padding="8dp"
++                app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto"
++                tools:ignore="MissingConstraints">
++
++                <EditText
++                    android:id="@+id/textSpecialScheduleDate"
++                    android:layout_width="0dp"
++                    android:layout_weight="6.5"
++                    android:layout_height="wrap_content"
++                    android:textColor="@color/black"
++                    android:layout_marginTop="1dp" />
++
++                <Button
++                    android:id="@+id/calendarSpecialSchedule"
++                    android:layout_width="0dp"
++                    android:layout_weight="3.5"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="10dp"
++                    android:background="@color/transparent"
++                    android:clickable="true"
++                    android:textSize="28sp"
++                    android:enabled="true"
++                    android:fontFamily="@font/lato_bold"
++                    android:drawablePadding="12dp"
++                    android:drawableLeft="@drawable/ic_baseline_calendar_today_24"/>
++            </LinearLayout>
++
++
++            <Button
++                android:id="@+id/buttonSave"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:background="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="SAVE"
++                android:textColor="?orange_75f"
++                android:textSize="20dp"
++                app:layout_constraintRight_toRightOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
++
++            <Button
++                android:id="@+id/buttonCancel"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:layout_marginRight="50dp"
++                android:background="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="CANCEL"
++                android:textColor="?orange_75f"
++                android:textSize="20dp"
++                app:layout_constraintRight_toLeftOf="@+id/buttonSave"
++                app:layout_constraintRight_toRightOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
++
++
++        </androidx.constraintlayout.widget.ConstraintLayout>
++    </ScrollView>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+diff --git a/app/src/main/res/layout-xlarge/temp_schedule.xml b/app/src/main/res/layout-xlarge/temp_schedule.xml
+index 02c3add89..760f2819d 100644
+--- a/app/src/main/res/layout-xlarge/temp_schedule.xml
++++ b/app/src/main/res/layout-xlarge/temp_schedule.xml
+@@ -54,7 +54,42 @@
+             android:scaleType="centerInside"
+             android:src="@android:drawable/ic_menu_edit"
+             android:padding="8dp"></ImageButton>
++        <TextView
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:padding="10dp"
++            android:layout_marginLeft="20dp"
++            android:text="Special Schedule:"
++            android:textAppearance="@style/title_normal"
++            android:layout_gravity="center_vertical"/>
+ 
++        <TextView
++            android:id="@+id/special_status_status"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:padding="10dp"
++            android:text="No Special Scheduled"
++            style="@style/Widget.AppCompat.EditText"
++            android:fontFamily="@font/lato_regular"
++            android:layout_gravity="center_vertical"
++            android:textSize="22sp"
++            android:textColor="@color/hint_textcolor"/>
++
++        <ImageButton
++            android:id="@+id/special_status_edit_button"
++            android:layout_width="48dp"
++            android:layout_height="48dp"
++            android:scaleType="centerInside"
++            android:src="@android:drawable/ic_menu_edit"
++            android:background="@null"
++            android:padding="8dp"
++            android:layout_gravity="center_vertical"/>
++
++    </LinearLayout>
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:orientation="horizontal">
+ 
+         <TextView
+             android:layout_width="wrap_content"
+@@ -81,6 +116,7 @@
+             android:src="@android:drawable/ic_menu_edit"
+             android:visibility="gone"
+             android:padding="8dp"></ImageButton>
++
+     </LinearLayout>
+     <LinearLayout
+         android:id="@+id/ss_layout"
+diff --git a/app/src/main/res/layout/fragment_special_schedule_calendar.xml b/app/src/main/res/layout/fragment_special_schedule_calendar.xml
+new file mode 100644
+index 000000000..6a4feb900
+--- /dev/null
++++ b/app/src/main/res/layout/fragment_special_schedule_calendar.xml
+@@ -0,0 +1,60 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:layout_gravity="center"
++    android:orientation="vertical">
++
++    <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
++        android:id="@+id/calendarView"
++        android:layout_width="wrap_content"
++        android:layout_height="350dp"
++        android:layout_gravity="center"
++        app:mcv_selectionColor="?orange_75f"
++        app:mcv_selectionMode="range"
++        app:mcv_showOtherDates="all"
++        app:mcv_headerTextAppearance="@style/month_text_appearance"
++        />
++
++
++    <LinearLayout
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="end"
++        android:layout_marginTop="20dp"
++        android:orientation="horizontal">
++
++        <Button
++            android:id="@+id/buttonCancel"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_margin="8dp"
++            android:background="@null"
++            android:fontFamily="@font/lato_regular"
++            android:text="CANCEL"
++            android:textColor="?orange_75f"
++            android:textSize="20dp" />
++
++        <View android:layout_width="0.01dp"
++            android:layout_height="20dp"
++            android:layout_marginStart="40dp"
++            android:layout_marginEnd="40dp"
++            android:layout_gravity="center_vertical"
++            android:background="@color/line_greycolor"/>
++
++        <Button
++            android:id="@+id/buttonSave"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_margin="8dp"
++            android:background="@null"
++            android:fontFamily="@font/lato_regular"
++            android:text="SAVE"
++            android:textColor="?orange_75f"
++            android:textSize="20dp" />
++
++    </LinearLayout>
++
++
++</LinearLayout>
+\ No newline at end of file
+diff --git a/app/src/main/res/layout/fragment_special_schedule_dialog.xml b/app/src/main/res/layout/fragment_special_schedule_dialog.xml
+new file mode 100644
+index 000000000..c246d89f2
+--- /dev/null
++++ b/app/src/main/res/layout/fragment_special_schedule_dialog.xml
+@@ -0,0 +1,178 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:padding="32dp">
++
++    <ScrollView
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        app:layout_constraintLeft_toLeftOf="parent"
++        app:layout_constraintRight_toRightOf="parent">
++
++
++        <androidx.constraintlayout.widget.ConstraintLayout
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++
++
++
++            <ImageButton
++                android:id="@+id/buttonDelete"
++                android:layout_width="wrap_content"
++                android:layout_height="48dp"
++                android:background="@android:color/transparent"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintTop_toTopOf="parent"
++                android:visibility="gone"
++                app:srcCompat="@android:drawable/ic_menu_delete" />
++
++            <EditText
++                android:id="@+id/editText_specialScheduleName"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:layout_marginStart="8dp"
++                android:layout_marginTop="8dp"
++                android:layout_marginEnd="8dp"
++                android:layout_marginBottom="8dp"
++                android:ems="10"
++                android:hint="Special Schedule Name"
++                android:inputType="textPersonName"
++                app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toTopOf="parent"/>
++
++            <LinearLayout
++                android:id="@+id/desiredTemp"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/editText_specialScheduleName"
++                android:orientation="horizontal">
++
++                <TextView
++                    android:id="@+id/textViewDesiredTemp"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:gravity="left"
++                    android:text="Desired Temperature"
++                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                    app:layout_constraintBottom_toBottomOf="@+id/editText_specialScheduleName"
++                    app:layout_constraintTop_toTopOf="@+id/editText_specialScheduleName" />
++
++            </LinearLayout>
++
++            <a75f.io.renatus.views.RangeBarView
++                android:id="@+id/rangeSeekBar"
++                android:layout_width="match_parent"
++                android:layout_height="100dp"
++                android:layout_centerInParent="true"
++                android:layout_gravity="center"
++                android:layout_marginTop="20dp"
++                android:gravity="center"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/desiredTemp" />
++
++            <TextView
++                android:id="@+id/textViewSetSchedule"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:text="Set Schedule"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
++
++            <LinearLayout
++                android:id="@+id/ltNumberPicker"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/textViewSetSchedule">
++
++                <NumberPicker
++                    android:id="@+id/np1"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:gravity="center_vertical|center_horizontal"
++                    android:minWidth="150dp"
++                    android:theme="?DefaultNumberPickerTheme" />
++
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_gravity="center_vertical"
++                    android:layout_marginLeft="50dp"
++                    android:layout_marginRight="50dp"
++                    android:text="TO"
++                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
++
++                <NumberPicker
++                    android:id="@+id/np2"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:gravity="center_vertical|center_horizontal"
++                    android:minWidth="150dp"
++                    android:theme="?DefaultNumberPickerTheme" />
++
++            </LinearLayout>
++
++            <TextView
++                android:id="@+id/textViewAppliesto"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:text="Applies To"
++                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
++                app:layout_constraintLeft_toLeftOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />
++
++            <LinearLayout
++                android:id="@+id/radioGrp"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:orientation="horizontal"
++                android:padding="8dp"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto">
++            </LinearLayout>
++
++
++            <Button
++                android:id="@+id/buttonSave"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="24dp"
++                android:background="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="SAVE"
++                android:textColor="?orange_75f"
++                android:textSize="20dp"
++                app:layout_constraintRight_toRightOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
++
++            <Button
++                android:id="@+id/buttonCancel"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="24dp"
++                android:layout_marginRight="50dp"
++                android:background="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="CANCEL"
++                android:textColor="?orange_75f"
++                android:textSize="20dp"
++                app:layout_constraintRight_toLeftOf="@+id/buttonSave"
++                app:layout_constraintRight_toRightOf="parent"
++                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
++
++
++        </androidx.constraintlayout.widget.ConstraintLayout>
++    </ScrollView>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+diff --git a/app/src/main/res/layout/item_special_schedule.xml b/app/src/main/res/layout/item_special_schedule.xml
+new file mode 100644
+index 000000000..b19dff4d1
+--- /dev/null
++++ b/app/src/main/res/layout/item_special_schedule.xml
+@@ -0,0 +1,61 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:orientation="horizontal"
++    android:paddingTop="10dp"
++    android:paddingBottom="10dp">
++
++    <TextView
++        android:id="@+id/specialScheduleTitle"
++        android:textSize="18sp"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_weight="1"
++        android:text="Title" />
++
++
++    <TextView
++        android:id="@+id/specialScheduleStartDate"
++        android:textSize="18sp"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_weight="1"
++        android:text="Start Date" />
++
++    <TextView
++        android:id="@+id/specialScheduleEndDate"
++        android:textSize="18sp"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_weight="1"
++        android:text="End Date" />
++
++
++    <LinearLayout
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_weight="1"
++        android:gravity="center_horizontal"
++        android:orientation="horizontal">
++
++        <ImageButton
++            android:id="@+id/specialScheduleEditButton"
++            android:layout_width="?actionBarSize"
++            android:layout_height="wrap_content"
++            android:background="?android:attr/selectableItemBackground"
++            android:layout_marginRight="24dp"
++            android:src="@android:drawable/ic_menu_edit"
++            android:text="Special Schedule"
++            android:textSize="10sp" />
++
++        <ImageButton
++            android:id="@+id/specialScheduleDeleteButton"
++            android:layout_width="?actionBarSize"
++            android:layout_height="wrap_content"
++            android:background="?android:attr/selectableItemBackground"
++            android:src="@android:drawable/ic_menu_delete"
++            android:text="Special Schedule"
++            android:textSize="10sp" />
++    </LinearLayout>
++</LinearLayout>
+\ No newline at end of file
+diff --git a/app/src/main/res/layout/zones_item_details.xml b/app/src/main/res/layout/zones_item_details.xml
+index d39b81485..d8ef40e10 100644
+--- a/app/src/main/res/layout/zones_item_details.xml
++++ b/app/src/main/res/layout/zones_item_details.xml
+@@ -46,8 +46,7 @@
+             android:layout_height="wrap_content"
+             android:padding="10dp"
+             android:text="Schedule:"
+-            android:textAppearance="@style/title_normal">
+-        </TextView>
++            android:textAppearance="@style/title_normal"/>
+ 
+         <Spinner
+             android:id="@+id/schedule_spinner"
+@@ -55,8 +54,7 @@
+             android:layout_height="wrap_content"
+             android:spinnerMode="dropdown"
+             style="@style/Widget.AppCompat.Spinner.Underlined"
+-            android:layout_gravity="center_vertical"
+-            />
++            android:layout_gravity="center_vertical" />
+ 
+         <ImageButton android:id="@+id/schedule_edit_button"
+             android:layout_width="48dp"
+@@ -65,54 +63,85 @@
+             app:srcCompat="@drawable/ic_edit"
+             android:background="@null"
+             android:padding="8dp"
+-            android:layout_gravity="center_vertical">
+-
+-        </ImageButton>
+-
++            android:layout_gravity="center_vertical"/>
+ 
+         <TextView
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:padding="10dp"
+             android:layout_marginLeft="20dp"
+-            android:text="Vacation:"
++            android:text="Special Schedule:"
+             android:textAppearance="@style/title_normal"
+-            android:layout_gravity="center_vertical">
+-
+-        </TextView>
++            android:layout_gravity="center_vertical"/>
+ 
+         <TextView
+-            android:id="@+id/vacation_status"
++            android:id="@+id/special_status_status"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:padding="10dp"
+-            android:text="No Vacation Scheduled"
++            android:text="No Special Scheduled"
+             style="@style/Widget.AppCompat.EditText"
+             android:fontFamily="@font/lato_regular"
+             android:layout_gravity="center_vertical"
+             android:textSize="22sp"
+-            android:textColor="@color/hint_textcolor"
+-            >
+-
+-        </TextView>
++            android:textColor="@color/hint_textcolor"/>
+ 
+         <ImageButton
+-            android:id="@+id/vacation_edit_button"
++            android:id="@+id/special_status_edit_button"
+             android:layout_width="48dp"
+             android:layout_height="48dp"
+             android:scaleType="centerInside"
+             app:srcCompat="@drawable/ic_edit"
+             android:background="@null"
+             android:padding="8dp"
+-            android:layout_gravity="center_vertical" />
++            android:layout_gravity="center_vertical"/>
++    </LinearLayout>
++
++    <LinearLayout
++        android:id="@+id/vc_schedule"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:orientation="horizontal"
++        android:layout_below="@+id/lt_schedule"
++        android:layout_marginLeft="100dp">
++
++        <TextView
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:padding="10dp"
++            android:text="Vacations:"
++            android:textAppearance="@style/title_normal"/>
++
++        <TextView
++            android:id="@+id/vacation_status"
++            style="@style/Widget.AppCompat.EditText"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center_vertical"
++            android:fontFamily="@font/lato_regular"
++            android:padding="10dp"
++            android:text="No Vacation Scheduled"
++            android:textColor="@color/hint_textcolor"
++            android:textSize="22sp" />
++
++        <ImageButton
++            android:id="@+id/vacation_edit_button"
++            android:layout_width="48dp"
++            android:layout_height="48dp"
++            android:layout_gravity="center_vertical"
++            android:background="@null"
++            android:padding="8dp"
++            android:scaleType="centerInside"
++            app:srcCompat="@drawable/ic_edit" />
++
+     </LinearLayout>
+ 
+     <LinearLayout
+         android:id="@+id/lt_profilepoints"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+-        android:layout_below="@+id/lt_schedule"
+-        android:layout_alignLeft="@+id/lt_schedule"
++        android:layout_below="@+id/vc_schedule"
++        android:layout_alignLeft="@+id/vc_schedule"
+         android:orientation="vertical">
+ 
+     </LinearLayout>
+@@ -124,7 +153,7 @@
+         android:layout_height="wrap_content"
+         android:orientation="vertical"
+         android:layout_below="@+id/lt_profilepoints"
+-        android:layout_alignLeft="@+id/lt_schedule"
++        android:layout_alignLeft="@+id/vc_schedule"
+         android:visibility="gone"
+         >
+         <LinearLayout
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 1f25929c8..f76d7050c 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1185,6 +1185,7 @@
+     <string name="success_msg">Device session activated successfully</string>
+     <string name="okay">OKAY</string>
+     <string name="no_internet">Please check the internet connection</string>
++    <string name="desired_temperature">Desired Temperature</string>
+ 
+ 
+     <!-- Named Schedule-->
+diff --git a/haystack/src/main/java/a75f/io/api/haystack/CCUHsApi.java b/haystack/src/main/java/a75f/io/api/haystack/CCUHsApi.java
+index 587ef7389..89fe01de1 100644
+--- a/haystack/src/main/java/a75f/io/api/haystack/CCUHsApi.java
++++ b/haystack/src/main/java/a75f/io/api/haystack/CCUHsApi.java
+@@ -1153,6 +1153,9 @@ public class CCUHsApi
+         //import building schedule data
+         importBuildingSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
+ 
++        //import building special schedule
++        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
++
+         //import building tuners
+         importBuildingTuners(StringUtils.prependIfMissing(siteId, "@"), hClient);
+ 
+@@ -1267,7 +1270,7 @@ public class CCUHsApi
+ 
+     private void importBuildingSchedule(String siteId, HClient hClient){
+ 
+-        HashMap currentBuildingSchedule = read("schedule and building and not named");
++        HashMap currentBuildingSchedule = read("schedule and building and not named and not special");
+         if (!currentBuildingSchedule.isEmpty()) {
+             //CCU already has a building schedule.
+             CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
+@@ -1276,7 +1279,8 @@ public class CCUHsApi
+ 
+         try {
+             HDict buildingDict =
+-                    new HDictBuilder().add("filter", "building and schedule and not named and siteRef == " + siteId).toDict();
++                    new HDictBuilder().add("filter",
++                            "building and schedule and not named and not special and siteRef == " + siteId).toDict();
+             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+ 
+             if (buildingSch == null) {
+@@ -1298,6 +1302,36 @@ public class CCUHsApi
+         }
+     }
+ 
++    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
++
++        HashMap<Object, Object>  currentBuildingSchedule = readEntity("schedule and building and special");
++        if (!currentBuildingSchedule.isEmpty()) {
++            //CCU already has a building special schedule.
++            CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
++            return;
++        }
++
++        try {
++            HDict buildingDict =
++                    new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
++                            + siteId).toDict();
++            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
++
++            if (buildingSch == null) {
++                return;
++            }
++
++            Iterator it = buildingSch.iterator();
++            while (it.hasNext()) {
++                HRow row = (HRow) it.next();
++                tagsDb.addHDict(row.get("id").toString(), row);
++                CcuLog.i(TAG,"Building Special schedule Imported");
++            }
++        } catch (UnknownRecException e) {
++            e.printStackTrace();
++        }
++    }
++
+     private void importBuildingTuners(String siteId, HClient hClient) {
+         CcuLog.i(TAG, " importBuildingTuners");
+         ArrayList<Equip> equips = new ArrayList<>();
+@@ -1645,14 +1679,27 @@ public class CCUHsApi
+         return ccuId != null ? ccuId.toString() : null;
+     }
+ 
++    private String getHSQueryToReadSpecialSchedule(String zoneId){
++        String query = "schedule and building and special";
++        if(!StringUtils.isEmpty(zoneId)){
++            query = "schedule and special and zone and roomRef == "+zoneId;
++        }
++        return query;
++    }
++
++    public List<HashMap<Object, Object>> getSpecialSchedules(String zoneId){
++        String query = getHSQueryToReadSpecialSchedule(zoneId);
++        return CCUHsApi.getInstance().readAllEntities(query);
++    }
++
+     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
+     {
+         ArrayList<Schedule> schedules = new ArrayList<>();
+         String              filter    = null;
+         if (!vacation)
+-            filter = "schedule and building and not named and not vacation";
++            filter = "schedule and building and not named and not special and not vacation";
+         else
+-            filter = "schedule and building and not named and vacation";
++            filter = "schedule and building and not named and not special and vacation";
+ 
+         HGrid scheduleHGrid = tagsDb.readAll(filter);
+         for (int i = 0; i < scheduleHGrid.numRows(); i++)
+@@ -1663,18 +1710,14 @@ public class CCUHsApi
+         return schedules;
+     }
+ 
+-    public Schedule getIntrinsicSchedule(){
+-        return new Schedule.Builder().setHDict(tagsDb.read("intrinsic and schedule")).build();
+-    }
+-
+     public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
+     {
+         ArrayList<Schedule> schedules = new ArrayList<>();
+         String              filter    = null;
+         if (!vacation)
+-            filter = "schedule and zone and not named and not vacation and roomRef == "+zoneId;
++            filter = "schedule and zone and not named and not special and not vacation and roomRef == "+zoneId;
+         else
+-            filter = "schedule and zone and not named and vacation and roomRef == "+zoneId;
++            filter = "schedule and zone and not named and not special and vacation and roomRef == "+zoneId;
+ 
+         Log.d("CCU_HS"," getZoneSchedule : "+filter);
+         if(filter != null) {
+@@ -1698,6 +1741,11 @@ public class CCUHsApi
+         return schedules;
+     }
+ 
++    public List<HashMap<Object, Object>> getAllSpecialSchedules(){
++        String query = "special and schedule";
++        return CCUHsApi.getInstance().readAllEntities(query);
++    }
++
+     public void addSchedule(String localId, HDict scheduleDict)
+     {
+         tagsDb.addHDict(localId, scheduleDict);
+@@ -1732,6 +1780,10 @@ public class CCUHsApi
+         Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+     }
+ 
++    public void updateSpecialScheduleNoSync(String entityId, HDict scheduleDict){
++        tagsDb.addHDict(entityId, scheduleDict);
++    }
++
+     public Schedule getScheduleById(String scheduleRef)
+     {
+         if (scheduleRef == null)
+@@ -1742,6 +1794,13 @@ public class CCUHsApi
+         return new Schedule.Builder().setHDict(hDict).build();
+     }
+ 
++    public HDict getScheduleDictById(String scheduleId){
++        if(scheduleId == null){
++            return null;
++        }
++        return tagsDb.readById(HRef.copy(scheduleId));
++    }
++
+     public double getPredictedPreconRate(String ahuRef) {
+         HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+ 
+@@ -2337,7 +2396,7 @@ public class CCUHsApi
+         Collections.sort(sortedNamedSchedules, (o1, o2) -> (o1.get("dis").toString()).compareTo(o2.get("dis").toString()));
+         return sortedNamedSchedules;
+     }
+-    
++
+     public void removeAllNamedSchedule(){
+         List<HashMap<Object, Object>> allNamedSchedules = CCUHsApi.getInstance().getAllNamedSchedules();
+         for (HashMap<Object, Object> namedSchedule:allNamedSchedules) {
+diff --git a/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java b/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
+index ed7aec8cb..d71fc866f 100644
+--- a/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
++++ b/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
+@@ -70,6 +70,38 @@ public class RestoreCCUHsApi {
+         hisSyncHandler = ccuHsApi.getHisSyncHandler();
+     }
+ 
++    public void importZoneSpecialSchedule(Set<String> zoneRefSet){
++        StringBuilder zoneRefString = new StringBuilder("(");
++        int index = 0;
++        for(String zoneRef : zoneRefSet){
++            zoneRefString.append("roomRef == ");
++            zoneRefString.append(StringUtils.prependIfMissing(zoneRef, "@"));
++            if(index == zoneRefSet.size()-1){
++                zoneRefString.append(" ) ");
++            }
++            else{
++                zoneRefString.append(" or ");
++            }
++            index++;
++        }
++        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
++        HDict zoneScheduleDict = new HDictBuilder().add("filter",
++                "schedule and zone and special and " + zoneRefString).toDict();
++        HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
++        if (zoneScheduleGrid == null) {
++            return;
++        }
++        Iterator it = zoneScheduleGrid.iterator();
++        while (it.hasNext()) {
++            HRow row = (HRow) it.next();
++            String scheduleId = row.get("id").toString();
++            tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
++            syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
++            ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
++            CcuLog.i(TAG,"Zone Special schedule Imported");
++        }
++    }
++
+     public void importZoneSchedule(Set<String> zoneRefSet){
+         StringBuffer zoneRefString = new StringBuffer("(");
+         int index = 0;
+@@ -86,7 +118,7 @@ public class RestoreCCUHsApi {
+         }
+         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+         HDict zoneScheduleDict = new HDictBuilder().add("filter",
+-                "schedule and zone and " + zoneRefString).toDict();
++                "schedule and zone and not special and " + zoneRefString).toDict();
+         HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
+         if (zoneScheduleGrid == null) {
+             return;
+@@ -478,7 +510,8 @@ public class RestoreCCUHsApi {
+         try {
+             HDict buildingDict =
+                     new HDictBuilder().add("filter",
+-                            "building and schedule and not special and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
++                            "building and schedule and not special and siteRef == " +
++                                    StringUtils.prependIfMissing(siteId, "@")).toDict();
+             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+ 
+             if (buildingSch == null) {
+@@ -497,12 +530,46 @@ public class RestoreCCUHsApi {
+                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
+             }
+         } catch (UnknownRecException e) {
+-            Log.i(TAG, "Exception occured while Importing building schedule "+e.getMessage());
++            Log.i(TAG, "Exception occurred while Importing building schedule "+e.getMessage());
+             e.printStackTrace();
+         }
+         Log.i(TAG, "Import building schedule completed");
+     }
+ 
++    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
++
++        HashMap<Object, Object>  currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and special");
++        if (!currentBuildingSchedule.isEmpty()) {
++            //CCU already has a building special schedule.
++            CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
++            return;
++        }
++
++        try {
++            HDict buildingDict =
++                    new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
++                            + siteId).toDict();
++            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
++
++            if (buildingSch == null) {
++                return;
++            }
++
++            Iterator it = buildingSch.iterator();
++            while (it.hasNext()) {
++                HRow row = (HRow) it.next();
++                String scheduleId = row.get("id").toString();
++                tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
++                syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
++                ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
++                CcuLog.i(TAG,"Building Special schedule Imported");
++            }
++        } catch (UnknownRecException e) {
++            e.printStackTrace();
++        }
++    }
++
++
+     /**
+      * copied from CCuHsApi
+      * @param siteId
+@@ -606,6 +673,9 @@ public class RestoreCCUHsApi {
+         //import building schedule data
+         importBuildingSchedule(siteId, hClient);
+ 
++        //import building special schedule
++        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
++
+         //import building tuners
+         importBuildingTuners(siteId, hClient);
+ 
+diff --git a/haystack/src/main/java/a75f/io/api/haystack/Schedule.java b/haystack/src/main/java/a75f/io/api/haystack/Schedule.java
+index db111643a..fb8dcd50e 100644
+--- a/haystack/src/main/java/a75f/io/api/haystack/Schedule.java
++++ b/haystack/src/main/java/a75f/io/api/haystack/Schedule.java
+@@ -4,6 +4,8 @@ import android.util.Log;
+ 
+ import org.joda.time.DateTime;
+ import org.joda.time.Interval;
++import org.joda.time.format.DateTimeFormat;
++import org.joda.time.format.DateTimeFormatter;
+ import org.projecthaystack.HDateTime;
+ import org.projecthaystack.HDict;
+ import org.projecthaystack.HDictBuilder;
+@@ -20,9 +22,13 @@ import java.util.GregorianCalendar;
+ import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.Iterator;
++import java.util.List;
+ import java.util.Map;
+ import java.util.Objects;
++import java.util.Set;
+ import java.util.Stack;
++import java.util.TreeSet;
++import java.util.UUID;
+ 
+ import a75f.io.logger.CcuLog;
+ 
+@@ -35,6 +41,8 @@ import a75f.io.logger.CcuLog;
+  */
+ public class Schedule extends Entity
+ {
++    private static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
++
+     public boolean isBuildingSchedule()
+     {
+         return getMarkers().contains("building") && !getMarkers().contains("named");
+@@ -75,14 +83,136 @@ public class Schedule extends Entity
+ 
+     }
+ 
++    private static int getInt(String intString){
++        if(intString.contains(".")){
++            String[] numerics = intString.split("\\.");
++            return Integer.parseInt(numerics[0]);
++        }
++        return Integer.parseInt(intString);
++    }
++
++    private static Date getWeekStartDate() {
++        Calendar calendar = Calendar.getInstance();
++        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
++            calendar.add(Calendar.DATE, -1);
++        }
++        return calendar.getTime();
++    }
++    private static Date getWeekEndDate() {
++        Calendar calendar = Calendar.getInstance();
++        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
++            calendar.add(Calendar.DATE, 1);
++        }
++        return calendar.getTime();
++    }
++
++    /**
++     *
++     * @param roomRef roomRef = null is building otherwise for a zone
++     */
++    private static List<Schedule.Days> getSpecialScheduleDaysForRunningWeek(String roomRef){
++        List<Schedule.Days> daysList = new ArrayList<>();
++        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(roomRef);
++        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
++            String beginDate = range.get(Tags.STDT).toString();
++            int beginHour = getInt(range.get(Tags.STHH).toString());
++            int beginMin = getInt(range.get(Tags.STMM).toString());
++            String endDate = range.get(Tags.ETDT).toString();
++            int endHour = getInt(range.get(Tags.ETHH).toString());
++            endHour  = endHour == 24 ? 23 : endHour;
++            int endMin = getInt(range.get(Tags.ETMM).toString());
++            endMin = endHour == 24 ? 59 : endMin;
++
++            DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
++                    .withHourOfDay(beginHour)
++                    .withMinuteOfHour(beginMin);
++            DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
++                    .withHourOfDay(endHour)
++                    .withMinuteOfHour(endMin);
++
++            int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
++
++            Date weekStartDate = getWeekStartDate();
++            Calendar calendar = Calendar.getInstance();
++            while(weekStartDate.before(getWeekEndDate())){
++                calendar.setTime(weekStartDate);
++                DateTime currentDateTime = new DateTime(weekStartDate);
++                calendar.add(Calendar.DATE, 1);
++                weekStartDate = calendar.getTime();
++                if(currentDateTime.getDayOfYear() >= beginDateTime.getDayOfYear() &&
++                        currentDateTime.getDayOfYear() <= endDateTime.getDayOfYear()){
++                    HDictBuilder hDictDay = new HDictBuilder()
++                            .add(Tags.DAY, HNum.make(dayNumber))
++                            .add(Tags.STHH, HNum.make(beginHour))
++                            .add(Tags.STMM, HNum.make(beginMin))
++                            .add(Tags.ETHH, HNum.make(endHour))
++                            .add(Tags.ETMM, HNum.make(endMin))
++                            .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
++                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
++                        daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
++
++                }
++                dayNumber++;
++            }
++        }
++        return daysList;
++    }
++
++    private static List<Schedule.Days> getSpecialScheduleDaysForZone(String zoneId){
++        return getSpecialScheduleDaysForRunningWeek(zoneId);
++    }
++
++    private static List<Schedule.Days> getSpecialScheduleDaysForBuilding(){
++        return getSpecialScheduleDaysForRunningWeek(null);
++    }
++
++    private static Schedule createScheduleForSpecialSchedule(List<Schedule.Days> specialScheduleForZone, boolean isZone){
++        Schedule specialSchedule = null;
++        if(specialScheduleForZone.size() > 0){
++            Schedule.Days[] zonesDaySchedule = new Schedule.Days[specialScheduleForZone.size()];
++            zonesDaySchedule = specialScheduleForZone.toArray(zonesDaySchedule);
++            List<HDict> specialScheduleList = new ArrayList<>();
++            for(int i=0; i < specialScheduleForZone.size(); i++){
++                HDictBuilder hDictDay = new HDictBuilder()
++                        .add(Tags.DAY, HNum.make(zonesDaySchedule[i].getDay()))
++                        .add(Tags.STHH, HNum.make(zonesDaySchedule[i].getSthh()))
++                        .add(Tags.STMM, HNum.make(zonesDaySchedule[i].getStmm()))
++                        .add(Tags.ETHH, HNum.make(zonesDaySchedule[i].getEthh()))
++                        .add(Tags.ETMM, HNum.make(zonesDaySchedule[i].getEtmm()))
++                        .add(Tags.COOLVAL, HNum.make(zonesDaySchedule[i].getCoolingVal()))
++                        .add(Tags.HEATVAL, HNum.make(zonesDaySchedule[i].getHeatingVal()));
++                specialScheduleList.add(hDictDay.toDict());
++            }
++            HList hList = HList.make(specialScheduleList);
++            HDictBuilder hDictBuilder = new HDictBuilder()
++                    .add(Tags.ID, UUID.randomUUID().toString())
++                    .add("kind", "Number")
++                    .add("temp")
++                    .add("heating")
++                    .add("cooling")
++                    .add("specialschedule")
++                    .add("dis", "Special Schedule")
++                    .add("days", hList)
++                    .add("siteRef", CCUHsApi.getInstance().getSiteIdRef());
++            if(isZone){
++                hDictBuilder.add("zone");
++            }
++            else{
++                hDictBuilder.add("building");
++            }
++            specialSchedule = new Schedule.Builder().setHDict(hDictBuilder.toDict()).build();
++        }
++        return specialSchedule;
++    }
++
+     public static Schedule getScheduleForZone(String zoneId, boolean vacation)
+     {
+-        
+         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+ 
+         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+ 
+-        String ref = null;
++        String ref;
+         if (vacation)
+             ref = build.getVacationRef();
+         else
+@@ -110,6 +240,273 @@ public class Schedule extends Entity
+         return null;
+     }
+ 
++    private static boolean isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(Schedule.Days lessPrioritySchedule,
++                                                                                  Set<Schedule.Days> morePriorityScheduleList){
++        boolean isPresent = false;
++        for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
++            if(morePrioritySchedule.getDay() == lessPrioritySchedule.getDay()){
++                isPresent = true;
++                break;
++            }
++        }
++        return isPresent;
++    }
++
++    private static boolean isScheduleColliding(Schedule.Days morePrioritySchedule, Schedule.Days lessPrioritySchedule){
++        /*In Schedule Entity days are stored in 0-6(Monday to Sunday) and in Joda time, it is 1-7(Monday to Sunday).
++        Hence +1*/
++        int dayAdjustConst = 1;
++        DateTime morePriorityScheduleBeginTime =
++                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getSthh(),
++                morePrioritySchedule.getStmm(),
++                0, 0);
++        DateTime morePriorityScheduleEndTime =
++                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getEthh(),
++                morePrioritySchedule.getEtmm(),
++                0, 0);
++        Interval morePriorityScheduleInterval = new Interval(morePriorityScheduleBeginTime,
++                morePriorityScheduleEndTime);
++
++        DateTime lessPriorityScheduleBeginTime =
++                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getSthh(),
++                lessPrioritySchedule.getStmm(),
++                0, 0);
++        DateTime lessPriorityScheduleEndTime =
++                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getEthh(),
++                lessPrioritySchedule.getEtmm(),
++                0, 0);
++        Interval lessPriorityScheduleInterval = new Interval(lessPriorityScheduleBeginTime,
++                lessPriorityScheduleEndTime);
++        return morePriorityScheduleInterval.overlaps(lessPriorityScheduleInterval);
++    }
++
++    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
++                                                             Set<Schedule.Days> lessPriorityScheduleList){
++        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
++        daysList.addAll(morePriorityScheduleList);
++        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
++        for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
++            for(Schedule.Days lessPrioritySchedule : lessPriorityScheduleList){
++                if (!isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(lessPrioritySchedule,
++                        morePriorityScheduleList)) {
++                    daysList.add(lessPrioritySchedule);
++                }
++                else if(morePrioritySchedule.getDay() == lessPrioritySchedule.getDay()){
++                    boolean scheduleCollision = isScheduleColliding(morePrioritySchedule, lessPrioritySchedule);
++                    if(scheduleCollision && isLessPriorityScheduleWithinMorePrioritySchedule(morePrioritySchedule,
++                            lessPrioritySchedule)){
++                        continue;
++                    }
++                    else if(scheduleCollision && isLessPriorityScheduleBeginsBeforeMorePrioritySchedule(
++                            morePrioritySchedule, lessPrioritySchedule)){
++                        Schedule.Days firstSplitSchedule = new Schedule.Days();
++                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
++                        firstSplitSchedule.setSthh(lessPrioritySchedule.getSthh());
++                        firstSplitSchedule.setStmm(lessPrioritySchedule.getStmm());
++                        firstSplitSchedule.setEthh(morePrioritySchedule.getSthh());
++                        firstSplitSchedule.setEtmm(morePrioritySchedule.getStmm());
++                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
++                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
++                        intermediateScheduleList.add(firstSplitSchedule);
++                    }
++                    else if(scheduleCollision && isLessPriorityScheduleEndsAfterMorePrioritySchedule(
++                            morePrioritySchedule, lessPrioritySchedule)){
++                        Schedule.Days firstSplitSchedule = new Schedule.Days();
++                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
++                        firstSplitSchedule.setSthh(morePrioritySchedule.getEthh());
++                        firstSplitSchedule.setStmm(morePrioritySchedule.getEtmm());
++                        firstSplitSchedule.setEthh(lessPrioritySchedule.getEthh());
++                        firstSplitSchedule.setEtmm(lessPrioritySchedule.getEtmm());
++                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
++                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
++                        intermediateScheduleList.add(firstSplitSchedule);
++                    }
++                    else if(scheduleCollision && isLessPriorityScheduleBeginsBeforeAndEndsAfterMorePrioritySchedule(
++                            morePrioritySchedule, lessPrioritySchedule)){
++                        Schedule.Days firstSplitSchedule = new Schedule.Days();
++                        firstSplitSchedule.setDay(lessPrioritySchedule.getDay());
++                        firstSplitSchedule.setSthh(lessPrioritySchedule.getSthh());
++                        firstSplitSchedule.setStmm(lessPrioritySchedule.getStmm());
++                        firstSplitSchedule.setEthh(morePrioritySchedule.getSthh());
++                        firstSplitSchedule.setEtmm(morePrioritySchedule.getStmm());
++                        firstSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
++                        firstSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
++                        intermediateScheduleList.add(firstSplitSchedule);
++                        Schedule.Days secondSplitSchedule = new Schedule.Days();
++                        secondSplitSchedule.setDay(lessPrioritySchedule.getDay());
++                        secondSplitSchedule.setSthh(morePrioritySchedule.getEthh());
++                        secondSplitSchedule.setStmm(morePrioritySchedule.getEtmm());
++                        secondSplitSchedule.setEthh(lessPrioritySchedule.getEthh());
++                        secondSplitSchedule.setEtmm(lessPrioritySchedule.getEtmm());
++                        secondSplitSchedule.setCoolingVal(lessPrioritySchedule.getCoolingVal());
++                        secondSplitSchedule.setHeatingVal(lessPrioritySchedule.getHeatingVal());
++                        intermediateScheduleList.add(secondSplitSchedule);
++                    }
++                    else if(!isScheduleColliding(morePriorityScheduleList, lessPrioritySchedule)){
++                        daysList.add(lessPrioritySchedule);
++                    }
++
++                }
++            }
++        }
++        for(Schedule.Days intermediateSchedule : intermediateScheduleList){
++            if(!isScheduleColliding(morePriorityScheduleList, intermediateSchedule)){
++                daysList.add(intermediateSchedule);
++            }
++        }
++       return daysList;
++    }
++    private static boolean isScheduleColliding(Set<Days> morePriorityScheduleList, Days lessPrioritySchedule){
++        boolean scheduleCollision = false;
++        for(Days morePrioritySchedule : morePriorityScheduleList){
++            scheduleCollision = isScheduleColliding(morePrioritySchedule, lessPrioritySchedule);
++            if(scheduleCollision){
++                break;
++            }
++        }
++        return scheduleCollision;
++    }
++
++    private static boolean isLessPriorityScheduleWithinMorePrioritySchedule(Days morePrioritySchedule,
++                                                                            Days lessPrioritySchedule) {
++        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
++                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
++                || lessPrioritySchedule.getSthh() > morePrioritySchedule.getSthh())
++                &&
++                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
++                lessPrioritySchedule.getEtmm() <= morePrioritySchedule.getEtmm())
++                || lessPrioritySchedule.getEthh() < morePrioritySchedule.getEthh());
++    }
++
++    private static boolean isLessPriorityScheduleBeginsBeforeMorePrioritySchedule(Days morePrioritySchedule,
++                                                                             Days lessPrioritySchedule) {
++        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
++                lessPrioritySchedule.getStmm() < morePrioritySchedule.getStmm())
++                || lessPrioritySchedule.getSthh() < morePrioritySchedule.getSthh())
++                &&
++                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
++                        lessPrioritySchedule.getEtmm() <= morePrioritySchedule.getEtmm())
++                        || lessPrioritySchedule.getEthh() < morePrioritySchedule.getEthh());
++
++    }
++
++    private static boolean isLessPriorityScheduleEndsAfterMorePrioritySchedule(Days morePrioritySchedule,
++                                                                            Days lessPrioritySchedule) {
++        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
++                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
++                || lessPrioritySchedule.getSthh() > morePrioritySchedule.getSthh())
++                &&
++                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
++                lessPrioritySchedule.getEtmm() >= morePrioritySchedule.getEtmm())
++                ||(lessPrioritySchedule.getEthh() > morePrioritySchedule.getEthh()));
++    }
++
++    private static boolean isLessPriorityScheduleBeginsBeforeAndEndsAfterMorePrioritySchedule(Days morePrioritySchedule,
++                                                                                              Days lessPrioritySchedule) {
++        return ((lessPrioritySchedule.getSthh() == morePrioritySchedule.getSthh() &&
++                lessPrioritySchedule.getStmm() >= morePrioritySchedule.getStmm())
++                || lessPrioritySchedule.getSthh() < morePrioritySchedule.getSthh())
++                &&
++                ((lessPrioritySchedule.getEthh() == morePrioritySchedule.getEthh() &&
++                        lessPrioritySchedule.getEtmm() >= morePrioritySchedule.getEtmm())
++                        || lessPrioritySchedule.getEthh() > morePrioritySchedule.getEthh());
++    }
++
++    private static Comparator<Schedule.Days> sortSchedules() {
++        return (o1, o2) -> {
++            int dayResult = o1.getDay() - o2.getDay();
++            if (dayResult == 0) {
++                int startHour = o1.getSthh() - o2.getSthh();
++                if (startHour == 0) {
++                    int startMin = o1.getStmm() - o2.getStmm();
++                    if (startMin == 0) {
++                        int endHour = o1.getEthh() - o2.getEthh();
++                        if (endHour == 0) {
++                            return o1.getEtmm() - o2.getEtmm();
++                        }
++                        return endHour;
++                    }
++                    return startMin;
++                }
++                return startHour;
++            }
++            return dayResult;
++        };
++    }
++    public static Set<Schedule.Days> combineSpecialSchedules(String zoneId){
++        Set<Schedule.Days> specialScheduleForZone = new TreeSet<>(sortSchedules());
++        specialScheduleForZone.addAll(getSpecialScheduleDaysForZone(zoneId.startsWith("@")? zoneId : "@"+zoneId));
++
++        Set<Schedule.Days> specialScheduleForBuilding =  new TreeSet<>(sortSchedules());
++        specialScheduleForBuilding.addAll(getSpecialScheduleDaysForBuilding());
++
++        Set<Schedule.Days> combinedSpecialSchedules =  new TreeSet<>(sortSchedules());
++        if(!specialScheduleForZone.isEmpty() && !specialScheduleForBuilding.isEmpty()){
++            combinedSpecialSchedules.addAll(schedulesWithPriority(specialScheduleForZone, specialScheduleForBuilding));
++        }
++        else if(specialScheduleForZone.isEmpty()){
++            combinedSpecialSchedules.addAll(specialScheduleForBuilding);
++        }
++        else if(specialScheduleForBuilding.isEmpty()){
++            combinedSpecialSchedules.addAll(specialScheduleForZone);
++        }
++        return combinedSpecialSchedules;
++    }
++
++    public static Schedule getScheduleForZoneScheduleProcessing(String zoneId, boolean vacation)
++    {
++        Set<Schedule.Days> combinedSpecialSchedules =  combineSpecialSchedules(zoneId);
++        HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
++        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
++        String ref;
++        if (vacation)
++            ref = build.getVacationRef();
++        else
++            ref = build.getScheduleRef();
++
++        if (ref != null && !ref.equals(""))
++        {
++            Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
++            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
++            {
++                schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
++                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
++                        + schedule.toString());
++                return schedule;
++            }
++        }
++        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
++        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
++        if (retVal != null && retVal.size() > 0) {
++            Schedule schedule = retVal.get(0);
++            schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
++            CcuLog.d("Schedule", "Building Schedule with special schedule:  "+schedule);
++            return schedule;
++        }
++        return null;
++    }
++
++    private static Schedule mergeSpecialScheduleWithZoneSchedule(Set<Schedule.Days> combinedSpecialSchedules,
++                                                                 Schedule zoneSchedule, boolean isZone){
++        Set<Schedule.Days> zoneScheduleDays = new TreeSet<>(sortSchedules());
++        zoneScheduleDays.addAll(zoneSchedule.getDays());
++        /*
++        The below loop is to handle overnight schedule
++         */
++        for(Schedule.Days days : zoneScheduleDays){
++            if(days.getEthh() < days.getSthh() || (days.getEthh() == days.getSthh() && days.getEtmm() < days.getStmm())){
++                days.setEthh(23);
++                days.setEtmm(59);
++            }
++        }
++
++        if(!combinedSpecialSchedules.isEmpty()){
++            List<Schedule.Days> intrinsicScheduleDays = new ArrayList<>();
++            intrinsicScheduleDays.addAll(schedulesWithPriority(combinedSpecialSchedules, zoneScheduleDays));
++            zoneSchedule = createScheduleForSpecialSchedule(intrinsicScheduleDays, isZone);
++        }
++        return zoneSchedule;
++    }
+     public static Zone getZoneforEquipId(String equipId)
+     {
+         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+@@ -315,20 +712,21 @@ public class Schedule extends Entity
+                         .withSecondOfMinute(0);
+                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
+                 if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
++                    boolean isLastHour = daysSorted.get(i-1).getEthh() == 24;
+                     if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
+                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+-                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+-                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
++                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
++                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+-                                .withSecondOfMinute(0);
++                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+ 					}else {
+                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+-                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+-                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
++                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
++                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                 .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
+-                                .withSecondOfMinute(0);
++                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+                     }
+@@ -355,11 +753,12 @@ public class Schedule extends Entity
+                     .withSecondOfMinute(0);
+             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
+ 
++            boolean isLastHour = daysSorted.get(j).getEthh() == 24;
+             DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+-                    .withHourOfDay(daysSorted.get(j).getEthh())
+-                    .withMinuteOfHour(daysSorted.get(j).getEtmm())
++                    .withHourOfDay(isLastHour? 23 : daysSorted.get(j).getEthh())
++                    .withMinuteOfHour(isLastHour? 59 : daysSorted.get(j).getEtmm())
+                     .withDayOfWeek(daysSorted.get(j).getDay() + 1)
+-                    .withSecondOfMinute(0);
++                    .withSecondOfMinute(isLastHour? 59 : 0);
+             occupied.setPreviouslyOccupiedSchedule(daysSorted.get(j));
+             occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() - endDateTime.getMillis());
+             
+@@ -568,12 +967,14 @@ public class Schedule extends Entity
+                     .withDayOfWeek(day.getDay() + 1)
+                     .withSecondOfMinute(0)
+                     .withMillisOfSecond(0);
++            boolean isLastHour = day.getEthh() == 24;
+             DateTime endDateTime = new DateTime(now)
+-                    .withHourOfDay(day.getEthh())
+-                    .withMinuteOfHour(day.getEtmm())
+-                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
++                    .withHourOfDay(isLastHour ? 23 : day.getEthh())
++                    .withMinuteOfHour(isLastHour? 59 :day.getEtmm())
++                    .withSecondOfMinute(isLastHour ? 59 :0).withMillisOfSecond(0).withDayOfWeek(
+                             day.getDay() +
+                                     1);
++
+             Interval scheduledInterval = null;
+             if (startDateTime.isAfter(endDateTime))
+             {
+@@ -1177,7 +1578,7 @@ public class Schedule extends Entity
+             return days;
+         }
+ 
+-        private static Days parseSingleDay(HDict hDict)
++        public static Days parseSingleDay(HDict hDict)
+         {
+             Days days = new Days();
+ 
+diff --git a/haystack/src/main/java/a75f/io/api/haystack/Tags.java b/haystack/src/main/java/a75f/io/api/haystack/Tags.java
+index 78ffab7e5..68fb72052 100644
+--- a/haystack/src/main/java/a75f/io/api/haystack/Tags.java
++++ b/haystack/src/main/java/a75f/io/api/haystack/Tags.java
+@@ -70,6 +70,7 @@ public class Tags
+     public static final String USERINTENT = "userIntent";
+     
+     public static final String ZONE = "zone";
++    public static final String BUILDING = "building";
+     public static final String SYSTEM = "system";
+     public static final String DEFAULT = "default";
+     public static final String TUNER = "tuner";
+@@ -119,6 +120,8 @@ public class Tags
+     public static final String CLOUD = "cloud";
+ 
+     public static final String DAY = "day";
++    public static final String STDT = "stdt";
++    public static final String ETDT = "etdt";
+     public static final String STHH = "sthh";
+     public static final String STMM = "stmm";
+     public static final String ETHH = "ethh";
+@@ -132,4 +135,6 @@ public class Tags
+     public static final String IAQ = "iaq";
+     public static final String MIN ="min" ;
+     public static final String COV = "cov" ;
++    public static final String RANGE = "range";
++    public static final String SPECIAL = "special";
+ }
+diff --git a/logic/build.gradle b/logic/build.gradle
+index c3cfae7c7..4235688f1 100644
+--- a/logic/build.gradle
++++ b/logic/build.gradle
+@@ -175,6 +175,7 @@ dependencies {
+     testImplementation "io.objectbox:objectbox-linux:$objectboxVersion"
+     testImplementation "io.objectbox:objectbox-macos:$objectboxVersion"
+     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
++    implementation 'org.apache.commons:commons-collections4:4.4'
+ }
+ repositories {
+     mavenCentral()
+diff --git a/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java b/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
+index 3c5b41e2a..fac9c55d5 100644
+--- a/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
++++ b/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
+@@ -72,13 +72,21 @@ public class RestoreCCU {
+         List<CCU> ccuList = new ArrayList<>();
+         for (int index = 0; index < ccuArray.length(); index++) {
+             try {
++                boolean isCCUOnline = false;
+                 JSONObject ccuDetails = ccuArray.getJSONObject(index);
+-                Date lastUpdatedDatetime = new Date(HDateTime.make(ccuDetails.getString("lastUpdatedDatetime")).millis());
++                String lastUpdatedDatetimeString = ccuDetails.getString("lastUpdatedDatetime").trim();
++                if(!lastUpdatedDatetimeString.isEmpty()){
++                    Date lastUpdatedDatetime = new Date(HDateTime.make(lastUpdatedDatetimeString).millis());
++                    lastUpdatedDatetimeString =
++                            new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime);
++                    isCCUOnline = isCCUOnline(lastUpdatedDatetime);
++
++                }else{
++                    lastUpdatedDatetimeString = "n/a";
++                }
+                 String ccuId = ccuDetails.getString("deviceId");
+                 ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
+-                        ccuVersionMap.get(ccuIdMap.get(ccuId)),
+-                        new SimpleDateFormat("MMM dd, yyyy | HH:mm:ss").format(lastUpdatedDatetime),
+-                        isCCUOnline(lastUpdatedDatetime)));
++                        ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
+             } catch (JSONException e) {
+                 e.printStackTrace();
+             }
+@@ -377,6 +385,7 @@ public class RestoreCCU {
+     private void getZoneSchedules(Set<String> roomRefSet){
+         restoreCCUHsApi.importZoneSchedule(roomRefSet);
+         restoreCCUHsApi.importNamedSchedule();
++        restoreCCUHsApi.importZoneSpecialSchedule(roomRefSet);
+     }
+ 
+     public void syncExistingSite(String siteCode){
+diff --git a/logic/src/main/java/a75f/io/logic/jobs/ScheduleProcessJob.java b/logic/src/main/java/a75f/io/logic/jobs/ScheduleProcessJob.java
+index f07746344..fe78c6c85 100644
+--- a/logic/src/main/java/a75f/io/logic/jobs/ScheduleProcessJob.java
++++ b/logic/src/main/java/a75f/io/logic/jobs/ScheduleProcessJob.java
+@@ -16,13 +16,16 @@ import android.os.StrictMode;
+ import android.util.Log;
+ 
+ import org.joda.time.DateTime;
++import org.projecthaystack.HDict;
+ import org.projecthaystack.HNum;
+ import org.projecthaystack.HRef;
+ 
+ import java.text.ParseException;
+ import java.util.ArrayList;
+ import java.util.HashMap;
++import java.util.List;
+ import java.util.Map;
++import java.util.Set;
+ import java.util.concurrent.locks.Lock;
+ import java.util.concurrent.locks.ReentrantLock;
+ 
+@@ -33,6 +36,7 @@ import a75f.io.api.haystack.HSUtil;
+ import a75f.io.api.haystack.HisItem;
+ import a75f.io.api.haystack.Occupied;
+ import a75f.io.api.haystack.Schedule;
++import a75f.io.api.haystack.Tags;
+ import a75f.io.api.haystack.Zone;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.BaseJob;
+@@ -56,6 +60,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
+ import a75f.io.logic.bo.building.system.SystemController;
+ import a75f.io.logic.bo.building.system.SystemMode;
+ import a75f.io.logic.pubnub.ZoneDataInterface;
++import a75f.io.logic.schedule.SpecialSchedule;
+ import a75f.io.logic.tuners.TunerUtil;
+ import a75f.io.logic.watchdog.WatchdogMonitor;
+ 
+@@ -207,6 +212,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+             CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob<- Job instance running ");
+         }
+     }
++    private static boolean isCurrentMinuteUnderSpecialSchedule(Set<Schedule.Days> combinedSpecialSchedules){
++        boolean isSpecialScheduleMin = false;
++        for(Schedule.Days specialSchedule : combinedSpecialSchedules){
++            DateTime dateTime = new DateTime();
++            DateTime beginTime = new DateTime().withTime(specialSchedule.getSthh(), specialSchedule.getStmm(),0,0);
++            DateTime endTime = new DateTime().withTime(specialSchedule.getEthh(), specialSchedule.getEtmm(),59,0);
++            if(dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() && dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
++                isSpecialScheduleMin = true;
++                break;
++            }
++        }
++        return isSpecialScheduleMin;
++    }
+ 
+     public static void processSchedules() {
+ 
+@@ -228,15 +246,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+             if(equip != null) {
+ 
+                 Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
+-                Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
++                Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""), false);
+                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
+                 {
+                     CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule*");
+                     continue;
+                 }
+-
++                Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
++                        replace("@", ""));
++                if(isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
++                    writePointsForEquip(equip, equipSchedule, null);
++                }
+                 //If building vacation is not active, check zone vacations.
+-                if (activeSystemVacation == null )
++                else if (activeSystemVacation == null )
+                 {
+                     Log.e(TAG_CCU_SCHEDULER, "processSchedules: "+equip.getRoomRef() );
+                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+@@ -255,6 +277,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+ 
+         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
+         updateSystemOccupancy();
++        deleteExpiredSpecialSchedules();
+ 
+         try {
+             deleteExpiredVacation();
+@@ -265,13 +288,38 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+ 
+     /*This method will delete expired vacation from the internal portal as well, done by Aniket*/
+     private static void deleteExpiredVacation() throws ParseException {
++        DateTime now = new DateTime();
++        //by below check, outdated vacations are deleted once in an hour
++        if((now.getMinuteOfDay() % 60) != 0){
++            return;
++        }
+         ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+         for (int i=0; i<getAllVacationSchedules.size(); i++){
+             if (getAllVacationSchedules.get(i).getEndDate().getMillis() < System.currentTimeMillis()){
+                 CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
+             }
+         }
+-        CCUHsApi.getInstance().syncEntityTree();
++        CCUHsApi.getInstance().scheduleSync();
++    }
++
++    private static void deleteExpiredSpecialSchedules(){
++        DateTime now = new DateTime();
++        //by below check, outdated special schedules are deleted once in an hour
++        if((now.getMinuteOfDay() % 60) != 0){
++            return;
++        }
++        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getAllSpecialSchedules();
++        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
++            DateTime endDateTime = SpecialSchedule.SS_DATE_TIME_FORMATTER
++                    .parseDateTime(range.get(Tags.ETDT).toString())
++                    .withHourOfDay(SpecialSchedule.getInt(range.get(Tags.ETHH).toString()))
++                    .withMinuteOfHour(SpecialSchedule.getInt(range.get(Tags.ETMM).toString()));
++            if(endDateTime.getMillis() < System.currentTimeMillis()){
++                CCUHsApi.getInstance().deleteEntity(specialSchedule.get(Tags.ID).toString());
++            }
++        }
++        CCUHsApi.getInstance().scheduleSync();
+     }
+ 
+     public static void processZoneEquipSchedule(Equip equip){
+@@ -279,7 +327,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+ 
+             Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
+ 
+-            Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
++            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef().replace("@", ""), false);
+ 
+             if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
+             {
+@@ -287,8 +335,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+                 return;
+             }
+ 
++            Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
++                    replace("@", ""));
++            if(isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
++                writePointsForEquip(equip, equipSchedule, null);
++            }
+             //If building vacation is not active, check zone vacations.
+-            if (activeSystemVacation == null )
++            else if (activeSystemVacation == null )
+             {
+                 ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+                 Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+@@ -422,7 +475,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
+         if(cachedOccupied == null)
+         {
+-            Schedule currentSchedule = Schedule.getScheduleForZone(zoneId.replace("@", ""), false);
++            Schedule currentSchedule = Schedule.getScheduleForZoneScheduleProcessing(zoneId.replace("@", ""), false);
+             Log.d(L.TAG_CCU_SCHEDULER, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
+             if (currentSchedule.getDays().size() == 0) {
+                 return "No schedule configured";
+diff --git a/logic/src/main/java/a75f/io/logic/jobs/SystemScheduleUtil.java b/logic/src/main/java/a75f/io/logic/jobs/SystemScheduleUtil.java
+index 96a22b08c..b8b7146fe 100644
+--- a/logic/src/main/java/a75f/io/logic/jobs/SystemScheduleUtil.java
++++ b/logic/src/main/java/a75f/io/logic/jobs/SystemScheduleUtil.java
+@@ -358,13 +358,13 @@ public class SystemScheduleUtil {
+             return;
+         }
+         Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
+-        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                "== " +zone.getId());
++        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not special and " +
++                "roomRef == " +zone.getId());
+         Schedule schedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+         
+         if (schedule == null) {
+-            HashMap<Object, Object> zoneScheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                    "== " +zone.getId());
++            HashMap<Object, Object> zoneScheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
++                    "special and roomRef == " +zone.getId());
+             Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(zoneScheduleHashMap.get("id").toString());
+             CcuLog.d(L.TAG_CCU_SCHEDULER, "Failed to read schedule : schedule type update cannot be completed for "
+                      +zone+" scheduleRef "+scheduleById);
+diff --git a/logic/src/main/java/a75f/io/logic/pubnub/UpdateScheduleHandler.java b/logic/src/main/java/a75f/io/logic/pubnub/UpdateScheduleHandler.java
+index 9bf93136f..9f4afb862 100644
+--- a/logic/src/main/java/a75f/io/logic/pubnub/UpdateScheduleHandler.java
++++ b/logic/src/main/java/a75f/io/logic/pubnub/UpdateScheduleHandler.java
+@@ -23,6 +23,7 @@ import java.util.List;
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.MockTime;
+ import a75f.io.api.haystack.Schedule;
++import a75f.io.api.haystack.Tags;
+ import a75f.io.api.haystack.sync.HttpUtil;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.L;
+@@ -33,7 +34,7 @@ public class UpdateScheduleHandler
+     public static final String CMD = "updateSchedule";
+     public static final String ADD_SCHEDULE = "addSchedule";
+     public static final String DELETE_SCHEDULE = "deleteSchedule";
+-    private static BuildingScheduleListener scheduleListener = null;
++    private static BuildingScheduleListener scheduleListener;
+     private static IntrinsicScheduleListener intrinsicScheduleListener;
+     
+     public static void handleMessage(JsonObject msgObject)
+@@ -75,6 +76,10 @@ public class UpdateScheduleHandler
+ 
+                     return;
+                 }
++                if(scheduleDict.has(Tags.SPECIAL)){
++                    CCUHsApi.getInstance().updateSpecialScheduleNoSync(uid, scheduleDict);
++                    break;
++                }
+                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                 s.setId(uid);
+                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
+@@ -121,6 +126,11 @@ public class UpdateScheduleHandler
+                     }
+                     return;
+                 }
++                if(scheduleDict.has(Tags.SPECIAL)){
++                    CCUHsApi.getInstance().addSchedule(uid, scheduleDict);
++                    CCUHsApi.getInstance().setSynced("@" + uid);
++                    break;
++                }
+                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
+                 s.setId(uid);
+diff --git a/logic/src/main/java/a75f/io/logic/schedule/IntrinsicScheduleCreator.java b/logic/src/main/java/a75f/io/logic/schedule/IntrinsicScheduleCreator.java
+index ab434e52e..c1998becc 100644
+--- a/logic/src/main/java/a75f/io/logic/schedule/IntrinsicScheduleCreator.java
++++ b/logic/src/main/java/a75f/io/logic/schedule/IntrinsicScheduleCreator.java
+@@ -44,28 +44,32 @@ public class IntrinsicScheduleCreator {
+         return false;
+     }
+ 
+-    private void calculateIntrinsicScheduleWithZones(List<HashMap<Object, Object>> rooms, int dayNumber,
+-                                                     DateTime currentDateTime, List<HDict> intrinsicScheduleList){
++    private Set<Schedule.Days> calculateIntrinsicScheduleWithSpecialSchedules(int dayNumber){
+         Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
+-        if (!areAllZonesInVacation(rooms, currentDateTime)) {
+-            for (HashMap<Object, Object> room : rooms) {
+-                if (isZoneConsideredForIntrinsicSchedule(room) && isZoneOnNamedSchedule(room)
+-                        && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
+-                    zonesDayScheduleSet.addAll(getNamedSchedulesForDay(room, dayNumber));
+-                } else if (isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
+-                    zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
+-                }
+-            }
++        List<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
++        for(HashMap<Object, Object> room : rooms){
++            zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(
++                    room.get(Tags.ID).toString(), dayNumber));
+         }
+-        calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, zonesDayScheduleSet);
++        zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(null, dayNumber));
++        return zonesDayScheduleSet;
+     }
+ 
+-    private boolean areAllZonesInVacation(List<HashMap<Object, Object>> rooms,DateTime currentDateTime) {
+-        for(HashMap<Object, Object> room : rooms){
+-            if(!isZoneOnVacationForCurrentDay(room,currentDateTime))
+-                return false;
++    private void calculateIntrinsicScheduleWithZones(List<HashMap<Object, Object>> rooms, int dayNumber,
++                                                     DateTime currentDateTime, List<HDict> intrinsicScheduleList,
++                                                     boolean isBuildingVacToday){
++        Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
++        for (HashMap<Object, Object> room : rooms) {
++            if (isZoneConsideredForIntrinsicSchedule(room) && isZoneOnNamedSchedule(room)
++                    && !isZoneOnVacationForCurrentDay(room, currentDateTime) && !isBuildingVacToday) {
++                zonesDayScheduleSet.addAll(getNamedSchedulesForDay(room, dayNumber));
++            } else if (isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room,
++                    currentDateTime) && !isBuildingVacToday) {
++                zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
++            }
++            zonesDayScheduleSet.addAll(calculateIntrinsicScheduleWithSpecialSchedules(dayNumber));
+         }
+-        return true;
++        calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, zonesDayScheduleSet);
+     }
+ 
+     private boolean isZoneOnNamedSchedule(HashMap<Object, Object> room) {
+@@ -207,14 +211,14 @@ public class IntrinsicScheduleCreator {
+         return false;
+     }
+ 
+-    private Date getWeekStartDate() {
++    public static Date getWeekStartDate() {
+         Calendar calendar = Calendar.getInstance();
+         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+             calendar.add(Calendar.DATE, -1);
+         }
+         return calendar.getTime();
+     }
+-    private static Date getWeekEndDate() {
++    public static Date getWeekEndDate() {
+         Calendar calendar = Calendar.getInstance();
+         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+             calendar.add(Calendar.DATE, 1);
+@@ -232,10 +236,17 @@ public class IntrinsicScheduleCreator {
+         return false;
+     }
+ 
+-    private void calculateIntrinsicScheduleWithBuildingSchedule(Schedule buildingSchedule, int dayNumber,
+-                                                                List<HDict> intrinsicScheduleList) {
++    private void calculateIntrinsicScheduleWithBuildingSchedule(List<HashMap<Object, Object>> rooms,
++                                                                Schedule buildingSchedule, int dayNumber,
++                                                                List<HDict> intrinsicScheduleList,
++                                                                boolean isBuildingVacToday, DateTime currentDateTime) {
+         Set<Schedule.Days> buildingDayScheduleSet = new TreeSet<>(sortSchedules());
+-        buildingDayScheduleSet.addAll(getBuildingScheduleForDay(buildingSchedule, dayNumber));
++        for(HashMap<Object, Object> room : rooms) {
++            if (!isBuildingVacToday && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
++                buildingDayScheduleSet.addAll(getBuildingScheduleForDay(buildingSchedule, dayNumber));
++            }
++        }
++        buildingDayScheduleSet.addAll(calculateIntrinsicScheduleWithSpecialSchedules(dayNumber));
+         calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, buildingDayScheduleSet);
+     }
+ 
+@@ -261,20 +272,20 @@ public class IntrinsicScheduleCreator {
+         Date weekStartDate = getWeekStartDate();
+         int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
+         Calendar calendar = Calendar.getInstance();
++        boolean isBuildingVacToday = false;
+         while(weekStartDate.before(getWeekEndDate()) && !zones.isEmpty()) {
+             calendar.setTime(weekStartDate);
+             DateTime currentDateTime = new DateTime(weekStartDate);
+             calendar.add(Calendar.DATE, 1);
+             weekStartDate = calendar.getTime();
+-            if(isCurrentDayOnBuildingVacation(buildingVacations, currentDateTime)){
+-                dayNumber++;
+-                continue;
+-            }
+-            else if(isAnyZoneFollowingBuildingSchedule(zones) && !areAllZonesInVacation(zones,currentDateTime)){
+-                calculateIntrinsicScheduleWithBuildingSchedule(buildingSchedule,dayNumber, intrinsicScheduleList);
++            isBuildingVacToday = isCurrentDayOnBuildingVacation(buildingVacations, currentDateTime);
++            if(isAnyZoneFollowingBuildingSchedule(zones)){
++                calculateIntrinsicScheduleWithBuildingSchedule(zones, buildingSchedule, dayNumber,
++                        intrinsicScheduleList, isBuildingVacToday, currentDateTime);
+             }
+             else{
+-                calculateIntrinsicScheduleWithZones(zones, dayNumber, currentDateTime, intrinsicScheduleList);
++                calculateIntrinsicScheduleWithZones(zones, dayNumber, currentDateTime, intrinsicScheduleList,
++                        isBuildingVacToday);
+             }
+             dayNumber++;
+         }
+diff --git a/logic/src/main/java/a75f/io/logic/schedule/SpecialSchedule.java b/logic/src/main/java/a75f/io/logic/schedule/SpecialSchedule.java
+new file mode 100644
+index 000000000..07e59dd52
+--- /dev/null
++++ b/logic/src/main/java/a75f/io/logic/schedule/SpecialSchedule.java
+@@ -0,0 +1,233 @@
++package a75f.io.logic.schedule;
++
++
++import org.apache.commons.collections4.MultiValuedMap;
++import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
++import org.apache.commons.lang3.StringUtils;
++import org.joda.time.DateTime;
++import org.joda.time.Interval;
++import org.joda.time.format.DateTimeFormat;
++import org.joda.time.format.DateTimeFormatter;
++import org.projecthaystack.HDate;
++import org.projecthaystack.HDict;
++import org.projecthaystack.HDictBuilder;
++import org.projecthaystack.HNum;
++import org.projecthaystack.HRef;
++import java.util.ArrayList;
++import java.util.Calendar;
++import java.util.Date;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.UUID;
++import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.api.haystack.Schedule;
++import a75f.io.api.haystack.Tags;
++
++public class SpecialSchedule {
++
++    private SpecialSchedule(){
++
++    }
++    public static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
++    private static final String OVERLAP_BEGIN_TIME_FORMAT = "YYYY-MM-dd hh:mm aa";
++    private static final String OVERLAP_END_TIME_FORMAT = "hh:mm aa";
++
++    public static void createSpecialSchedule(String specialScheduleId, String scheduleName, DateTime startDate,
++                                             DateTime endDate, double coolVal, double heatVal, boolean isZone,
++                                             String zoneId){
++
++        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
++        HRef localId;
++        if(StringUtils.isEmpty(specialScheduleId)) {
++            localId = HRef.make(UUID.randomUUID().toString());
++        }
++        else {
++            localId = HRef.make(specialScheduleId.replaceFirst("@", ""));
++        }
++        boolean isLastHour = endDate.getHourOfDay() == 23 && endDate.getMinuteOfHour() == 59;
++        HDict hDict = new HDictBuilder()
++                .add("stdt", HDate.make(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth()))
++                .add("etdt", HDate.make(endDate.getYear(), endDate.getMonthOfYear(), endDate.getDayOfMonth()))
++                .add("sthh",startDate.getHourOfDay())
++                .add("stmm", startDate.getMinuteOfHour())
++                .add("ethh", isLastHour ? 24 : endDate.getHourOfDay())
++                .add("etmm", isLastHour ? 00 : endDate.getMinuteOfHour())
++                .add("coolVal", HNum.make(coolVal))
++                .add("heatVal", HNum.make(heatVal))
++                .toDict();
++
++        HDictBuilder defaultSchedule = new HDictBuilder()
++                .add("id", localId)
++                .add("special")
++                .add(isZone ? "zone":"building")
++                .add("temp")
++                .add("schedule")
++                .add("heating")
++                .add("cooling")
++                .add("dis", scheduleName)
++                .add("range", hDict)
++                .add("siteRef", siteId);
++
++        if (zoneId != null) {
++            defaultSchedule.add("roomRef", HRef.copy(zoneId));
++        }
++        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
++    }
++
++    public static boolean isSpecialScheduleNameAvailable(String specialScheduleName,
++                                                         List<HashMap<Object, Object>> specialScheduleList){
++        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++            if(specialSchedule.get("dis").toString().trim().equalsIgnoreCase(specialScheduleName.trim())){
++                return false;
++            }
++        }
++        return true;
++    }
++
++    public static int getInt(String intString){
++        if(intString.contains(".")){
++            String[] numerics = intString.split("\\.");
++            return Integer.parseInt(numerics[0]);
++        }
++        return Integer.parseInt(intString);
++    }
++    private static Map<Interval, String> getAvailableSpecialScheduleIntervals(List<HashMap<Object, Object>> specialScheduleList){
++        Map<Interval, String> specialScheduleIntervalMap = new HashMap<>();
++        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++            String scheduleName = specialSchedule.get(Tags.DIS).toString();
++            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
++            String beginDate = range.get(Tags.STDT).toString();
++            int beginHour = getInt(range.get(Tags.STHH).toString());
++            int beginMin = getInt(range.get(Tags.STMM).toString());
++            String endDate = range.get(Tags.ETDT).toString();
++            int endHour = getInt(range.get(Tags.ETHH).toString());
++            int endMin = getInt(range.get(Tags.ETMM).toString());
++            if(endHour == 24){
++                endHour = 23;
++                endMin = 59;
++            }
++            int beginDateNum = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate).getDayOfYear();
++            int endDateNum = SS_DATE_TIME_FORMATTER.parseDateTime(endDate).getDayOfYear();
++            int count = 0;
++
++            do{
++                DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate).plusDays(count)
++                        .withHourOfDay(beginHour)
++                        .withMinuteOfHour(beginMin);
++                DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate).plusDays(count)
++                        .withHourOfDay(endHour)
++                        .withMinuteOfHour(endMin);
++                specialScheduleIntervalMap.put(new Interval(beginDateTime, endDateTime), scheduleName);
++                count++;
++                beginDateNum++;
++            }while(beginDateNum <= endDateNum);
++        }
++        return specialScheduleIntervalMap;
++
++    }
++    private static List<Interval> getDesiredSpecialScheduleList(DateTime scheduleStartDate, DateTime scheduleEndDate){
++        List<Interval> specialScheduleIntervals = new ArrayList<>();
++        int beginDateNum = scheduleStartDate.getDayOfYear();
++        int endDateNum = scheduleEndDate.getDayOfYear();
++        int count = 0;
++        do{
++            DateTime beginDateTime = scheduleStartDate.plusDays(count);
++            DateTime endDateTime = scheduleStartDate.plusDays(count)
++                    .withHourOfDay(scheduleEndDate.getHourOfDay())
++                    .withMinuteOfHour(scheduleEndDate.getMinuteOfHour());
++            Interval interval = new Interval(beginDateTime, endDateTime);
++            specialScheduleIntervals.add(interval);
++            count++;
++            beginDateNum++;
++        }while(beginDateNum <= endDateNum);
++
++        return specialScheduleIntervals;
++    }
++
++    /**
++     *
++     * @param scheduleStartDate begin date and time of special schedule
++     * @param scheduleEndDate end date and time of special schedule
++     * @param specialScheduleList List of special schedule available
++     * @return MultiValuedMap<String, String> : This holds available overlapping special schedule name as value and
++     * key would be each day's begin time and end time.
++     */
++    public static MultiValuedMap<String, String>  getListOfOverlapSpecialSchedules(DateTime scheduleStartDate,
++                                                      DateTime scheduleEndDate, List<HashMap<Object, Object>> specialScheduleList){
++        MultiValuedMap<String, String> overlapSchedules = new ArrayListValuedHashMap<>();
++        Map<Interval, String> availableSpecialScheduleIntervalsMap =
++                getAvailableSpecialScheduleIntervals(specialScheduleList);
++        List<Interval> desiredSpecialScheduleIntervals = getDesiredSpecialScheduleList(scheduleStartDate, scheduleEndDate);
++        for(Map.Entry<Interval, String> availableSpecialScheduleIntervalEntry :
++                availableSpecialScheduleIntervalsMap.entrySet()) {
++            Interval availableSpecialInterval = availableSpecialScheduleIntervalEntry.getKey();
++            for (Interval desiredSpeInterval : desiredSpecialScheduleIntervals) {
++                Interval overlapInterval = desiredSpeInterval.overlap(availableSpecialInterval);
++                if (overlapInterval != null)
++                    overlapSchedules.put(availableSpecialScheduleIntervalEntry.getValue(),
++                            overlapInterval.getStart().toString(OVERLAP_BEGIN_TIME_FORMAT) + " to " + overlapInterval.getEnd().toString(
++                                    OVERLAP_END_TIME_FORMAT));
++                }
++        }
++        return overlapSchedules;
++    }
++
++    /**
++     *
++     * @param roomRef roomRef = null is building otherwise for a zone
++     */
++    public static List<Schedule.Days> getSpecialScheduleForRunningWeekForZone(String roomRef, int intrinsicDayNum){
++        List<Schedule.Days> daysList = new ArrayList<>();
++        List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(roomRef);
++        for(HashMap<Object, Object> specialSchedule : specialScheduleList){
++            HDict range = (HDict) specialSchedule.get(Tags.RANGE);
++            String beginDate = range.get(Tags.STDT).toString();
++            int beginHour = getInt(range.get(Tags.STHH).toString());
++            int beginMin = getInt(range.get(Tags.STMM).toString());
++            String endDate = range.get(Tags.ETDT).toString();
++            int endHour = getInt(range.get(Tags.ETHH).toString());
++            int endMin = getInt(range.get(Tags.ETMM).toString());
++            if(endHour == 24){
++                endHour = 23;
++                endMin = 59;
++            }
++
++            DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
++                    .withHourOfDay(beginHour)
++                    .withMinuteOfHour(beginMin);
++            DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
++                    .withHourOfDay(endHour)
++                    .withMinuteOfHour(endMin);
++
++            int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
++
++            Date weekStartDate = IntrinsicScheduleCreator.getWeekStartDate();
++            Calendar calendar = Calendar.getInstance();
++            while(weekStartDate.before(IntrinsicScheduleCreator.getWeekEndDate())){
++                calendar.setTime(weekStartDate);
++                DateTime currentDateTime = new DateTime(weekStartDate);
++                calendar.add(Calendar.DATE, 1);
++                weekStartDate = calendar.getTime();
++                if(currentDateTime.getDayOfYear() >= beginDateTime.getDayOfYear() &&
++                        currentDateTime.getDayOfYear() <= endDateTime.getDayOfYear()){
++                    HDictBuilder hDictDay = new HDictBuilder()
++                            .add(Tags.DAY, HNum.make(dayNumber))
++                            .add(Tags.STHH, HNum.make(beginHour))
++                            .add(Tags.STMM, HNum.make(beginMin))
++                            .add(Tags.ETHH, HNum.make(endHour))
++                            .add(Tags.ETMM, HNum.make(endMin))
++                            .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
++                            .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
++                    if(intrinsicDayNum == dayNumber){
++                        daysList.add(Schedule.Days.parseSingleDay(hDictDay.toDict()));
++                    }
++
++                }
++                dayNumber++;
++            }
++        }
++        return daysList;
++    }
++
++}
+-- 
+2.31.0.windows.1
+

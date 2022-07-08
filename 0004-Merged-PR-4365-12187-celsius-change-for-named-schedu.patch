@@ -1,0 +1,135 @@
+From 081eca209f6ed889eb7c7f48b2c971f673b43462 Mon Sep 17 00:00:00 2001
+From: kiran vemulapally <kvemulapally@75f.io>
+Date: Tue, 28 Jun 2022 10:37:58 +0000
+Subject: [PATCH 04/15] Merged PR 4365: 12187:celsius change for named schedule
+
+12187:celsius change for named schedule
+
+Related work items: #12187
+---
+ .../io/renatus/schedules/NamedSchedule.java   | 56 +++++++++++++------
+ .../java/a75f/io/logic/bo/util/UnitUtils.java | 15 +++++
+ 2 files changed, 54 insertions(+), 17 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java b/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
+index dfe01e020..630d83541 100644
+--- a/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
++++ b/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
+@@ -1,5 +1,6 @@
+ package a75f.io.renatus.schedules;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+ import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+ import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+@@ -376,6 +377,10 @@ public class NamedSchedule extends DialogFragment {
+ 
+             double coolingDeadband = TunerUtil.getZoneCoolingDeadband(roomRef);
+             double heatingDeadband = TunerUtil.getZoneHeatingDeadband(roomRef);
++            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                 coolingDeadband = fahrenheitToCelsiusRelative(coolingDeadband);
++                 heatingDeadband = fahrenheitToCelsiusRelative(heatingDeadband);
++            }
+             for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
+                 double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
+                 if(deadbandNamedSched < coolingDeadband+heatingDeadband){
+@@ -391,29 +396,46 @@ public class NamedSchedule extends DialogFragment {
+             StringBuilder desiredTempWarning = new StringBuilder();
+             boolean isDesiredTempValid = true;
+             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
+-                if (!(namedSchedDay.getHeatingVal() <= buildingTuner.getMaxHeatingUserLimit()
+-                && namedSchedDay.getHeatingVal() >= buildingTuner.getMinHeatingUserLimit()
+-                && namedSchedDay.getCoolingVal() <= buildingTuner.getMaxCoolingUserLimit()
+-                && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
++                if (!(namedSchedDay.getHeatingVal() < buildingTuner.getMaxHeatingUserLimit()
++                && namedSchedDay.getHeatingVal()> buildingTuner.getMinHeatingUserLimit()
++                && namedSchedDay.getCoolingVal() < buildingTuner.getMaxCoolingUserLimit()
++                && namedSchedDay.getCoolingVal() > buildingTuner.getMinCoolingUserLimit())) {
+                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
+                             "Saturday","Sunday"};
+-                    desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+-                            .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+-                            .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+-                            .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(";")
+-                            .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t");
++                    if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
++                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
++                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
++                                .append("(CDT - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingVal())).append(";")
++                                .append("HDT - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingVal())).append(")").append("\n\t\t");
++                    } else {
++                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
++                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
++                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
++                                .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(";")
++                                .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t");
++                    }
+                     isValid = false;
+                     isDesiredTempValid= false;
+                 }
+ 
+             }
+             if(!isDesiredTempValid) {
+-                warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
+-                        .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
+-                        .append("Building desired temps limit : HDT - ")
+-                        .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
+-                        .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
+-                        .append("\n\n");;
++                if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
++                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
++                            .append("Building desired temps limit : HDT - ")
++                            .append((fahrenheitToCelsius(buildingTuner.getMinHeatingUserLimit()))).append("~").append((fahrenheitToCelsius(buildingTuner.getMaxHeatingUserLimit())))
++                            .append("\n\t\t CDT - ").append(fahrenheitToCelsius(buildingTuner.getMinCoolingUserLimit())).append("~").append(fahrenheitToCelsius(buildingTuner.getMaxCoolingUserLimit()))
++                            .append("\n\n");
++                } else {
++                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
++                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
++                            .append("Building desired temps limit : HDT - ")
++                            .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
++                            .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
++                            .append("\n\n");
++                }
+             }
+ 
+         }
+@@ -637,8 +659,8 @@ public class NamedSchedule extends DialogFragment {
+ 
+ 
+         if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+-            coolingTemp =(fahrenheitToCelsiusTwoDecimal(coolingTemp));
+-            heatingTemp=(fahrenheitToCelsiusTwoDecimal(heatingTemp));
++            coolingTemp =(fahrenheitToCelsius(coolingTemp));
++            heatingTemp=(fahrenheitToCelsius(heatingTemp));
+         }
+         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
+         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
+diff --git a/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java b/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
+index 79d75f69a..fa529143d 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
++++ b/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
+@@ -30,4 +30,19 @@ public class UnitUtils {
+         return celsiusTemperature;
+     }
+ 
++    public static double fahrenheitToCelsiusRelative(double temperature) {
++        double celsiusTemperature ;
++        celsiusTemperature =(temperature/ 1.8);
++        double decimalValue = celsiusTemperature -(long) celsiusTemperature;
++
++        if (decimalValue > 0.01 && decimalValue <= 0.3) {
++            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
++        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
++            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
++        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
++            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
++        }
++        return celsiusTemperature;
++    }
++
+ }
+-- 
+2.31.0.windows.1
+

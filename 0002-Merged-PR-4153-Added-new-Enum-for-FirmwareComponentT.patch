@@ -1,0 +1,249 @@
+From fa34c1940ef622c73c80033fc1af54bf7c867207 Mon Sep 17 00:00:00 2001
+From: mkundaragi <mkundaragi@75f.io>
+Date: Mon, 13 Jun 2022 09:34:52 +0000
+Subject: [PATCH 02/50] Merged PR 4153: Added new Enum for
+ FirmwareComponentType_t
+
+Added new Enum for FirmwareComponentType_t
+
+Related work items: #12198
+---
+ .../a75f/io/renatus/OTAUpdateService.java     | 29 ++++++-------
+ .../serial/FirmwareComponentType_t.java       | 36 ++++++++++++++++
+ .../device/serial/FirmwareDeviceType_t.java   | 42 ++++---------------
+ .../io/device/serial/FirmwareMetdata_t.java   |  2 +-
+ 4 files changed, 61 insertions(+), 48 deletions(-)
+ create mode 100644 device/src/main/java/a75f/io/device/serial/FirmwareComponentType_t.java
+
+diff --git a/app/src/main/java/a75f/io/renatus/OTAUpdateService.java b/app/src/main/java/a75f/io/renatus/OTAUpdateService.java
+index 37b94204c..1a5d0a289 100644
+--- a/app/src/main/java/a75f/io/renatus/OTAUpdateService.java
++++ b/app/src/main/java/a75f/io/renatus/OTAUpdateService.java
+@@ -40,6 +40,7 @@ import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
+ import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
+ import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
+ import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
++import a75f.io.device.serial.FirmwareComponentType_t;
+ import a75f.io.device.serial.FirmwareDeviceType_t;
+ import a75f.io.device.serial.MessageConstants;
+ import a75f.io.device.serial.MessageType;
+@@ -72,7 +73,7 @@ public class OTAUpdateService extends IntentService {
+ 
+     private static int mUpdateLength = -1;         //Binary length (bytes)
+     private static byte[] mFirmwareSignature = {};
+-    private static FirmwareDeviceType_t mFirmwareDeviceType;
++    private static FirmwareComponentType_t mFirmwareDeviceType;
+ 
+     private static long mMetadataDownloadId = -1;
+     private static long mBinaryDownloadId = -1;
+@@ -204,7 +205,7 @@ public class OTAUpdateService extends IntentService {
+     private void handleNodeReboot(byte[] eventBytes) {
+         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
+         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+-        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE ||
++        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
+                 (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
+             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
+ 
+@@ -266,17 +267,17 @@ public class OTAUpdateService extends IntentService {
+             return;
+         }
+         if(firmwareVersion.startsWith("SmartNode_")) {
+-            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
++            mFirmwareDeviceType = FirmwareComponentType_t.SMART_NODE_DEVICE_TYPE;
+             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+         }
+         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
+-            mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
++            mFirmwareDeviceType = FirmwareComponentType_t.ITM_DEVICE_TYPE;
+             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+         } else if(firmwareVersion.startsWith("HyperStat_")) {
+-            mFirmwareDeviceType = FirmwareDeviceType_t.HYPER_STAT_DEVICE_TYPE;
++            mFirmwareDeviceType = FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE;
+             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+         }else if(firmwareVersion.startsWith("CM_")){
+-            mFirmwareDeviceType = FirmwareDeviceType_t.CONTROL_MOTE_DEVICE_TYPE;
++            mFirmwareDeviceType = FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE;
+             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+         }else{
+             otaRequestProcessInProgress = false;
+@@ -293,7 +294,7 @@ public class OTAUpdateService extends IntentService {
+      * @param versionMinor The minor version of the new firmware
+      * @param deviceType   The type of device being updated
+      */
+-    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
++    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
+         String filename = makeFileName(versionMajor, versionMinor, deviceType);
+         Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
+         if (mUpdateInProgress) {
+@@ -382,7 +383,7 @@ public class OTAUpdateService extends IntentService {
+      * @param versionMajor The expected major version
+      * @param versionMinor The expected minor version
+      */
+-    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
++    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
+ 
+         String filename = makeFileName(versionMajor, versionMinor, deviceType);
+ 
+@@ -415,7 +416,7 @@ public class OTAUpdateService extends IntentService {
+      *
+      * @param dir The directory to search for the binary file
+      */
+-    private void runBinaryCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
++    private void runBinaryCheck(File dir, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
+         String filename = makeFileName(versionMajor, versionMinor, deviceType);
+ 
+         Log.d(TAG, "[BINARY] Running binary check on file: " + filename);
+@@ -458,7 +459,7 @@ public class OTAUpdateService extends IntentService {
+      * @param fileFormat The file extension type (e.g. ".meta" or ".bin")
+      * @return The DownloadManager ID for this file
+      */
+-    private long startFileDownload(String filename, FirmwareDeviceType_t deviceType, String fileFormat) {
++    private long startFileDownload(String filename, FirmwareComponentType_t deviceType, String fileFormat) {
+         String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
+         String filePathUrl = DOWNLOAD_BASE_URL + deviceType.getUpdateUrlDirectory() + filename + fileFormat;
+         Log.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
+@@ -498,7 +499,7 @@ public class OTAUpdateService extends IntentService {
+      * @param dir        The directory where OTA update files are downloaded
+      * @param deviceType The type of device whose files are to be deleted
+      */
+-    private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
++    private void deleteFilesByDeviceType(File dir, FirmwareComponentType_t deviceType){
+         try {
+             for (File file : dir.listFiles()) {
+                 if (file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
+@@ -567,7 +568,7 @@ public class OTAUpdateService extends IntentService {
+      * @param file       The file to be loaded and processed
+      * @param deviceType The type of device being updated
+      */
+-    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
++    private void setUpdateFile(File file, FirmwareComponentType_t deviceType) {
+         Log.d(TAG, "[STARTUP] Moving binary file to RAM");
+         packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+ 
+@@ -646,7 +647,7 @@ public class OTAUpdateService extends IntentService {
+      *
+      * @param firmware The type of device being updated
+      */
+-    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
++    private void sendFirmwareMetadata(FirmwareComponentType_t firmware) {
+         CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
+ 
+         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
+@@ -748,7 +749,7 @@ public class OTAUpdateService extends IntentService {
+         return (major >= 0) && (minor >= 0);
+     }
+ 
+-    private String makeFileName(int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
++    private String makeFileName(int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
+         return deviceType.getUpdateFileName() + "_v" + versionMajor + "." + versionMinor;
+     }
+ 
+diff --git a/device/src/main/java/a75f/io/device/serial/FirmwareComponentType_t.java b/device/src/main/java/a75f/io/device/serial/FirmwareComponentType_t.java
+new file mode 100644
+index 000000000..0a1dd218f
+--- /dev/null
++++ b/device/src/main/java/a75f/io/device/serial/FirmwareComponentType_t.java
+@@ -0,0 +1,36 @@
++package a75f.io.device.serial;
++
++/**
++ * Created by samjithsadasivan isOn 8/1/17.
++ */
++
++public enum FirmwareComponentType_t
++{
++	REMOTE_TEMPERATURE_SENSOR_DEVICE_TYPE(	null, 			null, 		null),
++	SMART_NODE_DEVICE_TYPE(					"SmartNode", 	"sn_fw/", 	"smartnode"),
++	CONTROL_MOTE_DEVICE_TYPE(				"CM4", 			"cm4_fw/", 		"cm"),
++	ITM_DEVICE_TYPE(						"itm", 		"itm_fw/", 	"smartstat"),
++	SMART_STAT_BACK_DEVICE_TYPE(			null, 			null, 		null),
++	HIA_DEVICE_TYPE(						null, 			null, 		null),
++	HYPER_STAT_DEVICE_TYPE("HyperStat","hs_fw/","hyperstat");
++
++	private final String updateFileName;
++	private final String updateUrlDirectory;
++	private final String hsMarkerName;
++
++	private FirmwareComponentType_t(String updateFileName, String updateUrlDirectory, String hsMarkerName) {
++		this.updateFileName = updateFileName;
++		this.updateUrlDirectory = updateUrlDirectory;
++		this.hsMarkerName = hsMarkerName;
++	}
++
++	public String getUpdateFileName() {
++		return updateFileName;
++	}
++
++	public String getUpdateUrlDirectory() {
++		return updateUrlDirectory;
++	}
++
++	public String getHsMarkerName() { return hsMarkerName; }
++}
+diff --git a/device/src/main/java/a75f/io/device/serial/FirmwareDeviceType_t.java b/device/src/main/java/a75f/io/device/serial/FirmwareDeviceType_t.java
+index 7d29be017..817311858 100644
+--- a/device/src/main/java/a75f/io/device/serial/FirmwareDeviceType_t.java
++++ b/device/src/main/java/a75f/io/device/serial/FirmwareDeviceType_t.java
+@@ -1,36 +1,12 @@
+ package a75f.io.device.serial;
+ 
+-/**
+- * Created by samjithsadasivan isOn 8/1/17.
+- */
+-
+-public enum FirmwareDeviceType_t
+-{
+-	REMOTE_TEMPERATURE_SENSOR_DEVICE_TYPE(	null, 			null, 		null),
+-	SMART_NODE_DEVICE_TYPE(					"SmartNode", 	"sn_fw/", 	"smartnode"),
+-	CONTROL_MOTE_DEVICE_TYPE(				"CM4", 			"cm4_fw/", 		"cm"),
+-	ITM_DEVICE_TYPE(						"itm", 		"itm_fw/", 	"smartstat"),
+-	SMART_STAT_BACK_DEVICE_TYPE(			null, 			null, 		null),
+-	HIA_DEVICE_TYPE(						null, 			null, 		null),
+-	HYPER_STAT_DEVICE_TYPE("HyperStat","hs_fw/","hyperstat");
+-
+-	private final String updateFileName;
+-	private final String updateUrlDirectory;
+-	private final String hsMarkerName;
+-
+-	private FirmwareDeviceType_t(String updateFileName, String updateUrlDirectory, String hsMarkerName) {
+-		this.updateFileName = updateFileName;
+-		this.updateUrlDirectory = updateUrlDirectory;
+-		this.hsMarkerName = hsMarkerName;
+-	}
+-
+-	public String getUpdateFileName() {
+-		return updateFileName;
+-	}
+-
+-	public String getUpdateUrlDirectory() {
+-		return updateUrlDirectory;
+-	}
+-
+-	public String getHsMarkerName() { return hsMarkerName; }
++public enum FirmwareDeviceType_t {
++    FIRMWARE_DEVICE_WIRELESS_RTH ,
++    FIRMWARE_DEVICE_SMART_NODE ,
++    FIRMWARE_DEVICE_CONTROL_MOTE ,
++    FIRMWARE_DEVICE_SMART_STAT ,
++    FIRMWARE_DEVICE_SMART_STAT_REMOTE ,
++    FIRMWARE_DEVICE_SMART_LITE ,
++    FIRMWARE_DEVICE_SMART_STAT_BACK ,
++    FIRMWARE_DEVICE_HYPERSTAT
+ }
+diff --git a/device/src/main/java/a75f/io/device/serial/FirmwareMetdata_t.java b/device/src/main/java/a75f/io/device/serial/FirmwareMetdata_t.java
+index dabb3f33e..1fb2c00cd 100644
+--- a/device/src/main/java/a75f/io/device/serial/FirmwareMetdata_t.java
++++ b/device/src/main/java/a75f/io/device/serial/FirmwareMetdata_t.java
+@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
+ public class FirmwareMetdata_t extends Struct
+ {
+ 	
+-	public final Enum8<FirmwareDeviceType_t> deviceType = new Enum8<>(FirmwareDeviceType_t.values()); /* Type of device to be updated */
++	public final Enum8<FirmwareComponentType_t> deviceType = new Enum8<>(FirmwareComponentType_t.values()); /* Type of device to be updated */
+ 	
+ 	public final Unsigned8 majorVersion = new Unsigned8(); /* The major version of the new firmware */
+ 	
+-- 
+2.31.0.windows.1
+

@@ -1,0 +1,1020 @@
+From a5dbf6a571ac732ef5c41164d577fb658b342395 Mon Sep 17 00:00:00 2001
+From: sdev <sdev@75f.io>
+Date: Thu, 7 Jul 2022 03:55:32 +0000
+Subject: [PATCH 49/50] Merged PR 4252: CCU: 12199- Thermister support for TI
+ profile
+
+Current temperature can be read from th1 or th2 based on the thermistor selected.
+
+Related work items: #12199
+---
+ .../renatus/FragmentTempInfConfiguration.java |  50 ++++-
+ .../layout-xlarge/fragment_tempinf_config.xml | 209 ++++++++++++------
+ .../res/layout/fragment_tempinf_config.xml    | 208 +++++++++++------
+ app/src/main/res/values/strings.xml           |   4 +
+ .../main/java/a75f/io/device/mesh/Pulse.java  |  37 +++-
+ .../io/logic/bo/building/ccu/CazEquip.java    | 111 ++++++----
+ .../bo/building/ccu/CazProfileConfig.java     |   4 +
+ .../logic/bo/haystack/device/ControlMote.java |  40 ++++
+ .../a75f/io/logic/util/MigrationUtil.java     |  77 ++++++-
+ 9 files changed, 556 insertions(+), 184 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/FragmentTempInfConfiguration.java b/app/src/main/java/a75f/io/renatus/FragmentTempInfConfiguration.java
+index 6e62d3dc3..d0e0cad18 100644
+--- a/app/src/main/java/a75f/io/renatus/FragmentTempInfConfiguration.java
++++ b/app/src/main/java/a75f/io/renatus/FragmentTempInfConfiguration.java
+@@ -1,5 +1,6 @@
+ package a75f.io.renatus;
+ 
++import android.annotation.SuppressLint;
+ import android.app.Dialog;
+ import android.content.Intent;
+ import android.content.res.Resources;
+@@ -17,6 +18,7 @@ import android.widget.ArrayAdapter;
+ import android.widget.Button;
+ import android.widget.NumberPicker;
+ import android.widget.Spinner;
++import android.widget.ToggleButton;
+ 
+ import java.lang.reflect.Field;
+ 
+@@ -54,6 +56,18 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
+     @BindView(R.id.setBtn)
+     Button setButton;
+ 
++    @SuppressLint("NonConstantResourceId")
++    @BindView(R.id.togglemainsensor)
++    ToggleButton mainSensor;
++
++    @SuppressLint("NonConstantResourceId")
++    @BindView(R.id.toggleth1)
++    ToggleButton toggleTh1;
++
++    @SuppressLint("NonConstantResourceId")
++    @BindView(R.id.toggleth2)
++    ToggleButton toggleTh2;
++
+     private ProfileType             mProfileType;
+     private CazProfile              mCcuAsZoneProfile;
+     private CazProfileConfig mProfileConfig;
+@@ -146,11 +160,22 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
+         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+         zonePriority.setAdapter(zonePriorityAdapter);
+         CCUUiUtil.setSpinnerDropDownColor(zonePriority,getContext());
++        mainSensor.setChecked(true);
++        mainSensor.setEnabled(false);
++        toggleTh1.setChecked(false);
++        toggleTh2.setChecked(false);
++
++        toggleTh1.setOnCheckedChangeListener((compoundButton, checked) -> handleTH1SenorChange(checked));
++
++        toggleTh2.setOnCheckedChangeListener((compoundButton, checked) -> handleTH2SenorChange(checked));
+ 
+         if(mProfileConfig != null) {
+             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
+             int offsetIndex = (int) mProfileConfig.temperaturOffset + TEMP_OFFSET_LIMIT;
+             temperatureOffset.setValue(offsetIndex);
++            mainSensor.setChecked(mProfileConfig.isEnableMain);
++            toggleTh1.setChecked(mProfileConfig.enableThermistor1);
++            toggleTh2.setChecked(mProfileConfig.enableThermistor2 );
+         }else {
+             zonePriority.setSelection(2);
+         }
+@@ -189,6 +214,27 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
+         });
+     }
+ 
++    private void handleTH2SenorChange(boolean checked) {
++        if(checked){
++            mainSensor.setChecked(false);
++            toggleTh1.setChecked(false);
++        }else{
++            if(!toggleTh1.isChecked())
++                mainSensor.setChecked(true);
++        }
++    }
++
++    private void handleTH1SenorChange(boolean checked) {
++        if(checked){
++            mainSensor.setChecked(false);
++            toggleTh2.setChecked(false);
++        }else{
++            if(!toggleTh2.isChecked())
++                mainSensor.setChecked(true);
++        }
++    }
++
++
+     private void setupCcuAsZoneProfile() {
+ 
+         CazProfileConfig cazConfig = new CazProfileConfig();
+@@ -197,7 +243,9 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
+         cazConfig.setNodeAddress(mSmartNodeAddress);
+         cazConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
+         cazConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+-
++        cazConfig.isEnableMain = mainSensor.isChecked();
++        cazConfig.enableThermistor1 = toggleTh1.isChecked();
++        cazConfig.enableThermistor2 = toggleTh2.isChecked();
+ 
+         mCcuAsZoneProfile.getProfileConfiguration().put(mSmartNodeAddress, cazConfig);
+         if (mProfileConfig == null) {
+diff --git a/app/src/main/res/layout-xlarge/fragment_tempinf_config.xml b/app/src/main/res/layout-xlarge/fragment_tempinf_config.xml
+index 73f685bc9..0f5ed0ba5 100644
+--- a/app/src/main/res/layout-xlarge/fragment_tempinf_config.xml
++++ b/app/src/main/res/layout-xlarge/fragment_tempinf_config.xml
+@@ -36,83 +36,154 @@
+             </RelativeLayout>
+ 
+ 
+-        <LinearLayout
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:orientation="vertical"
+-            android:layout_below="@+id/layoutHeader"
+-            android:layout_marginTop="46dp"
+-            android:paddingLeft="200dp"
+-            android:paddingRight="200dp">
+-
+-
+-            <RelativeLayout
++            <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:layout_marginTop="36dp">
+-                <TextView
+-                    android:id="@+id/textZonePriority"
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="40dp"
+-                    android:layout_alignParentLeft="true"
+-                    android:text="@string/label_zonepriority"
+-                    android:textAppearance="@style/title_normal" />
+-
+-                <Spinner
+-                    android:id="@+id/zonePriority"
+-                    android:layout_width="160dp"
+-                    android:layout_height="?android:attr/listPreferredItemHeight"
+-                    android:layout_alignParentRight="true"
+-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+-                    android:entries="@array/hvac_stage_selector"
+-                    tools:listitem="@layout/spinner_dropdown_item"/>
+-            </RelativeLayout>
++                android:orientation="vertical"
++                android:layout_below="@+id/layoutHeader"
++                android:layout_marginTop="46dp"
++                android:paddingLeft="200dp"
++                android:paddingRight="200dp"
++                android:layout_marginBottom="100dp">
+ 
+ 
+-            <RelativeLayout
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginTop="72dp"
+-                android:layout_gravity="center_horizontal">
+-                <TextView
+-                    android:id="@+id/textTempOffset"
++                <RelativeLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="36dp">
++                    <TextView
++                        android:id="@+id/textZonePriority"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:layout_alignParentStart="true"
++                        android:text="@string/label_zonepriority"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RelativeOverlap" />
++
++                    <Spinner
++                        android:id="@+id/zonePriority"
++                        android:layout_width="160dp"
++                        android:layout_height="40dp"
++                        android:layout_alignParentEnd="true"
++                        style="@style/Widget.AppCompat.Spinner.Underlined"
++                        android:entries="@array/hvac_stage_selector"
++                        tools:listitem="@layout/spinner_dropdown_item"/>
++                </RelativeLayout>
++
++
++                <RelativeLayout
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:layout_centerHorizontal="true"
+-                    android:text="@string/label_tempoffsetnp"
+-                    android:gravity="center_vertical|center_horizontal"
+-                    android:textAppearance="@style/label_values" />
+-
+-                <NumberPicker
+-                    android:theme="?DefaultNumberPickerTheme"
+-                    android:id="@+id/temperatureOffset"
++                    android:layout_marginTop="72dp"
++                    android:layout_gravity="center_horizontal">
++                    <TextView
++                        android:id="@+id/textTempOffset"
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:layout_centerHorizontal="true"
++                        android:text="@string/label_tempoffsetnp"
++                        android:gravity="center_vertical|center_horizontal"
++                        android:textAppearance="@style/label_values" />
++
++                    <NumberPicker
++                        android:id="@+id/temperatureOffset"
++                        android:theme="?DefaultNumberPickerTheme"
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:layout_below="@+id/textTempOffset"
++                        android:layout_centerHorizontal="true"
++                        android:textColor="#202020"
++                        android:textSize="30sp"/>
++                </RelativeLayout>
++
++                <LinearLayout
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:layout_below="@+id/textTempOffset"
+-                    android:layout_centerHorizontal="true"
+-                    android:textColor="#202020"
+-                    android:textSize="30sp"/>
+-
+-            </RelativeLayout>
+-
+-        </LinearLayout>
+-
+-
+-        <Button
+-            android:id="@+id/setBtn"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_alignParentRight="true"
+-            android:layout_alignParentBottom="true"
+-            android:layout_marginRight="24dp"
+-            android:layout_marginBottom="24dp"
+-            android:background="@null"
+-            android:button="@null"
+-            android:fontFamily="@font/lato_regular"
+-            android:text="@string/button_set"
+-            android:textAllCaps="true"
+-            android:textColor="?orange_75f"
+-            android:textSize="19.5dp" />
++                    android:orientation="horizontal"
++                    android:layout_marginTop="20dp">
++                    <TextView
++                        android:id="@+id/textmainsensor"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="240dp"
++                        android:text="@string/mainsensor"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/togglemainsensor"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="true"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++
++                <LinearLayout
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:paddingTop="20dp">
++                    <TextView
++                        android:id="@+id/textth1"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="330dp"
++                        android:text="@string/thermistor1"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/toggleth1"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="false"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++
++                <LinearLayout
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:paddingTop="20dp">
++                    <TextView
++                        android:id="@+id/textth2"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="330dp"
++                        android:text="@string/thermistor2"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/toggleth2"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="false"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++            </LinearLayout>
++
++            <Button
++                android:id="@+id/setBtn"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_alignParentEnd="true"
++                android:layout_alignParentBottom="true"
++                android:layout_marginEnd="24dp"
++                android:layout_marginBottom="24dp"
++                android:background="@null"
++                android:button="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="@string/button_set"
++                android:textAllCaps="true"
++                android:textColor="?orange_75f"
++                android:textSize="19.5sp" />
+         </RelativeLayout>
+     </ScrollView>
+ </LinearLayout>
+diff --git a/app/src/main/res/layout/fragment_tempinf_config.xml b/app/src/main/res/layout/fragment_tempinf_config.xml
+index d4835f1fc..d515023f9 100644
+--- a/app/src/main/res/layout/fragment_tempinf_config.xml
++++ b/app/src/main/res/layout/fragment_tempinf_config.xml
+@@ -36,82 +36,154 @@
+             </RelativeLayout>
+ 
+ 
+-        <LinearLayout
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:orientation="vertical"
+-            android:layout_below="@+id/layoutHeader"
+-            android:layout_marginTop="46dp"
+-            android:paddingLeft="200dp"
+-            android:paddingRight="200dp">
+-
+-
+-            <RelativeLayout
++            <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:layout_marginTop="36dp">
+-                <TextView
+-                    android:id="@+id/textZonePriority"
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="40dp"
+-                    android:layout_alignParentLeft="true"
+-                    android:text="@string/label_zonepriority"
+-                    android:textAppearance="@style/title_normal" />
+-
+-                <Spinner
+-                    android:id="@+id/zonePriority"
+-                    android:layout_width="160dp"
+-                    android:layout_height="40dp"
+-                    android:layout_alignParentRight="true"
+-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+-                    android:entries="@array/hvac_stage_selector"
+-                    tools:listitem="@layout/spinner_dropdown_item"/>
+-            </RelativeLayout>
++                android:orientation="vertical"
++                android:layout_below="@+id/layoutHeader"
++                android:layout_marginTop="46dp"
++                android:paddingLeft="200dp"
++                android:paddingRight="200dp"
++                android:layout_marginBottom="100dp">
+ 
+ 
+-            <RelativeLayout
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginTop="72dp"
+-                android:layout_gravity="center_horizontal">
+-                <TextView
+-                    android:id="@+id/textTempOffset"
++                <RelativeLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="36dp">
++                    <TextView
++                        android:id="@+id/textZonePriority"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:layout_alignParentStart="true"
++                        android:text="@string/label_zonepriority"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RelativeOverlap" />
++
++                    <Spinner
++                        android:id="@+id/zonePriority"
++                        android:layout_width="160dp"
++                        android:layout_height="40dp"
++                        android:layout_alignParentEnd="true"
++                        style="@style/Widget.AppCompat.Spinner.Underlined"
++                        android:entries="@array/hvac_stage_selector"
++                        tools:listitem="@layout/spinner_dropdown_item"/>
++                </RelativeLayout>
++
++
++                <RelativeLayout
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:layout_centerHorizontal="true"
+-                    android:text="@string/label_tempoffsetnp"
+-                    android:gravity="center_vertical|center_horizontal"
+-                    android:textAppearance="@style/label_values" />
+-
+-                <NumberPicker
+-                    android:id="@+id/temperatureOffset"
+-                    android:theme="?DefaultNumberPickerTheme"
++                    android:layout_marginTop="72dp"
++                    android:layout_gravity="center_horizontal">
++                    <TextView
++                        android:id="@+id/textTempOffset"
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:layout_centerHorizontal="true"
++                        android:text="@string/label_tempoffsetnp"
++                        android:gravity="center_vertical|center_horizontal"
++                        android:textAppearance="@style/label_values" />
++
++                    <NumberPicker
++                        android:id="@+id/temperatureOffset"
++                        android:theme="?DefaultNumberPickerTheme"
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:layout_below="@+id/textTempOffset"
++                        android:layout_centerHorizontal="true"
++                        android:textColor="#202020"
++                        android:textSize="30sp"/>
++                </RelativeLayout>
++
++                <LinearLayout
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:layout_below="@+id/textTempOffset"
+-                    android:layout_centerHorizontal="true"
+-                    android:textColor="#202020"
+-                    android:textSize="30sp"/>
+-            </RelativeLayout>
+-
+-        </LinearLayout>
+-
+-
+-        <Button
+-            android:id="@+id/setBtn"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_alignParentRight="true"
+-            android:layout_alignParentBottom="true"
+-            android:layout_marginRight="24dp"
+-            android:layout_marginBottom="24dp"
+-            android:background="@null"
+-            android:button="@null"
+-            android:fontFamily="@font/lato_regular"
+-            android:text="@string/button_set"
+-            android:textAllCaps="true"
+-            android:textColor="?orange_75f"
+-            android:textSize="19.5dp" />
++                    android:orientation="horizontal"
++                    android:layout_marginTop="20dp">
++                    <TextView
++                        android:id="@+id/textmainsensor"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="240dp"
++                        android:text="@string/mainsensor"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/tooglemainsensor"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="true"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++
++                <LinearLayout
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:paddingTop="20dp">
++                    <TextView
++                        android:id="@+id/textth1"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="330dp"
++                        android:text="@string/thermistor1"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/toogleth1"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="false"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++
++                <LinearLayout
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:paddingTop="20dp">
++                    <TextView
++                        android:id="@+id/textth2"
++                        android:layout_width="wrap_content"
++                        android:layout_height="40dp"
++                        android:paddingEnd="330dp"
++                        android:text="@string/thermistor2"
++                        android:textAppearance="@style/title_normal"
++                        tools:ignore="RtlSymmetry" />
++
++                    <ToggleButton
++                        android:id="@+id/toogleth2"
++                        android:layout_width="47dp"
++                        android:layout_height="28dp"
++                        android:background="@drawable/toggle_selector"
++                        android:checked="false"
++                        android:textOff=""
++                        android:textOn="" />
++                </LinearLayout>
++            </LinearLayout>
++
++            <Button
++                android:id="@+id/setBtn"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_alignParentEnd="true"
++                android:layout_alignParentBottom="true"
++                android:layout_marginEnd="24dp"
++                android:layout_marginBottom="24dp"
++                android:background="@null"
++                android:button="@null"
++                android:fontFamily="@font/lato_regular"
++                android:text="@string/button_set"
++                android:textAllCaps="true"
++                android:textColor="?orange_75f"
++                android:textSize="19.5sp" />
+         </RelativeLayout>
+     </ScrollView>
+ </LinearLayout>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index f76d7050c..9ae42828f 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1207,6 +1207,10 @@
+     <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
+     <string name="desiredTemp_warning">Desired temperatures of this NamedSChedule is outside the desired temperature limits of the building</string>
+ 
++    <!-- Thermistor for TI Profile -->
++    <string name="mainsensor">Main Temperature/Humidity Sensor</string>
++    <string name="thermistor1">Probe 1 Temperature Sensor</string>
++    <string name="thermistor2">Probe 2 Temperature Sensor</string>
+     <!--True Cfm-->
+     <string name="label_min_cfm_for_iaq">Min CFM For\nIAQ</string>
+ 
+diff --git a/device/src/main/java/a75f/io/device/mesh/Pulse.java b/device/src/main/java/a75f/io/device/mesh/Pulse.java
+index 09618830b..0a252513f 100644
+--- a/device/src/main/java/a75f/io/device/mesh/Pulse.java
++++ b/device/src/main/java/a75f/io/device/mesh/Pulse.java
+@@ -534,13 +534,17 @@ public class Pulse
+ 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
+ 			String logicalCurTempPoint = "";
+ 			double th2TempVal = 0.0;
++			double th1TempVal = 0.0;
+ 			boolean isTh2Enabled = false;
++			boolean isTh1Enabled = false;
++			boolean isTI = false;
+ 			for (HashMap phyPoint : phyPoints) {
+ 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+ 					continue;
+ 				}
+-				HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
++				HashMap<Object,Object> logPoint = hayStack.readEntity("point and id==" + phyPoint.get("pointRef"));
+ 				
++
+ 				if (logPoint.isEmpty()) {
+ 					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
+ 					continue;
+@@ -572,11 +576,19 @@ public class Pulse
+ 							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
+ 							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+ 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
++							if(logPoint.keySet().contains(Tags.TI)){
++								curTempVal=curTh2TempVal;
++								isTI = true;
++							}
+ 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+ 							if(oldTh2TempVal != curTh2TempVal)
+ 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
++							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempvalth2 " + hayStack.readHisValById(logPoint.get("id").toString()));
++
+ 						}
+ 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
++
++						CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
+ 						break;
+ 					case ANALOG_IN_ONE:
+ 						val = cmRegularUpdateMessage_t.analogSense1.get();
+@@ -593,11 +605,19 @@ public class Pulse
+ 					case TH1_IN:
+ 						val = cmRegularUpdateMessage_t.thermistor1.get();
+ 						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
++						isTh1Enabled = phyPoint.get("portEnabled").toString().equals("true");
+ 						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+ 						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
++						th1TempVal = curTh1TempVal;
+ 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
++						if(logPoint.keySet().contains(Tags.TI)){
++						    curTempVal=curTh1TempVal;
++						    isTI = true;
++						}
+ 						if(oldTh1TempVal != curTh1TempVal)
+ 							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
++
++						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempval " + hayStack.readHisValById(logPoint.get("id").toString()));
+ 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
+ 						break;
+ 					case SENSOR_RH:
+@@ -611,11 +631,18 @@ public class Pulse
+ 						break;
+ 				}
+ 			}
+-			//Write Current temp point based on th2 enabled or not,
+-			if (isTh2Enabled && !logicalCurTempPoint.isEmpty()) {
++
++			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTI) {
++				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
++				if (currentTempInterface != null) {
++					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
++					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(deviceInfo.getAddr()));
++				}
++			}//Write Current temp point based on th2 enabled or not,
++			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() ) {
+ 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+ 				if (currentTempInterface != null) {
+-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
++					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+ 					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(deviceInfo.getAddr()));
+ 				}
+ 			} else if (!logicalCurTempPoint.isEmpty()) {
+@@ -623,7 +650,7 @@ public class Pulse
+ 				if(oldCurTemp != curTempVal) {
+ 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
+ 					if (currentTempInterface != null) {
+-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
++						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+ 						currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
+ 					}
+ 				}
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazEquip.java b/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazEquip.java
+index 01f82871e..256ee43a8 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazEquip.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazEquip.java
+@@ -216,39 +216,6 @@ public class CazEquip
+         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+ 
+-        Point dischargeAirTemp1 = new Point.Builder()
+-                .setDisplayName(siteDis+"-TI-"+nodeAddr+"-thermistor1")
+-                .setEquipRef(equipRef)
+-                .setSiteRef(siteRef)
+-                .setRoomRef(roomRef)
+-                .setFloorRef(floorRef)
+-                .setHisInterpolate("cov")
+-                .addMarker("zone").addMarker("ti")
+-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical")
+-                .setGroup(String.valueOf(nodeAddr))
+-                .setUnit("\u00B0F")
+-                .setTz(tz)
+-                .build();
+-        String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
+-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(dat1Id, 0.0);
+-
+-
+-        Point eatPoint = new Point.Builder()
+-                .setDisplayName(equipDis+"-external10kTempSensorTh2")
+-                .setEquipRef(equipRef)
+-                .setSiteRef(siteRef)
+-                .setRoomRef(roomRef)
+-                .setFloorRef(floorRef)
+-                .setHisInterpolate("cov")
+-                .addMarker("standalone").addMarker("ti").addMarker("his")
+-                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
+-                .setGroup(String.valueOf(nodeAddr))
+-                .setUnit("\u00B0F")
+-                .setTz(tz)
+-                .build();
+-        String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
+-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(eatID, 0.0);
+-
+         Point zoneDynamicPriorityPoint = new Point.Builder()
+             .setDisplayName(equipDis+"-zoneDynamicPriority")
+             .setEquipRef(equipRef)
+@@ -284,11 +251,6 @@ public class CazEquip
+         //4 TODO map system device?
+         ControlMote device = new ControlMote(nodeAddr,siteRef, floorRef, roomRef, equipRef);
+         device.currentTemp.setPointRef(ctID);
+-        device.currentTemp.setEnabled(true);
+-        device.th1In.setPointRef(dat1Id);
+-        device.th1In.setEnabled(true);
+-        device.th2In.setPointRef(eatID);
+-        device.th2In.setEnabled(config.enableThermistor2);
+         device.rssi.setPointRef(heartBeatId);
+         device.rssi.setEnabled(true);
+ 
+@@ -306,6 +268,7 @@ public class CazEquip
+         setHumidity(0);
+ 
+         CCUHsApi.getInstance().syncEntityTree();
++        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
+     }
+ 
+     String getId(){
+@@ -348,14 +311,77 @@ public class CazEquip
+         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
+         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
+ 
++        Point mainSensor = new Point.Builder()
++                .setDisplayName(equipDis+"-mainTemperatureSensor")
++                .setEquipRef(equipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp")
++                .addMarker("enable")
++                .setGroup(String.valueOf(nodeAddr))
++                .setTz(tz)
++                .build();
++        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
++        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, config.isEnableMain ? 1.0:0.0);
++
++        Point th1Config = new Point.Builder()
++                .setDisplayName(equipDis+"-th1")
++                .setEquipRef(equipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("th1").addMarker("sp").addMarker("enable")
++                .setGroup(String.valueOf(nodeAddr))
++                .setTz(tz)
++                .build();
++        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
++        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, config.enableThermistor1 ? 1.0:0.0);
++
++        Point th2Config = new Point.Builder()
++                .setDisplayName(equipDis+"-th2")
++                .setEquipRef(equipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("th2").addMarker("sp").addMarker("enable")
++                .setGroup(String.valueOf(nodeAddr))
++                .setTz(tz)
++                .build();
++        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
++        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, config.enableThermistor2 ? 1.0:0.0);
++    }
++
++    public void updateCurrentTemp(boolean isMain,boolean isEnableth1, boolean isEnableth2) {
++        CCUHsApi hayStack = CCUHsApi.getInstance();
++        HashMap<Object,Object> device = hayStack.readEntity("cm and device ");
++        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
++                "temp and equipRef == \""+equipRef+"\"");
++        if (!device.isEmpty() && !currentTemp.isEmpty()) {
++            if (isEnableth1) {
++                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
++                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
++                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
++                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), currentTemp.get(
++                        "id").toString());
++            } else if (isEnableth2) {
++                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
++                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
++                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
++                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), currentTemp.get(
++                        "id").toString());
++            } else if (isMain) {
++                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
++                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
++                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
++            }
++        }
+     }
+ 
+     public CazProfileConfig getProfileConfiguration() {
+         CazProfileConfig config = new CazProfileConfig();
+         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
+         config.temperaturOffset = getConfigNumVal("temperature and offset");
+-
+-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
++        config.isEnableMain = getConfigNumVal("main and current and temperature and enable") > 0;
++        config.enableThermistor1 = getConfigNumVal("th1 and enable") > 0;
++        config.enableThermistor2 = getConfigNumVal("th2 and enable") > 0;
+         return config;
+     }
+ 
+@@ -364,6 +390,11 @@ public class CazEquip
+         setHisVal("priority",config.getPriority().ordinal());
+         setConfigNumVal("temperature and offset",config.temperaturOffset);
+         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
++        setConfigNumVal("enable and main and current and temperature",config.isEnableMain ? 1.0 : 0);
++        setConfigNumVal("enable and th1",config.enableThermistor1 ? 1.0 : 0);
++        setConfigNumVal("enable and th2",config.enableThermistor2 ? 1.0 : 0);
++        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
++
+     }
+ 
+     public void setConfigNumVal(String tags,double val) {
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazProfileConfig.java b/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazProfileConfig.java
+index 2148274d2..371678109 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazProfileConfig.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/ccu/CazProfileConfig.java
+@@ -7,4 +7,8 @@ public class CazProfileConfig extends BaseProfileConfiguration {
+ 
+     public double temperaturOffset;
+     public boolean enableThermistor2;
++
++    public boolean isEnableMain;
++    public boolean enableThermistor1;
++
+ }
+diff --git a/logic/src/main/java/a75f/io/logic/bo/haystack/device/ControlMote.java b/logic/src/main/java/a75f/io/logic/bo/haystack/device/ControlMote.java
+index 7f9787833..fdafbf0be 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/haystack/device/ControlMote.java
++++ b/logic/src/main/java/a75f/io/logic/bo/haystack/device/ControlMote.java
+@@ -1,5 +1,7 @@
+ package a75f.io.logic.bo.haystack.device;
+ 
++import android.util.Log;
++
+ import java.util.HashMap;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+@@ -405,4 +407,42 @@ public class ControlMote
+     public static boolean getRelay7() {
+         return ControlMote.getRelayState(Tags.RELAY7) > 0.01;
+     }
++
++
++    public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
++        Log.d("CCU"," Update Physical point "+port);
++
++        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
++        if (device == null)
++        {
++            return ;
++        }
++
++        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
++                "point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
++        RawPoint p = new RawPoint.Builder().setHashMap(point).setPointRef(pointRef).build();
++        CCUHsApi.getInstance().updatePoint(p,p.getId());
++    }
++
++    public static void setPointEnabled(int addr, String port, boolean enabled) {
++        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
++
++        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
++        if (device == null)
++        {
++            return ;
++        }
++
++        HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
++                "point and physical and deviceRef == \"" + device.get("id").toString() +
++                        "\""+" and port == \""+port+"\"");
++        if (point != null && point.size() > 0)
++        {
++            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
++            p.setEnabled(enabled);
++            CCUHsApi.getInstance().updatePoint(p,p.getId());
++            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
++        }
++    }
++
+ }
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 68af3ce3c..35d32490d 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -47,6 +47,7 @@ import kotlin.Pair;
+ import a75f.io.logic.migration.point.PointMigrationHandler;
+ 
+ public class MigrationUtil {
++    private static final String TAG = "MIGRATION_UTIL";
+     
+     /**
+      * All the migration tasks needed to be run during an application version upgrade should be called from here.
+@@ -129,7 +130,12 @@ public class MigrationUtil {
+             PreferenceUtil.setDiagEquipMigration();
+         }
+ 
+-
++        if(!isTIThermisterMigrated()){
++            Log.d(TAG,"isTIThermisterMigrated return true");
++            addTIThermisters(CCUHsApi.getInstance());
++        }else{
++            Log.d(TAG,"isTIThermisterMigrated is false");
++        }
+     }
+ 
+     private static void migrateVocPm2p5(CCUHsApi instance) {
+@@ -186,6 +192,29 @@ public class MigrationUtil {
+         }
+     }
+ 
++    private static void addTIThermisters(CCUHsApi ccuHsApi) {
++        Log.d(TAG,"addTIThermisters++");
++        HashMap<Object,Object> tiEquip = ccuHsApi.readEntity("equip and ti");
++        if(!tiEquip.isEmpty()) {
++            Log.d(TAG,"ti isnt empty");
++            String tiEquipRef = tiEquip.get("id").toString();
++            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
++                    "temp and equipRef == \"" + tiEquipRef + "\"");
++            String nodeAddress = currentTemp.get("group").toString();
++            createTIThermisterPoints(tiEquipRef,nodeAddress);
++        }
++
++    }
++
++    private static boolean isTIThermisterMigrated() {
++        Log.d(TAG,"isTIThermisterMigrated");
++        HashMap<Object,Object> th1Config = CCUHsApi.getInstance().readEntity("point and ti and " +
++                "config and th1");
++        HashMap<Object,Object> th2Config = CCUHsApi.getInstance().readEntity("point and ti and " +
++                "config and th2");
++        return !th1Config.isEmpty() && !th2Config.isEmpty();
++    }
++
+     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+ 
+         // approach is deleting all the daig point which does not have any gateway reff.
+@@ -631,4 +660,50 @@ public class MigrationUtil {
+         });
+     }
+ 
++    private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
++        Log.d("TIThermistor","createTIThermisterPoints");
++        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
++        String siteRef = siteMap.get(Tags.ID).toString();
++        String siteDis = siteMap.get("dis").toString();
++        String equipDis = siteDis + "-TI-" + nodeAddress;
++        String tz = siteMap.get("tz").toString();
++        Point mainSensor = new Point.Builder()
++                .setDisplayName(equipDis+"-mainTemperatureSensor")
++                .setEquipRef(tiEquipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp").addMarker("enable")
++                .setGroup((nodeAddress))
++                .setTz(tz)
++                .build();
++        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
++        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, 1.0);
++
++        Point th1Config = new Point.Builder()
++                .setDisplayName(equipDis+"-th1")
++                .setEquipRef(tiEquipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("th1").addMarker("sp").addMarker("enable")
++                .setGroup((nodeAddress))
++                .setTz(tz)
++                .build();
++        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
++        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, 0.0);
++
++        Point th2Config = new Point.Builder()
++                .setDisplayName(equipDis+"-th2")
++                .setEquipRef(tiEquipRef)
++                .setSiteRef(siteRef)
++                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
++                .addMarker("th2").addMarker("sp").addMarker("enable")
++                .setGroup((nodeAddress))
++                .setTz(tz)
++                .build();
++        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
++        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, 0.0);
++
++        Log.d("TIThermistor","createTIThermisterPoints completed");
++    }
++
+ }
+\ No newline at end of file
+-- 
+2.31.0.windows.1
+

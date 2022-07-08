@@ -72,7 +72,8 @@ public class BACnetScheduler {
 
         zoneDevice = HSUtil.getDevices(zone.getId()).get(0);
 
-        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not vacation and " +
+                "roomRef " +
                 "== " +zone.getId());
         schedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
         systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);

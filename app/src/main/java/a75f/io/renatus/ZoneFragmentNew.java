@@ -920,7 +920,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                     if (zone != null) {
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and not" +
+                                " vacation and roomRef " +
                                 "== " +zone.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         zone.setScheduleRef(scheduleById.getId());
@@ -941,7 +942,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and not" +
+                                " vacation and roomRef " +
                                 "== " +zone.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         if (zone.hasSchedule()) {
@@ -956,7 +958,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
                              * still created a schedule. Handle it before creating a new schedule again.
                              */
-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and not " +
+                                    "vacation and roomRef " +
                                                                                                  "== " +zone.getId());
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
@@ -966,7 +969,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                         }
-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and not " +
+                                "vacation and roomRef " +
                                 "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
@@ -1510,7 +1514,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                     if (z != null) {
-                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                        HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and not vacation and " +
+                                "roomRef " +
                                 "== " +z.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         z.setScheduleRef(scheduleById.getId());
@@ -1532,7 +1537,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         Zone zone = Schedule.getZoneforEquipId(equipId);
                         Schedule scheduleById = null;
                         if (zone.hasSchedule()) {
-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and" +
+                                    " not vacation and roomRef " +
                                     "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
@@ -1545,7 +1551,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
                              * still created a schedule. Handle it before creating a new schedule again.
                              */
-                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                            HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and not " +
+                                    "vacation and roomRef " +
                                                                                                  "== " +zone.getId());
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
@@ -1555,11 +1562,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and" +
+                                    " not vacation and roomRef " +
                                     "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                         }
-                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+                        HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and not " +
+                                "vacation and roomRef " +
                                 "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());

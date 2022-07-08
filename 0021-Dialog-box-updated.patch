@@ -1,0 +1,78 @@
+From d9fddbde58426c6e1967ea2d60d182ade952375c Mon Sep 17 00:00:00 2001
+From: Bharathpanchakshari
+ <33091312+Bharathpanchakshari@users.noreply.github.com>
+Date: Mon, 27 Jun 2022 16:30:05 +0530
+Subject: [PATCH 21/35] Dialog box updated
+
+---
+ .../MasterControl/MasterControlView.java      | 20 +++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
+index 559f2c9a6..9475a906c 100644
+--- a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
++++ b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
+@@ -19,6 +19,7 @@ import android.widget.ImageButton;
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
+ import android.widget.Toast;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ 
+ import org.projecthaystack.HDict;
+ import org.projecthaystack.HDictBuilder;
+@@ -54,6 +55,7 @@ import a75f.io.renatus.schedules.ScheduleUtil;
+ import a75f.io.renatus.util.ProgressDialogUtils;
+ 
+ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+ 
+ 
+ public class MasterControlView extends LinearLayout {
+@@ -200,6 +202,9 @@ public class MasterControlView extends LinearLayout {
+         ArrayList<String> namedSchedulesWarning = new ArrayList<>();
+         Set<String> namedSchedulesIds = new HashSet<String>();
+ 
++        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++
++
+         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+         heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+         coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+@@ -234,14 +239,22 @@ public class MasterControlView extends LinearLayout {
+                 String heatValues = "";
+                 if (days.getHeatingVal() < heatingTemperatureUpperLimit || days.getHeatingVal() > heatingTemperatureLowerLimit) {
+                     double heatingDesiredTemperatureValue = getHeatingDesiredTemperature(days.getHeatingVal(), heatingTemperatureUpperLimit, heatingTemperatureLowerLimit);
+-                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
++                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        heatValues = "\u0020" + "Heating (" + roundToHalf((float) fahrenheitToCelsius(days.getHeatingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(heatingDesiredTemperatureValue)) + ")";
++                    }else {
++                        heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
++                    }
+ 
+                     days.setHeatingVal(heatingDesiredTemperatureValue);
+                 }
+ 
+                 if (days.getCoolingVal() < coolingTemperatureLowerLimit || days.getCoolingVal() > coolingTemperatureUpperLimit) {
+                     double coolingDesiredTemperatureValue = getCoolingDesiredTemperature(days.getCoolingVal(), coolingTemperatureLowerLimit, coolingTemperatureUpperLimit);
+-                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
++                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        coolValues = "\u0020" + "Cooling (" + roundToHalf((float) fahrenheitToCelsius(days.getCoolingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(coolingDesiredTemperatureValue)) + ")";
++                    }else {
++                        coolValues = "\u0020" + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
++                    }
+ 
+                     days.setCoolingVal(coolingDesiredTemperatureValue);
+                 }
+@@ -730,6 +743,9 @@ public class MasterControlView extends LinearLayout {
+         }
+         return 0;
+     }
++    private static float roundToHalf(float d) {
++        return Math.round(d * 2) / 2.0f;
++    }
+ 
+     private double getHeatingDesiredTemperature(double heatingDesiredTemperature, double heatingTemperatureUpperLimit,
+                                                 double heatingTemperatureLowerLimit) {
+-- 
+2.31.0.windows.1
+

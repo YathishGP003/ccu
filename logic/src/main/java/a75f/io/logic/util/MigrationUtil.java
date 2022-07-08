@@ -133,6 +133,12 @@ public class MigrationUtil {
             updateScheduleRefs(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefUpdateMigration();
        }
+
+
+        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
+            updateScheduleRefForZones(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefForZoneMigration();
+        }
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -651,5 +657,40 @@ public class MigrationUtil {
             }
         });
     }
+
+    private static void updateScheduleRefForZones(CCUHsApi hayStack){
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, " updating scheduleRef for room entity ");
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        List<HashMap<Object,Object>> scheduleTypes = hayStack.readAllEntities("scheduleType and point");
+        for(HashMap<Object,Object> room : rooms){
+            for(HashMap<Object,Object> scheduleType : scheduleTypes){
+                if(room.containsKey("scheduleRef") && isRefEqualsToId(scheduleType.get("roomRef").toString(),
+                        room.get("id").toString()) &&
+                        !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
+                    HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
+                            "roomRef == " +room.get("id"));
+                    Schedule zoneSchedule =
+                            CCUHsApi.getInstance().getScheduleById(zoneScheduleMap.get("id").toString());
+                    Zone zone = new Zone.Builder().setHashMap(room).build();
+                    zone.setScheduleRef(zoneSchedule.getId());
+                    hayStack.updateZone(zone, zone.getId());
+                }
+            }
+            if(!room.containsKey("scheduleRef")){
+                CcuLog.i(TAG_CCU_MIGRATION_UTIL, room.get("id").toString() +" does not have scheduleRef");
+            }
+        }
+    }
+
+    private static boolean isZoneFollowingNamedSchedule(CCUHsApi hayStack, HashMap<Object,Object> scheduleType){
+        return hayStack.readHisValById(scheduleType.get("id").toString()).intValue() == ScheduleType.NAMED.ordinal();
+    }
+
+    private static boolean isRefEqualsToId(String ref, String id){
+        ref = ref.startsWith("@")? ref.substring(1) : ref;
+        id = id.startsWith("@")? id.substring(1) : id;
+        return ref.equals(id);
+    }
+
 
 }

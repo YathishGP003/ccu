@@ -1,0 +1,81 @@
+From 54112f80240523db0020fbc604b5d96e1b23819c Mon Sep 17 00:00:00 2001
+From: Bharathpanchakshari
+ <33091312+Bharathpanchakshari@users.noreply.github.com>
+Date: Tue, 28 Jun 2022 15:11:55 +0530
+Subject: [PATCH 23/35] Made the changes mentioned in the comments
+
+---
+ .../io/renatus/registration/InstallerOptions.java     |  1 -
+ .../io/renatus/tuners/DialogTunerPriorityArray.java   | 11 ++++++++++-
+ .../io/renatus/tuners/TunerExpandableGridAdapter.java | 11 +++++++++--
+ 3 files changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java b/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
+index a5962c475..3fe01786d 100644
+--- a/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
++++ b/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
+@@ -94,7 +94,6 @@ public class InstallerOptions extends Fragment {
+     String mSiteId;
+     String addressBandSelected = "1000";
+     Prefs prefs;
+-    SharedPreferences sharedPreferences;
+     String localSiteID;
+     String CCU_ID = "";
+     private boolean isFreshRegister;
+diff --git a/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java b/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
+index e6f0fc850..78cdc5d43 100644
+--- a/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
++++ b/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
+@@ -326,10 +326,19 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+         buttonCancel.setOnClickListener(v -> dismiss());
+     }
+     public boolean doesPointNeedRelativeConversion() {
+-        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") || tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") && tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) || tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") || tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") || tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") || tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") && tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) || tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
++        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") ||
++                tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") &&
++                tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) ||
++                tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") ||
++                tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") ||
++                tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") ||
++                tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") &&
++                tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) ||
++                tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
+     }
+ 
+ 
++
+     public double getTunerValue(String id) {
+         CCUHsApi hayStack = CCUHsApi.getInstance();
+         ArrayList values = hayStack.readPoint(id);
+diff --git a/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java b/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
+index d1992866e..a1d60744a 100644
+--- a/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
++++ b/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
+@@ -53,7 +53,6 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+     int childIndexPosition = 0;
+     TunerGroupItem previousOpenGroup = null;
+     String tunerGroupType = "Building";
+-    SharedPreferences mPreferences;
+     HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+ 
+     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
+@@ -211,7 +210,15 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+     }
+ 
+     private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
+-        return  tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") || tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") && tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) || tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") || tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") || tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") || tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") && tunerItem.containsKey("min") && tunerItem.containsKey("differential")) || tunerItem.containsKey("leeway") || tunerItem.containsKey("proportional");
++        return  tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") ||
++                tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") &&
++                tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) ||
++                tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") ||
++                tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") ||
++                tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") ||
++                tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") &&
++                tunerItem.containsKey("min") && tunerItem.containsKey("differential")) ||
++                tunerItem.containsKey("leeway") || tunerItem.containsKey("proportional");
+     }
+ 
+     @Override
+-- 
+2.31.0.windows.1
+

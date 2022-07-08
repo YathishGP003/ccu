@@ -1,0 +1,113 @@
+From 65b1acad3b5185551d726732ecf133f5a0e8db82 Mon Sep 17 00:00:00 2001
+From: mkundaragi <mkundaragi@75f.io>
+Date: Thu, 30 Jun 2022 05:37:57 +0000
+Subject: [PATCH 27/35] Merged PR 4240: Running profile algorithm on receiving
+ override request from hyperstat device
+
+Running profile algorithm on receiving override request from hyperstat device
+
+Related work items: #11507
+---
+ .../mesh/hyperstat/HyperStatMsgReceiver.java  | 27 ++++++++++++++-----
+ .../hyperstat/cpu/HyperStatCpuProfile.kt      |  2 +-
+ 2 files changed, 22 insertions(+), 7 deletions(-)
+
+diff --git a/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMsgReceiver.java b/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMsgReceiver.java
+index 106f28c72..3ddc3f043 100644
+--- a/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMsgReceiver.java
++++ b/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMsgReceiver.java
+@@ -1,5 +1,9 @@
+ package a75f.io.device.mesh.hyperstat;
+ 
++import static a75f.io.device.mesh.Pulse.getHumidityConversion;
++
++import android.util.Log;
++
+ import com.google.protobuf.InvalidProtocolBufferException;
+ 
+ import java.nio.ByteBuffer;
+@@ -7,15 +11,16 @@ import java.nio.ByteOrder;
+ import java.util.Arrays;
+ import java.util.HashMap;
+ import java.util.List;
++import java.util.Objects;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.Point;
+ import a75f.io.api.haystack.RawPoint;
+ import a75f.io.device.HyperStat;
++import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
+ import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
+ import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
+-import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
+ import a75f.io.device.mesh.AnalogUtil;
+ import a75f.io.device.mesh.DLog;
+ import a75f.io.device.mesh.DeviceHSUtil;
+@@ -27,24 +32,21 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
+ import a75f.io.device.serial.MessageType;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.L;
++import a75f.io.logic.bo.building.ZoneProfile;
+ import a75f.io.logic.bo.building.definitions.Port;
+ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
+ import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
+ import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode;
++import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
+ import a75f.io.logic.bo.building.sensors.SensorType;
+ import a75f.io.logic.bo.haystack.device.HyperStatDevice;
+ import a75f.io.logic.bo.util.CCUUtils;
+ import a75f.io.logic.jobs.HyperStatScheduler;
+-import a75f.io.logic.jobs.ScheduleProcessJob;
+ import a75f.io.logic.jobs.SystemScheduleUtil;
+ import a75f.io.logic.pubnub.ZoneDataInterface;
+ 
+-import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+-
+-import android.util.Log;
+-
+ public class HyperStatMsgReceiver {
+     
+     private static final int HYPERSTAT_MESSAGE_ADDR_START_INDEX = 1;
+@@ -127,10 +129,23 @@ public class HyperStatMsgReceiver {
+         updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
+         updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
+ 
++        ZoneProfile profile = L.getProfile((short) nodeAddress);
++        runProfileAlgo(profile,(short) nodeAddress);
++
+         /** send the updated control  message*/
+         HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
+         sendAcknowledge(nodeAddress);
+     }
++
++    private static void runProfileAlgo(ZoneProfile profile,short nodeAddress){
++        // We have multiple profile for Hyperstat device to handle
++
++        if (profile instanceof HyperStatCpuProfile) {
++            HyperStatCpuProfile hyperStatCpuProfile = (HyperStatCpuProfile) profile;
++            hyperStatCpuProfile.runHyperstatCPUAlgorithm(Objects.requireNonNull(hyperStatCpuProfile.getHsCpuEquip(nodeAddress)));
++        }
++    }
++
+     
+     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
+                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/hyperstat/cpu/HyperStatCpuProfile.kt b/logic/src/main/java/a75f/io/logic/bo/building/hyperstat/cpu/HyperStatCpuProfile.kt
+index 7970b0b07..de40cd7eb 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/hyperstat/cpu/HyperStatCpuProfile.kt
++++ b/logic/src/main/java/a75f/io/logic/bo/building/hyperstat/cpu/HyperStatCpuProfile.kt
+@@ -75,7 +75,7 @@ class HyperStatCpuProfile : ZoneProfile() {
+     }
+ 
+     // Run the profile logic and algorithm for an equip.
+-    private fun runHyperstatCPUAlgorithm(equip: HyperStatCpuEquip) {
++    fun runHyperstatCPUAlgorithm(equip: HyperStatCpuEquip) {
+         Log.i(L.TAG_CCU_HSCPU, "************************ HSCPU Address: ${equip.node}**********************")
+         logicalPointsList = equip.getLogicalPointList()
+ 
+-- 
+2.31.0.windows.1
+

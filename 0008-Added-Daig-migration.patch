@@ -1,0 +1,201 @@
+From d45ef0702d9438f675d6e48531a0bdac184b86eb Mon Sep 17 00:00:00 2001
+From: Manjunath Kundaragi <mkundaragi@75f.io>
+Date: Tue, 14 Jun 2022 15:36:04 +0530
+Subject: [PATCH 08/50] Added Daig migration 1. Checking the diag points has 
+ gateway reff if no adding to diag eqip 2. If there is no local diag points,
+ than fetching from silo
+
+---
+ .../a75f/io/api/haystack/RestoreCCUHsApi.java | 14 +++---
+ .../a75f/io/logic/ccu/restore/RestoreCCU.java | 19 +++++++-
+ .../a75f/io/logic/util/MigrationUtil.java     | 47 +++++++++++--------
+ .../a75f/io/logic/util/PreferenceUtil.java    |  8 +++-
+ 4 files changed, 58 insertions(+), 30 deletions(-)
+
+diff --git a/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java b/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
+index 4f870e19d..cb4941553 100644
+--- a/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
++++ b/haystack/src/main/java/a75f/io/api/haystack/RestoreCCUHsApi.java
+@@ -245,13 +245,6 @@ public class RestoreCCUHsApi {
+         return hClient.call("read", HGridBuilder.dictToGrid(ccuDict));
+     }
+ 
+-    public HGrid getDiagEquip(String gatewayId){
+-        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+-        HDict ccuDict = new HDictBuilder().add("filter",
+-                "diag and equip and gatewayRef == " + StringUtils.prependIfMissing(gatewayId, "@")).toDict();
+-        return hClient.call("read", HGridBuilder.dictToGrid(ccuDict));
+-    }
+-
+     public HGrid getZoneEquipWithGatewayRef(String gatewayRef){
+         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+         HDict ccuDict = new HDictBuilder().add("filter",
+@@ -704,5 +697,12 @@ public class RestoreCCUHsApi {
+         }
+     }
+ 
++    public HGrid getDiagEquipByEquipId(String equipId){
++        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
++        HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(equipId, "@"))).toDict();
++
++        return hClient.call("read", HZincWriter.gridToString(HGridBuilder.dictToGrid(ccuDict)));
++    }
++
+ }
+ 
+diff --git a/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java b/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
+index 7cc79c7fd..3c5b41e2a 100644
+--- a/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
++++ b/logic/src/main/java/a75f/io/logic/ccu/restore/RestoreCCU.java
+@@ -134,6 +134,17 @@ public class RestoreCCU {
+         }
+         return null;
+     }
++    private String getEquipRefFromCCU(String ccuId, String siteCode){
++        HGrid ccuGrid = getCcuHGrid(siteCode);
++        Iterator ccuGridIterator = ccuGrid.iterator();
++        while (ccuGridIterator.hasNext()) {
++            HRow ccuRow = (HRow) ccuGridIterator.next();
++            if(ccuId.equals(ccuRow.get("id").toString())){
++                return ccuRow.get("equipRef").toString();
++            }
++        }
++        return null;
++    }
+ 
+     public void getSystemProfileOfCCU(String ccuId, String siteCode){
+         Log.i(TAG, "Restoring system profile of CCU started");
+@@ -166,9 +177,12 @@ public class RestoreCCU {
+     }
+ 
+     public void getDiagEquipOfCCU(String ccuId, String siteCode){
++        getDiagEquipOfCCU(getEquipRefFromCCU(ccuId, siteCode));
++    }
++
++    public void getDiagEquipOfCCU(String equipRef){
+         Log.i(TAG, "Restoring Diag equip is started");
+-        String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode);
+-        HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquip(gatewayRef);
++        HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquipByEquipId(equipRef);
+         if(diagEquipGrid == null){
+             throw new NullHGridException("Null occurred while fetching diag equip.");
+         }
+@@ -178,6 +192,7 @@ public class RestoreCCU {
+             getEquipAndPoints(diagEquipRow);
+         }
+         Log.i(TAG, "Restoring Diag equip is completed");
++
+     }
+ 
+     public void getZoneEquipsOfCCU(String ccuId, String siteCode, int deviceCount,
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 007e1a4a8..19748f1fd 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -8,6 +8,8 @@ import android.content.pm.PackageInfo;
+ import android.content.pm.PackageManager;
+ import android.util.Log;
+ 
++import org.projecthaystack.HGrid;
++
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.HashSet;
+@@ -36,6 +38,7 @@ import a75f.io.logic.bo.building.definitions.Units;
+ import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
+ import a75f.io.logic.bo.building.vav.VavEquip;
+ import a75f.io.logic.bo.haystack.device.SmartNode;
++import a75f.io.logic.ccu.restore.RestoreCCU;
+ import a75f.io.logic.diag.DiagEquip;
+ 
+ public class MigrationUtil {
+@@ -96,8 +99,10 @@ public class MigrationUtil {
+             addUnitToTuners(CCUHsApi.getInstance());
+             PreferenceUtil.setUnitAddedToTuners();
+         }
+-
+-        doDiagPointsMigration(CCUHsApi.getInstance());
++        if(!PreferenceUtil.getDiagEquipMigration()){
++            doDiagPointsMigration(CCUHsApi.getInstance());
++            PreferenceUtil.setDiagEquipMigration();
++        }
+     }
+ 
+     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+@@ -106,30 +111,32 @@ public class MigrationUtil {
+         // Because in server we will never get to know these diag points are belongs which ccu
+         // Create create fresh daig points.
+ 
+-        HashMap ccu = ccuHsApi.read("device and ccu");
+-        RestoreCCUHsApi restoreCCUHsApi = RestoreCCUHsApi.getInstance();
++        HashMap ccu = ccuHsApi.readEntity("device and ccu");
+         if (ccu.size() == 0) {
++            Log.i(TAG_CCU_MIGRATION_UTIL, "doDiagPointsMigration: ");
+             return;
+         }
+ 
+-      /*  HashMap diag = ccuHsApi.read("equip and diag");
+-
+-        if (diag.size() == 0) {
+-            // Diag points are not found locally
+-            DiagEquip.getInstance().create();
+-            Equip systemEquip = new Equip.Builder()
+-                    .setHashMap(ccuHsApi.read("system and equip")).build();
+-            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+-            return;
++        HashMap diag = ccuHsApi.readEntity("equip and diag");
++        if (!diag.isEmpty()) {
++            Log.i(TAG_CCU_MIGRATION_UTIL, "diag points are available ");
++            // Diag are present so check with def
++            Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
++            if(!diagEquip.getMarkers().contains("gatewayRef")){
++                // Update gateway reff
++                Log.i(TAG_CCU_MIGRATION_UTIL, "adding gateway reference");
++                Equip systemEquip = new Equip.Builder()
++                        .setHashMap(ccuHsApi.read("system and equip")).build();
++                ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
++            }
++        }else{
++            Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not avaiable Restoring daig equips");
++            // Locally diag points are missing check at silo
++            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
+         }
+-        Equip diagEquip = new Equip.Builder().setHashMap(diag).build();
+ 
+-        if(!diagEquip.getMarkers().contains("gatewayRef")){
+-            Equip systemEquip = new Equip.Builder()
+-                    .setHashMap(ccuHsApi.read("system and equip")).build();
+-            ccuHsApi.updateDiagGatewayRef(systemEquip.getId());
+-        }
+-*/
++
++
+     }
+ 
+     private static void airflowUnitMigration(CCUHsApi ccuHsApi) {
+diff --git a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+index ebe3a16aa..171231df5 100644
+--- a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+@@ -226,10 +226,16 @@ public class PreferenceUtil {
+     public static boolean getDamperFeedbackMigration() {
+         return getBooleanPreference(DAMPER_FEEDBACK_MIGRATION);
+     }
++    public static void setDiagEquipMigration() {
++        setBooleanPreference(DIAG_POINTS_MIGRATION, true);
++    }
++    public static boolean getDiagEquipMigration() {
++        return getBooleanPreference(DIAG_POINTS_MIGRATION);
++    }
+ 
+ 
+     public static void setSmartNodeMigration() {
+-        setBooleanPreference(SMART_NODE_MIGRATION, true);
++        setBooleanPreference(SMART_NODE_MIGRATION, false);
+ 
+     }
+ }
+\ No newline at end of file
+-- 
+2.31.0.windows.1
+

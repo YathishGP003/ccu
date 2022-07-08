@@ -1,0 +1,53 @@
+From a177af2cff5db053ee04275f2c2be05122e99125 Mon Sep 17 00:00:00 2001
+From: Manjunath Kundaragi <mkundaragi@75f.io>
+Date: Wed, 15 Jun 2022 15:46:32 +0530
+Subject: [PATCH 13/50] resolved merge conflicts
+
+---
+ logic/src/main/java/a75f/io/logic/util/MigrationUtil.java | 8 ++++----
+ .../src/main/java/a75f/io/logic/util/PreferenceUtil.java  | 3 ---
+ 2 files changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 187435046..34e37c83d 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -104,6 +104,10 @@ public class MigrationUtil {
+             PreferenceUtil.setVocPm2p5Migration();
+         }
+ 
++        if(!PreferenceUtil.getDiagEquipMigration()){
++            doDiagPointsMigration(CCUHsApi.getInstance());
++            PreferenceUtil.setDiagEquipMigration();
++        }
+ 
+ 
+     }
+@@ -146,10 +150,6 @@ public class MigrationUtil {
+ 
+     private static boolean isPointExist(String query, CCUHsApi ccuHsApi){
+       return !ccuHsApi.readEntity(query).isEmpty();
+-        if(!PreferenceUtil.getDiagEquipMigration()){
+-            doDiagPointsMigration(CCUHsApi.getInstance());
+-            PreferenceUtil.setDiagEquipMigration();
+-        }
+     }
+ 
+     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
+diff --git a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+index 01fbf8886..9df598be6 100644
+--- a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+@@ -203,9 +203,6 @@ public class PreferenceUtil {
+         setBooleanPreference(ADDED_UNIT_TO_TUNERS, true);
+     }
+ 
+-
+-
+-
+     public static boolean isIduPointsMigrationDone() {
+         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+         return sharedPreferences.getBoolean("iduMigration",false);
+-- 
+2.31.0.windows.1
+

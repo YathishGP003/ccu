@@ -1,0 +1,116 @@
+From 83eb345e835fba22dd6f5554e51488655cc973c1 Mon Sep 17 00:00:00 2001
+From: jtheertha <jtheertha@75f.io>
+Date: Mon, 13 Jun 2022 10:31:34 +0000
+Subject: [PATCH 03/50] Merged PR 4136: Vacation bug
+
+Once time zone of CCU gets changed, based on time difference, vacation was getting spread into next or previous day. This is because, with previous time zone, vacation's start and end time was getting converted into millis and then new time zone was applied to create range for vacation with HDateTime.
+
+Now the fix is, while converting start date and end date of vacation into HDateTime, new time zone is considered with out converting  start date and end date into millis
+
+Related work items: #12282
+---
+ .../java/a75f/io/logic/DefaultSchedules.java  | 35 +++++++++++--------
+ 1 file changed, 20 insertions(+), 15 deletions(-)
+
+diff --git a/logic/src/main/java/a75f/io/logic/DefaultSchedules.java b/logic/src/main/java/a75f/io/logic/DefaultSchedules.java
+index 12319ef10..fc5ef1e50 100644
+--- a/logic/src/main/java/a75f/io/logic/DefaultSchedules.java
++++ b/logic/src/main/java/a75f/io/logic/DefaultSchedules.java
+@@ -3,12 +3,14 @@ package a75f.io.logic;
+ import android.util.Log;
+ 
+ import org.joda.time.DateTime;
++import org.projecthaystack.HDate;
+ import org.projecthaystack.HDateTime;
+ import org.projecthaystack.HDict;
+ import org.projecthaystack.HDictBuilder;
+ import org.projecthaystack.HList;
+ import org.projecthaystack.HNum;
+ import org.projecthaystack.HRef;
++import org.projecthaystack.HTime;
+ import org.projecthaystack.HTimeZone;
+ 
+ import java.util.ArrayList;
+@@ -89,7 +91,6 @@ public class DefaultSchedules {
+     {
+         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+         HRef localId;
+-        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
+ 
+         if(id == null) {
+             localId = HRef.make(UUID.randomUUID().toString());
+@@ -98,10 +99,6 @@ public class DefaultSchedules {
+             localId = HRef.make(id);
+         }
+ 
+-        HDict hDict = new HDictBuilder()
+-                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
+-                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
+-
+         HDict defaultSchedule = new HDictBuilder()
+                 .add("id", localId)
+                 .add("temp")
+@@ -110,7 +107,7 @@ public class DefaultSchedules {
+                 .add("vacation")
+                 .add("cooling")
+                 .add("heating")
+-                .add("range", hDict)
++                .add("range", buildVacationHDictRange(startDate, endDate))
+                 .add("dis", vacationName)
+                 .add("siteRef", siteId)
+                 .toDict();
+@@ -122,13 +119,27 @@ public class DefaultSchedules {
+             CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
+         }
+     }
++
++    private static HDict buildVacationHDictRange(DateTime startDate, DateTime endDate){
++        String timeZoneFromHS = CCUHsApi.getInstance().readEntity("site").get("tz").toString();
++
++        HDate startHdate = HDate.make(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth());
++        HTime startHTime = HTime.make(startDate.getHourOfDay(), startDate.getMinuteOfHour(),
++                startDate.getSecondOfMinute());
++
++        HDate endHdate = HDate.make(endDate.getYear(), endDate.getMonthOfYear(), endDate.getDayOfMonth());
++        HTime endHTime = HTime.make(endDate.getHourOfDay(), endDate.getMinuteOfHour(), endDate.getSecondOfMinute());
++
++        return new HDictBuilder()
++                .add("stdt", HDateTime.make(startHdate, startHTime, HTimeZone.make(timeZoneFromHS)))
++                .add("etdt", HDateTime.make(endHdate, endHTime, HTimeZone.make(timeZoneFromHS))).toDict();
++    }
+     
+     public static void upsertZoneVacation(String id, String vacationName, DateTime startDate, DateTime endDate, String roomRef)
+     {
+         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+         HRef localId;
+-        String timeZoneFromHS = CCUHsApi.getInstance().read("site").get("tz").toString();
+-        
++
+         if(id == null) {
+             localId = HRef.make(UUID.randomUUID().toString());
+         }
+@@ -136,12 +147,6 @@ public class DefaultSchedules {
+             localId = HRef.make(id);
+         }
+ 
+-
+-        HDict hDict = new HDictBuilder()
+-                .add("stdt", HDateTime.make(startDate.getMillis(), HTimeZone.make(timeZoneFromHS)))
+-                .add("etdt", HDateTime.make(endDate.getMillis(), HTimeZone.make(timeZoneFromHS))).toDict();
+-
+-
+         HDict defaultSchedule = new HDictBuilder()
+                                         .add("id", localId)
+                                         .add("temp")
+@@ -150,7 +155,7 @@ public class DefaultSchedules {
+                                         .add("vacation")
+                                         .add("cooling")
+                                         .add("heating")
+-                                        .add("range", hDict)
++                                        .add("range", buildVacationHDictRange(startDate, endDate))
+                                         .add("dis", vacationName)
+                                         .add("siteRef", siteId)
+                                         .add("roomRef", HRef.copy(roomRef))
+-- 
+2.31.0.windows.1
+

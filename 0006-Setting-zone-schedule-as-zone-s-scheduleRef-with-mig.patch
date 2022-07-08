@@ -1,0 +1,38 @@
+From d0d86af9b9b43dd0b01a1a3760586b741eac71fc Mon Sep 17 00:00:00 2001
+From: JayaTheertha <jtheertha@75f.io>
+Date: Wed, 6 Jul 2022 20:42:10 +0530
+Subject: [PATCH 6/8] Setting zone schedule as zone's scheduleRef with
+ migration.
+
+---
+ logic/src/main/java/a75f/io/logic/util/MigrationUtil.java | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index d829580aa..8e0dd6641 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -642,7 +642,8 @@ public class MigrationUtil {
+         List<HashMap<Object,Object>> scheduleTypes = hayStack.readAllEntities("scheduleType and point");
+         for(HashMap<Object,Object> room : rooms){
+             for(HashMap<Object,Object> scheduleType : scheduleTypes){
+-                if(isRefEqualsToId(scheduleType.get("roomRef").toString(), room.get("id").toString()) &&
++                if(room.containsKey("scheduleRef") && isRefEqualsToId(scheduleType.get("roomRef").toString(),
++                        room.get("id").toString()) &&
+                         !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
+                     HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
+                             "roomRef == " +room.get("id"));
+@@ -653,7 +654,9 @@ public class MigrationUtil {
+                     hayStack.updateZone(zone, zone.getId());
+                 }
+             }
+-
++            if(!room.containsKey("scheduleRef")){
++                CcuLog.i(TAG_CCU_MIGRATION_UTIL, room.get("id").toString() +" does not have scheduleRef");
++            }
+         }
+     }
+ 
+-- 
+2.31.0.windows.1
+

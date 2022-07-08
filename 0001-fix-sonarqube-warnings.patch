@@ -1,0 +1,46 @@
+From f717ab52c47850683e9c807c43f09635761c7047 Mon Sep 17 00:00:00 2001
+From: Samjith Sadasivan <samjith@75f.io>
+Date: Wed, 15 Jun 2022 11:05:28 -0500
+Subject: [PATCH 01/35] fix sonarqube warnings
+
+---
+ .../main/java/a75f/io/logic/bo/building/oao/OAOProfile.java   | 4 ----
+ .../java/a75f/io/logic/bo/building/system/SystemProfile.java  | 3 ++-
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/oao/OAOProfile.java b/logic/src/main/java/a75f/io/logic/bo/building/oao/OAOProfile.java
+index 7fb3ab4c9..12e144449 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/oao/OAOProfile.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/oao/OAOProfile.java
+@@ -1,14 +1,10 @@
+ package a75f.io.logic.bo.building.oao;
+ 
+-import android.content.Context;
+-import android.media.audiofx.DynamicsProcessing;
+ import android.util.Log;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+-import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.Occupied;
+ import a75f.io.logger.CcuLog;
+-import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
+ import a75f.io.logic.bo.building.BaseProfileConfiguration;
+ import a75f.io.logic.bo.building.EpidemicState;
+diff --git a/logic/src/main/java/a75f/io/logic/bo/building/system/SystemProfile.java b/logic/src/main/java/a75f/io/logic/bo/building/system/SystemProfile.java
+index 7357aca52..710ae6f9b 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/building/system/SystemProfile.java
++++ b/logic/src/main/java/a75f/io/logic/bo/building/system/SystemProfile.java
+@@ -921,7 +921,8 @@ public abstract class SystemProfile
+     }
+     
+     public void updateOutsideWeatherParams() {
+-        double externalTemp = 0, externalHumidity = 0;
++        double externalTemp = 0;
++        double externalHumidity = 0;
+         try {
+             if (Globals.getInstance().isWeatherTest()) {
+                 externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+-- 
+2.31.0.windows.1
+

@@ -1,0 +1,233 @@
+From 453d1e5f18268de0aeea41dddb5827744c5f28cf Mon Sep 17 00:00:00 2001
+From: JayaTheertha <jtheertha@75f.io>
+Date: Wed, 6 Jul 2022 19:58:50 +0530
+Subject: [PATCH 32/35] Setting zone schedule as zone's scheduleRef with
+ migration.
+
+---
+ .../EquipTempExpandableListAdapter.java       |  8 ++---
+ .../java/a75f/io/renatus/ZoneFragmentNew.java | 18 +++++-----
+ .../io/renatus/schedules/ScheduleUtil.java    |  4 +--
+ .../io/device/bacnet/BACnetScheduler.java     |  4 +--
+ .../a75f/io/logic/util/MigrationUtil.java     | 36 +++++++++++++++++++
+ .../a75f/io/logic/util/PreferenceUtil.java    |  8 +++++
+ 6 files changed, 61 insertions(+), 17 deletions(-)
+
+diff --git a/app/src/main/java/a75f/io/renatus/EquipTempExpandableListAdapter.java b/app/src/main/java/a75f/io/renatus/EquipTempExpandableListAdapter.java
+index 1dd5dac9b..9ab9b83d3 100644
+--- a/app/src/main/java/a75f/io/renatus/EquipTempExpandableListAdapter.java
++++ b/app/src/main/java/a75f/io/renatus/EquipTempExpandableListAdapter.java
+@@ -195,8 +195,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
+                             Schedule scheduleById = null;
+                             if (zone.hasSchedule())
+                             {
+-                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                        "== " +zone.getId());
++                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                        "not vacation and roomRef == " +zone.getId());
+                                 scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
+                                 Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                                 scheduleById.setDisabled(false);
+@@ -210,8 +210,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
+                                 DefaultSchedules.setDefaultCoolingHeatingTemp();
+                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
+-                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                                        "== " +zone.getId());
++                                HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
++                                        "not vacation and roomRef == " +zone.getId());
+                                 scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
+                             }
+                             scheduleImageButton.setTag(scheduleById.getId());
+diff --git a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+index 3fd299a37..74a792bc2 100644
+--- a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
++++ b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+@@ -914,7 +914,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     Zone zone = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                     if (zone != null) {
+                         HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                "not special and roomRef " + "== " +zone.getId());
++                                "not special and not vacation and roomRef " + "== " +zone.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         zone.setScheduleRef(scheduleById.getId());
+                         CCUHsApi.getInstance().updateZone(zone, zoneId);
+@@ -937,7 +937,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
+                         HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                "not special and roomRef " + "== " +zone.getId());
++                                "not special and not vacation and roomRef " + "== " +zone.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         if (zone.hasSchedule()) {
+ 
+@@ -952,7 +952,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                              * still created a schedule. Handle it before creating a new schedule again.
+                              */
+                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                    "not special and roomRef " + "== " +zone.getId());
++                                    "not special and not vacation and roomRef " + "== " +zone.getId());
+                             if (!schedule.isEmpty()) {
+                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                 zone.setScheduleRef(schedule.get("id").toString());
+@@ -962,7 +962,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                             }
+                         }
+                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                "not special and roomRef " + "== " +zone.getId());
++                                "not special and not vacation and roomRef " + "== " +zone.getId());
+                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                         if (z != null) {
+@@ -1537,7 +1537,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                     if (z != null) {
+                         HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
+-                                "not special and roomRef " + "== " +z.getId());
++                                "not special and not vacation and roomRef " + "== " +z.getId());
+                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
+                         z.setScheduleRef(scheduleById.getId());
+                         CCUHsApi.getInstance().updateZone(z, zoneId);
+@@ -1561,7 +1561,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                         Schedule scheduleById = null;
+                         if (zone.hasSchedule()) {
+                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                    "not special and roomRef " + "== " +zone.getId());
++                                    "not special and not vacation and roomRef " + "== " +zone.getId());
+                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
+                             scheduleById.setDisabled(false);
+@@ -1574,7 +1574,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                              * still created a schedule. Handle it before creating a new schedule again.
+                              */
+                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                    "not special and roomRef " + "== " +zone.getId());
++                                    "not special and not vacation and roomRef " + "== " +zone.getId());
+                             if (!schedule.isEmpty()) {
+                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
+                                 zone.setScheduleRef(schedule.get("id").toString());
+@@ -1584,11 +1584,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                             }
+                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                    "not special and roomRef " + "== " +zone.getId());
++                                    "not special and not vacation and roomRef " + "== " +zone.getId());
+                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+                         }
+                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
+-                                "not special and roomRef " + "== " +zone.getId());
++                                "not special and not vacation and roomRef " + "== " +zone.getId());
+                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
+                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+                         if (z != null) {
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/ScheduleUtil.java b/app/src/main/java/a75f/io/renatus/schedules/ScheduleUtil.java
+index b29cbef7e..8449eee84 100644
+--- a/app/src/main/java/a75f/io/renatus/schedules/ScheduleUtil.java
++++ b/app/src/main/java/a75f/io/renatus/schedules/ScheduleUtil.java
+@@ -23,8 +23,8 @@ public class ScheduleUtil {
+         for (String zoneId : spillsMap.keySet()) {
+ 
+             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
+-            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                    "== " +z.getId());
++            HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
++                    "vacation and roomRef == " +z.getId());
+             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+             ArrayList<Interval> spills = spillsMap.get(zoneId);
+ 
+diff --git a/device/src/main/java/a75f/io/device/bacnet/BACnetScheduler.java b/device/src/main/java/a75f/io/device/bacnet/BACnetScheduler.java
+index 76a49d411..581c483c5 100644
+--- a/device/src/main/java/a75f/io/device/bacnet/BACnetScheduler.java
++++ b/device/src/main/java/a75f/io/device/bacnet/BACnetScheduler.java
+@@ -72,8 +72,8 @@ public class BACnetScheduler {
+ 
+         zoneDevice = HSUtil.getDevices(zone.getId()).get(0);
+ 
+-        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and roomRef " +
+-                "== " +zone.getId());
++        HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not vacation and " +
++                "roomRef == " +zone.getId());
+         schedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
+         systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+ 
+diff --git a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+index 68af3ce3c..d829580aa 100644
+--- a/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/MigrationUtil.java
+@@ -129,6 +129,11 @@ public class MigrationUtil {
+             PreferenceUtil.setDiagEquipMigration();
+         }
+ 
++        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
++                updateScheduleRefForZones(CCUHsApi.getInstance());
++            PreferenceUtil.setScheduleRefForZoneMigration();
++        }
++
+ 
+     }
+ 
+@@ -631,4 +636,35 @@ public class MigrationUtil {
+         });
+     }
+ 
++    private static void updateScheduleRefForZones(CCUHsApi hayStack){
++        CcuLog.i(TAG_CCU_MIGRATION_UTIL, " updating scheduleRef for room entity ");
++        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
++        List<HashMap<Object,Object>> scheduleTypes = hayStack.readAllEntities("scheduleType and point");
++        for(HashMap<Object,Object> room : rooms){
++            for(HashMap<Object,Object> scheduleType : scheduleTypes){
++                if(isRefEqualsToId(scheduleType.get("roomRef").toString(), room.get("id").toString()) &&
++                        !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
++                    HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
++                            "roomRef == " +room.get("id"));
++                    Schedule zoneSchedule =
++                            CCUHsApi.getInstance().getScheduleById(zoneScheduleMap.get("id").toString());
++                    Zone zone = new Zone.Builder().setHashMap(room).build();
++                    zone.setScheduleRef(zoneSchedule.getId());
++                    hayStack.updateZone(zone, zone.getId());
++                }
++            }
++
++        }
++    }
++
++    private static boolean isZoneFollowingNamedSchedule(CCUHsApi hayStack, HashMap<Object,Object> scheduleType){
++        return hayStack.readHisValById(scheduleType.get("id").toString()).intValue() == ScheduleType.NAMED.ordinal();
++    }
++
++    private static boolean isRefEqualsToId(String ref, String id){
++        ref = ref.startsWith("@")? ref.substring(1) : ref;
++        id = id.startsWith("@")? id.substring(1) : id;
++        return ref.equals(id);
++    }
++
+ }
+\ No newline at end of file
+diff --git a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+index 460ccce05..3c5e72e89 100644
+--- a/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
++++ b/logic/src/main/java/a75f/io/logic/util/PreferenceUtil.java
+@@ -20,6 +20,7 @@ public class PreferenceUtil {
+     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
+     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
+     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
++    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefForZoneMigration";
+ 
+     public static void setContext(Context c) {
+         context= c;
+@@ -265,4 +266,11 @@ public class PreferenceUtil {
+         setBooleanPreference(SMART_NODE_MIGRATION, true);
+ 
+     }
++
++    public static void setScheduleRefForZoneMigration() {
++        setBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION, true);
++    }
++    public static boolean getScheduleRefForZoneMigration() {
++        return getBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION);
++    }
+ }
+\ No newline at end of file
+-- 
+2.31.0.windows.1
+

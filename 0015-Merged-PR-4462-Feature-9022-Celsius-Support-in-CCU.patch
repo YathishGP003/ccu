@@ -1,0 +1,2334 @@
+From 924431100e77f8b7973f68c9901d959dbac804d1 Mon Sep 17 00:00:00 2001
+From: mkundaragi <mkundaragi@75f.io>
+Date: Thu, 7 Jul 2022 05:27:26 +0000
+Subject: [PATCH 15/15] Merged PR 4462: Feature 9022: Celsius Support in CCU
+
+Related work items: #9022
+---
+ .../java/a75f/io/renatus/AlertsFragment.java  |  46 +++-
+ .../java/a75f/io/renatus/SystemFragment.java  |  11 +-
+ .../java/a75f/io/renatus/ZoneFragmentNew.java | 244 ++++++++++++++----
+ .../registration/InstallerOptions.java        |  36 +++
+ .../io/renatus/schedules/NamedSchedule.java   | 100 +++++--
+ .../renatus/schedules/SchedulerFragment.java  |  22 +-
+ .../tuners/DialogTunerPriorityArray.java      |  76 +++++-
+ .../tuners/TunerExpandableGridAdapter.java    |  60 ++++-
+ .../a75f/io/renatus/tuners/TunerFragment.java |  34 ++-
+ .../java/a75f/io/renatus/util/SeekArc.java    |  74 ++++--
+ .../views/MasterControl/MasterControl.java    |  67 +++--
+ .../MasterControl/MasterControlView.java      |  20 +-
+ .../java/a75f/io/renatus/views/RangeBar.java  |  17 +-
+ .../io/renatus/views/TempLimit/TempLimit.java |  59 +++--
+ .../res/drawable/black_teardrop_small.png     | Bin 0 -> 1491 bytes
+ .../main/res/drawable/blue_teardrop_small.png | Bin 0 -> 1547 bytes
+ .../res/drawable/orange_teardrop_small.png    | Bin 0 -> 1565 bytes
+ .../fragment_installeroption.xml              |   2 +-
+ .../res/layout/fragment_installeroption.xml   |   2 +-
+ app/src/main/res/values/preference_keys.xml   |   1 +
+ .../java/a75f/io/device/mesh/LSmartNode.java  |   3 +-
+ .../java/a75f/io/device/mesh/LSmartStat.java  |   3 +-
+ .../hyperstat/HyperStatMessageGenerator.java  |   9 +
+ .../io/device/util/DeviceConfigurationUtil.kt |  20 ++
+ .../java/a75f/io/logic/bo/util/UnitUtils.java |  69 ++++-
+ .../a75f/io/logic/tuners/GenericTuners.java   |  17 +-
+ .../a75f/io/logic/tuners/TunerConstants.java  |   2 +
+ .../a75f/io/logic/tuners/TunerUpgrades.java   |  41 ++-
+ .../java/a75f/io/logic/tuners/TunerUtil.java  |  15 ++
+ 29 files changed, 890 insertions(+), 160 deletions(-)
+ create mode 100644 app/src/main/res/drawable/black_teardrop_small.png
+ create mode 100644 app/src/main/res/drawable/blue_teardrop_small.png
+ create mode 100644 app/src/main/res/drawable/orange_teardrop_small.png
+ create mode 100644 device/src/main/java/a75f/io/device/util/DeviceConfigurationUtil.kt
+
+diff --git a/app/src/main/java/a75f/io/renatus/AlertsFragment.java b/app/src/main/java/a75f/io/renatus/AlertsFragment.java
+index 5d00114eb..0dec65256 100644
+--- a/app/src/main/java/a75f/io/renatus/AlertsFragment.java
++++ b/app/src/main/java/a75f/io/renatus/AlertsFragment.java
+@@ -16,14 +16,25 @@ import android.view.ViewGroup;
+ import android.widget.AdapterView;
+ import android.widget.ListView;
+ 
++import org.apache.commons.lang3.StringUtils;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
++
+ import java.text.DateFormat;
++import java.text.DecimalFormat;
+ import java.text.SimpleDateFormat;
+ import java.util.ArrayList;
+ import java.util.Date;
++import java.util.HashMap;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
+ 
+ import a75f.io.alerts.AlertManager;
+ import a75f.io.alerts.AlertSyncHandler;
+ import a75f.io.api.haystack.Alert;
++import a75f.io.logic.tuners.TunerConstants;
++import a75f.io.renatus.util.CCUUtils;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+ import io.reactivex.rxjava3.disposables.Disposable;
+ import io.reactivex.rxjava3.functions.Action;
+@@ -40,7 +51,9 @@ public class AlertsFragment extends Fragment
+ 	ListView         listView;
+ 	private static AlertAdapter adapter;
+ 	private Disposable alertDeleteDisposable;
+-	
++	private HashMap<Object, Object> useCelsius;
++
++
+ 	public static AlertsFragment newInstance()
+ 	{
+ 
+@@ -68,8 +81,17 @@ public class AlertsFragment extends Fragment
+ 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+ 				
+ 				Alert a = alertList.get(position);
++				String message = a.getmMessage();
++
++				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++
++				if (message.contains("\u00B0")) {
++					if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++						message = formatMessageToCelsius(message);
++					}
++				}
+ 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+-				builder.setMessage(a.getmTitle() + "\n\n" + a.getmMessage() + "\n"
++				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
+ 				                   + "\n Alert Generated at " + getFormattedDate(a.getStartTime())
+ 				                   + "\n Alert Fixed at "+getFormattedDate(a.getEndTime()))
+ 				       .setCancelable(false)
+@@ -122,6 +144,26 @@ public class AlertsFragment extends Fragment
+ 		CcuLog.i("UI_PROFILING","AlertsFragment.onViewCreated Done");
+ 		
+ 	}
++
++	String formatMessageToCelsius(String alertMessage){
++		String reverse = StringUtils.reverse(alertMessage);
++		String[] temp = StringUtils.substringsBetween(reverse,"\u00B0 "," ");
++		for (String s : temp) {
++			try {
++				DecimalFormat f = new DecimalFormat("##.00");
++				String celsiusVal = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Float.valueOf(StringUtils.reverse(s)))));
++				Pattern fahrenheitVal = Pattern.compile(StringUtils.reverse(s));
++				Matcher tempVal = fahrenheitVal.matcher(alertMessage);
++				alertMessage = tempVal.replaceAll(celsiusVal);
++			} catch (Exception e) {
++				e.printStackTrace();
++			}
++		}
++		Pattern fahrenheitUnit = Pattern.compile("\u00B0F");
++		Matcher tempUnit = fahrenheitUnit.matcher(alertMessage);
++		alertMessage = tempUnit.replaceAll("\u00B0C");
++		return alertMessage;
++	}
+ 	
+ 	String getFormattedDate(long millis) {
+ 		if (millis == 0)
+diff --git a/app/src/main/java/a75f/io/renatus/SystemFragment.java b/app/src/main/java/a75f/io/renatus/SystemFragment.java
+index adc4b9d48..de6f300ce 100644
+--- a/app/src/main/java/a75f/io/renatus/SystemFragment.java
++++ b/app/src/main/java/a75f/io/renatus/SystemFragment.java
+@@ -16,9 +16,11 @@ import a75f.io.api.haystack.MockTime;
+ import a75f.io.api.haystack.Schedule;
+ import a75f.io.api.haystack.Tags;
+ import a75f.io.logger.CcuLog;
++import a75f.io.logic.bo.util.CCUUtils;
+ import a75f.io.logic.pubnub.IntrinsicScheduleListener;
+ import a75f.io.logic.pubnub.UpdateScheduleHandler;
+ import a75f.io.logic.schedule.IntrinsicScheduleCreator;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.util.ProgressDialogUtils;
+ import a75f.io.renatus.util.RxjavaUtil;
+ import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
+@@ -65,6 +67,8 @@ import java.util.Collections;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Objects;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.modbus.EquipmentDevice;
+@@ -84,9 +88,12 @@ import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+ import a75f.io.renatus.util.CCUUiUtil;
+ import a75f.io.renatus.util.HeartBeatUtil;
+ import a75f.io.renatus.util.Prefs;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ import a75f.io.renatus.views.OaoArc;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
++import static a75f.io.logic.jobs.ScheduleProcessJob.getSystemStatusString;
+ 
+ import com.tooltip.Tooltip;
+ 
+@@ -909,7 +916,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
+ 					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
+ 
+ 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+-					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
++					occupancyStatus.setText(getSystemStatusString());
+ 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+ 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+ 					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+@@ -938,6 +945,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
+ 		}
+ 		
+ 	}
++
++
+ 	@Override
+ 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
+ 	                           long arg3)
+diff --git a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+index 3fd299a37..d7b5a7c14 100644
+--- a/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
++++ b/app/src/main/java/a75f/io/renatus/ZoneFragmentNew.java
+@@ -1,5 +1,6 @@
+ package a75f.io.renatus;
+ 
++import static java.lang.Double.parseDouble;
+ import android.annotation.SuppressLint;
+ import android.app.AlertDialog;
+ import android.content.BroadcastReceiver;
+@@ -48,6 +49,8 @@ import java.util.Comparator;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Objects;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+@@ -78,6 +81,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
+ import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
+ import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
++import a75f.io.logic.bo.util.CCUUtils;
+ import a75f.io.logic.jobs.HyperStatScheduler;
+ import a75f.io.logic.jobs.ScheduleProcessJob;
+ import a75f.io.logic.jobs.StandaloneScheduler;
+@@ -85,6 +89,7 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
+ import a75f.io.logic.pubnub.UpdatePointHandler;
+ import a75f.io.logic.pubnub.ZoneDataInterface;
+ import a75f.io.logic.tuners.BuildingTunerCache;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.logic.tuners.TunerUtil;
+ import a75f.io.modbusbox.EquipsManager;
+ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
+@@ -112,7 +117,10 @@ import io.reactivex.rxjava3.core.Observable;
+ import io.reactivex.rxjava3.schedulers.Schedulers;
+ 
+ import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+ 
+ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
+     private static final String LOG_TAG = " ZoneFragmentNew ";
+@@ -128,6 +136,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+     public DataArrayAdapter<Floor> mFloorListAdapter;
+     ArrayList<Zone> roomList = new ArrayList();
+ 
++    private HashMap<Object, Object> useCelsius;
+     private RelativeLayout weather_data = null;
+     private TextView place;
+     private TextView temperature;
+@@ -198,6 +207,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+     @Override
+     public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                              Bundle savedInstanceState) {
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+         View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
+         parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
+         return rootView;
+@@ -363,7 +373,36 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+             }
+         }
+     }
+-    
++
++    public String StatusCelsiusVal(String temp)
++    {
++        String s="";
++        ArrayList < Double > myDoubles = new ArrayList < Double >();
++        Matcher matcher = Pattern.compile( "[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?" ).matcher( temp );
++
++        Pattern p = Pattern.compile("[a-zA-Z]+");
++        Matcher m1 = p.matcher(temp);
++        while (m1.find()) {
++            s=s+m1.group()+" ";
++        }
++
++        while ( matcher.find() )
++        {
++            double element = Double.parseDouble( matcher.group() );
++            myDoubles.add( Math.abs(element) );
++        }
++        if(myDoubles.size() > 0) {
++            try {
++                return ((s.substring(0, s.lastIndexOf("F")) + " ")+ (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
++            }  catch (Exception e) {
++               e.printStackTrace();
++               return (" ");
++            }
++        } else {
++            return (" ");
++        }
++    }
++
+     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
+         if (getActivity() != null) {
+             int i;
+@@ -381,7 +420,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
+                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
+                             vacationStatusTV.setText(vacationStatus);
+-                            scheduleStatus.setText(status);
++                            try {
++                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                                scheduleStatus.setText(StatusCelsiusVal(status));
++                            } else {
++                                scheduleStatus.setText(status);
++                            }
++                            } catch (Exception e) {
++                            e.printStackTrace();
++                            }
+ 
+                            /* if (vacationStatus.equals("Active Vacation"))
+                             {
+@@ -478,9 +525,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+     public void UpdateWeatherData() {
+         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
+ 
+-            temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
+-            maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
+-            minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
++            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                temperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
++                maximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
++                minimumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
++            } else {
++                temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
++                maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
++                minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
++            }
+             DecimalFormat df = new DecimalFormat("#.##");
+             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
+             double weatherHumidity = WeatherDataDownloadService.getHumidity();
+@@ -834,10 +887,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
+ 
+-        Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
+-                  .subscribeOn(Schedulers.io())
+-                  .observeOn(AndroidSchedulers.mainThread())
+-                  .subscribe(status -> scheduleStatus.setText(status));
++        try {
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
++                    .subscribeOn(Schedulers.io())
++                    .observeOn(AndroidSchedulers.mainThread())
++                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
++        } else {
++            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
++                    .subscribeOn(Schedulers.io())
++                    .observeOn(AndroidSchedulers.mainThread())
++                    .subscribe(status -> scheduleStatus.setText(status));
++        }
++        } catch (Exception e) {
++        e.printStackTrace();
++        }
+ 
+         Observable.fromCallable(() -> ScheduleProcessJob.getVacationStateString(zoneId))
+                   .subscribeOn(Schedulers.io())
+@@ -1441,10 +1505,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         scheduleSpinner.setAdapter(scheduleAdapter);
+ 
+         String zoneId = Schedule.getZoneIdByEquipId(equipId);
+-        Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
+-                  .subscribeOn(Schedulers.io())
+-                  .observeOn(AndroidSchedulers.mainThread())
+-                  .subscribe(status -> scheduleStatus.setText(status));
++        try {
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
++                    .subscribeOn(Schedulers.io())
++                    .observeOn(AndroidSchedulers.mainThread())
++                    .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status)));
++        } else {
++            Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
++                    .subscribeOn(Schedulers.io())
++                    .observeOn(AndroidSchedulers.mainThread())
++                    .subscribe(status -> scheduleStatus.setText(status));
++        }
++        } catch (Exception e) {
++        e.printStackTrace();
++        }
+ 
+         Observable.fromCallable(() -> ScheduleProcessJob.getVacationStateString(zoneId))
+                   .subscribeOn(Schedulers.io())
+@@ -2042,9 +2117,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+                             double targetValue = (double) plcPoints.get("Target Value");
+                             double inputValue = (double) plcPoints.get("Input Value");
+-                            nonTempControl.setPiInputText(String.format("%.2f", inputValue));
++                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                                nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
++                                nonTempControl.setPiInputUnitText(" \u00B0C");
++                            } else {
++                                nonTempControl.setPiInputText(String.format("%.2f", inputValue));
++                                nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
++                            }
+                             nonTempControl.setPiOutputText(String.valueOf(targetValue));
+-                            nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
+                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                             } else {
+@@ -2147,9 +2227,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         textViewLabel2.setText("Reheat Coil : ");
+         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
+         textViewLabel3.setText("Discharge Airflow : ");
+-        textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
++        }
+         textViewLabel4.setText("Supply Airflow : ");
+-        textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
++        }
+         if (!Boolean.TRUE.equals(vavPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+         linearLayoutZonePoints.addView(viewTitle);
+         linearLayoutZonePoints.addView(viewStatus);
+@@ -2187,7 +2275,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         textViewStatus.setText(ssePoints.get("Status").toString());
+         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+         textViewLabel1.setText("Discharge Airflow : ");
+-        textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(ssePoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
++        }
+         if (!Boolean.TRUE.equals(ssePoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+ 
+@@ -2250,7 +2342,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         textViewLabel1.setText("Damper : ");
+         textViewLabel2.setText("Discharge Airflow : ");
+         textViewValue1.setText(dabPoints.get("Damper").toString());
+-        textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
++        }
+         if (!Boolean.TRUE.equals(dabPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+ 
+@@ -2295,16 +2391,35 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
+         textViewStatus.setText(dualDuctPoints.get("Status").toString());
+         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+-        if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
+-            textViewLabel1.setText("Cooling Supply Airflow : ");
+-            textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
+-        } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
+-            textViewLabel1.setText("Heating Supply Airflow : ");
+-            textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
++                textViewLabel1.setText("Cooling Supply Airflow : ");
++                textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("CoolingSupplyAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++            } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
++                textViewLabel1.setText("Heating Supply Airflow : ");
++                textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("HeatingSupplyAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++            }
++        } else {
++            if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
++                textViewLabel1.setText("Cooling Supply Airflow : ");
++                textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
++            } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
++                textViewLabel1.setText("Heating Supply Airflow : ");
++                textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
++            }
+         }
+ 
+         textViewLabel2.setText("Discharge Airflow : ");
+-        textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
++        try {
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
++        }
++        }
++        catch (Exception e) {
++            e.printStackTrace();
++        }
+ 
+         if (dualDuctPoints.containsKey("CoolingDamper")) {
+             textViewLabel3.setText("Cooling Damper : ");
+@@ -2346,7 +2461,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+         CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
+         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+-        textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(cpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
++        }
+ 
+         if (!Boolean.TRUE.equals(cpuEquipPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+@@ -2576,7 +2695,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         CCUUiUtil.setSpinnerDropDownColor(conditionSpinner,getContext());
+         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
+         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+-        textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(hpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
++        }
+         if (!Boolean.TRUE.equals(hpuEquipPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+ 
+@@ -2816,7 +2939,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+ 
+-        textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
++
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p2FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
++        }
+ 
+         if (!Boolean.TRUE.equals(p2FCUPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+@@ -2976,7 +3104,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+ 
+         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+ 
+-        textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p4FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
++        } else {
++            textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
++        }
+         if (!Boolean.TRUE.equals(p4FCUPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
+ 
+ 
+@@ -3201,7 +3333,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
+ 
+         double processValue = (double) plcPoints.get("Input Value");
+-        textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
++        } else {
++            textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
++        }
+         try {
+             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
+ 
+@@ -3524,13 +3660,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+ 
+ 
+-            String label_string = sensePoints.get("Thermistor1").toString() +
+-                     " ("+ getString(R.string.thermistor1_label)+") " + " : ";
+-            String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
+-                    "Unit3").toString());
++            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                String label_string = sensePoints.get("Thermistor1").toString() +
++                        " (" + getString(R.string.thermistor1_label) + ") " + " : ";
++                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
++                label.setText(label_string);
++                val.setText(val_string);
++            } else {
++                String label_string = sensePoints.get("Thermistor1").toString() +
++                        " (" + getString(R.string.thermistor1_label) + ") " + " : ";
++                String val_string = (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get(
++                        "Unit3").toString());
+ 
+-            label.setText(label_string);
+-            val.setText(val_string);
++                label.setText(label_string);
++                val.setText(val_string);
++            }
+ 
+             linearLayoutZonePoints.addView(viewPointRow1);
+         }
+@@ -3544,13 +3688,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
+             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+ 
+-            String label_string = sensePoints.get("Thermistor2").toString() +
+-                   " (" + getString(R.string.thermistor2_label)+") " + " : ";
+-            String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
+-                    "Unit4").toString());
++            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                String label_string = sensePoints.get("Thermistor2").toString() +
++                        " (" + getString(R.string.thermistor2_label) + ") " + " : ";
++                String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
++                label.setText(label_string);
++                val.setText(val_string);
++            } else {
++                String label_string = sensePoints.get("Thermistor2").toString() +
++                        " (" + getString(R.string.thermistor2_label)+") " + " : ";
++                String val_string = (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get(
++                        "Unit4").toString());
+ 
+-            label.setText(label_string);
+-            val.setText(val_string);
++                label.setText(label_string);
++                val.setText(val_string);
++            }
+ 
+             linearLayoutZonePoints.addView(viewPointRow1);
+         }
+@@ -3886,7 +4038,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
+         setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
+ 
+         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+-        textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(Float.parseFloat(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString().replaceAll("[^0-9\\.]",""))))))+ " \u00B0C");
++        } else {
++            textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
++        }
+ 
+         linearLayoutZonePoints.addView(viewTitle);
+         linearLayoutZonePoints.addView(viewStatus);
+diff --git a/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java b/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
+index c9d2722fa..3fe01786d 100644
+--- a/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
++++ b/app/src/main/java/a75f/io/renatus/registration/InstallerOptions.java
+@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.IntentFilter;
++import android.content.SharedPreferences;
+ import android.net.ConnectivityManager;
+ import android.os.AsyncTask;
+ import android.os.Build;
+@@ -55,6 +56,7 @@ import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
+ import a75f.io.logic.bo.building.definitions.ProfileType;
+ import a75f.io.logic.tuners.BuildingTuners;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.logic.tuners.TunerUtil;
+ import a75f.io.renatus.BuildConfig;
+ import a75f.io.renatus.R;
+@@ -108,6 +110,8 @@ public class InstallerOptions extends Fragment {
+ 
+     //BACnet Setup
+     ToggleButton toggleBACnet;
++    ToggleButton toggleCelsius;
++    TextView textCelsiusEnable;
+     RelativeLayout relativeLayoutBACnet;
+     EditText editIPAddr,editSubnet,editGateway;
+     Button buttonInitialise;
+@@ -211,6 +215,8 @@ public class InstallerOptions extends Fragment {
+ 
+         //BACnet Setup UI Components
+         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
++        toggleCelsius= rootView.findViewById(R.id.toggleCelsius);
++        textCelsiusEnable = rootView.findViewById(R.id.textUseCelsius);
+         relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
+         editIPAddr = rootView.findViewById(R.id.editIPaddr);
+         editSubnet = rootView.findViewById(R.id.editSubnet);
+@@ -239,6 +245,18 @@ public class InstallerOptions extends Fragment {
+ 		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
+         String ccuUid = null;
+ 
++        textCelsiusEnable.setVisibility(View.VISIBLE);
++        toggleCelsius.setVisibility(View.VISIBLE);
++        HashMap<Object, Object> useCelsius;
++
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++
++        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++           toggleCelsius.setChecked(true);
++        } else {
++           toggleCelsius.setChecked(false);
++        }
++
+         if (ccuId != null) {
+             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
+         }
+@@ -251,6 +269,8 @@ public class InstallerOptions extends Fragment {
+             if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
+                 textBacnetEnable.setVisibility(View.VISIBLE);
+                 toggleBACnet.setVisibility(View.VISIBLE);
++                textCelsiusEnable.setVisibility(View.VISIBLE);
++                toggleCelsius.setVisibility(View.VISIBLE);
+             }else {
+                 textBacnetEnable.setVisibility(View.GONE);
+                 toggleBACnet.setVisibility(View.GONE);
+@@ -384,6 +404,22 @@ public class InstallerOptions extends Fragment {
+ 
+         getTempValues();
+ 
++        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
++            @Override
++            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
++                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++
++                if(isChecked) {
++                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
++                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
++                } else {
++                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
++                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
++                }
++                getTempValues();
++            }
++        });
++
+         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+             @Override
+             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java b/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
+index 1522d450a..9cc68bb3e 100644
+--- a/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
++++ b/app/src/main/java/a75f/io/renatus/schedules/NamedSchedule.java
+@@ -1,6 +1,10 @@
+ package a75f.io.renatus.schedules;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+ 
+ import android.annotation.SuppressLint;
+ import android.app.AlertDialog;
+@@ -53,6 +57,7 @@ import a75f.io.api.haystack.Zone;
+ import a75f.io.logger.CcuLog;
+ 
+ import a75f.io.logic.tuners.BuildingTunerCache;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.logic.tuners.TunerUtil;
+ import a75f.io.renatus.R;
+ import a75f.io.renatus.util.FontManager;
+@@ -62,6 +67,7 @@ public class NamedSchedule extends DialogFragment {
+     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
+     private static final String PARAM_SCHED_NAME = "PARAM_SCHED_NAME";
+     private static final String TAG = "NAMED_SCHEDULE";
++    private HashMap<Object, Object> useCelsius;
+ 
+     TextView textViewMonday;
+     TextView textViewTuesday;
+@@ -163,7 +169,7 @@ public class NamedSchedule extends DialogFragment {
+         //Scheduler Layout
+         initialiseViews(rootView);
+ 
+-
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+         setButton = rootView.findViewById(R.id.setButton);
+         setButton.setOnClickListener(v -> {
+             if (validateNamedSchedule()) {
+@@ -371,44 +377,74 @@ public class NamedSchedule extends DialogFragment {
+ 
+             double coolingDeadband = TunerUtil.getZoneCoolingDeadband(roomRef);
+             double heatingDeadband = TunerUtil.getZoneHeatingDeadband(roomRef);
+-            for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
+-                double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
+-                if(deadbandNamedSched < coolingDeadband+heatingDeadband){
+-                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
+-                            .append(deadbandNamedSched).append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\n\n");
+-                    isValid = false;
+-                    break;
++            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                 coolingDeadband = fahrenheitToCelsiusRelative(coolingDeadband);
++                 heatingDeadband = fahrenheitToCelsiusRelative(heatingDeadband);
++                for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
++                    double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
++                    deadbandNamedSched=fahrenheitToCelsiusRelative(deadbandNamedSched);
++                    if(deadbandNamedSched < coolingDeadband+heatingDeadband){
++                        warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
++                                .append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append(" \u00B0C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append(" \u00B0C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append(" \u00B0C").append("\n\n");
++                        isValid = false;
++                        break;
++                    }
++                }
++            } else {
++                for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
++                    double deadbandNamedSched = namedSchedDay.getCoolingVal() - namedSchedDay.getHeatingVal();
++                    if (deadbandNamedSched < coolingDeadband + heatingDeadband) {
++                        warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
++                                .append(deadbandNamedSched).append(" \u00B0F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\u00B0F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\u00B0F").append("\n\n");
++                        isValid = false;
++                        break;
++                    }
+                 }
+-
+-
+             }
+ 
+             StringBuilder desiredTempWarning = new StringBuilder();
+             boolean isDesiredTempValid = true;
+             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
+-                if (!(namedSchedDay.getHeatingVal() <= buildingTuner.getMaxHeatingUserLimit()
+-                && namedSchedDay.getHeatingVal() >= buildingTuner.getMinHeatingUserLimit()
+-                && namedSchedDay.getCoolingVal() <= buildingTuner.getMaxCoolingUserLimit()
+-                && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
++                if (!(namedSchedDay.getHeatingVal() < buildingTuner.getMaxHeatingUserLimit()
++                && namedSchedDay.getHeatingVal()> buildingTuner.getMinHeatingUserLimit()
++                && namedSchedDay.getCoolingVal() < buildingTuner.getMaxCoolingUserLimit()
++                && namedSchedDay.getCoolingVal() > buildingTuner.getMinCoolingUserLimit())) {
+                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
+                             "Saturday","Sunday"};
+-                    desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+-                            .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+-                            .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+-                            .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(";")
+-                            .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t");
++                    if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
++                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
++                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
++                                .append("(CDT - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingVal())).append(" \u00B0C").append(";")
++                                .append("HDT - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingVal())).append(" \u00B0C").append(")").append("\n\t\t");
++                    } else {
++                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
++                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
++                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
++                                .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(" \u00B0F").append(";")
++                                .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(" \u00B0F").append(")").append("\n\t\t");
++                    }
+                     isValid = false;
+                     isDesiredTempValid= false;
+                 }
+ 
+             }
+             if(!isDesiredTempValid) {
+-                warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
+-                        .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
+-                        .append("Building desired temps limit : HDT - ")
+-                        .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
+-                        .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
+-                        .append("\n\n");;
++                if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
++                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
++                            .append("Building desired temps limit : HDT - ")
++                            .append((fahrenheitToCelsius(buildingTuner.getMinHeatingUserLimit()))).append(" \u00B0C").append("~").append((fahrenheitToCelsius(buildingTuner.getMaxHeatingUserLimit()))).append(" \u00B0C")
++                            .append("\n\t\t CDT - ").append(fahrenheitToCelsius(buildingTuner.getMinCoolingUserLimit())).append(" \u00B0C").append("~").append(fahrenheitToCelsius(buildingTuner.getMaxCoolingUserLimit())).append(" \u00B0C")
++                            .append("\n\n");
++                } else {
++                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
++                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
++                            .append("Building desired temps limit : HDT - ")
++                            .append(buildingTuner.getMinHeatingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxHeatingUserLimit()).append(" \u00B0F")
++                            .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxCoolingUserLimit()).append(" \u00B0F")
++                            .append("\n\n");
++                }
+             }
+ 
+         }
+@@ -514,7 +550,15 @@ public class NamedSchedule extends DialogFragment {
+         if(getContext()==null) return;
+         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
+         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
+-        textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp,Html.FROM_HTML_MODE_LEGACY));
++        String celsiusUnitMin = FontManager.getColoredSpanned("\u00B0C", colorMinTemp);
++        String celsiusUnitMax = FontManager.getColoredSpanned("\u00B0C", colorMaxTemp);
++        String farenUnitMin = FontManager.getColoredSpanned("\u00B0F", colorMinTemp);
++        String farenUnitMax = FontManager.getColoredSpanned("\u00B0F", colorMaxTemp);
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
++        } else {
++            textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
++        }
+         if(typeface!=null)
+             textViewTemp.setTypeface(typeface);
+         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+@@ -631,6 +675,10 @@ public class NamedSchedule extends DialogFragment {
+     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
+ 
+ 
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            coolingTemp =(fahrenheitToCelsius(coolingTemp));
++            heatingTemp=(fahrenheitToCelsius(heatingTemp));
++        }
+         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
+         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
+ 
+diff --git a/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java b/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
+index 79f7af3e5..a90dac369 100644
+--- a/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
++++ b/app/src/main/java/a75f/io/renatus/schedules/SchedulerFragment.java
+@@ -1,5 +1,8 @@
+ package a75f.io.renatus.schedules;
+ 
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
++
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ import static a75f.io.usbserial.UsbModbusService.TAG;
+ 
+ import android.app.AlertDialog;
+@@ -67,6 +70,7 @@ import a75f.io.logic.DefaultSchedules;
+ import a75f.io.logic.L;
+ import a75f.io.logic.jobs.ScheduleProcessJob;
+ import a75f.io.logic.schedule.SpecialSchedule;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
+ import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
+ import a75f.io.renatus.util.FontManager;
+@@ -1096,12 +1100,24 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
+     private String getDayString(Schedule.Days day) {
+         return ScheduleUtil.getDayString(day.getDay()+1);
+     }
+-    
++    private static float roundToHalf(float d) {
++        return Math.round(d * 2) / 2.0f;
++    }
++
+     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
+ 
+ 
+-        String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
+-        String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
++        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++        String unit = "\u00B0F";
++
++        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
++            heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
++            unit = "\u00B0C";
++        }
++
++        String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp) + unit, colorMinTemp);
++        String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp) + unit, colorMaxTemp);
+ 
+         Typeface typeface=Typeface.DEFAULT;
+         try {
+diff --git a/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java b/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
+index 10afab1b6..54dd74b7d 100644
+--- a/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
++++ b/app/src/main/java/a75f/io/renatus/tuners/DialogTunerPriorityArray.java
+@@ -5,6 +5,10 @@ import android.app.AlertDialog;
+ import android.app.Dialog;
+ import android.content.Intent;
+ import android.os.Bundle;
++import androidx.annotation.Nullable;
++import androidx.core.content.ContextCompat;
++import androidx.recyclerview.widget.LinearLayoutManager;
++import androidx.recyclerview.widget.RecyclerView;
+ import android.text.Html;
+ import android.util.Log;
+ import android.view.LayoutInflater;
+@@ -34,13 +38,21 @@ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.Floor;
+ import a75f.io.api.haystack.HSUtil;
++import a75f.io.api.haystack.Tags;
+ import a75f.io.api.haystack.Zone;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.BASE.BaseDialogFragment;
+ import a75f.io.renatus.R;
+ import a75f.io.renatus.util.CCUUiUtil;
++import a75f.io.renatus.util.CCUUtils;
++import a75f.io.renatus.util.Prefs;
+ import a75f.io.renatus.util.TunerNumberPicker;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ import butterknife.ButterKnife;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
++import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+ 
+ public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
+     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
+@@ -58,8 +70,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+     String selectedTunerValue;
+     String selectedTunerLevel;
+     String tunerGroupType;
++    String tunerName;
++    String tunerVal;
+     LinearLayout viewStub;
+     LinearLayout layoutTitle;
++    Prefs prefs;
++    double defaultVal;
++    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+ 
+ 
+     private void configureArguments(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
+@@ -263,13 +280,25 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+     @Override
+     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+ 
++        defaultVal = getTunerDefaultValue(tunerItemSelected.get("id").toString());
++
++        tunerName = tunerItemSelected.get("dis").toString();
++        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
++                if (doesPointNeedRelativeConversion()) {
++                    defaultVal = roundToHalf(fahrenheitToCelsiusRelative(defaultVal));
++                } else {
++                    defaultVal = Math.round(fahrenheitToCelsius(defaultVal));
++                }
++            }
++        }
+          String tunerName = tunerItemSelected.get("dis").toString();
+         if (tunerItemSelected.containsKey("unit")) {
+             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
+-            textTunerDefaultValue.setText(getTunerDefaultValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
++            textTunerDefaultValue.setText(defaultVal + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
+         } else {
+             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+-            textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
++            textTunerDefaultValue.setText("" + defaultVal);
+         }
+ 
+         textTunerGroupTitle.setText(tunerGroupSelected.getName());
+@@ -295,6 +324,18 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+         });
+         buttonCancel.setOnClickListener(v -> dismiss());
+     }
++    public boolean doesPointNeedRelativeConversion() {
++        return  tunerItemSelected.containsKey("deadband") || tunerItemSelected.containsKey("setback") ||
++                tunerItemSelected.containsKey("abnormal") || (tunerItemSelected.containsKey("spread") &&
++                tunerItemSelected.containsKey("user") && !tunerItemSelected.containsKey("multiplier")) ||
++                tunerItemSelected.containsKey("sat") && tunerItemSelected.containsKey("spmax") ||
++                tunerItemSelected.containsKey("spmin") || tunerItemSelected.containsKey("spres") ||
++                tunerItemSelected.containsKey("spinit") || tunerItemSelected.containsKey("sptrim") ||
++                tunerItemSelected.containsKey("spresmax") || (tunerItemSelected.containsKey("reheat") &&
++                tunerItemSelected.containsKey("min") && tunerItemSelected.containsKey("differential")) ||
++                tunerItemSelected.containsKey("leeway") || tunerItemSelected.containsKey("proportional");
++    }
++
+ 
+ 
+     public double getTunerValue(String id) {
+@@ -350,14 +391,25 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+         return 0;
+     }
+ 
+-    public String getTunerValue(String id, String level) {
++    private String getTunerValue(String id, String level) {
+         CCUHsApi hayStack = CCUHsApi.getInstance();
+         ArrayList values = hayStack.readPoint(id);
+         if (values != null && values.size() > 0) {
+             for (int l = 1; l <= values.size(); l++) {
+                 HashMap valMap = ((HashMap) values.get(l - 1));
+                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
+-                    return valMap.get("val").toString();
++                    tunerVal = valMap.get("val").toString();
++                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
++                            if (doesPointNeedRelativeConversion()) {
++                                tunerVal = String.valueOf(roundToHalf(fahrenheitToCelsiusRelative(Double.parseDouble(valMap.get("val").toString()))));
++                            } else {
++                                tunerVal = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(valMap.get("val").toString()))));
++                            }
++                        }
++
++                    }
++                    return tunerVal;
+                 }
+             }
+         }
+@@ -383,6 +435,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+             buttonUndo.setVisibility(View.GONE);
+             buttonSaveAlert.setEnabled(false);
+             String levelName = "Building";
++            prefs = new Prefs(getContext().getApplicationContext());
+             int level;
+             if (position == 15) {
+                 levelName = "Building";
+@@ -430,6 +483,21 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
+                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
+                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
+ 
++                if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                    if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
++                        prefs.setBoolean(tunerItemSelected.get("id").toString(), true);
++                        if (doesPointNeedRelativeConversion()) {
++                            maxValueDb = roundToHalf(fahrenheitToCelsiusRelative(maxValueDb));
++                            minValueDb = roundToHalf(fahrenheitToCelsiusRelative(minValueDb));
++                            currentValueDb = roundToHalf(fahrenheitToCelsiusRelative(currentValueDb));
++                        } else {
++                            minValueDb = roundToHalf(fahrenheitToCelsius(minValueDb));
++                            maxValueDb = roundToHalf(fahrenheitToCelsius(maxValueDb));
++                            currentValueDb = roundToHalf(fahrenheitToCelsius(currentValueDb));
++                        }
++                    }
++                }
++
+                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
+ 
+                 ArrayList<String> valueList = new ArrayList<>();
+diff --git a/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java b/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
+index 9aef57c4b..448f082fb 100644
+--- a/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
++++ b/app/src/main/java/a75f/io/renatus/tuners/TunerExpandableGridAdapter.java
+@@ -6,6 +6,7 @@ import android.app.Activity;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.graphics.Color;
++import android.content.SharedPreferences;
+ import androidx.cardview.widget.CardView;
+ import androidx.recyclerview.widget.GridLayoutManager;
+ import androidx.recyclerview.widget.RecyclerView;
+@@ -16,12 +17,20 @@ import android.view.ViewGroup;
+ import android.widget.ImageButton;
+ import android.widget.TextView;
+ import android.widget.ToggleButton;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
++import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
++
+ 
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ 
+ import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.api.haystack.Tags;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
++import a75f.io.renatus.util.Prefs;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ 
+ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpandableGridAdapter.ViewHolder> {
+ 
+@@ -44,6 +53,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+     int childIndexPosition = 0;
+     TunerGroupItem previousOpenGroup = null;
+     String tunerGroupType = "Building";
++    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+ 
+     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
+                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
+@@ -63,6 +73,10 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+         });
+     }
+ 
++    public Context getmContext() {
++        return mContext;
++    }
++
+     private boolean isSection(int position) {
+         return mDataArrayList.get(position) instanceof TunerGroupItem;
+     }
+@@ -81,7 +95,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
+                 Log.i("TunersUI", "tunerItem:" + tunerItem);
+                 String tunerName = tunerItem.get("dis").toString();
+-                
++                Prefs prefs = new Prefs(getmContext().getApplicationContext());
++
+                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+                 if (tunerItem.containsKey("newValue")) {
+                     if (tunerItem.get("newValue") == null){
+@@ -92,7 +107,17 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+                             holder.imgBtnUndo.setVisibility(View.GONE);
+                         }
+                     } else {
+-                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
++                        String val = tunerItem.get("newValue").toString();
++                        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
++                            if (tunerItem.containsKey("unit") && tunerItem.get("unit").toString().equals("\u00B0F") || tunerItem.get("unit").toString().equals("\u00B0C")) {
++                                if (doesPointNeedRelativeConversion(tunerItem)) {
++                                    val = String.valueOf(roundToHalf(fahrenheitToCelsiusRelative(Double.parseDouble(val))));
++                                } else {
++                                    val = String.valueOf(Math.round(fahrenheitToCelsius(Double.parseDouble(val))));
++                                }
++                            }
++                        }
++                        holder.itemTextValueView.setText(val);
+                         if (tunerItem.containsKey("hideRefresh")){
+                             holder.imgBtnUndo.setVisibility(View.GONE);
+                         } else {
+@@ -102,12 +127,29 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+                 } else {
+                     holder.imgBtnUndo.setVisibility(View.GONE);
+                     if (getTunerValue(tunerItem.get("id").toString()) != null){
+-                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
++                        double val = (getTunerValue(tunerItem.get("id").toString()));
++                        if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED && !prefs.getBoolean(tunerItem.get("id").toString())) {
++                            if (!tunerItem.containsKey("displayUnit")) {
++                                if (tunerItem.containsKey("unit") && tunerItem.get("unit").toString().equals("\u00B0F") || tunerItem.get("unit").toString().equals("\u00B0C")) {
++                                    if (doesPointNeedRelativeConversion(tunerItem)) {
++                                        val = roundToHalf(fahrenheitToCelsiusRelative(val));
++                                    } else {
++                                        val = Math.round(fahrenheitToCelsius(val));
++                                    }
++                                }
++                            }
++                        }
++                        holder.itemTextValueView.setText(String.valueOf(val));
+                     } else {
+                         holder.itemTextValueView.setText("-");
+                     }
+                 }
+                 if (tunerItem.containsKey("unit")) {
++                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        if (tunerItem.get("unit").toString().equals("\u00B0F")) {
++                            tunerItem.put("unit", "\u00B0C");
++                        }
++                    }
+                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
+                 } else {
+                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+@@ -169,6 +211,18 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
+         }
+     }
+ 
++    private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
++        return  tunerItem.containsKey("deadband") || tunerItem.containsKey("setback") ||
++                tunerItem.containsKey("abnormal") || (tunerItem.containsKey("spread") &&
++                tunerItem.containsKey("user") && !tunerItem.containsKey("multiplier")) ||
++                tunerItem.containsKey("sat") && tunerItem.containsKey("spmax") ||
++                tunerItem.containsKey("spmin") || tunerItem.containsKey("spres") ||
++                tunerItem.containsKey("spinit") || tunerItem.containsKey("sptrim") ||
++                tunerItem.containsKey("spresmax") || (tunerItem.containsKey("reheat") &&
++                tunerItem.containsKey("min") && tunerItem.containsKey("differential")) ||
++                tunerItem.containsKey("leeway") || tunerItem.containsKey("proportional");
++    }
++
+     @Override
+     public int getItemCount() {
+         return mDataArrayList.size();
+diff --git a/app/src/main/java/a75f/io/renatus/tuners/TunerFragment.java b/app/src/main/java/a75f/io/renatus/tuners/TunerFragment.java
+index 1c511ba41..b1149e200 100644
+--- a/app/src/main/java/a75f/io/renatus/tuners/TunerFragment.java
++++ b/app/src/main/java/a75f/io/renatus/tuners/TunerFragment.java
+@@ -53,15 +53,21 @@ import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.api.haystack.Equip;
+ import a75f.io.api.haystack.Floor;
+ import a75f.io.api.haystack.HSUtil;
++import a75f.io.api.haystack.Tags;
+ import a75f.io.api.haystack.Zone;
+ import a75f.io.api.haystack.sync.HttpUtil;
+ import a75f.io.logic.L;
+ import a75f.io.logic.bo.building.definitions.ProfileType;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.BASE.BaseDialogFragment;
+ import a75f.io.renatus.R;
+ import a75f.io.renatus.util.CCUUiUtil;
++import a75f.io.renatus.util.Prefs;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ 
+-
++import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
++import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
++import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+ 
+ 
+ /**
+@@ -90,6 +96,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
+     Spinner spinnerSelection;
+     ArrayList<HashMap> tuners = new ArrayList<>();
+     String tunerGroupType = "Building";
++    Prefs prefs;
+     public TunerFragment() {
+     }
+ 
+@@ -119,6 +126,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
+         cancelTunerUpdate = view.findViewById(R.id.buttonCancel);
+         editChangeReason = view.findViewById(R.id.editChangeReason);
+         editTunerSearch = view.findViewById(R.id.editTunerSearch);
++        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+         saveTunerValues.setEnabled(false);
+         //Default Show System Tuners
+         //TODO: revert building tuners
+@@ -322,7 +330,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
+             Button buttonApplyTuners = dialogView.findViewById(R.id.buttonApplyTuner);
+             Button buttonCancelTuners = dialogView.findViewById(R.id.buttonCancelTuner);
+             buttonApplyTuners.setOnClickListener(dialogV -> {
++                prefs = new Prefs(getContext().getApplicationContext());
+                 for (HashMap newTunerValueItem : updatedTunerValues) {
++                    if( (double) MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED  || prefs.getBoolean(newTunerValueItem.get("id").toString())) {
++                        if (newTunerValueItem.containsKey("unit") && newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
++                            if (doesPointNeedRelativeConversion(newTunerValueItem)) {
++                                newTunerValueItem.replace("newValue", String.valueOf(roundToHalf(celsiusToFahrenheitRelativeChange(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
++                            } else {
++                                newTunerValueItem.replace("newValue", String.valueOf(Math.round(celsiusToFahrenheit(Double.parseDouble(newTunerValueItem.get("newValue").toString())))));
++                            }
++                            prefs.setBoolean(newTunerValueItem.get("id").toString(), false);
++                        }
++                    }
+                     if ((newTunerValueItem.get("newLevel").toString().equals("16") || newTunerValueItem.get("newLevel").toString().equals("14")) && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB")) {
+                         if (!newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())) {
+                             continue;
+@@ -475,6 +494,19 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
+     }
+ 
+ 
++    private boolean doesPointNeedRelativeConversion(HashMap<Object,Object> newTunerValueItem) {
++        return  newTunerValueItem.containsKey("deadband") || newTunerValueItem.containsKey("setback") ||
++                newTunerValueItem.containsKey("abnormal") || (newTunerValueItem.containsKey("spread") &&
++                newTunerValueItem.containsKey("user") && !newTunerValueItem.containsKey("multiplier")) ||
++                newTunerValueItem.containsKey("sat") && newTunerValueItem.containsKey("spmax") ||
++                newTunerValueItem.containsKey("spmin") || newTunerValueItem.containsKey("spres") ||
++                newTunerValueItem.containsKey("spinit") || newTunerValueItem.containsKey("sptrim") ||
++                newTunerValueItem.containsKey("spresmax") || (newTunerValueItem.containsKey("reheat") &&
++                newTunerValueItem.containsKey("min") && newTunerValueItem.containsKey("differential")) ||
++                newTunerValueItem.containsKey("leeway") || newTunerValueItem.containsKey("proportional");
++    }
++
++
+     private void updateModuleData(String equipRef) {
+         tuners.clear();
+         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
+diff --git a/app/src/main/java/a75f/io/renatus/util/SeekArc.java b/app/src/main/java/a75f/io/renatus/util/SeekArc.java
+index fd01b4084..25429eb63 100644
+--- a/app/src/main/java/a75f/io/renatus/util/SeekArc.java
++++ b/app/src/main/java/a75f/io/renatus/util/SeekArc.java
+@@ -1,6 +1,10 @@
+ package a75f.io.renatus.util;
+ 
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
++
+ import android.content.Context;
+ import android.content.res.Resources;
+ import android.content.res.TypedArray;
+@@ -16,6 +20,7 @@ import android.graphics.drawable.BitmapDrawable;
+ import android.graphics.drawable.Drawable;
+ import android.os.Handler;
+ 
++import a75f.io.api.haystack.CCUHsApi;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.L;
+ import androidx.annotation.ColorInt;
+@@ -31,6 +36,7 @@ import android.view.View;
+ import java.text.DecimalFormat;
+ import java.util.HashMap;
+ 
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
+ 
+ 
+@@ -179,6 +185,7 @@ public class SeekArc extends View
+     private float mCoolingDesiredTemp;
+     private float mHeatingDesiredTemp;
+     private float mCurrentTemp;
++    private double useCelsiusVal;
+ 
+     private float mLimitCoolingStartAngle;
+     private float mLimitHeatingStartAngle;
+@@ -273,6 +280,7 @@ public class SeekArc extends View
+ 
+     public void init(Context context, AttributeSet attrs, int defStyle)
+     {
++        useCelsiusVal=(double) getTuner((CCUHsApi.getInstance().readEntity("displayUnit")).get("id").toString());
+         mCurrentBitmapMatrix = new Matrix();
+ 
+         mHeatingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_dt_two));
+@@ -502,7 +510,12 @@ public class SeekArc extends View
+ 
+     private void drawCurrentTempTextNotDetailed(Canvas canvas, float currentTemp)
+     {
+-        String curTemp = String.valueOf(roundToHalf(currentTemp));
++        String curTemp;
++        if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            curTemp=String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(currentTemp))));
++        } else {
++            curTemp= String.valueOf(roundToHalf(currentTemp));
++        }
+         mCurrentTemperatureTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
+         float xPositionOfCurrentTempText = cx - (bounds.width() / 2f);  //origin
+         float yPositionOfCurrentTempText = cy + (bounds.height() / 2f);  // baseline
+@@ -513,7 +526,16 @@ public class SeekArc extends View
+     private void drawCurrentTempTextDetailed(Canvas canvas)
+     {
+         if (isSense) {
+-            String currentTempText = String.valueOf(getCurrentTemp());
++            String currentTempText;
++            String tempString ;
++            String curString = "CURRENT";
++            if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                 currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
++                 tempString = "TEMP"+" (\u00B0C )";
++            } else {
++                 currentTempText = String.valueOf(getCurrentTemp());
++                 tempString = "TEMP"+" (\u00B0F )";
++            }
+             mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+ 
+             float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
+@@ -531,31 +553,37 @@ public class SeekArc extends View
+             float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+ 
+-            String curString = "CURRENT";
+             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
+-
+             float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
+ 
+             float heightOfCurrentStringText = bounds.height();
+ 
+-            String tempString = "TEMP";
+-
+             mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+ 
+ 
+             float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
+             float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+-
+-            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+-            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+-            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+-
++             canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
++             canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
++             canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+         } else {
+-            String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
+-            String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
+-            String currentTempText = String.valueOf(getCurrentTemp());
+-
++            String coolingDesiredText;
++            String heatingDesiredText;
++            String currentTempText;
++            String tempString ;
++            String curString = "CURRENT";
++            if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                 coolingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getCoolingDesiredTemp()))));
++                 heatingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getHeatingDesiredTemp()))));
++                 currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
++                 tempString = "TEMP"+" (\u00B0C )";
++            } else {
++                 coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
++                 heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
++                 currentTempText = String.valueOf(getCurrentTemp());
++                 tempString = "TEMP"+" (\u00B0F )";
++            }
+              mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
+              mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
+             mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+@@ -583,16 +611,12 @@ public class SeekArc extends View
+             float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+ 
+-            String curString = "CURRENT";
+             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
+-
+             float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
+ 
+             float heightOfCurrentStringText = bounds.height();
+ 
+-            String tempString = "TEMP";
+-
+             mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+ 
+ 
+@@ -647,9 +671,15 @@ public class SeekArc extends View
+         mCurrentTemperatureTextPaint.setColor(tempPaintColor);
+         mCurrentTemperatureStringTextPaint.setColor(descriptionColor);
+ 
+-        canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
+-        canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
+-        canvas.drawText(curTemp, xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
++        if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
++            canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
++            canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(curTemp))), xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
++        } else {
++            canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
++            canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
++            canvas.drawText(curTemp, xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
++        }
+ 
+         mCurrentTemperatureTextPaint.setColor(prevCurrentTempColor);
+         mCurrentTemperatureStringTextPaint.setColor(prevCurrentStringColor);
+diff --git a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControl.java b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControl.java
+index d7d00609d..1a976b664 100644
+--- a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControl.java
++++ b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControl.java
+@@ -22,10 +22,15 @@ import android.view.MotionEvent;
+ import android.view.View;
+ import android.widget.HorizontalScrollView;
+ 
++import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+ 
++import java.util.HashMap;
++
+ 
+ public class MasterControl extends View {
+ 
+@@ -73,6 +78,8 @@ public class MasterControl extends View {
+     private float lowerBuildingTemp = 55;
+     private float upperBuildingTemp = 90;
+ 
++    private HashMap<Object, Object> useCelsius;
++
+     Rect bounds = new Rect();
+ 
+     int mPaddingPX = 0;
+@@ -125,7 +132,7 @@ public class MasterControl extends View {
+         UP, DOWN
+     }
+ 
+-    private void drawSliderIcon(Canvas canvas, Direction direction, int yDisplacemnet, MasterControlState stateReflected) {
++    private void drawSliderIcon(Canvas canvas, Direction direction, int yDisplacemnet, MasterControlState stateReflected, float buildTemp) {
+ 
+         matrix.reset();
+ 
+@@ -148,9 +155,15 @@ public class MasterControl extends View {
+ 
+         //The 2 and 1.5 are used to slide the number on the bitmap image.
+         //Text centered left to right and 1/3 the way down the icon.
+-        canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
+-                xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
+-                (float) (yPos + bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
++        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
++                    xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
++                    (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
++        } else {
++            canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
++                    xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
++                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
++        }
+     }
+ 
+     private MasterControlState isHitBoxTouched(float x, float y) {
+@@ -276,6 +289,7 @@ public class MasterControl extends View {
+             this.setNestedScrollingEnabled(true);
+ 
+         }
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
+         this.setBackgroundColor(Color.WHITE);
+ 
+@@ -286,13 +300,22 @@ public class MasterControl extends View {
+         mArrowHeadLeftBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_left);
+         mArrowHeadRightBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_right);
+ 
+-        bitmaps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = bitmaps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] =
+-                getBitmapFromVectorDrawable(getContext(), R.drawable.ic_black_pin_seekbar);
+-        bitmaps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] =
+-                getBitmapFromVectorDrawable(getContext(), R.drawable.ic_blue_pin_seekbar);
+-        bitmaps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] =
+-                getBitmapFromVectorDrawable(getContext(), R.drawable.ic_orange_pin_seekbar);
+-
++        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++
++            bitmaps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = bitmaps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.black_teardrop_small);
++            bitmaps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.blue_teardrop_small);
++            bitmaps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.orange_teardrop_small);
++        } else {
++            bitmaps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = bitmaps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.ic_black_pin_seekbar);
++            bitmaps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.ic_blue_pin_seekbar);
++            bitmaps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] = bitmaps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] =
++                    getBitmapFromVectorDrawable(getContext(), R.drawable.ic_orange_pin_seekbar);
++        }
+ 
+         setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, mSetBack, mZoneDifferential, hdb, cdb);
+ 
+@@ -392,7 +415,7 @@ public class MasterControl extends View {
+         mDegreeIncremntPX = (int) (suggestedWidth / visibleDegrees);
+         mPaddingPX = (int) (PADDING_LEFT_RIGHT_PX * displayMetrics.density);
+         mTextPadding = (int) (TEXT_PADDING_LEFT_RIGHT_DP * displayMetrics.density);
+-        mViewWidth = Math.round((mUpperBound - mLowerBound) * mDegreeIncremntPX + (mPaddingPX) * 2);
++        mViewWidth = Math.round((mUpperBound - mLowerBound) * mDegreeIncremntPX + (mPaddingPX) * 10);
+         mArrowImageWidth = (int) (ARROW_IMAGE_WIDTH * displayMetrics.density);
+         mBuildingLimitSpacing = (int) (SETTLED_BUILDING_LIMITS_H * displayMetrics.density);
+         mEnergySavingsSpacing = (int) (SETTLED_ENERGY_SAVINGS_LIMITS_H * displayMetrics.density);
+@@ -529,32 +552,32 @@ public class MasterControl extends View {
+ 
+                 if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
+                     drawSliderIcon(canvas,
+-                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT);
++                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT,lowerCoolingTemp);
+                 }
+ 
+                 if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
+                     drawSliderIcon(canvas,
+-                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT);
++                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT, lowerHeatingTemp);
+                 }
+ 
+                 if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
+                     drawSliderIcon(canvas,
+-                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT);
++                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT, upperCoolingTemp);
+                 }
+ 
+                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
+                     drawSliderIcon(canvas,
+-                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT);
++                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT, upperHeatingTemp);
+                 }
+ 
+             }
+             drawBuildingLimitCircles(canvas);
+             if (mSelected == MasterControlState.UPPER_BUILDING_LIMIT) {
+-                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT);
++                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT, upperBuildingTemp);
+             }
+ 
+             if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
+-                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT);
++                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT, lowerBuildingTemp);
+             }
+         }
+     }
+@@ -734,13 +757,17 @@ public class MasterControl extends View {
+             canvas.drawLine(i, mViewHeight / 3.0f, i, mViewHeight / 2.0f + 24.0f, mDelimeterPaint);
+         }
+ 
+-        for (int i = (int) (5 * (Math.ceil(Math.abs((int) mLowerBound / 5)))); i <= 5 * (Math.floor(Math.abs((int) mUpperBound / 5))); i += 5) {
++        for (int i = (int) (5 * (Math.ceil(Math.abs((int) (mLowerBound+3) / 5)))); i <= 5 * (Math.floor(Math.abs((int) mUpperBound / 5))); i += 5) {
+             String temp = String.valueOf(i);
+ 
+             mDebugTextPaint.setTextSize(mArrowTextSize);
+             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
+-            canvas.drawText(temp, getPXForTemp(i) - mSetBack, getTempLineYLocation() + mEnergySavingsSpacing, mDebugTextPaint);
++            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.valueOf(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
++            } else {
++                canvas.drawText(temp+ " \u00B0F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
+ 
++            }
+         }
+     }
+ 
+diff --git a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
+index 559f2c9a6..9475a906c 100644
+--- a/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
++++ b/app/src/main/java/a75f/io/renatus/views/MasterControl/MasterControlView.java
+@@ -19,6 +19,7 @@ import android.widget.ImageButton;
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
+ import android.widget.Toast;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ 
+ import org.projecthaystack.HDict;
+ import org.projecthaystack.HDictBuilder;
+@@ -54,6 +55,7 @@ import a75f.io.renatus.schedules.ScheduleUtil;
+ import a75f.io.renatus.util.ProgressDialogUtils;
+ 
+ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+ 
+ 
+ public class MasterControlView extends LinearLayout {
+@@ -200,6 +202,9 @@ public class MasterControlView extends LinearLayout {
+         ArrayList<String> namedSchedulesWarning = new ArrayList<>();
+         Set<String> namedSchedulesIds = new HashSet<String>();
+ 
++        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
++
++
+         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+         heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+         coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+@@ -234,14 +239,22 @@ public class MasterControlView extends LinearLayout {
+                 String heatValues = "";
+                 if (days.getHeatingVal() < heatingTemperatureUpperLimit || days.getHeatingVal() > heatingTemperatureLowerLimit) {
+                     double heatingDesiredTemperatureValue = getHeatingDesiredTemperature(days.getHeatingVal(), heatingTemperatureUpperLimit, heatingTemperatureLowerLimit);
+-                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
++                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        heatValues = "\u0020" + "Heating (" + roundToHalf((float) fahrenheitToCelsius(days.getHeatingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(heatingDesiredTemperatureValue)) + ")";
++                    }else {
++                        heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
++                    }
+ 
+                     days.setHeatingVal(heatingDesiredTemperatureValue);
+                 }
+ 
+                 if (days.getCoolingVal() < coolingTemperatureLowerLimit || days.getCoolingVal() > coolingTemperatureUpperLimit) {
+                     double coolingDesiredTemperatureValue = getCoolingDesiredTemperature(days.getCoolingVal(), coolingTemperatureLowerLimit, coolingTemperatureUpperLimit);
+-                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
++                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                        coolValues = "\u0020" + "Cooling (" + roundToHalf((float) fahrenheitToCelsius(days.getCoolingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(coolingDesiredTemperatureValue)) + ")";
++                    }else {
++                        coolValues = "\u0020" + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
++                    }
+ 
+                     days.setCoolingVal(coolingDesiredTemperatureValue);
+                 }
+@@ -730,6 +743,9 @@ public class MasterControlView extends LinearLayout {
+         }
+         return 0;
+     }
++    private static float roundToHalf(float d) {
++        return Math.round(d * 2) / 2.0f;
++    }
+ 
+     private double getHeatingDesiredTemperature(double heatingDesiredTemperature, double heatingTemperatureUpperLimit,
+                                                 double heatingTemperatureLowerLimit) {
+diff --git a/app/src/main/java/a75f/io/renatus/views/RangeBar.java b/app/src/main/java/a75f/io/renatus/views/RangeBar.java
+index 8ed934d40..c8fd53676 100644
+--- a/app/src/main/java/a75f/io/renatus/views/RangeBar.java
++++ b/app/src/main/java/a75f/io/renatus/views/RangeBar.java
+@@ -18,9 +18,15 @@ import android.util.Log;
+ import android.view.MotionEvent;
+ import android.view.View;
+ 
++import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
+ 
+ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
++import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
++
++import java.util.HashMap;
+ 
+ 
+ /**
+@@ -41,6 +47,7 @@ public class RangeBar extends View {
+     private int mHeatingBarDisplacement = 0;
+     private int mCoolingBarDisplacement = 0;
+     private int mHitBoxPadding = 0;
++      private HashMap<Object, Object> useCelsius;
+ 
+     //
+     private float lowerHeatingTemp = 72;
+@@ -127,8 +134,13 @@ public class RangeBar extends View {
+             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
+         }
+ 
+-        canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])),
+-                xPos,(yPos - 10f), mTempIconPaint);
++        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
++                    xPos, (yPos - 10f), mTempIconPaint);
++        } else {
++            canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
++                    xPos, (yPos - 10f), mTempIconPaint);
++        }
+     }
+ 
+     private RangeBarState isHitBoxTouched(float x, float y) {
+@@ -230,6 +242,7 @@ public class RangeBar extends View {
+             this.setNestedScrollingEnabled(true);
+ 
+         }
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
+         this.setBackgroundColor(Color.WHITE);
+ 
+diff --git a/app/src/main/java/a75f/io/renatus/views/TempLimit/TempLimit.java b/app/src/main/java/a75f/io/renatus/views/TempLimit/TempLimit.java
+index ce8825301..8fb0a2aec 100644
+--- a/app/src/main/java/a75f/io/renatus/views/TempLimit/TempLimit.java
++++ b/app/src/main/java/a75f/io/renatus/views/TempLimit/TempLimit.java
+@@ -1,5 +1,6 @@
+ package a75f.io.renatus.views.TempLimit;
+ 
++import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+ import android.content.Context;
+ import android.graphics.Canvas;
+ import android.graphics.Color;
+@@ -14,7 +15,11 @@ import android.util.DisplayMetrics;
+ import android.view.MotionEvent;
+ import android.view.View;
+ 
++import java.util.HashMap;
++import a75f.io.api.haystack.CCUHsApi;
++import a75f.io.logic.tuners.TunerConstants;
+ import a75f.io.renatus.R;
++import a75f.io.renatus.views.MasterControl.MasterControlView;
+ 
+ /**
+  * Created by mahesh on 27-08-2019.
+@@ -42,6 +47,9 @@ public class TempLimit extends View {
+     private float lowerBuildingTemp = 55;
+     private float upperBuildingTemp = 90;
+     //
++
++    private HashMap<Object, Object> useCelsius;
++
+     int mPaddingPX = 0;
+     int mViewWidth = 0;
+ 
+@@ -81,20 +89,34 @@ public class TempLimit extends View {
+ 
+     float[] temps = new float[TempLimitState.values().length];
+ 
+-    private void drawSliderIcon(Canvas canvas, int yDisplacemnet, TempLimitState stateReflected, int color, Direction direction) {
++    private void drawSliderIcon(Canvas canvas, int yDisplacemnet, TempLimitState stateReflected, int color, Direction direction, float buildingTemp) {
+ 
+         int xPos;
+         if (stateReflected == TempLimitState.LOWER_COOLING_LIMIT || stateReflected == TempLimitState.UPPER_HEATING_LIMIT) {
+-            xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 15;
++            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 20;
++            } else {
++                xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 15;
++            }
+         } else {
+-            xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 15;
++            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++                xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 20;
++            } else {
++                xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 15;
++            }
+         }
+ 
+         int yPos = (direction == Direction.UP) ? getTempLineYLocation() - yDisplacemnet - 5 : getTempLineYLocation() + yDisplacemnet + 15;
+ 
+         mTempIconPaint.setColor(color);
+-        canvas.drawText(String.valueOf((int) temps[stateReflected.ordinal()]),
+-                xPos, yPos, mTempIconPaint);
++        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            canvas.drawText(String.valueOf( fahrenheitToCelsius(buildingTemp)),
++                    xPos, yPos, mTempIconPaint);
++        } else {
++            canvas.drawText(String.valueOf((int) temps[stateReflected.ordinal()]),
++                    xPos, yPos, mTempIconPaint);
++        }
++        invalidate();
+     }
+ 
+     private TempLimitState mSelected = TempLimitState.NONE;
+@@ -138,6 +160,7 @@ public class TempLimit extends View {
+         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
+         this.setBackgroundColor(Color.WHITE);
+ 
++        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+ 
+         setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
+ 
+@@ -221,17 +244,16 @@ public class TempLimit extends View {
+             drawTempGauge(canvas, temps[TempLimitState.LOWER_COOLING_LIMIT.ordinal()],
+                     temps[TempLimitState.UPPER_COOLING_LIMIT.ordinal()], Color.parseColor("#5990B4"), Direction.UP);
+ 
+-            drawSliderIcon(canvas, mCoolingBarDisplacement, TempLimitState.LOWER_COOLING_LIMIT, Color.parseColor("#5990B4"), Direction.UP);
++            drawSliderIcon(canvas, mCoolingBarDisplacement, TempLimitState.LOWER_COOLING_LIMIT, Color.parseColor("#5990B4"), Direction.UP, lowerCoolingTemp);
+ 
+-            drawSliderIcon(canvas, mHeatingBarDisplacement, TempLimitState.LOWER_HEATING_LIMIT, Color.parseColor("#e24725"), Direction.DOWN);
++            drawSliderIcon(canvas, mHeatingBarDisplacement, TempLimitState.LOWER_HEATING_LIMIT, Color.parseColor("#e24725"), Direction.DOWN, lowerHeatingTemp);
+ 
+-            drawSliderIcon(canvas, mCoolingBarDisplacement, TempLimitState.UPPER_COOLING_LIMIT, Color.parseColor("#5990B4"), Direction.UP);
++            drawSliderIcon(canvas, mCoolingBarDisplacement, TempLimitState.UPPER_COOLING_LIMIT, Color.parseColor("#5990B4"), Direction.UP, upperCoolingTemp);
+ 
+-            drawSliderIcon(canvas, mHeatingBarDisplacement, TempLimitState.UPPER_HEATING_LIMIT, Color.parseColor("#e24725"), Direction.DOWN);
+-
+-            drawBuildingLimitCircle(canvas, TempLimitState.LOWER_BUILDING_LIMIT);
+-            drawBuildingLimitCircle(canvas, TempLimitState.UPPER_BUILDING_LIMIT);
++            drawSliderIcon(canvas, mHeatingBarDisplacement, TempLimitState.UPPER_HEATING_LIMIT, Color.parseColor("#e24725"), Direction.DOWN, upperHeatingTemp);
+ 
++            drawBuildingLimitCircle(canvas, TempLimitState.LOWER_BUILDING_LIMIT, lowerBuildingTemp);
++            drawBuildingLimitCircle(canvas, TempLimitState.UPPER_BUILDING_LIMIT, upperBuildingTemp);
+         }
+     }
+ 
+@@ -242,18 +264,23 @@ public class TempLimit extends View {
+         canvas.drawLine(getPXForTemp(mLowerHeatingTemp), (direction == Direction.UP) ? getTempLineYLocation() - 30 : getTempLineYLocation() + 30, getPXForTemp(mUpperHeatingTemp), (direction == Direction.UP) ? getTempLineYLocation() - 30 : getTempLineYLocation() + 30, mTempLinePaint);
+     }
+ 
+-    private void drawBuildingLimitCircle(Canvas canvas, TempLimitState controlState) {
++    private void drawBuildingLimitCircle(Canvas canvas, TempLimitState controlState, float buildingTemp) {
+         float temp = temps[controlState.ordinal()];
+         mTempPaint.setColor(Color.BLACK);
+ 
+         int xLoc = getPXForTemp(temp);
+         int yLoc = getTempLineYLocation();
+ 
+-        canvas.drawText(String.valueOf((int) temps[controlState.ordinal()]),
+-                xLoc - 8, yLoc - 15, mTempPaint);
+-
++        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
++            canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(buildingTemp) + " "),
++                    xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
++        } else {
++            canvas.drawText(String.valueOf((int) temps[controlState.ordinal()]),
++                    xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
++        }
+         canvas.drawCircle(xLoc, yLoc,
+                 4, mTempPaint);
++        invalidate();
+     }
+ 
+     private int getPXForTemp(float temp) {
+diff --git a/app/src/main/res/drawable/black_teardrop_small.png b/app/src/main/res/drawable/black_teardrop_small.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..2173fb25fa9103a367dbe968c23db03633bd3575
+GIT binary patch
+literal 1491
+zcmV;^1uXiBP)<h;3K|Lk000e1NJLTq003nG001cn1^@s6EavCf00004b3#c}2nYxW
+zd<bNS000GwNkl<ZcwX&W-EZ4e6!)<cw_Q8hLSwsWI|eJFLqio`8%)3?v<Ybwp#1~9
+z00N$P03iVqJRlwryn+N0AL0ds5C{ngkaz(k#M%KufW|`#jHPWpIvQxpTF3WZe%H0#
+zBum?5v~iQzQX9v)@jd7Ke7;XespGi1zrWXx#S)}x{alFMMAV5_t&Ur?#Zr}s2_cs8
+zx*!;v*BvMS+x-0BwK7k&EKDYod$7rs#CcyW>!URnOF*b<0T1!nnVFeCH<QnXpcsZ>
+z>Z&>hZMe+8kx&$~qpSC*s>Kg6XT@U0<qpoBn!w$Rm=^im1|R3~cUB?#g&3O<M6*6`
+z(4K#6&VSA2a@qCxU00ZcgM<5_8Kc1$iN@l3_x(kC=|GDJuVHN9K|ZAj@iBz`bMSDh
+zYHD_N_DnS*s)7PQZUi7hC4fAH^LrY`MT>3(VSfrY@EX|Tl0}%bX#n$mCA$}aQUORp
+zjm4kl%-PqXated36dw4OVbW&S1Evg=3X_#kRqX{XxD^KFExu<KPX9T<xerX4DGNZ6
+zPCZ6+u*77&i1Ym|E}Ssgn^HJ`0>J>2L^wiB_|887W!SQg1W^{zgIITOm=w3k-k%`=
+zcvbQ$qq1}+^QAm@L6Lcg!q~Vg2%>B8|D`q&O6Y8o5YHew`^hCl(|(kBj0*~U$sIvr
+zNc1Ew-5xr%Z9)J5m_$VOyyx@_h{nDqSvpzP^*cQoB%mp8w23@+44ZKJkHYCsOM*IW
+z`zsnwBu2Tax(*$voj|De@Q$IjeF%9QzU4#Lw{U)jMl9<VRL@q!-pF)?@)(qwFpVff
+zL#BBb98I?e$}4ys35Bxu-ZTeIkrA)7R!f9X_;^r$CwdRpceS^CLgAhPl#{OcLf%42
+z(_E`*5q*T~QGX;1TsS}JCz3Q|Stk&Zsh;_YG$jl`6eZ9UL}HwhhH(rCbw)lV95lRL
+z1D^sjwk$z83{b9!qOb5kDUH4W%6YOZ>pE2kw=^H+DWL%q<SCqJicHfq;Mos(<U|>L
+z2)LAH^e7phTCIH<#@+Zpk4#wO5h<&E31QFXa-aJJ$+dobR3&aGGNn~ww1?ehmkY}1
+z=xE1<#l@o~p>fntX$&+$KShSZT|GTtq*AGswI)|dVbU{WQRi`cfhp@e%0gs1pHF!K
+z*V@jggWZZcSi*PuQICGxP$}!tLo@Qz+3dIeZe@cL!^6W}qF6i(VEp=5G|jU0xRgz^
+z0Dylf9{(ntPG6`BioEDHz2fnML6-086Gd}hTL4bw+?UMWJB!7M$~ohz!+42Aq9+!M
+z-B30=98E}GGA!#%NERH&`5~XrFIL`o!x`Wa(>#D==Bm;!MYF`4Vzc2avHUiY_218B
+zv%v^!U7*Ot@H3Z_<LnE%lbh1ikOdFGq~2G{PRIjZ$Ak1qEo--XjqEClSZoUZ<FAeO
+zs(D&|U|?XkuIowUGR98$Nd)5hM<DFun+WnP*lpP(3hnTI0+F+AduDEKZlM-JY6hj^
+zW*P#5o+VxH=wz&6O)*9^E;KFJ4?`Z0LFmV-F$%`s!S(lp&rp4hF?O~Vq5R)9%bLcz
+zZF>a{T>1-l0<xatQbDO_k1bt0WEkTBV~>ARXw2i#m?LGI2=Ol7%fHpb8*<xHLbmZ{
+zO$UmUMQOW1z6TRe0jS%&^ABKRrIxJX!Ps}_=H}c%>Sj5b5)>(1%&T34d9|@X&_vI|
+zl%?_hO?eFi2#%vDr!$#MzFENV>1<k1JdN3l2Ho{8Gx7(q-UPc$%5>YF{G(7PG#enE
+zwl^c$Yc!7x3?!MR-Q-`9zsOx->~yuHtXVj1YEAKl3?Gw-Day^9v4vf|y_2&1-7El9
+tqq8MIk&Nx_>+6HLl6gSgA?Qv6@IOcMG^<)Rr8WQn002ovPDHLkV1lpiz})}<
+
+literal 0
+HcmV?d00001
+
+diff --git a/app/src/main/res/drawable/blue_teardrop_small.png b/app/src/main/res/drawable/blue_teardrop_small.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..6bb5e45077290a73274965a703d1b04f4e9812e1
+GIT binary patch
+literal 1547
+zcmV+m2K4!fP)<h;3K|Lk000e1NJLTq003nG001cn1^@s6EavCf00004b3#c}2nYxW
+zd<bNS000HTNkl<ZcwX&WeM}rh6rVTCae%FY4XswKA8jKwHN<ZvEeN4%YSi?P`lo+b
+zJ{zkx8mp+VfHo3MYBW-%U#9<PTB9*Bu|@(Mt&N4MG1}Bb&|svsB?wBTciinf-we0Q
+z9X;R<kGr1CBzL*pot^jg_q&<*-n_TKVrUhweR)}$H!auCA;%D~5E;v0fJO{M%#W@J
+z7BJ?uIF7gk4h1p-11-<5`zzXqr+a5^6?KP~8HRPOK$bmoZ`~sj0vy<|Wf^@f^=p5d
+z38868DXVE+0vSAyBfr!h2oaaiO{H{v7k#c^z}yV!TelzrIK}`536nlT<pd({0>INY
+zJOaeu=oLTh-d=iUD#)e;b919-l_hY6Lk44cfcO|4uh#g-jKDD>>QlPwNBd5LLr?R|
+zMJFST6p@q)v-4H}ag}oeVmbYOC}vgk4Pgk74gMU!c#kn5<OP~V{VitUx07MIfRs=|
+z03a7p)X-F1uJMfz0t9#u1O5gwJT(<DVWfmES&9%LUR8EOxA-Ce><lnoXA?7dDRW4X
+zM%{3y-Dyjw3r%FySH)KwJz59?y|kP?OMiY#p0j*`F5CD!q?9+b71>@EA}a%i4{HeL
+z9DzgR05nS}(kt6lTjG(w6)7?f0dD0h6%cQv@7L#C9W5XTH@pa({h**1#`iLgQKVEi
+zbgXp(L&WFk)EbRhVi2HJsT(*nN@+5{+*y0?VUSxV;BytKDTE@IGuV?Db+i-*0nVx!
+zLcf|VZht3iHrrQN0Lq|~VSkXOPNjw`;Rw7>w&i0f)j&K6<qaKoa16S=dg)3y8{?B<
+zVhIz#{(vgeQ-Xk(1hsjGdR&tf&E~aGI7=>9nS=lk{((x<v)<W$NA@A{mNl>ONyfti
+zqgVwtDA97;zp}n#VowXjCv;KgN0LAc8pZ|?LIsjgQQt|%UGQ<1^h`+tA2M2WW(qPc
+z<V;ydiezY;k`y|ELMLnro$x}r=_%lVi^gY)4jhv~O_=wEFi3{J^CkvDZO!XAB^i_`
+znNFO-koS^H{MBLvzfA4wh(1}Ighcd!u48KNtGvGLe$IHhUcwU3O4!oH#MrL7k}nh~
+zWt5LM?0mf5B~B<ah!eZS7Uk`CQ{G;YvgNIx-M*pIrM7FV^C=1A#mT2gSJ<6%W$W8d
+zuJk!cuF#E1sglk-&N(q*nMb)1*=!c~1hJnGUj0h@-NJ%gbwTIo=Z=+0IeKp3z|NP7
+zzqSR26;5p3dNgx1J5WG=nA-o+)hzMnWpXtOrM5=1hSQGj*impkA}R7@#WqTMWw~Sl
+zg&pO~07ln+#etv6bzd~37f1bFEluHd#u1D0$i6H<4!4BX4%2|TLUQ)RTu>n?Q@<ea
+zJF+9^CJ#Gp4RDp&z8V3p54}m(63@iU^tHswEFk{+u37Aqu*O7+?7Yc5bUEi4%bo1x
+zOgbgxI&PvJ?MI>$1uf)CeimKdx$Pyhib8mM_m~g-Ih~}atK}bWI<n9`Hn!A{e6evc
+zyb^(|ij3X*>0!iuR3b__qU1GtQDxW#;;b({{nXxVYeu5cBx+JZ2iv&ufRS@U&H|p9
+z<rXe0VM#F%RzB56Ir1pjeTtkAnR<xOU_SysU|*p3YX&Va`l12lzxLsN!xHC5eM7$t
+zojZ8&QI)ugrOk?zSOmnoZ)HPUKJBC~v&RJn&rlJ1QJ5Tn59nBaRI`iR;;qYEjhAwy
+zNFXZBR!TRdg}w>!0?n9vf*^fF0oHySFh7ocv)8;&Rk){0OG#1`F^!&;lxxTf0lJom
+z`JD*aE6>pjAc263AKzC~IFKr2Ow9gN(>O$5a@nsVm;Gk7L?Ie>1v?#jGZDMrG>eB*
+z@$pi2rr2OVVIEoPhrn&lzYKANsz8oM3d&N2pp+*?0=;E>XKuhRZl`xNN8F39?v~r%
+xsX{;`J^vS^$On7cY|rjLF)%V47xZEy@LvbwM$!pfzFz<U002ovPDHLkV1jwc#6182
+
+literal 0
+HcmV?d00001
+
+diff --git a/app/src/main/res/drawable/orange_teardrop_small.png b/app/src/main/res/drawable/orange_teardrop_small.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..374fd4a93ef700df09b649b710238b2f32c2c687
+GIT binary patch
+literal 1565
+zcmV+&2IBdNP)<h;3K|Lk000e1NJLTq003nG001cn1^@s6EavCf00004b3#c}2nYxW
+zd<bNS000HlNkl<ZcwX&WOKclO7@mK2ZRgbzD0wHP&4auhrztIsfJ&$pQY%2c^vH!G
+z;KTuh1W0f|91vVV0*QyXfB=DzkN}AbAQhT44b8(&8YgXO9&JJ(kfd?!-TC=vW4r6b
+zN$iq%V|zzR;>?cce|$Uh&;J-;Nwm?9>N^mFMY@1HQHWgvAqPMxNlcLyLlL>o0RzDK
+zyu$Hs0Ow3i&)7eS3J-}49BnG!tEqU8U{ILIczeuR4RD5Yss>kUypw-yrk@Q#>2E16
+zQNh{3K<ti8gbYiTT)U5H+<Dlc2TGk<z{Q1@5V)H$lOfN83}BWayGrs50%8~aKNXb?
+z`M(+lhgt`wZ>%Tpy2`xNQr1Xour~5V8rZPp$a}&ST5QP><)u=LbI8~?oWVeZs3OpR
+z@4%EV9usjv@w&?n0E3Fi7X)KZ0mDaADMg0T`i>*Khrmdsj2074H1$ngSS{-sP|Sb;
+zup$kVmuY*d$xtPwUMv7Vz2I*%gvs@Qi2=pDWf_1l{su?AH1(WkJjELT{56JX0JC~4
+zi-KYpb*>&V8T2>lb7RJ<$1(w7l=iO|=;hZX3!2cnBE~-oim$cusOgk-hW5M1EaNvz
+z2$S-^XAIso#HCYNWB>S1@}mKY^h1IwYm=YJ0@c%=_g0qZ#d0wTfL92He#wYaV;7|#
+zV}LU3E_*QI7}5%Pk-8qRoZBp60FiZbfY+tC(!s3noB9Q0=p+~lJY=jAGVbK;e2^vj
+z*fC;q;LjrBgt1y2IX{E{KxJ)66DtNC@g$w0pWZRtW(gw*@G(dBl@!;ZavuzPs_qkF
+z<=AU)UDmt>F<Tf{uEUVK;$Z?KKMcw{^tZ|y*0Pr>8TM&1_GhF9D3Y=W-qy+!k?=c#
+z^BMK$Wv_ayk(@vwUj<IBSP-s*&s`pkX%Q%2Q@@=bu>c!|!zm$F97(w3sW_<%<l*hh
+zUMUs;VqPf(jsUNx{5S}fW7`x9&<K+>+Z0+J0q}XsJIRgTW1qgP1I2v$A`fyFM%qi8
+zG@Y-6=50U45@gJNimHfF@ViTjLrgg=xv@QZOE6((kKV!bb4KjT*H-ojC0(5M7M6NY
+zVzw^8VB^K99}H0XDIc$f^YM0+IJLl-qr@8J?OQ2tZ-6pVTkFDtrDKt!F?HGbloViN
+z&Zihh;f35E>-_%ZXp$=?Fez<5Lp$@ht-!=)9%Uf1_QJT|a30NcN8A<nYYdBw2X>Br
+zJ0Xe5(W?w*>iQ;rix7+f<?NBl+&zofDHs~@FT0v$8*o`w%|f+cH)r$VZ0E1zOL0Mw
+zo#!d(m8S;|MZA3DsBG7LZ52APbzkJY-&AtC4z8**j$4d3*i=-&RJEN@jMfg@6_Wo8
+zmo*iVv>VMaP3vv;&Md5+dBYlDue+*+Dq!}Tzhu`EZwk)FwZz6DO1a$BcP(1NniME<
+z@L+T0U8)0WBH77JSxUhGdNH0PGLI)hitOV1<QRXO$k^>3!zrt%g>bZaaQv^0XeC@N
+zKU9DBF6MHU>kNy{+uC*uvflgz%ro@t#D>BFd_=FM%n@1E<Tj-+m}bkt$%f%S=M!Nh
+zVNlGIeNKt6>W=Dy!qB2C=*US~QVc_S8*scu5Ait)q8^VcDCeJ0Kd~Ba6n$l&%IgW+
+z-khO;KIh0^9_txfIBjGVlWVsHN^&H&cJx4VMVq4F-dnTc^K{MNsF@1oxj&`<<&V(>
+z6}dGha9L+-IlcYa(hd|U>L8^X=mJ~xCIEr*5}D5<@)-&ACH<DG#Au)>Jq^9rj6&*k
+zX=w?HRIb-kSqDNim=yggMO??puzx7~IC71v+WETP>oe&BM)XBWH-^pp`aGrknBc7j
+z2%K&dgbNQ)ut2Wr?B4(TmAQ13FKt&!MA<{_RpqGb9Z}`eja(62J|E91OBaCB9u%o)
+zN@*7fO+Bb_G4EW=>z3i~bO9h9pBVv)6zsBRUtxFMmHE?OB!2|mX#oBQms~&}e$+t_
+P00000NkvXXu0mjfIE>_P
+
+literal 0
+HcmV?d00001
+
+diff --git a/app/src/main/res/layout-xlarge/fragment_installeroption.xml b/app/src/main/res/layout-xlarge/fragment_installeroption.xml
+index 788a7352d..c1b4e19bc 100644
+--- a/app/src/main/res/layout-xlarge/fragment_installeroption.xml
++++ b/app/src/main/res/layout-xlarge/fragment_installeroption.xml
+@@ -289,7 +289,7 @@
+                 android:layout_marginTop="36dp"
+                 android:background="@drawable/toggle_selector"
+                 android:checked="false"
+-                android:enabled="false"
++                android:enabled="true"
+                 android:textOff=""
+                 android:textOn=""
+                 android:visibility="gone" />
+diff --git a/app/src/main/res/layout/fragment_installeroption.xml b/app/src/main/res/layout/fragment_installeroption.xml
+index 788a7352d..c1b4e19bc 100644
+--- a/app/src/main/res/layout/fragment_installeroption.xml
++++ b/app/src/main/res/layout/fragment_installeroption.xml
+@@ -289,7 +289,7 @@
+                 android:layout_marginTop="36dp"
+                 android:background="@drawable/toggle_selector"
+                 android:checked="false"
+-                android:enabled="false"
++                android:enabled="true"
+                 android:textOff=""
+                 android:textOn=""
+                 android:visibility="gone" />
+diff --git a/app/src/main/res/values/preference_keys.xml b/app/src/main/res/values/preference_keys.xml
+index 3881b43b4..f0983932a 100644
+--- a/app/src/main/res/values/preference_keys.xml
++++ b/app/src/main/res/values/preference_keys.xml
+@@ -13,4 +13,5 @@
+     <string name="USE_SETUP_PASSWORD_KEY">use_setup_password</string>
+     <string name="USE_SAME_SETTINGS_PASSWORD_KEY">use_same_settings_password</string>
+     <string name="USE_SAME_TEMP_ALL_DAYS">use_same_temp_all_days</string>
++    <string name="USE_CELSIUS_KEY">use_celsius_key</string>
+ </resources>
+diff --git a/device/src/main/java/a75f/io/device/mesh/LSmartNode.java b/device/src/main/java/a75f/io/device/mesh/LSmartNode.java
+index efcc54a01..a7aa8218a 100644
+--- a/device/src/main/java/a75f/io/device/mesh/LSmartNode.java
++++ b/device/src/main/java/a75f/io/device/mesh/LSmartNode.java
+@@ -25,6 +25,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
+ import a75f.io.device.serial.MessageType;
+ import a75f.io.device.serial.SmartNodeControls_t;
+ import a75f.io.device.serial.SmartNodeSettings_t;
++import a75f.io.device.util.DeviceConfigurationUtil;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
+@@ -204,7 +205,7 @@ public class LSmartNode
+         settings.airflowHeatingTemperature.set((short)105);
+         settings.airflowCoolingTemperature.set((short)60);
+     
+-        settings.showCentigrade.set((short)0);
++        settings.showCentigrade.set((short)(DeviceConfigurationUtil.Companion.getUserConfiguration()));
+         settings.displayHold.set((short)0);
+         settings.militaryTime.set((short)0);
+         try
+diff --git a/device/src/main/java/a75f/io/device/mesh/LSmartStat.java b/device/src/main/java/a75f/io/device/mesh/LSmartStat.java
+index 8d163266a..379a5a418 100644
+--- a/device/src/main/java/a75f/io/device/mesh/LSmartStat.java
++++ b/device/src/main/java/a75f/io/device/mesh/LSmartStat.java
+@@ -28,6 +28,7 @@ import a75f.io.device.serial.SmartStatControls_t;
+ import a75f.io.device.serial.SmartStatFanSpeed_t;
+ import a75f.io.device.serial.SmartStatProfileMap_t;
+ import a75f.io.device.serial.SmartStatSettings_t;
++import a75f.io.device.util.DeviceConfigurationUtil;
+ import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
+ import a75f.io.logic.bo.building.Output;
+@@ -180,7 +181,7 @@ public class LSmartStat {
+         settings_t.enabledRelaysBitmap.relay4.set(getConfigEnabled(Port.RELAY_FOUR.name(),address));
+         settings_t.enabledRelaysBitmap.relay5.set(getConfigEnabled(Port.RELAY_FIVE.name(),address));
+         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
+-        settings_t.otherBitMaps.centigrade.set((short)0);
++        settings_t.otherBitMaps.centigrade.set((short) (DeviceConfigurationUtil.Companion.getUserConfiguration()));
+         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
+         if (!is2pfcuDevice(address)) {
+             settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(), address));
+diff --git a/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMessageGenerator.java b/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMessageGenerator.java
+index 319f2001c..5f6239732 100644
+--- a/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMessageGenerator.java
++++ b/device/src/main/java/a75f/io/device/mesh/hyperstat/HyperStatMessageGenerator.java
+@@ -14,6 +14,8 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
+ import a75f.io.device.HyperStat;
+ import a75f.io.device.mesh.DeviceHSUtil;
+ import a75f.io.device.mesh.DeviceUtil;
++import a75f.io.device.util.DeviceConfigurationUtil;
++import a75f.io.device.util.DeviceConfigurationUtil;
+ import a75f.io.logger.CcuLog;
+ import a75f.io.logic.Globals;
+ import a75f.io.logic.L;
+@@ -90,11 +92,18 @@ public class HyperStatMessageGenerator {
+             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
+             .setDisplayHumidity(true)
+             .setDisplayCO2(true)
++            .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
++             .setDisplayHumidity(true)
++             .setDisplayCO2(true)
++             .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
++            .setDisplayHumidity(true)
++            .setDisplayCO2(true)
+             .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
+             .setPm25AlertThreshold((int)readVocThresholdValue(equipRef))
+             .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
+             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
+             .build();
++
+     }
+     
+     /**
+diff --git a/device/src/main/java/a75f/io/device/util/DeviceConfigurationUtil.kt b/device/src/main/java/a75f/io/device/util/DeviceConfigurationUtil.kt
+new file mode 100644
+index 000000000..f3e718887
+--- /dev/null
++++ b/device/src/main/java/a75f/io/device/util/DeviceConfigurationUtil.kt
+@@ -0,0 +1,20 @@
++package a75f.io.device.util
++
++import a75f.io.api.haystack.CCUHsApi
++import a75f.io.logic.tuners.TunerUtil
++import android.util.Log
++
++/**
++ * Created by Manjunath K on 18-04-2022.
++ */
++class DeviceConfigurationUtil {
++
++    companion object{
++        fun getUserConfiguration(): Double{
++            Log.i("DEV_DEBUG", "getUserConfiguration: ")
++            val useCelsius = CCUHsApi.getInstance().readEntity("displayUnit")
++            Log.i("DEV_DEBUG", "getUserConfiguration: "+TunerUtil.getTuner(useCelsius["id"].toString()))
++            return TunerUtil.getTuner(useCelsius["id"].toString())
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java b/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
+index 200ca6ad8..4b9b98196 100644
+--- a/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
++++ b/logic/src/main/java/a75f/io/logic/bo/util/UnitUtils.java
+@@ -4,11 +4,72 @@ public class UnitUtils {
+     
+     /**
+      * Convert celsius to Fahrenheit
+-     * @param T
++     *
++     * @param temperature
+      * @return
+      */
+-    public static double celsiusToFahrenheit(double T) {
+-        return (T * 9/5) + 32;
++    public static double celsiusToFahrenheit(double temperature) {
++        return CCUUtils.roundToTwoDecimal((temperature * 9 / 5) + 32);
+     }
+-    
++
++    public static double fahrenheitToCelsiusTwoDecimal(double temperature) {
++        return CCUUtils.roundToOneDecimal((temperature - 32) * 5 / 9);
++    }
++
++    public static double fahrenheitToCelsius(double temperature) {
++        double celsiusTemperature;
++        celsiusTemperature = ((temperature - 32) * 5 / 9);
++        double decimalValue = celsiusTemperature - (long) celsiusTemperature;
++
++        if (decimalValue > 0.01 && decimalValue <= 0.3) {
++            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue));
++        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
++            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 0.5);
++        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
++            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
++        }
++        return celsiusTemperature;
++    }
++
++    public static double fahrenheitToCelsiusRelative(double temperature) {
++        double celsiusTemperature ;
++        celsiusTemperature =(temperature/ 1.8);
++        double decimalValue = celsiusTemperature -(long) celsiusTemperature;
++
++        if (decimalValue > 0.01 && decimalValue <= 0.3) {
++            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue));
++        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
++            celsiusTemperature = (Math.round(celsiusTemperature- decimalValue) + 0.5);
++        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
++            celsiusTemperature = (Math.round(celsiusTemperature - decimalValue) + 1.0);
++        }
++        return celsiusTemperature;
++    }
++
++    public static double celsiusToFahrenheitRelativeChange(double temperature) {
++        double fahrenheitTemperature ;
++        fahrenheitTemperature = (temperature * 1.8);
++        double decimalValue = fahrenheitTemperature - (long) fahrenheitTemperature;
++
++        if (decimalValue > 0.01 && decimalValue <= 0.3) {
++            fahrenheitTemperature = (Math.round(fahrenheitTemperature- decimalValue));
++        } else if (decimalValue > 0.3 && decimalValue <= 0.7) {
++            fahrenheitTemperature = (Math.round(fahrenheitTemperature- decimalValue) + 0.5);
++        } else if (decimalValue > 0.7 && decimalValue <= 0.99) {
++            fahrenheitTemperature = (Math.round(fahrenheitTemperature - decimalValue) + 1.0);
++        }
++        return fahrenheitTemperature;
++
++    }
++
++    public static double roundToHalf(double d)
++    {
++        return 0.5 * Math.round(d * 2);
++    }
++
++
++
++
++
++
+ }
+diff --git a/logic/src/main/java/a75f/io/logic/tuners/GenericTuners.java b/logic/src/main/java/a75f/io/logic/tuners/GenericTuners.java
+index 96d06a0d4..52b398228 100644
+--- a/logic/src/main/java/a75f/io/logic/tuners/GenericTuners.java
++++ b/logic/src/main/java/a75f/io/logic/tuners/GenericTuners.java
+@@ -47,7 +47,22 @@ class GenericTuners {
+         String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
+         hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MIN, 0);
+         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
+-    
++
++        Point useCelsius = new Point.Builder()
++                .setDisplayName(equipDis+"-"+"displayUnit")
++                .setSiteRef(siteRef)
++                .setEquipRef(equipRef).setHisInterpolate("cov")
++                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("displayUnit")
++                .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
++                .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
++                .setMinVal("0")
++                .setMaxVal("1")
++                .setTz(tz)
++                .build();
++        String useCelsiusId = hayStack.addPoint(useCelsius);
++        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED,TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
++        hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
++
+         Point buildingLimitMax = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"buildingLimitMax")
+                                      .setSiteRef(siteRef)
+diff --git a/logic/src/main/java/a75f/io/logic/tuners/TunerConstants.java b/logic/src/main/java/a75f/io/logic/tuners/TunerConstants.java
+index 518a2046f..bdf79c186 100644
+--- a/logic/src/main/java/a75f/io/logic/tuners/TunerConstants.java
++++ b/logic/src/main/java/a75f/io/logic/tuners/TunerConstants.java
+@@ -95,6 +95,8 @@ public class TunerConstants
+     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
+     public static final int VAV_BUILDING_VAL_LEVEL = 16;
+ 	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 7;
++    public static final double USE_CELSIUS_FLAG_ENABLED = 1.0;
++    public static final int USE_CELSIUS_FLAG_DISABLED = 0;
+ 
+     public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
+     public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 2.0;
+diff --git a/logic/src/main/java/a75f/io/logic/tuners/TunerUpgrades.java b/logic/src/main/java/a75f/io/logic/tuners/TunerUpgrades.java
+index 63c6854b2..9e47d2d6f 100644
+--- a/logic/src/main/java/a75f/io/logic/tuners/TunerUpgrades.java
++++ b/logic/src/main/java/a75f/io/logic/tuners/TunerUpgrades.java
+@@ -3,10 +3,6 @@ package a75f.io.logic.tuners;
+ import android.content.Context;
+ import android.preference.PreferenceManager;
+ import android.util.Log;
+-import android.widget.ArrayAdapter;
+-
+-import org.projecthaystack.HNum;
+-import org.projecthaystack.HRef;
+ 
+ import java.util.ArrayList;
+ import java.util.HashMap;
+@@ -44,6 +40,7 @@ public class TunerUpgrades {
+         upgradeDcwbBuildingTuners(hayStack);
+         createDefaultTempLockoutPoints(hayStack);
+         addVavDischargeTempTuners(hayStack);
++        migrateCelsiusSupportConfiguration(hayStack);
+     }
+     
+     /**
+@@ -309,4 +306,38 @@ public class TunerUpgrades {
+ 
+         }
+ 
+-    }
++
++   private static void migrateCelsiusSupportConfiguration(CCUHsApi hayStack){
++       HashMap<Object, Object> tuner = hayStack.readEntity(TagQueries.TUNER_EQUIP);
++
++       if (tuner != null && tuner.size() > 0) {
++           String equipRef = tuner.get("id").toString();
++           String equipDis = tuner.get("dis").toString();
++           HashMap<Object, Object> siteMap = hayStack.readEntity(Tags.SITE);
++           String siteRef = siteMap.get(Tags.ID).toString();
++           String tz = siteMap.get("tz").toString();
++           HashMap<Object, Object> useCelsiusPoint = CCUHsApi.getInstance().readEntity("displayUnit");
++            if(useCelsiusPoint.isEmpty()) {
++                Log.i("DEV_DEBUG", "migrateCelsiusSupportConfiguration: useCelsiusPoint Creating");
++                Point useCelsius = new Point.Builder()
++                        .setDisplayName(equipDis + "-" + "displayUnit")
++                        .setSiteRef(siteRef)
++                        .setEquipRef(equipRef).setHisInterpolate("cov")
++                        .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("displayUnit")
++                        .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
++                        .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
++                        .setMinVal("0")
++                        .setMaxVal("1")
++                        .setTz(tz)
++                        .build();
++                String useCelsiusId = hayStack.addPoint(useCelsius);
++                hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED, TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
++                hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
++                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint Point created ");
++            }else{
++                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint already present");
++            }
++       }
++
++   }
++}
+diff --git a/logic/src/main/java/a75f/io/logic/tuners/TunerUtil.java b/logic/src/main/java/a75f/io/logic/tuners/TunerUtil.java
+index cda5026d0..00ce4c8de 100644
+--- a/logic/src/main/java/a75f/io/logic/tuners/TunerUtil.java
++++ b/logic/src/main/java/a75f/io/logic/tuners/TunerUtil.java
+@@ -307,4 +307,19 @@ public class TunerUtil
+         }
+         return 0;
+     }
++
++    public static double getTuner(String id) {
++        CCUHsApi hayStack = CCUHsApi.getInstance();
++        ArrayList<HashMap> values = hayStack.readPoint(id);
++        if (values != null && !values.isEmpty()) {
++            for (int l = 1; l <= values.size(); l++) {
++                HashMap<Object,Object> valMap =  values.get(l - 1);
++                if (valMap.containsKey("val")) {
++                    return Double.parseDouble(valMap.get("val").toString());
++                }
++            }
++        }
++        return 0;
++    }
++
+ }
+-- 
+2.31.0.windows.1
+

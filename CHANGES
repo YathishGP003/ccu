@@ -1,153 +1,95 @@
- - Merged PR 4251: True CFM Implementation for DAB
- - Merged PR 4114: TrueCFM dab algorithm implementation
- - Merged PR 4160: Mapping local oat to outsideTemp
- - Merged PR 4161: History sync issue
- - merge master
- - Merged PR 4224: Restoring Diag points
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Resolved issue while add new ccu for existing site also
- - Merged PR 4091: Dis name for analog input changed for piloop and sense.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Merged PR 4135: 12285 : CCU | BPOS| zone is not reverting to temporary hold (auto)
- - Merged PR 4042: Bug 11411: CCU : Overlapping in building schedule after editing zone schedule
- - Merged PR 4109: Bug 11758: CCU: Changing floor name disrupts zone modbus communication
- - Merged PR 3715: TrueCfm algorithm implementation
- - Merge master
- - fix sonarqube warnings
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Merged PR 4110: Alert not resolving
- - resolved merge conflicts
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Merged PR 4141: VOC and pm2.5 configuration for HS & minor UI changes
- - handle deadband
- - Added Daig migration 1. Checking the diag points has  gateway reff if no adding to diag eqip 2. If there is no local diag points, than fetching from silo
- - Added Daig migration 1. Checking the diag points has  gateway reff if no adding to diag eqip 2. If there is no local diag points, than fetching from silo
- - Added Daig migration 1. Checking the diag points has  gateway reff if no adding to diag eqip 2. If there is no local diag points, than fetching from silo
- - Migration draft
- - Added migration for missing Daig Points
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Merged PR 4136: Vacation bug
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Merged PR 4153: Added new Enum for FirmwareComponentType_t
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/12446_Bug_12446_CCU_Not_Reporting_Proper_App_Version_in_Portal
- - Changed the default system profile daig point creation sequence
- - Merged PR 4009: 11565 : CCU screen should fall back to Zone screen
- - Fix vav query
- - crash resolved
- - Merge branch 'bug/sdev/12203_delete_schedule' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/11411_overlapping_schedules
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/12203_delete_schedule
- - update push
- - try catch added
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/11411_overlapping_schedules
- - Corner cases
- - History sync issue
- - crash resolved
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/12203_delete_schedule
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/11411_overlapping_schedules
- - unwanted changes removed
- - Bug 11758: CCU: Changing floor name disrupts zone modbus communication
- - Bug 11758: CCU: Changing floor name disrupts zone modbus communication
- - Merge master
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/12203_delete_schedule
- - Overlapping issue resolved
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/11411_overlapping_schedules
- - Mapping local oat to outsideTemp
- - Merge branch 'Story/Amaresh/True_cfm_vav_latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/5325_truecfm_vav_algorithm
- - Merge master
- - crash on deletion fixed
- - Merge master
- - Merge branch 'master' into story/samjith/5325_truecfm_vav_algorithm
- - Merge branch 'Story/Amaresh/True_Cfm_Dab_Latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/5326_truecfm_dab_algo
- - default value for minCfm is changed back to 100
- - comment resolved
- - sonarQ issue resolved
- - Bug 11411: CCU : Overlapping in building schedule after editing zone schedule
- - Handle damper when truecfm disabled
- - Revert "Handled migration for pressurePoint"
- - Merge branch 'story/samjith/5326_truecfm_dab_algo' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_Cfm_Dab_Latest
- - Merge branch 'master' into story/samjith/5326_truecfm_dab_algo
- - refactor code
- - changed default value for mincfmiaq from 100 to 900
- - Merge branch 'Story/Amaresh/True_Cfm_Dab_Latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/Amaresh/True_Cfm_Dab_Latest
- - Added unit for minCFMIAQ
- - Merge branch 'Story/Amaresh/True_Cfm_Dab_Latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/5326_truecfm_dab_algo
- - TrueCfm DAB algorithm- initial implementation
- - Reconfiguration support for DAB
- - Merge branch 'Story/Amaresh/True_cfm_vav_latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_Cfm_Dab_Latest
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_cfm_vav_latest
- - Handled migration for pressurePoint
- - resolved multiple sp points creation issue
- - fixed observation in reconfiguration support-4 "if maxCfm is  reduced less than minCfm from portal, then max value of minCfm should be less <= maxCfm"
- - Merge branch 'Story/Amaresh/True_Cfm_Dab_Latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/5326_truecfm_dab_algo
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_cfm_vav_latest
- - fixed observation in reconfiguration support-3
- - fixed observation in reconfiguration support-2
- - fixed observation in reconfiguration support
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_cfm_vav_latest
- - updated changes
- - created common method for adding iaq point
- - True CFM DAB UI and model implementation Reconfiguration and migration support
- - Merge master
- - Add logs and damper limit check
- - Merge branch 'Story/Amaresh/True_cfm_vav_latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/Amaresh/True_Cfm_Dab_Latest
- - Merge branch 'Story/Amaresh/True_cfm_vav_latest' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/5325_truecfm_vav_algorithm
- - Initialize cfm loop in series and parallel fan profiles
- - fix for observation3
- - repush
- - Airflow cfm becomes invisible in zones page when cfm is disabled
- - fix for improper tags to read airflow cfm and default value for min cfm cooling abd reheating
- - updated test cases
- - updated reconfiguration for vav-2
- - updated reconfiguration for vav
- - Merge branch 'story/samjith/5325_truecfm_vav_algorithm' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_cfm_vav_latest
- - Added min and max tags
- - Fix enable tag
- - merge
- - Resolved merge conflicts
- - Merge branch 'story/samjith/5325_truecfm_vav_algorithm' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/True_cfm_vav_latest
- - Merge branch 'Story/Amaresh/truecfm_vav_ui_model' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/Truecfmvav5323
- - merge master
- - changed tag type enable to enabled
- - Added enums and control point
- - Add cfm units and fix enable tag
- - updated tags and resolved conflicts
- - Merge branch 'story/samjith/5325_truecfm_vav_algorithm' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/Amaresh/truecfm_vav_ui_model
- - Tag changes
- - Merge branch 'story/Amaresh/truecfm_vav_ui_model' into story/samjith/5325_truecfm_vav_algorithm
- - Update tuner points
- - Merge UI branch
- - Merge branch 'master' into story/samjith/5325_truecfm_vav_algorithm
- - Resolved merge conflicts
- - Resolved merge conflicts
- - Resolved merge conflicts
- - Revert "Merged PR 3588: Airflow volume unit migration"
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/truecfm_vav_ui_model
- - Fixes for app crashing while Default Tuner creation and while Migration
- - Merge branch 'Story/Amaresh/truecfm_vav_ui_model' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/truecfm_vav_ui_model
- - Merged PR 3688: TrueCFM branch merge
- - Resolve merge conflicts
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/truecfm_vav_ui_model
- -  Reconfiguration support for TrueCFM -VAV
- - Fix invalid damper when system is cooling and zone is heating
- - cfm algorithm implementation
- - Resolved merge conflicts
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Story/Amaresh/truecfm_vav_ui_model
- -  True cfm Migration support for vav
- - Merge branch 'story/Amaresh/truecfm_vav_ui_model' into story/samjith/5325_truecfm_vav_algorithm
- - Remove duplicate tuner creation
- - Merge branch 'story/Amaresh/truecfm_vav_ui_model' into story/samjith/5325_truecfm_vav_algorithm
- - Fix misc issues with point creation
- - Merge branch 'story/Amaresh/truecfm_vav_ui_model' into story/samjith/5325_truecfm_vav_algorithm
- - handle creation and deletion of damper config points
- - Initial implementation of VAV - truecfm
- - Added fanMarker tag to new config points
- - Revert "created static variables in VavProfileConfiguration class"
- - created static variables in VavProfileConfiguration class
- - sonar cube issues resolved
- - updated Test cases
- - updated changes for vavTunerPoints
- - refactor forcepush
- - Refactor config point class
- - Created common file for TrueCFMConfig points so it can be reused for DAB profile
- - sonar cube issues resolved
- - True CFM VAV UI and model Implementation
+ - Merged PR 4444: Fixed cooling and heating desired temp round off issue for VRV
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/10117-VRV-CDT-HDT
+ - Merged PR 4475: Handle scheduleRef during zone update
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/samjith/13065_update_zone_scheduleRef
+ - Merged PR 4476: Operate trueCFM when pressure is 0
+ - Merged PR 4282: check for vacation overlap
+ - Merged PR 4472: Setting zone schedule as zone's scheduleRef with migration.
+ - Merged PR 4260: Handled special schedule in replace CCU
+ - Merged PR 4462: Feature 9022: Celsius Support in CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/12479-replace_CCU_restore_modules
+ - Merged PR 4252: CCU: 12199- Thermister support for TI profile
+ - Handle scheduleRef during zone update
+ - Operate trueCFM when pressure is 0
+ - Merged PR 4315: Disable test mode during screen switch
+ - Merged PR 4320: SN CPU profile fan low fix
+ - Fixed cooling and heating desired temp round off issue for VRV
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/12479-replace_CCU_restore_modules
+ - Merged PR 4395: Revert "Merged PR 3987: User Story 10649: [CCU]: Celsius support for Schedules
+ - Revert "Merged PR 3987: User Story 10649: [CCU]: Celsius support for Schedules
+ - Merged PR 3987: User Story 10649: [CCU]: Celsius support for Schedules
+ - final updated version
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - Merged PR 4238: Restoring the snband point while restoring the point
+ - Merged PR 4350: Added Min, Max, Increment values to kFactor
+ - Merged PR 4158: Fix for Restart Alert discrepancy
+ - Merged PR 4240: Running profile algorithm on receiving override request from hyperstat device
+ - Merged PR 4364: User Story 10647: [CCU]: Celsius support for tuners
+ - Merge conflicts resolved
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - 12187: latest changes; Named schedule.
+ - Merged PR 4365: 12187:celsius change for named schedule
+ - Made the changes mentioned in the comments
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - Merged PR 3601: Special Schedule - Create, View, Edit and Update
+ - Dialog box updated
+ - updated branch
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - updated branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - Min val for KFactor is reset to 1
+ - reconfigured values
+ - removed unnecessary space
+ - Added min,Max  and increment values to K-Factor
+ - Added min,Max  and increment values to K-Factor
+ - Merged PR 4225: Number formatting for numbers
+ - Merged PR 4257: Celsius support for Named Schedules
+ - Disable test mode during screen switch
+ - updated to common branch
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/10647/bharath/trueCFM_Tuners
+ - 10649 implemented true CFM for tuners
+ - Handled special schedule in replace CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - resolved merge conflits
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Removed "APP_START" and "APP_RESTART" preference and value of appRestart point is stored in haystack database
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/Amaresh/10700
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge remote-tracking branch 'origin/comman_celcius_support_integration_branch' into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - Merged PR 4214: zonetemp decimal calculation modification
+ - Merged PR 4206: 12232:User Stories 10650, 10796 and 11577 (Celsius support for Zones)
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - removed unused import statements
+ - Fix for Restart Alert discrepancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - sonarqube issues resolved
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - sonarqube issues resolved
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merged PR 3894: 10795 : [CCU] Celsius support for Master control.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - User Story 10649: [CCU]: Celsius support for Schedules
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into userSory/Bharath/10649_celsius_support_schedules
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'comman_celcius_support_integration_branch' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into comman_celcius_support_integration_branch
+ - Merged PR 3766: migration for celsius support
+ - Merged PR 3745: 10795 : [CCU] Celsius support for Master control.
+ - Merged PR 3744: celsius suooprt teminal devices
+ - Merged PR 3743: US : [CCU]: Celsius support Configuration :
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

@@ -1185,6 +1185,7 @@
     <string name="success_msg">Device session activated successfully</string>
     <string name="okay">OKAY</string>
     <string name="no_internet">Please check the internet connection</string>
+    <string name="desired_temperature">Desired Temperature</string>
 
 
     <!-- Named Schedule-->
@@ -1206,6 +1207,10 @@
     <string name="deadband_warning">Deadbands of the NamedSchedule is outsite the deadband of the zone</string>
     <string name="desiredTemp_warning">Desired temperatures of this NamedSChedule is outside the desired temperature limits of the building</string>
 
+    <!-- Thermistor for TI Profile -->
+    <string name="mainsensor">Main Temperature/Humidity Sensor</string>
+    <string name="thermistor1">Probe 1 Temperature Sensor</string>
+    <string name="thermistor2">Probe 2 Temperature Sensor</string>
     <!--True Cfm-->
     <string name="label_min_cfm_for_iaq">Min CFM For\nIAQ</string>
 

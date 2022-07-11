@@ -75,7 +75,7 @@ class HyperStatCpuProfile : ZoneProfile() {
     }
 
     // Run the profile logic and algorithm for an equip.
-    private fun runHyperstatCPUAlgorithm(equip: HyperStatCpuEquip) {
+    fun runHyperstatCPUAlgorithm(equip: HyperStatCpuEquip) {
         Log.i(L.TAG_CCU_HSCPU, "************************ HSCPU Address: ${equip.node}**********************")
         logicalPointsList = equip.getLogicalPointList()
 

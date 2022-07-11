@@ -70,7 +70,40 @@ public class RestoreCCUHsApi {
         hisSyncHandler = ccuHsApi.getHisSyncHandler();
     }
 
+    public void importZoneSpecialSchedule(Set<String> zoneRefSet){
+        StringBuilder zoneRefString = new StringBuilder("(");
+        int index = 0;
+        for(String zoneRef : zoneRefSet){
+            zoneRefString.append("roomRef == ");
+            zoneRefString.append(StringUtils.prependIfMissing(zoneRef, "@"));
+            if(index == zoneRefSet.size()-1){
+                zoneRefString.append(" ) ");
+            }
+            else{
+                zoneRefString.append(" or ");
+            }
+            index++;
+        }
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict zoneScheduleDict = new HDictBuilder().add("filter",
+                "schedule and zone and special and " + zoneRefString).toDict();
+        HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
+        if (zoneScheduleGrid == null) {
+            return;
+        }
+        Iterator it = zoneScheduleGrid.iterator();
+        while (it.hasNext()) {
+            HRow row = (HRow) it.next();
+            String scheduleId = row.get("id").toString();
+            tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
+            syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
+            ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
+            CcuLog.i(TAG,"Zone Special schedule Imported");
+        }
+    }
+
     public void importZoneSchedule(Set<String> zoneRefSet){
+        Log.i(TAG, " Importing Zone  schedule started");
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -86,7 +119,7 @@ public class RestoreCCUHsApi {
         }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict zoneScheduleDict = new HDictBuilder().add("filter",
-                "schedule and zone and " + zoneRefString).toDict();
+                "schedule and zone and not special and " + zoneRefString).toDict();
         HGrid zoneScheduleGrid = hClient.call("read", HGridBuilder.dictToGrid(zoneScheduleDict));
         if (zoneScheduleGrid == null) {
             return;
@@ -99,6 +132,7 @@ public class RestoreCCUHsApi {
             ccuHsApi.addSchedule(guid, zoneSchedule.getZoneScheduleHDict(zoneSchedule.getRoomRef()));
             ccuHsApi.setSynced(StringUtils.prependIfMissing(guid, "@"));
         }
+        Log.i(TAG, " Importing Zone  schedule completed");
     }
 
     public HGrid getAllCCUs(String siteId){
@@ -118,6 +152,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importFloors(Set<String> floorRefSet) {
+        Log.i(TAG, " Importing floor started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[floorRefSet.size()];
         int index = 0;
@@ -134,9 +169,11 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteFloor(floor, floor.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
+        Log.i(TAG, " Importing floor completed");
     }
 
     public void importZones(Set<String> zoneRefSet){
+        Log.i(TAG, " Importing Zone started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[zoneRefSet.size()];
         int index = 0;
@@ -153,6 +190,7 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteZone(zone, zone.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
+        Log.i(TAG, " Importing Zone completed");
     }
 
     public Map<String, String> getCCUVersion(List<String> equipRefs){
@@ -274,6 +312,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importEquip(HRow equipRow){
+        Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
         equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
@@ -300,9 +339,11 @@ public class RestoreCCUHsApi {
                 CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
             }
         }
+        Log.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
     }
 
     public void importDevice(HRow deviceRow){
+        Log.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
         List<Device> devices = new ArrayList<>();
         List<HashMap> deviceMap = ccuHsApi.HGridToList(deviceRow.grid());
         deviceMap.forEach(equip -> devices.add(new Device.Builder().setHashMap(equip).build()));
@@ -328,11 +369,13 @@ public class RestoreCCUHsApi {
                 CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
             }
         }
+        Log.i(TAG, "Import device completed for "+deviceRow.get("dis").toString());
     }
 
     private void addDeviceAndPoints(List<Device> devices, List<RawPoint> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Device device : devices) {
+            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteDevice(device, device.getId().replace("@", ""));
             hsApi.setSynced(StringUtils.prependIfMissing(equipLuid, "@"));
             //Points
@@ -348,12 +391,14 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
+            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" completed");
         }
     }
 
     private void addEquipAndPoints(List<Equip> equips, List<Point> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Equip equip : equips) {
+            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteEquip(equip, equip.getId().replace("@", ""));
             hsApi.setSynced(equipLuid);
             //Points
@@ -369,13 +414,16 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
+            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
     private void writeValueToDevicePoints(List<Device> devices, HClient hClient) {
         for(Device device : devices){
+            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" started");
             List<HDict> devicePoints = getDevicePoints(device);
             writeValueToPoints(devicePoints, hClient);
+            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" completed");
         }
     }
 
@@ -433,8 +481,10 @@ public class RestoreCCUHsApi {
 
     private void writeValueToEquipPoints(List<Equip> equips, HClient hClient) {
         for(Equip equip : equips){
+            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" started");
             List<HDict> equipPoints = getEquipPoints(equip);
             writeValueToPoints(equipPoints, hClient);
+            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
@@ -478,7 +528,8 @@ public class RestoreCCUHsApi {
         try {
             HDict buildingDict =
                     new HDictBuilder().add("filter",
-                            "building and schedule and not special and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                            "building and schedule and not special and siteRef == " +
+                                    StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
 
             if (buildingSch == null) {
@@ -497,11 +548,45 @@ public class RestoreCCUHsApi {
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
         } catch (UnknownRecException e) {
-            Log.i(TAG, "Exception occured while Importing building schedule "+e.getMessage());
+            Log.i(TAG, "Exception occurred while Importing building schedule "+e.getMessage());
             e.printStackTrace();
         }
         Log.i(TAG, "Import building schedule completed");
     }
+
+    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
+
+        HashMap<Object, Object>  currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and special");
+        if (!currentBuildingSchedule.isEmpty()) {
+            //CCU already has a building special schedule.
+            CcuLog.i(TAG, " importBuildingSpecialSchedule : building Special Schedule exists");
+            return;
+        }
+
+        try {
+            HDict buildingDict =
+                    new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
+                            + siteId).toDict();
+            HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
+            if (buildingSch == null) {
+                return;
+            }
+
+            Iterator it = buildingSch.iterator();
+            while (it.hasNext()) {
+                HRow row = (HRow) it.next();
+                String scheduleId = row.get("id").toString();
+                tagsDb.addHDict(scheduleId.replace("@", ""),  new HDictBuilder().add(row).toDict());
+                syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(scheduleId, "@"));
+                ccuHsApi.setSynced(StringUtils.prependIfMissing(scheduleId, "@"));
+                CcuLog.i(TAG,"Building Special schedule Imported");
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * copied from CCuHsApi
@@ -606,6 +691,9 @@ public class RestoreCCUHsApi {
         //import building schedule data
         importBuildingSchedule(siteId, hClient);
 
+        //import building special schedule
+        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
+
         //import building tuners
         importBuildingTuners(siteId, hClient);
 
@@ -674,6 +762,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importNamedSchedule() {
+        Log.i(TAG, " Import Named schedule started");
         Site site = CCUHsApi.getInstance().getSite();
         HClient hClient =new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (site != null && site.getOrganization() != null) {
@@ -692,9 +781,36 @@ public class RestoreCCUHsApi {
             while (it.hasNext()) {
                 HRow row = (HRow) it.next();
                 tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                CcuLog.i(TAG, "Named schedule Imported");
+                CcuLog.i(TAG, "Import Named schedule Imported");
             }
         }
+    }
+    public void restoreSNBandPointByCCUId(String ccuDeviceID){
+
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict settingPoints = new HDictBuilder().add("filter",
+                "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
+        HGrid settingPointsGrid =  hClient.call("read", HGridBuilder.dictToGrid(settingPoints));
+
+        List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
+
+        pointMaps.forEach(pointMap -> {
+            Point pointDetails = new Point.Builder().setHashMap(pointMap).build();
+            String pointId = StringUtils.prependIfMissing(pointDetails.getId(), "@");
+            HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
+            if (point.isEmpty()) {
+                String pointLuid = ccuHsApi.addRemotePoint(pointDetails, pointDetails.getId().replace("@", ""));
+                ccuHsApi.setSynced(pointLuid);
+            } else {
+                CcuLog.i(TAG, "Point already imported "+pointDetails.getId());
+            }
+
+            Log.i(TAG, "restoreSNBandPointByCCUId: ");
+            SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(pointMaps.get(0));
+            sp.setVal(pointMaps.get(0).get("val").toString());
+            SettingPoint snBand = sp.build();
+            CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
+        });
     }
 
     public HGrid getDiagEquipByEquipId(String equipId){

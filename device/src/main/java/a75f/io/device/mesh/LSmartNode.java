@@ -25,6 +25,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
+import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -204,7 +205,7 @@ public class LSmartNode
         settings.airflowHeatingTemperature.set((short)105);
         settings.airflowCoolingTemperature.set((short)60);
     
-        settings.showCentigrade.set((short)0);
+        settings.showCentigrade.set((short)(DeviceConfigurationUtil.Companion.getUserConfiguration()));
         settings.displayHold.set((short)0);
         settings.militaryTime.set((short)0);
         try

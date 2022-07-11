@@ -7,4 +7,8 @@ public class CazProfileConfig extends BaseProfileConfiguration {
 
     public double temperaturOffset;
     public boolean enableThermistor2;
+
+    public boolean isEnableMain;
+    public boolean enableThermistor1;
+
 }

@@ -17,6 +17,7 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -211,6 +212,27 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         return true;
     }
 
+
+    private boolean isVacationOverlapping(Schedule vacation){
+        List<CalendarDay> selectedDates = mCalendarView.getSelectedDates();
+        DateTime startDate = new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(),
+                selectedDates.get(0).getDay()).withTimeAtStartOfDay();
+        DateTime endDate = new DateTime().withDate(selectedDates.get(0).getYear(),
+                selectedDates.get(0).getMonth(),
+                selectedDates.get(0).getDay()).withTime(23, 59, 59, 0);
+        if(mCalendarView.getSelectedDates().size() > 1){
+            endDate =  new DateTime().withDate(selectedDates.get(selectedDates.size() - 1).getYear(), selectedDates.get(selectedDates.size() - 1).getMonth(),
+                    selectedDates.get(selectedDates.size() - 1).getDay()).withTime(23, 59, 59, 0);
+        }
+        Interval vacationInterval = new Interval(vacation.getStartDate(), vacation.getEndDate());
+        Interval plannedVacationInterval = new Interval(startDate, endDate);
+        if(vacationInterval.overlaps(plannedVacationInterval)){
+            Toast.makeText(this.getContext(), "Vacation for the selected date(s) already exist.", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
+    }
+
     private boolean validate()
     {
         if (mVacationNameEditText.getText() == null || mVacationNameEditText.getText().toString().length() == 0)
@@ -242,6 +264,9 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                         Toast.makeText(this.getContext(), "Two or more vacations cannot have the same start date", Toast.LENGTH_SHORT).show();
                         return false;
                     }
+                    if (isVacationOverlapping(v)) {
+                        return false;
+                    }
                 }
             }
         } else
@@ -259,6 +284,9 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                     if (v.getStartDate().getYear() == mCalendarView.getSelectedDates().get(0).getYear() && v.getStartDate().getMonthOfYear() == mCalendarView.getSelectedDates().get(0).getMonth() && v.getStartDate().getDayOfMonth() == mCalendarView.getSelectedDates().get(0).getDay())
                     {
                         Toast.makeText(this.getContext(), "Two or more vacations cannot have the same start date", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    if (isVacationOverlapping(v)) {
                         return false;
                     }
                 }

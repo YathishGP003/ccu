@@ -252,10 +252,10 @@ class HyperStatIduMessageHandler {
     }
     
     private static int getHeatingDesiredTemp(int address, CCUHsApi hayStack) {
-        return hayStack.readPointPriorityValByQuery("desired and temp and heating and group == \""+address+"\"").intValue() * 2;
+        return (int)(hayStack.readPointPriorityValByQuery("desired and temp and heating and group == \""+address+"\"") * 2);
     }
     
     private static int getCoolingDesiredTemp(int address, CCUHsApi hayStack) {
-        return hayStack.readPointPriorityValByQuery("desired and temp and cooling and group == \""+address+"\"").intValue() * 2;
+        return (int)(hayStack.readPointPriorityValByQuery("desired and temp and cooling and group == \""+address+"\"") * 2);
     }
 }

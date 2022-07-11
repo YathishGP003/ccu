@@ -44,28 +44,32 @@ public class IntrinsicScheduleCreator {
         return false;
     }
 
-    private void calculateIntrinsicScheduleWithZones(List<HashMap<Object, Object>> rooms, int dayNumber,
-                                                     DateTime currentDateTime, List<HDict> intrinsicScheduleList){
+    private Set<Schedule.Days> calculateIntrinsicScheduleWithSpecialSchedules(int dayNumber){
         Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
-        if (!areAllZonesInVacation(rooms, currentDateTime)) {
-            for (HashMap<Object, Object> room : rooms) {
-                if (isZoneConsideredForIntrinsicSchedule(room) && isZoneOnNamedSchedule(room)
-                        && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
-                    zonesDayScheduleSet.addAll(getNamedSchedulesForDay(room, dayNumber));
-                } else if (isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
-                    zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
-                }
-            }
+        List<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
+        for(HashMap<Object, Object> room : rooms){
+            zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(
+                    room.get(Tags.ID).toString(), dayNumber));
         }
-        calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, zonesDayScheduleSet);
+        zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(null, dayNumber));
+        return zonesDayScheduleSet;
     }
 
-    private boolean areAllZonesInVacation(List<HashMap<Object, Object>> rooms,DateTime currentDateTime) {
-        for(HashMap<Object, Object> room : rooms){
-            if(!isZoneOnVacationForCurrentDay(room,currentDateTime))
-                return false;
+    private void calculateIntrinsicScheduleWithZones(List<HashMap<Object, Object>> rooms, int dayNumber,
+                                                     DateTime currentDateTime, List<HDict> intrinsicScheduleList,
+                                                     boolean isBuildingVacToday){
+        Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
+        for (HashMap<Object, Object> room : rooms) {
+            if (isZoneConsideredForIntrinsicSchedule(room) && isZoneOnNamedSchedule(room)
+                    && !isZoneOnVacationForCurrentDay(room, currentDateTime) && !isBuildingVacToday) {
+                zonesDayScheduleSet.addAll(getNamedSchedulesForDay(room, dayNumber));
+            } else if (isZoneConsideredForIntrinsicSchedule(room) && !isZoneOnVacationForCurrentDay(room,
+                    currentDateTime) && !isBuildingVacToday) {
+                zonesDayScheduleSet.addAll(getZoneSchedulesForDay(room, dayNumber));
+            }
+            zonesDayScheduleSet.addAll(calculateIntrinsicScheduleWithSpecialSchedules(dayNumber));
         }
-        return true;
+        calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, zonesDayScheduleSet);
     }
 
     private boolean isZoneOnNamedSchedule(HashMap<Object, Object> room) {
@@ -207,14 +211,14 @@ public class IntrinsicScheduleCreator {
         return false;
     }
 
-    private Date getWeekStartDate() {
+    public static Date getWeekStartDate() {
         Calendar calendar = Calendar.getInstance();
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DATE, -1);
         }
         return calendar.getTime();
     }
-    private static Date getWeekEndDate() {
+    public static Date getWeekEndDate() {
         Calendar calendar = Calendar.getInstance();
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DATE, 1);
@@ -232,10 +236,17 @@ public class IntrinsicScheduleCreator {
         return false;
     }
 
-    private void calculateIntrinsicScheduleWithBuildingSchedule(Schedule buildingSchedule, int dayNumber,
-                                                                List<HDict> intrinsicScheduleList) {
+    private void calculateIntrinsicScheduleWithBuildingSchedule(List<HashMap<Object, Object>> rooms,
+                                                                Schedule buildingSchedule, int dayNumber,
+                                                                List<HDict> intrinsicScheduleList,
+                                                                boolean isBuildingVacToday, DateTime currentDateTime) {
         Set<Schedule.Days> buildingDayScheduleSet = new TreeSet<>(sortSchedules());
-        buildingDayScheduleSet.addAll(getBuildingScheduleForDay(buildingSchedule, dayNumber));
+        for(HashMap<Object, Object> room : rooms) {
+            if (!isBuildingVacToday && !isZoneOnVacationForCurrentDay(room, currentDateTime)) {
+                buildingDayScheduleSet.addAll(getBuildingScheduleForDay(buildingSchedule, dayNumber));
+            }
+        }
+        buildingDayScheduleSet.addAll(calculateIntrinsicScheduleWithSpecialSchedules(dayNumber));
         calculateIntrinsicScheduleForDay(dayNumber, intrinsicScheduleList, buildingDayScheduleSet);
     }
 
@@ -261,20 +272,20 @@ public class IntrinsicScheduleCreator {
         Date weekStartDate = getWeekStartDate();
         int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
         Calendar calendar = Calendar.getInstance();
+        boolean isBuildingVacToday = false;
         while(weekStartDate.before(getWeekEndDate()) && !zones.isEmpty()) {
             calendar.setTime(weekStartDate);
             DateTime currentDateTime = new DateTime(weekStartDate);
             calendar.add(Calendar.DATE, 1);
             weekStartDate = calendar.getTime();
-            if(isCurrentDayOnBuildingVacation(buildingVacations, currentDateTime)){
-                dayNumber++;
-                continue;
-            }
-            else if(isAnyZoneFollowingBuildingSchedule(zones) && !areAllZonesInVacation(zones,currentDateTime)){
-                calculateIntrinsicScheduleWithBuildingSchedule(buildingSchedule,dayNumber, intrinsicScheduleList);
+            isBuildingVacToday = isCurrentDayOnBuildingVacation(buildingVacations, currentDateTime);
+            if(isAnyZoneFollowingBuildingSchedule(zones)){
+                calculateIntrinsicScheduleWithBuildingSchedule(zones, buildingSchedule, dayNumber,
+                        intrinsicScheduleList, isBuildingVacToday, currentDateTime);
             }
             else{
-                calculateIntrinsicScheduleWithZones(zones, dayNumber, currentDateTime, intrinsicScheduleList);
+                calculateIntrinsicScheduleWithZones(zones, dayNumber, currentDateTime, intrinsicScheduleList,
+                        isBuildingVacToday);
             }
             dayNumber++;
         }

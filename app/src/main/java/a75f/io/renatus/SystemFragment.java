@@ -16,9 +16,11 @@ import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.pubnub.IntrinsicScheduleListener;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
@@ -65,6 +67,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
@@ -84,9 +88,12 @@ import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.OaoArc;
 
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.jobs.ScheduleProcessJob.getSystemStatusString;
 
 import com.tooltip.Tooltip;
 
@@ -599,6 +606,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 	}
 	private String convertIntHourMinsToString(int hour, int minute){
+		if(hour == 23 && minute == 59){
+			return "24:00";
+		}
 		String hr = String.valueOf(hour);
 		String min = String.valueOf(minute);
 		String zero = "0";
@@ -906,7 +916,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+					occupancyStatus.setText(getSystemStatusString());
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
@@ -935,6 +945,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		
 	}
+
+
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)

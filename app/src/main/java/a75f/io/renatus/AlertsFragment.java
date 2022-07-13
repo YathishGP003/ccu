@@ -146,35 +146,31 @@ public class AlertsFragment extends Fragment
 	}
 
 	String formatMessageToCelsius(String alertMessage) {
-		String[] strArray = null;
-		strArray = alertMessage.split(" ");
+		String[] alertMessageArray = alertMessage.split(getString(R.string.space));
 		boolean limit = false;
-		Log.d("TAG", "formatMessageToCelsius: before " + alertMessage);
-		for (int i=0;i<strArray.length;i++){
-			String temp;
-			if (strArray[i].equals("limit")){
+		for(int i=0; i<alertMessageArray.length; i++){
+			if (alertMessageArray[i].equals("limit")){
 				limit = true;
 			}
 			try {
-				if (strArray[i].contains("\u00B0")) {
-					temp = strArray[i - 1];
-					DecimalFormat f = new DecimalFormat("##.00");
-					strArray[i - 1] = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Double.valueOf(temp))));
-					strArray[i] = "\u00B0C";
+				if (alertMessageArray[i].contains("\u00B0")) {
+					String temp = alertMessageArray[i - 1];
+					DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
+					alertMessageArray[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(temp)));
+					alertMessageArray[i] = "\u00B0C";
 					if (limit) {
-						strArray[i - 1] = String.valueOf(f.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.valueOf(temp)))));
+						alertMessageArray[i - 1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(temp))));
 					}
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (NumberFormatException numberFormatException) {
+				numberFormatException.printStackTrace();
 			}
 		}
-		StringBuffer stringBuffer = new StringBuffer();
-		for (String s : strArray) {
-			stringBuffer.append(s).append(" ");
+		StringBuffer alertMessageBuffer = new StringBuffer();
+		for (String s : alertMessageArray) {
+			alertMessageBuffer.append(s).append(R.string.space);
 		}
-		alertMessage = stringBuffer.toString();
-		Log.d("TAG", "formatMessageToCelsius: after " + alertMessage);
+		alertMessage = alertMessageBuffer.toString();
 		return alertMessage;
 	}
 	

@@ -1222,7 +1222,7 @@
     <string name="max_val_for_kfactor">3.0</string>
     <string name="step_for_kactor_values">.01</string>
     <string name="default_val_for_kfactor">100</string>
-
+    <string name="space">\" \"</string>
 
 
 </resources>

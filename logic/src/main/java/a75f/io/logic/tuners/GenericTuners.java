@@ -60,7 +60,7 @@ class GenericTuners {
                 .setTz(tz)
                 .build();
         String useCelsiusId = hayStack.addPoint(useCelsius);
-        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED,TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
+        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.USE_CELSIUS_FLAG_DISABLED, 0);
         hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
 
         Point buildingLimitMax = new Point.Builder()

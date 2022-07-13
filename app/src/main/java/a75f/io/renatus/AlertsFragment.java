@@ -145,23 +145,36 @@ public class AlertsFragment extends Fragment
 		
 	}
 
-	String formatMessageToCelsius(String alertMessage){
-		String reverse = StringUtils.reverse(alertMessage);
-		String[] temp = StringUtils.substringsBetween(reverse,"\u00B0 "," ");
-		for (String s : temp) {
+	String formatMessageToCelsius(String alertMessage) {
+		String[] strArray = null;
+		strArray = alertMessage.split(" ");
+		boolean limit = false;
+		Log.d("TAG", "formatMessageToCelsius: before " + alertMessage);
+		for (int i=0;i<strArray.length;i++){
+			String temp;
+			if (strArray[i].equals("limit")){
+				limit = true;
+			}
 			try {
-				DecimalFormat f = new DecimalFormat("##.00");
-				String celsiusVal = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Float.valueOf(StringUtils.reverse(s)))));
-				Pattern fahrenheitVal = Pattern.compile(StringUtils.reverse(s));
-				Matcher tempVal = fahrenheitVal.matcher(alertMessage);
-				alertMessage = tempVal.replaceAll(celsiusVal);
+				if (strArray[i].contains("\u00B0")) {
+					temp = strArray[i - 1];
+					DecimalFormat f = new DecimalFormat("##.00");
+					strArray[i - 1] = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Double.valueOf(temp))));
+					strArray[i] = "\u00B0C";
+					if (limit) {
+						strArray[i - 1] = String.valueOf(f.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.valueOf(temp)))));
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		Pattern fahrenheitUnit = Pattern.compile("\u00B0F");
-		Matcher tempUnit = fahrenheitUnit.matcher(alertMessage);
-		alertMessage = tempUnit.replaceAll("\u00B0C");
+		StringBuffer stringBuffer = new StringBuffer();
+		for (String s : strArray) {
+			stringBuffer.append(s).append(" ");
+		}
+		alertMessage = stringBuffer.toString();
+		Log.d("TAG", "formatMessageToCelsius: after " + alertMessage);
 		return alertMessage;
 	}
 	

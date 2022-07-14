@@ -376,8 +376,10 @@ public class VavStagedRtu extends VavSystemProfile
         //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
         // even if the loopOp is 0
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
-            int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
-            tempStatus[FAN_1.ordinal()] = fanStatus;
+            int fan1Status = isStageEnabled(FAN_1) ? 1 : 0;
+            tempStatus[FAN_1.ordinal()] = fan1Status;
+            int fan2Status = isStageEnabled(FAN_2) ? 1 : 0;
+            tempStatus[FAN_2.ordinal()] = fan2Status;
         }
         
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {

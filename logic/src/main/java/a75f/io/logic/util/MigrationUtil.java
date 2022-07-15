@@ -150,7 +150,6 @@ public class MigrationUtil {
             migrateHisInterpolateIssueFix(CCUHsApi.getInstance());
             PreferenceUtil.setVocPm2p5MigrationV1();
        }
-        }
 
         if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
             updateScheduleType(CCUHsApi.getInstance());

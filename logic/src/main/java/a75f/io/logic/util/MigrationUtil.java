@@ -781,9 +781,9 @@ public class MigrationUtil {
             boolean isScheduleTypeNamedSchedule =
                     hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
                             .intValue() == ScheduleType.NAMED.ordinal();
-            hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
-                    "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
             if(zoneScheduleMap.isEmpty() && isScheduleTypeNamedSchedule) {
+                hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
+                        "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
             }

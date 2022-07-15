@@ -1015,6 +1015,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              * There might have been an error scenario that prevented attaching the scheduleRef, but
                              * still created a schedule. Handle it before creating a new schedule again.
                              */
+                            scheduleById.setDisabled(false);
                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
                             if (!schedule.isEmpty()) {

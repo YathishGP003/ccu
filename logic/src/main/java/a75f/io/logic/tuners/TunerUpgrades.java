@@ -331,7 +331,7 @@ public class TunerUpgrades {
                         .setTz(tz)
                         .build();
                 String useCelsiusId = hayStack.addPoint(useCelsius);
-                hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED, TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
+                hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.TUNER_BUILDING_VAL_LEVEL, TunerConstants.USE_CELSIUS_FLAG_DISABLED, 0);
                 hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
                 Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint Point created ");
             }else{

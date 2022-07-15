@@ -139,8 +139,10 @@ public class TempOverrideFragment extends Fragment {
                 if (getActivity() != null) {
                     StatusPagerAdapter mStatusPagerAdapter = new StatusPagerAdapter(getActivity().getSupportFragmentManager());
                     mViewPager.setAdapter(mStatusPagerAdapter);
-                    btnTabs.getTabAt(1).select();
-                    mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                    if (btnTabs.getSelectedTabPosition() != 0) {
+                        btnTabs.getTabAt(1).select();
+                        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                    }
                 }
             }
         };

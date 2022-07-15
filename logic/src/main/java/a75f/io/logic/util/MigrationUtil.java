@@ -142,12 +142,15 @@ public class MigrationUtil {
             PreferenceUtil.setScheduleRefForZoneMigration();
         }
 
-
-
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){
             updateScheduleRefs(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefUpdateMigration();
-       }
+        }
+
+        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
+            updateScheduleType(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -770,4 +773,20 @@ public class MigrationUtil {
         return ref.equals(id);
     }
 
+    private static void updateScheduleType(CCUHsApi hayStack){
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        for(HashMap<Object,Object> room : rooms){
+            HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and not special and " +
+                    "roomRef == " +room.get("id"));
+            boolean isScheduleTypeNamedSchedule =
+                    hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
+                            .intValue() == ScheduleType.NAMED.ordinal();
+            hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
+                    "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
+            if(zoneScheduleMap.isEmpty() && isScheduleTypeNamedSchedule) {
+                hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
+                        "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
+            }
+        }
+    }
 }

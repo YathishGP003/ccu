@@ -34,6 +34,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.vav.VavEquip;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -127,6 +128,11 @@ public class MigrationUtil {
 
         if(!PreferenceUtil.getDiagEquipMigration()){
             doDiagPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDiagEquipMigration();
+        }
+
+        if(!PreferenceUtil.getSiteNameEquipMigration()){
+            ControlMote.updateOnSiteNameChange();
             PreferenceUtil.setDiagEquipMigration();
         }
 

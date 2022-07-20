@@ -24,6 +24,7 @@ public class PreferenceUtil {
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
 
     private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
+    private static final String SITE_NAME_MIGRATION = "siteNameMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -263,6 +264,12 @@ public class PreferenceUtil {
     }
     public static boolean getDiagEquipMigration() {
         return getBooleanPreference(DIAG_POINTS_MIGRATION);
+    }
+    public static void setSiteNameEquipMigration() {
+        setBooleanPreference(SITE_NAME_MIGRATION, true);
+    }
+    public static boolean getSiteNameEquipMigration() {
+        return getBooleanPreference(SITE_NAME_MIGRATION);
     }
 
     public static void setSmartNodeMigration() {

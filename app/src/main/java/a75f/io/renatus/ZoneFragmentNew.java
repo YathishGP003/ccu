@@ -929,7 +929,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         vacationImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId,
+                    false);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1060,8 +1061,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         scheduleSpinner.setSelection(position);
 
                         namedSchedule.setOnExitListener(() -> {
-
+                            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
+                            ScheduleProcessJob.updateSchedules(equipOpen);
                             Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                            scheduleImageButton.setTag(mSchedule.getId());
+                            vacationImageButton.setTag(mSchedule.getId());
+                            specialScheduleImageButton.setTag(mSchedule.getId());
+                            scheduleImageButton.setVisibility(View.GONE);
                         });
                     }
                     scheduleSpinner.setSelection(position);
@@ -1391,7 +1397,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     private void imageButtonClickListener(View v, String zoneId, String[] equipId,
                                         FragmentManager childFragmentManager2) {
-        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, true);
         FragmentManager childFragmentManager = childFragmentManager2;
         childFragmentManager.beginTransaction();
         schedulerFragment.show(childFragmentManager, "dialog");
@@ -1429,7 +1435,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         Spinner scheduleSpinner = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
-        ImageButton specilaScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
+        ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
 
@@ -1535,10 +1541,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
-        specilaScheduleImageButton.setTag(mSchedule.getId());
+        specialScheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId,
+                    false);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1551,7 +1558,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         });
         scheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId,
+                    false);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1562,9 +1570,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 ScheduleProcessJob.updateSchedules(equipOpen);
             });
         });
-        specilaScheduleImageButton.setOnClickListener(v ->
+        specialScheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId,
+                    true);
             FragmentManager childFragmentManager = getChildFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1621,7 +1630,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     CCUHsApi.getInstance().scheduleSync();
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
-                    specilaScheduleImageButton.setTag(mSchedule.getId());
+                    specialScheduleImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
                     boolean isContainment = true;
@@ -1630,7 +1639,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
-                        specilaScheduleImageButton.setTag(mSchedule.getId());
+                        specialScheduleImageButton.setTag(mSchedule.getId());
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId);
@@ -1696,7 +1705,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         scheduleSpinner.setSelection(position);
 
                         namedSchedule.setOnExitListener(() -> {
+                            mSchedule = Schedule.getScheduleByEquipId(equipId);
+                            ScheduleProcessJob.updateSchedules(equipOpen);
+                            scheduleImageButton.setVisibility(View.GONE);
                             Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                            mSchedule = Schedule.getScheduleByEquipId(equipId);
+                            ScheduleProcessJob.updateSchedules(equipOpen);
+                            Toast.makeText(getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                            scheduleImageButton.setTag(mSchedule.getId());
+                            vacationImageButton.setTag(mSchedule.getId());
+                            specialScheduleImageButton.setTag(mSchedule.getId());
+                            scheduleImageButton.setVisibility(View.GONE);
                         });
                     }
                     scheduleSpinner.setSelection(position);
@@ -1706,7 +1725,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 scheduleImageButton.setTag(mSchedule.getId());
                 vacationImageButton.setTag(mSchedule.getId());
-                specilaScheduleImageButton.setTag(mSchedule.getId());
+                specialScheduleImageButton.setTag(mSchedule.getId());
             }
 
             @Override

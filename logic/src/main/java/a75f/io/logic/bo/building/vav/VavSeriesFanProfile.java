@@ -79,7 +79,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
             
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            int loopOp = getLoopOp(conditioning, roomTemp,vavEquip.getId());
+            int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
             
             SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
@@ -128,7 +128,7 @@ public class VavSeriesFanProfile extends VavProfile
         setDamperLimits(node, damper);
     }
     
-    private int getLoopOp(SystemController.State conditioning, double roomTemp, String vavEquip) {
+    private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip vavEquip) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
@@ -144,10 +144,14 @@ public class VavSeriesFanProfile extends VavProfile
             if (state != HEATING) {
                 handleHeatingChangeOver();
             }
-            loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-            if (conditioning == VavSystemController.State.COOLING ) {
-                updateReheatDuringSystemCooling(loopOp,vavEquip);
+            int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            if (conditioning == SystemController.State.COOLING) {
+                updateReheatDuringSystemCooling(heatingLoopOp, vavEquip.getId());
+                loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
+            } else if (conditioning == SystemController.State.HEATING) {
+                loopOp = heatingLoopOp;
             }
+            
         } else {
             //Zone is in deadband
             handleDeadband();

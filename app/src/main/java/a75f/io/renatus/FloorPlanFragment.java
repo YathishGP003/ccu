@@ -1063,17 +1063,17 @@ public class FloorPlanFragment extends Fragment {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
 
             if (roomToRename != null) {
-                roomList.remove(roomToRename);
-                siteRoomList.remove(roomToRename.getDisplayName());
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString())) {
+                    if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 }
+                roomList.remove(roomToRename);
+                siteRoomList.remove(roomToRename.getDisplayName());
 
                 Zone hsZone = new Zone.Builder()
-                        .setDisplayName(addRoomEdit.getText().toString())
+                        .setDisplayName(addRoomEdit.getText().toString().trim())
                         .setFloorRef(roomToRename.getFloorRef())
                         .setSiteRef(roomToRename.getSiteRef())
                         .setScheduleRef(roomToRename.getScheduleRef())
@@ -1089,15 +1089,15 @@ public class FloorPlanFragment extends Fragment {
                 selectRoom(roomList.indexOf(hsZone));
                 hideKeyboard();
                 roomToRename = null;
-                if (!siteRoomList.contains(addRoomEdit.getText().toString())) {
-                    siteRoomList.add(addRoomEdit.getText().toString());
+                if (!siteRoomList.contains(addRoomEdit.getText().toString().trim())) {
+                    siteRoomList.add(addRoomEdit.getText().toString().trim());
                 }
                 return true;
             }
 
             if (addRoomEdit.getText().toString().length() > 0) {
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString())) {
+                    if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
@@ -1109,7 +1109,7 @@ public class FloorPlanFragment extends Fragment {
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
                 Zone hsZone = new Zone.Builder()
-                        .setDisplayName(addRoomEdit.getText().toString())
+                        .setDisplayName(addRoomEdit.getText().toString().trim())
                         .setFloorRef(floor.getId())
                         .setSiteRef(siteMap.get("id").toString())
                         .build();
@@ -1126,7 +1126,7 @@ public class FloorPlanFragment extends Fragment {
                 selectRoom(roomList.indexOf(hsZone));
 
                 hideKeyboard();
-                siteRoomList.add(addRoomEdit.getText().toString());
+                siteRoomList.add(addRoomEdit.getText().toString().trim());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();

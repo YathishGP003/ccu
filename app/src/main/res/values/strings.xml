@@ -1066,8 +1066,8 @@
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
     <string name="txt_GUID_details">GUID Details:</string>
 
-    <string name="enable_force_occupy">Enable Auto Force Occupied</string>
-    <string name="enable_auto_away">Enable Auto Away</string>
+    <string name="auto_force_occupy">Auto Force Occupied</string>
+    <string name="auto_away">Auto Away</string>
 
     <string name="textbpos">BPOS</string>
     <string name="descbpos">Battery Power Occupancy Sensor</string>

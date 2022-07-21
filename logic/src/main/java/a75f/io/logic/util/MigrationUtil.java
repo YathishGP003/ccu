@@ -156,6 +156,11 @@ public class MigrationUtil {
             migrateHisInterpolateIssueFix(CCUHsApi.getInstance());
             PreferenceUtil.setVocPm2p5MigrationV1();
        }
+
+        if(!PreferenceUtil.getStageTimerForDABMigration()){
+            updateStageTimerForDAB(CCUHsApi.getInstance());
+            PreferenceUtil.setStageTimerForDABMigration();
+        }
     }
 
     private static void migrateHisInterpolateIssueFix(CCUHsApi instance) {
@@ -821,6 +826,24 @@ public class MigrationUtil {
         ref = ref.startsWith("@")? ref.substring(1) : ref;
         id = id.startsWith("@")? id.substring(1) : id;
         return ref.equals(id);
+    }
+
+    private static void updateStageTimerForDAB(CCUHsApi haystack) {
+        HashMap<Object, Object> systemEquip = haystack.readEntity("equip and dab and system");
+
+        if (!systemEquip.isEmpty()) {
+            Equip equipMap = new Equip.Builder().setHashMap(systemEquip).build();
+            String MAX_VAL_FOR_STAGE_TIMER = "30";
+
+            HashMap<Object, Object> stageUpTimer = haystack.readEntity("stageUp and system and dab and equipRef == \"" + equipMap.getId() + "\"");
+            HashMap<Object, Object> stageDownTimer = haystack.readEntity("stageDown and system and dab and equipRef == \"" + equipMap.getId() + "\"");
+
+            Point updatedPointForStageUp = new Point.Builder().setHashMap(stageUpTimer).setMaxVal(MAX_VAL_FOR_STAGE_TIMER).build();
+            Point updatedPointForStageDown = new Point.Builder().setHashMap(stageDownTimer).setMaxVal(MAX_VAL_FOR_STAGE_TIMER).build();
+
+            CCUHsApi.getInstance().updatePoint(updatedPointForStageUp, updatedPointForStageUp.getId());
+            CCUHsApi.getInstance().updatePoint(updatedPointForStageDown, updatedPointForStageDown.getId());
+        }
     }
 
 }

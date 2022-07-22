@@ -1225,9 +1225,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setId(ViewCompat.generateViewId());
         textViewTemp.setTag(position);
 
-        if (getArguments() != null && (getArguments().containsKey(PARAM_IS_VACATION) || getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE))) {
-            boolean isVacation = getArguments().getBoolean(PARAM_IS_VACATION);
-            boolean isSpecialSchedule = getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
+        if (getArguments() != null) {
+            boolean isVacation =
+                    getArguments().containsKey(PARAM_IS_VACATION) && getArguments().getBoolean(PARAM_IS_VACATION);
+            boolean isSpecialSchedule =
+                    getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
             if (isVacation || isSpecialSchedule){
                 scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
                 if (!schedule.getDis().equals("Zone Schedule")) {

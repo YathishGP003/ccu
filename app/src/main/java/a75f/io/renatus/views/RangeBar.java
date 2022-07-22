@@ -22,6 +22,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
@@ -47,8 +48,6 @@ public class RangeBar extends View {
     private int mHeatingBarDisplacement = 0;
     private int mCoolingBarDisplacement = 0;
     private int mHitBoxPadding = 0;
-      private HashMap<Object, Object> useCelsius;
-
     //
     private float lowerHeatingTemp = 72;
     private float upperHeatingTemp = 64;
@@ -134,7 +133,7 @@ public class RangeBar extends View {
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
         }
 
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])))))+"\u00B0C",
                     xPos, (yPos - 10f), mTempIconPaint);
         } else {
@@ -242,7 +241,6 @@ public class RangeBar extends View {
             this.setNestedScrollingEnabled(true);
 
         }
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
         this.setBackgroundColor(Color.WHITE);
 

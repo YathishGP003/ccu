@@ -1,15 +1,16 @@
 package a75f.io.renatus;
+
+import static a75f.io.renatus.RenatusLandingActivity.btnTabs;
+import static a75f.io.renatus.RenatusLandingActivity.mTabLayout;
+import static a75f.io.renatus.RenatusLandingActivity.mViewPager;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
@@ -17,6 +18,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -38,14 +43,9 @@ import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
-import android.view.View.OnClickListener;
 import a75f.io.renatus.util.ZoneSorter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static a75f.io.renatus.RenatusLandingActivity.btnTabs;
-import static a75f.io.renatus.RenatusLandingActivity.mTabLayout;
-import static a75f.io.renatus.RenatusLandingActivity.mViewPager;
 
 public class TempOverrideFragment extends Fragment {
 

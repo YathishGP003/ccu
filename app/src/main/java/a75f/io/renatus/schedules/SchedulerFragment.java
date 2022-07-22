@@ -1,5 +1,6 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
@@ -1110,10 +1111,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
 
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         String unit = "\u00B0F";
 
-        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
             heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
             unit = "\u00B0C";

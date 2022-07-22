@@ -119,6 +119,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -136,7 +137,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     public DataArrayAdapter<Floor> mFloorListAdapter;
     ArrayList<Zone> roomList = new ArrayList();
 
-    private HashMap<Object, Object> useCelsius;
     private RelativeLayout weather_data = null;
     private TextView place;
     private TextView temperature;
@@ -207,7 +207,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        //useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
         parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
         return rootView;
@@ -421,7 +421,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
                             try {
-                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                            if(isCelsiusTunerAvailableStatus()) {
                                 scheduleStatus.setText(StatusCelsiusVal(status));
                             } else {
                                 scheduleStatus.setText(status);
@@ -525,7 +525,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
     public void UpdateWeatherData() {
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
 
-            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if( isCelsiusTunerAvailableStatus()) {
                 temperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
                 maximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
                 minimumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
@@ -888,7 +888,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
         try {
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, equipId[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1513,7 +1513,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
         try {
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             Observable.fromCallable(() -> ScheduleProcessJob.getZoneStatusMessage(zoneId, p.getId()))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -2137,7 +2137,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                            if( isCelsiusTunerAvailableStatus()) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
                             } else {
@@ -2247,13 +2247,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
         textViewLabel4.setText("Supply Airflow : ");
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
@@ -2295,7 +2295,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewStatus.setText(ssePoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(ssePoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
@@ -2362,7 +2362,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel1.setText("Damper : ");
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
@@ -2411,7 +2411,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
                 textViewLabel1.setText("Cooling Supply Airflow : ");
                 textViewValue1.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("CoolingSupplyAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
@@ -2431,7 +2431,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         textViewLabel2.setText("Discharge Airflow : ");
         try {
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
@@ -2481,7 +2481,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
         CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(cpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
@@ -2715,7 +2715,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CCUUiUtil.setSpinnerDropDownColor(conditionSpinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(hpuEquipPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
@@ -2960,7 +2960,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
 
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p2FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
@@ -3124,7 +3124,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(p4FCUPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
@@ -3353,7 +3353,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
 
         double processValue = (double) plcPoints.get("Input Value");
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
         } else {
             textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
@@ -3680,7 +3680,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
 
-            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if( isCelsiusTunerAvailableStatus()) {
                 String label_string = sensePoints.get("Thermistor1").toString() +
                         " (" + getString(R.string.thermistor1_label) + ") " + " : ";
                 String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
@@ -3708,7 +3708,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
-            if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if( isCelsiusTunerAvailableStatus()) {
                 String label_string = sensePoints.get("Thermistor2").toString() +
                         " (" + getString(R.string.thermistor2_label) + ") " + " : ";
                 String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(sensePoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
@@ -4058,7 +4058,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        if( (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(Float.parseFloat(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString().replaceAll("[^0-9\\.]",""))))))+ " \u00B0C");
         } else {
             textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());

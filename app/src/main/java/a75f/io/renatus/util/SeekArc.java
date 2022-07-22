@@ -3,6 +3,7 @@ package a75f.io.renatus.util;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 import android.content.Context;
@@ -185,7 +186,6 @@ public class SeekArc extends View
     private float mCoolingDesiredTemp;
     private float mHeatingDesiredTemp;
     private float mCurrentTemp;
-    private double useCelsiusVal;
 
     private float mLimitCoolingStartAngle;
     private float mLimitHeatingStartAngle;
@@ -280,7 +280,6 @@ public class SeekArc extends View
 
     public void init(Context context, AttributeSet attrs, int defStyle)
     {
-        useCelsiusVal=(double) getTuner((CCUHsApi.getInstance().readEntity("displayUnit")).get("id").toString());
         mCurrentBitmapMatrix = new Matrix();
 
         mHeatingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_dt_two));
@@ -511,7 +510,7 @@ public class SeekArc extends View
     private void drawCurrentTempTextNotDetailed(Canvas canvas, float currentTemp)
     {
         String curTemp;
-        if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             curTemp=String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(currentTemp))));
         } else {
             curTemp= String.valueOf(roundToHalf(currentTemp));
@@ -529,7 +528,7 @@ public class SeekArc extends View
             String currentTempText;
             String tempString ;
             String curString = "CURRENT";
-            if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if( isCelsiusTunerAvailableStatus()) {
                  currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
                  tempString = "TEMP"+" (\u00B0C )";
             } else {
@@ -573,7 +572,7 @@ public class SeekArc extends View
             String currentTempText;
             String tempString ;
             String curString = "CURRENT";
-            if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if( isCelsiusTunerAvailableStatus()) {
                  coolingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getCoolingDesiredTemp()))));
                  heatingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getHeatingDesiredTemp()))));
                  currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
@@ -671,7 +670,7 @@ public class SeekArc extends View
         mCurrentTemperatureTextPaint.setColor(tempPaintColor);
         mCurrentTemperatureStringTextPaint.setColor(descriptionColor);
 
-        if( useCelsiusVal == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if( isCelsiusTunerAvailableStatus()) {
             canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
             canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
             canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(curTemp))), xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);

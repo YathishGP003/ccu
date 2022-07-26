@@ -3334,10 +3334,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
 
         double processValue = (double) plcPoints.get("Input Value");
-        if( isCelsiusTunerAvailableStatus()) {
-            textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
-        } else {
-            textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        if (plcPoints.get("Unit").equals("\u00B0F")) {
+            if (isCelsiusTunerAvailableStatus()) {
+                textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");
+            }
         }
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {

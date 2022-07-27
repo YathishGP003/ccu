@@ -270,7 +270,7 @@ public class OTAUpdateService extends IntentService {
             mFirmwareDeviceType = FirmwareComponentType_t.SMART_NODE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
-        else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
+        else if(firmwareVersion.startsWith("ITM_")) {
             mFirmwareDeviceType = FirmwareComponentType_t.ITM_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         } else if(firmwareVersion.startsWith("HyperStat_")) {

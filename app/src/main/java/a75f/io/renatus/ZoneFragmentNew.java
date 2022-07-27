@@ -376,7 +376,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     public String StatusCelsiusVal(String temp)
     {
-        if (temp.contains("F")) {
             String s = "";
             ArrayList<Double> myDoubles = new ArrayList<Double>();
             Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
@@ -396,13 +395,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return (" ");
+                    return temp;
                 }
             } else {
-                return (" ");
+                return temp;
             }
-        }
-        return temp;
+
     }
 
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {

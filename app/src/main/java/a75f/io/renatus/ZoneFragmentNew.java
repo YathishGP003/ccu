@@ -376,31 +376,33 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     public String StatusCelsiusVal(String temp)
     {
-        String s="";
-        ArrayList < Double > myDoubles = new ArrayList < Double >();
-        Matcher matcher = Pattern.compile( "[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?" ).matcher( temp );
+        if (temp.contains("F")) {
+            String s = "";
+            ArrayList<Double> myDoubles = new ArrayList<Double>();
+            Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
 
-        Pattern p = Pattern.compile("[a-zA-Z]+");
-        Matcher m1 = p.matcher(temp);
-        while (m1.find()) {
-            s=s+m1.group()+" ";
-        }
-
-        while ( matcher.find() )
-        {
-            double element = Double.parseDouble( matcher.group() );
-            myDoubles.add( Math.abs(element) );
-        }
-        if(myDoubles.size() > 0) {
-            try {
-                return ((s.substring(0, s.lastIndexOf("F")) + " ")+ (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
-            }  catch (Exception e) {
-               e.printStackTrace();
-               return (" ");
+            Pattern p = Pattern.compile("[a-zA-Z]+");
+            Matcher m1 = p.matcher(temp);
+            while (m1.find()) {
+                s = s + m1.group() + " ";
             }
-        } else {
-            return (" ");
+
+            while (matcher.find()) {
+                double element = Double.parseDouble(matcher.group());
+                myDoubles.add(Math.abs(element));
+            }
+            if (myDoubles.size() > 0) {
+                try {
+                    return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return (" ");
+                }
+            } else {
+                return (" ");
+            }
         }
+        return temp;
     }
 
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {

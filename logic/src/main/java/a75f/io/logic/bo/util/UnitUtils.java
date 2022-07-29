@@ -97,7 +97,7 @@ public class UnitUtils {
 
     public static double celsiusToFahrenheitTuner(double value) {
 
-        double conversionToFarh = ((value) * (9 / 5) + 32);
+        double conversionToFarh = (value * 9 / 5) + 32;
         double conversionValue = (((conversionToFarh) * 10) / 10);
         return Math.round(conversionValue);
 

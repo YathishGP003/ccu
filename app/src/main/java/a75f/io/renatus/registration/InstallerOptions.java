@@ -418,7 +418,9 @@ public class InstallerOptions extends Fragment {
                     }
                 }
                 getTempValues();
-                TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+                if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
+                    TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+                }
             }
         });
 

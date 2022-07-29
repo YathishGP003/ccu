@@ -341,7 +341,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                     textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                     String val = getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString());
-                    if ((newTunerValueItem.containsKey("unit") && !val.equals("-")) && newTunerValueItem.containsKey("displayUnit")){
+                    if ((newTunerValueItem.containsKey("unit") && !val.equals("-")) && !newTunerValueItem.containsKey("displayUnit")){
                         if (isCelsiusTunerAvailableStatus()) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                 val = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(val)));

@@ -529,20 +529,22 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     maxValueDb = getTuner(heatingMax.get("id").toString()) - TunerUtil.getHeatingDeadband(p.getId());
                 }
 
-                if(isCelsiusTunerAvailableStatus()) {
-                    if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                        if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                            maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
-                            minValueDb = (convertingRelativeValueFtoC(minValueDb));
-                            currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
-                        } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
-                            minValueDb = (convertingDeadBandValueFtoC(minValueDb));
-                            maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
-                            currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
-                        } else {
-                            minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
-                            maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
-                            currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+                if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
+                    if (isCelsiusTunerAvailableStatus()) {
+                        if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                            if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                                maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
+                                minValueDb = (convertingRelativeValueFtoC(minValueDb));
+                                currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
+                            } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
+                                minValueDb = (convertingDeadBandValueFtoC(minValueDb));
+                                maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
+                                currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
+                            } else {
+                                minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
+                                maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
+                                currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+                            }
                         }
                     }
                 }
@@ -665,21 +667,22 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             HashMap<Object, Object> heatingMax = CCUHsApi.getInstance().readEntity("point and limit and max and heating and user");
             maxValueDb = getTuner(heatingMax.get("id").toString()) - TunerUtil.getHeatingDeadband(p.getId());
         }
-
-        if(isCelsiusTunerAvailableStatus()) {
-            if (tunerItemSelected.containsKey("unit") && tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                    maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
-                    minValueDb = (convertingRelativeValueFtoC(minValueDb));
-                    currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
-                } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
-                    minValueDb = (convertingDeadBandValueFtoC(minValueDb));
-                    maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
-                    currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
-                } else {
-                    minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
-                    maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
-                    currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+        if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
+            if (isCelsiusTunerAvailableStatus()) {
+                if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                    if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                        maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
+                        minValueDb = (convertingRelativeValueFtoC(minValueDb));
+                        currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
+                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
+                        minValueDb = (convertingDeadBandValueFtoC(minValueDb));
+                        maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
+                        currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
+                    } else {
+                        minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
+                        maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
+                        currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+                    }
                 }
             }
         }

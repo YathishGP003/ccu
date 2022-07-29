@@ -151,7 +151,6 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     if (getTunerValue(tunerItem.get("id").toString()) != null){
                         double val = (getTunerValue(tunerItem.get("id").toString()));
                         if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")) {
-                        if (!tunerItem.containsKey("displayUnit")) {
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (tunerItem.get("unit").toString().equals("\u00B0F")) {
                                     if (doesPointNeedRelativeConversion(tunerItem)) {
@@ -171,7 +170,6 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                                     val = celsiusToFahrenheitTuner(val);
                                 }
                             }
-                        }
                         }
                         holder.itemTextValueView.setText(String.valueOf(val));
                     } else {

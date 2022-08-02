@@ -107,7 +107,8 @@ public class UnitUtils {
 
         double relativeValue = (deadBandValue / 1.8);
         double conversionDeadBandValue = ((relativeValue) * 10) / 10;
-        return Math.round(conversionDeadBandValue);
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadBandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
     }
 
 
@@ -116,7 +117,8 @@ public class UnitUtils {
 
         double relativeValue = (deadBandValue * 1.8);
         double conversionDeadBandValue = ((relativeValue) * 10) / 10;
-        return Math.round(conversionDeadBandValue);
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadBandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
 
     }
 
@@ -125,14 +127,14 @@ public class UnitUtils {
         double conversionDeadband = (deadBandValue / 1.8);
         double conversionDeadbandValue = (((conversionDeadband) * 10) / 10);
         BigDecimal numberBigDecimal = new BigDecimal(conversionDeadbandValue);
-        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_UP)));
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
     }
 
     public static double convertingDeadBandValueCtoF(double deadBandValue) {
         double conversionDeadband = (deadBandValue * 1.8);
         double conversionDeadbandValue = (((conversionDeadband) * 10) / 10);
         BigDecimal numberBigDecimal = new BigDecimal(conversionDeadbandValue);
-        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_UP)));
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
     }
 
 

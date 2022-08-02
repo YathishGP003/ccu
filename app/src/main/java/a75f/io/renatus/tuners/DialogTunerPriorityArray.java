@@ -295,7 +295,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (target > Double.parseDouble(dataArray.get(mid)))
                 start = mid;
         }
-        return Math.abs(Double.parseDouble(target - Double.parseDouble(dataArray.get(start)) <= Math.abs(target - Double.parseDouble(dataArray.get(end))) ? dataArray.get(start)
+        return (Double.parseDouble(target - Double.parseDouble(dataArray.get(start)) <= Math.abs(target - Double.parseDouble(dataArray.get(end))) ? dataArray.get(start)
                 : dataArray.get(end)));
     }
 
@@ -506,28 +506,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
-                HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
-                Equip p = new Equip.Builder().setHashMap(tuner).build();
-                if (tunerItemSelected.get("dis").toString().contains("coolingUserLimitMax")){
-                    HashMap<Object, Object> coolingMin = CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user");
-                    minValueDb = getTuner(coolingMin.get("id").toString()) + TunerUtil.getCoolingDeadband(p.getId());
-                }
-                if (tunerItemSelected.get("dis").toString().contains("coolingUserLimitMin")){
-                    HashMap<Object, Object> heatingMax = CCUHsApi.getInstance().readEntity("point and limit and max and heating and user");
-                    minValueDb = getTuner(heatingMax.get("id").toString());
-                    HashMap<Object, Object> coolingMax = CCUHsApi.getInstance().readEntity("point and limit and max and cooling and user");
-                    maxValueDb = getTuner(coolingMax.get("id").toString()) - TunerUtil.getCoolingDeadband(p.getId());
-                }
-                if (tunerItemSelected.get("dis").toString().contains("heatingUserLimitMax")){
-                    HashMap<Object, Object> coolingMin = CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user");
-                    maxValueDb = getTuner(coolingMin.get("id").toString());
-                    HashMap<Object, Object> heatingMin = CCUHsApi.getInstance().readEntity("point and limit and min and heating and user");
-                    minValueDb = getTuner(heatingMin.get("id").toString()) + TunerUtil.getHeatingDeadband(p.getId());
-                }
-                if (tunerItemSelected.get("dis").toString().contains("heatingUserLimitMin")){
-                    HashMap<Object, Object> heatingMax = CCUHsApi.getInstance().readEntity("point and limit and max and heating and user");
-                    maxValueDb = getTuner(heatingMax.get("id").toString()) - TunerUtil.getHeatingDeadband(p.getId());
-                }
 
                 if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
                     if (isCelsiusTunerAvailableStatus()) {
@@ -559,7 +537,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 int currentValPos = 0;
                 if (minValue < 0) {
                     for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                        valueList.add(String.valueOf(i / 100.0));
+                        valueList.add(String.valueOf(Math.round(i) / 100.0));
                     }
                     for (String currVal : valueList) {
                         if (currentValueDb == Double.parseDouble(currVal)) {
@@ -569,7 +547,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                 } else {
                     for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                        valueList.add(String.valueOf(i / 100.0));
+                        valueList.add(String.valueOf(Math.round(i) / 100.0));
                     }
                     for (String currVal : valueList) {
                         if (currentValueDb == Double.parseDouble(currVal)) {
@@ -645,28 +623,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
         double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
         double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
-        HashMap<Object,Object> tuner = CCUHsApi.getInstance().readEntity("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
-        if (tunerItemSelected.get("dis").toString().contains("coolingUserLimitMax")){
-            HashMap<Object, Object> coolingMin = CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user");
-            minValueDb = getTuner(coolingMin.get("id").toString()) + TunerUtil.getCoolingDeadband(p.getId());
-        }
-        if (tunerItemSelected.get("dis").toString().contains("coolingUserLimitMin")){
-            HashMap<Object, Object> heatingMax = CCUHsApi.getInstance().readEntity("point and limit and max and heating and user");
-            minValueDb = getTuner(heatingMax.get("id").toString());
-            HashMap<Object, Object> coolingMax = CCUHsApi.getInstance().readEntity("point and limit and max and cooling and user");
-            maxValueDb = getTuner(coolingMax.get("id").toString()) - TunerUtil.getCoolingDeadband(p.getId());
-        }
-        if (tunerItemSelected.get("dis").toString().contains("heatingUserLimitMax")){
-            HashMap<Object, Object> coolingMin = CCUHsApi.getInstance().readEntity("point and limit and min and cooling and user");
-            maxValueDb = getTuner(coolingMin.get("id").toString());
-            HashMap<Object, Object> heatingMin = CCUHsApi.getInstance().readEntity("point and limit and min and heating and user");
-            minValueDb = getTuner(heatingMin.get("id").toString()) + TunerUtil.getHeatingDeadband(p.getId());
-        }
-        if (tunerItemSelected.get("dis").toString().contains("heatingUserLimitMin")){
-            HashMap<Object, Object> heatingMax = CCUHsApi.getInstance().readEntity("point and limit and max and heating and user");
-            maxValueDb = getTuner(heatingMax.get("id").toString()) - TunerUtil.getHeatingDeadband(p.getId());
-        }
+
         if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
             if (isCelsiusTunerAvailableStatus()) {
                 if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
@@ -697,7 +654,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         int currentValPos = 0;
         if (minValue < 0) {
             for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                valueList.add(String.valueOf(i / 100.0));
+                valueList.add(String.valueOf(Math.round(i) / 100.0));
             }
             for (String currVal : valueList) {
                 if (currentValueDb == Double.parseDouble(currVal)) {
@@ -707,7 +664,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             }
         } else {
             for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                valueList.add(String.valueOf(i / 100.0));
+                valueList.add(String.valueOf(Math.round(i) / 100.0));
             }
             for (String currVal : valueList) {
                 if (currentValueDb == Double.parseDouble(currVal)) {

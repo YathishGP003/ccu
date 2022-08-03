@@ -96,7 +96,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private static final long DISCONNECT_TIMEOUT = 3000;
     private static final long INTERVAL = 1000;
     private long mStopTimeInFuture;
-    private static final long mMillisInFuture = 3600000;
+    private static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
     //TODO - refactor
     public boolean settingView = false;
     private TabItem pageSettingButton;
@@ -271,34 +271,27 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @SuppressLint("LogNotTimber")
     private void startCountDownTimer(long interval) {
-        Log.d(TAG,"in start");
-        mStopTimeInFuture = System.currentTimeMillis() + mMillisInFuture;
-        countDownTimer = new CountDownTimer(mMillisInFuture, interval) {
+        mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
+        countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, interval) {
             @Override
             public void onTick(long l) {
-              /*
-              * No Operation on every second*/
-                Log.d(TAG,"in tick");
-
-            }
+             }
 
             @Override
             public void onFinish() {
-
                 final long millisLeft = mStopTimeInFuture - System.currentTimeMillis();
-                Log.d(TAG,"in onfinish - millisLeft="+millisLeft);
                 if (millisLeft <= 10000) {
                     launchZoneFragment();
                 }
                 stopCountdownTimer();
-
             }
         };
         countDownTimer.start();
     }
 
     private void launchZoneFragment() {
-
+        Globals.getInstance().setTestMode(false);
+        Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)
             mViewPager.setAdapter(mStatusPagerAdapter);
         btnTabs.getTabAt(1).select();

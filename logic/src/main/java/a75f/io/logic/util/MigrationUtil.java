@@ -139,6 +139,52 @@ public class MigrationUtil {
             updateScheduleRefForZones(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefForZoneMigration();
         }
+        if(!PreferenceUtil.getVocPm2p5MigrationV1()){
+            migrateHisInterpolateIssueFix(CCUHsApi.getInstance());
+            PreferenceUtil.setVocPm2p5MigrationV1();
+        }
+    }
+
+    private static void migrateHisInterpolateIssueFix(CCUHsApi instance) {
+        ArrayList<HashMap<Object, Object>> hyperstatEquips = instance.readAllEntities("equip and hyperstat");
+        hyperstatEquips.forEach(rawEquip -> {
+            Equip equip = new Equip.Builder().setHashMap(rawEquip).build();
+            HashMap<Object, Object> covThresholdPoint = instance.readEntity ("point and hyperstat and voc and threshold and equipRef == \"" +equip.getId()+"\"");
+            HashMap<Object, Object> covTargetPoint = instance.readEntity ("point and hyperstat and voc and target and equipRef == \"" +equip.getId()+"\"" );
+            HashMap<Object, Object> pm2p5ThresholdPoint = instance.readEntity ("point and hyperstat and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" );
+            HashMap<Object, Object> pm2p5TargetPoint = instance.readEntity ("point and hyperstat and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" );
+            HashMap<Object, Object> damperOpeningRate = instance.readEntity ("point and hyperstat and damper and opening and rate and equipRef == \"" +equip.getId()+"\"" );
+            HashMap<Object, Object> co2Target = instance.readEntity ("point and hyperstat and target and co2 and equipRef == \"" +equip.getId()+"\"" );
+            HashMap<Object, Object> co2Threshold = instance.readEntity ("point and hyperstat and threshold and co2 and equipRef == \"" +equip.getId()+"\"" );
+            if(!covThresholdPoint.isEmpty()) {
+                Point covThresholdRowPoint = new Point.Builder().setHashMap(covThresholdPoint).setHisInterpolate("cov").build();
+                instance.updatePoint(covThresholdRowPoint, covThresholdRowPoint.getId());
+            }
+            if(!covTargetPoint.isEmpty()) {
+                Point covTargetRowPoint = new Point.Builder().setHashMap(covTargetPoint).setHisInterpolate("cov").build();
+                instance.updatePoint(covTargetRowPoint,covTargetRowPoint.getId());
+            }
+            if(!pm2p5ThresholdPoint.isEmpty()) {
+                Point pm2p5ThresholdRowPoint = new Point.Builder().setHashMap(pm2p5ThresholdPoint).setHisInterpolate("cov").build();
+                instance.updatePoint(pm2p5ThresholdRowPoint,pm2p5ThresholdRowPoint.getId());
+            }
+            if(!pm2p5TargetPoint.isEmpty()) {
+                Point pm2p5TargetRowPoint = new Point.Builder().setHashMap(pm2p5TargetPoint).setHisInterpolate("cov").build();
+                instance.updatePoint(pm2p5TargetRowPoint, pm2p5TargetRowPoint.getId());
+            }
+            if(!damperOpeningRate.isEmpty()) {
+                Point damperOpeningRawRate = new Point.Builder().setHashMap(damperOpeningRate).setHisInterpolate("cov").build();
+                instance.updatePoint(damperOpeningRawRate, damperOpeningRawRate.getId());
+            }
+            if(!co2Threshold.isEmpty()) {
+                Point co2ThresholdRawPoint = new Point.Builder().setHashMap(co2Threshold).setHisInterpolate("cov").build();
+                instance.updatePoint(co2ThresholdRawPoint, co2ThresholdRawPoint.getId());
+            }
+            if(!co2Target.isEmpty()) {
+                Point co2RawTarget = new Point.Builder().setHashMap(co2Target).setHisInterpolate("cov").build();
+                instance.updatePoint(co2RawTarget, co2RawTarget.getId());
+            }
+        });
     }
 
     private static void migrateVocPm2p5(CCUHsApi instance) {
@@ -146,8 +192,8 @@ public class MigrationUtil {
         hyperstatEquips.forEach(rawEquip -> {
             Equip equip = new Equip.Builder().setHashMap(rawEquip).build();
 
-            boolean isCovThresholdExist = isPointExist ("point and hyperstat and cov and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
-            boolean isCovTargetExist = isPointExist ("point and hyperstat and cov and target and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isCovThresholdExist = isPointExist ("point and hyperstat and voc and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isCovTargetExist = isPointExist ("point and hyperstat and voc and target and equipRef == \"" +equip.getId()+"\"" ,instance);
             boolean isPm2p5ThresholdExist = isPointExist ("point and hyperstat and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
             boolean isPm2p5TargetExist = isPointExist ("point and hyperstat and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" ,instance);
 

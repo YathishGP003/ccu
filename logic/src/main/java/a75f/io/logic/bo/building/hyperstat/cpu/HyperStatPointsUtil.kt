@@ -230,7 +230,7 @@ class HyperStatPointsUtil constructor(
     }
 
     private fun createHaystackPointWithUnit(
-        displayName: String, markers: Array<String>, hisInterpolate: String, unit: String
+            displayName: String, markers: Array<String>, hisInterpolate: String?, unit: String
     ): Point {
         // Point which has default details
         val point = Point.Builder()
@@ -241,10 +241,12 @@ class HyperStatPointsUtil constructor(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
-            .setHisInterpolate(hisInterpolate)
             .setUnit(unit)
             // add common  markers
             .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
+
+        if(!hisInterpolate.isNullOrEmpty())
+            point.setHisInterpolate(hisInterpolate)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -766,20 +768,20 @@ class HyperStatPointsUtil constructor(
         val co2DamperOpeningRatePoint = createHaystackPointWithUnit(
             "$equipDis-co2DamperOpeningRate",
             co2DamperOpeningRatePointMarkers,
-            "","%"
+                "cov","%"
         )
 
 
         val zoneCO2ThresholdPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Threshold",
             zoneCO2ThresholdPointMarkers,
-            "","ppm"
+            "cov","ppm"
         )
 
         val zoneCO2TargetPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Target",
             zoneCO2TargetPointMarkers,
-            "","ppm"
+            "cov","ppm"
         )
 
         co2ConfigPointsList.add(
@@ -818,20 +820,20 @@ class HyperStatPointsUtil constructor(
         val zoneVOCThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-zoneVOCThreshold",
             vocMarkers.stream().toArray { arrayOfNulls(it) },
-            "","ppb"
+            "cov","ppb"
         )
         vocMarkers.remove("threshold")
         vocMarkers.add("target")
         val zoneVOCTargetPoint = createHaystackPointWithUnit(
             "$equipDis-zoneVOCTarget",
             vocMarkers.stream().toArray { arrayOfNulls(it) },
-            "","ppb"
+            "cov","ppb"
         )
 
         val zonePm2p5ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-zonePm2p5Threshold",
             pm2p5Markers.stream().toArray { arrayOfNulls(it) },
-            "","ug/\u33A5"
+            "cov","ug/\u33A5"
         )
 
         pm2p5Markers.remove("threshold")
@@ -839,7 +841,7 @@ class HyperStatPointsUtil constructor(
         val zonePm2p5TargetPoint = createHaystackPointWithUnit(
             "$equipDis-zonePm2p5Target",
             pm2p5Markers.stream().toArray { arrayOfNulls(it) },
-            "","ug/\u33A5"
+            "cov","ug/\u33A5"
         )
 
 

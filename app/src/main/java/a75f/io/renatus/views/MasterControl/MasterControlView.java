@@ -54,6 +54,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -202,8 +203,6 @@ public class MasterControlView extends LinearLayout {
         ArrayList<String> namedSchedulesWarning = new ArrayList<>();
         Set<String> namedSchedulesIds = new HashSet<String>();
 
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
-
 
         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
@@ -239,7 +238,7 @@ public class MasterControlView extends LinearLayout {
                 String heatValues = "";
                 if (days.getHeatingVal() < heatingTemperatureUpperLimit || days.getHeatingVal() > heatingTemperatureLowerLimit) {
                     double heatingDesiredTemperatureValue = getHeatingDesiredTemperature(days.getHeatingVal(), heatingTemperatureUpperLimit, heatingTemperatureLowerLimit);
-                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                    if(isCelsiusTunerAvailableStatus()) {
                         heatValues = "\u0020" + "Heating (" + roundToHalf((float) fahrenheitToCelsius(days.getHeatingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(heatingDesiredTemperatureValue)) + ")";
                     }else {
                         heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
@@ -250,7 +249,7 @@ public class MasterControlView extends LinearLayout {
 
                 if (days.getCoolingVal() < coolingTemperatureLowerLimit || days.getCoolingVal() > coolingTemperatureUpperLimit) {
                     double coolingDesiredTemperatureValue = getCoolingDesiredTemperature(days.getCoolingVal(), coolingTemperatureLowerLimit, coolingTemperatureUpperLimit);
-                    if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+                    if(isCelsiusTunerAvailableStatus()) {
                         coolValues = "\u0020" + "Cooling (" + roundToHalf((float) fahrenheitToCelsius(days.getCoolingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(coolingDesiredTemperatureValue)) + ")";
                     }else {
                         coolValues = "\u0020" + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";

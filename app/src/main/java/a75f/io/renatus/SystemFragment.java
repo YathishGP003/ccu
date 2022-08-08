@@ -472,7 +472,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	private void drawSchedule(int position, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 		Typeface typeface=Typeface.DEFAULT;
 		try {
-			typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
+			typeface = Typeface.createFromAsset(requireActivity().getAssets(), "fonts/lato_regular.ttf");
 		}catch (Exception e){
 			e.printStackTrace();
 		}

@@ -1,6 +1,8 @@
 package a75f.io.renatus.views.TempLimit;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -48,8 +50,6 @@ public class TempLimit extends View {
     private float upperBuildingTemp = 90;
     //
 
-    private HashMap<Object, Object> useCelsius;
-
     int mPaddingPX = 0;
     int mViewWidth = 0;
 
@@ -93,13 +93,13 @@ public class TempLimit extends View {
 
         int xPos;
         if (stateReflected == TempLimitState.LOWER_COOLING_LIMIT || stateReflected == TempLimitState.UPPER_HEATING_LIMIT) {
-            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(isCelsiusTunerAvailableStatus()) {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 20;
             } else {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) - 15;
             }
         } else {
-            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(isCelsiusTunerAvailableStatus()) {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 20;
             } else {
                 xPos = getPXForTemp(temps[stateReflected.ordinal()]) + 15;
@@ -109,7 +109,7 @@ public class TempLimit extends View {
         int yPos = (direction == Direction.UP) ? getTempLineYLocation() - yDisplacemnet - 5 : getTempLineYLocation() + yDisplacemnet + 15;
 
         mTempIconPaint.setColor(color);
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf( fahrenheitToCelsius(buildingTemp)),
                     xPos, yPos, mTempIconPaint);
         } else {
@@ -159,8 +159,6 @@ public class TempLimit extends View {
         }
         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
         this.setBackgroundColor(Color.WHITE);
-
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
         setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
 
@@ -271,7 +269,7 @@ public class TempLimit extends View {
         int xLoc = getPXForTemp(temp);
         int yLoc = getTempLineYLocation();
 
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(buildingTemp) + " "),
                     xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
         } else {

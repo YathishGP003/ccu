@@ -454,10 +454,6 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         // On Click save the CPU configuration
         setButton.setOnClickListener {
             setButton.isEnabled = false
-            Log.i("DEV_DEBUG", "zoneVOCThreshold: ${zoneVOCThreshold.selectedItem}")
-            Log.i("DEV_DEBUG", "zoneVOCTarget: ${zoneVOCTarget.selectedItem}")
-            Log.i("DEV_DEBUG", "zonePMThreshold: ${zonePMThreshold.selectedItem}")
-            Log.i("DEV_DEBUG", "zonePMTarget: ${zonePMTarget.selectedItem}")
             configurationDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
                     ProgressDialogUtils.showProgressDialog(activity, "Saving Hyperstat CPU Configuration")

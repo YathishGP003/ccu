@@ -27,6 +27,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
 import java.util.HashMap;
@@ -76,9 +77,7 @@ public class MasterControl extends View {
     private float lowerCoolingTemp = 70;
     private float upperCoolingTemp = 75;
     private float lowerBuildingTemp = 55;
-    private float upperBuildingTemp = 90;
-
-    private HashMap<Object, Object> useCelsius;
+    private float upperBuildingTemp = 90; 
 
     Rect bounds = new Rect();
 
@@ -155,7 +154,7 @@ public class MasterControl extends View {
 
         //The 2 and 1.5 are used to slide the number on the bitmap image.
         //Text centered left to right and 1/3 the way down the icon.
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
                     xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
@@ -289,7 +288,6 @@ public class MasterControl extends View {
             this.setNestedScrollingEnabled(true);
 
         }
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
         this.setBackgroundColor(Color.WHITE);
 
@@ -300,7 +298,7 @@ public class MasterControl extends View {
         mArrowHeadLeftBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_left);
         mArrowHeadRightBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_right);
 
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
 
             bitmaps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = bitmaps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] =
                     getBitmapFromVectorDrawable(getContext(), R.drawable.black_teardrop_small);
@@ -762,7 +760,7 @@ public class MasterControl extends View {
 
             mDebugTextPaint.setTextSize(mArrowTextSize);
             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
-            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(isCelsiusTunerAvailableStatus()) {
                 canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.valueOf(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
             } else {
                 canvas.drawText(temp+ " \u00B0F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);

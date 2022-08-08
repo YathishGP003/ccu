@@ -63,6 +63,8 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.logic.cloud.CloudConnectionManager;
+import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
@@ -92,6 +94,7 @@ public class FloorPlanFragment extends Fragment {
         ENERGY_METER,
         BTU_METER
     }
+    private enum FloorHandledCondition { ALLOW_NEW_FLOOR, ALLOW_RENAMING_FLOOR, ADD_NEW_FLOOR, ADD_RENAMED_FLOOR }
 
     SysyemDeviceType sysyemDeviceType;
 
@@ -596,17 +599,22 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
         floorToRename = null;
-        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.",
-                           Toast.LENGTH_LONG)
-                 .show();
+        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
             return;
         }
+        isConnectedToServer(FloorHandledCondition.ALLOW_NEW_FLOOR, null);
+    }
 
+    private void allowNewFloor(){
         enableFloorEdit();
         addFloorEdit.setText("");
         addFloorEdit.requestFocus();
         showKeyboard(addFloorEdit);
+    }
+
+    private void serverDownWhileRenamingFloor(){
+        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
     }
 
     @OnClick(R.id.lt_addfloor)
@@ -854,143 +862,152 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
+
             if (floorToRename != null) {
-                floorList.remove(floorToRename);
-                siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName()));
-                Floor hsFloor = new Floor.Builder()
-                        .setDisplayName(addFloorEdit.getText().toString())
-                        .setSiteRef(floorToRename.getSiteRef())
-                        .build();
-                hsFloor.setId(floorToRename.getId());
-                hsFloor.setOrientation(floorToRename.getOrientation());
-                hsFloor.setFloorNum(floorToRename.getFloorNum());
-                for (Floor floor : siteFloorList) {
-                    if (floor.getDisplayName().equals(addFloorEdit.getText().toString())) {
-                        AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-                        adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
-                        adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
-                                        StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
-                            }
-
-                            //move zones and modules under new floor
-                            for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
-                                zone.setFloorRef(floor.getId());
-                                CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
-                                    equipDetails.setFloorRef(floor.getId());
-                                    CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
-                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId()+"\"");
-                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId()+"\"");
-                                    if(device !=null ) {
-                                        Device deviceDetails = new Device.Builder().setHashMap(device).build();
-                                        deviceDetails.setFloorRef(floor.getId());
-                                        CCUHsApi.getInstance().updateDevice(deviceDetails,deviceDetails.getId());
-                                    }
-
-                                    for(HashMap pointDetailsMap : ponitsList) {
-                                        Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
-                                        pointDetails.setFloorRef(floor.getId());
-                                        CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
-                                    }
-
-                                }
-                                EquipsManager.getInstance().getAllMbEquips(zone.getId())
-                                        .forEach( equip -> {
-                                            equip.setFloorRef(floor.getId());
-                                            EquipsManager.getInstance().saveProfile(equip);
-                                        });
-                            }
-
-                            refreshScreen();
-                            hideKeyboard();
-                            floorToRename = null;
-                            L.saveCCUState();
-                            CCUHsApi.getInstance().syncEntityTree();
-                            siteFloorList.add(hsFloor);
-                            dialog.dismiss();
-                        });
-                        adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
-                            hideKeyboard();
-                            refreshScreen();
-                            dialog.dismiss();
-                        });
-                        adb.show();
-
-                        return true;
-                    }
-                }
-
-                floorList.add(hsFloor);
-                CCUHsApi.getInstance().updateFloor(hsFloor, floorToRename.getId());
-                refreshScreen();
-                hideKeyboard();
-                floorToRename = null;
-                L.saveCCUState();
-                CCUHsApi.getInstance().syncEntityTree();
-                siteFloorList.add(hsFloor);
-                return true;
-            }
-
-            if (addFloorEdit.getText().toString().length() > 0) {
-                ArrayList<String> flrMarkers = new ArrayList<>();
-                flrMarkers.add("writable");
-                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-                Floor hsFloor = new Floor.Builder()
-                        .setDisplayName(addFloorEdit.getText().toString()).setMarkers(flrMarkers)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .build();
-                for (Floor floor : siteFloorList) {
-                    if (floor.getDisplayName().equals(addFloorEdit.getText().toString())) {
-                        AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-                        adb.setMessage("Floor name already exists in this site,would you like to continue?");
-                        adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (! CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
-                                        StringUtils.stripStart(floor.getId(), "@")));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId());
-                            }
-
-                            refreshScreen();
-                            hideKeyboard();
-                            floorToRename = null;
-                            L.saveCCUState();
-                            CCUHsApi.getInstance().syncEntityTree();
-                            siteFloorList.add(hsFloor);
-                            dialog.dismiss();
-                        });
-
-                        adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
-                            hideKeyboard();
-                            refreshScreen();
-                            dialog.dismiss();
-                        });
-                        adb.show();
-
-                        return true;
-                    }
-                }
-
-                hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-                floorList.add(hsFloor);
-                Collections.sort(floorList, new FloorComparator());
-                updateFloors();
-                selectFloor(HSUtil.getFloors().size() - 1);
-                L.saveCCUState();
-                CCUHsApi.getInstance().syncEntityTree();
-
-                hideKeyboard();
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-                siteFloorList.add(hsFloor);
-                return true;
-            } else {
-                Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
+                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR,null);
+            }else {
+                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR,null);
             }
         }
         return false;
+    }
+
+    private void addRenamedFloor(){
+        if (floorToRename != null) {
+            floorList.remove(floorToRename);
+            siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName().trim()));
+            Floor hsFloor = new Floor.Builder()
+                    .setDisplayName(addFloorEdit.getText().toString().trim())
+                    .setSiteRef(floorToRename.getSiteRef())
+                    .build();
+            hsFloor.setId(floorToRename.getId());
+            hsFloor.setOrientation(floorToRename.getOrientation());
+            hsFloor.setFloorNum(floorToRename.getFloorNum());
+            for (Floor floor : siteFloorList) {
+                if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
+                    AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
+                    adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
+                    adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
+                        if (!CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
+                            hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                    StringUtils.stripStart(floor.getId(), "@")));
+                            CCUHsApi.getInstance().setSynced(hsFloor.getId());
+                        }
+
+                        //move zones and modules under new floor
+                        for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
+                            zone.setFloorRef(floor.getId());
+                            CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                            for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
+                                equipDetails.setFloorRef(floor.getId());
+                                CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
+                                ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId()+"\"");
+                                HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId()+"\"");
+                                if(device !=null ) {
+                                    Device deviceDetails = new Device.Builder().setHashMap(device).build();
+                                    deviceDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updateDevice(deviceDetails,deviceDetails.getId());
+                                }
+
+                                for(HashMap pointDetailsMap : ponitsList) {
+                                    Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
+                                    pointDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
+                                }
+
+                            }
+                            EquipsManager.getInstance().getAllMbEquips(zone.getId())
+                                    .forEach( equip -> {
+                                        equip.setFloorRef(floor.getId());
+                                        EquipsManager.getInstance().saveProfile(equip);
+                                    });
+                        }
+
+                        refreshScreen();
+                        hideKeyboard();
+                        floorToRename = null;
+                        L.saveCCUState();
+                        CCUHsApi.getInstance().syncEntityTree();
+                        siteFloorList.add(hsFloor);
+                        dialog.dismiss();
+                    });
+                    adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
+                        hideKeyboard();
+                        refreshScreen();
+                        dialog.dismiss();
+                    });
+                    adb.show();
+
+                    return;
+                }
+            }
+
+            floorList.add(hsFloor);
+            CCUHsApi.getInstance().updateFloor(hsFloor, floorToRename.getId());
+            refreshScreen();
+            hideKeyboard();
+            floorToRename = null;
+            L.saveCCUState();
+            CCUHsApi.getInstance().syncEntityTree();
+            siteFloorList.add(hsFloor);
+        }
+    }
+
+    private void addNewFloor(){
+        if (addFloorEdit.getText().toString().length() > 0) {
+            ArrayList<String> flrMarkers = new ArrayList<>();
+            flrMarkers.add("writable");
+            HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+            Floor hsFloor = new Floor.Builder()
+                    .setDisplayName(addFloorEdit.getText().toString().trim()).setMarkers(flrMarkers)
+                    .setSiteRef(siteMap.get("id").toString())
+                    .build();
+            for (Floor floor : siteFloorList) {
+                if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
+                    AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
+                    adb.setMessage("Floor name already exists in this site,would you like to continue?");
+                    adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
+                        if (! CCUHsApi.getInstance().isEntityExisting(floor.getId())) {
+                            hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                    StringUtils.stripStart(floor.getId(), "@")));
+                            CCUHsApi.getInstance().setSynced(hsFloor.getId());
+                        }
+
+                        refreshScreen();
+                        hideKeyboard();
+                        floorToRename = null;
+                        L.saveCCUState();
+                        CCUHsApi.getInstance().syncEntityTree();
+                        siteFloorList.add(hsFloor);
+                        dialog.dismiss();
+                    });
+
+                    adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
+                        hideKeyboard();
+                        refreshScreen();
+                        dialog.dismiss();
+                    });
+                    adb.show();
+
+                    return;
+                }
+            }
+
+            hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
+            floorList.add(hsFloor);
+            Collections.sort(floorList, new FloorComparator());
+            updateFloors();
+            selectFloor(HSUtil.getFloors().size() - 1);
+            L.saveCCUState();
+            CCUHsApi.getInstance().syncEntityTree();
+
+            hideKeyboard();
+            Toast.makeText(getActivity().getApplicationContext(),
+                    "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+            siteFloorList.add(hsFloor);
+        } else {
+            Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnFocusChange(R.id.addFloorEdit)
@@ -1001,18 +1018,68 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void renameFloor(Floor floor) {
-        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
-            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.",
-                    Toast.LENGTH_LONG)
-                    .show();
+        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
             return;
         }
+
+        isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
+    }
+
+    private void allowRenamingFloor(Floor floor){
         floorToRename = floor;
         enableFloorEdit();
         addFloorEdit.setText(floor.getDisplayName());
         addFloorEdit.requestFocus();
         addFloorEdit.setSelection(floor.getDisplayName().length());
         showKeyboard(addFloorEdit);
+    }
+
+    private void serverDownWhileAddingNewFloor(){
+        Toast.makeText(getActivity(), "Floor cannot be added till CCU is connected to server", Toast.LENGTH_LONG).show();
+    }
+
+    private void isConnectedToServer(FloorHandledCondition condition, Floor floor){
+        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be handled when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
+            @Override
+            public void onSuccessResponse(boolean isOk) {
+                switch (condition) {
+                    case ALLOW_NEW_FLOOR:
+                        allowNewFloor();
+                        break;
+                    case ALLOW_RENAMING_FLOOR:
+                        allowRenamingFloor(floor);
+                        break;
+                    case ADD_NEW_FLOOR:
+                        addNewFloor();
+                        break;
+                    case ADD_RENAMED_FLOOR:
+                        addRenamedFloor();
+                        break;
+                }
+            }
+
+            @Override
+            public void onErrorResponse(boolean isOk) {
+                switch (condition) {
+                    case ADD_NEW_FLOOR:
+                    case ALLOW_NEW_FLOOR:
+                        serverDownWhileAddingNewFloor();
+                        break;
+                    case ALLOW_RENAMING_FLOOR:
+                    case ADD_RENAMED_FLOOR:
+                        serverDownWhileRenamingFloor();
+                        break;
+                }
+            }
+        };
+
+        new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
     }
 
     @OnClick(R.id.addRoomBtn)
@@ -1063,17 +1130,17 @@ public class FloorPlanFragment extends Fragment {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
 
             if (roomToRename != null) {
-                roomList.remove(roomToRename);
-                siteRoomList.remove(roomToRename.getDisplayName());
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString())) {
+                    if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 }
+                roomList.remove(roomToRename);
+                siteRoomList.remove(roomToRename.getDisplayName());
 
                 Zone hsZone = new Zone.Builder()
-                        .setDisplayName(addRoomEdit.getText().toString())
+                        .setDisplayName(addRoomEdit.getText().toString().trim())
                         .setFloorRef(roomToRename.getFloorRef())
                         .setSiteRef(roomToRename.getSiteRef())
                         .setScheduleRef(roomToRename.getScheduleRef())
@@ -1089,15 +1156,15 @@ public class FloorPlanFragment extends Fragment {
                 selectRoom(roomList.indexOf(hsZone));
                 hideKeyboard();
                 roomToRename = null;
-                if (!siteRoomList.contains(addRoomEdit.getText().toString())) {
-                    siteRoomList.add(addRoomEdit.getText().toString());
+                if (!siteRoomList.contains(addRoomEdit.getText().toString().trim())) {
+                    siteRoomList.add(addRoomEdit.getText().toString().trim());
                 }
                 return true;
             }
 
             if (addRoomEdit.getText().toString().length() > 0) {
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString())) {
+                    if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
@@ -1109,7 +1176,7 @@ public class FloorPlanFragment extends Fragment {
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
                 Zone hsZone = new Zone.Builder()
-                        .setDisplayName(addRoomEdit.getText().toString())
+                        .setDisplayName(addRoomEdit.getText().toString().trim())
                         .setFloorRef(floor.getId())
                         .setSiteRef(siteMap.get("id").toString())
                         .build();
@@ -1126,7 +1193,7 @@ public class FloorPlanFragment extends Fragment {
                 selectRoom(roomList.indexOf(hsZone));
 
                 hideKeyboard();
-                siteRoomList.add(addRoomEdit.getText().toString());
+                siteRoomList.add(addRoomEdit.getText().toString().trim());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();

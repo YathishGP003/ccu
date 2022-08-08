@@ -1,5 +1,12 @@
 package a75f.io.logic.bo.util;
 
+import static a75f.io.logic.tuners.TunerUtil.getTuner;
+
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.tuners.TunerConstants;
+
 public class UnitUtils {
     
     /**
@@ -60,6 +67,15 @@ public class UnitUtils {
         }
         return fahrenheitTemperature;
 
+    }
+
+    public static boolean isCelsiusTunerAvailableStatus() {
+        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        if((!useCelsius.isEmpty()) && (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+           return true;
+        } else {
+            return false;
+        }
     }
 
     public static double roundToHalf(double d)

@@ -98,6 +98,7 @@ public class InstallerOptions extends Fragment {
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
+    private static InstallerOptions instance;
     //
     float lowerHeatingTemp;
     float upperHeatingTemp;
@@ -157,7 +158,14 @@ public class InstallerOptions extends Fragment {
     };
 
     public InstallerOptions() {
-        // Required empty public constructor
+          instance=this;
+    }
+
+    public static InstallerOptions getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Api is not initialized");
+        }
+        return instance;
     }
 
     /**
@@ -249,11 +257,7 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
 
-        if( isCelsiusTunerAvailableStatus()) {
-           toggleCelsius.setChecked(true);
-        } else {
-           toggleCelsius.setChecked(false);
-        }
+        setToggleCheck();
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -518,7 +522,15 @@ public class InstallerOptions extends Fragment {
         buttonSendIAM.setEnabled(true);
         buttonSendIAM.setVisibility(View.GONE);
     }
-    
+
+    public void setToggleCheck() {
+        if (toggleCelsius!=null && isCelsiusTunerAvailableStatus()) {
+            toggleCelsius.setChecked(true);
+        } else {
+            toggleCelsius.setChecked(false);
+        }
+    }
+
     private void hideTempLockoutUI() {
         toggleCoolingLockout.setVisibility(View.GONE);
         toggleHeatingLockout.setVisibility(View.GONE);

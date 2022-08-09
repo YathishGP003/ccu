@@ -21,6 +21,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
+import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 /**
@@ -117,6 +118,11 @@ public class TempLimit extends View {
                     xPos, yPos, mTempIconPaint);
         }
         invalidate();
+        try {
+            InstallerOptions.getInstance().setToggleCheck();
+        }  catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     private TempLimitState mSelected = TempLimitState.NONE;

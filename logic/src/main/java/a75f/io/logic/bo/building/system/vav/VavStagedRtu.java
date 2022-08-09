@@ -380,7 +380,7 @@ public class VavStagedRtu extends VavSystemProfile
             tempStatus[FAN_1.ordinal()] = fanStatus;
         }
         
-        for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
+        for (int stageIndex = FAN_1.ordinal(); stageIndex <= DEHUMIDIFIER.ordinal(); stageIndex++) {
             stageStatus[stageIndex] = tempStatus[stageIndex];
             Stage stage = Stage.values()[stageIndex];
             setStageStatus(stage, tempStatus[stage.ordinal()]);

@@ -1031,7 +1031,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null) {
+                        if (z != null && z.getScheduleRef() == null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1620,7 +1620,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     }
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                    if (z != null) {
+                    if (z != null && z.getScheduleRef() == null) {
                         HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +z.getId());
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
@@ -1676,7 +1676,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null) {
+                        if (z != null && z.getScheduleRef() == null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }

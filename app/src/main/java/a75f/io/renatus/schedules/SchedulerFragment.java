@@ -1,7 +1,6 @@
 package a75f.io.renatus.schedules;
 
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.usbserial.UsbModbusService.TAG;
@@ -71,7 +70,6 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.schedule.SpecialSchedule;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
@@ -1363,8 +1361,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen(Schedule updatedSchedule) {
-        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
+    public void refreshScreen() {
+        if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

@@ -280,11 +280,8 @@ public class Schedule extends Entity
         return morePriorityScheduleInterval.overlaps(lessPriorityScheduleInterval);
     }
 
-    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
-                                                             Set<Schedule.Days> lessPriorityScheduleList){
-        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
-        daysList.addAll(morePriorityScheduleList);
-        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
+    private static void combineSchedules(Set<Schedule.Days> morePriorityScheduleList, Set<Schedule.Days> lessPriorityScheduleList,
+                                         Set<Schedule.Days> intermediateScheduleList, Set<Schedule.Days> daysList){
         for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
             for(Schedule.Days lessPrioritySchedule : lessPriorityScheduleList){
                 if (!isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(lessPrioritySchedule,
@@ -349,7 +346,17 @@ public class Schedule extends Entity
                 }
             }
         }
-        for(Schedule.Days intermediateSchedule : intermediateScheduleList){
+    }
+
+    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
+                                                             Set<Schedule.Days> lessPriorityScheduleList){
+        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
+        daysList.addAll(morePriorityScheduleList);
+        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
+        combineSchedules(morePriorityScheduleList, lessPriorityScheduleList, intermediateScheduleList, daysList);
+        Set<Schedule.Days> intermediateScheduleListWithoutCollision = new TreeSet<>(sortSchedules());
+        combineSchedules(morePriorityScheduleList, intermediateScheduleList, intermediateScheduleListWithoutCollision, daysList);
+        for(Schedule.Days intermediateSchedule : intermediateScheduleListWithoutCollision){
             if(!isScheduleColliding(morePriorityScheduleList, intermediateSchedule)){
                 daysList.add(intermediateSchedule);
             }

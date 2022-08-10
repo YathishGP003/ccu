@@ -66,7 +66,6 @@ public class HisSyncHandler
                 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                    doSync(nonCovSyncPending);
-                   nonCovSyncPending = false;
                 }
 
                 if (entitySyncRequired) {
@@ -81,6 +80,9 @@ public class HisSyncHandler
     
     private void doSync(boolean syncAllData) {
         CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData);
+        if (syncAllData) {
+            nonCovSyncPending = false;
+        }
         //Device sync is initiated concurrently on Rx thread
         Observable.fromCallable(() -> {
             syncHistorizedDevicePoints(syncAllData);

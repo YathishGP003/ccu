@@ -62,6 +62,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -421,6 +422,9 @@ public class InstallerOptions extends Fragment {
                     }
                 }
                 getTempValues();
+                if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
+                    TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+                }
             }
         });
 

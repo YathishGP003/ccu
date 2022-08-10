@@ -162,11 +162,15 @@ public class MigrationUtil {
             PreferenceUtil.setStageTimerForDABMigration();
         }
 
-
         if(hasTIProfile(CCUHsApi.getInstance()) && !PreferenceUtil.getTIUpdate()) {
             Log.d(TAG, "hasTIProfile");
             MigrateTIChanges(CCUHsApi.getInstance());
             PreferenceUtil.setTIUpdate();
+        }
+
+        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
+            updateScheduleType(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleTypeUpdateMigration();
         }
     }
 
@@ -188,11 +192,6 @@ public class MigrationUtil {
     private static boolean hasTIProfile(CCUHsApi instance) {
         ArrayList<HashMap<Object, Object>> tiEquips = instance.readAllEntities("equip and ti");
         return !tiEquips.isEmpty();
-
-        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
-            updateScheduleType(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleTypeUpdateMigration();
-        }
     }
 
     private static void migrateHisInterpolateIssueFix(CCUHsApi instance) {

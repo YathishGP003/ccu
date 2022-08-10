@@ -2,6 +2,10 @@ package a75f.io.logic.bo.util;
 
 import static a75f.io.logic.tuners.TunerUtil.getTuner;
 
+import android.util.Log;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -81,6 +85,70 @@ public class UnitUtils {
     public static double roundToHalf(double d)
     {
         return 0.5 * Math.round(d * 2);
+    }
+
+    public static double fahrenheitToCelsiusTuner(double value) {
+
+        double conversionToCel = ((value - 32) * 0.5555555555);
+        double conversionValue = (((conversionToCel) * 10) / 10);
+        return Math.round((conversionValue));
+
+    }
+
+    public static double celsiusToFahrenheitTuner(double value) {
+
+        double conversionToFarh = (value * 9 / 5) + 32;
+        double conversionValue = (((conversionToFarh) * 10) / 10);
+        return Math.round(conversionValue);
+
+    }
+
+    public static double convertingRelativeValueFtoC(double deadBandValue) {
+
+        double relativeValue = (deadBandValue / 1.8);
+        double conversionDeadBandValue = ((relativeValue) * 10) / 10;
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadBandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
+    }
+
+
+
+    public static double convertingRelativeValueCtoF(double deadBandValue) {
+
+        double relativeValue = (deadBandValue * 1.8);
+        double conversionDeadBandValue = ((relativeValue) * 10) / 10;
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadBandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
+
+    }
+
+    public static double convertingDeadBandValueFtoC(double deadBandValue) {
+
+        double conversionDeadband = (deadBandValue / 1.8);
+        double conversionDeadbandValue = (((conversionDeadband) * 10) / 10);
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadbandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
+    }
+
+    public static double convertingDeadBandValueCtoF(double deadBandValue) {
+        double conversionDeadband = (deadBandValue * 1.8);
+        double conversionDeadbandValue = (((conversionDeadband) * 10) / 10);
+        BigDecimal numberBigDecimal = new BigDecimal(conversionDeadbandValue);
+        return Double.parseDouble(String.valueOf(numberBigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP)));
+    }
+
+
+
+    public static boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
+        return   tunerItem.containsKey("deadband") || tunerItem.containsKey("spread") ||
+                (tunerItem.containsKey("pspread") && !tunerItem.containsKey("chilled")) ||
+                tunerItem.containsKey("leeway") || tunerItem.containsKey("setback") ||
+                tunerItem.containsKey("differential") ;
+    }
+
+    public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {
+        return  tunerItem.containsKey("abnormal") || tunerItem.containsKey("deadband") ||
+                tunerItem.containsKey("sat") || (tunerItem.containsKey("chilled") && tunerItem.containsKey("pspread"));
     }
 
 

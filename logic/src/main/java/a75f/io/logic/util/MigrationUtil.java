@@ -161,6 +161,38 @@ public class MigrationUtil {
             updateStageTimerForDAB(CCUHsApi.getInstance());
             PreferenceUtil.setStageTimerForDABMigration();
         }
+
+
+        if(hasTIProfile(CCUHsApi.getInstance()) && !PreferenceUtil.getTIUpdate()) {
+            Log.d(TAG, "hasTIProfile");
+            MigrateTIChanges(CCUHsApi.getInstance());
+            PreferenceUtil.setTIUpdate();
+        }
+    }
+
+    private static void MigrateTIChanges(CCUHsApi instance) {
+        ArrayList<HashMap<Object, Object>> tiEquips = instance.readAllEntities("equip and ti");
+        for (HashMap<Object, Object> equip:tiEquips) {
+            String equipRef = equip.get("id").toString();
+            HashMap<Object,Object> currentTemp = instance.readEntity("point and current and " +
+                    "temp and ti and equipRef == \""+equipRef+"\"");
+            String nodeAddress = currentTemp.get("group").toString();
+            ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH1_IN.name(), false);
+            ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
+            ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(),
+                    currentTemp.get("id").toString());
+
+        }
+    }
+
+    private static boolean hasTIProfile(CCUHsApi instance) {
+        ArrayList<HashMap<Object, Object>> tiEquips = instance.readAllEntities("equip and ti");
+        return !tiEquips.isEmpty();
+
+        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
+            updateScheduleType(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
     }
 
     private static void migrateHisInterpolateIssueFix(CCUHsApi instance) {
@@ -269,7 +301,7 @@ public class MigrationUtil {
             Log.d(TAG,"ti isnt empty");
             String tiEquipRef = tiEquip.get("id").toString();
             HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
-                    "temp and equipRef == \"" + tiEquipRef + "\"");
+                    "temp and ti and equipRef == \"" + tiEquipRef + "\"");
             String nodeAddress = currentTemp.get("group").toString();
             createTIThermisterPoints(tiEquipRef,nodeAddress);
         }
@@ -750,6 +782,7 @@ public class MigrationUtil {
 
     private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
         Log.d("TIThermistor","createTIThermisterPoints");
+        CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get(Tags.ID).toString();
         String siteDis = siteMap.get("dis").toString();
@@ -765,7 +798,7 @@ public class MigrationUtil {
                 .setTz(tz)
                 .build();
         String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
-        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, 1.0);
+        hayStack.writeDefaultValById(mainSensorId, 1.0);
 
         Point th1Config = new Point.Builder()
                 .setDisplayName(equipDis+"-th1")
@@ -777,7 +810,7 @@ public class MigrationUtil {
                 .setTz(tz)
                 .build();
         String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
-        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, 0.0);
+        hayStack.writeDefaultValById(th1ConfigId, 0.0);
 
         Point th2Config = new Point.Builder()
                 .setDisplayName(equipDis+"-th2")
@@ -789,7 +822,13 @@ public class MigrationUtil {
                 .setTz(tz)
                 .build();
         String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
-        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, 0.0);
+        hayStack.writeDefaultValById(th2ConfigId, 0.0);
+
+        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
+                "temp and ti and equipRef == \""+tiEquipRef+"\"");
+        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH1_IN.name(), false);
+        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
+        ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(), currentTemp.get("id").toString());
 
         Log.d("TIThermistor","createTIThermisterPoints completed");
     }
@@ -846,4 +885,20 @@ public class MigrationUtil {
         }
     }
 
+    private static void updateScheduleType(CCUHsApi hayStack){
+        List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
+        for(HashMap<Object,Object> room : rooms){
+            HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and not special and " +
+                    "roomRef == " +room.get("id"));
+            boolean isScheduleTypeNamedSchedule =
+                    hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
+                            .intValue() == ScheduleType.NAMED.ordinal();
+            if(!zoneScheduleMap.isEmpty() && isScheduleTypeNamedSchedule) {
+                hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
+                        "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
+                hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
+                        "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
+            }
+        }
+    }
 }

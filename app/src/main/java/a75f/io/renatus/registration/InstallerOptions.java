@@ -62,6 +62,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -98,6 +99,7 @@ public class InstallerOptions extends Fragment {
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
+    private static InstallerOptions instance;
     //
     float lowerHeatingTemp;
     float upperHeatingTemp;
@@ -157,7 +159,14 @@ public class InstallerOptions extends Fragment {
     };
 
     public InstallerOptions() {
-        // Required empty public constructor
+          instance=this;
+    }
+
+    public static InstallerOptions getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Api is not initialized");
+        }
+        return instance;
     }
 
     /**
@@ -249,11 +258,7 @@ public class InstallerOptions extends Fragment {
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
 
-        if( isCelsiusTunerAvailableStatus()) {
-           toggleCelsius.setChecked(true);
-        } else {
-           toggleCelsius.setChecked(false);
-        }
+        setToggleCheck();
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -417,6 +422,9 @@ public class InstallerOptions extends Fragment {
                     }
                 }
                 getTempValues();
+                if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
+                    TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+                }
             }
         });
 
@@ -518,7 +526,15 @@ public class InstallerOptions extends Fragment {
         buttonSendIAM.setEnabled(true);
         buttonSendIAM.setVisibility(View.GONE);
     }
-    
+
+    public void setToggleCheck() {
+        if (toggleCelsius!=null && isCelsiusTunerAvailableStatus()) {
+            toggleCelsius.setChecked(true);
+        } else {
+            toggleCelsius.setChecked(false);
+        }
+    }
+
     private void hideTempLockoutUI() {
         toggleCoolingLockout.setVisibility(View.GONE);
         toggleHeatingLockout.setVisibility(View.GONE);

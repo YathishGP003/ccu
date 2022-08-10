@@ -192,6 +192,7 @@ public class NamedSchedule extends DialogFragment {
                         zone.setScheduleRef(getArguments().getString(PARAM_SCHEDULE_ID));
                         CCUHsApi.getInstance().updateZone(zone, roomRef);
                     }
+                    CCUHsApi.getInstance().scheduleSync();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

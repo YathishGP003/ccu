@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstatsense;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -189,7 +190,6 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-        mHayStack.writeDefaultValById(ctID, 0.0);
         mHayStack.writeHisValById(ctID, 0.0);
 
         Point humidity = new Point.Builder()
@@ -206,7 +206,6 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
-        mHayStack.writeDefaultValById(humidityId, 0.0);
         mHayStack.writeHisValById(humidityId, 0.0);
 
         Point illuminance = new Point.Builder()
@@ -223,7 +222,6 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String illuminanceId = CCUHsApi.getInstance().addPoint(illuminance);
-        mHayStack.writeDefaultValById(illuminanceId, 0.0);
         mHayStack.writeHisValById(illuminanceId, 0.0);
 
 
@@ -241,7 +239,6 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
-        mHayStack.writeDefaultValById(occupancyId, 0.0);
         mHayStack.writeHisValById(occupancyId, 0.0);
 
         Point analog1InputSensor = new Point.Builder()
@@ -581,7 +578,8 @@ public class HyperStatSenseEquip {
         }
 
         String sensorVariableTagId = mHayStack.addPoint(sensorTag.build());
-        mHayStack.writeDefaultValById(sensorVariableTagId, 0.0);
+        if(markers != null && Arrays.asList(markers).contains("writable"))
+            mHayStack.writeDefaultValById(sensorVariableTagId, 0.0);
         mHayStack.writeHisValById(sensorVariableTagId, 0.0);
 
         return sensorVariableTagId;

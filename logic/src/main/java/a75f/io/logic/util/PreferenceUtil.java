@@ -26,6 +26,8 @@ public class PreferenceUtil {
     private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
+    private static final String TI_UPDATE = "updateTIThermister";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleType";
 
     public static void setContext(Context c) {
         context= c;
@@ -308,4 +310,23 @@ public class PreferenceUtil {
     public static void setStageTimerForDABMigration() {
         setBooleanPreference(STAGE_UP_TIMER_FOR_DAB, true);
     }
+
+
+    public static void setTIUpdate() {
+        setBooleanPreference(TI_UPDATE, true);
+    }
+    public static boolean getTIUpdate() {
+        return getBooleanPreference(TI_UPDATE);
+    }
+
+
+    public static boolean getScheduleTypeUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_TYPE);
+    }
+
+    public static void setScheduleTypeUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
+    }
+
+
 }

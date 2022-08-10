@@ -1,7 +1,6 @@
 package a75f.io.renatus.schedules;
 
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.usbserial.UsbModbusService.TAG;
@@ -71,7 +70,6 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.schedule.SpecialSchedule;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
@@ -83,6 +81,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
+    private static final String PARAM_IS_SPECIAL_SCHEDULE = "PARAM_IS_SPECIAL_SCHEDULE";
     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final int ID_DIALOG_VACATION = 02;
     private static final int ID_DIALOG_SCHEDULE = 01;
@@ -161,11 +160,13 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         return schedulerFragment;
     }
 
-    public static SchedulerFragment newInstance(String scheduleId, boolean isVacation, String roomRef) {
+    public static SchedulerFragment newInstance(String scheduleId, boolean isVacation, String roomRef,
+                                                boolean isSpecialSchedule) {
         SchedulerFragment schedulerFragment = new SchedulerFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
         args.putBoolean(PARAM_IS_VACATION, isVacation);
+        args.putBoolean(PARAM_IS_SPECIAL_SCHEDULE, isSpecialSchedule);
         args.putString(PARAM_ROOM_REF, roomRef);
         schedulerFragment.setArguments(args);
         return schedulerFragment;
@@ -1222,11 +1223,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setId(ViewCompat.generateViewId());
         textViewTemp.setTag(position);
 
-        if (getArguments() != null && getArguments().containsKey(PARAM_IS_VACATION)) {
-            boolean isVacation = getArguments().getBoolean(PARAM_IS_VACATION);
-            if (isVacation){
+        if (getArguments() != null) {
+            boolean isVacation =
+                    getArguments().containsKey(PARAM_IS_VACATION) && getArguments().getBoolean(PARAM_IS_VACATION);
+            boolean isSpecialSchedule =
+                    getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
+            if (isVacation || isSpecialSchedule){
                 scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
-                if (schedule.getDis().equals("Building Schedule")) {
+                if (!schedule.getDis().equals("Zone Schedule")) {
                     textViewaddEntry.setEnabled(false);
                     textViewaddEntryIcon.setEnabled(false);
                     textViewTemp.setEnabled(false);
@@ -1357,8 +1361,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen(Schedule updatedSchedule) {
-        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
+    public void refreshScreen() {
+        if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

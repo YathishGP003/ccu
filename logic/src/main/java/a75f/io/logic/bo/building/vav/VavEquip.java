@@ -1119,7 +1119,9 @@ public class VavEquip
             setConfigNumVal("max and trueCfm and cooling", config.nuMaxCFMCooling);
             setHisVal("max and trueCfm and cooling", config.nuMaxCFMCooling);
             setConfigNumVal("max and trueCfm and heating", config.numMaxCFMReheating);
+            setHisVal("max and trueCfm and heating", config.numMaxCFMReheating);
             setConfigNumVal("min and trueCfm and heating", config.numMinCFMReheating);
+            setHisVal("min and trueCfm and heating", config.numMinCFMReheating);
             setConfigNumVal("trueCfm and vav and config and kfactor", config.kFactor);
             setHisVal("trueCfm and vav and config and kfactor", config.kFactor);
         } else {

@@ -69,11 +69,14 @@ import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
@@ -318,9 +321,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         if (newTunerValueItem.containsKey("unit") && !val.equals("-") && !newTunerValueItem.containsKey("displayUnit")){
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                                    val = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(val)));
+                                    val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
+                                } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)){
+                                    val = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(val)));
                                 } else {
-                                    val = String.valueOf(fahrenheitToCelsius(Double.parseDouble(val)));
+                                    val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                                 }
                             }
                         }
@@ -344,9 +349,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     if ((newTunerValueItem.containsKey("unit") && !val.equals("-")) && !newTunerValueItem.containsKey("displayUnit")){
                         if (isCelsiusTunerAvailableStatus()) {
                             if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                                val = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(val)));
+//                                val = String.valueOf(fahrenheitToCelsiusRelative(Double.parseDouble(val)));
+                                val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
+                            } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)){
+                                val = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(val)));
+//                                val = String.valueOf(fahrenheitToCelsius(Double.parseDouble(val)));
                             } else {
-                                val = String.valueOf(fahrenheitToCelsius(Double.parseDouble(val)));
+                                val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                             }
                         }
                     }

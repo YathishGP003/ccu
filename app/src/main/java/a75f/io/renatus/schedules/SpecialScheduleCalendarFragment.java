@@ -25,6 +25,7 @@ import a75f.io.renatus.R;
 
 public class SpecialScheduleCalendarFragment extends DialogFragment{
     private static final int SPECIAL_SCHEDULE_DAYS_LIMIT = 7;
+    private static final int DAYS_IN_YEAR = 365;
     private MaterialCalendarView calendarView;
     private HDict specialScheduleHDict;
 
@@ -48,7 +49,7 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         Button buttonCancel = view.findViewById(R.id.buttonCancel);
 
         calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
-        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT-1l)).commit();
+        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
         calendarView.setSelectedDate(CalendarDay.today());
         buttonSave.setOnClickListener(saveClick -> processCalendar());
         buttonCancel.setOnClickListener(cancelClick -> dismiss());
@@ -77,21 +78,20 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         CalendarDay startDay = CalendarDay.from(beginDateTime.getYear(), beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth());
         CalendarDay endDay = CalendarDay.from(endDateTime.getYear(), endDateTime.getMonthOfYear(), endDateTime.getDayOfMonth());
         calendarView.selectRange(startDay, endDay);
-        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT-1l)).commit();
+        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+        calendarView.setCurrentDate(startDay, true);
     }
 
     private void processCalendar(){
         List<CalendarDay>  selectedDates = calendarView.getSelectedDates();
         if(selectedDates.isEmpty()){
             Toast.makeText(SpecialScheduleCalendarFragment.this.getContext(), "Please select date for Special " +
-                            "Schedule.",
-                    Toast.LENGTH_SHORT).show();
+                            "Schedule.", Toast.LENGTH_SHORT).show();
             return;
         }
         if(selectedDates.size() > SPECIAL_SCHEDULE_DAYS_LIMIT){
-            Toast.makeText(SpecialScheduleCalendarFragment.this.getContext(), "Special schedule can be applied for " +
-                            "seven days only.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(SpecialScheduleCalendarFragment.this.getContext(), "Special schedule should not be " +
+                            "greater than 7 days.", Toast.LENGTH_LONG).show();
             return;
         }
         specialScheduleDateListener.getSpecialScheduleDate(selectedDates);

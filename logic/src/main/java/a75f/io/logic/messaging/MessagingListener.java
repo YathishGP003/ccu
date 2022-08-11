@@ -82,16 +82,15 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public boolean onRetryError(ServerSentEvent sse, Throwable throwable, Response response) {
-        if( Globals.getInstance().isAckdMessagingEnabled() ) {
-            MessagingClient.getInstance().init();
-        }
         CcuLog.w(L.TAG_CCU_MESSAGING, "SSE connection error. Attempting to reconnect", throwable);
+        //We will simply request to retry here, assuming the error ie recoverable.
         return true;
     }
 
     @Override
     public void onClosed(ServerSentEvent sse) {
-        CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Socket Closed");
+        CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Socket Closed : resetMessagingConnection");
+        MessagingClient.getInstance().resetMessagingConnection();
     }
 
     private boolean isRestartCommand(JsonElement messageContents) {

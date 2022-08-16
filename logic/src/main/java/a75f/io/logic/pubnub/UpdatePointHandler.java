@@ -19,16 +19,21 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
+import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.modbusbox.EquipsManager;
 
 public class UpdatePointHandler
 {
     public static final String CMD = "updatePoint";
     private static ZoneDataInterface zoneDataInterface = null;
     private static ModbusDataInterface modbusDataInterface = null;
+    private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
     public static void handleMessage(final JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
@@ -155,7 +160,7 @@ public class UpdatePointHandler
     private static void fetchRemotePoint(String pointUid) {
         HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
         if (pointGrid == null) {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointUid);
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point : " + pointUid);
             return;
         }
         //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
@@ -225,6 +230,9 @@ public class UpdatePointHandler
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);
             }
+            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(p.getId());
+            }
         }
         if(isScheduleType){
             UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
@@ -246,7 +254,7 @@ public class UpdatePointHandler
     public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
-    
+    public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {
         HashMap ccu = hayStack.read("ccu");
         String ccuName = ccu.get("dis").toString();

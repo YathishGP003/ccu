@@ -99,12 +99,12 @@ dependencies {
 
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
-    api 'com.google.protobuf:protobuf-javalite:3.8.0'
+    api 'com.google.protobuf:protobuf-javalite:3.21.1'
 }
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.8.0'
+        artifact = 'com.google.protobuf:protoc:3.21.1'
     }
 
     plugins {

@@ -882,8 +882,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 equip.containsKey("dab") ||
                 equip.containsKey("dualDuct") ||
                 equip.containsKey("ti") ||
-                equip.containsKey("bpos") ||
-                equip.containsKey("sense")) && !equip.containsKey("system")) {
+                equip.containsKey("bpos")) && !equip.containsKey("system")) {
                 return true;
             }
         }

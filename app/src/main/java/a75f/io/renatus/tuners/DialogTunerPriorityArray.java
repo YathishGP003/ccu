@@ -273,7 +273,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         });
     }
 
-    private static double getClosestNumberOfTarget(ArrayList<String> dataArray, double target) {
+    public double getClosestNumberOfTarget(ArrayList<String> dataArray, double target) {
 
         if (dataArray.size() == 0)
             System.exit(1);
@@ -426,12 +426,16 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                                 } else {
                                     tunerVal = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(tunerVal)));
                                 }
+                                loadValueList(valueList);
+                                tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
                             }
                             if (level.equals("17")){
                                 loadValueList(valueList);
                                 tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
                             }
                         }
+                        loadValueList(valueList);
+                        tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
                     }
                     return tunerVal;
                 }

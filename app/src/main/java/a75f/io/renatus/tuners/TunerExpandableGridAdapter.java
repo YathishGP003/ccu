@@ -105,6 +105,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
                 Prefs prefs = new Prefs(getmContext().getApplicationContext());
+                ArrayList<String> valueList = new ArrayList<>();
+                DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(tunerItem, tunerGroupType,previousOpenGroup);
 
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
@@ -118,25 +120,33 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     } else {
                         if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")) {
                             if (isCelsiusTunerAvailableStatus()) {
+                                String value ;
                                 if (tunerItem.get("unit").toString().equals("\u00B0F")) {
                                     if (doesPointNeedRelativeConversion(tunerItem)) {
-                                        tunerItem.replace("newValue", convertingRelativeValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                        value = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
                                     } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
-                                        tunerItem.replace("newValue", convertingDeadBandValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                        value = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
                                     } else {
-                                        tunerItem.replace("newValue", fahrenheitToCelsiusTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                        value = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
 
                                     }
+                                    tunerPriorityArray.loadValueList(valueList);
+                                    value = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(value)));
+                                    tunerItem.replace("newValue", value);
                                 }
                             } else if (tunerItem.get("unit").toString().equals("\u00B0C")) {
+                                String value;
                                 if (doesPointNeedRelativeConversion(tunerItem)) {
-                                    tunerItem.replace("newValue", convertingRelativeValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                    value = String.valueOf(convertingRelativeValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
                                 } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
-                                    tunerItem.replace("newValue", convertingDeadBandValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                    value = String.valueOf(convertingDeadBandValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
                                 } else {
-                                    tunerItem.replace("newValue", celsiusToFahrenheitTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                    value = String.valueOf(celsiusToFahrenheitTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
 
                                 }
+                                tunerPriorityArray.loadValueList(valueList);
+                                value = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(value)));
+                                tunerItem.replace("newValue", value);
                             }
                         }
                         holder.itemTextValueView.setText(tunerItem.get("newValue").toString());

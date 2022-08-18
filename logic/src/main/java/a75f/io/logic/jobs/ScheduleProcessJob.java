@@ -10,6 +10,8 @@ import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.VACATION;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import android.content.Intent;
 import android.os.StrictMode;
@@ -510,11 +512,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if (cachedOccupied.getCurrentlyOccupiedSchedule() == null){
                 return "No schedule configured";
             }
-            return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Occupied mode",
-                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
-                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
-                    cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
-                    cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+            if( isCelsiusTunerAvailableStatus()) {
+                return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0C at %02d:%02d", "Occupied mode",
+                        fahrenheitToCelsius(cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback()),
+                        fahrenheitToCelsius(cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback()),
+                        cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
+                        cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+            } else {
+                return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Occupied mode",
+                        cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
+                        cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+            }
         }
         else {
             long th = getTemporaryHoldExpiry(equip);
@@ -546,21 +556,37 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     if (cachedOccupied.getNextOccupiedSchedule() == null){
                         return "No schedule configured";
                     }
-                    statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
-                            cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
-                            cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
-                            cachedOccupied.getNextOccupiedSchedule().getEthh(),
-                            cachedOccupied.getNextOccupiedSchedule().getEtmm());
+                    if( isCelsiusTunerAvailableStatus()) {
+                        statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0C at %02d:%02d", "Preconditioning",
+                                fahrenheitToCelsius(cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback()),
+                                fahrenheitToCelsius(cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback()),
+                                cachedOccupied.getNextOccupiedSchedule().getEthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getEtmm());
+                    }else {
+                        statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Preconditioning",
+                                cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                                cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                                cachedOccupied.getNextOccupiedSchedule().getEthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getEtmm());
+                    }
 
                 }else {
                     if (cachedOccupied.getNextOccupiedSchedule() == null){
                         return "No schedule configured";
                     }
-                    statusString = String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
-                            cachedOccupied.getHeatingVal(),
-                            cachedOccupied.getCoolingVal(),
-                            cachedOccupied.getNextOccupiedSchedule().getSthh(),
-                            cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    if( isCelsiusTunerAvailableStatus()) {
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0C at %02d:%02d", "Unoccupied mode",
+                                fahrenheitToCelsius(cachedOccupied.getHeatingVal()),
+                                fahrenheitToCelsius(cachedOccupied.getCoolingVal()),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    } else {
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Unoccupied mode",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    }
                 }
             }
             return statusString;
@@ -656,11 +682,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
                     return "No schedule configured";
                 }
-                return String.format("%sIn Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d",epidemicString, "Unoccupied mode",
-                        nextOccupied.getHeatingVal(),
-                        nextOccupied.getCoolingVal(),
-                        nextOccupied.getNextOccupiedSchedule().getSthh(),
-                        nextOccupied.getNextOccupiedSchedule().getStmm());
+                if( isCelsiusTunerAvailableStatus()) {
+                    return String.format("%sIn Energy saving %s | Changes to %.1f-%.1f\u00B0C at %02d:%02d", epidemicString, "Unoccupied mode",
+                            fahrenheitToCelsius(nextOccupied.getHeatingVal()),
+                            fahrenheitToCelsius(nextOccupied.getCoolingVal()),
+                            nextOccupied.getNextOccupiedSchedule().getSthh(),
+                            nextOccupied.getNextOccupiedSchedule().getStmm());
+                } else {
+                    return String.format("%sIn Energy saving %s | Changes to %.1f-%.1f\u00B0F at %02d:%02d",epidemicString, "Unoccupied mode",
+                            nextOccupied.getHeatingVal(),
+                            nextOccupied.getCoolingVal(),
+                            nextOccupied.getNextOccupiedSchedule().getSthh(),
+                            nextOccupied.getNextOccupiedSchedule().getStmm());
+                }
             case FORCEDOCCUPIED:
                 DateTime et = new DateTime(getSystemTemporaryHoldExpiry());
                 int min = et.getMinuteOfHour();

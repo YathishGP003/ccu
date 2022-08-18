@@ -311,10 +311,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         List<HashMap<Object, Object>> specialScheduleList = CCUHsApi.getInstance().getAllSpecialSchedules();
         for(HashMap<Object, Object> specialSchedule : specialScheduleList){
             HDict range = (HDict) specialSchedule.get(Tags.RANGE);
+            int endHour = Schedule.getInt(range.get(Tags.ETHH).toString());
+            endHour  = endHour == 24 ? 23 : endHour;
+            int endMin = Schedule.getInt(range.get(Tags.ETMM).toString());
+            endMin = endHour == 24 ? 59 : endMin;
+            int endSec = endHour == 24 ? 59 : 0;
             DateTime endDateTime = SpecialSchedule.SS_DATE_TIME_FORMATTER
                     .parseDateTime(range.get(Tags.ETDT).toString())
-                    .withHourOfDay(SpecialSchedule.getInt(range.get(Tags.ETHH).toString()))
-                    .withMinuteOfHour(SpecialSchedule.getInt(range.get(Tags.ETMM).toString()));
+                    .withHourOfDay(endHour)
+                    .withMinuteOfHour(endMin)
+                    .withSecondOfMinute(endSec);
             if(endDateTime.getMillis() < System.currentTimeMillis()){
                 CCUHsApi.getInstance().deleteEntity(specialSchedule.get(Tags.ID).toString());
             }

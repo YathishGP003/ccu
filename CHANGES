@@ -1,59 +1,10 @@
- - Merged PR 4447: Added hisVal for min and max Reheating
- - Merged PR 4762: Resolved merge conflicts
- - Resolved merge conflicts
- - Merged PR 4749: Fix for 13403- Building schedule not consumed when it is in between two speci...
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13403-BuildingSchedule_not_consumed_between_special_schedules
- - Merged PR 4736: Update migration condition for user limits
- - Merged PR 4751: GPC-36 updates
- - Merged PR 4636: Bug 13345: CCU : Globalization : Zone Occupancy Status disappears when CCU is...
- - Merged PR 4624: Bug 13373: CCU:PI Loop controller Native Sensor Input type conversion discrep...
- - Merged PR 4620: Tuners bugs are fixed related user Stories 13417, 13330, 13307, 13281
- - Merged PR 4739: Fix 15 minute sync issue
- - Merged PR 4649: 13287 : CCU:TI Profile showing Irrelevant current temp
- - Merged PR 4413: Removed writing default value for non writable tags
- - Merged PR 4732: USeCelsius Toggle sync issue
- - Merged PR 4586: Named schedule issues fixed
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/12893-named_schedule_crash_issue
- - Merged PR 4698: Ensure fan2 is on when cooling/heating is on
- - Merged PR 4697: Vavstage dehumidifier status not updated
- - Merged PR 4639: Fix for building level vacation and special schedule delete sync from portal...
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13358-13359-13390-Building_level_spec_scheduleand_vacation_fix
- - Merged PR 4545: Update scheduleType to point to building schedule after scheduleRef is restored for room.
- - Fix for 13403- Building schedule not consumed when it is in between two special schedules
- - Check for zone schedule
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13251-ScheduleType_update_after_reverting_scheduleref_to_zone_schedule
- - Merged PR 4519: Removed blank space before and after floor name
- - Round off descripency
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/13281_tuners_fix
- - Merged PR 4604: Fix for Messaging discrepancy
- - Merged PR 4284: Fix for Schedule updates are happening multiple times
- - code restructure
- - displayUnit crash has been resolved
- - displayUnit crash has been resolved
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/13281_tuners_fix
- - Fix for building level vacation and special schedule delete sync from portal or another ccu
- - returning unchanged string instead of null
- - Bug 13345: CCU : Globalization : Zone Occupancy Status disappears when CCU is in Celsius unit and active vacation is applied in Building (or) Zone level
- - Merged PR 4391: Changed the itm name ITM to sync with portal
- - Bug 13373: CCU:PI Loop controller Native Sensor Input type conversion discrepancy after converting to Celsius
- - The default values are mapped to range values
- - Tuners bugs are fixed related user Stories 13417, 13330, 13307, 13281
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/12893-named_schedule_crash_issue
- - Avoid NPE and app crash
- - Merged PR 4584: 13286: CCU : Renatus app crashes observed after 1.625.0 & discrepancy seen du...
- - GPC-36 updates
- - Merged PR 4434: updated maxVal for stageUp and stageDown timer points
- - Named schedule issues fixed
- - Merged PR 4316: Override Screen crash fix
- - Merged PR 4550: Trimmed zone names while adding and renaming
- - Merged PR 4527: Bug 12938: CCU | "Enable" text to be removed in re-configuration page for Hyp...
- - Fix 15 minute sync issue
- - Update scheduleType to point to building schedule after scheduleRef is restored for room.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13251-ScheduleType_update_after_reverting_scheduleref_to_zone_schedule
- - Update scheduleType to point to building schedule after scheduleRef is restored for room.
- - Update scheduleType to point to building schedule after scheduleRef is restored for room.
- - Merged PR 4379: Fix for app crashes when timer reaches to 0s In Temporary Override screen
- - Ensure fan2 is on when cooling/heating is on
- - Bug 12938: CCU | "Enable" text to be removed in re-configuration page for Hyperstat-CPU
- - Update migration condition for user limits
- - Vavstage dehumidifier status not updated
+ - Merged PR 4799: Exclude sense profile from ahu scheduling
+ - Merged PR 4806: Support for modbus userIntent reconfig
+ - Merged PR 4782: Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .
+ - Merged PR 4804: 13704: Celsius support for System Tab
+ - Merged PR 4801: DateTime object for special schedule while deleting
+ - Support for modbus userIntent reconfig
+ - DateTime object for special schedule while deleting
+ - Exclude sense profile from ahu scheduling
+ - Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .
+ - Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .

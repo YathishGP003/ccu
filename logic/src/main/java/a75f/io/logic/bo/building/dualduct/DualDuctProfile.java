@@ -22,11 +22,11 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -214,7 +214,7 @@ public class DualDuctProfile extends ZoneProfile {
         boolean  enabledCO2Control = dualDuctEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dualDuctEquip.getConfigNumVal("enable and iaq") > 0 ;
         String   zoneId            = HSUtil.getZoneIdFromEquipId(dualDuctEquip.getId());
-        Occupied occ               = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ               = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean  occupied          = (occ != null && occ.isOccupied());
     
         double        epidemicMode  = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");

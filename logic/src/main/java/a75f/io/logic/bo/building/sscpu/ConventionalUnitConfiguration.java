@@ -17,4 +17,7 @@ public class ConventionalUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableRelay5;
     public boolean enableRelay6;
     public int relay6Type;
+
+    public boolean enableAutoAway;
+    public boolean enableAutoForceOccupied;
 }

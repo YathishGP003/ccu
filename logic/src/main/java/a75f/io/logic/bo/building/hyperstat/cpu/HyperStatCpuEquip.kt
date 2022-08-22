@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.tuners.HyperstatTuners
@@ -373,6 +374,12 @@ class HyperStatCpuEquip(val node: Short) {
 
         val presetConfiguration = getConfiguration()
         Log.i(L.TAG_CCU_HSCPU, "===========Hyperstat profile Update  ============")
+
+        if (updatedHyperStatConfig.isEnableAutoAway != presetConfiguration.isEnableAutoAway
+                || updatedHyperStatConfig.isEnableAutoForceOccupied != presetConfiguration.isEnableAutoForceOccupied) {
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(), equipRef)
+        }
+
         updateGeneralConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAutoAwayConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAutoAForceOccupyConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
@@ -382,6 +389,9 @@ class HyperStatCpuEquip(val node: Short) {
         updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
+
+
+
         haystack.syncEntityTree()
 
     }
@@ -546,7 +556,7 @@ class HyperStatCpuEquip(val node: Short) {
         config.temperatureOffset = (tempOff / 10)
         config.isEnableAutoForceOccupied = (
                 equipRef?.let {
-                    hsHaystackUtil!!.readConfigStatus(it, "auto and occupancy and forced and control")
+                    hsHaystackUtil!!.readConfigStatus(it, "auto and forced and control and occupied or occupancy")
                         .toInt()
                 } == 1)
         config.isEnableAutoAway = (equipRef?.let {

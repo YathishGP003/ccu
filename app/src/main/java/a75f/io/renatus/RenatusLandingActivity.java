@@ -54,7 +54,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
 import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
@@ -67,10 +67,7 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
-
 import a75f.io.usbserial.UsbServiceActions;
-
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -87,7 +84,6 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
-
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -218,7 +214,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 return true;
             });
             setViewPager();
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
             HashMap site = CCUHsApi.getInstance().read("site");
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String siteCountry = site.get("geoCountry").toString();

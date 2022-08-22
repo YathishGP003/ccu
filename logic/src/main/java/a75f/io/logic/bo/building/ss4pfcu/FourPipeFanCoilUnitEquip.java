@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -26,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -472,6 +474,9 @@ public class FourPipeFanCoilUnitEquip  {
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
+
+        ConfigUtil.Companion.addConfigPoints(profile,siteRef,room,floor,equipRef,tz,String.valueOf(nodeAddr),
+                equipDis,"fcu",config.enableAutoAway ? 1:0, config.enableAutoAway ?1:0);
        
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
@@ -541,7 +546,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
@@ -769,6 +774,11 @@ public class FourPipeFanCoilUnitEquip  {
         SmartStat.setPointEnabled(nodeAddr, Port.TH1_IN.name(),config.enableThermistor1);
         SmartStat.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
 
+        setConfigNumVal("auto and away",config.enableAutoAway? 1:0);
+        setConfigNumVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+        setHisVal("auto and away",config.enableAutoAway? 1:0);
+        setHisVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+
         HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
         Equip equip = new Equip.Builder().setHashMap(equipHash).build();
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -818,6 +828,9 @@ public class FourPipeFanCoilUnitEquip  {
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);
+
+        config.enableAutoAway = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and forced and occupied") > 0;
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -1010,6 +1023,10 @@ public class FourPipeFanCoilUnitEquip  {
 
     public void setConfigNumVal(String tags,double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and fcu and pipe4 and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and standalone and pipe4 and fcu and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
     public double getConfigNumVal(String tags) {

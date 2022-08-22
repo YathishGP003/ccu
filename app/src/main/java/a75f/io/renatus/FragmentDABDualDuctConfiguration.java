@@ -102,6 +102,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     @BindView(R.id.enableOccupancyControl) ToggleButton enableOccupancyControl;
     @BindView(R.id.enableCO2Control) ToggleButton enableCO2Control;
     @BindView(R.id.enableIAQControl) ToggleButton enableIAQControl;
+    @BindView(R.id.enableAFOControl) ToggleButton enableAutoForceOccupied;
+    @BindView(R.id.enableAutoAwayControl) ToggleButton enableAutoAway;
     
     @BindView(R.id.setBtn) Button setButton;
     
@@ -433,6 +435,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         enableOccupancyControl.setChecked(mProfileConfig.isEnableOccupancyControl());
         enableCO2Control.setChecked(mProfileConfig.isEnableCO2Control());
         enableIAQControl.setChecked(mProfileConfig.isEnableIAQControl());
+        enableAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+        enableAutoAway.setChecked(mProfileConfig.enableAutoAwayControl);
         
         int offsetIndex = (int)mProfileConfig.getTemperatureOffset()+TEMP_OFFSET_LIMIT;
         temperatureOffset.setValue(offsetIndex);
@@ -514,6 +518,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setEnableOccupancyControl(enableOccupancyControl.isChecked());
         dualductConfig.setEnableCO2Control(enableCO2Control.isChecked());
         dualductConfig.setEnableIAQControl(enableIAQControl.isChecked());
+        dualductConfig.enableAutoForceOccupied = enableAutoForceOccupied.isChecked();
+        dualductConfig.enableAutoAwayControl = enableAutoAway.isChecked();
     
         dualductConfig.setMinHeatingDamperPos(minHeatingDamperPos.getValue());
         dualductConfig.setMaxHeatingDamperPos(maxHeatingDamperPos.getValue());

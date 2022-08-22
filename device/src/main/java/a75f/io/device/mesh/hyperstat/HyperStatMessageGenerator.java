@@ -19,15 +19,15 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
-import static a75f.io.logic.bo.building.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;

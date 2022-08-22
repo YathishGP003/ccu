@@ -305,9 +305,27 @@ public class CCUHsApi
         return tagsDb.addFloorWithId(f, id);
     }
 
+    //TODO - Replace CCU support
+    public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
+        Point occupancy = new Point.Builder()
+                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              //.setEquipRef(equipRef)
+                              .setSiteRef(zone.getSiteRef())
+                              .setRoomRef(zoneRef)
+                              .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                              .addMarker("occupancy").addMarker("state")
+                              .addMarker("zone").addMarker("his")
+                              .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
+                                        "emergencyconditioning, keycardautoaway, windowopen")
+                              .setTz(getTimeZone())
+                              .build();
+        CCUHsApi.getInstance().addPoint(occupancy);
+    }
+    
     public String addZone(Zone z) {
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
+        addZoneOccupancyPoint(zoneId, z);
         return zoneId;
     }
 
@@ -628,7 +646,6 @@ public class CCUHsApi
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
-        Log.i("CCU_HSCPU", "clearPointArrayLevel: ");
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()
@@ -785,7 +802,28 @@ public class CCUHsApi
 
         return readPointPriorityVal(id.toString());
     }
-
+    
+    /**
+     *
+     * @param id
+     * @param offset Level from which priority evaluation is done.
+     * @return
+     */
+    public static double readPointPriorityValFromOffset(String id, int offset){
+        
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = offset; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+        
+    }
+    
     public String readId(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
@@ -1029,10 +1067,19 @@ public class CCUHsApi
         } else if (entity.get("room") != null) {
 
             ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and roomRef == "+ id );
-            Log.d("CCU","  delete Schedules in room "+schedules.size());
+            CcuLog.i("CCU_HS","  delete Schedules in room "+schedules.size());
             for (HashMap<Object, Object> schedule : schedules) {
                 deleteEntityItem(schedule.get("id").toString());
             }
+    
+            //TODO - This should be made generic. but querying all points with roomRef needs more thought.
+            ArrayList<HashMap<Object, Object>> points =
+                readAllEntities("point and occupancy and state and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete occupancy state of room "+points.size());
+            for (HashMap<Object, Object> point : points) {
+                deleteEntityItem(point.get("id").toString());
+            }
+            
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
 
@@ -2423,4 +2470,5 @@ public class CCUHsApi
     public HisSyncHandler getHisSyncHandler() {
         return hisSyncHandler;
     }
+    
 }

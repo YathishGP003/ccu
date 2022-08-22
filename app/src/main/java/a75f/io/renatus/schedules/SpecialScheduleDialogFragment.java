@@ -11,11 +11,6 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import org.apache.commons.collections4.MultiValuedMap;
@@ -38,11 +33,14 @@ import java.util.Map;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.RangeBarView;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 public class SpecialScheduleDialogFragment extends DialogFragment {
     private NumberPicker npStartTime;

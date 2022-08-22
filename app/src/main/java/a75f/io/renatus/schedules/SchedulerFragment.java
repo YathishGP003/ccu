@@ -12,24 +12,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-
-import a75f.io.api.haystack.Tags;
-import a75f.io.logic.pubnub.BuildingScheduleListener;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
@@ -64,11 +46,14 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.pubnub.BuildingScheduleListener;
+import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
@@ -76,6 +61,21 @@ import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import static a75f.io.usbserial.UsbModbusService.TAG;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
 
@@ -440,7 +440,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             }
 
                             CCUHsApi.getInstance().saveTagsData();
-                            ScheduleProcessJob.updateSchedules();
+                            ScheduleManager.getInstance().updateSchedules();
                             CCUHsApi.getInstance().syncEntityTree();
 
                             new Handler(Looper.getMainLooper()).post(() -> {
@@ -481,7 +481,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
 
                 CCUHsApi.getInstance().saveTagsData();
-                ScheduleProcessJob.updateSchedules();
+                ScheduleManager.getInstance().updateSchedules();
                 CCUHsApi.getInstance().syncEntityTree();
 
                 new Handler().postDelayed(() -> {
@@ -525,7 +525,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting special Schedule...");
 
             CCUHsApi.getInstance().deleteEntity(scheduleId);
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
 
@@ -549,7 +549,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting vacation...");
 
             CCUHsApi.getInstance().deleteEntity("@"+vacationId);
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
 
@@ -891,7 +891,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
         CCUHsApi.getInstance().syncEntityTree();
         updateUI();
-        ScheduleProcessJob.updateSchedules();
+        ScheduleManager.getInstance().updateSchedules();
     }
     
     private HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(Schedule.Days d) {

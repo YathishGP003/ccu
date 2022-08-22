@@ -1,8 +1,6 @@
 package a75f.io.logic.jobs;
 
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -19,9 +17,10 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -44,7 +43,7 @@ public class StandaloneScheduler {
         Occupied occ = equipSchedule.getCurrentValues();
         //When schedule is deleted
         if (occ == null) {
-            ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
+            //ScheduleManager.getInstance().occupiedHashMap.remove(equip.getRoomRef());
             return null;
         }
         if (vacation != null)
@@ -68,7 +67,7 @@ public class StandaloneScheduler {
         else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
             occ.setForcedOccupied(true);
         CcuLog.d("ZoneScheduler", "Equip: " + equip.getDisplayName()+","+occ.isPreconditioning()+","+occ.isForcedOccupied()+","+equip.getId());
-        if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
+        if (occ != null && ScheduleManager.getInstance().putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() ) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
             setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied());

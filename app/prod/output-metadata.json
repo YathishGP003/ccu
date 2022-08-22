@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "a75f.io.renatus",
+  "variantName": "processProdResources",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 2112242147,
+      "versionName": "RENATUS_CCU_prod_1.616.0",
+      "outputFile": "RENATUS_CCU_prod_1.616.0.apk"
+    }
+  ]
+}

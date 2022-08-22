@@ -136,6 +136,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     @BindView(R.id.relay1TextVal) TextView relay1TextVal;
     @BindView(R.id.relay2TextView) TextView relay2TextView;
     @BindView(R.id.relay2TextVal) TextView relay2TextVal;
+
+    ToggleButton enableAutoAwayControl;
+    ToggleButton enableAutoForcceOccupiedControl;
     
     public FragmentVAVConfiguration()
     {
@@ -225,6 +228,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         if (mVavProfile != null) {
             CcuLog.d(L.TAG_CCU_UI,  "Get VavConfig: ");
             mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
+
+            CcuLog.d(L.TAG_CCU_UI, "sent config update after :  - "+
+                    mProfileConfig.enableAutoForceoccupied+"----------"+mProfileConfig.enableAutoAwayControl);
         } else {
             CcuLog.d(L.TAG_CCU_UI, "Create Vav Profile: ");
             switch (mProfileType) {
@@ -248,6 +254,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
+        enableAutoAwayControl = view.findViewById(R.id.enableAutoAwayControl);
+        enableAutoForcceOccupiedControl = view.findViewById(R.id.enableAFOControl);
+
 
         textEnableCFM=view.findViewById(R.id.textEnableCFM);
         enableCFMControl=view.findViewById(R.id.enableCFMControl);
@@ -474,6 +483,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
+            enableAutoAwayControl.setChecked(mProfileConfig.enableAutoAwayControl);
+            enableAutoForcceOccupiedControl.setChecked(mProfileConfig.enableAutoForceoccupied);
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
             int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
@@ -602,6 +613,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         vavConfig.enableCO2Control = enableCO2Control.isChecked();
         vavConfig.enableIAQControl = enableIAQControl.isChecked();
+        vavConfig.enableAutoAwayControl = enableAutoAwayControl.isChecked();
+        vavConfig.enableAutoForceoccupied = enableAutoForcceOccupiedControl.isChecked();
         vavConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
         vavConfig.minDamperCooling = (minCoolingDamperPos.getValue());
         vavConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
@@ -613,6 +626,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
 //        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
         vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
         vavConfig.enableCFMControl = enableCFMControl.isChecked();
+
         vavConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
         if(numMinCFMCooling.getValue() > numMaxCFMCooling.getValue()){
             vavConfig.numMinCFMCooling = numMaxCFMCooling.getValue()*STEP;
@@ -668,6 +682,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }
         
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+
+        CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "
+                +vavConfig.enableAutoForceoccupied+"----------"+vavConfig.enableAutoAwayControl);
         if (mProfileConfig == null) {
             mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
         } else

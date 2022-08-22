@@ -219,4 +219,15 @@ public class Occupied {
             return 72;
         }
     }
+    
+    @Override
+    public String toString() {
+        return " Occupied Schedule :"
+                + " mOccupied " +mOccupied
+                + " mPrecondition "+mPrecondition
+                + " mOccupancySensing "+mOccupancySensing
+                + " mForcedOccupied "+mForcedOccupied
+                + " mMillisecondsUntilNextChange "+mMillisecondsUntilNextChange
+                + " mMillisecondsUntilPrevChange "+mMillisecondsUntilPrevChange;
+    }
 }

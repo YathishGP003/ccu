@@ -3,7 +3,7 @@ package a75f.io.logic.jobs
 import a75f.io.api.haystack.*
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.Occupancy
+import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.Stage
@@ -12,8 +12,6 @@ import a75f.io.logic.tuners.StandaloneTunerUtil
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.tuners.TunerUtil
 import android.os.AsyncTask
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.projecthaystack.HNum
@@ -26,6 +24,7 @@ import a75f.io.api.haystack.Equip
 import java.lang.IllegalArgumentException
 import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.bo.building.hvac.AnalogOutput
+import a75f.io.logic.bo.building.schedules.ScheduleManager
 import org.joda.time.DateTime
 
 
@@ -188,7 +187,7 @@ class HyperStatScheduler {
             val occ = equipSchedule.currentValues
             //When schedule is deleted
             if (occ == null) {
-                ScheduleProcessJob.occupiedHashMap.remove(equip.roomRef)
+                //ScheduleManager.getInstance().occupiedHashMap.remove(equip.roomRef)
                 return
             }
             if (vacation != null) occ.isOccupied = false
@@ -233,7 +232,7 @@ class HyperStatScheduler {
 
             )
 
-            if (ScheduleProcessJob.putOccupiedModeCache(equip.roomRef, occ)) {
+            if (ScheduleManager.getInstance().putOccupiedModeCache(equip.roomRef, occ)) {
                 val avgTemp = (occ.coolingVal + occ.heatingVal) / 2.0
 
 
@@ -382,7 +381,7 @@ class HyperStatScheduler {
             equip: Equip,
             flag: String
         ) {
-            val occ = ScheduleProcessJob.getOccupiedModeCache(p.roomRef)
+            val occ = ScheduleManager.getInstance().getOccupiedModeCache(p.roomRef)
             CcuLog.d(
                 L.TAG_CCU_SCHEDULER,
                 "setDesiredatlevel3 Equip: " + equip.displayName + " Temp: " + desiredTemp + " Flag: " + flag + "," + isForcedOccupied

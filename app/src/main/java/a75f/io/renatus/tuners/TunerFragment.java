@@ -328,6 +328,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                                 }
                             }
+                            ArrayList<String> valueList = new ArrayList<>();
+                            DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
+                            tunerPriorityArray.loadValueList(valueList);
+                            val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
                         }
                         textView_oldValue.setText(val);
                         if (newTunerValueItem.get("newValue") != null){
@@ -356,6 +360,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                 val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                             }
                         }
+                        ArrayList<String> valueList = new ArrayList<>();
+                        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
                     }
                     textView_oldValue.setText(val);
                     if (newTunerValueItem.get("newValue") != null){
@@ -393,7 +401,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     tunerVal = celsiusToFahrenheitTuner(Double.parseDouble(String.valueOf(tunerVal)));
                                 }
                             }
-                            Log.d("TAG", "onViewCreated: newValue " + tunerVal);
+                            ArrayList<String> valueList = new ArrayList<>();
+                            DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
+                            tunerPriorityArray.loadValueList(valueList);
+                            tunerVal = tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal.toString()));
 
 
                         }

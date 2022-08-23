@@ -173,6 +173,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                                 }
                             }
                         }
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = tunerPriorityArray.getClosestNumberOfTarget(valueList,val);
                         holder.itemTextValueView.setText(String.valueOf(val));
                     } else {
                         holder.itemTextValueView.setText("-");
@@ -215,6 +217,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                             }
 
                             }
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
                         holder.itemTextValueView.setText((val));
                     } else {
                         holder.itemTextValueView.setText("-");

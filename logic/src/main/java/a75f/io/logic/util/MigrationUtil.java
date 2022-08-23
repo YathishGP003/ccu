@@ -3,6 +3,7 @@ package a75f.io.logic.util;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,12 +25,14 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil;
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil;
@@ -129,6 +132,18 @@ public class MigrationUtil {
         if(!PreferenceUtil.getDiagEquipMigration()){
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
+        }
+        if(!PreferenceUtil.getScheduleRefactorMigration()) {
+            scheduleRefactorMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefactorMigration();
+        }
+
+
+
+        if(!PreferenceUtil.getNewOccupancy()){
+            Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
+            migrateNewOccupancy(CCUHsApi.getInstance());
+            PreferenceUtil.setNewOccupancy();
         }
 
         if(!PreferenceUtil.getSiteNameEquipMigration()){
@@ -759,6 +774,153 @@ public class MigrationUtil {
                 Log.i(TAG_CCU_MIGRATION_UTIL, "error while doing DualDuct migration  "+e.getMessage());
             }
         });
+    }
+    
+    private static void scheduleRefactorMigration(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
+        rooms.forEach( room -> {
+            HashMap<Object, Object> occupancyState =
+                hayStack.read("point and occupancy and state and roomRef ==\""+room.get("id")+"\"");
+            if (occupancyState.isEmpty()) {
+                Zone roomEntity = new Zone.Builder().setHashMap(room).build();
+                hayStack.addZoneOccupancyPoint(roomEntity.getId(), roomEntity);
+            }
+        });
+    
+        ArrayList<HashMap<Object, Object>> hyperStatCpus = hayStack.readAllEntities("equip and hyperstat and cpu");
+        hyperStatCpus.forEach( cpuEquip -> {
+            HashMap<Object, Object> keyCardConfig = hayStack.readEntity("keycard and sensing and enabled and equipRef" +
+                                                                        " == \""+cpuEquip.get("id")+"\"");
+            
+            if (keyCardConfig.isEmpty()) {
+    
+                Equip equip = new Equip.Builder().setHashMap(cpuEquip).build();
+                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip, hayStack);
+    
+                hyperStatPointsUtil.createKeycardWindowSensingPoints().forEach(
+                    point -> pushPointToHS(hyperStatPointsUtil, point)
+                );
+            }
+        });
+        
+        ArrayList<HashMap<Object, Object>> occModePoints = hayStack.readAllEntities("occupancy and mode");
+        occModePoints.forEach( occMode -> {
+            Point occModePoint = new Point.Builder().setHashMap(occMode).build();
+            occModePoint.setEnums(Occupancy.getEnumStringDefinition());
+            hayStack.updatePoint(occModePoint, occModePoint.getId());
+        });
+        hayStack.scheduleSync();
+    }
+
+
+    private static void migrateNewOccupancy(CCUHsApi hsApi) {
+        Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");
+        ArrayList<HashMap<Object, Object>> dabEquips = hsApi.readAllEntities("equip and dab and smartnode");
+        ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hsApi.readAllEntities("equip and dualDuct and smartnode");
+        ArrayList<HashMap<Object, Object>> sseEquips = hsApi.readAllEntities("equip and sse and smartnode");
+        ArrayList<HashMap<Object, Object>> vavNoFanEquips = hsApi.readAllEntities("equip and vav and smartnode and not fanPowered");
+        ArrayList<HashMap<Object, Object>> vavSeriesEquips = hsApi.readAllEntities("equip and vav and series and smartnode");
+        ArrayList<HashMap<Object, Object>> vavParallelEquips = hsApi.readAllEntities("equip and vav and parallel and smartnode");
+        ArrayList<HashMap<Object, Object>> ssCPUEquips = hsApi.readAllEntities("equip and cpu and standalone and not hyperstat");
+        ArrayList<HashMap<Object, Object>> ssHPUEquips = hsApi.readAllEntities("equip and hpu and standalone");
+        ArrayList<HashMap<Object, Object>> ss2PFCUEquips = hsApi.readAllEntities("equip and pipe2 and fcu");
+        ArrayList<HashMap<Object, Object>> ss4PFCUEquips = hsApi.readAllEntities("equip and pipe4 and fcu");
+
+
+        if (!dabEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : dabEquips) {
+                String profile = "dab";
+                createPoints(equip,"DAB", profile, "");
+            }
+        }
+        if (!dabDualDuctEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : dabDualDuctEquips) {
+                String profile = "dualDuct";
+                createPoints(equip,"DualDuct",profile,"");
+            }
+        }
+        if (!vavNoFanEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : vavNoFanEquips) {
+                String profile = "vav";
+                createPoints(equip,"VAV", profile, "");
+            }
+        }
+        if (!vavSeriesEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : vavSeriesEquips) {
+                String profile = "vav";
+                String tag = "series";
+                createPoints(equip,"VAV", profile, tag);
+            }
+        }
+        if (!vavParallelEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : vavParallelEquips) {
+                String profile = "vav";
+                String tag = "parallel";
+                createPoints(equip,"VAV", profile, tag);
+            }
+        }
+
+        if (!sseEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : sseEquips) {
+                String profile = "sse";
+                createPoints(equip, "SSE",profile, "");
+            }
+        }
+
+        if (!ssCPUEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : ssCPUEquips) {
+                String profile = "cpu";
+                createPointsSS(equip, "CPU",profile, "standalone");
+            }
+        }
+        if (!ssHPUEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : ssHPUEquips) {
+                String profile = "hpu";
+                createPointsSS(equip, "HPU",profile, "standalone");
+            }
+        }
+        if(!ss2PFCUEquips.isEmpty()){
+            for (HashMap<Object,Object> equip:ss2PFCUEquips) {
+                String profile = "pipe2";
+                createPointsSS(equip,"2PFCU",profile,"fcu");
+            }
+        }
+
+        if(!ss4PFCUEquips.isEmpty()){
+            for (HashMap<Object,Object> equip:ss4PFCUEquips) {
+                String profile = "pipe4";
+                createPointsSS(equip,"4PFCU",profile,"fcu");
+            }
+        }
+    }
+
+    private static void createPoints(HashMap<Object,Object> equip,String profileDisplayName,String profiletag,String tags){
+        String nodeAddr = equip.get("group").toString();
+        String floorRef = equip.get("floorRef").toString();
+        String equipRef = equip.get("id").toString();
+        String roomRef = equip.get("roomRef").toString();
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = siteMap.get(Tags.ID).toString();
+        String siteDis = siteMap.get("dis").toString();
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteDis+"-"+profileDisplayName+"-"+nodeAddr;
+        SmartNode sn = new SmartNode(Integer.valueOf(nodeAddr));
+        ConfigUtil.Companion.addOccupancyPointsSN(sn,profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,equipDis);
+        ConfigUtil.Companion.addConfigPoints(profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,equipDis,tags,0,0);
+    }
+
+    private static void createPointsSS(HashMap<Object,Object> equip,String profileDisplayName,String profiletag,String tags){
+        String nodeAddr = equip.get("group").toString();
+        String floorRef = equip.get("floorRef").toString();
+        String equipRef = equip.get("id").toString();
+        String roomRef = equip.get("roomRef").toString();
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String siteRef = siteMap.get(Tags.ID).toString();
+        String siteDis = siteMap.get("dis").toString();
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteDis+"-"+profileDisplayName+"-"+nodeAddr;
+        ConfigUtil.Companion.addConfigPoints(profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,
+                equipDis,tags,0,0);
     }
 
     private static void updateScheduleRefs(CCUHsApi hayStack) {

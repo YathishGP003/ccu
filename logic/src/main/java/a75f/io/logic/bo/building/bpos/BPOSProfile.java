@@ -19,13 +19,14 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -82,7 +83,7 @@ public class BPOSProfile extends ZoneProfile {
             return;
         }
 
-        boolean isAutoforceoccupiedenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
+        /*boolean isAutoforceoccupiedenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
         boolean isAutoawayenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and away and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
@@ -104,7 +105,7 @@ public class BPOSProfile extends ZoneProfile {
         if (isAutoawayenabled) runAutoAwayOperation();
         else if (occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
             resetForceOccupy();
-        }
+        }*/
 
         double desiredTempCooling =
                 SystemTemperatureUtil.getDesiredTempCooling(mBPOSEquip.mEquipRef);
@@ -114,12 +115,9 @@ public class BPOSProfile extends ZoneProfile {
         mBPOSEquip.setDesiredTemp(tempMidPoint);
 
         String zoneId = HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef);
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ != null && occ.isOccupied());
-
-
-
-
+        
         HashMap<Object,Object> occDethashmap = CCUHsApi.getInstance().readEntity("point and occupancy and " +
                 "detection and his and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
         double occDetPoint =
@@ -131,11 +129,11 @@ public class BPOSProfile extends ZoneProfile {
         double systemDefaultTemp = 72.0;
 
 
-        Log.d(L.TAG_BPOS, "occupied = " + occupied
+        /*Log.d(L.TAG_BPOS, "occupied = " + occupied
                 + "isAutoforceoccupiedenabled = " + isAutoforceoccupiedenabled
                 + "isAutoawayenabled = " + isAutoawayenabled
                 + "occupancyvalue = " + occupancyvalue
-                + "occDetPoint = " + occDetPoint);
+                + "occDetPoint = " + occDetPoint);*/
 
         if (roomTemp > setTempCooling) {
             //Zone is in Cooling
@@ -218,7 +216,7 @@ public class BPOSProfile extends ZoneProfile {
                         "sensor and equipRef  == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
 
         Occupied occuStatus =
-                ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
+            ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
 
         Log.d(L.TAG_BPOS, "occupied = " + occuStatus
                 + "occupancyModeval = " + occupancyModeval
@@ -228,7 +226,7 @@ public class BPOSProfile extends ZoneProfile {
         if ((!occuStatus.isOccupied() || occuStatus.getVacation() != null)
                 && occupancyModeval != Occupancy.AUTOAWAY.ordinal()) {
             long temporaryHoldTime =
-                    ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(mBPOSEquip.mEquipRef));
+                    ScheduleUtil.getTemporaryHoldExpiry(HSUtil.getEquipInfo(mBPOSEquip.mEquipRef));
             long differenceInMinutes = findDifference(temporaryHoldTime, true);
             double desiredAvgTemp = mBPOSEquip.getDesiredTemp();
 
@@ -236,7 +234,7 @@ public class BPOSProfile extends ZoneProfile {
             If systemOccupancy is preconditioning then zone level profile will also be in
             preconditioning.
              */
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING){
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING){
                 CCUHsApi.getInstance().writeHisValByQuery(
                         "point and bpos and occupancy and mode and " +
                                 "equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
@@ -244,7 +242,6 @@ public class BPOSProfile extends ZoneProfile {
             }else if (occupancysensor) {
                 // If we are not is in force occupy then fall into force occupy
                 if (occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
-
                     CCUHsApi.getInstance().writeHisValByQuery(
                             "point and bpos and occupancy and mode and " +
                                     "equipRef == \"" + mBPOSEquip.mEquipRef + "\"",
@@ -309,7 +306,7 @@ public class BPOSProfile extends ZoneProfile {
         Equip q = new Equip.Builder().setHashMap(equipMap).build();
 
         String zoneId = HSUtil.getZoneIdFromEquipId(q.getId());
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         HashMap<Object,Object> coolingDtPoint = hayStack.readEntity("point and air and temp and " +
                 "desired and cooling and sp and equipRef == \"" + q.getId() + "\"");
         if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
@@ -359,7 +356,7 @@ public class BPOSProfile extends ZoneProfile {
                 CCUHsApi.getInstance().readEntity("equip and group == \"" + mBPOSEquip.mNodeAddr + "\"");
         Equip q = new Equip.Builder().setHashMap(equipMap).build();
         String zoneId = HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef);
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ != null && occ.isOccupied());
         HashMap<Object,Object> occupancymode = CCUHsApi.getInstance().readEntity(
                 "point and occupancy  and mode and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
@@ -462,7 +459,7 @@ public class BPOSProfile extends ZoneProfile {
         boolean isAutoawayenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and away and config and equipRef == \"" + mBPOSEquip.mEquipRef + "\"") > 0;
         Occupied occuStatus =
-                ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef ));
+            ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(mBPOSEquip.mEquipRef ));
         if(isAutoawayenabled && occuStatus != null) {
             if (occuStatus.isOccupied()) {
                 HashMap<Object,Object> ocupancyDetection = CCUHsApi.getInstance().readEntity(

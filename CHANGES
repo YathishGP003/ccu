@@ -1,10 +1,2 @@
- - Merged PR 4799: Exclude sense profile from ahu scheduling
- - Merged PR 4806: Support for modbus userIntent reconfig
- - Merged PR 4782: Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .
- - Merged PR 4804: 13704: Celsius support for System Tab
- - Merged PR 4801: DateTime object for special schedule while deleting
- - Support for modbus userIntent reconfig
- - DateTime object for special schedule while deleting
- - Exclude sense profile from ahu scheduling
- - Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .
- - Bug 13685: CCU: Celsius: Tuner values round off discrepancy in toast message .
+ - Merged PR 4712: Master control allowing overlapping with heating cooling limits
+ - Merged PR 4622: All profile UI and Autoaway Autoforce support

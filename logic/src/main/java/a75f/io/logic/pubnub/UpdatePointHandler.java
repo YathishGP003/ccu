@@ -268,7 +268,8 @@ public class UpdatePointHandler
         //Notification for updates which are local to a CCU.
         //Some places we still update the user as ccu_displayName. Until that is removed, we will keep name
         //comparison too.
-        if (pbSource.equals("ccu_"+ccuName) || pbSource.equals("Scheduler") || pbSource.equals("manual")) {
+        if (pbSource.equals("ccu_"+ccuName) || pbSource.equals("Scheduler") || pbSource.equals("manual")
+            || pbSource.equals("OccupancySensor")) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore");
             return true;
         }

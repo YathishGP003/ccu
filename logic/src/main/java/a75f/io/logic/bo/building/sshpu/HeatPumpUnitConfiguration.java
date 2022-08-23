@@ -16,4 +16,7 @@ public class HeatPumpUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableRelay6;
     public int changeOverRelay6Type; //NotEnabled(0), Energize in cooling(1), Energize in heating (2)
     public int fanRelay5Type;//NotEnabled(0), Fan Stage2(1), Humidifier(2), De-humidifier(3)
+
+    public boolean enableAutoAway;
+    public boolean enableAutoForceOccupied;
 }

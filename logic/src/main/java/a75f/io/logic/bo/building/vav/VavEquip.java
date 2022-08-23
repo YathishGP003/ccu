@@ -1,8 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -29,8 +26,8 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -42,14 +39,18 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTuners;
 import a75f.io.logic.util.RxTask;
+
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -594,8 +595,7 @@ public class VavEquip
                                     .addMarker("vav").addMarker(fanMarker).addMarker("occupancy").addMarker("mode")
                                     .addMarker("zone").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
-                                            "occupancysensing,autoforceoccupy,autoaway")
+                                    .setEnums(Occupancy.getEnumStringDefinition())
                                     .setTz(tz)
                                     .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
@@ -663,6 +663,7 @@ public class VavEquip
         device.rssi.setEnabled(true);
         device.analog1In.setEnabled(true);
         device.analog1In.setPointRef(damperFeedbackID);
+        ConfigUtil.Companion.addOccupancyPointsSN(device,fanMarker,siteRef,room,floor,equipRef,tz,String.valueOf(nodeAddr),equipDis);
 
         if (profileType != ProfileType.VAV_REHEAT) {
             createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);
@@ -971,6 +972,10 @@ public class VavEquip
         } else {
             TrueCFMPointsHandler.createNonCfmDamperConfigPoints(hayStack, equip, config, fanMarker);
         }
+
+        ConfigUtil.Companion.addConfigPoints("vav",siteRef,room,floor,equipRef,tz,
+                String.valueOf(nodeAddr),equipDis,fanMarker,config.enableAutoAwayControl ?1:0,
+                config.enableAutoForceoccupied ? 1:0);
         
     }
 
@@ -1095,7 +1100,9 @@ public class VavEquip
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
     
         handleTrueCfmConfiguration(config);
-        
+        CcuLog.d(L.TAG_CCU_UI, "sent config update:  - "
+                +config.enableAutoForceoccupied+"----------"+config.enableAutoAwayControl);
+
         setConfigNumVal("damper and type",config.damperType);
         setConfigNumVal("damper and size",config.damperSize);
         setConfigNumVal("damper and shape",config.damperShape);
@@ -1109,6 +1116,15 @@ public class VavEquip
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
+
+        setConfigNumVal("auto and away",config.enableAutoAwayControl ? 1:0);
+        setHisVal("auto and away",config.enableAutoAwayControl ? 1:0);
+        setConfigNumVal("auto and forced and occupied",config.enableAutoForceoccupied ? 1:0);
+        setHisVal("auto and forced and occupied",config.enableAutoForceoccupied ? 1:0);
+
+        CcuLog.d(L.TAG_CCU_UI, "sent config update after :  - "
+                +getConfigNumVal("auto and away")+"----------"+getConfigNumVal("auto and forced and occupied"));
+        
         
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
@@ -1182,6 +1198,9 @@ public class VavEquip
         config.numMinCFMReheating=(int)getConfigNumVal("min and trueCfm and heating");
         config.enableCFMControl = getConfigNumVal("trueCfm and enable") > 0;
         config.kFactor=getConfigNumVal("trueCfm and vav and config and kfactor");
+
+        config.enableAutoAwayControl = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceoccupied = getConfigNumVal("auto and forced and occupied") > 0;
         
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
         
@@ -1518,7 +1537,7 @@ public class VavEquip
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else
             {

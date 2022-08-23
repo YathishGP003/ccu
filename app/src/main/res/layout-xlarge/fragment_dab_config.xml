@@ -262,13 +262,37 @@
                     android:textOff=""
                     android:textOn="" />
 
+                <TextView
+                    android:id="@+id/textEnableautoforceoccupied"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableIAQ"
+                    android:layout_alignStart="@+id/textDamper2Type"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/autoforceoccupied"
+                    android:textAppearance="@style/title_normal" />
+
+                <ToggleButton
+                    android:id="@+id/enableAFOControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/enableIAQControl"
+                    android:layout_alignEnd="@id/damper2Type"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="45dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
 
                 <TextView
                     android:id="@+id/textEnableCFM"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/textEnableIAQ"
-                    android:layout_alignStart="@+id/textEnableIAQ"
+                    android:layout_below="@+id/textEnableautoforceoccupied"
+                    android:layout_alignStart="@+id/textEnableautoforceoccupied"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enable_cfm"
@@ -279,10 +303,9 @@
                     android:id="@+id/enableCFMControl"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_below="@+id/enableIAQControl"
-                    android:layout_alignStart="@+id/enableIAQControl"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
+                    android:layout_below="@+id/enableAFOControl"
+                    android:layout_alignStart="@+id/enableAFOControl"
+                    android:layout_marginTop="42dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
@@ -293,8 +316,8 @@
                     android:id="@+id/textKFactor"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:layout_below="@id/textEnableCO2"
-                    android:layout_alignStart="@+id/textEnableCO2"
+                    android:layout_below="@id/textEnableautoAway"
+                    android:layout_alignStart="@+id/textEnableautoAway"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_k_factor"
@@ -307,7 +330,7 @@
                     style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:layout_width="120dp"
                     android:layout_height="42dp"
-                    android:layout_below="@id/enableCO2Control"
+                    android:layout_below="@id/textEnableautoAway"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="80dp"
                     android:layout_marginTop="32dp"
@@ -336,6 +359,30 @@
                     android:layout_alignEnd="@id/zonePriority"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textEnableautoAway"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableCO2"
+                    android:layout_alignStart="@+id/textEnableCO2"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/autoaway"
+                    android:textAppearance="@style/title_normal" />
+
+                <ToggleButton
+                    android:id="@+id/enableAutoAwayControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/enableCO2Control"
+                    android:layout_alignEnd="@id/enableCO2Control"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="45dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""

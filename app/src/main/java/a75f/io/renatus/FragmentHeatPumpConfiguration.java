@@ -90,6 +90,9 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     Spinner fanHumiDSpinner;
     NumberPicker temperatureOffset;
 
+    ToggleButton toggleAutoaway;
+    ToggleButton toggleAutoForceOccupied;
+
     public FragmentHeatPumpConfiguration() {
     }
 
@@ -195,6 +198,9 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerFanHigh);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
 
+        toggleAutoaway = view.findViewById(R.id.toggleAutoAway);
+        toggleAutoForceOccupied = view.findViewById(R.id.toggleAFO);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -230,6 +236,8 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
             fanHumiDSpinner.setSelection(mProfileConfig.fanRelay5Type - 1, false);
             hpChangeOverTypeSpinner.setSelection(mProfileConfig.changeOverRelay6Type - 1);
+            toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
             if (mProfileConfig.getOutputs().size() > 0) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -374,6 +382,8 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         hpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         hpuConfig.changeOverRelay6Type = hpChangeOverTypeSpinner.getSelectedItemPosition()+1;
         hpuConfig.fanRelay5Type = fanHumiDSpinner.getSelectedItemPosition()+1;
+        hpuConfig.enableAutoAway = toggleAutoaway.isChecked();
+        hpuConfig.enableAutoForceOccupied = toggleAutoForceOccupied.isChecked();
 
         if (switchCoolingY1.isChecked()) {
             Output relay1Op = new Output();

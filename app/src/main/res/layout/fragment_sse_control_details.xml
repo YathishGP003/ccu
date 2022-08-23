@@ -242,6 +242,17 @@
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
+
+                <TextView
+                    android:id="@+id/textTh1sse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="20dp"
+                    android:text="TH1 - Airflow Temperature Sensor"
+                    android:textAppearance="@style/text_appearance" />
+
                 <ToggleButton
                     android:id="@+id/sse_thermister1_switch"
                     android:layout_width="46.12dp"
@@ -253,36 +264,6 @@
                     android:textOff=""
                     android:textOn="" />
 
-                <TextView
-                    android:id="@+id/textTh1sse"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="20dp"
-                    android:text="TH1 - Airflow Temperature Sensor"
-                    android:textAppearance="@style/text_appearance" />
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginStart="25dp"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <ToggleButton
-                    android:id="@+id/sse_thermister2_switch"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="@drawable/toggle_selector"
-                    android:layout_marginLeft="10dp"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textTh2sse"
@@ -293,6 +274,68 @@
                     android:layout_marginLeft="20dp"
                     android:text="TH2 - Use external 10k Temperature Sensor"
                     android:textAppearance="@style/text_appearance" />
+                <ToggleButton
+                    android:id="@+id/sse_thermister2_switch"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toEndOf="@+id/textTh1sse"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textAutoForcesse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:text="@string/autoforceoccupied"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/sse_autoforceoccupied"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="140dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textAutoAwaysse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:text="@string/autoaway"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/sse_autoAway"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="220dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -323,7 +366,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                      />
+                        />
                 </LinearLayout>
 
 

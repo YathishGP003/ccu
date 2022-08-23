@@ -4,9 +4,9 @@ import a75f.io.api.haystack.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
+import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.tuners.VrvTuners
-import java.util.*
 
 class VrvEquip(hsApi : CCUHsApi,
                addr: Short) {
@@ -225,7 +225,7 @@ class VrvEquip(hsApi : CCUHsApi,
             .setRoomRef(roomRef)
             .setFloorRef(floorRef).setHisInterpolate("cov")
             .addMarker("vrv").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-            .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+            .setEnums(Occupancy.getEnumStringDefinition())
             .setGroup(nodeAddr.toString())
             .setTz(equip.tz)
             .build()

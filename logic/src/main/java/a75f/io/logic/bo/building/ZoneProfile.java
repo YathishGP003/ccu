@@ -1,75 +1,48 @@
 package a75f.io.logic.bo.building;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
+import a75f.io.logic.bo.building.schedules.EquipOccupancyHandler;
+import a75f.io.logic.bo.building.schedules.EquipScheduleHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 
-/**
- * Created by Yinten isOn 8/15/2017.
- */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "clazz")
-public abstract class ZoneProfile extends Schedulable
+public abstract class ZoneProfile
 {
     public static final String TAG = ZoneProfile.class.getSimpleName();
     protected HashMap<Short, BaseProfileConfiguration> mProfileConfiguration = new HashMap<>();
-    @JsonIgnore
     protected UUID uuid = UUID.randomUUID();
-    @JsonIgnore
-    protected boolean mIsCircuitTest = false;
-    
-    @JsonIgnore
     public ZoneState    state    = COOLING;
     
+    private EquipOccupancyHandler equipOccupancyHandler = null;
+    private EquipScheduleHandler equipScheduleHandler = null;
     public ZoneProfile()
     {
     }
     
-    
     public abstract void updateZonePoints();
-    
     
     public abstract ProfileType getProfileType();
     
-    
     public abstract <T extends BaseProfileConfiguration> T getProfileConfiguration(short address);
     
-    @JsonIgnore
-    public boolean isCircuitTest()
-    {
-        return mIsCircuitTest;
-    }
-    
-    @JsonIgnore
-    public void setCircuitTest(boolean isCircuitTest)
-    {
-        this.mIsCircuitTest = isCircuitTest;
-    }
-    
-    //MARK
-    @JsonIgnore
     protected RoomDataInterface mInterface;
-    //MARK
-    @JsonIgnore
+    
     public void setZoneProfileInterface(RoomDataInterface zoneProfileInterface)
     {
         mInterface = zoneProfileInterface;
     }
     
-    
-    @JsonIgnore
     public Set<Short> getNodeAddresses()
     {
         return mProfileConfiguration.keySet();
@@ -103,48 +76,32 @@ public abstract class ZoneProfile extends Schedulable
      * TODO - Refactor.
      * Currently this is repeated it all the Zone profile's. It should be replaced by a single common implementation
      * here.
-     * @return
      */
     public boolean isZoneDead() {
         return false;
     }
     
-    @JsonIgnore
     public double getDisplayCurrentTemp()
     {
         return 0;
     }
     
-    /*@JsonIgnore
-    public void updateZoneControls(double desiredVal) {
-    }*/
-    
-    @JsonIgnore
-    public HashMap<String, Double> getTSData() {
-        return null;
-    }
-    
-    @JsonIgnore
     public ZonePriority getPriority() {
         return ZonePriority.LOW;
     }
     
-    @JsonIgnore
     public double getAverageZoneTemp() {
         return 72; //TODO- TEMP
     }
     
-    @JsonIgnore
     public double getCurrentTemp() {
         return 0;
     }
     
-    @JsonIgnore
     public Equip getEquip() {
         return null;
     }
     
-    @JsonIgnore
     public ZoneState getState() {
         return state;
     }
@@ -154,10 +111,7 @@ public abstract class ZoneProfile extends Schedulable
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
     
         double currentTemp = getCurrentTemp();
-        if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway)) {
-            return true;
-        }
-        return false;
+        return currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin - tempDeadLeeway);
     }
     
     public boolean buildingLimitMaxBreached() {
@@ -165,10 +119,7 @@ public abstract class ZoneProfile extends Schedulable
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
     
         double currentTemp = getCurrentTemp();
-        if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway)) {
-            return true;
-        }
-        return false;
+        return currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax + tempDeadLeeway);
     }
     
     public void reset(){
@@ -176,10 +127,33 @@ public abstract class ZoneProfile extends Schedulable
     
     /**
      * When a Zone has damperOverride active , System does not normazlize or adjust the damper further.
-     * @return
      */
     public boolean isDamperOverrideActive() {
         return false;
     }
+    
+    public void updateOccupancy(CCUHsApi hayStack) {
+        CcuLog.i(TAG_CCU_SCHEDULER, "UpdateOccupancy for Profile: "+getEquip().getDisplayName());
+        if (equipScheduleHandler == null) {
+            Equip currentEquip = getEquip();
+            if (currentEquip == null) {
+                CcuLog.e(L.TAG_CCU_SCHEDULER, "updateOccupancy failed: No equip for ZoneProfile");
+                return;
+            }
+            equipScheduleHandler = new EquipScheduleHandler(hayStack, currentEquip.getId());
+            equipOccupancyHandler = new EquipOccupancyHandler(hayStack, currentEquip.getId());
+        }
+        
+        equipOccupancyHandler.updateOccupancy();
+    }
+    
+    public EquipScheduleHandler getEquipScheduleHandler() {
+        return equipScheduleHandler;
+    }
+    
+    public EquipOccupancyHandler getEquipOccupancyHandler() {
+        return equipOccupancyHandler;
+    }
+    
 }
 

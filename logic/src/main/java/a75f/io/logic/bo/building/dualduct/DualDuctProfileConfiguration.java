@@ -28,6 +28,9 @@ public class DualDuctProfileConfiguration extends BaseProfileConfiguration {
     private double analog2OutAtMaxDamperHeating;
     private double analog2OutAtMinDamperCooling;
     private double analog2OutAtMaxDamperCooling;
+
+    public boolean enableAutoForceOccupied;
+    public boolean enableAutoAwayControl;
     
     public double getTemperatureOffset() {
         return temperatureOffset;
@@ -182,7 +185,9 @@ public class DualDuctProfileConfiguration extends BaseProfileConfiguration {
             analog2OutAtMinDamperHeating != config.analog2OutAtMinDamperHeating ||
             analog2OutAtMaxDamperHeating != config.analog2OutAtMaxDamperHeating ||
             analog2OutAtMinDamperCooling != config.analog2OutAtMinDamperCooling ||
-            analog2OutAtMaxDamperCooling != config.analog2OutAtMaxDamperCooling) {
+            analog2OutAtMaxDamperCooling != config.analog2OutAtMaxDamperCooling ||
+           enableAutoForceOccupied != config.enableAutoForceOccupied ||
+           enableAutoAwayControl != config.enableAutoAwayControl) {
             return false;
         }
         

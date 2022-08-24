@@ -332,4 +332,14 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
                 rangeSeekBarView.getCoolValue(), rangeSeekBarView.getHeatValue());
         dismiss();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(1165, 646);
+        }
+    }
+
 }

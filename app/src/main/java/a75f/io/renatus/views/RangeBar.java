@@ -1,5 +1,9 @@
 package a75f.io.renatus.views;
 
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,25 +13,16 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.res.ResourcesCompat;
-
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.tuners.TunerConstants;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.res.ResourcesCompat;
+
 import a75f.io.renatus.R;
-
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-
-import java.util.HashMap;
 
 
 /**
@@ -36,7 +31,7 @@ import java.util.HashMap;
 public class RangeBar extends View {
 
     //
-    public static final float RECOMMENDED_WIDTH_DP = 900.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 730.0f;
     //
     private Paint mLinePaint;
     private Paint mTempIconPaint;
@@ -65,7 +60,7 @@ public class RangeBar extends View {
     float mLowerBound = 32.0f;
     float mUpperBound = 110.0f;
 
-    int mDegreeIncremntPX = 5;
+    int mDegreeIncremntPX = 1;
     boolean mMeasured = false;
 
     double cdb = 2.0;

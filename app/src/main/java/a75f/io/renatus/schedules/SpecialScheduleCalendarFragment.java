@@ -50,7 +50,17 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
 
         calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
         calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
-        calendarView.setSelectedDate(CalendarDay.today());
+        calendarView.setOnDateChangedListener((widget, date, selected) -> {
+            if(selected) {
+                LocalDate localDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
+                calendarView.state().edit().setMinimumDate(localDate).commit();
+                calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l)).commit();
+            }else {
+                calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
+                calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+                calendarView.setCurrentDate(date, true);
+            }
+        });
         buttonSave.setOnClickListener(saveClick -> processCalendar());
         buttonCancel.setOnClickListener(cancelClick -> dismiss());
 
@@ -68,17 +78,14 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         HDict range = (HDict) specialScheduleHDict.get(Tags.RANGE);
         DateTime beginDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.STDT).toString());
         DateTime endDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.ETDT).toString());
-        if(beginDateTime.isBeforeNow()) {
             calendarView.state().edit().setMinimumDate(CalendarDay.from(beginDateTime.getYear(),
                     beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth())).commit();
-        }
-        else{
-            calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
-        }
         CalendarDay startDay = CalendarDay.from(beginDateTime.getYear(), beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth());
         CalendarDay endDay = CalendarDay.from(endDateTime.getYear(), endDateTime.getMonthOfYear(), endDateTime.getDayOfMonth());
         calendarView.selectRange(startDay, endDay);
-        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+        LocalDate localDate = LocalDate.of(beginDateTime.getYear(), beginDateTime.getMonthOfYear(),
+                beginDateTime.getDayOfMonth());
+        calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT-1)).commit();
         calendarView.setCurrentDate(startDay, true);
     }
 

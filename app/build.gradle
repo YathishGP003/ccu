@@ -99,6 +99,7 @@ android {
             signingConfig signingConfigs.debug
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU\"'
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
+            debuggable true
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         staging {

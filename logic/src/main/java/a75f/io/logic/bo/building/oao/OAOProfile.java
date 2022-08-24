@@ -8,14 +8,14 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 /*
@@ -159,7 +159,7 @@ public class OAOProfile
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
         if(systemMode != SystemMode.OFF) {
-            Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+            Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
             switch (systemOccupancy) {
                 case UNOCCUPIED:
                     boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
@@ -348,7 +348,7 @@ public class OAOProfile
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
-        Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+        Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
         switch (systemOccupancy) {
             case OCCUPIED:
             case FORCEDOCCUPIED:
@@ -405,7 +405,7 @@ public class OAOProfile
     private void handleSmartPrePurgeControl(){
         double smartPrePurgeRunTime = TunerUtil.readTunerValByQuery("prePurge and runtime and oao and system", oaoEquip.equipRef);
         double smartPrePurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("prePurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
-        Occupied occuSchedule = ScheduleProcessJob.getNextOccupiedTimeInMillis();
+        Occupied occuSchedule = ScheduleManager.getInstance().getNextOccupiedTimeInMillis();
         int minutesToOccupancy = occuSchedule != null ? (int)occuSchedule.getMillisecondsUntilNextChange()/60000 : -1;
         if((minutesToOccupancy != -1) && (smartPrePurgeOccupiedTimeOffset >= minutesToOccupancy) && (minutesToOccupancy >= (smartPrePurgeOccupiedTimeOffset - smartPrePurgeRunTime))) {
             outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
@@ -416,7 +416,7 @@ public class OAOProfile
     private void handleSmartPostPurgeControl(){
         double smartPostPurgeRunTime = TunerUtil.readTunerValByQuery("postPurge and runtime and oao and system", oaoEquip.equipRef);
         double smartPostPurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("postPurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
-        Occupied occuSchedule = ScheduleProcessJob.getPrevOccupiedTimeInMillis();
+        Occupied occuSchedule = ScheduleManager.getInstance().getPrevOccupiedTimeInMillis();
         if(occuSchedule != null)
             Log.d(L.TAG_CCU_OAO, "System Unoccupied, check postpurge22 = "+occuSchedule.getMillisecondsUntilPrevChange()+","+(occuSchedule.getMillisecondsUntilPrevChange())/60000+","+smartPostPurgeOccupiedTimeOffset+","+smartPostPurgeRunTime);
         int minutesInUnoccupied = occuSchedule != null ? (int)(occuSchedule.getMillisecondsUntilPrevChange()/60000) : -1;

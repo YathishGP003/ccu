@@ -435,7 +435,10 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(1165, 646);
+        }
     }
 
     private void setDividerColor(NumberPicker picker) {

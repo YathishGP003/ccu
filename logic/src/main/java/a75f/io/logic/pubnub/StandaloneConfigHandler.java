@@ -19,7 +19,7 @@ public class StandaloneConfigHandler {
     
         if (configPoint.getMarkers().contains(Tags.FCU)) {
             FanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
-        } else if (configPoint.getDisplayName().contains("CPU")) {
+        } else if (configPoint.getMarkers().contains(Tags.CPU)) {
             //CPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
             ConventionalPackageUnitUtil.updateCPUProfile(configPoint, msgObject, hayStack);
         } else if (HSUtil.isHPUEquip(configPoint.getId(), hayStack)) {

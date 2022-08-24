@@ -1,6 +1,5 @@
 package a75f.io.device.mesh;
 
-
 import android.util.Log;
 
 import org.javolution.io.Struct;
@@ -35,10 +34,8 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
@@ -155,7 +152,7 @@ public class LSmartStat {
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
         try {
             Log.d("LSmartStat","sch status="+equipId+","+zone.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zone.getId());
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zone.getId());
             if(occuStatus != null) {
                 Log.d("LSmartStat", "sch status22=" + occuStatus.getCoolingVal() + "," + occuStatus.getHeatingVal() + "," + occuStatus.getHeatingDeadBand() + "," + occuStatus.getCoolingDeadBand());
                 settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10

@@ -34,17 +34,64 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <LinearLayout
+                android:id="@+id/occupancy"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="200dp">
+
+                <TextView
+                    android:id="@+id/textAutoForceOccupied"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:text="@string/autoforceoccupied"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/toggleAFO"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_marginStart="40dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textAutoAway"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:text="@string/autoaway"
+                    android:layout_marginStart="80dp"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/toggleAutoAway"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_marginStart="40dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/textEnable"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:text="@string/title_enable"
-                android:textSize="19.5dp"
-                android:textColor="@color/black"
+                android:layout_marginLeft="282dp"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:layout_marginLeft="282dp"/>
+                android:text="@string/title_enable"
+                android:layout_below="@+id/occupancy"
+                android:textColor="@color/black"
+                android:textSize="19.5dp" />
 
 
             <TextView
@@ -57,7 +104,8 @@
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
                 android:layout_toEndOf="@+id/textEnable"
-                android:layout_marginLeft="285dp"/>
+                android:layout_marginLeft="285dp"
+                android:layout_below="@+id/occupancy"/>
 
             <TextView
                 android:id="@+id/textTempOffset"

@@ -3,17 +3,22 @@ package a75f.io.logic.bo.building.hyperstat.cpu
 import a75f.io.api.haystack.*
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.*
+import a75f.io.logic.bo.building.BaseProfileConfiguration
+import a75f.io.logic.bo.building.ZoneProfile
+import a75f.io.logic.bo.building.ZoneState
+import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualFanMode
+import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.jobs.HyperStatScheduler
 import a75f.io.logic.jobs.HyperStatScheduler.Companion.updateHyperstatUIPoints
-import a75f.io.logic.jobs.ScheduleProcessJob
 import a75f.io.logic.jobs.SystemScheduleUtil
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
@@ -22,9 +27,6 @@ import org.joda.time.DateTime
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import java.util.*
-import kotlin.collections.HashMap
-import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logic.bo.building.hvac.AnalogOutput
 
 
 /**
@@ -197,7 +199,7 @@ class HyperStatCpuProfile : ZoneProfile() {
                 "Heating Loop Output: $heatingLoopOutput "+
                 "Cooling Loop Output:: $coolingLoopOutput "+
                 "Fan Loop Output:: $fanLoopOutput")
-        val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
+        /*val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
                                                                     equip.equipRef)
         if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {
             runAutoForceOccupyOperation(equip)
@@ -211,7 +213,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         } else {
             if (equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt() == Occupancy.AUTOAWAY.ordinal)
                 resetOccupancy(equip)
-        }
+        }*/
 
         runRelayOperations(equip, config, hyperstatTuners, userIntents, basicSettings, relayStages)
 
@@ -307,7 +309,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             && currentOperatingMode != Occupancy.FORCEDOCCUPIED.ordinal
         ) {
 
-            val temporaryHoldTime = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipInfo(equip.equipRef))
+            val temporaryHoldTime = ScheduleUtil.getTemporaryHoldExpiry(HSUtil.getEquipInfo(equip.equipRef))
             val differenceInMinutes = findDifference(temporaryHoldTime, true)
 
             if (occupantDetected) {
@@ -573,8 +575,10 @@ class HyperStatCpuProfile : ZoneProfile() {
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                    &&( basicSettings.fanMode != StandaloneFanStage.OFF )
+
                 ) {
                     runRelayForCooling(relayState, equip, port, config, tuner, relayStages)
                 }else{
@@ -583,8 +587,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                    &&(basicSettings.fanMode != StandaloneFanStage.OFF)
                 ) {
                     runRelayForHeating(relayState, equip, port, config, tuner, relayStages)
                 }else{
@@ -965,8 +970,10 @@ class HyperStatCpuProfile : ZoneProfile() {
         when {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                    && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal )
+                ) {
                     runForAnalogOutCooling(equip, port)
                     dumpAnalogOutLoopStatus(coolingLoopOutput, AnalogOutput.COOLING.name, analogOutStages)
                 }else{
@@ -975,8 +982,10 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                        && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal ) )
+                {
                     dumpAnalogOutLoopStatus(heatingLoopOutput, AnalogOutput.HEATING.name, analogOutStages)
                     runForAnalogOutHeating(equip, port)
                 }else{
@@ -986,6 +995,8 @@ class HyperStatCpuProfile : ZoneProfile() {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
                     runForAnalogOutFanSpeed(analogOutState, equip, config, port, basicSettings, analogOutStages)
+                }else{
+                    updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
                 }
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
@@ -1138,7 +1149,8 @@ class HyperStatCpuProfile : ZoneProfile() {
             "point and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
-        equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.UNOCCUPIED.ordinal.toDouble())
+        //TODO - zone dead means unoccupied ?
+        //equip.hsHaystackUtil!!.setOccupancyMode(Occupancy.UNOCCUPIED.ordinal.toDouble())
 
     }
 
@@ -1184,6 +1196,7 @@ class HyperStatCpuProfile : ZoneProfile() {
         val isDoorOpen = isDoorOpenState(config,equip)
         Log.i(L.TAG_CCU_HSCPU, " is Door Open ? $isDoorOpen")
         if (isDoorOpen) resetLoopOutputValues()
+        //TODO - also update window sensor point.
     }
 
 
@@ -1193,6 +1206,10 @@ class HyperStatCpuProfile : ZoneProfile() {
         // If analog in value is less than 2v door is closed(0) else door is open (1)
         var isDoorOpen = false
 
+        var th2SensorEnabled = false
+        var analog1SensorEnabled = false
+        var analog2SensorEnabled = false
+
         // Thermistor 2 is always mapped to door window sensor
         if (config.isEnableDoorWindowSensor) {
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
@@ -1200,6 +1217,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU, "TH2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
+            th2SensorEnabled = true;
         }
 
         if (config.analogIn1State.enabled &&
@@ -1210,6 +1228,7 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU, "Analog In 1 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
+            analog1SensorEnabled = true
         }
 
         if (config.analogIn2State.enabled &&
@@ -1220,7 +1239,15 @@ class HyperStatCpuProfile : ZoneProfile() {
             )
             Log.i(L.TAG_CCU_HSCPU, "Analog In 2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
+            analog2SensorEnabled = true;
         }
+
+        equip.haystack.writeHisValByQuery("window and sensor and input and equipRef == \"${equip.equipRef}\"",
+            if (isDoorOpen) 1.0 else 0.0)
+        Log.i("CCU_SCHEDULER", "isDoorOpenState: "+if(th2SensorEnabled || analog1SensorEnabled || analog2SensorEnabled) 1.0 else 0.0)
+        equip.haystack.writeDefaultVal("window and sensing and enabled and equipRef == \"${equip.equipRef}\"",
+            if (th2SensorEnabled || analog1SensorEnabled || analog2SensorEnabled) 1.0 else 0.0)
+
         return isDoorOpen
     }
     private fun resetLoopOutputValues() {
@@ -1254,11 +1281,23 @@ class HyperStatCpuProfile : ZoneProfile() {
     */
         val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
                                                                                         equip.equipRef)
+        var analog1KeycardEnabled = false
+        var analog2KeycardEnabled = false
+
+        var analog1Sensor = 0.0
+        var analog2Sensor = 0.0
 
         if (config.analogIn1State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
         ) {
-            val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
+            analog1KeycardEnabled = true
+
+            analog1Sensor = equip.hsHaystackUtil!!.getSensorPointValue(
+                "analog1 and in and logical and  keycard and sensor"
+            )
+
+            //TODO - set key card sensing enable/disable
+            /*val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog1 and in and logical and  keycard and sensor"
             )
@@ -1289,14 +1328,21 @@ class HyperStatCpuProfile : ZoneProfile() {
                     resetOccupancy(equip)
                 }
 
-            }
+            }*/
         }
 
 
         if (config.analogIn2State.enabled &&
             HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn2State)
         ) {
-            val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
+
+            analog2KeycardEnabled = true
+            analog2Sensor = equip.hsHaystackUtil!!.getSensorPointValue(
+                "analog2 and in and logical and  keycard and sensor"
+            )
+
+            //TODO - set key card sensing enable/disable
+            /*val currentOperatingMode = equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt()
             val sensorValue = equip.hsHaystackUtil!!.getSensorPointValue(
                 "analog2 and in and logical and  keycard and sensor"
             )
@@ -1325,8 +1371,13 @@ class HyperStatCpuProfile : ZoneProfile() {
                     resetOccupancy(equip)
                 }
 
-            }
+            }*/
         }
+
+        equip.haystack.writeDefaultVal("keycard and sensing and enabled and equipRef == \""+equip.equipRef+"\"",
+            if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0)
+        equip.haystack.writeHisValByQuery("keycard and sensor and input and equipRef == \""+equip.equipRef+"\"",
+            if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0)
     }
 
     override fun getEquip(): Equip? {

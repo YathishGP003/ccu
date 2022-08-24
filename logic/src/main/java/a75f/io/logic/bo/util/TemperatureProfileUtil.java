@@ -6,12 +6,10 @@ import org.projecthaystack.HRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75.io.algos.CO2Loop;
-import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.logic.bo.building.Occupancy;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class TemperatureProfileUtil {
     
@@ -132,27 +130,23 @@ public class TemperatureProfileUtil {
     }
     
     public static void setStatus(int nodeAddr, double status, boolean emergency) {
-        if (getStatus(nodeAddr) != status )
-        {
+        if (getStatus(nodeAddr) != status ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
         }
         
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
-        } else
-        {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+        } else {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
-            } else
-            {
+            } else {
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             }
         }
         
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
-        if (!curStatus.equals(message))
-        {
+        if (!curStatus.equals(message)) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
         }
     }

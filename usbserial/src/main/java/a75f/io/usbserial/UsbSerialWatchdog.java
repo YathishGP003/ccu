@@ -28,21 +28,21 @@ public class UsbSerialWatchdog {
     }
     
     public void pet() {
-        Log.i("CCU_SERIAL", "USB watch dog pet.");
+        Log.i("CCU_USB", "USB watch dog pet.");
         watchdogTimeoutCounter = 0;
     }
     
     public void bark(Context context, CCUHsApi hayStack) {
         int USB_TABLET_REBOOT_TIMEOUT_MINS = 30;
         if (++watchdogTimeoutCounter >= USB_TABLET_REBOOT_TIMEOUT_MINS) {
-            Log.i("CCU_SERIAL", "USB watch dog triggering tablet reboot.");
+            Log.i("CCU_USB", "USB watch dog triggering tablet reboot.");
             if (UsbSerialUtil.isSerialRetryRequired(hayStack)) {
                 watchdogTimeoutCounter = 0;
                 Intent intent = new Intent(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
                 context.sendBroadcast(intent);
             }
         } else {
-            Log.i("CCU_SERIAL", "watchdogTimeoutCounter "+watchdogTimeoutCounter);
+            Log.i("CCU_USB", "watchdogTimeoutCounter "+watchdogTimeoutCounter);
         }
     }
     

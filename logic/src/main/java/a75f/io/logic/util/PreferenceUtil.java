@@ -28,7 +28,7 @@ public class PreferenceUtil {
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
-    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleType";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleTypes";
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";

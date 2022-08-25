@@ -391,7 +391,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                     Object tunerVal = newTunerValueItem.get("newValue");
                     try {
-                        if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit")) {
+                        if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit") && tunerVal != null) {
                             if (isCelsiusTunerAvailableStatus()) {
                                 if (doesPointNeedRelativeConversion(newTunerValueItem)) {
                                     tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
@@ -401,10 +401,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     tunerVal = celsiusToFahrenheitTuner(Double.parseDouble(String.valueOf(tunerVal)));
                                 }
                             }
-                            ArrayList<String> valueList = new ArrayList<>();
-                            DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
-                            tunerPriorityArray.loadValueList(valueList);
-                            tunerVal = tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal.toString()));
 
 
                         }

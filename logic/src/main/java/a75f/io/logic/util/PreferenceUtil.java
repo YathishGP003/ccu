@@ -20,6 +20,7 @@ public class PreferenceUtil {
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
+    private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
     private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefForZoneMigration";
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
 
@@ -28,6 +29,10 @@ public class PreferenceUtil {
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
     private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleType";
+
+
+    private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -280,6 +285,22 @@ public class PreferenceUtil {
 
     }
 
+    public static boolean getScheduleRefactorMigration() {
+        return getBooleanPreference(SCHEDULE_REFACTOR_MIGRATION);
+    }
+
+    public static void setScheduleRefactorMigration() {
+        setBooleanPreference(SCHEDULE_REFACTOR_MIGRATION, true);
+
+    }
+
+    public static void setNewOccupancy() {
+        setBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION, true);
+    }
+    public static boolean getNewOccupancy() {
+        return getBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION);
+    }
+
     public static void setScheduleRefForZoneMigration() {
         setBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION, true);
     }
@@ -294,7 +315,6 @@ public class PreferenceUtil {
     public static void setScheduleRefUpdateMigration() {
         setBooleanPreference(UPDATE_SCHEDULE_REFS, true);
     }
-
 
     public static void setVocPm2p5MigrationV1() {
         setBooleanPreference(VOC_PM2P5_MIGRATION_V1, true);

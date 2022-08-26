@@ -83,7 +83,7 @@ public class Schedule extends Entity
 
     }
 
-    private static int getInt(String intString){
+    public static int getInt(String intString){
         if(intString.contains(".")){
             String[] numerics = intString.split("\\.");
             return Integer.parseInt(numerics[0]);

@@ -19,15 +19,15 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.Units;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -779,7 +779,8 @@ public abstract class SystemProfile
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
         Point systemOccupancy =
-                new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway").setTz(tz).build();
+                new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
+                                   .setEnums(Occupancy.getEnumStringDefinition()).setTz(tz).build();
         String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
         CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
         Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
@@ -958,9 +959,9 @@ public abstract class SystemProfile
      * @return
      */
     public boolean isSystemOccupied() {
-         return ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED &&
-                ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION &&
-                ScheduleProcessJob.getSystemOccupancy() != Occupancy.AUTOAWAY;
+         return ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.UNOCCUPIED &&
+                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.VACATION &&
+                ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.AUTOAWAY;
     }
 
     public void reset() {

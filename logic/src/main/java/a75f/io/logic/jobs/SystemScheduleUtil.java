@@ -21,6 +21,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class SystemScheduleUtil {
@@ -33,21 +34,21 @@ public class SystemScheduleUtil {
      */
     public static void handleDesiredTempUpdate(Point point, boolean manual, double val) {
         
-        CcuLog.d(L.TAG_CCU_JOB, "handleDesiredTempUpdate for "+point.getDisplayName());
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(point.getRoomRef());
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "handleDesiredTempUpdate for "+point.getDisplayName());
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(point.getRoomRef());
         
         if (occ != null && occ.isOccupied()) {
             Schedule equipSchedule = Schedule.getScheduleByEquipId(point.getEquipRef());
             
             if(equipSchedule == null)
             {
-                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* skip handleDesiredTempUpdate");
+                CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule* skip handleDesiredTempUpdate");
                 return;
             }
             
             if (!manual) {
                 HashMap overrideLevel = getAppOverride(point.getId());
-                Log.d(L.TAG_CCU_JOB, " OverrideLevel : "+overrideLevel);
+                Log.d(L.TAG_CCU_SCHEDULER, " OverrideLevel : "+overrideLevel);
                 if (overrideLevel == null) {
                     return;
                 }
@@ -93,7 +94,7 @@ public class SystemScheduleUtil {
             double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time",point.getEquipRef());
     
             if (forcedOccupiedMins == 0) {
-                CcuLog.d(L.TAG_CCU_JOB, "handleDesiredTempUpdate skipped forcedOccupiedMins "+forcedOccupiedMins);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, "handleDesiredTempUpdate skipped forcedOccupiedMins "+forcedOccupiedMins);
                 return;
             }
             
@@ -102,7 +103,7 @@ public class SystemScheduleUtil {
             } else
             {
                 HashMap overrideLevel = getAppOverride(point.getId());
-                Log.d(L.TAG_CCU_JOB, " Desired Temp OverrideLevel : " + overrideLevel);
+                Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp OverrideLevel : " + overrideLevel);
                 if (overrideLevel == null) {
                     return;
                 }
@@ -115,7 +116,7 @@ public class SystemScheduleUtil {
                     for (int l = 9; l <= values.size(); l++)
                     {
                         HashMap valMap = ((HashMap) values.get(l - 1));
-                        Log.d(L.TAG_CCU_JOB, " Desired Temp Override : " + valMap);
+                        Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
                         if (valMap.get("duration") != null && valMap.get("val") != null)
                         {
                             long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -132,7 +133,7 @@ public class SystemScheduleUtil {
         HashMap equipid = CCUHsApi.getInstance().read("equip and group == \"" + point.getGroup() + "\"");
 
         Equip equip =  new Equip.Builder().setHashMap(equipid).build();
-        ScheduleProcessJob.processZoneEquipSchedule(equip);
+        ScheduleManager.getInstance().processZoneEquipSchedule(equip);
 
         CCUHsApi.getInstance().writeHisValById(point.getId(), HSUtil.getPriorityVal(point.getId()));
     }
@@ -148,14 +149,14 @@ public class SystemScheduleUtil {
      */
     public static void handleManualDesiredTempUpdate(Point coolpoint, Point heatpoint, Point avgpoint, double coolval, double heatval, double avgval) {
         
-        CcuLog.d(L.TAG_CCU_JOB, "handleManualDesiredTempUpdate for " + coolpoint.getDisplayName() + "," + heatpoint.getDisplayName() + "," + coolval + "," + heatval + "," + avgval);
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(coolpoint.getRoomRef());
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "handleManualDesiredTempUpdate for " + coolpoint.getDisplayName() + "," + heatpoint.getDisplayName() + "," + coolval + "," + heatval + "," + avgval);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(coolpoint.getRoomRef());
         
         if (occ != null && occ.isOccupied()) {
             Schedule equipSchedule = Schedule.getScheduleByEquipId(coolpoint.getEquipRef());
             
             if(equipSchedule == null) {
-                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* skip handleDesiredTempUpdate");
+                CcuLog.d(L.TAG_CCU_SCHEDULER,"<- *no schedule* skip handleDesiredTempUpdate");
                 return;
             }
             
@@ -206,7 +207,7 @@ public class SystemScheduleUtil {
             double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time", coolpoint.getEquipRef());
             
             if (forcedOccupiedMins == 0) {
-                CcuLog.d(L.TAG_CCU_JOB, "handleManualDesiredTempUpdate skipped forcedOccupiedMins "+forcedOccupiedMins);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, "handleManualDesiredTempUpdate skipped forcedOccupiedMins "+forcedOccupiedMins);
                 return;
             }
             if((coolpoint != null) && (coolval != 0))
@@ -249,7 +250,7 @@ public class SystemScheduleUtil {
             for (int l = 9; l <= values.size(); l++)
             {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                Log.d(L.TAG_CCU_JOB, " Desired Temp Override : " + valMap);
+                Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null)
                 {
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -279,7 +280,7 @@ public class SystemScheduleUtil {
         {
             for (int l = 9; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
-                Log.d(L.TAG_CCU_JOB, "getAppOverride : "+valMap);
+                Log.d(L.TAG_CCU_SCHEDULER, "getAppOverride : "+valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null ) {
                     long dur = (long) Double.parseDouble(valMap.get("duration").toString());
                     if (dur == 0) {
@@ -303,7 +304,7 @@ public class SystemScheduleUtil {
      */
     public static void setAppOverrideExpiry(Point point, long overrRideExpiryseconds) {
         HashMap overrideLevel = getAppOverride(point.getId());
-        Log.d(L.TAG_CCU_JOB, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
+        Log.d(L.TAG_CCU_SCHEDULER, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
         if (overrideLevel == null) {
             return;
         }
@@ -314,7 +315,7 @@ public class SystemScheduleUtil {
             for (int l = 9; l <= values.size(); l++)
             {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                Log.d(L.TAG_CCU_JOB, "setAppOverrideExpiry : " + valMap);
+                Log.d(L.TAG_CCU_SCHEDULER, "setAppOverrideExpiry : " + valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null)
                 {
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -329,13 +330,10 @@ public class SystemScheduleUtil {
     
     public static void clearOverrides(String id) {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ )
-            {
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                if (l != 8 && valMap.get("duration") != null && valMap.get("val") != null)
-                {
+                if (l != 8 && valMap.get("duration") != null && valMap.get("val") != null) {
                     CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), l, HNum.make(0), HNum.make(1, "ms"));
                 }
             }

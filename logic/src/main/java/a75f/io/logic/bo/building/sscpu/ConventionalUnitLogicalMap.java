@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -27,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -91,6 +93,8 @@ public class ConventionalUnitLogicalMap {
         createConventionalConfigPoints(config, equipRef,floor,room);
 
         addProfilePoints(siteRef,equipRef,equipDis,tz,floor,room);
+        ConfigUtil.Companion.addConfigPoints("cpu",siteRef,room,floor,equipRef,tz,String.valueOf(nodeAddr),equipDis,"standalone",
+                config.enableAutoAway ? 1:0 ,config.enableAutoForceOccupied ?1:0);
         Point currentTemp = new Point.Builder()
                 .setDisplayName(equipDis+"-currentTemp")
                 .setEquipRef(equipRef)
@@ -499,6 +503,7 @@ public class ConventionalUnitLogicalMap {
         device.relay4.setEnabled(config.isOpConfigured(Port.RELAY_FOUR));
         device.relay5.setEnabled(config.isOpConfigured(Port.RELAY_FIVE));
         device.relay6.setEnabled(config.isOpConfigured(Port.RELAY_SIX));
+
         SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[config.relay6Type];
         switch (fanRelayType){
             case FAN_STAGE2:
@@ -567,7 +572,7 @@ public class ConventionalUnitLogicalMap {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);
@@ -849,7 +854,12 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("relay6 and type",(double)config.relay6Type);
         setConfigNumVal("enable and fan and stage1",config.enableFanStage1 == true ? 1.0 : 0);
-        
+
+        setConfigNumVal("auto and away",config.enableAutoAway? 1:0);
+        setConfigNumVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+        setHisVal("auto and away",config.enableAutoAway? 1:0);
+        setHisVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+
         updateConditioningMode(equip, config, CCUHsApi.getInstance());
         updateFanMode(equip, config, CCUHsApi.getInstance());
         CCUHsApi.getInstance().syncEntityTree();
@@ -866,6 +876,9 @@ public class ConventionalUnitLogicalMap {
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);//TODO - revisit
         config.relay6Type = (int)getConfigNumVal("relay6 and type"); //TODO need to revisit once ui is done
+
+        config.enableAutoAway = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and forced and occupied") > 0;
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -1069,6 +1082,10 @@ public class ConventionalUnitLogicalMap {
 
     public void setConfigNumVal(String tags,double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
     public double getConfigNumVal(String tags) {

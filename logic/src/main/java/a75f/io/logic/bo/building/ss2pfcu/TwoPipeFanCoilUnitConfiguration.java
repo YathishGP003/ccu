@@ -15,4 +15,7 @@ public class TwoPipeFanCoilUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableRelay4;
     public boolean enableRelay5;
     public boolean enableRelay6;
+
+    public boolean enableAutoAway;
+    public boolean enableAutoForceOccupied;
 }

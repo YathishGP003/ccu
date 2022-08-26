@@ -15,14 +15,14 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
@@ -46,7 +46,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -276,7 +276,7 @@ public class VavStagedRtu extends VavSystemProfile
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
-        String scheduleStatus =  ScheduleProcessJob.getSystemStatusString();
+        String scheduleStatus =  ScheduleManager.getInstance().getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus)) {
@@ -516,8 +516,9 @@ public class VavStagedRtu extends VavSystemProfile
                     break;
                 case HUMIDIFIER:
                 case DEHUMIDIFIER:
-                    if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
-                        || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
+                    if (systemMode == SystemMode.OFF ||
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION) {
                         relayState = 0;
                     } else {
                         double humidity = VavSystemController.getInstance().getAverageSystemHumidity();

@@ -21,10 +21,10 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -239,7 +239,7 @@ public class DabProfile extends ZoneProfile
         boolean  enabledCO2Control = dabEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dabEquip.getConfigNumVal("enable and iaq") > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
     
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");

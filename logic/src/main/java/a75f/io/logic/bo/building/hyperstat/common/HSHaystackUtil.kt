@@ -1,6 +1,9 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
-import a75f.io.api.haystack.*
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.Occupied
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
@@ -9,14 +12,11 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip
-import a75f.io.logic.jobs.ScheduleProcessJob
+import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
-import java.lang.Exception
-import java.lang.NullPointerException
-import java.util.*
 
 /**
  * Created by Manjunath K on 06-08-2021.
@@ -316,7 +316,7 @@ class HSHaystackUtil(
     }
 
     fun getOccupancyStatus(): Occupied {
-        return ScheduleProcessJob.getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef))
+        return ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef))
     }
 
     fun getTargetMinInsideHumidity(): Double {

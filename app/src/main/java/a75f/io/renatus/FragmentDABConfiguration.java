@@ -91,7 +91,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     ToggleButton enableTrueCFMControl;
     TextView textKFactor;
     LinearLayout minCFMForIAQ;
-    
+    ToggleButton enableAutoForceOccupied;
+    ToggleButton enableAutoAway;
+
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;
     private DabProfileConfiguration mProfileConfig;
@@ -298,6 +300,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
         textKFactor = view.findViewById(R.id.textKFactor);
         kFactor = view.findViewById(R.id.enableKFactor);
+        enableAutoForceOccupied = view.findViewById(R.id.enableAFOControl);
+        enableAutoAway = view.findViewById(R.id.enableAutoAwayControl);
+
         ArrayList<String> spinnerArray = new ArrayList<>();
         double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
         double MAX_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.max_val_for_kfactor));
@@ -415,6 +420,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
+            enableAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            enableAutoAway.setChecked(mProfileConfig.enableAutoAwayControl);
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
             int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
@@ -489,6 +496,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         dabConfig.enableCO2Control = enableCO2Control.isChecked();
         dabConfig.enableIAQControl = enableIAQControl.isChecked();
+        dabConfig.enableAutoForceOccupied = enableAutoForceOccupied.isChecked();
+        dabConfig.enableAutoAwayControl = enableAutoAway.isChecked();
         dabConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
         dabConfig.minDamperCooling = (minCoolingDamperPos.getValue());
         dabConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());

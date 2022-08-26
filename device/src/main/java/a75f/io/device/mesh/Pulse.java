@@ -40,19 +40,18 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
-import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -413,7 +412,7 @@ public class Pulse
 		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
 		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
-		Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+		Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 		if(occ != null) {
 			cdb = occ.getCoolingDeadBand();
 			hdb = occ.getHeatingDeadBand();
@@ -1226,16 +1225,15 @@ public class Pulse
 		}
 
 	}
-
+	
+	//Occupancy has a physical and logical points, which are COV based. In addition to that an occupancyDetection
+	//point is used to track occupancy events without COV filtering.
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
-		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		if((val == 1) ) {
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if (!occDetPoint.isEmpty()){
 				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
-				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
-						" and his and equipRef == \"" + device.getEquipRef() + "\"");
 			}
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
@@ -1249,7 +1247,7 @@ public class Pulse
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
 			if(val > 0) {
-				Occupied occupied = ScheduleProcessJob.getOccupiedModeCache(device.getRoomRef());
+				Occupied occupied = ScheduleManager.getInstance().getOccupiedModeCache(device.getRoomRef());
 				if (occupied != null)
 					Log.d("Occupancy", "pulse occupancy sensor22=" + occupied.isOccupied() + "," + occupied.isPreconditioning());
 				if ((occupied != null) && !occupied.isOccupied() && !occupied.isPreconditioning()) {

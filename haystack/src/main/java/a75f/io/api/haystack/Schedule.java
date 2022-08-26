@@ -120,7 +120,7 @@ public class Schedule extends Entity
             int beginMin = getInt(range.get(Tags.STMM).toString());
             String endDate = range.get(Tags.ETDT).toString();
             int endHour = getInt(range.get(Tags.ETHH).toString());
-            endHour  = getInt(range.get(Tags.ETHH).toString()) == 24 ? 23 : endHour;
+            endHour  = endHour == 24 ? 23 : endHour;
             int endMin = getInt(range.get(Tags.ETMM).toString());
             endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
 
@@ -255,8 +255,6 @@ public class Schedule extends Entity
     private static boolean isScheduleColliding(Schedule.Days morePrioritySchedule, Schedule.Days lessPrioritySchedule){
         /*In Schedule Entity days are stored in 0-6(Monday to Sunday) and in Joda time, it is 1-7(Monday to Sunday).
         Hence +1*/
-        Log.i("Jayatheertha","morePrioritySchedule" + morePrioritySchedule);
-        Log.i("Jayatheertha","lessPrioritySchedule" + lessPrioritySchedule);
         int dayAdjustConst = 1;
         DateTime morePriorityScheduleBeginTime =
                 new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getSthh(),

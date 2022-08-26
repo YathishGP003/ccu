@@ -40,6 +40,14 @@ public class MessagingAckJob {
             return;
         }
 
+        CcuLog.d(L.TAG_CCU_MESSAGING, " connectionCount "+MessagingClient.getInstance().getOkSse().getClient().connectionPool().connectionCount()+"" +
+                " idleConnectionCount "+MessagingClient.getInstance().getOkSse().getClient().connectionPool().idleConnectionCount());
+        if (MessagingClient.getInstance().getOkSse().getClient().connectionPool().connectionCount() == 0) {
+            CcuLog.e(L.TAG_CCU_MESSAGING, " No active connection found, re-init messaging ");
+            MessagingClient.getInstance().reInit();
+            return;
+        }
+
         channelsToMessageIds.forEach((channel, messageIds) ->
                 messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
                     .subscribe(

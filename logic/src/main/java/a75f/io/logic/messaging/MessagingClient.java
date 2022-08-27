@@ -19,7 +19,6 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class MessagingClient {
@@ -61,23 +60,9 @@ public class MessagingClient {
         }
     }
 
-    /**
-     * To be used strictly for simple re-opening of messaging reconnection.
-     * It does not restart MessagingAckJob thread.
-     */
-    public void reInit() {
-        this.closeMessagingConnection();
-        String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
-        String ccuId = CCUHsApi.getInstance().getCcuId();
-
-        if (ccuId != null) {
-            String bearerToken = CCUHsApi.getInstance().getJwt();
-            this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
-        }
-    }
-
     public boolean isSubscribed() {
-        return sse != null;
+        return sse != null &&
+               okSse.getClient().connectionPool().connectionCount() > 0;
     }
 
     public void queueMessageIdToAck(JsonObject message) {

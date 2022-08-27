@@ -90,7 +90,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
     @Override
     public void onClosed(ServerSentEvent sse) {
         CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Socket Closed : resetMessagingConnection");
-        MessagingClient.getInstance().reInit();
+        MessagingClient.getInstance().resetMessagingConnection();
     }
 
     private boolean isRestartCommand(JsonElement messageContents) {

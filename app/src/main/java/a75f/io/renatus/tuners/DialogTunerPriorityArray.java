@@ -521,7 +521,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                                 currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
                             } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
                                 minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
-                                maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
+                                maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
                                 currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
                             } else {
                                 minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
@@ -638,7 +638,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
                     } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
                         minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
-                        maxValueDb = (convertingDeadBandValueFtoC(maxValueDb));
+                        maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
                         currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
                     } else {
                         minValueDb = (fahrenheitToCelsiusTuner(minValueDb));

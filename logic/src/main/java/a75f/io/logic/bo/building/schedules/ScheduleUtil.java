@@ -102,9 +102,13 @@ public class ScheduleUtil {
     public static boolean isZoneAutoAway(String roomRef, CCUHsApi hayStack, Map<String, OccupancyData> equipOccupancy) {
         ArrayList<HashMap<Object, Object>> equipsInZone = hayStack
                                                               .readAllEntities("equip and roomRef == \""+roomRef+"\"");
-        
+
         for (HashMap<Object, Object> equip : equipsInZone) {
-            if (equipOccupancy.get(equip.get("id").toString()).occupancy == AUTOAWAY) {
+            OccupancyData occupancyData = equipOccupancy.get(equip.get("id").toString());
+            if (occupancyData == null) {
+                continue;
+            }
+            if (occupancyData.occupancy == AUTOAWAY) {
                 CcuLog.i(TAG_CCU_SCHEDULER, "Zone " + roomRef + " is in AutoAway " + " via " + equip);
                 return true;
             }

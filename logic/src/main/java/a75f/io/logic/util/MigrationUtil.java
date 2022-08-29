@@ -1049,12 +1049,16 @@ public class MigrationUtil {
     private static void updateScheduleType(CCUHsApi hayStack){
         List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
         for(HashMap<Object,Object> room : rooms){
-            HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and not special and " +
-                    "roomRef == " +room.get("id"));
+            String scheduleId = room.containsKey("scheduleRef") ? room.get("scheduleRef").toString() : null;
+            if(scheduleId == null){
+                continue;
+            }
+            HashMap<Object, Object> schedule = hayStack.readMapById(scheduleId.replaceFirst("@",""));
+            boolean isScheduleRefZoneSchedule = schedule.containsKey("zone") && schedule.containsKey("schedule");
             boolean isScheduleTypeNamedSchedule =
                     hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
                             .intValue() == ScheduleType.NAMED.ordinal();
-            if(!zoneScheduleMap.isEmpty() && isScheduleTypeNamedSchedule) {
+            if(isScheduleRefZoneSchedule && isScheduleTypeNamedSchedule) {
                 hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +

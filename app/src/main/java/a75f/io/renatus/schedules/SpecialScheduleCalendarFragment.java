@@ -28,6 +28,7 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
     private static final int DAYS_IN_YEAR = 365;
     private MaterialCalendarView calendarView;
     private HDict specialScheduleHDict;
+    private List<CalendarDay> selectedDates;
 
     public interface SpecialScheduleDateListener{
         void getSpecialScheduleDate(List<CalendarDay> selectedDates);
@@ -35,9 +36,12 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
 
     private SpecialScheduleDateListener specialScheduleDateListener;
 
-    public SpecialScheduleCalendarFragment(HDict specialScheduleHDict, SpecialScheduleDateListener specialScheduleDateListener){
+    public SpecialScheduleCalendarFragment(HDict specialScheduleHDict,
+                                           SpecialScheduleDateListener specialScheduleDateListener,
+                                           List<CalendarDay> selectedDates){
         this.specialScheduleDateListener = specialScheduleDateListener;
         this.specialScheduleHDict = specialScheduleHDict;
+        this.selectedDates = selectedDates;
     }
 
     @Override
@@ -77,19 +81,35 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
     }
 
     private void displaySelectedDates(){
-        if(specialScheduleHDict == null){
+        if(specialScheduleHDict == null && selectedDates.isEmpty()){
             return;
         }
-        HDict range = (HDict) specialScheduleHDict.get(Tags.RANGE);
-        DateTime beginDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.STDT).toString());
-        DateTime endDateTime = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.ETDT).toString());
-            calendarView.state().edit().setMinimumDate(CalendarDay.from(beginDateTime.getYear(),
-                    beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth())).commit();
-        CalendarDay startDay = CalendarDay.from(beginDateTime.getYear(), beginDateTime.getMonthOfYear(), beginDateTime.getDayOfMonth());
-        CalendarDay endDay = CalendarDay.from(endDateTime.getYear(), endDateTime.getMonthOfYear(), endDateTime.getDayOfMonth());
+        DateTime startDate = null;
+        DateTime endDate = null;
+        if(!selectedDates.isEmpty()){
+            startDate = new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(),
+                    selectedDates.get(0).getDay());
+            endDate =  new DateTime().withDate(selectedDates.get(selectedDates.size() - 1).getYear(),
+                    selectedDates.get(selectedDates.size() - 1).getMonth(),
+                    selectedDates.get(selectedDates.size() - 1).getDay());
+
+        }
+        else if(specialScheduleHDict != null){
+            HDict range = (HDict) specialScheduleHDict.get(Tags.RANGE);
+            startDate = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.STDT).toString());
+            endDate = SpecialSchedule. SS_DATE_TIME_FORMATTER.parseDateTime(range.get(Tags.ETDT).toString());
+        }
+        if(startDate == null || endDate == null){
+            return;
+        }
+
+        calendarView.state().edit().setMinimumDate(CalendarDay.from(startDate.getYear(),
+                    startDate.getMonthOfYear(), startDate.getDayOfMonth())).commit();
+        CalendarDay startDay = CalendarDay.from(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth());
+        CalendarDay endDay = CalendarDay.from(endDate.getYear(), endDate.getMonthOfYear(), endDate.getDayOfMonth());
         calendarView.selectRange(startDay, endDay);
-        LocalDate localDate = LocalDate.of(beginDateTime.getYear(), beginDateTime.getMonthOfYear(),
-                beginDateTime.getDayOfMonth());
+        LocalDate localDate = LocalDate.of(startDate.getYear(), startDate.getMonthOfYear(),
+                startDate.getDayOfMonth());
         if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR-1l))){
             calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
         }

@@ -52,7 +52,7 @@ public class TrueCFMPointsHandler {
     }
     
     private static void createTrueCFMCoolingMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal,
-                                                String fanType) {
+                                                String fanType, String maxValueForMinCfmCooling) {
         Point numMinCFMCooling = new Point.Builder()
                                      .setDisplayName(equip.getDisplayName() + "-minCFMCooling")
                                      .setEquipRef(equip.getId())
@@ -62,7 +62,7 @@ public class TrueCFMPointsHandler {
                                      .addMarker("config").addMarker(profileTag).addMarker("min")
                                      .addMarker("trueCfm").addMarker("cooling").addMarker(fanType)
                                      .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
-                                     .setMinVal("0").setMaxVal("500").setIncrementVal("10")
+                                     .setMinVal("0").setMaxVal(maxValueForMinCfmCooling).setIncrementVal("10")
                                      .setGroup(equip.getGroup())
                                      .setTz(equip.getTz())
                                      .setUnit(Units.CFM)
@@ -95,7 +95,7 @@ public class TrueCFMPointsHandler {
     }
     
     private static void createTrueCFMReheatMin(CCUHsApi hayStack, Equip equip, String profileTag, double initialVal,
-                                               String fanType) {
+                                               String fanType, String maxValueForMinCfmHeating) {
         Point numMinCFMReheating = new Point.Builder()
                                        .setDisplayName(equip.getDisplayName() + "-minCFMReheating")
                                        .setEquipRef(equip.getId())
@@ -104,7 +104,7 @@ public class TrueCFMPointsHandler {
                                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                        .addMarker("config").addMarker(profileTag).addMarker("min")
                                        .addMarker("trueCfm").addMarker("heating").addMarker(fanType)
-                                       .setMinVal("0").setMaxVal("500").setIncrementVal("10")
+                                       .setMinVal("0").setMaxVal(maxValueForMinCfmHeating).setIncrementVal("10")
                                        .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                        .setGroup(equip.getGroup())
                                        .setTz(equip.getTz())
@@ -193,14 +193,20 @@ public class TrueCFMPointsHandler {
                                                     VavProfileConfiguration vavProfileConfiguration, String fanType) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        
+
+        String maxValueForMinCfmCooling = String.valueOf(vavProfileConfiguration.nuMaxCFMCooling);
+
+        String maxValueForMinCfmHeating = String.valueOf(vavProfileConfiguration.numMaxCFMReheating);
+
+
+
         createTrueCFMKFactorPoint(hayStack, equip, Tags.VAV, vavProfileConfiguration.kFactor, fanType);
     
-        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling, fanType);
+        createTrueCFMCoolingMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMCooling, fanType, maxValueForMinCfmCooling);
     
         createTrueCFMCoolingMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.nuMaxCFMCooling, fanType);
     
-        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating, fanType);
+        createTrueCFMReheatMin(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMinCFMReheating, fanType, maxValueForMinCfmHeating);
     
         createTrueCFMReheatMax(hayStack, equip, Tags.VAV, vavProfileConfiguration.numMaxCFMReheating, fanType);
     

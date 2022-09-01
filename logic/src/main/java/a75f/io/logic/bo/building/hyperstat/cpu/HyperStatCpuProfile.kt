@@ -572,8 +572,10 @@ class HyperStatCpuProfile : ZoneProfile() {
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                                basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                        &&( basicSettings.fanMode != StandaloneFanStage.OFF )
+
                 ) {
                     runRelayForCooling(relayState, equip, port, config, tuner, relayStages)
                 }else{
@@ -582,8 +584,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                                basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                        &&(basicSettings.fanMode != StandaloneFanStage.OFF)
                 ) {
                     runRelayForHeating(relayState, equip, port, config, tuner, relayStages)
                 }else{
@@ -964,8 +967,9 @@ class HyperStatCpuProfile : ZoneProfile() {
         when {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                                basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                        && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal )) {
                     runForAnalogOutCooling(equip, port)
                     dumpAnalogOutLoopStatus(coolingLoopOutput, AnalogOutput.COOLING.name, analogOutStages)
                 }else{
@@ -974,8 +978,9 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal) {
+                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                                basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                        && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal ) ) {
                     dumpAnalogOutLoopStatus(heatingLoopOutput, AnalogOutput.HEATING.name, analogOutStages)
                     runForAnalogOutHeating(equip, port)
                 }else{
@@ -985,6 +990,8 @@ class HyperStatCpuProfile : ZoneProfile() {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
                 if (basicSettings.fanMode != StandaloneFanStage.OFF) {
                     runForAnalogOutFanSpeed(analogOutState, equip, config, port, basicSettings, analogOutStages)
+                }else{
+                    updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
                 }
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {

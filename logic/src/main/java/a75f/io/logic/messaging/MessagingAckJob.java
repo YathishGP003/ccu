@@ -5,6 +5,7 @@ import java.util.Set;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.util.ConnectionUtil;
 
 public class MessagingAckJob {
     private final String ccuId;
@@ -34,6 +35,11 @@ public class MessagingAckJob {
      */
     public void doJob() {
         CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
+
+        if (!MessagingClient.getInstance().isSubscribed() && ConnectionUtil.isNetworkConnected()) {
+            MessagingClient.getInstance().resetMessagingConnection();
+            return;
+        }
 
         Map<String, Set<String>> channelsToMessageIds = MessagingClient.getInstance().pollMessageIdsToAck();
         if (channelsToMessageIds.isEmpty()) {

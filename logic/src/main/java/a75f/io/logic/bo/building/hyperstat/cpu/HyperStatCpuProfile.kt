@@ -136,22 +136,21 @@ class HyperStatCpuProfile : ZoneProfile() {
             Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
         }
 
-        var loopValue =  hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-            currentTemp, userIntents.zoneCoolingTargetTemperature
-        ).toInt()
+        coolingLoopOutput = 0
+        heatingLoopOutput = 0
+        fanLoopOutput = 0
+        when (state) {
+            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
+            ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
+                    currentTemp, userIntents.zoneCoolingTargetTemperature
+            ).toInt().coerceAtLeast(0)
+            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
+            ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
+                    userIntents.zoneHeatingTargetTemperature, currentTemp
+            ).toInt().coerceAtLeast(0)
+            else -> Log.i(L.TAG_CCU_HSCPU, " Zone is in deadband")
+        }
 
-        Log.i(L.TAG_CCU_HSCPU, "Val cool $loopValue")
-        coolingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
-
-        loopValue = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-            userIntents.zoneHeatingTargetTemperature, currentTemp
-        ).toInt()
-
-        Log.i(L.TAG_CCU_HSCPU, "Val heat $loopValue")
-        heatingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
-
-        if (coolingLoopOutput == 0 || heatingLoopOutput == 0)
-            fanLoopOutput = 0
 
         if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
                     ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {

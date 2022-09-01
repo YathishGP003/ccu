@@ -140,15 +140,14 @@ public class UnitUtils {
 
 
     public static boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
-        return   tunerItem.containsKey("deadband") || tunerItem.containsKey("spread") ||
-                (tunerItem.containsKey("pspread") && !tunerItem.containsKey("chilled")) ||
+        return   tunerItem.containsKey("spread") || tunerItem.containsKey("abnormal") ||
+                (tunerItem.containsKey("chilled") || tunerItem.containsKey("pspread")) ||
                 tunerItem.containsKey("leeway") || tunerItem.containsKey("setback") ||
-                tunerItem.containsKey("differential") ;
+                tunerItem.containsKey("differential")|| tunerItem.containsKey("sat") ;
     }
 
     public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {
-        return  tunerItem.containsKey("abnormal") || tunerItem.containsKey("deadband") ||
-                tunerItem.containsKey("sat") || (tunerItem.containsKey("chilled") && tunerItem.containsKey("pspread"));
+        return   tunerItem.containsKey("deadband");
     }
 
 

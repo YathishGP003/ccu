@@ -10,7 +10,7 @@ import a75f.io.logic.util.ConnectionUtil;
 public class MessagingAckJob {
     private final String ccuId;
     private final MessagingService messagingService;
-
+    private int emptyMessageWatchdogCounter;
     public MessagingAckJob(String ccuId, String messagingUrl, String bearerToken) {
         this.ccuId = ccuId;
 
@@ -35,17 +35,24 @@ public class MessagingAckJob {
      */
     public void doJob() {
         CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
-
-        if (!MessagingClient.getInstance().isSubscribed() && ConnectionUtil.isNetworkConnected()) {
+        if (!MessagingClient.getInstance().isSubscribed()) {
+            CcuLog.d(L.TAG_CCU_MESSAGING, "Not subscribed , reset connection");
             MessagingClient.getInstance().resetMessagingConnection();
             return;
         }
 
         Map<String, Set<String>> channelsToMessageIds = MessagingClient.getInstance().pollMessageIdsToAck();
         if (channelsToMessageIds.isEmpty()) {
+            emptyMessageWatchdogCounter++;
+            int EMPTY_MESSAGE_WATCHDOG_TIMEOUT_MINUTES = 60;
+            if (emptyMessageWatchdogCounter > EMPTY_MESSAGE_WATCHDOG_TIMEOUT_MINUTES) {
+                CcuLog.d(L.TAG_CCU_MESSAGING, "Message Job : Empty Message Watch dog bite , reset connection");
+                MessagingClient.getInstance().resetMessagingConnection();
+                emptyMessageWatchdogCounter = 0;
+            }
             return;
         }
-
+        emptyMessageWatchdogCounter = 0;
         channelsToMessageIds.forEach((channel, messageIds) ->
                 messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
                     .subscribe(

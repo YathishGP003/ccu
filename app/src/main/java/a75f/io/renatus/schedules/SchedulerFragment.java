@@ -221,6 +221,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
         scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
         scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
+        scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
@@ -1229,7 +1230,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             boolean isSpecialSchedule =
                     getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
             if (isVacation || isSpecialSchedule){
-                scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
                 if (!schedule.getDis().equals("Zone Schedule")) {
                     textViewaddEntry.setEnabled(false);
                     textViewaddEntryIcon.setEnabled(false);

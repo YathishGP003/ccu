@@ -405,10 +405,10 @@ public class NamedSchedule extends DialogFragment {
             StringBuilder desiredTempWarning = new StringBuilder();
             boolean isDesiredTempValid = true;
             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
-                if (!(namedSchedDay.getHeatingVal() < buildingTuner.getMaxHeatingUserLimit()
-                && namedSchedDay.getHeatingVal()> buildingTuner.getMinHeatingUserLimit()
-                && namedSchedDay.getCoolingVal() < buildingTuner.getMaxCoolingUserLimit()
-                && namedSchedDay.getCoolingVal() > buildingTuner.getMinCoolingUserLimit())) {
+                if (!(namedSchedDay.getHeatingVal() <= buildingTuner.getMaxHeatingUserLimit()
+                && namedSchedDay.getHeatingVal() >= buildingTuner.getMinHeatingUserLimit()
+                && namedSchedDay.getCoolingVal() <= buildingTuner.getMaxCoolingUserLimit()
+                && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
                             "Saturday","Sunday"};
                     if(isCelsiusTunerAvailableStatus()) {

@@ -288,8 +288,8 @@ public class ScheduleUtil {
             int endHour = Schedule.getInt(range.get(Tags.ETHH).toString());
             endHour  = endHour == 24 ? 23 : endHour;
             int endMin = Schedule.getInt(range.get(Tags.ETMM).toString());
-            endMin = endHour == 24 ? 59 : endMin;
-            int endSec = endHour == 24 ? 59 : 0;
+            endMin = Schedule.getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
+            int endSec = Schedule.getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : 0;
             DateTime endDateTime = SpecialSchedule.SS_DATE_TIME_FORMATTER
                     .parseDateTime(range.get(Tags.ETDT).toString())
                     .withHourOfDay(endHour)

@@ -122,7 +122,7 @@ public class Schedule extends Entity
             int endHour = getInt(range.get(Tags.ETHH).toString());
             endHour  = endHour == 24 ? 23 : endHour;
             int endMin = getInt(range.get(Tags.ETMM).toString());
-            endMin = endHour == 24 ? 59 : endMin;
+            endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
 
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)

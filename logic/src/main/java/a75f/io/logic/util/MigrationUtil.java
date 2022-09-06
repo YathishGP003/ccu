@@ -17,6 +17,7 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -45,6 +46,8 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import kotlin.Pair;
@@ -144,6 +147,10 @@ public class MigrationUtil {
             Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
             migrateNewOccupancy(CCUHsApi.getInstance());
             PreferenceUtil.setNewOccupancy();
+        }
+
+        if(isFanControlDelayDefaultValueUpdated(CCUHsApi.getInstance())){
+            updateFanControlDefaultValue(CCUHsApi.getInstance());
         }
 
         if(!PreferenceUtil.getSiteNameEquipMigration()){
@@ -921,6 +928,27 @@ public class MigrationUtil {
         String equipDis = siteDis+"-"+profileDisplayName+"-"+nodeAddr;
         ConfigUtil.Companion.addConfigPoints(profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,
                 equipDis,tags,0,0);
+    }
+
+    private static boolean isFanControlDelayDefaultValueUpdated(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl check");
+        HashMap<Object, Object> fanControlTuner =
+                hsApi.readEntity("point and tuner and fan and control and time and delay");
+        return !fanControlTuner.isEmpty();
+    }
+
+    private static void updateFanControlDefaultValue(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl update");
+        ArrayList<HashMap<Object, Object>> fanControlTunerAll =
+                hsApi.readAllEntities("point and tuner and fan and control and time and delay");
+        if(!fanControlTunerAll.isEmpty()) {
+            for (HashMap<Object, Object> fanControlTuner: fanControlTunerAll) {
+                hsApi.clearPointArrayLevel(fanControlTuner.get("id").toString(), TUNER_EQUIP_VAL_LEVEL, false);
+
+                hsApi.writePointForCcuUser(fanControlTuner.get("id").toString(), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                        TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+            }
+        }
     }
 
     private static void updateScheduleRefs(CCUHsApi hayStack) {

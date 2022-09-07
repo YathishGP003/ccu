@@ -3,7 +3,7 @@ package a75f.io.logic.bo.util;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 
 public class SystemScheduleUtil {
     

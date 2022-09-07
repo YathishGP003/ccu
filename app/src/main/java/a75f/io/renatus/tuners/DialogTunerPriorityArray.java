@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,10 +23,6 @@ import android.widget.NumberPicker;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,12 +34,22 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -58,8 +67,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     String selectedTunerValue;
     String selectedTunerLevel;
     String tunerGroupType;
+    String tunerName;
+    String tunerVal;
     LinearLayout viewStub;
     LinearLayout layoutTitle;
+    Prefs prefs;
+    double defaultVal;
+    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 
     private void configureArguments(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
@@ -260,16 +274,60 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         });
     }
 
+    public double getClosestNumberOfTarget(ArrayList<String> dataArray, double target) {
+
+        if (dataArray.size() == 0)
+            System.exit(1);
+        if (target <= Double.parseDouble(dataArray.get(0)))
+            return Double.parseDouble(dataArray.get(0));
+        if (target >= Double.parseDouble(dataArray.get(dataArray.size() - 1)))
+            return Double.parseDouble(dataArray.get(dataArray.size() - 1));
+
+        int start = 0;
+        int end = dataArray.size()-1;
+        int mid = 0;
+
+        while (end - start != 1) {
+            mid = (start + end) / 2;
+            if (target == Double.parseDouble(dataArray.get(mid)))
+                return Double.parseDouble(dataArray.get(mid));
+            if (target < Double.parseDouble(dataArray.get(mid)))
+                end = mid;
+            if (target > Double.parseDouble(dataArray.get(mid)))
+                start = mid;
+        }
+        return (Double.parseDouble(target - Double.parseDouble(dataArray.get(start)) <= Math.abs(target - Double.parseDouble(dataArray.get(end))) ? dataArray.get(start)
+                : dataArray.get(end)));
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        ArrayList<String> valueList = new ArrayList<>();
+        defaultVal = getTunerDefaultValue(tunerItemSelected.get("id").toString());
+        loadValueList(valueList);
 
+        tunerName = tunerItemSelected.get("dis").toString();
+        if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
+            if (isCelsiusTunerAvailableStatus()) {
+                if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                    if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                        defaultVal = (convertingRelativeValueFtoC(defaultVal));
+                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
+                        defaultVal = roundToHalf(convertingDeadBandValueFtoC(defaultVal));
+                    } else {
+                        defaultVal = fahrenheitToCelsiusTuner(defaultVal);
+                    }
+                }
+                defaultVal = getClosestNumberOfTarget(valueList,defaultVal);
+            }
+        }
          String tunerName = tunerItemSelected.get("dis").toString();
         if (tunerItemSelected.containsKey("unit")) {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
-            textTunerDefaultValue.setText(getTunerDefaultValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
+            textTunerDefaultValue.setText(defaultVal + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
         } else {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-            textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
+            textTunerDefaultValue.setText("" + defaultVal);
         }
 
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
@@ -350,14 +408,37 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         return 0;
     }
 
-    public String getTunerValue(String id, String level) {
+    private String getTunerValue(String id, String level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
+        ArrayList<String> valueList = new ArrayList<>();
         if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
-                    return valMap.get("val").toString();
+                    tunerVal = valMap.get("val").toString();
+                    if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit") ) {
+                        if (isCelsiusTunerAvailableStatus()) {
+                            if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                                if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                                    tunerVal = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(tunerVal)));
+                                } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
+                                    tunerVal = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(tunerVal)));
+                                } else {
+                                    tunerVal = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(tunerVal)));
+                                }
+                                loadValueList(valueList);
+                                tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
+                            }
+                            if (level.equals("17")){
+                                loadValueList(valueList);
+                                tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, roundToHalf(Double.parseDouble(tunerVal))));
+                            }
+                        }
+                        loadValueList(valueList);
+                        tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
+                    }
+                    return tunerVal;
                 }
             }
         }
@@ -383,6 +464,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             buttonUndo.setVisibility(View.GONE);
             buttonSaveAlert.setEnabled(false);
             String levelName = "Building";
+            prefs = new Prefs(getContext().getApplicationContext());
             int level;
             if (position == 15) {
                 levelName = "Building";
@@ -430,6 +512,26 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
+                if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
+                    if (isCelsiusTunerAvailableStatus()) {
+                        if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                            if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                                maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
+                                minValueDb = (convertingRelativeValueFtoC(minValueDb));
+                                currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
+                            } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
+                                minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
+                                maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
+                                currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
+                            } else {
+                                minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
+                                maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
+                                currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+                            }
+                        }
+                    }
+                }
+
                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
 
                 ArrayList<String> valueList = new ArrayList<>();
@@ -440,7 +542,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 int currentValPos = 0;
                 if (minValue < 0) {
                     for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                        valueList.add(String.valueOf(i / 100.0));
+                        valueList.add(String.valueOf(Math.round(i) / 100.0));
                     }
                     for (String currVal : valueList) {
                         if (currentValueDb == Double.parseDouble(currVal)) {
@@ -450,7 +552,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                 } else {
                     for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
-                        valueList.add(String.valueOf(i / 100.0));
+                        valueList.add(String.valueOf(Math.round(i) / 100.0));
                     }
                     for (String currVal : valueList) {
                         if (currentValueDb == Double.parseDouble(currVal)) {
@@ -503,6 +605,78 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
             }
             //dialog.show();
+        }
+    }
+    public void loadValueList(ArrayList<String> valueList) {
+        int currentValue;
+        double currentValueDb;
+        if (getTunerValByLevel(tunerItemSelected.get("id").toString()) != 0) {
+            currentValue = (int) getTunerValByLevel(tunerItemSelected.get("id").toString());
+        } else {
+            currentValue = (int) getTunerValue(tunerItemSelected.get("id").toString());
+        }
+        int minValue = (int) (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
+        int maxValue = (int) (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
+        int incrementVal = (int) (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
+
+        if (getTunerValByLevel(tunerItemSelected.get("id").toString()) != 0) {
+            currentValueDb = getTunerValByLevel(tunerItemSelected.get("id").toString());
+        } else {
+            currentValueDb = getTunerValue(tunerItemSelected.get("id").toString());
+        }
+
+        double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
+        double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
+        double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
+
+        if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
+            if (isCelsiusTunerAvailableStatus()) {
+                if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
+                    if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+                        maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
+                        minValueDb = (convertingRelativeValueFtoC(minValueDb));
+                        currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
+                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
+                        minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
+                        maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
+                        currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
+                    } else {
+                        minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
+                        maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
+                        currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
+                    }
+                }
+            }
+        }
+
+        Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
+
+
+        if (incrementValDb == 0) {
+            incrementValDb = 1.0;
+            incrementVal = 1;
+        }
+        int currentValPos = 0;
+        if (minValue < 0) {
+            for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
+                valueList.add(String.valueOf(Math.round(i) / 100.0));
+            }
+            for (String currVal : valueList) {
+                if (currentValueDb == Double.parseDouble(currVal)) {
+                    currentValPos = valueList.indexOf(currVal);
+                    break;
+                }
+            }
+        } else {
+            for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
+                valueList.add(String.valueOf(Math.round(i) / 100.0));
+            }
+            for (String currVal : valueList) {
+                if (currentValueDb == Double.parseDouble(currVal)) {
+                    currentValPos = valueList.indexOf(currVal);
+                    break;
+                }
+            }
         }
     }
 

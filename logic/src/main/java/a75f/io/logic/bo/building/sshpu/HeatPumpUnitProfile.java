@@ -13,9 +13,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -24,7 +22,8 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
@@ -33,8 +32,6 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES;
-import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES;
 
 public class HeatPumpUnitProfile extends ZoneProfile {
 
@@ -121,7 +118,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             Log.d(TAG, " smartstat hpu, updates 111=" + hpuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling+","+roomTemp);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(hpuEquip.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 
             occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             //For dual temp but for single mode we use tuners

@@ -48,7 +48,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/enable_force_occupy"
+                    android:text="@string/auto_force_occupy"
                     android:textAppearance="@style/text_label" />
 
                 <ToggleButton
@@ -61,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="115dp"
-                    android:text="@string/enable_auto_away"
+                    android:text="@string/auto_away"
                     android:textAppearance="@style/text_label" />
 
                 <ToggleButton

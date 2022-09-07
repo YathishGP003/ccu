@@ -86,8 +86,10 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     Button buttonSave;
     Button buttonCancel;
     RangeBarView rangeSeekBarView;
-    int nMinVal = 0;
-    int nMaxVal = 95;
+    int nMinValForStartTime = 0;
+    int nMaxValForStartTime = 95;
+    int nMinValForEndTime = 1;
+    int nMaxValForEndTime = 96;
 
     Boolean booleanisMonday = false;
     Boolean booleanisTuesday = false;
@@ -143,8 +145,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             checkBoxSunday.setEnabled(false);
         }
 
-        npStartTime.setMinValue(nMinVal);
-        npStartTime.setMaxValue(nMaxVal);
+        npStartTime.setMinValue(nMinValForStartTime);
+        npStartTime.setMaxValue(nMaxValForStartTime);
 
         npStartTime.setValue(32);
         npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -163,8 +165,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             //Log.e("Crash", e.getMessage());
         }
 
-        npEndTime.setMinValue(nMinVal);
-        npEndTime.setMaxValue(nMaxVal);
+        npEndTime.setMinValue(nMinValForEndTime);
+        npEndTime.setMaxValue(nMaxValForEndTime);
 
         npEndTime.setValue(70);
         npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -435,7 +437,10 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(1165, 646);
+        }
     }
 
     private void setDividerColor(NumberPicker picker) {

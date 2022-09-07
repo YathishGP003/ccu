@@ -1,6 +1,13 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -53,6 +60,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.FontManager;
@@ -163,7 +171,6 @@ public class NamedSchedule extends DialogFragment {
         //Scheduler Layout
         initialiseViews(rootView);
 
-
         setButton = rootView.findViewById(R.id.setButton);
         setButton.setOnClickListener(v -> {
             if (validateNamedSchedule()) {
@@ -187,6 +194,7 @@ public class NamedSchedule extends DialogFragment {
                         zone.setScheduleRef(getArguments().getString(PARAM_SCHEDULE_ID));
                         CCUHsApi.getInstance().updateZone(zone, roomRef);
                     }
+                    CCUHsApi.getInstance().scheduleSync();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -360,8 +368,9 @@ public class NamedSchedule extends DialogFragment {
                     spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
                             .append(" ").append("").append(i.getStart().hourOfDay().get())
                             .append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" :
-                            i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":")
-                            .append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
+                            i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":")
+                            .append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
+
                 }
 
                 warningMessage.append(getText(R.string.warning_msg)).append("\n\t").append(spillZones)
@@ -371,16 +380,29 @@ public class NamedSchedule extends DialogFragment {
 
             double coolingDeadband = TunerUtil.getZoneCoolingDeadband(roomRef);
             double heatingDeadband = TunerUtil.getZoneHeatingDeadband(roomRef);
-            for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
-                double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
-                if(deadbandNamedSched < coolingDeadband+heatingDeadband){
-                    warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
-                            .append(deadbandNamedSched).append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\n\n");
-                    isValid = false;
-                    break;
+            if( isCelsiusTunerAvailableStatus()) {
+                 coolingDeadband = fahrenheitToCelsiusRelative(coolingDeadband);
+                 heatingDeadband = fahrenheitToCelsiusRelative(heatingDeadband);
+                for (Schedule.Days namedSchedDay:namedSchedule.getDays()) {
+                    double deadbandNamedSched = namedSchedDay.getCoolingVal()-namedSchedDay.getHeatingVal();
+                    deadbandNamedSched=fahrenheitToCelsiusRelative(deadbandNamedSched);
+                    if(deadbandNamedSched < coolingDeadband+heatingDeadband){
+                        warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
+                                .append(fahrenheitToCelsiusRelative(deadbandNamedSched)).append(" \u00B0C").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append(" \u00B0C").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append(" \u00B0C").append("\n\n");
+                        isValid = false;
+                        break;
+                    }
                 }
-
-
+            } else {
+                for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
+                    double deadbandNamedSched = namedSchedDay.getCoolingVal() - namedSchedDay.getHeatingVal();
+                    if (deadbandNamedSched < coolingDeadband + heatingDeadband) {
+                        warningMessage.append(getText(R.string.deadband_warning)).append("\n\t").append("Deadband in Named schedule - ")
+                                .append(deadbandNamedSched).append(" \u00B0F").append("\n\t").append("Deadband for zone: CoolingDeadband - ").append(coolingDeadband).append("\u00B0F").append("\n\t\t").append("HeatingDeadband - ").append(heatingDeadband).append("\u00B0F").append("\n\n");
+                        isValid = false;
+                        break;
+                    }
+                }
             }
 
             StringBuilder desiredTempWarning = new StringBuilder();
@@ -392,23 +414,40 @@ public class NamedSchedule extends DialogFragment {
                 && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
                             "Saturday","Sunday"};
-                    desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
-                            .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
-                            .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
-                            .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(";")
-                            .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(")").append("\n\t\t");
+                    if(isCelsiusTunerAvailableStatus()) {
+                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("(CDT - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingVal())).append(" \u00B0C").append(";")
+                                .append("HDT - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingVal())).append(" \u00B0C").append(")").append("\n\t\t");
+                    } else {
+                        desiredTempWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-")
+                                .append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm())
+                                .append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm())
+                                .append("(CDT - ").append(namedSchedDay.getCoolingVal()).append(" \u00B0F").append(";")
+                                .append("HDT - ").append(namedSchedDay.getHeatingVal()).append(" \u00B0F").append(")").append("\n\t\t");
+                    }
                     isValid = false;
                     isDesiredTempValid= false;
                 }
 
             }
             if(!isDesiredTempValid) {
-                warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
-                        .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
-                        .append("Building desired temps limit : HDT - ")
-                        .append(buildingTuner.getMinHeatingUserLimit()).append("~").append(buildingTuner.getMaxHeatingUserLimit())
-                        .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append("~").append(buildingTuner.getMaxCoolingUserLimit())
-                        .append("\n\n");;
+                if(isCelsiusTunerAvailableStatus()) {
+                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
+                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
+                            .append("Building desired temps limit : HDT - ")
+                            .append((fahrenheitToCelsius(buildingTuner.getMinHeatingUserLimit()))).append(" \u00B0C").append("~").append((fahrenheitToCelsius(buildingTuner.getMaxHeatingUserLimit()))).append(" \u00B0C")
+                            .append("\n\t\t CDT - ").append(fahrenheitToCelsius(buildingTuner.getMinCoolingUserLimit())).append(" \u00B0C").append("~").append(fahrenheitToCelsius(buildingTuner.getMaxCoolingUserLimit())).append(" \u00B0C")
+                            .append("\n\n");
+                } else {
+                    warningMessage.append(getText(R.string.desiredTemp_warning)).append("\n\t")
+                            .append("Named schedule desired temperature : \n\t\t").append(desiredTempWarning)
+                            .append("Building desired temps limit : HDT - ")
+                            .append(buildingTuner.getMinHeatingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxHeatingUserLimit()).append(" \u00B0F")
+                            .append("\n\t\t CDT - ").append(buildingTuner.getMinCoolingUserLimit()).append(" \u00B0F").append("~").append(buildingTuner.getMaxCoolingUserLimit()).append(" \u00B0F")
+                            .append("\n\n");
+                }
             }
 
         }
@@ -514,7 +553,15 @@ public class NamedSchedule extends DialogFragment {
         if(getContext()==null) return;
         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
-        textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp,Html.FROM_HTML_MODE_LEGACY));
+        String celsiusUnitMin = FontManager.getColoredSpanned("\u00B0C", colorMinTemp);
+        String celsiusUnitMax = FontManager.getColoredSpanned("\u00B0C", colorMaxTemp);
+        String farenUnitMin = FontManager.getColoredSpanned("\u00B0F", colorMinTemp);
+        String farenUnitMax = FontManager.getColoredSpanned("\u00B0F", colorMaxTemp);
+        if(isCelsiusTunerAvailableStatus()) {
+            textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
+        }
         if(typeface!=null)
             textViewTemp.setTypeface(typeface);
         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
@@ -631,6 +678,10 @@ public class NamedSchedule extends DialogFragment {
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
 
+        if(isCelsiusTunerAvailableStatus()) {
+            coolingTemp =(fahrenheitToCelsius(coolingTemp));
+            heatingTemp=(fahrenheitToCelsius(heatingTemp));
+        }
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 

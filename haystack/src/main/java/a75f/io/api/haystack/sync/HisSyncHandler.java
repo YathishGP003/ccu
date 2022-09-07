@@ -66,7 +66,6 @@ public class HisSyncHandler
                 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                    doSync(nonCovSyncPending);
-                   nonCovSyncPending = false;
                 }
 
                 if (entitySyncRequired) {
@@ -81,6 +80,9 @@ public class HisSyncHandler
     
     private void doSync(boolean syncAllData) {
         CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData);
+        if (syncAllData) {
+            nonCovSyncPending = false;
+        }
         //Device sync is initiated concurrently on Rx thread
         Observable.fromCallable(() -> {
             syncHistorizedDevicePoints(syncAllData);
@@ -91,6 +93,8 @@ public class HisSyncHandler
     
         //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
         syncHistorizedEquipPoints(syncAllData);
+    
+        syncHistorizedZonePoints(syncAllData);
     }
     
     /**
@@ -146,6 +150,29 @@ public class HisSyncHandler
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " equip points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
                 syncPoints(equipId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
+            }
+        }
+    }
+    
+    /**
+     * This is a short cut to get all the occupancy points on rooms to get synced.
+     * This must be revisited.
+     * @param timeForQuarterHourSync
+     */
+    private void syncHistorizedZonePoints(boolean timeForQuarterHourSync) {
+        List<HashMap> allZones = ccuHsApi.readAll("room");
+        List<HashMap> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
+        
+        for (HashMap zone : zonesToSync) {
+            String roomId = zone.get("id").toString();
+            
+            List<HashMap> allPointsForZone =
+                ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
+            CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
+            List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForZone);
+            CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " zone points that have a GUID for syncing");
+            if (!pointsToSyncForEquip.isEmpty()) {
+                syncPoints(roomId, pointsToSyncForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP);
             }
         }
     }
@@ -276,9 +303,7 @@ public class HisSyncHandler
         return pointToSync.containsKey("heartbeat")
                || pointToSync.containsKey("rssi")
                || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
-               || (pointToSync.containsKey("bpos") && pointToSync.containsKey("detection") && pointToSync.containsKey("occupancy"))
-                || (pointToSync.containsKey("hyperstat") && pointToSync.containsKey("cpu")
-                    && pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"));
+               || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

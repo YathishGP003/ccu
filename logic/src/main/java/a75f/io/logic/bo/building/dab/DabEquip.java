@@ -22,17 +22,19 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -392,8 +394,7 @@ public class DabEquip
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("dab").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-                                  .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
-                                          "occupancysensing,autoforceoccupy,autoaway")
+                                  .setEnums(Occupancy.getEnumStringDefinition())
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -415,7 +416,7 @@ public class DabEquip
         hisItems.add(new HisItem(zoneDynamicPriorityPointID, new Date(System.currentTimeMillis()), 10.0));
         
         Point pressure = new Point.Builder()
-                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressure")
+                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-pressure")
                              .setEquipRef(equipRef)
                              .setSiteRef(siteRef)
                              .setRoomRef(roomRef)
@@ -425,7 +426,10 @@ public class DabEquip
                              .setTz(tz)
                              .build();
         String pressureId = CCUHsApi.getInstance().addPoint(pressure);
-        
+
+        ConfigUtil.Companion.addConfigPoints("dab",siteRef,roomRef,floorRef,
+                equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAwayControl ? 1:0,
+                config.enableAutoForceOccupied ? 1:0);
         String damperFeedbackID = createFeedbackPoint(CCUHsApi.getInstance(),nodeAddr,equipDis,equipRef,siteRef,
                 roomRef,floorRef,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
@@ -446,6 +450,8 @@ public class DabEquip
         device.rssi.setEnabled(true);
         device.analog1In.setEnabled(true);
         device.analog1In.setPointRef(damperFeedbackID);
+        ConfigUtil.Companion.addOccupancyPointsSN(device,"dab",siteRef,roomRef,
+                floorRef,equipRef,tz,String.valueOf(nodeAddr),equipDis);
 
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
@@ -726,7 +732,8 @@ public class DabEquip
         config.enableCFMControl = getConfigNumVal("enable and trueCfm and dab") > 0;
         config.minCFMForIAQ= (int) getConfigNumVal("min and iaq and trueCfm and dab");
         config.kFactor=getConfigNumVal("trueCfm and kfactor and dab");
-
+        config.enableAutoAwayControl = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and occupied and forced") > 0;
 
         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
@@ -776,12 +783,23 @@ public class DabEquip
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
         }
 
+        if(config.enableAutoAwayControl != getProfileConfiguration().enableAutoAwayControl
+             || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
+        }
+
         setConfigNumVal("damper and type and primary",config.damper1Type);
         setConfigNumVal("damper and size and primary",config.damper1Size);
         setConfigNumVal("damper and shape and primary",config.damper1Shape);
         setConfigNumVal("damper and type and secondary",config.damper2Type);
         setConfigNumVal("damper and size and secondary",config.damper2Size);
         setConfigNumVal("damper and shape and secondary",config.damper2Shape);
+        setConfigNumVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1 :0);
+        setConfigNumVal("auto and away",config.enableAutoAwayControl ? 1 :0);
+        setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1 :0);
+        setHisVal("auto and away",config.enableAutoAwayControl ? 1 :0);
+
+
         
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
@@ -1004,7 +1022,7 @@ public class DabEquip
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else
             {
@@ -1045,8 +1063,7 @@ public class DabEquip
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov").addMarker("analog1").addMarker("in")
                 .addMarker("damper").addMarker("dab")
-                .addMarker("temp").addMarker("sensor")
-                .addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
+                .addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("%")
                 .setTz(tz)

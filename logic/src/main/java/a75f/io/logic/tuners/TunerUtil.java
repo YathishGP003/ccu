@@ -19,8 +19,7 @@ import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
 
 public class TunerUtil
 {
-    public static double readTunerValByQuery(String query) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static double readTunerValByQuery(String query, CCUHsApi hayStack) {
         HashMap tunerPoint = hayStack.read("point and tuner and "+query);
         if (!tunerPoint.isEmpty()) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
@@ -36,8 +35,11 @@ public class TunerUtil
         return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     
-    public static double readTunerValByQuery(String query, String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static double readTunerValByQuery(String query) {
+        return readTunerValByQuery(query, CCUHsApi.getInstance());
+    }
+    
+    public static double readTunerValByQuery(String query, String equipRef, CCUHsApi hayStack) {
         HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and equipRef == \""+equipRef+"\"");
         if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
@@ -51,6 +53,10 @@ public class TunerUtil
             }
         }
         return BuildingTunerFallback.getDefaultTunerVal(query);
+    }
+    
+    public static double readTunerValByQuery(String query, String equipRef) {
+        return readTunerValByQuery(query, equipRef, CCUHsApi.getInstance());
     }
     
     public static double readBuildingTunerValByQuery(String query) {
@@ -307,4 +313,19 @@ public class TunerUtil
         }
         return 0;
     }
+
+    public static double getTuner(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> values = hayStack.readPoint(id);
+        if (values != null && !values.isEmpty()) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap<Object,Object> valMap =  values.get(l - 1);
+                if (valMap.containsKey("val")) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+
 }

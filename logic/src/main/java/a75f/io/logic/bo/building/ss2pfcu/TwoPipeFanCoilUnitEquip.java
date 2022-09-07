@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -26,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -472,6 +474,10 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
+        ConfigUtil.Companion.addConfigPoints(profile,siteRef,room,floor,equipRef,tz,
+                String.valueOf(nodeAddr),equipDis,"fcu",config.enableAutoAway ? 1:0,
+                config.enableAutoForceOccupied ? 1:0);
+
 
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
@@ -540,11 +546,8 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .setGroup(String.valueOf(nodeAddr))
-                .addMarker("standalone").addMarker("occupancy")
-                .addMarker("mode").addMarker("his").addMarker("sp")
-                .addMarker("zone").addMarker("pipe2").addMarker("fcu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
@@ -555,11 +558,8 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,cooling,heating,tempdead")
-                .addMarker("standalone").addMarker("temp")
-                .addMarker("operating").addMarker("mode").addMarker("his")
-                .addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
                 .setTz(tz)
                 .build();
         String condModeId = CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
@@ -775,6 +775,11 @@ public class TwoPipeFanCoilUnitEquip {
         SmartStat.setPointEnabled(nodeAddr, Port.TH1_IN.name(),config.enableThermistor1);
         SmartStat.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
 
+        setConfigNumVal("auto and away",config.enableAutoAway? 1:0);
+        setConfigNumVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+        setHisVal("auto and away",config.enableAutoAway? 1:0);
+        setHisVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+
 
         HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
         Equip equip = new Equip.Builder().setHashMap(equipHash).build();
@@ -825,6 +830,8 @@ public class TwoPipeFanCoilUnitEquip {
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
         config.enableThermistor2 = true;
         config.setNodeType(NodeType.SMART_STAT);
+        config.enableAutoAway = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and forced and occupied") > 0;
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -1025,6 +1032,11 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and pipe2 and fcu and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and standalone and pipe2 and fcu and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+
+
     public double getConfigNumVal(String tags) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and pipe2 and fcu and "+tags+" and group == \""+nodeAddr+"\"");
     }
@@ -1076,10 +1088,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setFloorRef(floor)
                 .setRoomRef(room).setHisInterpolate("cov")
-                .setGroup(String.valueOf(nodeAddr))
-                .addMarker("standalone").addMarker("userIntent")
-                .addMarker("writable").addMarker("fan").addMarker("operation")
-                .addMarker("mode").addMarker("his")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
                 .addMarker("pipe2").addMarker("fcu").addMarker("zone")
                 .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
@@ -1097,10 +1106,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .setGroup(String.valueOf(nodeAddr))
-                .addMarker("standalone").addMarker("userIntent")
-                .addMarker("writable").addMarker("conditioning")
-                .addMarker("mode").addMarker("zone").addMarker("his")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
                 .addMarker("pipe2").addMarker("fcu").addMarker("temp")
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)

@@ -1,6 +1,11 @@
 package a75f.io.renatus.util;
 
 
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -16,6 +21,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import androidx.annotation.ColorInt;
@@ -31,6 +37,7 @@ import android.view.View;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 
 
@@ -502,7 +509,12 @@ public class SeekArc extends View
 
     private void drawCurrentTempTextNotDetailed(Canvas canvas, float currentTemp)
     {
-        String curTemp = String.valueOf(roundToHalf(currentTemp));
+        String curTemp;
+        if( isCelsiusTunerAvailableStatus()) {
+            curTemp=String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(currentTemp))));
+        } else {
+            curTemp= String.valueOf(roundToHalf(currentTemp));
+        }
         mCurrentTemperatureTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
         float xPositionOfCurrentTempText = cx - (bounds.width() / 2f);  //origin
         float yPositionOfCurrentTempText = cy + (bounds.height() / 2f);  // baseline
@@ -513,7 +525,16 @@ public class SeekArc extends View
     private void drawCurrentTempTextDetailed(Canvas canvas)
     {
         if (isSense) {
-            String currentTempText = String.valueOf(getCurrentTemp());
+            String currentTempText;
+            String tempString ;
+            String curString = "CURRENT";
+            if( isCelsiusTunerAvailableStatus()) {
+                 currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
+                 tempString = "TEMP"+" (\u00B0C )";
+            } else {
+                 currentTempText = String.valueOf(getCurrentTemp());
+                 tempString = "TEMP"+" (\u00B0F )";
+            }
             mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
 
             float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
@@ -531,31 +552,37 @@ public class SeekArc extends View
             float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
-            String curString = "CURRENT";
             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-
             float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
             float heightOfCurrentStringText = bounds.height();
-
-            String tempString = "TEMP";
 
             mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
 
 
             float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
             float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
-
-            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
-            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
-            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
-
+             canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+             canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+             canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
         } else {
-            String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
-            String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
-            String currentTempText = String.valueOf(getCurrentTemp());
-
+            String coolingDesiredText;
+            String heatingDesiredText;
+            String currentTempText;
+            String tempString ;
+            String curString = "CURRENT";
+            if( isCelsiusTunerAvailableStatus()) {
+                 coolingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getCoolingDesiredTemp()))));
+                 heatingDesiredText = String.valueOf(fahrenheitToCelsius(Double.parseDouble(String.valueOf(getHeatingDesiredTemp()))));
+                 currentTempText = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(getCurrentTemp()))));
+                 tempString = "TEMP"+" (\u00B0C )";
+            } else {
+                 coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
+                 heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
+                 currentTempText = String.valueOf(getCurrentTemp());
+                 tempString = "TEMP"+" (\u00B0F )";
+            }
              mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
              mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
             mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
@@ -583,15 +610,11 @@ public class SeekArc extends View
             float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
-            String curString = "CURRENT";
             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-
             float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
             float heightOfCurrentStringText = bounds.height();
-
-            String tempString = "TEMP";
 
             mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
 
@@ -647,9 +670,15 @@ public class SeekArc extends View
         mCurrentTemperatureTextPaint.setColor(tempPaintColor);
         mCurrentTemperatureStringTextPaint.setColor(descriptionColor);
 
-        canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(curTemp, xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
+        if( isCelsiusTunerAvailableStatus()) {
+            canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(curTemp))), xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
+        } else {
+            canvas.drawText(top, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(bottom, xPositionOfDesiredText, yPositionOfDesiredText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(curTemp, xPositionOfCurrentTempText, yPositionOfCurrentTempText, mCurrentTemperatureTextPaint);
+        }
 
         mCurrentTemperatureTextPaint.setColor(prevCurrentTempColor);
         mCurrentTemperatureStringTextPaint.setColor(prevCurrentStringColor);

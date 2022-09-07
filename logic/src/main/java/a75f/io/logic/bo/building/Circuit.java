@@ -15,7 +15,7 @@ import a75f.io.logic.bo.building.definitions.Port;
  * Input and Output.   Input and Output should be renamed to
  * CircuitInput and CircuitOutput.  This maintains the logical to physical mapping of a circuit IO.
  */
-public abstract class Circuit extends Schedulable
+public abstract class Circuit
 {
 
     @JsonIgnore

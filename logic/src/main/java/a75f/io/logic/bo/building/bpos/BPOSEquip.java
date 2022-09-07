@@ -14,15 +14,15 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BPOSTuners;
-import a75f.io.logic.tuners.TITuners;
 
 /*
  * created by spoorthidev on 3-August-2021
@@ -132,8 +132,7 @@ public class BPOSEquip {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
                 .addMarker("zone").addMarker("bpos")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied," +
-                        "vacation,occupancysensing,autoforceoccupied,autoaway")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
@@ -430,6 +429,14 @@ public class BPOSEquip {
         HashMap autooccupied = CCUHsApi.getInstance().read("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mEquipRef + "\"");
 
+        BPOSConfiguration currentConfig = getbposconfiguration();
+
+        if(config.getautoAway() != currentConfig.getautoAway()
+                || config.getautoforceOccupied() != currentConfig.getautoforceOccupied())
+        {
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),mEquipRef);
+        }
+
         CCUHsApi.getInstance().writeDefaultValById(tempOffset.get("id").toString(),
                 config.gettempOffset());
         CCUHsApi.getInstance().writeDefaultValById(zonepriority.get("id").toString(),
@@ -581,7 +588,7 @@ public class BPOSEquip {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" :
                     "Emergency Heating");
         } else {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else {
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" :

@@ -13,20 +13,18 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -127,7 +125,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             setTempHeating = twoPfcuDevice.getDesiredTempHeating();
             supplyWaterTempTh2 = twoPfcuDevice.getSupplyWaterTemp();
             String zoneId = HSUtil.getZoneIdFromEquipId(twoPfcuEquip.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(twoPfcuEquip.getId(),0);
             Log.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
 

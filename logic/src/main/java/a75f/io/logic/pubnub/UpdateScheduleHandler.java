@@ -23,17 +23,18 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class UpdateScheduleHandler
 {
     public static final String CMD = "updateSchedule";
     public static final String ADD_SCHEDULE = "addSchedule";
     public static final String DELETE_SCHEDULE = "deleteSchedule";
-    private static BuildingScheduleListener scheduleListener = null;
+    private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
     
     public static void handleMessage(JsonObject msgObject)
@@ -74,6 +75,10 @@ public class UpdateScheduleHandler
 
 
                     return;
+                }
+                if(scheduleDict.has(Tags.SPECIAL)){
+                    CCUHsApi.getInstance().updateSpecialScheduleNoSync(uid, scheduleDict);
+                    break;
                 }
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setId(uid);
@@ -121,6 +126,11 @@ public class UpdateScheduleHandler
                     }
                     return;
                 }
+                if(scheduleDict.has(Tags.SPECIAL)){
+                    CCUHsApi.getInstance().addSchedule(uid, scheduleDict);
+                    CCUHsApi.getInstance().setSynced("@" + uid);
+                    break;
+                }
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                 s.setId(uid);
@@ -134,9 +144,9 @@ public class UpdateScheduleHandler
                 }
                 CCUHsApi.getInstance().setSynced("@" + uid);
             }
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
         }
-        refreshSchedulesScreen(Schedule.getScheduleByEquipId(uid));
+        refreshSchedulesScreen();
         refreshIntrinsicSchedulesScreen();
     }
     
@@ -225,9 +235,9 @@ public class UpdateScheduleHandler
         }
     }
     
-    public static void refreshSchedulesScreen(Schedule updatedSchedule) {
+    public static void refreshSchedulesScreen() {
         if (scheduleListener != null) {
-            scheduleListener.refreshScreen(updatedSchedule);
+            scheduleListener.refreshScreen();
         }
     }
 

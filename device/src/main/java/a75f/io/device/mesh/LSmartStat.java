@@ -1,6 +1,5 @@
 package a75f.io.device.mesh;
 
-
 import android.util.Log;
 
 import org.javolution.io.Struct;
@@ -28,16 +27,15 @@ import a75f.io.device.serial.SmartStatControls_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.device.serial.SmartStatSettings_t;
+import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
@@ -154,7 +152,7 @@ public class LSmartStat {
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
         try {
             Log.d("LSmartStat","sch status="+equipId+","+zone.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zone.getId());
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zone.getId());
             if(occuStatus != null) {
                 Log.d("LSmartStat", "sch status22=" + occuStatus.getCoolingVal() + "," + occuStatus.getHeatingVal() + "," + occuStatus.getHeatingDeadBand() + "," + occuStatus.getCoolingDeadBand());
                 settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
@@ -180,7 +178,7 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay4.set(getConfigEnabled(Port.RELAY_FOUR.name(),address));
         settings_t.enabledRelaysBitmap.relay5.set(getConfigEnabled(Port.RELAY_FIVE.name(),address));
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
-        settings_t.otherBitMaps.centigrade.set((short)0);
+        settings_t.otherBitMaps.centigrade.set((short) (DeviceConfigurationUtil.Companion.getUserConfiguration()));
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
         if (!is2pfcuDevice(address)) {
             settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(), address));

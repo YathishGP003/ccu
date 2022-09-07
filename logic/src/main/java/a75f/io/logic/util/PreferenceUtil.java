@@ -20,7 +20,20 @@ public class PreferenceUtil {
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
-    private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
+    private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
+    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefForZoneMigration";
+    private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
+
+    private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
+    private static final String SITE_NAME_MIGRATION = "siteNameMigration";
+    private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
+    private static final String TI_UPDATE = "updateTIThermister";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleTypes";
+
+
+    private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -261,18 +274,87 @@ public class PreferenceUtil {
     public static boolean getDiagEquipMigration() {
         return getBooleanPreference(DIAG_POINTS_MIGRATION);
     }
+    public static void setSiteNameEquipMigration() {
+        setBooleanPreference(SITE_NAME_MIGRATION, true);
+    }
+    public static boolean getSiteNameEquipMigration() {
+        return getBooleanPreference(SITE_NAME_MIGRATION);
+    }
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
 
     }
 
-    public static boolean getSmartStatPointsMigration() {
-        return getBooleanPreference(SMART_STAT_POINTS_MIGRATION);
+    public static boolean getScheduleRefactorMigration() {
+        return getBooleanPreference(SCHEDULE_REFACTOR_MIGRATION);
     }
 
-    public static void setSmartStatPointsMigration() {
-        setBooleanPreference(SMART_STAT_POINTS_MIGRATION, true);
+    public static void setScheduleRefactorMigration() {
+        setBooleanPreference(SCHEDULE_REFACTOR_MIGRATION, true);
 
     }
+
+    public static void setNewOccupancy() {
+        setBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION, true);
+    }
+    public static boolean getNewOccupancy() {
+        return getBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION);
+    }
+
+    public static void setScheduleRefForZoneMigration() {
+        setBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION, true);
+    }
+    public static boolean getScheduleRefForZoneMigration() {
+        return getBooleanPreference(SCHEDULE_REF_FOR_ZONE_MIGRATION);
+    }
+
+    public static boolean getScheduleRefUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_REFS);
+    }
+
+    public static void setScheduleRefUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_REFS, true);
+    }
+
+    public static void setVocPm2p5MigrationV1() {
+        setBooleanPreference(VOC_PM2P5_MIGRATION_V1, true);
+    }
+    public static boolean getVocPm2p5MigrationV1() {
+        return getBooleanPreference(VOC_PM2P5_MIGRATION_V1);
+    }
+
+    public static boolean getStageTimerForDABMigration() {
+        return getBooleanPreference(STAGE_UP_TIMER_FOR_DAB);
+    }
+
+    public static void setStageTimerForDABMigration() {
+        setBooleanPreference(STAGE_UP_TIMER_FOR_DAB, true);
+    }
+
+
+    public static void setTIUpdate() {
+        setBooleanPreference(TI_UPDATE, true);
+    }
+    public static boolean getTIUpdate() {
+        return getBooleanPreference(TI_UPDATE);
+    }
+
+
+    public static boolean getScheduleTypeUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_TYPE);
+    }
+
+    public static void setScheduleTypeUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
+    }
+
+    public static void setDCWBPointsMigration() {
+        setBooleanPreference(DCWB_POINTS_MIGRATION, true);
+    }
+    public static boolean getDCWBPointsMigration() {
+        return getBooleanPreference(DCWB_POINTS_MIGRATION);
+    }
+
+
 }

@@ -14,13 +14,15 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 
 public class UpdateEntityHandler {
     public static final String CMD = "updateEntity";
     public static void updateEntity(JsonObject msgObject){
         String uid = msgObject.get("ids").getAsJsonArray().get(0).toString().replaceAll("\"", "");
         HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
-        if(entity.get("room") != null){
+        final int mScheduleType =  CCUHsApi.getInstance().readHisValByQuery("scheduleType and roomRef == \"" + entity.get("id") +"\"").intValue();
+        if(entity.get("room") != null && mScheduleType == ScheduleType.NAMED.ordinal()){
             updateNamedSchedule(entity,uid);
         }
         else if (entity.get("floor") != null) {

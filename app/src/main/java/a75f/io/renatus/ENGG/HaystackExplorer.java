@@ -1,28 +1,22 @@
 package a75f.io.renatus.ENGG;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import a75f.io.logic.jobs.SystemScheduleUtil;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +25,14 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
-import a75f.io.renatus.FloorPlanFragment;
-import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 public class HaystackExplorer extends Fragment
 {
@@ -53,7 +47,8 @@ public class HaystackExplorer extends Fragment
     int lastExpandedPosition;
 
     // require pass code for environments QA and up.
-    private boolean passCodeValidationRequired = !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev"));
+    private boolean passCodeValidationRequired =
+        !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa"));
     
     public HaystackExplorer()
     {
@@ -287,6 +282,7 @@ public class HaystackExplorer extends Fragment
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
+            Collections.sort(tunerList);
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
     
@@ -366,7 +362,7 @@ public class HaystackExplorer extends Fragment
                 if (p.getMarkers().contains("his"))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    hayStack.writeHisValById(id, val);
+                    hayStack.writeHisValueByIdWithoutCOV(id, val);
                 }
                 return null;
             }

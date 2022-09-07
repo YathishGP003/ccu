@@ -627,7 +627,7 @@ public class Globals {
         double heatDTMax = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and heating and user");
         double heatDTMindf = TunerUtil.readTunerValByQuery("point and limit and min and heating and user");
         double heatDTMaxdf = TunerUtil.readTunerValByQuery("point and limit and max and heating and user");
-        if(heatDTMin > heatDTMax ||  heatDTMindf > heatDTMaxdf) return false;
+        if(heatDTMin >= heatDTMax ||  heatDTMindf >= heatDTMaxdf) return false;
         else return true;
     }
     

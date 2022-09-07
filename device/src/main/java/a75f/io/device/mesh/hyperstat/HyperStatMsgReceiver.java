@@ -1,5 +1,8 @@
 package a75f.io.device.mesh.hyperstat;
 
+import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+import android.util.Log;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.nio.ByteBuffer;
@@ -7,15 +10,16 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
+import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
-import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
@@ -37,13 +41,10 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatScheduler;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
-
-import android.util.Log;
 
 public class HyperStatMsgReceiver {
     
@@ -245,7 +246,7 @@ public class HyperStatMsgReceiver {
 
         if(index == SensorType.KEY_CARD_SENSOR.ordinal()){ //12 it is KEY_CARD_SENSOR
             Log.d(L.TAG_CCU_DEVICE, "KEY_CARD_SENSOR Sensor Analog input :"+voltageReceived);
-            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 0.0 : 1.0);
+            hayStack.writeHisValById(point.getId(), ((voltageReceived) >= 2)? 1.0 : 0.0);
             return;
         }
         if(index == SensorType.DOOR_WINDOW_SENSOR.ordinal()){ //13 it is DOOR_WINDOW_SENSOR

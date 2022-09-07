@@ -79,6 +79,9 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     Button setButton;
     NumberPicker temperatureOffset;
 
+    ToggleButton toggleAutoaway;
+    ToggleButton toggleAutoForceOccupied;
+
     public Fragment2PipeFanCoilUnitConfig() {
     }
 
@@ -178,6 +181,10 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
 
+        toggleAutoaway = view.findViewById(R.id.toggleAutoAway);
+        toggleAutoForceOccupied = view.findViewById(R.id.toggleAFO);
+
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -204,6 +211,10 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             switchOccSensor.setChecked(mProfileConfig.enableOccupancyControl);
             int offsetIndex = (int) mProfileConfig.temperatureOffset + TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
+
+            toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
+
             //switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
             if (mProfileConfig.getOutputs().size() > 0) {
@@ -280,6 +291,9 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         twoPfcuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         twoPfcuConfig.enableThermistor1 = switchThermistor1.isChecked();
         twoPfcuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
+
+        twoPfcuConfig.enableAutoAway = toggleAutoaway.isChecked();
+        twoPfcuConfig.enableAutoForceOccupied = toggleAutoForceOccupied.isChecked();
 
         if (switchFanMediumY1.isChecked()) {
             Output relay1Op = new Output();

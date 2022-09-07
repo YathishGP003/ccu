@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.vav;
 
+import android.util.Log;
+
+import java.util.Objects;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -7,24 +11,20 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-
-import android.util.Log;
-
-import java.util.Objects;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -269,8 +269,9 @@ public class VavReheatProfile extends VavProfile
         boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(vavEquip.getId());
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-        boolean occupied = (occ == null ? false : occ.isOccupied()) || (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
+        boolean occupied = (occ == null ? false : occ.isOccupied())
+                           || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
         
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];

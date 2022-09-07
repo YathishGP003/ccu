@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
 import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
+import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
 import android.util.Log
 import java.util.*
@@ -230,7 +231,7 @@ class HyperStatPointsUtil constructor(
     }
 
     private fun createHaystackPointWithUnit(
-        displayName: String, markers: Array<String>, hisInterpolate: String, unit: String
+        displayName: String, markers: Array<String>, hisInterpolate: String?, unit: String
     ): Point {
         // Point which has default details
         val point = Point.Builder()
@@ -241,10 +242,12 @@ class HyperStatPointsUtil constructor(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
-            .setHisInterpolate(hisInterpolate)
             .setUnit(unit)
             // add common  markers
             .addMarker(HYPERSTAT).addMarker(profileName).addMarker(Tags.STANDALONE)
+
+           if(!hisInterpolate.isNullOrEmpty())
+               point.setHisInterpolate(hisInterpolate)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -706,7 +709,7 @@ class HyperStatPointsUtil constructor(
         val autoForceAutoAwayConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
         val enableAutoForceOccupancyControlPointMarkers = arrayOf(
-            "config", "writable", "zone", "auto", "occupancy", "enabled", "control", "forced","his"
+            "config", "writable", "zone", "auto", "occupied", "enabled", "control", "forced","his"
         )
         val enableAutoAwayControlPointMarkers = arrayOf(
             "config", "writable", "zone", "auto", "away", "enabled", "control","his"
@@ -741,9 +744,82 @@ class HyperStatPointsUtil constructor(
             )
         )
 
+        autoForceAutoAwayConfigPointsList.add(
+            Pair(
+                enableAutoAwayControlPointPoint,
+                if (hyperStatConfig.isEnableAutoAway) 1.0 else 0.0
+            )
+        )
+
+        autoForceAutoAwayConfigPointsList.addAll(createKeycardWindowSensingPoints())
         return autoForceAutoAwayConfigPointsList
     }
 
+    fun createKeycardWindowSensingPoints() : MutableList<Pair<Point, Any>> {
+
+        val keycardWindowSensingPointsList: MutableList<Pair<Point, Any>> = LinkedList()
+
+        val enableKeyCardSensingPointMarkers = arrayOf(
+            "config","zone", "keycard", "sensing", "enabled","writable"
+        )
+
+        val enableWindowSensingPointMarkers = arrayOf(
+            "config","zone", "window", "sensing", "enabled","writable"
+        )
+
+        val keycardSensorInputPointMarkers = arrayOf(
+            "zone", "keycard", "sensor", "input","his"
+        )
+
+        val windowSensorInputPointMarkers = arrayOf(
+            "zone", "window", "sensor", "input","his"
+        )
+
+        val enableKeycardSensingPointPoint = createHaystackPointWithEnums(
+            "$equipDis-keycardSensingEnabled",
+            enableKeyCardSensingPointMarkers,
+            "cov",
+            "off,on"
+        )
+
+        val enableWindowSensingPointPoint = createHaystackPointWithEnums(
+            "$equipDis-windowSensingEnabled",
+            enableWindowSensingPointMarkers,
+            "cov",
+            "off,on"
+        )
+
+        val keycardSensorInput = createHaystackPointWithEnums(
+            "$equipDis-keycardSensorInput",
+            keycardSensorInputPointMarkers,
+            "cov",
+            "off,on"
+        )
+
+        val windowSensorInput = createHaystackPointWithEnums(
+            "$equipDis-windowSensorInput",
+            windowSensorInputPointMarkers,
+            "cov",
+            "off,on"
+        )
+
+        keycardWindowSensingPointsList.add(
+            Pair(enableKeycardSensingPointPoint, 0)
+        )
+        keycardWindowSensingPointsList.add(
+            Pair(enableWindowSensingPointPoint, 0)
+        )
+
+        keycardWindowSensingPointsList.add(
+            Pair(keycardSensorInput, 0)
+        )
+
+        keycardWindowSensingPointsList.add(
+            Pair(windowSensorInput, 0)
+        )
+
+        return keycardWindowSensingPointsList;
+    }
 
     // Function which creates co2 Points
     fun createPointCO2ConfigPoint(
@@ -766,20 +842,20 @@ class HyperStatPointsUtil constructor(
         val co2DamperOpeningRatePoint = createHaystackPointWithUnit(
             "$equipDis-co2DamperOpeningRate",
             co2DamperOpeningRatePointMarkers,
-            "","%"
+            "cov","%"
         )
 
 
         val zoneCO2ThresholdPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Threshold",
             zoneCO2ThresholdPointMarkers,
-            "","ppm"
+            "cov","ppm"
         )
 
         val zoneCO2TargetPointPoint = createHaystackPointWithUnit(
             "$equipDis-zoneCO2Target",
             zoneCO2TargetPointMarkers,
-            "","ppm"
+            "cov","ppm"
         )
 
         co2ConfigPointsList.add(
@@ -818,20 +894,20 @@ class HyperStatPointsUtil constructor(
         val zoneVOCThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-zoneVOCThreshold",
             vocMarkers.stream().toArray { arrayOfNulls(it) },
-            "","ppb"
+            "cov","ppb"
         )
         vocMarkers.remove("threshold")
         vocMarkers.add("target")
         val zoneVOCTargetPoint = createHaystackPointWithUnit(
             "$equipDis-zoneVOCTarget",
             vocMarkers.stream().toArray { arrayOfNulls(it) },
-            "","ppb"
+            "cov","ppb"
         )
 
         val zonePm2p5ThresholdPoint = createHaystackPointWithUnit(
             "$equipDis-zonePm2p5Threshold",
             pm2p5Markers.stream().toArray { arrayOfNulls(it) },
-            "","ug/\u33A5"
+            "cov","ug/\u33A5"
         )
 
         pm2p5Markers.remove("threshold")
@@ -839,7 +915,7 @@ class HyperStatPointsUtil constructor(
         val zonePm2p5TargetPoint = createHaystackPointWithUnit(
             "$equipDis-zonePm2p5Target",
             pm2p5Markers.stream().toArray { arrayOfNulls(it) },
-            "","ug/\u33A5"
+            "cov","ug/\u33A5"
         )
 
 
@@ -1673,8 +1749,7 @@ class HyperStatPointsUtil constructor(
         val operatingModeMarkers = arrayOf("temp", "mode", "his", "sp", "zone","operating")
         val operatingModePointEnums = "off,cooling,heating,tempdead"
 
-        val occupancyEnum = "unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing," +
-                "autoforceoccupy,autoaway"
+        val occupancyEnum = Occupancy.getEnumStringDefinition()
 
         val occupancyDetection = createHaystackPointWithEnums(
             displayName = "$equipDis-occupancyDetection",

@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
 import android.content.Intent;
-import android.util.Log;
 
 import java.util.HashMap;
 
@@ -14,15 +13,14 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createAnalog4LoopConfigPoints;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createChilledWaterConfigPoints;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createConfigPoints;
@@ -30,7 +28,7 @@ import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.createLoopPoi
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteAnalog4LoopConfigPoints;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteConfigPoints;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteLoopOutputPoints;
-import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
 {
@@ -129,7 +127,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());
         String systemStatus = getStatusMessage();
-        String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
+        String scheduleStatus = ScheduleManager.getInstance().getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         

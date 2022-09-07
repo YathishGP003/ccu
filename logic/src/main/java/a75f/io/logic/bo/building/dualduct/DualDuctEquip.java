@@ -16,6 +16,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -23,6 +24,8 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.tuners.DualDuctTuners;
@@ -121,8 +124,11 @@ public class DualDuctEquip {
         createEquipOperationPoints(siteRef, equipDis, roomRef, floorRef, tz );
         
         createConfigPoints(siteRef, equipDis, tz, config);
-        
-        
+
+        ConfigUtil.Companion.addConfigPoints("dualDuct",siteRef,roomRef,floorRef,
+                equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAwayControl ? 1:0,
+                config.enableAutoForceOccupied ?1:0);
+
         setDefaultValues();
         
         CCUHsApi.getInstance().syncEntityTree();
@@ -265,7 +271,8 @@ public class DualDuctEquip {
         device.th2In.setEnabled(true);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
-
+        ConfigUtil.Companion.addOccupancyPointsSN(device,"dualDuct",siteRef,roomRef,
+                floorRef,equipRef,tz,String.valueOf(nodeAddr),equipDis);
 
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
@@ -391,8 +398,7 @@ public class DualDuctEquip {
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("dualDuct").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his")
-                                  .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation," +
-                                          "occupancysensing,autoforceoccupy,autoaway")
+                                  .setEnums(Occupancy.getEnumStringDefinition())
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -877,7 +883,9 @@ public class DualDuctEquip {
         config.setEnableCO2Control(getConfigNumVal("enable and co2") > 0);
         config.setEnableIAQControl(getConfigNumVal("enable and iaq") > 0) ;
         config.setTemperatureOffset(getConfigNumVal("temperature and offset"));
-        
+        config.enableAutoAwayControl = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and occupied and forced") > 0;
+
         config.setNodeType(NodeType.SMART_NODE);
         
         return config;
@@ -1271,7 +1279,12 @@ public class DualDuctEquip {
         }
         
         updateThermistorConfig(config);
-        
+
+        if(config.enableAutoAwayControl != currentConfig.enableAutoAwayControl
+                || config.enableAutoForceOccupied != currentConfig.enableAutoForceOccupied){
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
+        }
+
         setConfigNumVal("analog1 and output and type",config.getAnalogOut1Config());
         setHisVal("analog1 and output and type",config.getAnalogOut1Config());
         setConfigNumVal("analog2 and output and type",config.getAnalogOut2Config());
@@ -1297,7 +1310,16 @@ public class DualDuctEquip {
         setHisVal("analog2 and output and min and damper and cooling and pos", config.getAnalog2OutAtMinDamperCooling());
         setConfigNumVal("analog2 and output and max and damper and cooling and pos", config.getAnalog2OutAtMaxDamperCooling());
         setHisVal("analog2 and output and max and damper and cooling and pos", config.getAnalog2OutAtMaxDamperCooling());
-        
+
+        setConfigNumVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 :0);
+        setConfigNumVal("auto and away",config.enableAutoAwayControl ? 1.0 :0);
+        setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 :0);
+        setHisVal("auto and away",config.enableAutoAwayControl ? 1.0 :0);
+
+        if(!config.enableAutoAwayControl){
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
+        }
+
         setConfigNumVal("enable and occupancy",config.isEnableOccupancyControl() ? 1.0 : 0);
         setHisVal("enable and occupancy",config.isEnableOccupancyControl() ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.isEnableCO2Control() ? 1.0 : 0);

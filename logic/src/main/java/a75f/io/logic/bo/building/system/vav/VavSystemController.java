@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
@@ -13,10 +11,11 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -24,7 +23,6 @@ import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -34,8 +32,6 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
-
-
 
 /**
  * VavSystemController applies Weighted average and Moving average filters on temperature diffs.
@@ -215,7 +211,7 @@ public class VavSystemController extends SystemController
         zoneDeadCount = 0;
         hasTi = false;
         
-        Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
+        Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
             currSystemOccupancy == Occupancy.PRECONDITIONING ||
             currSystemOccupancy == Occupancy.FORCEDOCCUPIED ||
@@ -313,8 +309,8 @@ public class VavSystemController extends SystemController
 
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
                 if(isCMTempDead(cmCurrentTemp)) {
-                    double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
-                    double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+                    double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
+                    double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
 
                     double zoneCoolingLoad = cmCurrentTemp > desiredTempCooling ? cmCurrentTemp - desiredTempCooling : 0;
                     double zoneHeatingLoad = cmCurrentTemp < desiredTempHeating ? desiredTempHeating - cmCurrentTemp : 0;
@@ -652,8 +648,8 @@ public class VavSystemController extends SystemController
     public void updateSystemDesiredTemp(){
         try {
 
-            double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
-            double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+            double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
+            double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
             HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
                                                             .readEntity("point and system and cm and cooling and " +
                                                                         "desired and temp and equipRef == " + "\"" +

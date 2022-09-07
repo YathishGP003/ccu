@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.content.SharedPreferences;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,11 +18,28 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpandableGridAdapter.ViewHolder> {
 
@@ -44,6 +62,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
     String tunerGroupType = "Building";
+    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
@@ -61,6 +80,10 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 return isSection(position) ? gridLayoutManager.getSpanCount() : 1;
             }
         });
+    }
+
+    public Context getmContext() {
+        return mContext;
     }
 
     private boolean isSection(int position) {
@@ -81,7 +104,10 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
-                
+                Prefs prefs = new Prefs(getmContext().getApplicationContext());
+                ArrayList<String> valueList = new ArrayList<>();
+                DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(tunerItem, tunerGroupType,previousOpenGroup);
+
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
                     if (tunerItem.get("newValue") == null){
@@ -92,6 +118,37 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                             holder.imgBtnUndo.setVisibility(View.GONE);
                         }
                     } else {
+                        if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")) {
+                            if (isCelsiusTunerAvailableStatus()) {
+                                String value ;
+                                if (tunerItem.get("unit").toString().equals("\u00B0F")) {
+                                    if (doesPointNeedRelativeConversion(tunerItem)) {
+                                        value = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
+                                        value = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                    } else {
+                                        value = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
+
+                                    }
+                                    tunerPriorityArray.loadValueList(valueList);
+                                    value = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(value)));
+                                    tunerItem.replace("newValue", value);
+                                }
+                            } else if (tunerItem.get("unit").toString().equals("\u00B0C")) {
+                                String value;
+                                if (doesPointNeedRelativeConversion(tunerItem)) {
+                                    value = String.valueOf(convertingRelativeValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
+                                    value = String.valueOf(convertingDeadBandValueCtoF(Double.parseDouble(tunerItem.get("newValue").toString())));
+                                } else {
+                                    value = String.valueOf(celsiusToFahrenheitTuner(Double.parseDouble(tunerItem.get("newValue").toString())));
+
+                                }
+                                tunerPriorityArray.loadValueList(valueList);
+                                value = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(value)));
+                                tunerItem.replace("newValue", value);
+                            }
+                        }
                         holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
                         if (tunerItem.containsKey("hideRefresh")){
                             holder.imgBtnUndo.setVisibility(View.GONE);
@@ -102,12 +159,35 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 } else {
                     holder.imgBtnUndo.setVisibility(View.GONE);
                     if (getTunerValue(tunerItem.get("id").toString()) != null){
-                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                        double val = (getTunerValue(tunerItem.get("id").toString()));
+                        if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")) {
+                            if (isCelsiusTunerAvailableStatus()) {
+                                if (tunerItem.get("unit").toString().equals("\u00B0F") || tunerItem.get("unit").toString().equals("\u00B0C")) {
+                                    if (doesPointNeedRelativeConversion(tunerItem)) {
+                                        val = convertingRelativeValueFtoC(val);
+                                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
+                                        val = convertingDeadBandValueFtoC(val);
+                                    } else {
+                                        val = fahrenheitToCelsiusTuner(val);
+                                    }
+                                }
+                            }
+                        }
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = tunerPriorityArray.getClosestNumberOfTarget(valueList,val);
+                        holder.itemTextValueView.setText(String.valueOf(val));
                     } else {
                         holder.itemTextValueView.setText("-");
                     }
                 }
-                if (tunerItem.containsKey("unit")) {
+                if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")) {
+                    if(isCelsiusTunerAvailableStatus()) {
+                        if (tunerItem.get("unit").toString().equals("\u00B0F")) {
+                            tunerItem.put("unit", "\u00B0C");
+                        }
+                    }else if (tunerItem.get("unit").toString().equals("\u00B0C")) {
+                        tunerItem.put("unit","\u00B0F");
+                    }
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
                 } else {
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
@@ -124,7 +204,22 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     tunerItem.remove("newValue");
                     tunerItem.remove("newLevel");
                     if (getTunerValue(tunerItem.get("id").toString()) != null){
-                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                        String val = String.valueOf(getTunerValue(tunerItem.get("id").toString()));
+                        if (tunerItem.containsKey("unit") && !tunerItem.containsKey("displayUnit")){
+                            if (isCelsiusTunerAvailableStatus()) {
+                                if (doesPointNeedRelativeConversion(tunerItem)) {
+                                    val = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(val)));
+                                } else if (doesPointNeedRelativeDeadBandConversion(tunerItem)){
+                                    val = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(val)));
+                                } else {
+                                    val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
+                                }
+                            }
+
+                            }
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
+                        holder.itemTextValueView.setText((val));
                     } else {
                         holder.itemTextValueView.setText("-");
                     }
@@ -168,6 +263,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 throw new IllegalStateException("Unexpected value: " + holder.viewType);
         }
     }
+
 
     @Override
     public int getItemCount() {

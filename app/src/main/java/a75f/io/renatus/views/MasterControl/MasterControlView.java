@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -53,7 +54,9 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 
 public class MasterControlView extends LinearLayout {
@@ -200,6 +203,7 @@ public class MasterControlView extends LinearLayout {
         ArrayList<String> namedSchedulesWarning = new ArrayList<>();
         Set<String> namedSchedulesIds = new HashSet<String>();
 
+
         coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
@@ -234,14 +238,22 @@ public class MasterControlView extends LinearLayout {
                 String heatValues = "";
                 if (days.getHeatingVal() < heatingTemperatureUpperLimit || days.getHeatingVal() > heatingTemperatureLowerLimit) {
                     double heatingDesiredTemperatureValue = getHeatingDesiredTemperature(days.getHeatingVal(), heatingTemperatureUpperLimit, heatingTemperatureLowerLimit);
-                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
+                    if(isCelsiusTunerAvailableStatus()) {
+                        heatValues = "\u0020" + "Heating (" + roundToHalf((float) fahrenheitToCelsius(days.getHeatingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(heatingDesiredTemperatureValue)) + ")";
+                    }else {
+                        heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
+                    }
 
                     days.setHeatingVal(heatingDesiredTemperatureValue);
                 }
 
                 if (days.getCoolingVal() < coolingTemperatureLowerLimit || days.getCoolingVal() > coolingTemperatureUpperLimit) {
                     double coolingDesiredTemperatureValue = getCoolingDesiredTemperature(days.getCoolingVal(), coolingTemperatureLowerLimit, coolingTemperatureUpperLimit);
-                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
+                    if(isCelsiusTunerAvailableStatus()) {
+                        coolValues = "\u0020" + "Cooling (" + roundToHalf((float) fahrenheitToCelsius(days.getCoolingVal())) + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + roundToHalf((float) fahrenheitToCelsius(coolingDesiredTemperatureValue)) + ")";
+                    }else {
+                        coolValues = "\u0020" + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
+                    }
 
                     days.setCoolingVal(coolingDesiredTemperatureValue);
                 }
@@ -729,6 +741,9 @@ public class MasterControlView extends LinearLayout {
             }
         }
         return 0;
+    }
+    private static float roundToHalf(float d) {
+        return Math.round(d * 2) / 2.0f;
     }
 
     private double getHeatingDesiredTemperature(double heatingDesiredTemperature, double heatingTemperatureUpperLimit,

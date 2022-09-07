@@ -7,14 +7,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
 import java.util.Set;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -22,11 +21,11 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -128,7 +127,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Log.d(TAG, " smartstat cpu, updates 111="+cpuEquip.getRoomRef()+","+setTempHeating+","+setTempCooling);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(cpuEquip.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             double coolingDeadband = 2.0;
             double heatingDeadband = 2.0;
 
@@ -245,6 +244,10 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if(getCmdSignal("cooling and stage2",node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
+                        if(isFanStage1Enabled && getCmdSignal("fan and stage1", node) == 0) {
+                                setCmdSignal("fan and stage1", 1, node);
+                                relayStages.put("FanStage1",1);
+                        }
                         if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || isFanSpeedHigh) ) ||  (occupied && enableFanStage1DuringOccupied && isFanSpeedHigh))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2",node) == 0)

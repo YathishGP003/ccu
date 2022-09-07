@@ -12,14 +12,13 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TITuners;
 import a75f.io.logic.util.RxTask;
 
@@ -216,39 +215,6 @@ public class CazEquip
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);
 
-        Point dischargeAirTemp1 = new Point.Builder()
-                .setDisplayName(siteDis+"-TI-"+nodeAddr+"-thermistor1")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
-                .addMarker("zone").addMarker("ti")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical")
-                .setGroup(String.valueOf(nodeAddr))
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(dat1Id, 0.0);
-
-
-        Point eatPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-external10kTempSensorTh2")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("ti").addMarker("his")
-                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
-                .setGroup(String.valueOf(nodeAddr))
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(eatID, 0.0);
-
         Point zoneDynamicPriorityPoint = new Point.Builder()
             .setDisplayName(equipDis+"-zoneDynamicPriority")
             .setEquipRef(equipRef)
@@ -271,7 +237,7 @@ public class CazEquip
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
                 .addMarker("ti").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -284,11 +250,6 @@ public class CazEquip
         //4 TODO map system device?
         ControlMote device = new ControlMote(nodeAddr,siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
-        device.currentTemp.setEnabled(true);
-        device.th1In.setPointRef(dat1Id);
-        device.th1In.setEnabled(true);
-        device.th2In.setPointRef(eatID);
-        device.th2In.setEnabled(config.enableThermistor2);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
 
@@ -306,6 +267,7 @@ public class CazEquip
         setHumidity(0);
 
         CCUHsApi.getInstance().syncEntityTree();
+        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
     }
 
     String getId(){
@@ -348,14 +310,77 @@ public class CazEquip
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
 
+        Point mainSensor = new Point.Builder()
+                .setDisplayName(equipDis+"-mainTemperatureSensor")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp")
+                .addMarker("enable")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
+        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, config.isEnableMain ? 1.0:0.0);
+
+        Point th1Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th1")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th1").addMarker("sp").addMarker("enable")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
+        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, config.enableThermistor1 ? 1.0:0.0);
+
+        Point th2Config = new Point.Builder()
+                .setDisplayName(equipDis+"-th2")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("th2").addMarker("sp").addMarker("enable")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
+        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, config.enableThermistor2 ? 1.0:0.0);
+    }
+
+    public void updateCurrentTemp(boolean isMain,boolean isEnableth1, boolean isEnableth2) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object,Object> device = hayStack.readEntity("cm and device ");
+        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
+                "temp and equipRef == \""+equipRef+"\"");
+        if (!device.isEmpty() && !currentTemp.isEmpty()) {
+            if (isEnableth1) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), currentTemp.get(
+                        "id").toString());
+            } else if (isEnableth2) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), currentTemp.get(
+                        "id").toString());
+            } else if (isMain) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+            }
+        }
     }
 
     public CazProfileConfig getProfileConfiguration() {
         CazProfileConfig config = new CazProfileConfig();
         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
-
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        config.isEnableMain = getConfigNumVal("main and current and temperature and enable") > 0;
+        config.enableThermistor1 = getConfigNumVal("th1 and enable") > 0;
+        config.enableThermistor2 = getConfigNumVal("th2 and enable") > 0;
         return config;
     }
 
@@ -364,6 +389,11 @@ public class CazEquip
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and main and current and temperature",config.isEnableMain ? 1.0 : 0);
+        setConfigNumVal("enable and th1",config.enableThermistor1 ? 1.0 : 0);
+        setConfigNumVal("enable and th2",config.enableThermistor2 ? 1.0 : 0);
+        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
+
     }
 
     public void setConfigNumVal(String tags,double val) {
@@ -494,7 +524,7 @@ public class CazEquip
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
                 message = "In Preconditioning ";
             } else
             {

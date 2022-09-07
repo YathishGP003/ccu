@@ -40,19 +40,18 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
-import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -413,7 +412,7 @@ public class Pulse
 		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+equip.getId()+"\"");
 		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+equip.getId()+"\"");
 		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
-		Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+		Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
 		if(occ != null) {
 			cdb = occ.getCoolingDeadBand();
 			hdb = occ.getHeatingDeadBand();
@@ -532,15 +531,21 @@ public class Pulse
 		if (device != null && device.size() > 0) {
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
+			CcuLog.d(L.TAG_CCU_DEVICE, "deviceRef "+ deviceInfo.getId() );
+
 			String logicalCurTempPoint = "";
 			double th2TempVal = 0.0;
+			double th1TempVal = 0.0;
 			boolean isTh2Enabled = false;
+			boolean isTh1Enabled = false;
+			boolean isTI = false;
 			for (HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
 				}
-				HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+				HashMap<Object,Object> logPoint = hayStack.readEntity("point and id==" + phyPoint.get("pointRef"));
 				
+
 				if (logPoint.isEmpty()) {
 					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
 					continue;
@@ -566,17 +571,26 @@ public class Pulse
 					case TH2_IN:
 						val = cmRegularUpdateMessage_t.thermistor2.get();
 						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th2 " + phyPoint.get("id").toString() );
 						if (isTh2Enabled) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
+							if(logPoint.keySet().contains(Tags.TI)){
+								curTempVal=curTh2TempVal;
+								isTI = true;
+							}
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(oldTh2TempVal != curTh2TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh2TempVal);
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempvalth2 " + hayStack.readHisValById(logPoint.get("id").toString()));
+
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
+
+						CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+addr+"\"", th2TempVal);
 						break;
 					case ANALOG_IN_ONE:
 						val = cmRegularUpdateMessage_t.analogSense1.get();
@@ -593,12 +607,24 @@ public class Pulse
 					case TH1_IN:
 						val = cmRegularUpdateMessage_t.thermistor1.get();
 						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						if(oldTh1TempVal != curTh1TempVal)
-							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
+						isTh1Enabled = phyPoint.get("portEnabled").toString().equals("true");
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th1 " + phyPoint.get("id").toString() );
+
+						if(isTh1Enabled){
+							double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+							curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
+							th1TempVal = curTh1TempVal;
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							if(logPoint.keySet().contains(Tags.TI)){
+								curTempVal=curTh1TempVal;
+								isTI = true;
+							}
+							if(oldTh1TempVal != curTh1TempVal)
+								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : curtempval " + hayStack.readHisValById(logPoint.get("id").toString()));
+							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + th1TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh1Enabled);
 						break;
 					case SENSOR_RH:
 						val = cmRegularUpdateMessage_t.humidity.get();
@@ -611,11 +637,18 @@ public class Pulse
 						break;
 				}
 			}
-			//Write Current temp point based on th2 enabled or not,
-			if (isTh2Enabled && !logicalCurTempPoint.isEmpty()) {
+
+			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTI) {
+				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
+				if (currentTempInterface != null) {
+					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(deviceInfo.getAddr()));
+				}
+			}//Write Current temp point based on th2 enabled or not,
+			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() ) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if (currentTempInterface != null) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			} else if (!logicalCurTempPoint.isEmpty()) {
@@ -623,7 +656,7 @@ public class Pulse
 				if(oldCurTemp != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
 					}
 				}
@@ -1192,16 +1225,15 @@ public class Pulse
 		}
 
 	}
-
+	
+	//Occupancy has a physical and logical points, which are COV based. In addition to that an occupancyDetection
+	//point is used to track occupancy events without COV filtering.
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
-		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		if((val == 1) ) {
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if (!occDetPoint.isEmpty()){
 				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
-				double occDetPoint2 = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and detection" +
-						" and his and equipRef == \"" + device.getEquipRef() + "\"");
 			}
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
@@ -1215,7 +1247,7 @@ public class Pulse
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
 			if(val > 0) {
-				Occupied occupied = ScheduleProcessJob.getOccupiedModeCache(device.getRoomRef());
+				Occupied occupied = ScheduleManager.getInstance().getOccupiedModeCache(device.getRoomRef());
 				if (occupied != null)
 					Log.d("Occupancy", "pulse occupancy sensor22=" + occupied.isOccupied() + "," + occupied.isPreconditioning());
 				if ((occupied != null) && !occupied.isOccupied() && !occupied.isPreconditioning()) {

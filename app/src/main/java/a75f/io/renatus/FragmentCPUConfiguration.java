@@ -85,6 +85,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     ToggleButton switchEnableFanStage1;
     @BindView(R.id.textCoolStage1)
     TextView textCoolStage1;
+
+    ToggleButton toggleAutoaway;
+    ToggleButton toggleAutoForceOccupied;
+
     Button setButton;
     Button cancelButton;
     NumberPicker temperatureOffset;
@@ -183,6 +187,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleCpuExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         fanHumiDSpinner = (Spinner) view.findViewById(R.id.spinnerCpuFanHigh);
+        toggleAutoaway = view.findViewById(R.id.toggleAutoAway);
+        toggleAutoForceOccupied = view.findViewById(R.id.toggleAFO);
 
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
@@ -213,6 +219,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             temperatureOffset.setValue(offsetIndex);
             switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
+            toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
 
             fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
             if (mProfileConfig.getOutputs().size() > 0) {
@@ -339,6 +347,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         cpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         cpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         cpuConfig.relay6Type = fanHumiDSpinner.getSelectedItemPosition() + 1;
+        cpuConfig.enableAutoAway = toggleAutoaway.isChecked();
+        cpuConfig.enableAutoForceOccupied = toggleAutoForceOccupied.isChecked();
 
 
         if (switchCoolingY1.isChecked()) {

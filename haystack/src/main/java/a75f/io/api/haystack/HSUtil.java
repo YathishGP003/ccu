@@ -99,9 +99,14 @@ public class HSUtil
         return equip.getRoomRef();
     }
     public static Equip getEquipInfo(String equipId) {
+        return getEquip( CCUHsApi.getInstance(), equipId);
+    }
+    
+    public static Equip getEquip(CCUHsApi hayStack, String equipId) {
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         return new Equip.Builder().setHashMap(equipHashMap).build();
     }
+    
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();
@@ -154,9 +159,12 @@ public class HSUtil
     }
     
     public static double getPriorityVal(String id) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        return getPriorityVal(id, CCUHsApi.getInstance());
+    }
+    
+    public static double getPriorityVal(String id, CCUHsApi hayStack) {
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
                 if (valMap.get("val") != null) {
@@ -180,7 +188,11 @@ public class HSUtil
     }
     
     public static HashMap getPriorityLevel(String id, int level) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        return getPriorityLevel(id, level, CCUHsApi.getInstance());
+    }
+    
+    public static HashMap<Object, Object> getPriorityLevel(String id, int level, CCUHsApi hayStack) {
+        ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
             return ((HashMap) values.get(level-1));
         }
@@ -371,5 +383,15 @@ public class HSUtil
             return null;
         }
         return new Equip.Builder().setHashMap(equipMap).build();
+    }
+
+    public static boolean isTIProfile(String pointUid, CCUHsApi instance) {
+        HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
+        return ((pointEntity.containsKey("ti")
+                && pointEntity.containsKey("config"))
+        &&(pointEntity.containsKey("th1")
+                || pointEntity.containsKey("th2")
+                ||pointEntity.containsKey("main")));
+
     }
 }

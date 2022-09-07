@@ -546,6 +546,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
@@ -558,6 +559,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
@@ -1068,6 +1070,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
                 .addMarker("fcu").addMarker("pipe4").addMarker("zone")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
                 .build();
@@ -1085,6 +1088,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
                 .addMarker("pipe4").addMarker("fcu").addMarker("temp")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();

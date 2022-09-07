@@ -199,6 +199,11 @@ public class MigrationUtil {
             migrateDCWBPoints(CCUHsApi.getInstance());
             PreferenceUtil.setDCWBPointsMigration();
         }
+
+        if(!PreferenceUtil.getSmartStatPointsMigration()){
+            doSmartStatPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setSmartStatPointsMigration();
+        }
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -1134,5 +1139,21 @@ public class MigrationUtil {
         }else {
             CcuLog.i(TAG_CCU_MIGRATION_UTIL, "DCWB IS NOT ENABLED");
         }
+    }
+
+    private static void doSmartStatPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("equip");
+
+        equipList.forEach(equip -> {
+            Equip equipMap = new Equip.Builder().setHashMap(equip).build();
+            String nodeAddress = equipMap.getGroup();
+            // Below list consists of smartStat points which does not have group tag
+            ArrayList<HashMap<Object, Object>> smartStatPoints = CCUHsApi.getInstance().readAllEntities("point and not group and standalone and not tuner and not system and not diag and  equipRef == \""+ equipMap.getId()+"\"");
+
+            for(HashMap<Object, Object> point : smartStatPoints){
+                Point up = new Point.Builder().setHashMap(point).setGroup(nodeAddress).build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        });
     }
 }

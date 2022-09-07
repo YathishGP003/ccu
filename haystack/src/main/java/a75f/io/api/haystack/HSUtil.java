@@ -384,4 +384,14 @@ public class HSUtil
         }
         return new Equip.Builder().setHashMap(equipMap).build();
     }
+
+    public static boolean isTIProfile(String pointUid, CCUHsApi instance) {
+        HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
+        return ((pointEntity.containsKey("ti")
+                && pointEntity.containsKey("config"))
+        &&(pointEntity.containsKey("th1")
+                || pointEntity.containsKey("th2")
+                ||pointEntity.containsKey("main")));
+
+    }
 }

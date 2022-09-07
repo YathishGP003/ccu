@@ -194,6 +194,11 @@ public class MigrationUtil {
             updateScheduleType(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleTypeUpdateMigration();
         }
+
+        if(!PreferenceUtil.getDCWBPointsMigration()){
+            migrateDCWBPoints(CCUHsApi.getInstance());
+            PreferenceUtil.setDCWBPointsMigration();
+        }
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -1092,6 +1097,42 @@ public class MigrationUtil {
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
             }
+        }
+    }
+
+    private static void migrateDCWBPoints(CCUHsApi ccuHsApi){
+        boolean isDCWBEnabled = ccuHsApi.readDefaultVal("dcwb and enabled") > 0;
+        if(isDCWBEnabled){
+            ArrayList<HashMap<Object, Object>> DCWBPoints = new ArrayList<>();
+            HashMap<Object, Object> analog4OutputEnabled = ccuHsApi.readEntity("system and analog4 and output and enabled");
+            DCWBPoints.add(analog4OutputEnabled);
+            HashMap<Object, Object> adaptiveDeltaEnabled = ccuHsApi.readEntity("system and adaptive and delta and enabled");
+            DCWBPoints.add(adaptiveDeltaEnabled);
+            HashMap<Object, Object> maximizedExitWaterTempEnabled = ccuHsApi.readEntity("system and maximized and exit and water and enabled");
+            DCWBPoints.add(maximizedExitWaterTempEnabled);
+            HashMap<Object, Object> analog1AtValveClosedPosition = ccuHsApi.readEntity("system and analog1 and valve and closed");
+            DCWBPoints.add(analog1AtValveClosedPosition);
+            HashMap<Object, Object> analog1AtValveFullPosition = ccuHsApi.readEntity("system and analog1 and valve and full");
+            DCWBPoints.add(analog1AtValveFullPosition);
+            HashMap<Object, Object> analog4LoopOutputType = ccuHsApi.readEntity("system and analog4 and loop and output");
+            DCWBPoints.add(analog4LoopOutputType);
+            HashMap<Object, Object> analog4AtMinCoolingLoop = ccuHsApi.readEntity("system and analog4 and min and loop");
+            DCWBPoints.add(analog4AtMinCoolingLoop);
+            HashMap<Object, Object> analog4AtMaxCoolingLoop = ccuHsApi.readEntity("system and analog4 and max and loop");
+            DCWBPoints.add(analog4AtMaxCoolingLoop);
+            HashMap<Object, Object> createChilledWaterConfigPoints = ccuHsApi.readEntity("system and chilled and water and target and delta");
+            DCWBPoints.add(createChilledWaterConfigPoints);
+            HashMap<Object, Object> chilledWaterExitMargin = ccuHsApi.readEntity("system and chilled and water and exit and temp and margin");
+            DCWBPoints.add(chilledWaterExitMargin);
+            HashMap<Object, Object> chilledWaterMaxFlowRate = ccuHsApi.readEntity("system and chilled and water and max and flow and rate");
+            DCWBPoints.add(chilledWaterMaxFlowRate);
+
+            for (HashMap<Object, Object> DCWBPoint: DCWBPoints ) {
+                Point updatedPoint = new Point.Builder().setHashMap(DCWBPoint).addMarker(Tags.DCWB).build();
+                ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        }else {
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "DCWB IS NOT ENABLED");
         }
     }
 }

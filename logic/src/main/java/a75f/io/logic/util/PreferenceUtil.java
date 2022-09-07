@@ -32,6 +32,7 @@ public class PreferenceUtil {
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
 
 
     public static void setContext(Context c) {
@@ -346,6 +347,13 @@ public class PreferenceUtil {
 
     public static void setScheduleTypeUpdateMigration() {
         setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
+    }
+
+    public static void setDCWBPointsMigration() {
+        setBooleanPreference(DCWB_POINTS_MIGRATION, true);
+    }
+    public static boolean getDCWBPointsMigration() {
+        return getBooleanPreference(DCWB_POINTS_MIGRATION);
     }
 
 

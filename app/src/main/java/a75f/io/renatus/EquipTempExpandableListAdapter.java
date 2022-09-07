@@ -41,6 +41,7 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.renatus.ENGG.HaystackExplorer.getPointVal;
 
 /**
@@ -107,6 +108,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             Spinner     scheduleSpinner     = convertView.findViewById(R.id.schedule_spinner);
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
             TextView vacationStatusTV = convertView.findViewById(R.id.vacation_status);
+            TextView specialScheduleStatusText = convertView.findViewById(R.id.special_status_status);
             ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
             LinearLayout smartStatLayout = convertView.findViewById(R.id.ss_layout);
             TextView ssStatus = convertView.findViewById(R.id.ss_conditioning_status_tv);
@@ -120,6 +122,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
+            String specialScheduleStatus = getScheduleStateString(zoneId);
+            specialScheduleStatusText.setText(specialScheduleStatus);
             scheduleStatus.setText(status);
             String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
             mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);

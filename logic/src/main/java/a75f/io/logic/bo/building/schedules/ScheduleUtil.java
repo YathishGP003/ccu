@@ -252,7 +252,9 @@ public class ScheduleUtil {
             DateTime dateTime = new DateTime();
             DateTime beginTime = new DateTime().withTime(specialSchedule.getSthh(), specialSchedule.getStmm(),0,0);
             DateTime endTime = new DateTime().withTime(specialSchedule.getEthh(), specialSchedule.getEtmm(),59,0);
-            if(dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() && dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
+            if(specialSchedule.getDay() == dateTime.getDayOfWeek()-1 &&
+                    dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() &&
+                    dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
                 isSpecialScheduleMin = true;
                 break;
             }

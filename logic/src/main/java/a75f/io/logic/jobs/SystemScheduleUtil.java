@@ -1,5 +1,8 @@
 package a75f.io.logic.jobs;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+
 import android.util.Log;
 
 import org.joda.time.DateTime;
@@ -180,8 +183,8 @@ public class SystemScheduleUtil {
                 Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
                 
                 DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
-                                              .withHourOfDay(day.getEthh())
-                                              .withMinuteOfHour(day.getEtmm())
+                                              .withHourOfDay(getEndHour(day.getEthh()))
+                                              .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
                                               .withDayOfWeek(day.getDay() + 1)
                                               .withSecondOfMinute(0);
                 

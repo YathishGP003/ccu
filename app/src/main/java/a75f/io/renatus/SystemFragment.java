@@ -358,7 +358,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				//Leave 20% for padding.
 				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-				if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
 
 				loadIntrinsicSchedule();
 				drawCurrentTime();

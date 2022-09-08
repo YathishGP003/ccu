@@ -743,14 +743,6 @@ class HyperStatPointsUtil constructor(
                 if (hyperStatConfig.isEnableAutoAway) 1.0 else 0.0
             )
         )
-
-        autoForceAutoAwayConfigPointsList.add(
-            Pair(
-                enableAutoAwayControlPointPoint,
-                if (hyperStatConfig.isEnableAutoAway) 1.0 else 0.0
-            )
-        )
-
         autoForceAutoAwayConfigPointsList.addAll(createKeycardWindowSensingPoints())
         return autoForceAutoAwayConfigPointsList
     }

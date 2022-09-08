@@ -45,6 +45,7 @@ import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
@@ -867,5 +868,21 @@ public class ScheduleManager {
             return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
                         nextOccupiedInfo.getHeatingVal() - setback : nextOccupiedInfo.getHeatingVal();
         else return 0;
+    }
+
+    /**
+     * Below method accepts zoneId and check whether that zone follows
+     *  special schedule or not at that minute
+     * @param zoneId
+     * @return
+     */
+    public static String getScheduleStateString(String zoneId){
+        Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(zoneId.
+                replace("@", ""));
+        if(isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
+            return "Active Schedule";
+        }else{
+            return "No Active Schedule";
+        }
     }
 }

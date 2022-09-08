@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Point;
 import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
@@ -31,6 +32,7 @@ import android.widget.ToggleButton;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
@@ -621,9 +623,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
         vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
-//        vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
         vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
-//        vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
         vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
         vavConfig.enableCFMControl = enableCFMControl.isChecked();
 
@@ -633,11 +633,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }else {
             vavConfig.numMinCFMCooling = numMinCFMCooling.getValue()*STEP;
         }
+        String maxValueOfMinCFMCooling = String.valueOf(vavConfig.nuMaxCFMCooling);
+        HashMap<Object,Object> minTrueCfmCoolingEntity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and cooling and group == \""+mSmartNodeAddress+"\"");
+        if(!minTrueCfmCoolingEntity.isEmpty()) {
+            Point updatedPoint = new Point.Builder().setHashMap(minTrueCfmCoolingEntity).setMaxVal(maxValueOfMinCFMCooling).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
 
         if((numMinCFMReheating.getValue() > numMaxCFMReheating.getValue())){
             vavConfig.numMinCFMReheating = numMaxCFMReheating.getValue()*STEP;
         }else {
             vavConfig.numMinCFMReheating = numMinCFMReheating.getValue()*STEP;
+        }
+        String maxValueOfCFMReheating = String.valueOf(vavConfig.numMaxCFMReheating);
+        HashMap<Object,Object> minTrueCfmHeatingEntity = CCUHsApi.getInstance().readEntity("vav and trueCfm and min and heating and group == \""+mSmartNodeAddress+"\"");
+        if(!minTrueCfmHeatingEntity.isEmpty()) {
+            Point updatedPoint = new Point.Builder().setHashMap(minTrueCfmHeatingEntity).setMaxVal(maxValueOfCFMReheating).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);

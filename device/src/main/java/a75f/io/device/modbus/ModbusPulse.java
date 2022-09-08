@@ -10,6 +10,7 @@ import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -93,15 +94,7 @@ public class ModbusPulse {
     }
 
     private static void updateHeartBeatPoint(int slaveId, CCUHsApi hayStack){
-        HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
-        HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
-        if(heartBeatPoint.size() == 0){
-            return;
-        }
-        HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
-        if((heartBeatHisItem == null) || ((new Date().getTime() - heartBeatHisItem.getDate().getTime()) > 60000)){
-                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(),  1.0);
-        }
+        LModbus.setHeartbeatUpdateReceived(true);
     }
 
     private static void updateModbusRespone(String deviceRef, RtuMessageResponse response,byte registerType){

@@ -28,10 +28,12 @@ public class PreferenceUtil {
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
-    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleType";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleTypes";
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
+    private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
 
 
     public static void setContext(Context c) {
@@ -348,5 +350,20 @@ public class PreferenceUtil {
         setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
     }
 
+    public static void setDCWBPointsMigration() {
+        setBooleanPreference(DCWB_POINTS_MIGRATION, true);
+    }
+    public static boolean getDCWBPointsMigration() {
+        return getBooleanPreference(DCWB_POINTS_MIGRATION);
+    }
+
+    public static boolean getSmartStatPointsMigration() {
+        return getBooleanPreference(SMART_STAT_POINTS_MIGRATION);
+    }
+
+    public static void setSmartStatPointsMigration() {
+        setBooleanPreference(SMART_STAT_POINTS_MIGRATION, true);
+
+    }
 
 }

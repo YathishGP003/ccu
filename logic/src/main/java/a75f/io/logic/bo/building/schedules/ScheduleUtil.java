@@ -29,6 +29,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
@@ -104,7 +106,11 @@ public class ScheduleUtil {
                                                               .readAllEntities("equip and roomRef == \""+roomRef+"\"");
         
         for (HashMap<Object, Object> equip : equipsInZone) {
-            if (equipOccupancy.get(equip.get("id").toString()).occupancy == AUTOAWAY) {
+            OccupancyData occupancyData = equipOccupancy.get(equip.get("id").toString());
+            if (occupancyData == null) {
+                continue;
+            }
+            if (occupancyData.occupancy == AUTOAWAY) {
                 CcuLog.i(TAG_CCU_SCHEDULER, "Zone " + roomRef + " is in AutoAway " + " via " + equip);
                 return true;
             }
@@ -251,8 +257,10 @@ public class ScheduleUtil {
         for(Schedule.Days specialSchedule : combinedSpecialSchedules){
             DateTime dateTime = new DateTime();
             DateTime beginTime = new DateTime().withTime(specialSchedule.getSthh(), specialSchedule.getStmm(),0,0);
-            DateTime endTime = new DateTime().withTime(specialSchedule.getEthh(), specialSchedule.getEtmm(),59,0);
-            if(dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() && dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
+            DateTime endTime = new DateTime().withTime(getEndHour(specialSchedule.getEthh()), getEndMinute(specialSchedule.getEthh(), specialSchedule.getEtmm()),59,0);
+            if(specialSchedule.getDay() == dateTime.getDayOfWeek()-1 &&
+                    dateTime.getMinuteOfDay() >= beginTime.getMinuteOfDay() &&
+                    dateTime.getMinuteOfDay() <= endTime.getMinuteOfDay()){
                 isSpecialScheduleMin = true;
                 break;
             }
@@ -288,8 +296,8 @@ public class ScheduleUtil {
             int endHour = Schedule.getInt(range.get(Tags.ETHH).toString());
             endHour  = endHour == 24 ? 23 : endHour;
             int endMin = Schedule.getInt(range.get(Tags.ETMM).toString());
-            endMin = endHour == 24 ? 59 : endMin;
-            int endSec = endHour == 24 ? 59 : 0;
+            endMin = Schedule.getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
+            int endSec = Schedule.getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : 0;
             DateTime endDateTime = SpecialSchedule.SS_DATE_TIME_FORMATTER
                     .parseDateTime(range.get(Tags.ETDT).toString())
                     .withHourOfDay(endHour)

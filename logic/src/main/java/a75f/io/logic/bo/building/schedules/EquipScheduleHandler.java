@@ -131,7 +131,7 @@ public class EquipScheduleHandler implements Schedulable {
         CcuLog.i(L.TAG_CCU_SCHEDULER, "autoAwaySetback value: " + autoAwaySetback);
         String coolingDtId = getCoolingDesiredTempId();
         String heatingDtId = getHeatingDesiredTempId();
-        
+
         double coolingDT = hayStack.readPointPriorityValFromOffset(coolingDtId, HayStackConstants.FORCE_OVERRIDE_LEVEL);
         double heatingDT = hayStack.readPointPriorityValFromOffset(heatingDtId, HayStackConstants.FORCE_OVERRIDE_LEVEL);
     

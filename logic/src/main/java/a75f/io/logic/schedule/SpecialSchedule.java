@@ -1,6 +1,11 @@
 package a75f.io.logic.schedule;
 
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHrStr;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMinStr;
+
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +35,7 @@ public class SpecialSchedule {
 
     }
     public static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
-    private static final String OVERLAP_BEGIN_TIME_FORMAT = "YYYY-MM-dd hh:mm aa";
+    private static final String OVERLAP_DAY = "YYYY-MM-dd";
     private static final String OVERLAP_END_TIME_FORMAT = "hh:mm aa";
 
     public static void createSpecialSchedule(String specialScheduleId, String scheduleName, DateTime startDate,
@@ -103,10 +108,6 @@ public class SpecialSchedule {
             String endDate = range.get(Tags.ETDT).toString();
             int endHour = getInt(range.get(Tags.ETHH).toString());
             int endMin = getInt(range.get(Tags.ETMM).toString());
-            if(endHour == 24){
-                endHour = 23;
-                endMin = 59;
-            }
             int beginDateNum = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate).getDayOfYear();
             int endDateNum = SS_DATE_TIME_FORMATTER.parseDateTime(endDate).getDayOfYear();
             int count = 0;
@@ -116,8 +117,8 @@ public class SpecialSchedule {
                         .withHourOfDay(beginHour)
                         .withMinuteOfHour(beginMin);
                 DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate).plusDays(count)
-                        .withHourOfDay(endHour)
-                        .withMinuteOfHour(endMin);
+                        .withHourOfDay(getEndHour(endHour))
+                        .withMinuteOfHour(getEndMinute(endHour, endMin));
                 specialScheduleIntervalMap.put(new Interval(beginDateTime, endDateTime), scheduleName);
                 count++;
                 beginDateNum++;
@@ -166,8 +167,16 @@ public class SpecialSchedule {
                 Interval overlapInterval = desiredSpeInterval.overlap(availableSpecialInterval);
                 if (overlapInterval != null)
                     overlapSchedules.put(availableSpecialScheduleIntervalEntry.getValue(),
-                            overlapInterval.getStart().toString(OVERLAP_BEGIN_TIME_FORMAT) + " to " + overlapInterval.getEnd().toString(
-                                    OVERLAP_END_TIME_FORMAT));
+                            overlapInterval.getStart().toString(OVERLAP_DAY)+" "+
+                                    getEndTimeHrStr(Integer.parseInt(overlapInterval.getStart().hourOfDay().getAsString()),
+                                            Integer.parseInt(overlapInterval.getStart().minuteOfHour().getAsString())) +
+                                    ":" + getEndTimeMinStr(Integer.parseInt(overlapInterval.getStart().hourOfDay().getAsString()),
+                                    Integer.parseInt(overlapInterval.getStart().minuteOfHour().getAsString()))
+                                    + " to " + getEndTimeHrStr(Integer.parseInt(overlapInterval.getEnd().hourOfDay().getAsString()),
+                                    Integer.parseInt(overlapInterval.getEnd().minuteOfHour().getAsString())) +
+                                    ":" + getEndTimeMinStr(Integer.parseInt(overlapInterval.getEnd().hourOfDay().getAsString()),
+                                    Integer.parseInt(overlapInterval.getEnd().minuteOfHour().getAsString())));
+
                 }
         }
         return overlapSchedules;
@@ -188,17 +197,13 @@ public class SpecialSchedule {
             String endDate = range.get(Tags.ETDT).toString();
             int endHour = getInt(range.get(Tags.ETHH).toString());
             int endMin = getInt(range.get(Tags.ETMM).toString());
-            if(endHour == 24){
-                endHour = 23;
-                endMin = 59;
-            }
 
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)
                     .withMinuteOfHour(beginMin);
             DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
-                    .withHourOfDay(endHour)
-                    .withMinuteOfHour(endMin);
+                    .withHourOfDay(getEndHour(endHour))
+                    .withMinuteOfHour(getEndMinute(endHour, endMin));
 
             int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
 

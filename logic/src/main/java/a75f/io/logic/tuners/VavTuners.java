@@ -635,7 +635,8 @@ public class VavTuners {
                                                 .setTz(tz)
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
-        CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
+        hayStack.writePointForCcuUser(fanControlOnFixedTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY ,0);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
     
         Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(true, equipDis, equipRef,

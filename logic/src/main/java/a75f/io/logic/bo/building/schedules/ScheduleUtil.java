@@ -104,7 +104,11 @@ public class ScheduleUtil {
                                                               .readAllEntities("equip and roomRef == \""+roomRef+"\"");
         
         for (HashMap<Object, Object> equip : equipsInZone) {
-            if (equipOccupancy.get(equip.get("id").toString()).occupancy == AUTOAWAY) {
+            OccupancyData occupancyData = equipOccupancy.get(equip.get("id").toString());
+            if (occupancyData == null) {
+                continue;
+            }
+            if (occupancyData.occupancy == AUTOAWAY) {
                 CcuLog.i(TAG_CCU_SCHEDULER, "Zone " + roomRef + " is in AutoAway " + " via " + equip);
                 return true;
             }

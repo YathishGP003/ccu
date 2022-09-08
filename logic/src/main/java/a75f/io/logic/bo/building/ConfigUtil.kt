@@ -17,7 +17,7 @@ class ConfigUtil  {
             val hs = CCUHsApi.getInstance();
 
             val autoforceoccupiedPoint = Point.Builder()
-                    .setDisplayName("$equipDis-autoFroceOccupiedEnabled")
+                    .setDisplayName("$equipDis-autoForceOccupiedEnabled")
                     .setEquipRef(equipRef)
                     .setSiteRef(siteRef)
                     .setRoomRef(roomRef)

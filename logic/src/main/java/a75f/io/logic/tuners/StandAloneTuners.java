@@ -519,7 +519,24 @@ public class StandAloneTuners {
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
-    
+
+        Point autoAwaySetback   = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
+        hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
+        hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
+
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     

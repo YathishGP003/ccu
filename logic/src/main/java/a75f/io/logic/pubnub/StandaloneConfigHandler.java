@@ -26,6 +26,10 @@ public class StandaloneConfigHandler {
             //HPU config points do not seem to have 'hpu' tag. Hence checking the equip type to identify profile.
             HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
         }
+        if (configPoint.getMarkers().contains(Tags.HIS)) {
+            CCUHsApi.getInstance().writeHisValById(configPoint.getId(),
+                    HSUtil.getPriorityVal(configPoint.getId()));
+        }
         
     }
     

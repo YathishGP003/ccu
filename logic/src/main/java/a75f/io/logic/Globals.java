@@ -230,6 +230,7 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
     }
 
@@ -343,7 +344,6 @@ public class Globals {
                 Watchdog.getInstance().start();
 
                 CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(300);
-                CCUHsApi.getInstance().trimObjectBoxHisStore();
 
             }
         }.start();

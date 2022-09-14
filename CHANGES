@@ -1,2 +1,57 @@
- - Merged PR 4712: Master control allowing overlapping with heating cooling limits
- - Merged PR 4622: All profile UI and Autoaway Autoforce support
+ - Merged PR 4773: Restart messaging client on connection closure
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/samjith/13319_messaging_descrepency
+ - Merged PR 4893: Avoid running cooling and heating loops at the same time
+ - Merged PR 4956: CCU crash
+ - Merged PR 4901: Autoaway setback tuners added
+ - Merged PR 4593: Restricted zone name to 25 characters
+ - Merged PR 4919: Fixed priority value discrepancy for occupancy
+ - Merged PR 4422: Added group tag for few points in smartStat profile
+ - Merge master
+ - Merge master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/Amaresh/10405_Add_group_tag_for_smartStat
+ - Merged PR 4561: Added "dcwb" tags for DCWB profile points
+ - Merged PR 4709: Scheduler correction to 24 hours in CCU
+ - Merged PR 4860: Show special schedule status in zone screen
+ - Merged PR 4885: TI profile reconfiguration support
+ - Merged PR 4942: Misspelled word correction
+ - Merged PR 4366: 11115: CCU: fanControlOnFixedTimeDelay tuner point Default value not written.
+ - Merged PR 4618: Named schedule temp limits reverted to original logic. this was side affect h...
+ - Merged PR 4778: Restricting to create special schedule for 7 days in open calendar year
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
+ - Merged PR 4896: 13897- App crash issue with special schedule if it is created for the last ho...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13897-CCU_app-crash
+ - Merged PR 4420: Bug 12507: CCU : Modbus : Heartbeat values shows device as OFFLINE but actual...
+ - Remove connection reset on sse closure Implement 60 minuts watchdog.
+ - Merged PR 4807: Bug 13551: CCU: Celsius Support: Discrepancy in Deadband values
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
+ - 12939-fix
+ - Merged PR 4296: Added restriction for Min CFM Cooling/Reheating range
+ - round to half replaced with Mth.round
+ - all issues resolved
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
+ - Disable connection reset while offline
+ - Merge branch 'master' into Bug/samjith/13319_messaging_descrepency
+ - 13897- App crash issue with special schedule if it is created for the last hour of the day
+ - 13897- App crash issue with special schedule if it is created for the last hour of the day
+ - Messaging reinit
+ - Merged PR 4887: 13881 -  named schedule issue fix
+ - Avoid running cooling and heating loops at the same time
+ - 13881 -  named schedule issue fix for corner case
+ - all issues resolved
+ - 13881 -  named schedule issue fix
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
+ - 13574 - Modified with the latest requirement.
+ - Merged PR 4830: Resolved crash issue when user selects any of the Floor Zone screen.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
+ - Merged PR 4800: Added fan check for conditioning
+ - Merged PR 4810: Adjusted Range Bar to show the proper desired temps and limits
+ - Bug 10703: CCU: Temporary Override UI discrepancy.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
+ - Bug 13551: CCU: Celsius Support: Discrepancy in Deadband values
+ - Restricting to create special schedule for 7 days in open calendar year
+ - Restart messaging client on connection closure
+ - Comments resolved
+ - Added group tag for few points in smartStat profile
+ - Bug 12507: CCU : Modbus : Heartbeat values shows device as OFFLINE but actually device is ONLINE and fetching values from Modbus device

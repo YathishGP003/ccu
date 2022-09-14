@@ -130,6 +130,10 @@ public class UpdatePointHandler
             TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
         }
 
+        if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
+            TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

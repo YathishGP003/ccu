@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
@@ -366,8 +368,9 @@ public class NamedSchedule extends DialogFragment {
                     spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
                             .append(" ").append("").append(i.getStart().hourOfDay().get())
                             .append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" :
-                            i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":")
-                            .append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
+                            i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":")
+                            .append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
+
                 }
 
                 warningMessage.append(getText(R.string.warning_msg)).append("\n\t").append(spillZones)
@@ -405,10 +408,10 @@ public class NamedSchedule extends DialogFragment {
             StringBuilder desiredTempWarning = new StringBuilder();
             boolean isDesiredTempValid = true;
             for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
-                if (!(namedSchedDay.getHeatingVal() < buildingTuner.getMaxHeatingUserLimit()
-                && namedSchedDay.getHeatingVal()> buildingTuner.getMinHeatingUserLimit()
-                && namedSchedDay.getCoolingVal() < buildingTuner.getMaxCoolingUserLimit()
-                && namedSchedDay.getCoolingVal() > buildingTuner.getMinCoolingUserLimit())) {
+                if (!(namedSchedDay.getHeatingVal() <= buildingTuner.getMaxHeatingUserLimit()
+                && namedSchedDay.getHeatingVal() >= buildingTuner.getMinHeatingUserLimit()
+                && namedSchedDay.getCoolingVal() <= buildingTuner.getMaxCoolingUserLimit()
+                && namedSchedDay.getCoolingVal() >= buildingTuner.getMinCoolingUserLimit())) {
                     String[] dayName = {"Monday","Tuesday","Wednesday","Thursday","Friday",
                             "Saturday","Sunday"};
                     if(isCelsiusTunerAvailableStatus()) {

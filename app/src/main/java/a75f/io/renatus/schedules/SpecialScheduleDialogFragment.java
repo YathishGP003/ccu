@@ -234,7 +234,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         }
         SpecialScheduleCalendarFragment specialScheduleCalendarFragment =
                 new SpecialScheduleCalendarFragment(specialScheduleHDict,
-                        SpecialScheduleDialogFragment.this::displaySpecialScheduleDate);
+                        SpecialScheduleDialogFragment.this::displaySpecialScheduleDate, selectedDates);
         specialScheduleCalendarFragment.show(fragmentTransaction, "popup");
     }
 

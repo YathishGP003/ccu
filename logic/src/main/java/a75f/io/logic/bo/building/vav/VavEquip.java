@@ -784,7 +784,6 @@ public class VavEquip
             }
         }
 
-        CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, 1.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }

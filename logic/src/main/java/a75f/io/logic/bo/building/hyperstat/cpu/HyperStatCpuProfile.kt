@@ -138,22 +138,23 @@ class HyperStatCpuProfile : ZoneProfile() {
             Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
         }
 
-        var loopValue =  hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-            currentTemp, userIntents.zoneCoolingTargetTemperature
-        ).toInt()
+        coolingLoopOutput = 0
+        heatingLoopOutput = 0
+        fanLoopOutput = 0
 
-        Log.i(L.TAG_CCU_HSCPU, "Val cool $loopValue")
-        coolingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
+        when (state) {
+            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
+            ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
+                currentTemp, userIntents.zoneCoolingTargetTemperature
+            ).toInt().coerceAtLeast(0)
 
-        loopValue = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-            userIntents.zoneHeatingTargetTemperature, currentTemp
-        ).toInt()
+            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
+            ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
+                userIntents.zoneHeatingTargetTemperature, currentTemp
+            ).toInt().coerceAtLeast(0)
 
-        Log.i(L.TAG_CCU_HSCPU, "Val heat $loopValue")
-        heatingLoopOutput = if ( loopValue < 0 ) 0 else loopValue
-
-        if (coolingLoopOutput == 0 || heatingLoopOutput == 0)
-            fanLoopOutput = 0
+            else -> Log.i(L.TAG_CCU_HSCPU, " Zone is in deadband")
+        }
 
         if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
                     ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
@@ -193,27 +194,6 @@ class HyperStatCpuProfile : ZoneProfile() {
                  "Cooling Loop Output:: $coolingLoopOutput \n"+
                  "Fan Loop Output:: $fanLoopOutput \n"
         )
-        Log.i("Loop Output", "Current Temp : $currentTemp"+
-                "Desired Heating: ${userIntents.zoneHeatingTargetTemperature}"+
-                "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} "+
-                "Heating Loop Output: $heatingLoopOutput "+
-                "Cooling Loop Output:: $coolingLoopOutput "+
-                "Fan Loop Output:: $fanLoopOutput")
-        /*val forcedOccupiedMinutes = TunerUtil.readTunerValByQuery("forced and occupied and time",
-                                                                    equip.equipRef)
-        if (config.isEnableAutoForceOccupied && forcedOccupiedMinutes > 0) {
-            runAutoForceOccupyOperation(equip)
-        } else {
-            if (equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt() == Occupancy.AUTOFORCEOCCUPIED.ordinal)
-                resetOccupancy(equip)
-        }
-
-        if (config.isEnableAutoAway) {
-            runAutoAwayOperation(equip)
-        } else {
-            if (equip.hsHaystackUtil!!.getOccupancyModePointValue().toInt() == Occupancy.AUTOAWAY.ordinal)
-                resetOccupancy(equip)
-        }*/
 
         runRelayOperations(equip, config, hyperstatTuners, userIntents, basicSettings, relayStages)
 

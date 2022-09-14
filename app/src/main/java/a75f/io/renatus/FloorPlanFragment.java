@@ -1128,6 +1128,7 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addRoomEdit)
     public boolean handleRoomChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
+            int maxZoneNameLength = 24;
 
             if (roomToRename != null) {
                 for (String z : siteRoomList) {
@@ -1138,6 +1139,11 @@ public class FloorPlanFragment extends Fragment {
                 }
                 roomList.remove(roomToRename);
                 siteRoomList.remove(roomToRename.getDisplayName());
+
+                if ((addRoomEdit.getText().toString().length() >  maxZoneNameLength)) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
 
                 Zone hsZone = new Zone.Builder()
                         .setDisplayName(addRoomEdit.getText().toString().trim())
@@ -1168,6 +1174,10 @@ public class FloorPlanFragment extends Fragment {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
+                }
+                if ((addRoomEdit.getText().toString().length() > maxZoneNameLength)) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    return true;
                 }
 
                 Toast.makeText(getActivity().getApplicationContext(),

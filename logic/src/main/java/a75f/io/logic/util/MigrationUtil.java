@@ -17,6 +17,7 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -45,6 +46,8 @@ import a75f.io.logic.tuners.TunerConstants;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import kotlin.Pair;
@@ -146,6 +149,10 @@ public class MigrationUtil {
             PreferenceUtil.setNewOccupancy();
         }
 
+        if(isFanControlDelayDefaultValueUpdated(CCUHsApi.getInstance())){
+            updateFanControlDefaultValue(CCUHsApi.getInstance());
+        }
+
         if(!PreferenceUtil.getSiteNameEquipMigration()){
             ControlMote.updateOnSiteNameChange();
             PreferenceUtil.setDiagEquipMigration();
@@ -186,6 +193,16 @@ public class MigrationUtil {
         if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
             updateScheduleType(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
+
+        if(!PreferenceUtil.getDCWBPointsMigration()){
+            migrateDCWBPoints(CCUHsApi.getInstance());
+            PreferenceUtil.setDCWBPointsMigration();
+        }
+
+        if(!PreferenceUtil.getSmartStatPointsMigration()){
+            doSmartStatPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setSmartStatPointsMigration();
         }
     }
 
@@ -923,6 +940,27 @@ public class MigrationUtil {
                 equipDis,tags,0,0);
     }
 
+    private static boolean isFanControlDelayDefaultValueUpdated(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl check");
+        HashMap<Object, Object> fanControlTuner =
+                hsApi.readEntity("point and tuner and fan and control and time and delay");
+        return !fanControlTuner.isEmpty();
+    }
+
+    private static void updateFanControlDefaultValue(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl update");
+        ArrayList<HashMap<Object, Object>> fanControlTunerAll =
+                hsApi.readAllEntities("point and tuner and fan and control and time and delay");
+        if(!fanControlTunerAll.isEmpty()) {
+            for (HashMap<Object, Object> fanControlTuner: fanControlTunerAll) {
+                hsApi.clearPointArrayLevel(fanControlTuner.get("id").toString(), TUNER_EQUIP_VAL_LEVEL, false);
+
+                hsApi.writePointForCcuUser(fanControlTuner.get("id").toString(), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                        TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+            }
+        }
+    }
+
     private static void updateScheduleRefs(CCUHsApi hayStack) {
         CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs ");
         List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
@@ -1065,5 +1103,57 @@ public class MigrationUtil {
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
             }
         }
+    }
+
+    private static void migrateDCWBPoints(CCUHsApi ccuHsApi){
+        boolean isDCWBEnabled = ccuHsApi.readDefaultVal("dcwb and enabled") > 0;
+        if(isDCWBEnabled){
+            ArrayList<HashMap<Object, Object>> DCWBPoints = new ArrayList<>();
+            HashMap<Object, Object> analog4OutputEnabled = ccuHsApi.readEntity("system and analog4 and output and enabled");
+            DCWBPoints.add(analog4OutputEnabled);
+            HashMap<Object, Object> adaptiveDeltaEnabled = ccuHsApi.readEntity("system and adaptive and delta and enabled");
+            DCWBPoints.add(adaptiveDeltaEnabled);
+            HashMap<Object, Object> maximizedExitWaterTempEnabled = ccuHsApi.readEntity("system and maximized and exit and water and enabled");
+            DCWBPoints.add(maximizedExitWaterTempEnabled);
+            HashMap<Object, Object> analog1AtValveClosedPosition = ccuHsApi.readEntity("system and analog1 and valve and closed");
+            DCWBPoints.add(analog1AtValveClosedPosition);
+            HashMap<Object, Object> analog1AtValveFullPosition = ccuHsApi.readEntity("system and analog1 and valve and full");
+            DCWBPoints.add(analog1AtValveFullPosition);
+            HashMap<Object, Object> analog4LoopOutputType = ccuHsApi.readEntity("system and analog4 and loop and output");
+            DCWBPoints.add(analog4LoopOutputType);
+            HashMap<Object, Object> analog4AtMinCoolingLoop = ccuHsApi.readEntity("system and analog4 and min and loop");
+            DCWBPoints.add(analog4AtMinCoolingLoop);
+            HashMap<Object, Object> analog4AtMaxCoolingLoop = ccuHsApi.readEntity("system and analog4 and max and loop");
+            DCWBPoints.add(analog4AtMaxCoolingLoop);
+            HashMap<Object, Object> createChilledWaterConfigPoints = ccuHsApi.readEntity("system and chilled and water and target and delta");
+            DCWBPoints.add(createChilledWaterConfigPoints);
+            HashMap<Object, Object> chilledWaterExitMargin = ccuHsApi.readEntity("system and chilled and water and exit and temp and margin");
+            DCWBPoints.add(chilledWaterExitMargin);
+            HashMap<Object, Object> chilledWaterMaxFlowRate = ccuHsApi.readEntity("system and chilled and water and max and flow and rate");
+            DCWBPoints.add(chilledWaterMaxFlowRate);
+
+            for (HashMap<Object, Object> DCWBPoint: DCWBPoints ) {
+                Point updatedPoint = new Point.Builder().setHashMap(DCWBPoint).addMarker(Tags.DCWB).build();
+                ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        }else {
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "DCWB IS NOT ENABLED");
+        }
+    }
+
+    private static void doSmartStatPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("equip");
+
+        equipList.forEach(equip -> {
+            Equip equipMap = new Equip.Builder().setHashMap(equip).build();
+            String nodeAddress = equipMap.getGroup();
+            // Below list consists of smartStat points which does not have group tag
+            ArrayList<HashMap<Object, Object>> smartStatPoints = CCUHsApi.getInstance().readAllEntities("point and not group and standalone and not tuner and not system and not diag and  equipRef == \""+ equipMap.getId()+"\"");
+
+            for(HashMap<Object, Object> point : smartStatPoints){
+                Point up = new Point.Builder().setHashMap(point).setGroup(nodeAddress).build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        });
     }
 }

@@ -119,6 +119,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
@@ -441,6 +442,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             int i;
             String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
+            String specialScheduleStatus = getScheduleStateString(zoneId);
             for (i = 0; i < zoneStatusArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) zoneStatusArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
@@ -451,8 +453,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             TextView scheduleStatus = tempZoneDetails.findViewById(R.id.schedule_status_tv);
                             //Spinner scheduleSpinner = tempZoneDetails.findViewById(R.id.schedule_spinner);
                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
+                            TextView specialScheduleStatusText = tempZoneDetails.findViewById(R.id.special_status_status);
                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
+                            specialScheduleStatusText.setText(specialScheduleStatus);
                             try {
                             if(isCelsiusTunerAvailableStatus()) {
                                 scheduleStatus.setText(StatusCelsiusVal(status));
@@ -845,6 +849,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
 
         ArrayList<String> scheduleArray = new ArrayList<>();
         scheduleArray.add("Building Schedule");
@@ -940,6 +945,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(status -> vacationStatusTV.setText(status));
+
+        Observable.fromCallable(() -> ScheduleManager.getInstance().getScheduleStateString(zoneId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(status -> specialScheduleStatusText.setText(status));
 
         String scheduleTypeId = getScheduleTypeId(equipId[0]);
         final Integer mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
@@ -1344,6 +1354,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                     String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
                     vacationStatusTV.setText(vacationStatus);
+                    String specialScheduleStatus = getScheduleStateString(zoneId);
+                    specialScheduleStatusText.setText(specialScheduleStatus);
                     {
                         for (int k = 0; k < zoneMap.size(); k++) {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
@@ -1469,6 +1481,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
 
 
         ArrayList<String> scheduleArray = new ArrayList<>();
@@ -1565,6 +1578,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(status -> vacationStatusTV.setText(status));
+
+        Observable.fromCallable(() -> ScheduleManager.getInstance().getScheduleStateString(zoneId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(status -> specialScheduleStatusText.setText(status));
 
         String scheduleTypeId = getScheduleTypeId(equipId);
         final int mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);

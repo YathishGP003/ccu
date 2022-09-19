@@ -124,6 +124,10 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun isProfileConfigured() :Boolean {
+        return hscConfiguration != null
+    }
+
     private fun getExistingProfile(address: Short): HyperStatCpuProfile? = L.getProfile(address) as HyperStatCpuProfile?
 
     fun tempOffsetSelected(newVal: Int) {

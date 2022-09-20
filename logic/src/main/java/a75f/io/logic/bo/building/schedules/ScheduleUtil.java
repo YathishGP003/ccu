@@ -456,4 +456,9 @@ public class ScheduleUtil {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupancy detection does not exist for "+equipRef);
         }
     }
+
+    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
+        return hayStack.readHisValByQuery("point and occupancy and state and " +
+                            "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
+    }
 }

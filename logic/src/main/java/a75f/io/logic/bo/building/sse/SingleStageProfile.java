@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
@@ -122,7 +123,7 @@ public class SingleStageProfile extends ZoneProfile
             double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
             String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
             String stageStatus = "";
             Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
             if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {

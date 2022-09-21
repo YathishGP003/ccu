@@ -420,6 +420,8 @@ public class InstallerOptions extends Fragment {
                         CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                                 CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
                     }
+                } else {
+                    Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
                 }
                 getTempValues();
                 if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {

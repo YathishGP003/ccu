@@ -6,7 +6,10 @@ import android.util.Log;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
@@ -100,6 +103,35 @@ public class UnitUtils {
         double conversionToFarh = (value * 9 / 5) + 32;
         double conversionValue = (((conversionToFarh) * 10) / 10);
         return Math.round(conversionValue);
+
+    }
+
+    public static String StatusCelsiusVal(String temp)
+    {
+        String s = "";
+        ArrayList<Double> myDoubles = new ArrayList<Double>();
+        Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
+
+        Pattern p = Pattern.compile("[a-zA-Z]+");
+        Matcher m1 = p.matcher(temp);
+        while (m1.find()) {
+            s = s + m1.group() + " ";
+        }
+
+        while (matcher.find()) {
+            double element = Double.parseDouble(matcher.group());
+            myDoubles.add(Math.abs(element));
+        }
+        if (myDoubles.size() > 0) {
+            try {
+                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return temp;
+            }
+        } else {
+            return temp;
+        }
 
     }
 

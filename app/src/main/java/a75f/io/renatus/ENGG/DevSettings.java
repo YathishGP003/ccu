@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.IOException;
@@ -38,6 +41,8 @@ import a75f.io.renatus.util.CCUUiUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+
+import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -93,6 +98,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.crashButton) Button crashButton;
     public @BindView(R.id.btnRestart) Button btnRestart;
 
+    public @BindView(R.id.resetPassword) Button resetPassword;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -280,6 +286,47 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     putBoolean(getContext().getString(R.string.prefs_theme_key),isChecked).commit();
 
         });
+
+        resetPassword.setOnClickListener(view12 -> {
+            final EditText taskEditText = new EditText(getActivity());
+            KeyListener keyListener = DigitsKeyListener.getInstance("0123456789");
+            taskEditText.setKeyListener(keyListener);
+
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                    .setTitle("Enter passcode")
+                    .setMessage("Enter default 75F password to reset application security passwords.")
+                    .setView(taskEditText)
+                    .setPositiveButton("Done", (dialog1, which) -> {
+                        if (taskEditText.getText().toString().trim().equals("7575")) {
+                            dialog1.dismiss();
+                            resetPasswords();
+                            Toast.makeText(getActivity(), "Password reset succeeded", Toast.LENGTH_SHORT).show();
+                        } else {
+                            taskEditText.getText().clear();
+                            Toast.makeText(getActivity(), "Incorrect passcode , Try Again!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+        });
+
+    }
+
+    private void resetPasswords() {
+        Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
+
+        prefs.setBoolean(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), false);
+        prefs.setString(getString(R.string.SET_ZONE_PASSWORD), "");
+
+        prefs.setBoolean(getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), false);
+        prefs.setString(getString(R.string.SET_SYSTEM_PASSWORD), "");
+
+        prefs.setBoolean(getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), false);
+        prefs.setString(getString(R.string.SET_BUILDING_PASSWORD), "");
+
+        prefs.setBoolean(getString(R.string.SET_SETUP_PASSWORD), false);
+        prefs.setString(getString(R.string.USE_SETUP_PASSWORD_KEY), "");
 
     }
     

@@ -448,10 +448,14 @@ public class ScheduleUtil {
     }
     
     public static void resetOccupancyDetection(CCUHsApi hayStack, String equipRef) {
+        setOccupancyDetection(hayStack, equipRef, false);
+    }
+
+    public static void setOccupancyDetection(CCUHsApi hayStack, String equipRef, boolean occupancy) {
         HashMap<Object, Object> occupancyDetection = hayStack.readEntity(
-            "occupancy and detection and equipRef  == \"" + equipRef + "\"");
+                "occupancy and detection and equipRef  == \"" + equipRef + "\"");
         if (!occupancyDetection.isEmpty()) {
-            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), 0.0);
+            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), occupancy ? 1.0 : 0);
         } else {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupancy detection does not exist for "+equipRef);
         }

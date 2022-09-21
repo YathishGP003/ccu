@@ -1070,7 +1070,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     InputMethodManager mgr = (InputMethodManager)mActivity
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     mgr.hideSoftInputFromWindow(etThermistor.getWindowToken(), 0);
-                    Toast.makeText(mActivity, "Overriding Thermistor value..." + enteredOhms, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity, "Overriding Thermistor value..." + enteredOhms/1000 + " Kilo Ohms", Toast.LENGTH_LONG).show();
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override

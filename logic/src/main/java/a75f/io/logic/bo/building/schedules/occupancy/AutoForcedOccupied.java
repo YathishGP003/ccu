@@ -34,7 +34,7 @@ public class AutoForcedOccupied implements OccupancyTrigger {
     /**
      * AutoForceOccupied is considered as "Triggered" when we have received an occupancy detection in the last 120
      * minutes and the equip is currently not in any of the state s
-     * occupied/vacation/autoawya/preconditioning/forced-occupied
+     * occupied/autoaway/preconditioning/forced-occupied
      *
      * This return true even when we are already auto away state.
      * It is up to the EquipScheduleHandler to determine if the desiredTemp duration at level 4 has to be updated or
@@ -42,12 +42,12 @@ public class AutoForcedOccupied implements OccupancyTrigger {
      * @return
      */
     public boolean hasTriggered() {
-        ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
+        /*ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
         Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
         if(activeSystemVacation != null){
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Active vacation");
             return false;
-        }
+        }*/
 
         if (!isEnabled()) {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForcedOccupied not enabled");

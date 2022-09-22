@@ -180,11 +180,6 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 resetRelays(twoPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
 
             }
-            if(occuStatus != null){
-                twoPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                twoPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
-            }
         }
 
     }

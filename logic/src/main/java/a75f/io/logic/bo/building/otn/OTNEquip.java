@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.bpos;
+package a75f.io.logic.bo.building.otn;
 
 import android.util.Log;
 
@@ -21,16 +21,17 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
+import a75f.io.logic.bo.haystack.device.OTN;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.tuners.BPOSTuners;
+import a75f.io.logic.tuners.OTNTuners;
 
 /*
  * created by spoorthidev on 3-August-2021
  */
 
-public class BPOSEquip {
+public class OTNEquip {
 
-    private static final String LOG_TAG = "BPOSEquip";
+    private static final String LOG_TAG = "OTNEquip";
     public int mNodeAddr;
     ProfileType mProfileType;
     String mEquipRef = null;
@@ -39,7 +40,7 @@ public class BPOSEquip {
     double desiredTemp;
 
 
-    public BPOSEquip(ProfileType type, int node) {
+    public OTNEquip(ProfileType type, int node) {
         mNodeAddr = node;
         mProfileType = type;
     }
@@ -55,12 +56,12 @@ public class BPOSEquip {
         mEquipRef = equip.get("id").toString();
     }
 
-    public void createEntities(BPOSConfiguration config, String floorRef, String roomRef) {
+    public void createEntities(OTNConfiguration config, String floorRef, String roomRef) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-BPOS-" + mNodeAddr;
+        String equipDis = siteDis + "-OTN-" + mNodeAddr;
         String ahuRef = null;
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -77,13 +78,13 @@ public class BPOSEquip {
                 .setFloorRef(floorRef)
                 .setProfile(mProfileType.name())
                 .setPriority(config.getPriority().name())
-                .addMarker("equip").addMarker("bpos").addMarker("zone")
+                .addMarker("equip").addMarker("otn").addMarker("zone")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(mNodeAddr));
         mEquipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BPOSTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, equipDis, mEquipRef, roomRef,
+        OTNTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, equipDis, mEquipRef, roomRef,
                 floorRef, tz);
 
 
@@ -96,7 +97,7 @@ public class BPOSEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current")
-                .addMarker("his").addMarker("cur").addMarker("logical").addMarker("bpos")
+                .addMarker("his").addMarker("cur").addMarker("logical").addMarker("otn")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -114,7 +115,7 @@ public class BPOSEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone")
                 .addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("cur")
-                .addMarker("logical").addMarker("bpos").addMarker("air").addMarker("his")
+                .addMarker("logical").addMarker("otn").addMarker("air").addMarker("his")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("%")
                 .setTz(tz)
@@ -131,7 +132,7 @@ public class BPOSEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
-                .addMarker("zone").addMarker("bpos")
+                .addMarker("zone").addMarker("otn")
                 .setEnums(Occupancy.getEnumStringDefinition())
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
@@ -147,7 +148,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("bpos").addMarker("occupancy").addMarker("sensor")
+                .addMarker("zone").addMarker("otn").addMarker("occupancy").addMarker("sensor")
                 .addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
                 .setEnums("off,on")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -163,7 +164,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("occupancy").addMarker("detection").addMarker("bpos").addMarker("his").addMarker("zone")
+                .addMarker("occupancy").addMarker("detection").addMarker("otn").addMarker("his").addMarker("zone")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -178,7 +179,7 @@ public class BPOSEquip {
                 .setFloorRef(floorRef)
                 .setSiteRef(siteRef)
                 .setHisInterpolate("cov")
-                .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
+                .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
                 .addMarker("priority").addMarker("his")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("none,low,normal,high")
@@ -195,7 +196,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
+                .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
@@ -213,7 +214,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
+                .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
                 .addMarker("forced").addMarker("occupied").addMarker("auto")
                 .addMarker("his").addMarker("enabled").setHisInterpolate("cov")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -232,7 +233,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
+                .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
                 .addMarker("forced").addMarker("away").addMarker("auto").setHisInterpolate("cov")
                 .addMarker("his").addMarker("enabled")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -253,7 +254,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("bpos").addMarker("scheduleType")
+                .addMarker("zone").addMarker("otn").addMarker("scheduleType")
                 .addMarker("writable").addMarker("his")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("building,zone,named")
@@ -270,7 +271,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("bpos")
+                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("average").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
@@ -284,7 +285,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("bpos")
+                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("cooling").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
@@ -298,7 +299,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("bpos")
+                .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("heating").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
@@ -312,7 +313,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("status").addMarker("bpos").addMarker("his").addMarker("zone")
+                .addMarker("status").addMarker("otn").addMarker("his").addMarker("zone")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
@@ -326,7 +327,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("status").addMarker("message").addMarker("bpos")
+                .addMarker("status").addMarker("message").addMarker("otn")
                 .addMarker("writable").addMarker("zone")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
@@ -342,7 +343,7 @@ public class BPOSEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("bpos").addMarker("zone").addMarker("dynamic")
+                .addMarker("otn").addMarker("zone").addMarker("dynamic")
                 .addMarker("priority").addMarker("writable").addMarker("sp").addMarker("his").addMarker("logical")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
@@ -356,13 +357,13 @@ public class BPOSEquip {
 
 
         Point equipScheduleStatus = new Point.Builder()
-                .setDisplayName(siteDis+"-BPOS-"+mNodeAddr+"-equipScheduleStatus")
+                .setDisplayName(siteDis+"-OTN-"+mNodeAddr+"-equipScheduleStatus")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
-                .addMarker("scheduleStatus").addMarker("logical").addMarker("bpos").addMarker("zone")
+                .addMarker("scheduleStatus").addMarker("logical").addMarker("otn").addMarker("zone")
                 .addMarker("writable").addMarker("his")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
@@ -373,15 +374,13 @@ public class BPOSEquip {
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis
                 , mEquipRef,
-                siteRef, roomRef, floorRef, mNodeAddr, "bpos", tz, false));
+                siteRef, roomRef, floorRef, mNodeAddr, "otn", tz, false));
 
-        SmartNode device = new SmartNode(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef);
-        device.rssi.setPointRef(heartBeatId);
-        device.rssi.setEnabled(true);
-        device.currentTemp.setPointRef(ctID);
-        device.currentTemp.setEnabled(true);
-        device.desiredTemp.setPointRef(dtId);
-        device.desiredTemp.setEnabled(true);
+        OTN device = new OTN(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef);
+        device.getRssi().setPointRef(heartBeatId);
+        device.getRssi().setEnabled(true);
+        device.getCurrentTemp().setPointRef(ctID);
+        device.getCurrentTemp().setEnabled(true);
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_OCCUPANCY, occupancySensorid);
 
@@ -401,23 +400,23 @@ public class BPOSEquip {
     }
 
 
-    public BPOSConfiguration getbposconfiguration() {
-        BPOSConfiguration bposconfig = new BPOSConfiguration();
-        bposconfig.settempOffset(CCUHsApi.getInstance().readDefaultVal("point and temperature and" +
+    public OTNConfiguration getOTNconfiguration() {
+        OTNConfiguration otnConfig = new OTNConfiguration();
+        otnConfig.settempOffset(CCUHsApi.getInstance().readDefaultVal("point and temperature and" +
                 " offset and equipRef == \"" + mEquipRef + "\""));
-        bposconfig.setzonePriority(CCUHsApi.getInstance().readHisValByQuery("point and priority and " +
+        otnConfig.setzonePriority(CCUHsApi.getInstance().readHisValByQuery("point and priority and " +
                 "config  and equipRef == \"" + mEquipRef + "\"").intValue());
-        bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
+        otnConfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
                 "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
-        bposconfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
+        otnConfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
                 "forced and away and  equipRef == \"" + mEquipRef + "\"") > 0);
         Log.d(LOG_TAG,
-                "config: " + bposconfig.gettempOffset() + " - " + bposconfig.getautoAway() + " - " +
-                        "--" + bposconfig.getautoforceOccupied() + " - " + bposconfig.getzonePriority());
-        return bposconfig;
+                "config: " + otnConfig.gettempOffset() + " - " + otnConfig.getautoAway() + " - " +
+                        "--" + otnConfig.getautoforceOccupied() + " - " + otnConfig.getzonePriority());
+        return otnConfig;
     }
 
-    public void update(ProfileType type, int node, BPOSConfiguration config, String floorRef,
+    public void update(ProfileType type, int node, OTNConfiguration config, String floorRef,
                        String roomRef) {
 
         HashMap tempOffset = CCUHsApi.getInstance().read("point and temperature and offset and " +
@@ -429,7 +428,7 @@ public class BPOSEquip {
         HashMap autooccupied = CCUHsApi.getInstance().read("point and " +
                 "auto and forced and occupied and config and equipRef == \"" + mEquipRef + "\"");
 
-        BPOSConfiguration currentConfig = getbposconfiguration();
+        OTNConfiguration currentConfig = getOTNconfiguration();
 
         if(config.getautoAway() != currentConfig.getautoAway()
                 || config.getautoforceOccupied() != currentConfig.getautoforceOccupied())

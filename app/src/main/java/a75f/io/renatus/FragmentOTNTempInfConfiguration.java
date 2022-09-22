@@ -19,10 +19,9 @@ import androidx.annotation.Nullable;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
-import a75f.io.logic.bo.building.bpos.BPOSConfiguration;
-import a75f.io.logic.bo.building.bpos.BPOSProfile;
+import a75f.io.logic.bo.building.otn.OTNConfiguration;
+import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -36,16 +35,16 @@ import butterknife.OnClick;
 /**
  * created by spoorthidev on 21-July-2021
  */
-public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
+public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
 
-    public static String ID = FragmentBPOSTempInfConfiguration.class.getSimpleName();
-    private static String LOG_TAG = "FragmentBPOSTempInfConfiguration";
+    public static String ID = FragmentOTNTempInfConfiguration.class.getSimpleName();
+    private static String LOG_TAG = "FragmentOTNTempInfConfiguration";
     static final int TEMP_OFFSET_LIMIT = 100;
     private short    mNodeAddress;
     String floorRef;
     String zoneRef;
-    BPOSProfile mBPOSProfile ;
-    BPOSConfiguration mBPOSConfig;
+    OTNProfile mOTNProfile;
+    OTNConfiguration mOTNConfig;
 
 
     @BindView(R.id.temperatureOffset)
@@ -69,9 +68,9 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         return ID;
     }
 
-    public static FragmentBPOSTempInfConfiguration newInstance(short meshAddress, String roomName, String mFloorName, ProfileType profileType)
+    public static FragmentOTNTempInfConfiguration newInstance(short meshAddress, String roomName, String mFloorName, ProfileType profileType)
     {
-        FragmentBPOSTempInfConfiguration f = new FragmentBPOSTempInfConfiguration();
+        FragmentOTNTempInfConfiguration f = new FragmentOTNTempInfConfiguration();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
@@ -97,7 +96,7 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_bpos_tempinf, container, false);
+        View view = inflater.inflate(R.layout.fragment_otn_tempinf, container, false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
@@ -112,7 +111,7 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mBPOSProfile =(BPOSProfile) L.getProfile(mNodeAddress);
+        mOTNProfile =(OTNProfile) L.getProfile(mNodeAddress);
 
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];
@@ -124,15 +123,15 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         mTemperatureOffset.setWrapSelectorWheel(false);
 
-        if(mBPOSProfile != null){
-            mBPOSConfig = (BPOSConfiguration) mBPOSProfile.getProfileConfiguration(mNodeAddress);
+        if(mOTNProfile != null){
+            mOTNConfig = (OTNConfiguration) mOTNProfile.getProfileConfiguration(mNodeAddress);
 
-            mTemperatureOffset.setValue((int) (mBPOSConfig.gettempOffset() + TEMP_OFFSET_LIMIT));
-            mZonePriority.setSelection(mBPOSConfig.getzonePriority());
-            mAutoAway.setChecked(mBPOSConfig.getautoAway());
-            mAutoforceoccupied.setChecked(mBPOSConfig.getautoforceOccupied());
+            mTemperatureOffset.setValue((int) (mOTNConfig.gettempOffset() + TEMP_OFFSET_LIMIT));
+            mZonePriority.setSelection(mOTNConfig.getzonePriority());
+            mAutoAway.setChecked(mOTNConfig.getautoAway());
+            mAutoforceoccupied.setChecked(mOTNConfig.getautoforceOccupied());
         }else {
-            mBPOSProfile = new BPOSProfile();
+            mOTNProfile = new OTNProfile();
             mZonePriority.setSelection(2);
         }
 
@@ -144,13 +143,13 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
             @Override
             protected void onPreExecute() {
                 mSetbtn.setEnabled(false);
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving BPOS Configuration");
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration");
                 super.onPreExecute();
             }
 
             @Override
             protected Void doInBackground(final String... params) {
-                setupbposProfile();
+                setupOTNProfile();
                 L.saveCCUState();
                 return null;
             }
@@ -159,7 +158,7 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
             @Override
             protected void onPostExecute(final Void result) {
                 ProgressDialogUtils.hideProgressDialog();
-                FragmentBPOSTempInfConfiguration.this.closeAllBaseDialogFragments();
+                FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 RxjavaUtil.executeBackground(new Runnable() {
                     @Override
@@ -173,27 +172,27 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-    private void setupbposProfile() {
-        BPOSConfiguration bpos = new BPOSConfiguration();
-        bpos.settempOffset(mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
-        bpos.setPriority(ZonePriority.values()[mZonePriority.getSelectedItemPosition()]);
-        bpos.setzonePriority(mZonePriority.getSelectedItemPosition());
-        bpos.setautoforceOccupied(mAutoforceoccupied.isChecked());
-        bpos.setautoAway(mAutoAway.isChecked());
+    private void setupOTNProfile() {
+        OTNConfiguration otn = new OTNConfiguration();
+        otn.settempOffset(mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
+        otn.setPriority(ZonePriority.values()[mZonePriority.getSelectedItemPosition()]);
+        otn.setzonePriority(mZonePriority.getSelectedItemPosition());
+        otn.setautoforceOccupied(mAutoforceoccupied.isChecked());
+        otn.setautoAway(mAutoAway.isChecked());
 
 
-        mBPOSProfile.getProfileConfiguration().put(mNodeAddress,bpos);
+        mOTNProfile.getProfileConfiguration().put(mNodeAddress,otn);
 
-        if(mBPOSConfig == null ){
+        if(mOTNConfig == null ){
             Log.d(LOG_TAG, "Creating new config");
-            mBPOSProfile.addBPOSEquip(ProfileType.BPOS,mNodeAddress,bpos,floorRef,zoneRef);
+            mOTNProfile.addOTNEquip(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }else{
             Log.d(LOG_TAG, "Updating config");
-            mBPOSProfile.updateBPOS(ProfileType.BPOS,mNodeAddress,bpos,floorRef,zoneRef);
+            mOTNProfile.updateOTN(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }
-        L.ccu().zoneProfiles.add(mBPOSProfile);
+        L.ccu().zoneProfiles.add(mOTNProfile);
 
-        CcuLog.d(L.TAG_CCU_UI, "Set BPOS Config: Profiles - " + L.ccu().zoneProfiles.size());
+        CcuLog.d(L.TAG_CCU_UI, "Set OTN Config: Profiles - " + L.ccu().zoneProfiles.size());
 
     }
 }

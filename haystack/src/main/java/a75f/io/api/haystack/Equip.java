@@ -192,6 +192,12 @@ public class Equip extends Entity
             this.markers.add(m);
             return this;
         }
+        public Builder removeMarker(String marker)
+        {
+            if(this.markers.contains(marker))
+                this.markers.remove(marker);
+            return this;
+        }
         public Builder setSiteRef(String siteRef)
         {
             this.siteRef = siteRef;

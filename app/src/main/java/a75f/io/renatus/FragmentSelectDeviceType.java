@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.hyperstat.cpu.HyperStatProfileSelectionFragment;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -180,9 +179,9 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         showDialogFragment(FragmentModbusType.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentModbusType.MID);
     }
 
-    @OnClick(R.id.rlbpos) void onBPOSClick(){
+    @OnClick(R.id.rlOTN) void onOTNClick(){
 
-        showDialogFragment(FragmentBPOSTypeSelection.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentBPOSTypeSelection.ID);
+        showDialogFragment(FragmentOTNTypeSelection.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired), FragmentOTNTypeSelection.ID);
     }
 
     @OnClick(R.id.first_button) void onFirstButtonClick() {

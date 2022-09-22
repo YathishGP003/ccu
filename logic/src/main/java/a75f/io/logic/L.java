@@ -48,7 +48,7 @@ public class L
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
-    public static final String TAG_BPOS = "CCU_BPOS";
+    public static final String TAG_OTN = "CCU_OTN";
 
     public static Context app()
     {

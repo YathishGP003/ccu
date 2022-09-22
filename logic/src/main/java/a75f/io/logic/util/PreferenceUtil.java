@@ -34,6 +34,7 @@ public class PreferenceUtil {
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
     private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
     private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
+    private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
 
 
     public static void setContext(Context c) {
@@ -363,6 +364,15 @@ public class PreferenceUtil {
 
     public static void setSmartStatPointsMigration() {
         setBooleanPreference(SMART_STAT_POINTS_MIGRATION, true);
+
+    }
+
+    public static boolean getBPOSToOTNMigration() {
+        return getBooleanPreference(BPOS_TO_OTN_MIGRATION);
+    }
+
+    public static void setBPOSToOTNMigration() {
+        setBooleanPreference(BPOS_TO_OTN_MIGRATION, true);
 
     }
 

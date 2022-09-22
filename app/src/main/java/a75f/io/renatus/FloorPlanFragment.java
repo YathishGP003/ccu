@@ -1272,7 +1272,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isCCUPaired = false;
         boolean isPaired = false;
         boolean isSensePaired = false;
-        boolean isBPOSPaired = false;
+        boolean isOTNPaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1289,13 +1289,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("SENSE")) {
                     isSensePaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("BPOS")) {
-                    isBPOSPaired = true;
+                if (zoneEquips.get(i).getProfile().contains("OTN")) {
+                    isOTNPaired = true;
                 }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isBPOSPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isOTNPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1332,8 +1332,8 @@ public class FloorPlanFragment extends Fragment {
             if (isSensePaired) {
                 Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
-            if (isBPOSPaired) {
-                Toast.makeText(getActivity(), "BPOS is already paired in this zone", Toast.LENGTH_LONG).show();
+            if (isOTNPaired) {
+                Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1465,9 +1465,9 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
-                case BPOS:
-                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()),FragmentBPOSTempInfConfiguration.ID);
+                case OTN:
+                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)

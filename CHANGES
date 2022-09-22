@@ -1,7 +1,1 @@
- - Merged PR 4848: Bug 10703: CCU: Temporary Override UI discrepancy.
- - updated toast message
- - Merged PR 4952: Fixed status msg for both zone and system frags
- - Merged PR 4949: implemented Toast message to notify primary CCU upgrade for celsius feature.
- - Merged PR 4908: Null check for equips without occupancyData
- - Null check for equips without occupancyData
- - Bug 10703: CCU: Temporary Override UI discrepancy.
+ - Merged PR 5059: Rebranding BPOS to OTN

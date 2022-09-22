@@ -103,7 +103,7 @@ public class Tags
     public static final String HUMIDIFICATION = "humidification";
     public static final String HYPERSTAT = "hyperstat";
     public static final String SENSE = "sense";
-    public static final String BPOS = "bpos";
+    public static final String OTN = "otn";
     public static final String PLC = "pid";
     
     public static final String MULTI_ZONE = "multiZone";

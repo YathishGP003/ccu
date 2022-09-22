@@ -281,7 +281,6 @@ public class Pulse
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
-		boolean hasSensorOccupancy = false;
 
 		for (SmartNodeSensorReading_t r : sensorReadings) {
 			DLog.LogdStructAsJson(r);
@@ -312,8 +311,7 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
 					break;
 				case OCCUPANCY:
-					hasSensorOccupancy = true;
-					updateBPOSOccupancyStatus(sp,val,addr,device);
+					updateOTNOccupancyStatus(sp, val, device);
 					break;
 				case ILLUMINANCE:
 				case CO2:
@@ -946,11 +944,11 @@ public class Pulse
 				str += ", device type:" + snRebootIndicationMsgs.smartNodeDeviceType.get().name();
 				str += ", device:" + snRebootIndicationMsgs.smartNodeDeviceId;
 				str += ", serialnumber:" + snRebootIndicationMsgs.smartNodeSerialNumber;
+				Log.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
+				AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 			}catch (Exception e){
 				e.printStackTrace();
 			}
-		Log.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
-			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
 		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();
@@ -1225,12 +1223,13 @@ public class Pulse
 		}
 
 	}
-	
+
 	//Occupancy has a physical and logical points, which are COV based. In addition to that an occupancyDetection
 	//point is used to track occupancy events without COV filtering.
-	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
+	private static void updateOTNOccupancyStatus(RawPoint sp, double val, Device device){
 		if((val == 1) ) {
-			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef==" +
+			HashMap<Object, Object> occDetPoint = CCUHsApi.getInstance().readEntity("point and occupancy and " +
+					"detection and his and equipRef==" +
 					" \"" + device.getEquipRef() + "\"");
 			if (!occDetPoint.isEmpty()){
 				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);

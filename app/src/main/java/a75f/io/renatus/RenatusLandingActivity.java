@@ -672,7 +672,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 if(d.getMarkers().contains("smartstat")) {
                                     sendSmartStatResetMsg(d.getAddr());
                                 }else if(d.getMarkers().contains("smartnode") ||
-                                        d.getMarkers().contains("bpos")){
+                                        d.getMarkers().contains("otn")){
                                     sendSmarNodeResetMsg(d.getAddr());
                                 }else if (d.getMarkers().contains("hyperstat")) {
                                     HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -686,7 +686,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         if(d.getMarkers().contains("smartstat")) {
                             sendSmartStatResetMsg(d.getAddr());
                         }else if(d.getMarkers().contains("smartnode")  ||
-                                d.getMarkers().contains("bpos")) {
+                                d.getMarkers().contains("otn")) {
                            sendSmarNodeResetMsg(d.getAddr());
                         }else if (d.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -698,7 +698,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     if(equip.getMarkers().contains("smartstat")) {
                         sendSmartStatResetMsg(equip.getGroup());
                     }else if(equip.getMarkers().contains("smartnode") ||
-                            equip.getMarkers().contains("bpos")){
+                            equip.getMarkers().contains("otn")){
                         sendSmarNodeResetMsg(equip.getGroup());
                     }
                     else if (equip.getMarkers().contains("hyperstat")) {

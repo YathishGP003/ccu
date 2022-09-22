@@ -427,7 +427,7 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/rlbpos"
+            android:id="@+id/rlOTN"
             android:layout_width="match_parent"
             android:layout_height="114dp"
             android:layout_marginStart="440dp">
@@ -446,23 +446,23 @@
                 android:layout_centerVertical="true"
                 android:orientation="vertical">
                 <TextView
-                    android:id="@+id/textbpos"
+                    android:id="@+id/textOTN"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:text="@string/textbpos"
+                    android:text="@string/textotn"
                     android:textAppearance="@style/title_normal"/>
 
                 <TextView
-                    android:id="@+id/descbpos"
+                    android:id="@+id/descOTN"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/descbpos"
+                    android:text="@string/descotn"
                     android:textAppearance="@style/text_label"/>
 
             </LinearLayout>
             <ImageView
-                android:id="@+id/nextbpos"
+                android:id="@+id/nextOTN"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginEnd="96dp"

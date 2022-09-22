@@ -141,11 +141,6 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
-            if(occuStatus != null){
-                hpuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                hpuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
-            }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 
             if((fanSpeed != StandaloneLogicalFanSpeeds.OFF) && (roomTemp > 0)){

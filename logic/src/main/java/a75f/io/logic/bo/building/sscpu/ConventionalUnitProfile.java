@@ -167,12 +167,6 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
-
-            if(occuStatus != null){
-                cpuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                cpuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
-            }
             double targetThreshold = 25.0;
 
             switch (fanHighType){

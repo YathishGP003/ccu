@@ -105,7 +105,7 @@ public class EquipScheduleHandler implements Schedulable {
         double heatingDt;
         double coolingDt;
         if (updatedOccupancy == Occupancy.OCCUPIED || updatedOccupancy == Occupancy.PRECONDITIONING
-                || updatedOccupancy == Occupancy.AUTOAWAY || updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY) {
+                || updatedOccupancy == Occupancy.AUTOAWAY || updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY || updatedOccupancy == Occupancy.EMERGENCY_CONDITIONING) {
             coolingDt = occupiedSchedule.getCoolingVal();
             heatingDt = occupiedSchedule.getHeatingVal();
         } else {

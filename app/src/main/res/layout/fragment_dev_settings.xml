@@ -127,6 +127,23 @@
                     android:text="Save"
                     android:id="@+id/logCaptureBtn"/>
 
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_margin="10dp"
+                    android:textSize="20sp"
+                    android:text="Upload CCU logs to cloud"/>
+
+
+                <Button
+                    android:layout_margin="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upload"
+                    android:id="@+id/logUploadBtn"/>
+
             </LinearLayout>
 
             <LinearLayout

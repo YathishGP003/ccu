@@ -224,7 +224,14 @@ public class HaystackExplorer extends Fragment
                                     "Do you want to delete the point "+point+"?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteEntity(tunerMap.get(point));
+
+                                if (point.contains("Building Schedule") && scheduleMap.size() == 1) {
+                                    Toast.makeText(parent.getContext(),
+                                            "Delete Failed ! Cant delete the only building schedule",
+                                            Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                //deleteEntity(tunerMap.get(point));
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)

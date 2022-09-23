@@ -34,14 +34,17 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
+import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
+import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.util.CCUUiUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,6 +63,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.logCaptureBtn)
     Button logCaptureBtn;
+
+    @BindView(R.id.logUploadBtn)
+    Button logUploadBtn;
     
     @BindView(R.id.resetAppBtn)
     Button resetAppBtn;
@@ -122,53 +128,57 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         biskitModeBtn.setChecked(Globals.getInstance().isSimulation());
         
         
-        logCaptureBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-    
-                alert.setTitle("Log File Name ");
-                FileSystemTools fileSystemTools = new FileSystemTools(getContext().getApplicationContext());
-                String date = fileSystemTools.timeStamp();
-                
-                //alert.setMessage(date);
-    
-                // Set an EditText view to get user input
-                final EditText input = new EditText(getActivity());
-                input.setText("Renatus_Logs_"+date);
-                input.setTextSize(20);
-                alert.setView(input);
-    
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
-                                }
-                                catch (IOException | SecurityException ex) {
-                                    ex.printStackTrace();
-                                    getActivity().runOnUiThread(() -> showErrorDialog(
-                                            "Unable to save log file: " + ex.getMessage()));
-                                }
+        logCaptureBtn.setOnClickListener(view13 -> {
+            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+            alert.setTitle("Log File Name ");
+            FileSystemTools fileSystemTools = new FileSystemTools(getContext().getApplicationContext());
+            String date = fileSystemTools.timeStamp();
+
+            //alert.setMessage(date);
+
+            // Set an EditText view to get user input
+            final EditText input = new EditText(getActivity());
+            input.setText("Renatus_Logs_"+date);
+            input.setTextSize(20);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
                             }
-                        }.start();
-                    }
-                });
-    
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Canceled.
-                    }
-                });
-    
-                alert.show();
-            }
+                            catch (IOException | SecurityException ex) {
+                                ex.printStackTrace();
+                                getActivity().runOnUiThread(() -> showErrorDialog(
+                                        "Unable to save log file: " + ex.getMessage()));
+                            }
+                        }
+                    }.start();
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
         });
-    
+
+        logUploadBtn.setOnClickListener( v -> {
+            new Thread() {
+                @Override
+                public void run() {
+                    UploadLogs.instanceOf().saveCcuLogs();
+                }
+            }.start();
+        });
+
         resetAppBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -299,7 +309,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     .setPositiveButton("Done", (dialog1, which) -> {
                         if (taskEditText.getText().toString().trim().equals("7575")) {
                             dialog1.dismiss();
-                            resetPasswords();
+                            CCUUtils.resetPasswords(RenatusApp.getAppContext());
                             Toast.makeText(getActivity(), "Password reset succeeded", Toast.LENGTH_SHORT).show();
                         } else {
                             taskEditText.getText().clear();
@@ -313,22 +323,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     }
 
-    private void resetPasswords() {
-        Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
 
-        prefs.setBoolean(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), false);
-        prefs.setString(getString(R.string.SET_ZONE_PASSWORD), "");
-
-        prefs.setBoolean(getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), false);
-        prefs.setString(getString(R.string.SET_SYSTEM_PASSWORD), "");
-
-        prefs.setBoolean(getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), false);
-        prefs.setString(getString(R.string.SET_BUILDING_PASSWORD), "");
-
-        prefs.setBoolean(getString(R.string.SET_SETUP_PASSWORD), false);
-        prefs.setString(getString(R.string.USE_SETUP_PASSWORD_KEY), "");
-
-    }
     
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,

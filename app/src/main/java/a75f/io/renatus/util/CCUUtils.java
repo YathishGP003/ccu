@@ -652,5 +652,25 @@ public class CCUUtils {
 			return BuildConfig.GOOGLE_MAPS_KEY;
 	}
 
+	public static void resetPasswords(Context context) {
+		Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
+		final String DEFAULT_RESET_PASSWORD = "7575";
+		if (prefs.getBoolean(context.getString(R.string.SET_ZONE_PASSWORD))) {
+			prefs.setString(context.getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_SYSTEM_PASSWORD))) {
+			prefs.setString(context.getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_BUILDING_PASSWORD))) {
+			prefs.setString(context.getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_SETUP_PASSWORD))) {
+			prefs.setString(context.getString(R.string.USE_SETUP_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+	}
 
 }

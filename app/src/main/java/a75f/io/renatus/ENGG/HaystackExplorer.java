@@ -201,7 +201,7 @@ public class HaystackExplorer extends Fragment
                         .setMessage("Do you want to delete "+equip+" and all its points?")
                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                public void onClick(DialogInterface dialog, int which) {
-                                   deleteEntity(equipMap.get(equip));
+                                   deleteEntity(equipMap.get(equip), false);
                                }
                            })
                        .setNegativeButton(android.R.string.no, null)
@@ -224,7 +224,23 @@ public class HaystackExplorer extends Fragment
                                     "Do you want to delete the point "+point+"?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteEntity(tunerMap.get(point));
+
+                                if (point.contains("Building Schedule")) {
+                                    CcuLog.i("CCU_UI", " scheduleMap.size  "+scheduleMap.size());
+                                    if (scheduleMap.size() == 1) {
+                                        Toast.makeText(parent.getContext(),
+                                                "Delete Failed ! Cant delete the only building schedule",
+                                                Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    //Its a hack based on the current point length
+                                    int startIndex = point.indexOf("-");
+                                    String id = point.substring(startIndex+1, startIndex+37);
+                                    CcuLog.i("CCU_UI", " Delete Schedule : id "+id);
+                                    deleteEntity(id , true);
+                                } else {
+                                    deleteEntity(tunerMap.get(point), false);
+                                }
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
@@ -236,7 +252,7 @@ public class HaystackExplorer extends Fragment
         });
     }
     
-    private void deleteEntity(String entityId) {
+    private void deleteEntity(String entityId, boolean schedule) {
     
         new AsyncTask<Void, Void, Void>() {
         
@@ -248,7 +264,11 @@ public class HaystackExplorer extends Fragment
         
             @Override
             protected Void doInBackground( final Void ... params ) {
-                CCUHsApi.getInstance().deleteEntityTree(entityId);
+                if (schedule) {
+                    CCUHsApi.getInstance().deleteEntityItem(entityId);
+                } else {
+                    CCUHsApi.getInstance().deleteEntityTree(entityId);
+                }
                 updateAllData();
                 CCUHsApi.getInstance().syncEntityTree();
                 return null;
@@ -266,9 +286,9 @@ public class HaystackExplorer extends Fragment
         tunerMap.clear();
         expandableListDetail.clear();
         equipMap.clear();
+        scheduleMap.clear();
 
-
-        HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special");
+        HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special and not named");
         List<String> schedulesList = new ArrayList<>();
         Iterator it = buildingSchedulesGrid.iterator();
         while (it.hasNext()) {

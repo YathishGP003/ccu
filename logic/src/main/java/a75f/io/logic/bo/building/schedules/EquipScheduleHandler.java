@@ -144,32 +144,42 @@ public class EquipScheduleHandler implements Schedulable {
     }
     
     private void updateDesiredTempAutoForceOccupied(double forcedOccupiedMins) {
-    
+
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
+
+        double heatingDesiredTemp;
+        double coolingDesiredTemp;
+
+        if (occ != null) {
+            heatingDesiredTemp = occ.getHeatingVal();
+            coolingDesiredTemp = occ.getCoolingVal();
+        } else {
+            double averageDt = hayStack.readDefaultVal("average and desired and temp and equipRef == \""+equipRef+"\"");
+            double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equipRef, hayStack);
+            coolingDesiredTemp = averageDt + coolingDeadBand;
+            double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equipRef, hayStack);
+            heatingDesiredTemp = averageDt - heatingDeadBand;
+        }
+
         String coolingPointId = getCoolingDesiredTempId();
-        
-        double averageDt = hayStack.readDefaultVal("average and desired and temp and equipRef == \""+equipRef+"\"");
-    
-        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equipRef, hayStack);
         hayStack.pointWrite(HRef.copy(coolingPointId),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL,
                             "OccupancySensor",
-                            HNum.make(averageDt + coolingDeadBand) ,
+                            HNum.make(coolingDesiredTemp) ,
                             HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
         hayStack.writeHisValById(coolingPointId, HSUtil.getPriorityVal(coolingPointId, hayStack));
     
-        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equipRef, hayStack);
         String heatingPointId = getHeatingDesiredTempId();
-        
         hayStack.pointWrite(HRef.copy(heatingPointId),
                             HayStackConstants.FORCE_OVERRIDE_LEVEL,
                             "OccupancySensor",
-                            HNum.make(averageDt - heatingDeadBand) ,
+                            HNum.make(heatingDesiredTemp) ,
                             HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
         hayStack.writeHisValById(heatingPointId, HSUtil.getPriorityVal(heatingPointId, hayStack));
     
-        CcuLog.i(L.TAG_CCU_SCHEDULER, "AUFCO updated cooling dt "+HSUtil.getPriorityLevel(coolingPointId,
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForceOccupied updated cooling dt "+HSUtil.getPriorityLevel(coolingPointId,
                                 HayStackConstants.FORCE_OVERRIDE_LEVEL));
-        CcuLog.i(L.TAG_CCU_SCHEDULER, "AUFCO updated heating dt "+HSUtil.getPriorityLevel(heatingPointId,
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForceOccupied updated heating dt "+HSUtil.getPriorityLevel(heatingPointId,
                                                                                           HayStackConstants.FORCE_OVERRIDE_LEVEL));
     }
     

@@ -62,6 +62,7 @@ public class AutoForcedOccupied implements OccupancyTrigger {
         
         Occupied occStatus = ScheduleUtil.getOccupied(occupancyUtil.getEquipRef());
         Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
+
         if ((!occStatus.isOccupied() || occStatus.getVacation() != null)
             && occupancyMode != Occupancy.OCCUPIED
             && occupancyMode != Occupancy.AUTOAWAY

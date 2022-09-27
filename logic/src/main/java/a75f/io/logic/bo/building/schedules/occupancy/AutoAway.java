@@ -45,8 +45,8 @@ public class AutoAway implements OccupancyTrigger {
             }
             return false;
         }
-    
 
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "Current occupancyMode : "+occupancyMode);
         if (occupancyMode == Occupancy.AUTOFORCEOCCUPIED || occupancyMode == Occupancy.UNOCCUPIED) {
             return false;
         }

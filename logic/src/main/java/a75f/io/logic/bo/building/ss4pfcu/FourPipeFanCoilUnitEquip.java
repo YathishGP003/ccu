@@ -786,22 +786,24 @@ public class FourPipeFanCoilUnitEquip  {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-HPU-" + nodeAddr;
+        HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe4 and his and equipRef== \"" + equip.getId() + "\"");
         if(config.enableOccupancyControl){
-            Point occupancyDetection = new Point.Builder()
-                    .setDisplayName(equipDis+"-occupancyDetection")
-                    .setEquipRef(equip.getId())
-                    .setSiteRef(siteRef)
-                    .setRoomRef(equip.getRoomRef())
-                    .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                    .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe4").addMarker("his").addMarker("zone")
-                    .setGroup(String.valueOf(nodeAddr))
-                    .setEnums("false,true")
-                    .setTz(tz)
-                    .build();
-            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            if (occDetPoint.isEmpty()) {
+                Point occupancyDetection = new Point.Builder()
+                        .setDisplayName(equipDis + "-occupancyDetection")
+                        .setEquipRef(equip.getId())
+                        .setSiteRef(siteRef)
+                        .setRoomRef(equip.getRoomRef())
+                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                        .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe4").addMarker("his").addMarker("zone")
+                        .setGroup(String.valueOf(nodeAddr))
+                        .setEnums("false,true")
+                        .setTz(tz)
+                        .build();
+                String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+                CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            }
         }else {
-            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe4 and his and equipRef== \"" + equip.getId() + "\"");
             if ((occDetPoint != null) && (occDetPoint.size() > 0))
                 CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
         }

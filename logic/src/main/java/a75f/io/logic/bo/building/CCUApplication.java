@@ -18,7 +18,7 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 public class CCUApplication
 {
     /*
-        These need to be moved into tuners
+        These need to be moved into Tuners.
      */
     private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
     private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();

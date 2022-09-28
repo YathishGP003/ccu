@@ -558,8 +558,7 @@ class HyperStatCpuProfile : ZoneProfile() {
 
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
-                    &&(basicSettings.fanMode != StandaloneFanStage.OFF)
-                ) {
+                    &&( basicSettings.fanMode != StandaloneFanStage.OFF)) {
                     runRelayForCooling(relayState, equip, port, config, tuner, relayStages)
                 }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)

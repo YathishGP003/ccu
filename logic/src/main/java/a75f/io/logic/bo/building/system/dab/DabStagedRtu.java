@@ -285,7 +285,7 @@ public class DabStagedRtu extends DabSystemProfile
         }
     
         //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
-        //even if the loopOp is 0 ( Both fan stage1 and stage2 are turned on here
+        //even if the loopOp is 0 ( Both fan stage1 and stage2 are turned on here)
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fan1Status = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fan1Status;

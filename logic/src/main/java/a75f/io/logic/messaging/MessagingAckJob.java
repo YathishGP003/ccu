@@ -39,11 +39,11 @@ public class MessagingAckJob {
         CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
 
         if (!MessagingClient.getInstance().isSubscribed()) {
-
             CcuLog.d(L.TAG_CCU_MESSAGING, "Not subscribed , reset connection");
             MessagingClient.getInstance().resetMessagingConnection();
             return;
         }
+
         Map<String, Set<String>> channelsToMessageIds = MessagingClient.getInstance().pollMessageIdsToAck();
         if (channelsToMessageIds.isEmpty()) {
             emptyMessageWatchdogCounter++;

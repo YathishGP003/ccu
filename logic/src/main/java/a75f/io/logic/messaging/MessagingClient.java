@@ -62,7 +62,7 @@ public class MessagingClient {
 
     public boolean isSubscribed() {
         return sse != null &&
-                okSse.getClient().connectionPool().connectionCount() > 0;
+               okSse.getClient().connectionPool().connectionCount() > 0;
     }
 
     public void queueMessageIdToAck(JsonObject message) {

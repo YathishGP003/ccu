@@ -136,12 +136,11 @@ public class MigrationUtil {
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
         }
+
         if(!PreferenceUtil.getScheduleRefactorMigration()) {
             scheduleRefactorMigration(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefactorMigration();
         }
-
-
 
         if(!PreferenceUtil.getNewOccupancy()){
             Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
@@ -194,6 +193,7 @@ public class MigrationUtil {
             updateScheduleType(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleTypeUpdateMigration();
         }
+
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -782,7 +782,7 @@ public class MigrationUtil {
             }
         });
     }
-    
+
     private static void scheduleRefactorMigration(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
         rooms.forEach( room -> {
@@ -818,7 +818,6 @@ public class MigrationUtil {
         });
         hayStack.scheduleSync();
     }
-
 
     private static void migrateNewOccupancy(CCUHsApi hsApi) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");

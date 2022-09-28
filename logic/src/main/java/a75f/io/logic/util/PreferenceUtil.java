@@ -32,6 +32,7 @@ public class PreferenceUtil {
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
 
 
     public static void setContext(Context c) {
@@ -346,6 +347,13 @@ public class PreferenceUtil {
 
     public static void setScheduleTypeUpdateMigration() {
         setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
+    }
+
+    public static boolean getAutoAwaySetBackMigration() {
+        return getBooleanPreference(AUTOAWAYSETBACK);
+    }
+    public static void setAutoAwaySetBackMigration() {
+        setBooleanPreference(AUTOAWAYSETBACK, true);
     }
 
 

@@ -1029,7 +1029,7 @@ public class VavTuners {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();

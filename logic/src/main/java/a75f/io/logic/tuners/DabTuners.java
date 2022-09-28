@@ -598,7 +598,7 @@ public class DabTuners {
 
                 .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
 
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();

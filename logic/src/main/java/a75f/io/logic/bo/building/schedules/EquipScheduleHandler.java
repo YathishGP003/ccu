@@ -38,7 +38,8 @@ public class EquipScheduleHandler implements Schedulable {
     
         //This is required to avoid an existing occupancy detection triggering "AutoForcedOccupied' during a transition
         //from occupied to unoccupied.
-        if (updatedOccupancy == Occupancy.UNOCCUPIED && currentOccupancy == Occupancy.OCCUPIED) {
+        if ((updatedOccupancy == Occupancy.UNOCCUPIED || updatedOccupancy == Occupancy.VACATION)
+                 && (currentOccupancy == Occupancy.OCCUPIED || currentOccupancy == Occupancy.AUTOAWAY)) {
             initOccupancyDetection(false);
         }
         

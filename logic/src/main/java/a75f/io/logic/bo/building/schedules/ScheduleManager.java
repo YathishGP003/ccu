@@ -417,7 +417,7 @@ public class ScheduleManager {
             return;
         }
         
-        if (ScheduleUtil.isAnyZoneOccupied(ahuServedEquipsOccupancy)) {
+        if (ScheduleUtil.isAnyZoneOccupiedOrAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = OCCUPIED;
             currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
             CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
@@ -440,9 +440,9 @@ public class ScheduleManager {
             systemOccupancy = AUTOFORCEOCCUPIED;
         }
         
-        if (ScheduleUtil.areAllZonesInAutoAway(ahuServedEquipsOccupancy)) {
+        /*if (ScheduleUtil.areAllZonesInAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = AUTOAWAY;
-        }
+        }*/
         
         if (ScheduleUtil.areAllZonesKeyCardAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = KEYCARD_AUTOAWAY;

@@ -172,9 +172,9 @@ public class ScheduleUtil {
         return false;
     }
     
-    public static boolean isAnyZoneOccupied(Map<String, OccupancyData> equipOccupancy) {
+    public static boolean isAnyZoneOccupiedOrAutoAway(Map<String, OccupancyData> equipOccupancy) {
         for (OccupancyData occupancyData : equipOccupancy.values()) {
-            if (occupancyData.occupancy == OCCUPIED) {
+            if (occupancyData.occupancy == OCCUPIED || occupancyData.occupancy == AUTOAWAY) {
                 return true;
             }
         }
@@ -192,7 +192,7 @@ public class ScheduleUtil {
             }
             Occupied occ = (Occupied) occEntry.getValue();
             //CcuLog.i(TAG_CCU_SCHEDULER, " Occupied for "+roomRef+" "+occ.toString());
-            if (occ.isOccupied() && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)) {
+            if (occ.isOccupied()/* && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)*/) {
                 Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
                 if (currOccupied == null || occDay.getEthh() > currOccupied.getCurrentlyOccupiedSchedule().getEthh()
                     || (occDay.getEthh() == currOccupied.getCurrentlyOccupiedSchedule().getEthh() &&

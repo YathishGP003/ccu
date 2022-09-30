@@ -431,11 +431,18 @@ public class CreateNewSite extends Fragment {
             if (ccu.size() > 0) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
-                ccuFmEmail = ccu.get("fmEmail").toString();
-                ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteCCU.setText(ccuName);
-                mSiteEmailId.setText(ccuFmEmail);
+                ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteInstallerEmailId.setText(ccuInstallerEmail);
+
+//
+//                As per Lukee's comment in the Bug 12630: " there is no concept of a CCU-level Facility Manager Role in the User Management system"
+//                So we are commenting following code and we are showing the site entity fm email details
+//
+//                ccuFmEmail = ccu.get("fmEmail").toString();
+//                mSiteEmailId.setText(ccuFmEmail);
+//
+
             }
 
         }

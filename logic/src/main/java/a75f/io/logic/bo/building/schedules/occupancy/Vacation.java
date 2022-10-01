@@ -22,7 +22,7 @@ public class Vacation implements OccupancyTrigger{
     public boolean hasTriggered() {
     
         Occupied occupied = ScheduleManager.getInstance().getOccupiedModeCache(equip.getRoomRef());
-        return occupied.getVacation() != null;
+        return occupied != null && occupied.getVacation() != null;
         
         //TODO - Optimize , should be read only once.
        /* ArrayList<Schedule> systemVacation = hayStack.getSystemSchedule(true);

@@ -53,7 +53,7 @@ public class LSmartNode
     public static final String RELAY_ONE ="RELAY_ONE";
     public static final String RELAY_TWO ="RELAY_TWO";
     public static final String PULSE ="Pulsed Electric";
-    public static final String MAT ="MAT";
+    public static final String MAT ="Smart Damper";
     
     
     private static final short  TODO = 0;

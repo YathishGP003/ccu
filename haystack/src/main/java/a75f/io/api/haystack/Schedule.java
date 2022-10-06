@@ -894,7 +894,11 @@ public class Schedule extends Entity
     
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(mDis).append(" ");
+
+        b.append(mDis).append("-");
+        if (mId != null) {
+            b.append(mId).append(" ");
+        }
         if (isVacation()) {
             b.append(mStartDate.toString()+"-"+mEndDate.toString());
         }else

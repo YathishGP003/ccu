@@ -209,12 +209,12 @@ public class UpdatePointHandler
         boolean updateZoneUi = false;
         boolean isScheduleType = false;
 
-        if (p.getMarkers().contains("desired")) {
+        if (p.getMarkers().contains("desired") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
             updateZoneUi = true;
         }
 
-        if (p.getMarkers().contains("scheduleType")) {
+        if (p.getMarkers().contains("scheduleType") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
             updateZoneUi = true;
             isScheduleType = true;

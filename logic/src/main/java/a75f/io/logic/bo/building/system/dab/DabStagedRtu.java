@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
@@ -536,7 +537,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.append((stageStatus[COOLING_4.ordinal()] > 0) ? ",4" : "");
             status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
         }
-        
+
         if (isHeatingActive()) {
             status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
@@ -554,7 +555,7 @@ public class DabStagedRtu extends DabSystemProfile
                 status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
             }
         }
-        return status.toString().equals("")? "System OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn()+SystemProfileUtil.isHumidifierOn() : status.toString()+SystemProfileUtil.isDeHumidifierOn()+(SystemProfileUtil.isHumidifierOn());
     }
     
     public void updateStagesSelected() {

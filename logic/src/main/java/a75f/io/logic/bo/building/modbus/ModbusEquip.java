@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.modbus;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -52,10 +53,11 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType;
-        if (equipmentInfo.getEquipType().equalsIgnoreCase(String.valueOf(ModbusEquipTypes.EMR_ZONE))) {
+        List<String> modbusEquipTypes = Arrays.asList(equipmentInfo.getEquipType().replaceAll("\\s", "").split(","));
+        if (hasEquipType(ModbusEquipTypes.EMR_ZONE, modbusEquipTypes)) {
             modbusEquipType = String.valueOf(ModbusEquipTypes.EMR);
         } else {
-            modbusEquipType = equipmentInfo.getEquipType();
+            modbusEquipType = modbusEquipTypes.get(0);
         }
         String modbusName = equipmentInfo.getName();
         String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
@@ -72,8 +74,13 @@ public class ModbusEquip {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
-                    .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
+                    .addMarker("equip").addMarker("modbus")
                     .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+
+        for (String equip :
+                modbusEquipTypes) {
+            mbEquip.addMarker(equip.toLowerCase());
+        }
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             mbEquip.addMarker("zone");
         }
@@ -296,8 +303,14 @@ public class ModbusEquip {
 
             if (tags.length() > 0) {
                 String zoneTag="";
-                if(!equipmentDevice.getEquipType().equals(ModbusCategory.BTU.displayName)
-                        &&!equipmentDevice.getEquipType().equals(ModbusCategory.EMR.displayName)){
+                boolean isZone = false;
+                String[] modbusEquipTypes = equipmentDevice.getEquipType().replaceAll("\\s","").split(",");
+                for (String equipType :
+                        modbusEquipTypes) {
+                    isZone = !equipType.equals(ModbusCategory.BTU.displayName)
+                            && !equipType.equals(ModbusCategory.EMR.displayName);
+                }
+                if(!isZone){
                     zoneTag="and zone";
                 }
                 HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus "+zoneTag + tags + " and equipRef == \"" + equipRef + "\"");
@@ -319,6 +332,16 @@ public class ModbusEquip {
             }
         }
         CCUHsApi.getInstance().syncEntityTree();
+    }
+
+    public boolean hasEquipType(ModbusEquipTypes modbusEquipTyp, List<String> modbusEquipTypes) {
+        for (String eqType :
+                modbusEquipTypes) {
+            if (eqType.equalsIgnoreCase(String.valueOf(modbusEquipTyp))){
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Parameter> getProfileConfiguration(short slaveId){

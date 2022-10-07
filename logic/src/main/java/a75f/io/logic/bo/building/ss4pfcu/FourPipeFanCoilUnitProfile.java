@@ -104,7 +104,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
-                fourPfcuDevice.setProfilePoint("occupancy and mode",Occupancy.UNOCCUPIED.ordinal());
                 continue;
 
             }
@@ -163,11 +162,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
             }else {
                 resetRelays(fourPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
-            }
-            if (occuStatus != null) {
-                fourPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            } else {
-                fourPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
         }
     }

@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -75,9 +76,8 @@ public class VavParallelFanProfile extends VavProfile
                 valve.currentPosition = 0;
             }
             
-            boolean occupied = getZoneOccupancy(vavEquip.getId());
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), vavEquip.getRoomRef());
             updateIaqCompensatedMinDamperPos(occupied, node);
-            
             if (loopOp == 0) {
                 damper.currentPosition = damper.iaqCompensatedMinPos;
             } else {

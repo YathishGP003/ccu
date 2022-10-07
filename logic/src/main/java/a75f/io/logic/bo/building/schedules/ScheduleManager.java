@@ -404,6 +404,7 @@ public class ScheduleManager {
         
         if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)) {
             systemOccupancy = EMERGENCY_CONDITIONING;
+            postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
         
@@ -414,10 +415,11 @@ public class ScheduleManager {
                 systemOccupancy = VACATION;
             }
             CcuLog.i(TAG_CCU_SCHEDULER, " In SystemVacation : systemOccupancy : "+systemOccupancy);
+            postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
         
-        if (ScheduleUtil.isAnyZoneOccupied(ahuServedEquipsOccupancy)) {
+        if (ScheduleUtil.isAnyZoneOccupiedOrAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = OCCUPIED;
             currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
             CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
@@ -440,21 +442,24 @@ public class ScheduleManager {
             systemOccupancy = AUTOFORCEOCCUPIED;
         }
         
-        if (ScheduleUtil.areAllZonesInAutoAway(ahuServedEquipsOccupancy)) {
+        /*if (ScheduleUtil.areAllZonesInAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = AUTOAWAY;
-        }
+        }*/
         
         if (ScheduleUtil.areAllZonesKeyCardAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = KEYCARD_AUTOAWAY;
         }
-        
+        postSystemOccupancy(CCUHsApi.getInstance());
+        CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy : " + systemOccupancy);
+    }
+
+    private void postSystemOccupancy(CCUHsApi hayStack) {
         double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
         if (systemOccupancyValue != systemOccupancy.ordinal()){
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
         hayStack.writeHisValByQuery("point and system and his and occupancy and mode",
-                                                  (double) systemOccupancy.ordinal());
-        CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy : " + systemOccupancy);
+                (double) systemOccupancy.ordinal());
     }
     
     
@@ -780,7 +785,7 @@ public class ScheduleManager {
                 }
                 if (nextOccupiedInfo == null || nextOccupiedInfo.getNextOccupiedSchedule() == null ){
                     CcuLog.i(TAG_CCU_SCHEDULER, " Unoccupied and info does not exist");
-                    return "No schedule configured";
+                    return "In Unoccupied Mode";
                 }
                     return String.format("%sIn Energy saving %s | Changes to %.1f-%.1f\u00B0F at %02d:%02d",epidemicString, "Unoccupied mode",
                             nextOccupiedInfo.getHeatingVal(),

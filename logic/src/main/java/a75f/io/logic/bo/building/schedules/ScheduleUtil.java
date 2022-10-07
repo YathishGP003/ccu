@@ -172,9 +172,9 @@ public class ScheduleUtil {
         return false;
     }
     
-    public static boolean isAnyZoneOccupied(Map<String, OccupancyData> equipOccupancy) {
+    public static boolean isAnyZoneOccupiedOrAutoAway(Map<String, OccupancyData> equipOccupancy) {
         for (OccupancyData occupancyData : equipOccupancy.values()) {
-            if (occupancyData.occupancy == OCCUPIED) {
+            if (occupancyData.occupancy == OCCUPIED || occupancyData.occupancy == AUTOAWAY) {
                 return true;
             }
         }
@@ -192,7 +192,7 @@ public class ScheduleUtil {
             }
             Occupied occ = (Occupied) occEntry.getValue();
             //CcuLog.i(TAG_CCU_SCHEDULER, " Occupied for "+roomRef+" "+occ.toString());
-            if (occ.isOccupied() && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)) {
+            if (occ.isOccupied()/* && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)*/) {
                 Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
                 if (currOccupied == null || occDay.getEthh() > currOccupied.getCurrentlyOccupiedSchedule().getEthh()
                     || (occDay.getEthh() == currOccupied.getCurrentlyOccupiedSchedule().getEthh() &&
@@ -448,12 +448,21 @@ public class ScheduleUtil {
     }
     
     public static void resetOccupancyDetection(CCUHsApi hayStack, String equipRef) {
+        setOccupancyDetection(hayStack, equipRef, false);
+    }
+
+    public static void setOccupancyDetection(CCUHsApi hayStack, String equipRef, boolean occupancy) {
         HashMap<Object, Object> occupancyDetection = hayStack.readEntity(
-            "occupancy and detection and equipRef  == \"" + equipRef + "\"");
+                "occupancy and detection and equipRef  == \"" + equipRef + "\"");
         if (!occupancyDetection.isEmpty()) {
-            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), 0.0);
+            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), occupancy ? 1.0 : 0);
         } else {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupancy detection does not exist for "+equipRef);
         }
+    }
+
+    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
+        return hayStack.readHisValByQuery("point and occupancy and state and " +
+                            "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
     }
 }

@@ -331,15 +331,14 @@ public class ScheduleUtil {
                                                                            "temp and equipRef == \"" + equipId + "\"");
         HashMap<Object, Object> heatDT = CCUHsApi.getInstance().read("point and desired and heating and " +
                                                                      "temp and equipRef == \"" + equipId + "\"");
-        //HashMap averageDT =CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
+        HashMap averageDT =CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
         
         CCUHsApi.getInstance().clearPointArrayLevel(coolDT.get("id").toString(), level, false);
         CCUHsApi.getInstance().clearPointArrayLevel(heatDT.get("id").toString(), level, false);
         
-        /*if (!averageDT.isEmpty()) {
-            CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        if (!averageDT.isEmpty()) {
+            CCUHsApi.getInstance().clearPointArrayLevel(averageDT.get("id").toString(), level, false);
         }
-        systemOccupancy = UNOCCUPIED; */
     }
     public static long getSystemTemporaryHoldExpiry() {
         long thExpiry = 0;

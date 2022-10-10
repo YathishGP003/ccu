@@ -139,6 +139,10 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 .subscribe({ viewState -> render(viewState) },
                     { error -> handleError(error) })
         )
+
+        if (!viewModel.isProfileConfigured()) {
+            disableTestUI()
+        }
         CcuLog.i("CCU_HYPERSTAT", "View created for Hyperstat Cpu Fragment")
     }
 
@@ -268,16 +272,26 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             analogOut2Test.adapter = adapterTestSignal
             analogOut3Test.adapter = adapterTestSignal
 
-            analogOut1Test.setSelection(0,false)
-            analogOut2Test.setSelection(0,false)
-            analogOut3Test.setSelection(0,false)
+            analogOut1Test.setSelection(0, false)
+            analogOut2Test.setSelection(0, false)
+            analogOut3Test.setSelection(0, false)
             analogOut1Test.setOnItemSelected { sendControl() }
             analogOut2Test.setOnItemSelected { sendControl() }
             analogOut3Test.setOnItemSelected { sendControl() }
-
-        }
+            }
     }
 
+    private fun disableTestUI() {
+        relay1Test.isEnabled = false
+        relay2Test.isEnabled = false
+        relay3Test.isEnabled = false
+        relay4Test.isEnabled = false
+        relay5Test.isEnabled = false
+        relay6Test.isEnabled = false
+        analogOut1Test.isEnabled = false
+        analogOut2Test.isEnabled = false
+        analogOut3Test.isEnabled = false
+    }
     /**
      * Setting all the spinner values
      */
@@ -571,6 +585,11 @@ class HyperStatCpuFragment : BaseDialogFragment() {
 
     @SuppressLint("LogNotTimber")
     private fun sendControl() {
+        if (!viewModel.isProfileConfigured()) {
+            Log.i(L.TAG_CCU_HSCPU,
+                "--------------Hyperstat CPU test signal sendControl: Not Ready")
+            return
+        }
         val testSignalControlMessage: HyperStat.HyperStatControlsMessage_t  = getControlMessage()
         Log.i(L.TAG_CCU_HSCPU,
             "--------------Hyperstat CPU test signal sendControl: ------------------\n" +

@@ -1241,23 +1241,12 @@ public class Pulse
 
 
 	private static void updateOccupancyStatus(RawPoint sp, double val,Device device, short addr){
-
+		CcuLog.i(L.TAG_CCU_SCHEDULER, " updateOccupancyStatus for "+device.getAddr()+" : "+val);
 		double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and enable and occupancy and group == \""+addr+"\"");
-		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
-		if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
-			if(val > 0) {
-				Occupied occupied = ScheduleManager.getInstance().getOccupiedModeCache(device.getRoomRef());
-				if (occupied != null)
-					Log.d("Occupancy", "pulse occupancy sensor22=" + occupied.isOccupied() + "," + occupied.isPreconditioning());
-				if ((occupied != null) && !occupied.isOccupied() && !occupied.isPreconditioning()) {
-					//update desired temp for forced occupied
-					double dt = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and desired and average and sp and equipRef == \"" + device.getEquipRef() + "\"");
-					updateSmartStatDesiredTemp(addr, dt, false);
-				}
-			}
+		if(occuEnabled > 0 && val > 0) { //only if occupancy enabled
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef== \"" + device.getEquipRef() + "\"");
 			if ((occDetPoint != null) && (occDetPoint.size() > 0))
-				CCUHsApi.getInstance().writeHisValById(occDetPoint.get("id").toString(),val);
+				CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occDetPoint.get("id").toString(),val);
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
 		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);

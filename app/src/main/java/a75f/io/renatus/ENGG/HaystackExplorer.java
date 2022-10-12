@@ -24,11 +24,14 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -40,6 +43,10 @@ import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+
 public class HaystackExplorer extends Fragment
 {
     ExpandableListView            expandableListView;
@@ -50,6 +57,7 @@ public class HaystackExplorer extends Fragment
     
     HashMap<String, String> tunerMap = new HashMap();
     HashMap<String, String> equipMap = new HashMap();
+    HashMap<String, String> scheduleMap = new HashMap();
     int lastExpandedPosition;
 
     // require pass code for environments QA and up.
@@ -263,6 +271,19 @@ public class HaystackExplorer extends Fragment
         tunerMap.clear();
         expandableListDetail.clear();
         equipMap.clear();
+
+
+        HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special");
+        List<String> schedulesList = new ArrayList<>();
+        Iterator it = buildingSchedulesGrid.iterator();
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
+            schedulesList.add(new Schedule.Builder().setHDict(r).build().toString());
+            scheduleMap.put(r.get("dis").toString(), r.get("id").toString());
+        }
+
+        expandableListDetail.put("Building Schedule", schedulesList);
+
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
@@ -307,40 +328,36 @@ public class HaystackExplorer extends Fragment
     
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("writable"))
-            {
-                ArrayList values = hayStack.readPoint(id);
-                if (values != null && values.size() > 0)
-                {
-                    for (int l = 1; l <= values.size(); l++)
-                    {
-                        HashMap valMap = ((HashMap) values.get(l - 1));
-                        System.out.println(valMap);
-                        if (valMap.get("val") != null)
-                        {
-                            try
-                            {
+        try {
+            Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+            for (String marker : p.getMarkers()) {
+                if (marker.equals("writable")) {
+                    ArrayList values = hayStack.readPoint(id);
+                    if (values != null && values.size() > 0) {
+                        for (int l = 1; l <= values.size(); l++) {
+                            HashMap valMap = ((HashMap) values.get(l - 1));
+                            System.out.println(valMap);
+                            if (valMap.get("val") != null) {
                                 return Double.parseDouble(valMap.get("val").toString());
-                            }catch (Exception e) {
-                                return 0;
                             }
                         }
                     }
                 }
             }
-        }
-    
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("his"))
+            for (String marker : p.getMarkers())
             {
-                return hayStack.readHisValById(p.getId());
+                if (marker.equals("his"))
+                {
+                    return hayStack.readHisValById(p.getId());
+                }
             }
+
+        } catch (Exception e) {
+            return 0;
         }
-        
+
+    
+
         return 0;
     }
     

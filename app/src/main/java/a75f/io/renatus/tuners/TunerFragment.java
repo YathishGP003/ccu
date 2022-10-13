@@ -53,12 +53,16 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -256,6 +260,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
             String changeReason = editChangeReason.getText().toString();
             if (updatedTunerValues.size() <= 0){
+                return;
+            }
+
+            if (!validateTunersForLimitsViolation(CCUHsApi.getInstance())) {
+                Toast.makeText(getActivity(), "Updated deadband violates the building limits. " +
+                                "Please change building limits from Installer Options to accommodate higher deadbands.",
+                        Toast.LENGTH_LONG).show();
                 return;
             }
             saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
@@ -728,6 +739,15 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void itemClicked(HashMap item, int position) {
+
+        if (HSUtil.isBuildingLimitPoint(item.get("id").toString(), CCUHsApi.getInstance())) {
+            Toast.makeText(getContext(),
+                    "Building limits can be edited only from Installer Options Screen ",
+                    Toast.LENGTH_LONG )
+                    .show();
+            return;
+        }
+
         if(childSelected == -1) {
             childSelected = position;
             Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
@@ -740,6 +760,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             } else if (radioButtonModule.isChecked()) {
                 tunerGroupType = "Module";
             }
+
             DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
             tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
             showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
@@ -837,5 +858,68 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         if (updatedTunerValues != null && updatedTunerValues.size() > 0){
             updatedTunerValues.remove(item);
         }
+    }
+
+    //Should be moved to ViewModel
+    private boolean validateTunersForLimitsViolation(CCUHsApi hayStack) {
+
+        String tunerEquipRef = hayStack.readEntity("tuner and equip").get("id").toString();
+        double coolingDbVal = TunerUtil.getCoolingDeadband(tunerEquipRef);
+        double heatingDbVal = TunerUtil.getHeatingDeadband(tunerEquipRef);
+        boolean deadBandUpdated = false;
+        //Multiple deadband tuners might have changed in a single update.
+        //Iterate through all the updates and find highest values for cooling and heating deadbands.
+        for (Map<Object, Object> updatedTuner : updatedTunerValues) {
+            Object id = updatedTuner.get("id");
+            Object val = updatedTuner.get("newValue");
+            Object level = updatedTuner.get("newLevel");
+
+            if (id != null && val != null && level != null) {
+                if (Integer.parseInt(level.toString()) == 16) {
+                    Point updatedPoint = new Point.Builder()
+                                    .setHashMap(hayStack.readMapById(id.toString())).build();
+
+                    if (updatedPoint.getMarkers().contains("deadband")
+                            && updatedPoint.getMarkers().contains("base")) {
+
+                        double pointVal = Double.parseDouble(val.toString());
+                        if ((updatedPoint.getMarkers().contains("cooling") && pointVal > coolingDbVal)
+                                || (updatedPoint.getMarkers().contains("heating") && pointVal > heatingDbVal)) {
+                            if (updatedPoint.getMarkers().contains("cooling")) {
+                                coolingDbVal = pointVal;
+                                deadBandUpdated = true;
+                            } else if (updatedPoint.getMarkers().contains("heating")) {
+                                heatingDbVal = pointVal;
+                                deadBandUpdated = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_TUNER, " checkLimitsWithUpdatedDeadBand "+deadBandUpdated+" : " +coolingDbVal+" "+heatingDbVal);
+        if (deadBandUpdated && !checkLimitsWithUpdatedDeadBand(coolingDbVal, heatingDbVal)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean checkLimitsWithUpdatedDeadBand(double coolingDb, double heatingDb) {
+        double deadbandSum = coolingDb + heatingDb;
+        BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
+        if ((buildingTuner.getMaxCoolingUserLimit() - buildingTuner.getMaxHeatingUserLimit()) >= deadbandSum
+                && (buildingTuner.getMaxCoolingUserLimit() - buildingTuner.getMinCoolingUserLimit()) >= coolingDb
+                && (buildingTuner.getMinCoolingUserLimit() - buildingTuner.getMinHeatingUserLimit()) >= deadbandSum
+                && (buildingTuner.getMaxHeatingUserLimit() - buildingTuner.getMinHeatingUserLimit()) >= heatingDb) {
+            return true;
+        }
+        CcuLog.d(L.TAG_CCU_TUNER, " checkLimitsWithUpdatedDeadBand Failed!! "+" coolingDb "+coolingDb
+               +" heatingDb "+heatingDb+" getMaxCoolingUserLimit "+buildingTuner.getMaxCoolingUserLimit()
+                +" getMinCoolingUserLimit "+buildingTuner.getMinCoolingUserLimit()
+                +" getMaxHeatingUserLimit "+buildingTuner.getMaxHeatingUserLimit()
+                +" getMinHeatingUserLimit "+buildingTuner.getMinHeatingUserLimit()
+                );
+        return false;
     }
 }

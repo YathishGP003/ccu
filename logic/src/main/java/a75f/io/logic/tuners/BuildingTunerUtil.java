@@ -135,5 +135,4 @@ class BuildingTunerUtil {
         }
         return false;
     }
-    
 }

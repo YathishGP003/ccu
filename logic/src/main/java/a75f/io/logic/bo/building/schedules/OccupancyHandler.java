@@ -1,8 +1,13 @@
 package a75f.io.logic.bo.building.schedules;
 
+import java.util.Map;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.EmergencyConditioning;
@@ -97,5 +102,23 @@ public class OccupancyHandler implements Occupiable {
             return UnoccupiedTrigger.Vacation;
         }
         return UnoccupiedTrigger.Unoccupied;
+    }
+
+    /**
+     * Do clean up while transitioning from Unoccupied -> occupied
+     */
+    public void prepareOccupied() {
+
+    }
+
+    /**
+     * Do clean up while transitioning from occupied -> unoccupied
+     */
+    public void prepareUnoccupied() {
+        Map<Object, Object> forcedOccupiedLevel = ScheduleUtil.getForcedOccupiedLevel(equipRef);
+        if (forcedOccupiedLevel != null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Clear forced occupied "+forcedOccupiedLevel);
+            ScheduleUtil.clearTempOverrideAtLevel(equipRef, HayStackConstants.FORCE_OVERRIDE_LEVEL);
+        }
     }
 }

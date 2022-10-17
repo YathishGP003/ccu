@@ -53,6 +53,11 @@ public class EquipOccupancyHandler {
     public void updateOccupancy() {
         Occupied scheduleOccupancy = ScheduleUtil.getOccupied(equipRef);
         scheduleOccupied = scheduleOccupancy != null ? scheduleOccupancy.isOccupied() : false;
+        Occupancy currentOccupancy = occupancyUtil.getCurrentOccupiedMode();
+        if (currentOccupancy == Occupancy.OCCUPIED && !scheduleOccupied) {
+            occupancyHandler.prepareUnoccupied();
+        }
+
         if (scheduleOccupied) {
             occupiedTrigger = occupancyHandler.getOccupiedTrigger();
             updatedOccupancy = occupiedTrigger.toOccupancy();
@@ -138,4 +143,5 @@ public class EquipOccupancyHandler {
             }
         }
     }
+
 }

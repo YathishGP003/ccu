@@ -155,12 +155,12 @@ public class DabProfile extends ZoneProfile
             if (state != DEADBAND) {
                 state = DEADBAND;
             }
-            if (systemMode == SystemMode.OFF) {
-               damperOpController.reset();
-            } else if (prevState == COOLING) {
+            if (prevState == COOLING && conditioning == SystemController.State.COOLING) {
                 damperOpController.updateControlVariable(roomTemp, setTempCooling);
-            } else if (prevState == HEATING) {
+            } else if (prevState == HEATING && conditioning == SystemController.State.HEATING) {
                 damperOpController.updateControlVariable(setTempHeating, roomTemp);
+            } else {
+                damperOpController.reset();
             }
         }
         damperOpController.dump();

@@ -406,6 +406,11 @@ public class CCUHsApi
         }
     }
 
+    public void updateZoneLocally(Zone z, String id)
+    {
+        tagsDb.updateZone(z, id);
+    }
+
     /**
      * Helper method that converts HGrid to an Array of Hashmap of String.
      * This should be replaced with parameterized reallAllEntities call.

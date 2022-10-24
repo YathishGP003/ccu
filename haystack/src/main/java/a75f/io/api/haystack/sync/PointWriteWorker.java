@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -72,32 +73,37 @@ public class PointWriteWorker extends Worker {
     }
     
     private boolean sendPointArrayBatch(HGrid pointGrid) {
-        
-        ArrayList<HDict> pointValList = new ArrayList<>();
-        Iterator iterator = pointGrid.iterator();
-        
-        while (iterator.hasNext()) {
-            HDict pointDict = (HDict) iterator.next();
-            String pointId = pointDict.get(Tags.ID).toString();
-            if (!syncStatusService.hasEntitySynced(pointId)) {
-                continue;
+
+        if (CCUHsApi.getInstance().getAuthorised()) {
+            ArrayList<HDict> pointValList = new ArrayList<>();
+            Iterator iterator = pointGrid.iterator();
+
+            while (iterator.hasNext()) {
+                HDict pointDict = (HDict) iterator.next();
+                String pointId = pointDict.get(Tags.ID).toString();
+                if (!syncStatusService.hasEntitySynced(pointId)) {
+                    continue;
+                }
+                ArrayList<HDict> valDictList = PointWriteUtil.getWriteArrDict(pointDict.get(Tags.ID).toString());
+                if (valDictList.size() > 0) {
+                    pointValList.addAll(valDictList);
+                }
             }
-            ArrayList<HDict> valDictList = PointWriteUtil.getWriteArrDict(pointDict.get(Tags.ID).toString());
-            if (valDictList.size() > 0) {
-                pointValList.addAll(valDictList);
+            if (pointValList.size() > 0) {
+                HGrid gridData = HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[0]));
+                EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_POINT_WRITE_MANY,
+                        HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
+                if (response.getRespCode() >= 400) {
+                    CCUHsApi.getInstance().setAuthorised(false);
+                }
+                if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {
+                    return true;
+                } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                    EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
+                }
+                return response != null;
             }
-        }
-        if (pointValList.size() > 0) {
-            HGrid gridData = HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[0]));
-            EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl()+ENDPOINT_POINT_WRITE_MANY,
-                                                   HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
-            
-            if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {
-                return true;
-            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
-                EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
-            }
-            return response != null;
+            return true;
         }
         return true;
     }

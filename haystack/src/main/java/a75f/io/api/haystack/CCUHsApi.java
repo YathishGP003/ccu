@@ -177,6 +177,18 @@ public class CCUHsApi
         );
     }
 
+    public void setAuthorised(boolean isAuthorised) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isAuthorised", isAuthorised);
+        editor.apply();
+    }
+
+    public boolean getAuthorised(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("isAuthorised",true);
+    }
+
     public String getJwt() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString("token","");
@@ -186,7 +198,7 @@ public class CCUHsApi
     public void setJwt(String jwtToken) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("token", jwtToken);
+        editor.putString("token", jwtToken + "jhkjh");
         editor.commit();
     }
 

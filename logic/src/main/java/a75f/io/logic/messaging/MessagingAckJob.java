@@ -12,7 +12,6 @@ public class MessagingAckJob {
     private final MessagingService messagingService;
 
     private int emptyMessageWatchdogCounter;
-
     public MessagingAckJob(String ccuId, String messagingUrl, String bearerToken) {
         this.ccuId = ccuId;
 
@@ -37,7 +36,6 @@ public class MessagingAckJob {
      */
     public void doJob() {
         CcuLog.d(L.TAG_CCU_MESSAGING, "Doing Ack Job");
-
         if (!MessagingClient.getInstance().isSubscribed()) {
             CcuLog.d(L.TAG_CCU_MESSAGING, "Not subscribed , reset connection");
             MessagingClient.getInstance().resetMessagingConnection();

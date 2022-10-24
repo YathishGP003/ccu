@@ -41,6 +41,10 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+
 public class HaystackExplorer extends Fragment
 {
     ExpandableListView            expandableListView;

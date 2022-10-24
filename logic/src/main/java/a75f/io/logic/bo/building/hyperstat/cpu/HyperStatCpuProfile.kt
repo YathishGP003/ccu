@@ -555,7 +555,6 @@ class HyperStatCpuProfile : ZoneProfile() {
         Log.i(TAG, "Current Mode handleRelayState: $currentOperatingMode")
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
-
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                     &&( basicSettings.fanMode != StandaloneFanStage.OFF)) {
@@ -565,7 +564,6 @@ class HyperStatCpuProfile : ZoneProfile() {
                 }
             }
             (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
-
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                     &&(basicSettings.fanMode != StandaloneFanStage.OFF)
@@ -948,7 +946,6 @@ class HyperStatCpuProfile : ZoneProfile() {
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
-
                 if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
                     basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                     &&(basicSettings.fanMode != StandaloneFanStage.OFF)

@@ -1,57 +1,59 @@
- - Merged PR 4773: Restart messaging client on connection closure
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/samjith/13319_messaging_descrepency
- - Merged PR 4893: Avoid running cooling and heating loops at the same time
- - Merged PR 4956: CCU crash
- - Merged PR 4901: Autoaway setback tuners added
- - Merged PR 4593: Restricted zone name to 25 characters
- - Merged PR 4919: Fixed priority value discrepancy for occupancy
- - Merged PR 4422: Added group tag for few points in smartStat profile
- - Merge master
- - Merge master
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/Amaresh/10405_Add_group_tag_for_smartStat
- - Merged PR 4561: Added "dcwb" tags for DCWB profile points
- - Merged PR 4709: Scheduler correction to 24 hours in CCU
- - Merged PR 4860: Show special schedule status in zone screen
- - Merged PR 4885: TI profile reconfiguration support
- - Merged PR 4942: Misspelled word correction
- - Merged PR 4366: 11115: CCU: fanControlOnFixedTimeDelay tuner point Default value not written.
- - Merged PR 4618: Named schedule temp limits reverted to original logic. this was side affect h...
- - Merged PR 4778: Restricting to create special schedule for 7 days in open calendar year
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
- - Merged PR 4896: 13897- App crash issue with special schedule if it is created for the last ho...
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/jtheertha/13897-CCU_app-crash
- - Merged PR 4420: Bug 12507: CCU : Modbus : Heartbeat values shows device as OFFLINE but actual...
- - Remove connection reset on sse closure Implement 60 minuts watchdog.
- - Merged PR 4807: Bug 13551: CCU: Celsius Support: Discrepancy in Deadband values
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
- - 12939-fix
- - Merged PR 4296: Added restriction for Min CFM Cooling/Reheating range
- - round to half replaced with Mth.round
- - all issues resolved
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
- - Disable connection reset while offline
- - Merge branch 'master' into Bug/samjith/13319_messaging_descrepency
- - 13897- App crash issue with special schedule if it is created for the last hour of the day
- - 13897- App crash issue with special schedule if it is created for the last hour of the day
- - Messaging reinit
- - Merged PR 4887: 13881 -  named schedule issue fix
- - Avoid running cooling and heating loops at the same time
- - 13881 -  named schedule issue fix for corner case
- - all issues resolved
- - 13881 -  named schedule issue fix
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
- - 13574 - Modified with the latest requirement.
- - Merged PR 4830: Resolved crash issue when user selects any of the Floor Zone screen.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
- - Merged PR 4800: Added fan check for conditioning
- - Merged PR 4810: Adjusted Range Bar to show the proper desired temps and limits
+ - Merged PR 5275: Remove patches and update version
+ - Remove patches and update version
+ - Merged PR 5077: Objectbox trimming during app start up
+ - Merged PR 5105: Disable ventillation during AutoAway
+ - Merged PR 5064: Added Equipment Status on BPOS for Humidifier and Dehumidifier
+ - Merged PR 5052: Bug 14179: CCU: Time unit based tuners are converting to Fahernheit when Celsius toggle is Enabled
+ - Update SmartStat occupancy detection logic Publish System occupancy during vacation
+ - Merged PR 5130: Remove forced occupied handling for modbus equips
+ - Merged PR 5106: HSCPU: Disable test UI if pairing is not completed
+ - Merged PR 5129: Hidden Menu option to view and delete duplicate building schedule
+ - Merged PR 4777: Now showing site entity fm email instead of ccu fm email
+ - System status to show occupied during autoaway
+ - Version bump to 1.644.0
+ - Merged PR 5171: CCU build verification -1
+ - Merged PR 5169: Added space
+ - Added space
+ - Version bump to 1.643.0
+ - Fix duplicate detection point creation in smartstat FCU profiles
+ - Merged PR 5143: Release test
+ - Version bump to 1.642.0
+ - Version bump to 1.641.0
+ - Remove forced occupied handling for modbus equips
+ - AutforcedOccupied should consider next occupied temp
+ - Version bump to 1.640.0
+ - Version bump to 1.639.0
+ - Version bump to 1.638.0
+ - Version bump to 1.637.0
+ - Version bump to 1.636.0
+ - Log upload from CCU
+ - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
+ - Version bump to 1.635.0
+ - Version bump to 1.634.0
+ - Version bump to 1.633.0
+ - Version bump to 1.632.0
+ - Version bump to 1.631.0
+ - Merged PR 5059: Rebranding BPOS to OTN
+ - Version bump to 1.630.0
+ - Remove vacation check for triggering AutoForcedOccupied
+ - WIP
+ - Merged PR 4848: Bug 10703: CCU: Temporary Override UI discrepancy.
+ - updated toast message
+ - Merged PR 4952: Fixed status msg for both zone and system frags
+ - Disable ventillation during AutoAway
+ - HSCPU: Disable test UI if pairing is not completed
+ - UI to remove duplicate building schedule
+ - Objectbox trimming during app start up
+ - Merged PR 4949: implemented Toast message to notify primary CCU upgrade for celsius feature.
+ - Bug 14179: CCU: Time unit based tuners are converting to Fahernheit when Celsius toggle is Enabled
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 4908: Null check for equips without occupancyData
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Null check for equips without occupancyData
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Bug 13432: CCU : CELSIUS SUPPORT : UI discrepancies after Celsius toggle is Enabled
+ - Bug 13432: CCU : CELSIUS SUPPORT : UI discrepancies after Celsius toggle is Enabled
  - Bug 10703: CCU: Temporary Override UI discrepancy.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath_13551_inconsistent_round_off
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/13574-seven_days_special_schedule
- - Bug 13551: CCU: Celsius Support: Discrepancy in Deadband values
- - Restricting to create special schedule for 7 days in open calendar year
- - Restart messaging client on connection closure
- - Comments resolved
- - Added group tag for few points in smartStat profile
- - Bug 12507: CCU : Modbus : Heartbeat values shows device as OFFLINE but actually device is ONLINE and fetching values from Modbus device

@@ -42,6 +42,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -59,6 +61,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.pubnub.IntrinsicScheduleListener;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -86,7 +89,9 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -904,7 +909,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
-					occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
+					if (isCelsiusTunerAvailableStatus()) {
+						occupancyStatus.setText(StatusCelsiusVal(ScheduleManager.getInstance().getSystemStatusString()));
+					} else {
+						occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
+					}
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 					tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);

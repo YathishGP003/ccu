@@ -117,7 +117,7 @@
         <item>  Fan Stage 4 </item>
         <item>  Fan Stage 5 </item>
         <item>  Humidifier </item>
-        <item>  De Humidifier </item>
+        <item>  Dehumidifier </item>
 
 
     </string-array>
@@ -1069,12 +1069,12 @@
     <string name="auto_force_occupy">Auto Force Occupied</string>
     <string name="auto_away">Auto Away</string>
 
-    <string name="textbpos">BPOS</string>
-    <string name="descbpos">Battery Power Occupancy Sensor</string>
-    <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
+    <string name="textotn">OTN</string>
+    <string name="descotn">Occupancy and Temperature Node</string>
+    <string name="title_otn">OTN | SELECT MODULE TYPE</string>
     <string name="autoforceoccupied">Auto Force Occupied</string>
     <string name="autoaway">Auto Away</string>
-    <string-array name="zone_priority_bpos">
+    <string-array name="zone_priority_otn">
         <item>Normal</item>
         <item>No Priority</item>
         <item>Low</item>

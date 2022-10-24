@@ -112,8 +112,6 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
 				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
-                CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
-                                "equipRef == \"" + cpuEquip.getId() + "\"", 0.0);
                 continue;
             }
 			setTempCooling = cpuDevice.getDesiredTempCooling();
@@ -166,12 +164,6 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", fanModeSaved);
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
-            }
-
-            if(occuStatus != null){
-                cpuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                cpuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
             double targetThreshold = 25.0;
 

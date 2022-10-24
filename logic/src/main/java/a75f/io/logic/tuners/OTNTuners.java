@@ -11,24 +11,24 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 
-public class BPOSTuners {
+public class OTNTuners {
 
-    public static void addDefaultBPOSTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
-                                          String tz) {
-        HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and bpos");
+    public static void addDefaultOTNTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
+                                           String tz) {
+        HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and otn");
         if (tuner != null && tuner.size() > 0) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Default BPOS Tuner points already exist");
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Default OTN Tuner points already exist");
             return;
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM,"Default BPOS Tuner  does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Default OTN Tuner  does not exist. Create Now");
         Point zonePrioritySpread = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"zonePrioritySpread")
+                .setDisplayName(equipDis+"-OTN-"+"zonePrioritySpread")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
@@ -36,13 +36,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
 
         Point zonePriorityMultiplier = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"zonePriorityMultiplier")
+                .setDisplayName(equipDis+"-OTN-"+"zonePriorityMultiplier")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -50,13 +50,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
 
         Point coolingDb = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"coolingDeadband")
+                .setDisplayName(equipDis+"-OTN-"+"coolingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -66,13 +66,13 @@ public class BPOSTuners {
 
 
         Point heatingDb = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"heatingDeadband")
+                .setDisplayName(equipDis+"-OTN-"+"heatingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his").addMarker("system")
                 .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -81,13 +81,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
 
         Point propGain = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"proportionalKFactor ")
+                .setDisplayName(equipDis+"-OTN-"+"proportionalKFactor ")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("pgain").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String pgainId = hayStack.addPoint(propGain);
@@ -95,13 +95,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
 
         Point integralGain = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"integralKFactor ")
+                .setDisplayName(equipDis+"-OTN-"+"integralKFactor ")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("igain").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String igainId = hayStack.addPoint(integralGain);
@@ -109,13 +109,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
 
         Point propSpread = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"temperatureProportionalRange ")
+                .setDisplayName(equipDis+"-OTN-"+"temperatureProportionalRange ")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable")
                 .addMarker("his")
                 .addMarker("pspread").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String pSpreadId = hayStack.addPoint(propSpread);
@@ -123,13 +123,13 @@ public class BPOSTuners {
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
 
         Point integralTimeout = new Point.Builder()
-                .setDisplayName(equipDis+"-BPOS-"+"temperatureIntegralTime ")
+                .setDisplayName(equipDis+"-OTN-"+"temperatureIntegralTime ")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("default").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("default").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("itimeout").addMarker("sp")
                 .setUnit("m")
-                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
@@ -152,9 +152,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
@@ -168,9 +168,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -184,9 +184,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .setUnit("\u00B0F")
                 .build();
@@ -201,9 +201,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("zone").addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz)
                 .setUnit("\u00B0F")
                 .build();
@@ -218,8 +218,8 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
-                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .addMarker("zone").addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
+                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .addMarker("pgain").addMarker("sp")
                 .setTz(tz)
                 .build();
@@ -234,8 +234,8 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
-                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .addMarker("zone").addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
+                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .addMarker("igain").addMarker("sp")
                 .setTz(tz)
                 .build();
@@ -250,9 +250,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
+                .addMarker("zone").addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
                 .addMarker("pspread").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setTz(tz).setUnit(Units.FAHRENHEIT)
                 .build();
         String pSpreadId = hayStack.addPoint(propSpread);
@@ -266,9 +266,9 @@ public class BPOSTuners {
                 .setEquipRef(equipref)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("bpos").addMarker("writable").addMarker("his")
-                .addMarker("itimeout").addMarker("sp").addMarker("zone")
-                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.BPOS_TUNER_GROUP)
+                .addMarker("tuner").addMarker("otn").addMarker("writable").addMarker("his")
+                .addMarker("timeout").addMarker("sp").addMarker("zone")
+                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OTN_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();

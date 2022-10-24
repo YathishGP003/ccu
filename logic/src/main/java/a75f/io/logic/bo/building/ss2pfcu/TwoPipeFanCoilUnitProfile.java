@@ -105,7 +105,6 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
-                twoPfcuDevice.setProfilePoint("occupancy and mode", Occupancy.UNOCCUPIED.ordinal());
                 continue;
 
             }
@@ -179,11 +178,6 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }else{
                 resetRelays(twoPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
 
-            }
-            if(occuStatus != null){
-                twoPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                twoPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
         }
 

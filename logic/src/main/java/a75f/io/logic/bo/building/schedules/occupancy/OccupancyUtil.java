@@ -52,6 +52,9 @@ public class OccupancyUtil {
             // '0' value for occupancy detection, means it has been reset due to a state change (
             // as in occupied ->
             // unoccupied)
+            if (hisItem != null) {
+                CcuLog.i(L.TAG_CCU_SCHEDULER, "lastOccupancy detection " + hisItem);
+            }
             return (hisItem == null || hisItem.getVal() == 0) ? null : hisItem.getDate();
         }
         return null;

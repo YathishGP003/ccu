@@ -71,7 +71,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.bpos.BPOSUtil;
+import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
@@ -121,6 +121,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -406,35 +407,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 }
             }
         }
-    }
-
-    public String StatusCelsiusVal(String temp)
-    {
-            String s = "";
-            ArrayList<Double> myDoubles = new ArrayList<Double>();
-            Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
-
-            Pattern p = Pattern.compile("[a-zA-Z]+");
-            Matcher m1 = p.matcher(temp);
-            while (m1.find()) {
-                s = s + m1.group() + " ";
-            }
-
-            while (matcher.find()) {
-                double element = Double.parseDouble(matcher.group());
-                myDoubles.add(Math.abs(element));
-            }
-            if (myDoubles.size() > 0) {
-                try {
-                    return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return temp;
-                }
-            } else {
-                return temp;
-            }
-
     }
 
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
@@ -729,7 +701,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 String profileDualDuct = "DUAL_DUCT";
                 String profileModBus = "MODBUS";
                 String profileHyperStatSense = "HYPERSTAT_SENSE";
-                String profilebpos = "BPOS";
+                String profileOTN = "OTN";
 
                 boolean tempModule = false;
                 boolean nontempModule = false;
@@ -744,7 +716,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             profileType.contains(profileTempInfluence) ||
                             profileType.contains(profileDualDuct) ||
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
-                            profileType.contains(profilebpos)||
+                            profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())
                     ) {
                         tempModule = true;
@@ -1411,10 +1383,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
-                            if (p.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
-                                HashMap bpospoints = BPOSUtil.getbposPoints(p.getId());
-                                Log.i("PointsValue", "BPOS Points:" + bpospoints.toString());
-                                loadBPOSPointsUI(bpospoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            if (p.getProfile().equalsIgnoreCase(ProfileType.OTN.toString())) {
+                                HashMap otnPoints = OTNUtil.getOTNPoints(p.getId());
+                                Log.i("PointsValue", "OTN Points:" + otnPoints.toString());
+                                loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
@@ -1855,10 +1827,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
-            if (updatedEquip.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
-                HashMap bposPoints = BPOSUtil.getbposPoints(updatedEquip.getId());
-                Log.i("PointsValue", "BPOS Points:" + bposPoints.toString());
-                loadBPOSPointsUI(bposPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            if (updatedEquip.getProfile().equalsIgnoreCase(ProfileType.OTN.toString())) {
+                HashMap otnPoints = OTNUtil.getOTNPoints(updatedEquip.getId());
+                Log.i("PointsValue", "OTN Points:" + otnPoints.toString());
+                loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 HashMap cpuEquipPoints = ZoneViewData.getHyperstatCPUEquipPoints(updatedEquip);
@@ -4040,14 +4012,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         });
     }
 
-    private void loadBPOSPointsUI(HashMap point, LayoutInflater inflater,
-                                  LinearLayout linearLayoutZonePoints,
-                                  String nodeAddress) {
+    private void loadOTNPointsUI(HashMap point, LayoutInflater inflater,
+                                 LinearLayout linearLayoutZonePoints,
+                                 String nodeAddress) {
 
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.bpos_zone_ui, null);
+        View viewPointRow1 = inflater.inflate(R.layout.otn_zone_ui, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
@@ -4062,7 +4034,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-        Log.d("BPOSUtil","Status="+point.get("Status").toString() +
+        Log.d("OTNUtil","Status="+point.get("Status").toString() +
                 "humidity ="+point.get("humidity").toString() +
                 "forceoccupied" + point.get("forceoccupied"));
 

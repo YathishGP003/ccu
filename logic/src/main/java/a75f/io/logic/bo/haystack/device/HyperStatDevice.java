@@ -140,7 +140,7 @@ public class HyperStatDevice {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .addMarker("sensor").addMarker("his")
-                    .setUnit("Ohm")
+                    .setUnit("Kilo Ohm")
                     .setTz(tz)
                     .build();
         
@@ -153,7 +153,7 @@ public class HyperStatDevice {
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .addMarker("sensor").addMarker("his")
-                    .setUnit("Ohm")
+                    .setUnit("Kilo Ohm")
                     .setTz(tz)
                     .build();
         

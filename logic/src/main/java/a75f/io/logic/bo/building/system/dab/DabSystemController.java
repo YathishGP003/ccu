@@ -124,7 +124,7 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("equip and zone and (dab or dualDuct or " +
-                                                                            "ti or bpos)");
+                                                                            "ti or otn)");
     
         updateSystemTempHumidity(allEquips);
         
@@ -230,7 +230,7 @@ public class DabSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
             if (isZoneDead(equip)) {
                 zoneDeadCount++;
@@ -699,11 +699,11 @@ public class DabSystemController extends SystemController
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
-                    equip.getMarkers().contains("bpos") || equip.getMarkers().contains("ti")) {
+                    equip.getMarkers().contains("otn") || equip.getMarkers().contains("ti")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                         "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;

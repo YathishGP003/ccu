@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -544,6 +545,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0);
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
+                        value = value * 0.01;
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");
@@ -1063,11 +1065,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return true;
                 }
                 int enteredOhms = Integer.parseInt(etThermistor.getText().toString());
+                enteredOhms = enteredOhms * 1000;
                 if (enteredOhms >= 190 && enteredOhms <= 85387) {
                     InputMethodManager mgr = (InputMethodManager)mActivity
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     mgr.hideSoftInputFromWindow(etThermistor.getWindowToken(), 0);
-                    Toast.makeText(mActivity, "Overriding Thermistor value..." + enteredOhms, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity, "Overriding Thermistor value..." + enteredOhms/1000 + " Kilo Ohms", Toast.LENGTH_LONG).show();
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override

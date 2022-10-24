@@ -14,4 +14,7 @@ public interface Occupiable {
     //Trigger that can influence the unoccupied mode.
     UnoccupiedTrigger getUnoccupiedTrigger();
 
+    void prepareOccupied();
+
+    void prepareUnoccupied();
 }

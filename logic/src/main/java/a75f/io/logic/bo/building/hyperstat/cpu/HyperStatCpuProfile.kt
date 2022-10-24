@@ -35,7 +35,7 @@ import java.util.*
  */
 class HyperStatCpuProfile : ZoneProfile() {
 
-    // One zone can have many hyperstat devices.  Each has its own address and equip representation
+    // One zone can have many HyperStat devices.  Each has its own address and equip representation
     private val cpuDeviceMap: MutableMap<Short, HyperStatCpuEquip> = mutableMapOf()
 
     private var coolingLoopOutput = 0

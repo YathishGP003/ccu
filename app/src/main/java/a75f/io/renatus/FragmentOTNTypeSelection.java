@@ -29,11 +29,11 @@ import butterknife.Optional;
  * created by spoorthidev on 3-August-2021
  */
 
-public class FragmentBPOSTypeSelection extends BaseDialogFragment {
+public class FragmentOTNTypeSelection extends BaseDialogFragment {
 
-    public static final String ID = FragmentBPOSTypeSelection.class.getSimpleName();
+    public static final String ID = FragmentOTNTypeSelection.class.getSimpleName();
 
-    @BindView(R.id.rl_bpostempinf)
+    @BindView(R.id.rl_otntempinf)
     View tempinfo;
     Zone mZone;
     short mNodeAddress;
@@ -48,9 +48,9 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
     }
 
 
-    public static FragmentBPOSTypeSelection newInstance(short meshAddress, String roomName,
-                                                        String floorName, boolean isPaired) {
-        FragmentBPOSTypeSelection f = new FragmentBPOSTypeSelection();
+    public static FragmentOTNTypeSelection newInstance(short meshAddress, String roomName,
+                                                       String floorName, boolean isPaired) {
+        FragmentOTNTypeSelection f = new FragmentOTNTypeSelection();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
@@ -64,7 +64,7 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.bpos_typeselection, container, false);
+        View view = inflater.inflate(R.layout.otn_typeselection, container, false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
@@ -75,14 +75,14 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
         return view;
     }
 
-    @OnClick(R.id.rl_bpostempinf)
+    @OnClick(R.id.rl_otntempinf)
     public void Onclicktempinf() {
         if (checkForSingleModule()){
             return;
         }
-        showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
-                mFloorName, ProfileType.BPOS),
-                FragmentBPOSTempInfConfiguration.ID);
+        showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
+                mFloorName, ProfileType.OTN),
+                FragmentOTNTempInfConfiguration.ID);
     }
 
     @Optional
@@ -106,7 +106,7 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
     private boolean checkForSingleModule(){
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
         for (Equip equip: zoneEquips) {
-            if (!equip.getProfile().contains("BPOS")) {
+            if (!equip.getProfile().contains("OTN")) {
                 Toast.makeText(getActivity(), "Unpair all Modules and try", Toast.LENGTH_LONG).show();
                 closeAllBaseDialogFragments();
                 return true;

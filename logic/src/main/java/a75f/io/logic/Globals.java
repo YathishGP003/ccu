@@ -25,7 +25,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.bpos.BPOSProfile;
+import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -230,6 +230,7 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
     }
 
@@ -343,7 +344,6 @@ public class Globals {
                 Watchdog.getInstance().start();
 
                 CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(300);
-                CCUHsApi.getInstance().trimObjectBoxHisStore();
 
             }
         }.start();
@@ -513,10 +513,10 @@ public class Globals {
                             hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(hssense);
                             break;
-                        case BPOS:
-                            BPOSProfile bpos = new BPOSProfile();
-                            bpos.addBPOSEquip(Short.parseShort(eq.getGroup()));
-                            L.ccu().zoneProfiles.add(bpos);
+                        case OTN:
+                            OTNProfile otnProfile = new OTNProfile();
+                            otnProfile.addOTNEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(otnProfile);
                             break;
                         case HYPERSTAT_VRV:
                             VrvProfile vrv = new VrvProfile();

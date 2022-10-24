@@ -254,7 +254,7 @@ public class IntrinsicScheduleCreator {
         ArrayList<HashMap<Object, Object>> equips =
                 CCUHsApi.getInstance().readAllEntities("equip and zone and roomRef ==\"" + room.get("id").toString() + "\"");
         for(HashMap<Object, Object> equip : equips){
-            if(equip.containsKey(Tags.DAB) || equip.containsKey(Tags.DUALDUCT) || equip.containsKey(Tags.BPOS)
+            if(equip.containsKey(Tags.DAB) || equip.containsKey(Tags.DUALDUCT) || equip.containsKey(Tags.OTN)
                     || equip.containsKey(Tags.TI) || equip.containsKey(Tags.VAV)){
                 return true;
             }

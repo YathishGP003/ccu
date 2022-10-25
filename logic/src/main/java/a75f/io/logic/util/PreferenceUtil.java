@@ -35,7 +35,7 @@ public class PreferenceUtil {
     private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
     private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
     private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
-
+    private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
 
     public static void setContext(Context c) {
         context= c;
@@ -285,7 +285,6 @@ public class PreferenceUtil {
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
-
     }
 
     public static boolean getScheduleRefactorMigration() {
@@ -376,4 +375,11 @@ public class PreferenceUtil {
 
     }
 
+    public static boolean getAutoAwaySetBackMigration() {
+        return getBooleanPreference(AUTOAWAYSETBACK);
+    }
+
+    public static void setAutoAwaySetBackMigration() {
+        setBooleanPreference(AUTOAWAYSETBACK, true);
+    }
 }

@@ -358,7 +358,7 @@ private val OpeningRateMin = 0
 private val OpeningRateMax = 200
 
 private val CO2Min = 0
-private val CO2Max = 2000
+private val CO2Max = 4000
 
 private val INC = 10
 

@@ -283,7 +283,7 @@ public class HisSyncHandler
                     .toDict();
 
             EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
-            if (response.getRespCode() >= 400) {
+            if (response.getRespCode() == 401) {
                 CCUHsApi.getInstance().setAuthorised(false);
             }
             CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());

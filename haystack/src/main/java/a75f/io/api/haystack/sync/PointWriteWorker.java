@@ -93,7 +93,7 @@ public class PointWriteWorker extends Worker {
                 HGrid gridData = HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[0]));
                 EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_POINT_WRITE_MANY,
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
-                if (response.getRespCode() >= 400) {
+                if (response.getRespCode() == 401) {
                     CCUHsApi.getInstance().setAuthorised(false);
                 }
                 if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {

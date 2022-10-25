@@ -167,7 +167,7 @@ public class SyncWorker extends Worker {
                     String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
                             HZincWriter.gridToString(gridData));
                     CcuLog.d(TAG, "RemoveEntity Response : " + response);
-                    if (Integer.parseInt(response) >= 400) {
+                    if (Integer.parseInt(response) == 401) {
                         CCUHsApi.getInstance().setAuthorised(false);
                     }
                     if (response == null) {

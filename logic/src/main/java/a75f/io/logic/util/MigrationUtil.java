@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -138,12 +139,11 @@ public class MigrationUtil {
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
         }
+
         if(!PreferenceUtil.getScheduleRefactorMigration()) {
             scheduleRefactorMigration(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefactorMigration();
         }
-
-
 
         if(!PreferenceUtil.getNewOccupancy()){
             Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
@@ -841,7 +841,6 @@ public class MigrationUtil {
         hayStack.scheduleSync();
     }
 
-
     private static void migrateNewOccupancy(CCUHsApi hsApi) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");
         ArrayList<HashMap<Object, Object>> dabEquips = hsApi.readAllEntities("equip and dab and smartnode");
@@ -1108,7 +1107,8 @@ public class MigrationUtil {
             boolean isScheduleTypeNamedSchedule =
                     hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
                             .intValue() == ScheduleType.NAMED.ordinal();
-            if(isScheduleRefZoneSchedule && isScheduleTypeNamedSchedule) {
+
+            if(isScheduleRefZoneSchedule  && isScheduleTypeNamedSchedule) {
                 hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +

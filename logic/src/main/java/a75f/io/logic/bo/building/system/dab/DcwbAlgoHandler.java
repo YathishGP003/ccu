@@ -79,7 +79,7 @@ class DcwbAlgoHandler {
             chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     
             //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
-            if (adaptiveDelta) {
+            if (adaptiveDelta && !AdaptiveDeltaTControlAlgo.Companion.getLinearModeLoop()) {
                 chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
             }
         } else {

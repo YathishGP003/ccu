@@ -376,7 +376,6 @@ public class PreferenceUtil {
 
     }
 
-<<<<<<< HEAD
     public static boolean getAutoAwaySetBackMigration() {
         return getBooleanPreference(AUTOAWAYSETBACK);
     }
@@ -384,7 +383,6 @@ public class PreferenceUtil {
     public static void setAutoAwaySetBackMigration() {
         setBooleanPreference(AUTOAWAYSETBACK, true);
     }
-=======
     public static boolean getHyperStatDeviceDisplayConfigurationPointsMigration() {
         return getBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION);
     }
@@ -394,5 +392,4 @@ public class PreferenceUtil {
 
     }
 
->>>>>>> master
 }

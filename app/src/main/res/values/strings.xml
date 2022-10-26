@@ -1124,6 +1124,11 @@
     <string name="zonepmThreshold">PM 2.5 Threshold</string>
     <string name="zonepmTarget">PM 2.5 Target</string>
 
+    <string name="display_device">DISPLAY IN DEVICE HOME SCREEN</string>
+    <string name="humidity">Humidity</string>
+    <string name="co2">CO2</string>
+    <string name="voc">VOC</string>
+    <string name="p2pm">PM2.5</string>
 
     <string-array name="hyperstate_medium_high_fanmode">
         <item>  Off </item>

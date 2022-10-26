@@ -335,6 +335,27 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
         )
     }
 
+     fun onDisplayHumiditySelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayHumidityEnabled = checked )
+        )
+    }
+     fun onDisplayCo2Selected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayCo2Enabled = checked )
+        )
+    }
+     fun onDisplayVocSelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayVOCEnabled = checked )
+        )
+    }
+     fun onDisplayP2pmSelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayPp2p5Enabled = checked )
+        )
+    }
+
 }
 
 // Dropdown choice value ranges
@@ -571,6 +592,10 @@ data class CpuViewState(
     var zoneVocTargetPos: Int,
     var zonePm2p5ThresholdPos: Int,
     var zonePm2p5TargetPos: Int,
+    var isDisplayHumidityEnabled: Boolean,
+    var isDisplayVOCEnabled: Boolean,
+    var isDisplayPp2p5Enabled: Boolean,
+    var isDisplayCo2Enabled: Boolean,
 
     ) {
 
@@ -601,7 +626,11 @@ data class CpuViewState(
             zoneVocThresholdPos =  vocSetIndexFromValue(config.zoneVOCThreshold),
             zoneVocTargetPos =  vocSetIndexFromValue(config.zoneVOCTarget),
             zonePm2p5ThresholdPos =  pmSetIndexFromValue(config.zonePm2p5Threshold),
-            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target)
+            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target),
+            isDisplayHumidityEnabled = config.displayHumidity,
+            isDisplayCo2Enabled = config.displayCo2,
+            isDisplayVOCEnabled = config.displayVOC,
+            isDisplayPp2p5Enabled = config.displayPp2p5
 
         )
     }
@@ -634,6 +663,10 @@ data class CpuViewState(
             zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
             zonePm2p5Threshold = pm25ValueFromIndex(zonePm2p5ThresholdPos)
             zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
+            displayHumidity = isDisplayHumidityEnabled
+            displayCo2 = isDisplayCo2Enabled
+            displayVOC = isDisplayVOCEnabled
+            displayPp2p5 = isDisplayPp2p5Enabled
         }
     }
 }

@@ -211,6 +211,11 @@ public class MigrationUtil {
             migrateBPOSToOTN(CCUHsApi.getInstance());
             PreferenceUtil.setBPOSToOTNMigration();
         }
+
+        if(!PreferenceUtil.getHyperStatDeviceDisplayConfigurationPointsMigration()){
+            createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHyperStatDeviceDisplayConfigurationPointsMigration();
+        }
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -1209,5 +1214,33 @@ public class MigrationUtil {
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         });
         CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");
+        for (HashMap<Object, Object> rawEquip : equipList) {
+            if(!rawEquip.isEmpty()) {
+                createDeviceConfigurationPoints(haystack);
+            }
+        }
+    }
+    private static void createDeviceConfigurationPoints(CCUHsApi hayStack){
+
+        ArrayList<HashMap<Object, Object>> hyperStatCpus = hayStack.readAllEntities("equip and hyperstat and cpu");
+        hyperStatCpus.forEach( cpuEquip -> {
+            HashMap<Object, Object> deviceDisplayConfigurationPoint = hayStack.readEntity("humidity and enabled and equipRef" +
+                    " == \"" + cpuEquip.get("id") + "\"");
+
+            if (deviceDisplayConfigurationPoint.isEmpty()) {
+                Equip equip1 = new Equip.Builder().setHashMap(cpuEquip).build();
+                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip1, hayStack);
+                hyperStatPointsUtil.createDeviceDisplayConfigurationPoints(true,false,false,true).forEach(
+                        point -> pushPointToHS(hyperStatPointsUtil, point)
+                );
+            }
+        });
+
+
+
     }
 }

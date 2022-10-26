@@ -41,6 +41,11 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var zonePm2p5Threshold = 1000.0
    var zonePm2p5Target = 1000.0
 
+   var displayHumidity = true
+   var displayVOC = false
+   var displayPp2p5 = false
+   var displayCo2 = true
+
    companion object {
       fun default(): HyperStatCpuConfiguration = HyperStatCpuConfiguration()
    }

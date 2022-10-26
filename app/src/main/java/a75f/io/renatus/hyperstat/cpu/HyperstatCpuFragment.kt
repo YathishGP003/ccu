@@ -82,6 +82,11 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     lateinit var zoneVOCTarget: Spinner
     lateinit var zonePMThreshold: Spinner
     lateinit var zonePMTarget: Spinner
+    lateinit var displayHumidity: ToggleButton
+    lateinit var displayVOC: ToggleButton
+    lateinit var displayPp2p5: ToggleButton
+    lateinit var displayCo2: ToggleButton
+
 
 
     /**
@@ -239,6 +244,11 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMThreshold = findViewById(R.id.zonepmThresholdSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
+
+            displayHumidity = findViewById(R.id.humidity)
+            displayCo2 = findViewById(R.id.co2)
+            displayVOC = findViewById(R.id.voc)
+            displayPp2p5 = findViewById(R.id.p2pm)
 
             setButton = findViewById(R.id.setButton)
 
@@ -468,6 +478,24 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         zonePMThreshold.setOnItemSelected { position ->viewModel.zonePmThresholdSelect(position)  }
         zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
 
+        displayHumidity.setOnCheckedChangeListener { _, isChecked ->
+            if(enableDisplay(displayHumidity))
+                viewModel.onDisplayHumiditySelected(isChecked)
+        }
+        displayCo2.setOnCheckedChangeListener { _, isChecked ->
+            if(enableDisplay(displayCo2))
+                viewModel.onDisplayCo2Selected(isChecked)
+
+        }
+        displayVOC.setOnCheckedChangeListener { _, isChecked ->
+            if(enableDisplay(displayVOC))
+                viewModel.onDisplayVocSelected(isChecked)
+        }
+        displayPp2p5.setOnCheckedChangeListener { _, isChecked ->
+            if (enableDisplay(displayPp2p5))
+                viewModel.onDisplayP2pmSelected(isChecked)
+        }
+
 
         // On Click save the CPU configuration
         setButton.setOnClickListener {
@@ -574,8 +602,31 @@ class HyperStatCpuFragment : BaseDialogFragment() {
 
         zonePMThreshold.setSelection(viewState.zonePm2p5ThresholdPos)
         zonePMTarget.setSelection(viewState.zonePm2p5TargetPos)
+        displayHumidity.isChecked = viewState.isDisplayHumidityEnabled
+        displayCo2.isChecked = viewState.isDisplayCo2Enabled
+        displayVOC.isChecked = viewState.isDisplayVOCEnabled
+        displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
+
     }
 
+    private fun getDisplayDeviceCount(): Int{
+        var count = 0
+        if(displayHumidity.isChecked) count++
+        if(displayCo2.isChecked) count++
+        if(displayVOC.isChecked) count++
+        if(displayPp2p5.isChecked) count++
+        return count
+    }
+
+        private fun enableDisplay(toggle: ToggleButton): Boolean{
+            val count = getDisplayDeviceCount()
+            if(count > 2) {
+                Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()
+                toggle.isChecked = false
+                return false
+            }
+            return true
+        }
 
     // Just dispose the
     override fun onDestroy() {

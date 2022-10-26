@@ -35,6 +35,7 @@ public class PreferenceUtil {
     private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
     private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
     private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
+    private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
 
 
     public static void setContext(Context c) {
@@ -373,6 +374,15 @@ public class PreferenceUtil {
 
     public static void setBPOSToOTNMigration() {
         setBooleanPreference(BPOS_TO_OTN_MIGRATION, true);
+
+    }
+
+    public static boolean getHyperStatDeviceDisplayConfigurationPointsMigration() {
+        return getBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION);
+    }
+
+    public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
+        setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
 
     }
 

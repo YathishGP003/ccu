@@ -45,7 +45,8 @@ class HyperStatCpuEquip(val node: Short) {
     private var floorRef: String? = null
     private var systemEquip = haystack.read("equip and system") as HashMap<Any, Any>
     private lateinit var hyperStatPointsUtil: HyperStatPointsUtil
-    var hsHaystackUtil: HSHaystackUtil? = null
+    lateinit var hsHaystackUtil: HSHaystackUtil
+
 
 
     companion object {
@@ -320,10 +321,17 @@ class HyperStatCpuEquip(val node: Short) {
             hyperStatConfig = hyperStatConfig
         )
 
+        // device display configuration
+        val deviceDisplayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createDeviceDisplayConfigurationPoints(
+                hyperStatConfig.displayHumidity,hyperStatConfig.displayVOC,
+                hyperStatConfig.displayPp2p5,hyperStatConfig.displayCo2
+            )
+
         val allConfigPoints = arrayOf(
             configPointsList, relayConfigPoints, analogOutConfigPoints,
             analogInConfigPoints, thConfigPointsList, userIntentPointsList,
-            co2ConfigPointsList, loopOutputPoints,vocPmPointsList
+            co2ConfigPointsList, loopOutputPoints, vocPmPointsList, deviceDisplayConfigPoints
         )
         Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
@@ -538,9 +546,48 @@ class HyperStatCpuEquip(val node: Short) {
         if (newConfiguration.zonePm2p5Target != existingConfiguration.zonePm2p5Target) {
             val pointId = hsHaystackUtil!!.readPointID("pm2p5 and target") as String
             hyperStatPointsUtil.addDefaultValueForPoint(pointId, newConfiguration.zonePm2p5Target)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, newConfiguration.zonePm2p5Target)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(
+                pointId,
+                newConfiguration.zonePm2p5Target
+            )
         }
 
+        updateDeviceDisplayConfiguration(
+            existingConfiguration.displayHumidity,newConfiguration.displayHumidity,
+            existingConfiguration.displayVOC,newConfiguration.displayVOC,
+            existingConfiguration.displayPp2p5,newConfiguration.displayPp2p5,
+            existingConfiguration.displayCo2,newConfiguration.displayCo2
+        )
+
+    }
+
+    private fun updateDeviceDisplayConfiguration(
+        isDisplayHumidityEnabledOld: Boolean,isDisplayHumidityEnabledNew: Boolean,
+        isDisplayVOCEnabledOld: Boolean,isDisplayVOCEnabledNew: Boolean,
+        isDisplayP2p5EnabledOld: Boolean,isDisplayP2p5EnabledNew: Boolean,
+        isDisplayCo2EnabledOld: Boolean,  isDisplayCo2EnabledNew: Boolean,
+    ){
+
+        if (isDisplayHumidityEnabledOld != isDisplayHumidityEnabledNew) {
+            val pointId = hsHaystackUtil.readPointID("enabled and humidity") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, if(isDisplayHumidityEnabledNew) 1.0 else 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, if(isDisplayHumidityEnabledNew) 1.0 else 0.0)
+        }
+        if (isDisplayVOCEnabledOld != isDisplayVOCEnabledNew) {
+            val pointId = hsHaystackUtil.readPointID("enabled and voc") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId,if(isDisplayVOCEnabledNew) 1.0 else 0.0 )
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, if(isDisplayVOCEnabledNew) 1.0 else 0.0 )
+        }
+        if (isDisplayP2p5EnabledOld != isDisplayP2p5EnabledNew) {
+            val pointId = hsHaystackUtil.readPointID("enabled and pm2p5") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, if(isDisplayP2p5EnabledNew) 1.0 else 0.0 )
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, if(isDisplayP2p5EnabledNew) 1.0 else 0.0 )
+        }
+        if (isDisplayCo2EnabledOld != isDisplayCo2EnabledNew) {
+            val pointId = hsHaystackUtil.readPointID("enabled and co2") as String
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId,if(isDisplayCo2EnabledNew) 1.0 else 0.0  )
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, if(isDisplayCo2EnabledNew) 1.0 else 0.0)
+        }
     }
 
     // collect the existing profile configurations
@@ -552,6 +599,10 @@ class HyperStatCpuEquip(val node: Short) {
         getAnalogOutConfigurations(config)
         getAnalogInConfigurations(config)
 
+        config.displayHumidity = hsHaystackUtil.getDisplayHumidity() == 1.0
+        config.displayCo2 = hsHaystackUtil.getDisplayCo2() == 1.0
+        config.displayVOC = hsHaystackUtil.getDisplayVoc() == 1.0
+        config.displayPp2p5 = hsHaystackUtil.getDisplayP2p5() == 1.0
 
         config.temperatureOffset = (tempOff / 10)
         config.isEnableAutoForceOccupied = (

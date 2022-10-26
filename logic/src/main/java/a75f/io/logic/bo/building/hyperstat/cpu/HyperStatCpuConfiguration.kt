@@ -33,8 +33,8 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var analogIn2State = AnalogInState(false, CpuAnalogInAssociation.CURRENT_TX_0_20)
 
    var zoneCO2DamperOpeningRate = 10.0
-   var zoneCO2Threshold = 800.0
-   var zoneCO2Target = 1000.0
+   var zoneCO2Threshold = 4000.0
+   var zoneCO2Target = 4000.0
 
    var zoneVOCThreshold = 10000.0
    var zoneVOCTarget = 10000.0

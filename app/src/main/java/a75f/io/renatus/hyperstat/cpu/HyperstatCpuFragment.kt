@@ -73,6 +73,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
+    private lateinit var tvzoneCO2DamperOpeningRate: TextView
     private lateinit var zoneCO2DamperOpeningRate: Spinner
     private lateinit var zoneCO2Threshold: Spinner
     private lateinit var zoneCO2Target: Spinner
@@ -229,6 +230,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             )
 
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
+            tvzoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
@@ -349,6 +351,8 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         zonePMThreshold.setSelection(zonePMThreshold.adapter.count -1)
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
+        zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
+        zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
 
         analogOutUIs.forEach {
 
@@ -559,7 +563,8 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             }
         }
 
-        zoneCO2Layout.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvzoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
         zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
         zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)

@@ -741,11 +741,13 @@
                 <TextView
                     android:id="@+id/zoneCO2DamperOpeningRate"
                     style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/zoneCO2DamperOpeningRate" />
+                    android:text="@string/zoneCO2DamperOpeningRate"
+                    android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
-                    style="@style/Damper_HyperStat" />
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/zoneCO2Threshold"

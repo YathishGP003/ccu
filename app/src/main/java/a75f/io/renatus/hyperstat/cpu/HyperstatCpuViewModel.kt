@@ -358,7 +358,7 @@ private val OpeningRateMin = 0
 private val OpeningRateMax = 200
 
 private val CO2Min = 0
-private val CO2Max = 2000
+private val CO2Max = 4000
 
 private val INC = 10
 
@@ -370,6 +370,7 @@ private val VOCMax = 10000
 
 private val PMMin = 0
 private val PMMax = 1000
+const val DISABLED = 65535.0
 
 private fun tempOffsetIndexFromValue(tempOffset: Double) =
     offsetIndexFromValue(TEMP_OFFSET_LIMIT_MIN, TEMP_OFFSET_INC, tempOffset)
@@ -420,25 +421,46 @@ fun analogFanLevelSpeedValue(): Array<String?> {
 }
 
 private fun co2DCVDamperValueFromIndex(index: Int) = offsetFromIndex(CO2Min, INC.toDouble(), index)
-private fun OpeningDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
 
-private fun vocValueFromIndex(index: Int) = offsetFromIndex(VOCMin, VOC_INC.toDouble(), index)
-private fun pm25ValueFromIndex(index: Int) = offsetFromIndex(PMMin, PM_INC.toDouble(), index)
+//private fun OpeningDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
+private fun OpeningDamperValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else co2DCVDamperValue()[index].toString().replace(" ppm","").toDouble()
+}
 
+//private fun vocValueFromIndex(index: Int) = offsetFromIndex(VOCMin, VOC_INC.toDouble(), index)
+private fun vocValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else vocValues()[index].toString().replace(" ppb","").toDouble()
+}
 
-private fun co2DCVDamperSetIndexFromValue(value: Double) = offsetIndexFromValue(CO2Min, INC.toDouble(), value)
+//private fun pm25ValueFromIndex(index: Int) = offsetFromIndex(PMMin, PM_INC.toDouble(), index)
+private fun pm25ValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else pmValues()[index].toString().replace(" ug/㎥","").toDouble()
+}
+
+//private fun co2DCVDamperSetIndexFromValue(value: Double) = offsetIndexFromValue(CO2Min, INC.toDouble(), value)
+private fun co2DCVDamperSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(CO2Min, INC.toDouble(), value)+1
+}
+
 private fun co2DCVOpeningDamperSetIndexFromValue(value: Double) =
     offsetIndexFromValue(OpeningRateMin, INC.toDouble(), value)
 
-private fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
-private fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
-
+//private fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
+private fun vocSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)+1
+}
+//private fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
+private fun pmSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)+1
+}
 
 fun co2DCVDamperValue(): Array<String?> {
-    return offsetSpinnerValues(
+    val co2List: MutableList<String?> = offsetSpinnerValues(
         CO2Max, CO2Min,
         INC.toDouble(), true, " ppm"
-    )
+    ).toMutableList()
+    co2List.add(0,"Disabled")
+    return co2List.toTypedArray()
 }
 
 fun co2DCVOpeningDamperValue(): Array<String?> {
@@ -449,16 +471,21 @@ fun co2DCVOpeningDamperValue(): Array<String?> {
 }
 
 fun vocValues(): Array<String?> {
-    return offsetSpinnerValues(
+    val vocList: MutableList<String?> = offsetSpinnerValues(
         VOCMax, VOCMin,
         VOC_INC.toDouble(), true, " ppb"
-    )
+    ).toMutableList()
+    vocList.add(0,"Disabled")
+    return vocList.toTypedArray()
 }
 fun pmValues(): Array<String?> {
-    return offsetSpinnerValues(
+    val pmList: MutableList<String?> = offsetSpinnerValues(
         PMMax, PMMin,
         PM_INC.toDouble(), true, " ug/㎥"
-    )
+    ).toMutableList()
+    pmList.add(0,"Disabled")
+    return pmList.toTypedArray()
+
 }
 
 

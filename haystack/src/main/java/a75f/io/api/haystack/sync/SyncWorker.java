@@ -69,10 +69,12 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "CCU sync failed");
                 return Result.retry();
             }
-    
-            if (!syncDeletedEntities()) {
-                CcuLog.e(TAG, "Deleted entity sync failed");
-                return Result.retry();
+
+            if (CCUHsApi.getInstance().getAuthorised()) {
+                if (!syncDeletedEntities()) {
+                    CcuLog.e(TAG, "Deleted entity sync failed");
+                    return Result.retry();
+                }
             }
             
             if (!syncUnSyncedEntities()) {
@@ -148,8 +150,6 @@ public class SyncWorker extends Worker {
         if (!syncStatusService.hasDeletedData()) {
             return true;
         }
-
-        if (CCUHsApi.getInstance().getAuthorised()) {
             List<String> deletedItems = syncStatusService.getDeletedData();
             synchronized (deletedItems) {
                 List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
@@ -179,8 +179,7 @@ public class SyncWorker extends Worker {
                 updateDeleteStatus(deletedSyncedItems);
             }
             return true;
-        }
-        return true;
+
     }
     
     /**

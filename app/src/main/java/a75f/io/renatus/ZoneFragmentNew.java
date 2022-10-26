@@ -857,40 +857,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);           // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);
@@ -1490,40 +1488,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);   // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);

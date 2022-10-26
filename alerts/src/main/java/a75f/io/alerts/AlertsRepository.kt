@@ -308,7 +308,9 @@ class AlertsRepository(
       CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
 
       if (unsyncedAlerts.isNotEmpty()) {
-         alertSyncHandler.sync(unsyncedAlerts, dataStore)
+         if (CCUHsApi.getInstance().getAuthorised()) {
+            alertSyncHandler.sync(unsyncedAlerts, dataStore)
+         }
       }
    }
 

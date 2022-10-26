@@ -3,6 +3,7 @@ package a75f.io.logic.messaging;
 import java.util.Map;
 import java.util.Set;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.util.ConnectionUtil;
@@ -26,7 +27,9 @@ public class MessagingAckJob {
             @Override
             public void run()
             {
-                doJob();
+                if (CCUHsApi.getInstance().getAuthorised()) {
+                    doJob();
+                }
             }
         };
     }
@@ -62,6 +65,8 @@ public class MessagingAckJob {
                             response -> {
                                 if (response.isSuccessful()) {
                                     CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
+                                } else if(response.code() == 401) {
+                                    CCUHsApi.getInstance().setAuthorised(false);
                                 } else {
                                     CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
                                 }

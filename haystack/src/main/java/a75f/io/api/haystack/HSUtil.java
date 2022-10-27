@@ -413,4 +413,25 @@ public class HSUtil
                 || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
                 || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
     }
+
+    /**
+     * Checks a given point is a limit tuner.
+     * @param id
+     * @param hayStack
+     * @return
+     */
+    public static boolean isBuildingLimitPoint(String id, CCUHsApi hayStack) {
+        if (id == null) {
+            return false;
+        }
+
+        Point tunerPoint = new Point.Builder()
+                .setHashMap(hayStack.readMapById(id))
+                .build();
+
+        return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
+                !tunerPoint.getMarkers().contains("alert"))
+                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
+                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
+    }
 }

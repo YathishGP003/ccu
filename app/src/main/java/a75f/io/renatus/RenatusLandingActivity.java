@@ -287,7 +287,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void launchZoneFragment() {
-
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)

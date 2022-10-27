@@ -210,7 +210,6 @@ public class HaystackExplorer extends Fragment
                     return true;
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
                            ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                    
                     int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
                     int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
                 
@@ -291,10 +290,11 @@ public class HaystackExplorer extends Fragment
         HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special and not named");
         List<String> schedulesList = new ArrayList<>();
         Iterator it = buildingSchedulesGrid.iterator();
+        int scheduleNameCounter = 0;
         while (it.hasNext()) {
             HRow r = (HRow) it.next();
             schedulesList.add(new Schedule.Builder().setHDict(r).build().toString());
-            scheduleMap.put(r.get("dis").toString(), r.get("id").toString());
+            scheduleMap.put(++scheduleNameCounter+""+r.get("dis").toString(), r.get("id").toString());
         }
 
         expandableListDetail.put("Building Schedule", schedulesList);

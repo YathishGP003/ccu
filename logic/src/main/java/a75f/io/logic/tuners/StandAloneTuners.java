@@ -537,7 +537,6 @@ public class StandAloneTuners {
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
 
-    
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     

@@ -160,6 +160,7 @@ public class DabProfile extends ZoneProfile
             } else if (prevState == HEATING && conditioning == SystemController.State.HEATING) {
                 damperOpController.updateControlVariable(setTempHeating, roomTemp);
             } else {
+                prevState = DEADBAND;
                 damperOpController.reset();
             }
         }

@@ -507,4 +507,28 @@ class HSHaystackUtil(
         return 0.0
     }
 
+    fun getDisplayHumidity(): Double{
+        return  haystack.readDefaultVal(
+            "point and humidity and enabled and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getDisplayCo2(): Double{
+        return  haystack.readDefaultVal(
+            "point and co2 and enabled and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getDisplayVoc(): Double{
+        return  haystack.readDefaultVal(
+            "point and voc and enabled and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getDisplayP2p5(): Double{
+        return  haystack.readDefaultVal(
+            "point and pm2p5 and enabled and equipRef == \"$equipRef\""
+        )
+    }
+
 }

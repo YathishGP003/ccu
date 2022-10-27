@@ -588,7 +588,6 @@ public class DabTuners {
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
 
-
         Point autoAwaySetback   = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"autoAwaySetback")
                 .setSiteRef(siteRef)
@@ -605,7 +604,7 @@ public class DabTuners {
         BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
-    
+
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 

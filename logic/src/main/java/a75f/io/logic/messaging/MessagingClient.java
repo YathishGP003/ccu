@@ -110,6 +110,7 @@ public class MessagingClient {
         }
 
     }
+
     private void openMessagingConnection(String bearerToken, String siteId, String ccuId) {
         if (sse != null) {
             return;

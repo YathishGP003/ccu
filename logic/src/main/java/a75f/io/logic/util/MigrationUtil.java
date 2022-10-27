@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -138,12 +139,11 @@ public class MigrationUtil {
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
         }
+
         if(!PreferenceUtil.getScheduleRefactorMigration()) {
             scheduleRefactorMigration(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefactorMigration();
         }
-
-
 
         if(!PreferenceUtil.getNewOccupancy()){
             Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
@@ -210,6 +210,11 @@ public class MigrationUtil {
         if(!PreferenceUtil.getBPOSToOTNMigration()){
             migrateBPOSToOTN(CCUHsApi.getInstance());
             PreferenceUtil.setBPOSToOTNMigration();
+        }
+
+        if(!PreferenceUtil.getHyperStatDeviceDisplayConfigurationPointsMigration()){
+            createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHyperStatDeviceDisplayConfigurationPointsMigration();
         }
     }
 
@@ -836,7 +841,6 @@ public class MigrationUtil {
         hayStack.scheduleSync();
     }
 
-
     private static void migrateNewOccupancy(CCUHsApi hsApi) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");
         ArrayList<HashMap<Object, Object>> dabEquips = hsApi.readAllEntities("equip and dab and smartnode");
@@ -1103,7 +1107,8 @@ public class MigrationUtil {
             boolean isScheduleTypeNamedSchedule =
                     hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
                             .intValue() == ScheduleType.NAMED.ordinal();
-            if(isScheduleRefZoneSchedule && isScheduleTypeNamedSchedule) {
+
+            if(isScheduleRefZoneSchedule  && isScheduleTypeNamedSchedule) {
                 hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
@@ -1209,5 +1214,33 @@ public class MigrationUtil {
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         });
         CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");
+        for (HashMap<Object, Object> rawEquip : equipList) {
+            if(!rawEquip.isEmpty()) {
+                createDeviceConfigurationPoints(haystack);
+            }
+        }
+    }
+    private static void createDeviceConfigurationPoints(CCUHsApi hayStack){
+
+        ArrayList<HashMap<Object, Object>> hyperStatCpus = hayStack.readAllEntities("equip and hyperstat and cpu");
+        hyperStatCpus.forEach( cpuEquip -> {
+            HashMap<Object, Object> deviceDisplayConfigurationPoint = hayStack.readEntity("humidity and enabled and equipRef" +
+                    " == \"" + cpuEquip.get("id") + "\"");
+
+            if (deviceDisplayConfigurationPoint.isEmpty()) {
+                Equip equip1 = new Equip.Builder().setHashMap(cpuEquip).build();
+                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip1, hayStack);
+                hyperStatPointsUtil.createDeviceDisplayConfigurationPoints(true,false,false,true).forEach(
+                        point -> pushPointToHS(hyperStatPointsUtil, point)
+                );
+            }
+        });
+
+
+
     }
 }

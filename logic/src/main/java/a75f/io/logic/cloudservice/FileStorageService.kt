@@ -13,6 +13,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import java.util.concurrent.TimeUnit
 
 /**
  * Retrofit service for remote file storage API
@@ -54,6 +55,9 @@ class ServiceGenerator(
       retrofit.create(FileStorageService::class.java)
 
 
+   /**
+    * This client has generous timeout periods set to help large log file uploads.
+    */
    private fun createRetrofit(token: String): Retrofit {
       val okhttpLogging = HttpLoggingInterceptor().apply {
          level = HttpLoggingInterceptor.Level.HEADERS
@@ -72,6 +76,9 @@ class ServiceGenerator(
             }
          )
          addInterceptor(okhttpLogging)
+         connectTimeout(60, TimeUnit.SECONDS)
+         readTimeout(60, TimeUnit.SECONDS)
+         writeTimeout(60, TimeUnit.SECONDS)
       }.build()
 
       return Retrofit.Builder()

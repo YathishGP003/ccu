@@ -142,12 +142,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     private static void checkforOccUpdate(Occupied occupied) {
         if(occupied.isOccupied() ){
-            //Read all bpos equips
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and bpos");
+            //Read all OTN equips
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and otn");
             for(HashMap hs : equips)
             {
                 HashMap ocupancyDetection = CCUHsApi.getInstance().read(
-                        "point and  bpos and occupancy and detection and his and equipRef  ==" +
+                        "point and  otn and occupancy and detection and his and equipRef  ==" +
                                 " \"" + hs.get("id") + "\"");
                 if (ocupancyDetection.get("id") != null) {
                     double val = CCUHsApi.getInstance().readHisValById(ocupancyDetection.get(

@@ -93,7 +93,7 @@ public class HisSyncHandler
     
         //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
         syncHistorizedEquipPoints(syncAllData);
-    
+
         syncHistorizedZonePoints(syncAllData);
     }
     
@@ -153,7 +153,7 @@ public class HisSyncHandler
             }
         }
     }
-    
+
     /**
      * This is a short cut to get all the occupancy points on rooms to get synced.
      * This must be revisited.
@@ -162,10 +162,10 @@ public class HisSyncHandler
     private void syncHistorizedZonePoints(boolean timeForQuarterHourSync) {
         List<HashMap> allZones = ccuHsApi.readAll("room");
         List<HashMap> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
-        
+
         for (HashMap zone : zonesToSync) {
             String roomId = zone.get("id").toString();
-            
+
             List<HashMap> allPointsForZone =
                 ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");

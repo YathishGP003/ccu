@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.bpos;
+package a75f.io.logic.bo.building.otn;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
@@ -6,7 +6,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
  * created by spoorthidev on 3-August-2021
  */
 
-public class BPOSConfiguration extends BaseProfileConfiguration {
+public class OTNConfiguration extends BaseProfileConfiguration {
 
     private double temperatureOffset;
     private int zonePriority;

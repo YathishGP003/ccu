@@ -546,7 +546,10 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .setGroup(String.valueOf(nodeAddr))
+                .addMarker("standalone").addMarker("occupancy")
+                .addMarker("mode").addMarker("his").addMarker("sp")
+                .addMarker("zone").addMarker("pipe2").addMarker("fcu")
                 .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
@@ -558,8 +561,11 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,cooling,heating,tempdead")
-                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .addMarker("standalone").addMarker("temp")
+                .addMarker("operating").addMarker("mode").addMarker("his")
+                .addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
                 .setTz(tz)
                 .build();
         String condModeId = CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
@@ -787,23 +793,25 @@ public class TwoPipeFanCoilUnitEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-HPU-" + nodeAddr;
+        String equipDis = siteDis + "-2PFCU-" + nodeAddr;
+        HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe2 and his and equipRef== \"" + equip.getId() + "\"");
         if(config.enableOccupancyControl){
-            Point occupancyDetection = new Point.Builder()
-                    .setDisplayName(equipDis+"-occupancyDetection")
-                    .setEquipRef(equip.getId())
-                    .setSiteRef(siteRef)
-                    .setRoomRef(equip.getRoomRef())
-                    .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                    .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe2").addMarker("his").addMarker("zone")
-                    .setGroup(String.valueOf(nodeAddr))
-                    .setEnums("false,true")
-                    .setTz(tz)
-                    .build();
-            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            if (occDetPoint.isEmpty()) {
+                Point occupancyDetection = new Point.Builder()
+                        .setDisplayName(equipDis + "-occupancyDetection")
+                        .setEquipRef(equip.getId())
+                        .setSiteRef(siteRef)
+                        .setRoomRef(equip.getRoomRef())
+                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                        .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe2").addMarker("his").addMarker("zone")
+                        .setGroup(String.valueOf(nodeAddr))
+                        .setEnums("false,true")
+                        .setTz(tz)
+                        .build();
+                String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+                CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            }
         }else {
-            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe2 and his and equipRef== \"" + equip.getId() + "\"");
             if ((occDetPoint != null) && (occDetPoint.size() > 0))
                 CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
         }
@@ -1088,7 +1096,10 @@ public class TwoPipeFanCoilUnitEquip {
                 .setEquipRef(equipref)
                 .setFloorRef(floor)
                 .setRoomRef(room).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
+                .addMarker("standalone").addMarker("userIntent")
+                .addMarker("writable").addMarker("fan").addMarker("operation")
+                .addMarker("mode").addMarker("his")
                 .addMarker("pipe2").addMarker("fcu").addMarker("zone")
                 .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
@@ -1106,7 +1117,10 @@ public class TwoPipeFanCoilUnitEquip {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
+                .addMarker("standalone").addMarker("userIntent")
+                .addMarker("writable").addMarker("conditioning")
+                .addMarker("mode").addMarker("zone").addMarker("his")
                 .addMarker("pipe2").addMarker("fcu").addMarker("temp")
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)

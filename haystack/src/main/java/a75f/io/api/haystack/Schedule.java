@@ -1,5 +1,9 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
+
 import android.util.Log;
 
 import org.joda.time.DateTime;
@@ -120,16 +124,16 @@ public class Schedule extends Entity
             int beginMin = getInt(range.get(Tags.STMM).toString());
             String endDate = range.get(Tags.ETDT).toString();
             int endHour = getInt(range.get(Tags.ETHH).toString());
-            endHour  = endHour == 24 ? 23 : endHour;
             int endMin = getInt(range.get(Tags.ETMM).toString());
-            endMin = endHour == 24 ? 59 : endMin;
+
+            endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
 
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)
                     .withMinuteOfHour(beginMin);
             DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
-                    .withHourOfDay(endHour)
-                    .withMinuteOfHour(endMin);
+                    .withHourOfDay(getEndHour(endHour))
+                    .withMinuteOfHour(getEndMinute(endHour, endMin));
 
             int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
 
@@ -257,24 +261,26 @@ public class Schedule extends Entity
         Hence +1*/
         int dayAdjustConst = 1;
         DateTime morePriorityScheduleBeginTime =
-                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getSthh(),
-                morePrioritySchedule.getStmm(),
+                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(morePrioritySchedule.getSthh(), morePrioritySchedule.getStmm(),
                 0, 0);
         DateTime morePriorityScheduleEndTime =
-                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getEthh(),
-                morePrioritySchedule.getEtmm(),
-                0, 0);
+        new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst)
+                .withTime(getEndHour(morePrioritySchedule.getEthh()),
+                        getEndMinute(morePrioritySchedule.getEthh(), morePrioritySchedule.getEtmm()),
+                        getEndSec(morePrioritySchedule.getEthh()), 0);
         Interval morePriorityScheduleInterval = new Interval(morePriorityScheduleBeginTime,
                 morePriorityScheduleEndTime);
 
         DateTime lessPriorityScheduleBeginTime =
-                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getSthh(),
-                lessPrioritySchedule.getStmm(),
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(lessPrioritySchedule.getSthh(), lessPrioritySchedule.getStmm(),
                 0, 0);
         DateTime lessPriorityScheduleEndTime =
-                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getEthh(),
-                lessPrioritySchedule.getEtmm(),
-                0, 0);
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(getEndHour(lessPrioritySchedule.getEthh()),
+                                getEndMinute(lessPrioritySchedule.getEthh(), lessPrioritySchedule.getEtmm()),
+                                getEndSec(lessPrioritySchedule.getEthh()), 0);
         Interval lessPriorityScheduleInterval = new Interval(lessPriorityScheduleBeginTime,
                 lessPriorityScheduleEndTime);
         return morePriorityScheduleInterval.overlaps(lessPriorityScheduleInterval);
@@ -719,21 +725,20 @@ public class Schedule extends Entity
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
-                    boolean isLastHour = daysSorted.get(i-1).getEthh() == 24;
                     if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(getEndHour(daysSorted.get(i - 1).getEthh()))
+                                .withMinuteOfHour(getEndMinute(daysSorted.get(i - 1).getEthh(), daysSorted.get(i - 1).getEtmm()))
                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
-                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                                .withSecondOfMinute(getEndSec(daysSorted.get(i - 1).getEthh()));
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
 					}else {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(getEndHour(daysSorted.get(i - 1).getEthh()))
+                                .withMinuteOfHour(getEndMinute(daysSorted.get(i - 1).getEthh(), daysSorted.get(i - 1).getEtmm()))
                                 .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
-                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                                .withSecondOfMinute(getEndSec(daysSorted.get(i - 1).getEthh()));
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
                     }
@@ -760,12 +765,11 @@ public class Schedule extends Entity
                     .withSecondOfMinute(0);
             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 
-            boolean isLastHour = daysSorted.get(j).getEthh() == 24;
             DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                    .withHourOfDay(isLastHour? 23 : daysSorted.get(j).getEthh())
-                    .withMinuteOfHour(isLastHour? 59 : daysSorted.get(j).getEtmm())
+                    .withHourOfDay(getEndHour(daysSorted.get(j).getEthh()))
+                    .withMinuteOfHour(getEndMinute(daysSorted.get(j).getEthh(), daysSorted.get(j).getEtmm()))
                     .withDayOfWeek(daysSorted.get(j).getDay() + 1)
-                    .withSecondOfMinute(isLastHour? 59 : 0);
+                    .withSecondOfMinute(getEndSec(daysSorted.get(j).getEthh()));
             occupied.setPreviouslyOccupiedSchedule(daysSorted.get(j));
             occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() - endDateTime.getMillis());
             
@@ -892,7 +896,11 @@ public class Schedule extends Entity
     
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(mDis).append(" ");
+
+        b.append(mDis).append("-");
+        if (mId != null) {
+            b.append(mId).append(" ");
+        }
         if (isVacation()) {
             b.append(mStartDate.toString()+"-"+mEndDate.toString());
         }else
@@ -974,11 +982,10 @@ public class Schedule extends Entity
                     .withDayOfWeek(day.getDay() + 1)
                     .withSecondOfMinute(0)
                     .withMillisOfSecond(0);
-            boolean isLastHour = day.getEthh() == 24;
             DateTime endDateTime = new DateTime(now)
-                    .withHourOfDay(isLastHour ? 23 : day.getEthh())
-                    .withMinuteOfHour(isLastHour? 59 :day.getEtmm())
-                    .withSecondOfMinute(isLastHour ? 59 :0).withMillisOfSecond(0).withDayOfWeek(
+                    .withHourOfDay(getEndHour(day.getEthh()))
+                    .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
+                    .withSecondOfMinute(getEndSec(day.getEthh())).withMillisOfSecond(0).withDayOfWeek(
                             day.getDay() +
                                     1);
 
@@ -1020,9 +1027,9 @@ public class Schedule extends Entity
                                          .withSecondOfMinute(0)
                                          .withMillisOfSecond(0);
         DateTime endDateTime = new DateTime(now)
-                                       .withHourOfDay(day.getEthh())
-                                       .withMinuteOfHour(day.getEtmm())
-                                       .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
+                .withHourOfDay(getEndHour(day.getEthh()))
+                .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
+                .withSecondOfMinute(getEndSec(day.getEthh())).withMillisOfSecond(0).withDayOfWeek(
                         day.getDay() +
                         1);
         

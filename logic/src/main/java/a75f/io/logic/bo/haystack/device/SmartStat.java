@@ -114,7 +114,7 @@ public class SmartStat {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setUnit("Ohm")
+                .setUnit("Kilo Ohm")
                 .setTz(tz)
                 .build();
 
@@ -127,7 +127,7 @@ public class SmartStat {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setUnit("Ohm")
+                .setUnit("Kilo Ohm")
                 .setTz(tz)
                 .build();
 

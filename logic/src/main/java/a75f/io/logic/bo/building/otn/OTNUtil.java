@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.bpos;
+package a75f.io.logic.bo.building.otn;
 
 import android.util.Log;
 import java.util.HashMap;
@@ -8,11 +8,11 @@ import a75f.io.api.haystack.CCUHsApi;
  * created by spoorthidev on 3-August-2021
  */
 
-public class BPOSUtil {
+public class OTNUtil {
 
-    private static String LOG_TAG = "BPOSUtil";
+    private static String LOG_TAG = "OTNUtil";
 
-    public static HashMap getbposPoints(String equipID) {
+    public static HashMap getOTNPoints(String equipID) {
         HashMap points = new HashMap();
         points.put("Profile", "Temperature Influencing");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
@@ -23,7 +23,7 @@ public class BPOSUtil {
         double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
                 " mode and equipRef == \"" + equipID + "\"");
 
-        Log.d("BPOSUtil", "equipStatusPoint =" + equipStatusPoint +
+        Log.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +
                 "humidity =" + humidity + "forceoccupied" + forceoccupied);
 
         if (equipStatusPoint.length() > 0) {

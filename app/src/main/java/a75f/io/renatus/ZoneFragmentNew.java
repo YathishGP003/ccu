@@ -16,13 +16,17 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
@@ -67,7 +71,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.bpos.BPOSUtil;
+import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
@@ -115,7 +119,9 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -257,7 +263,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
         mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem, floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
-        
+
         zoneLoadTextView = view.findViewById(R.id.zoneLoadTextView);
         zoneLoadTextView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         
@@ -280,7 +286,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 selectFloor(position);
             }
         });
-    
+
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
@@ -292,6 +298,33 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated Done");
         weatherUpdateHandler = new Handler();
         weatherInIt(3000);
+
+        // To resolve app crash issue we have written the below code.
+        lvFloorList.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode actionMode) {
+
+            }
+        });
     }
 
     public void weatherInIt(int delay) {
@@ -376,40 +409,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         }
     }
 
-    public String StatusCelsiusVal(String temp)
-    {
-            String s = "";
-            ArrayList<Double> myDoubles = new ArrayList<Double>();
-            Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
-
-            Pattern p = Pattern.compile("[a-zA-Z]+");
-            Matcher m1 = p.matcher(temp);
-            while (m1.find()) {
-                s = s + m1.group() + " ";
-            }
-
-            while (matcher.find()) {
-                double element = Double.parseDouble(matcher.group());
-                myDoubles.add(Math.abs(element));
-            }
-            if (myDoubles.size() > 0) {
-                try {
-                    return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return temp;
-                }
-            } else {
-                return temp;
-            }
-
-    }
-
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
         if (getActivity() != null) {
             int i;
             String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
+            String specialScheduleStatus = getScheduleStateString(zoneId);
             for (i = 0; i < zoneStatusArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) zoneStatusArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
@@ -420,8 +425,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             TextView scheduleStatus = tempZoneDetails.findViewById(R.id.schedule_status_tv);
                             //Spinner scheduleSpinner = tempZoneDetails.findViewById(R.id.schedule_spinner);
                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
+                            TextView specialScheduleStatusText = tempZoneDetails.findViewById(R.id.special_status_status);
                             ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
+                            specialScheduleStatusText.setText(specialScheduleStatus);
                             try {
                             if(isCelsiusTunerAvailableStatus()) {
                                 scheduleStatus.setText(StatusCelsiusVal(status));
@@ -694,7 +701,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 String profileDualDuct = "DUAL_DUCT";
                 String profileModBus = "MODBUS";
                 String profileHyperStatSense = "HYPERSTAT_SENSE";
-                String profilebpos = "BPOS";
+                String profileOTN = "OTN";
 
                 boolean tempModule = false;
                 boolean nontempModule = false;
@@ -709,7 +716,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             profileType.contains(profileTempInfluence) ||
                             profileType.contains(profileDualDuct) ||
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
-                            profileType.contains(profilebpos)||
+                            profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())
                     ) {
                         tempModule = true;
@@ -814,6 +821,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
 
         ArrayList<String> scheduleArray = new ArrayList<>();
         scheduleArray.add("Building Schedule");
@@ -849,40 +857,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);           // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);
@@ -909,6 +915,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(status -> vacationStatusTV.setText(status));
+
+        Observable.fromCallable(() -> ScheduleManager.getInstance().getScheduleStateString(zoneId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(status -> specialScheduleStatusText.setText(status));
 
         String scheduleTypeId = getScheduleTypeId(equipId[0]);
         final Integer mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
@@ -1001,8 +1012,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
+
                         HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         if (zone.hasSchedule()) {
 
@@ -1029,6 +1042,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         }
                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null && z.getScheduleRef() == null) {
@@ -1313,6 +1327,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                     String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
                     vacationStatusTV.setText(vacationStatus);
+                    String specialScheduleStatus = getScheduleStateString(zoneId);
+                    specialScheduleStatusText.setText(specialScheduleStatus);
                     {
                         for (int k = 0; k < zoneMap.size(); k++) {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
@@ -1368,10 +1384,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
-                            if (p.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
-                                HashMap bpospoints = BPOSUtil.getbposPoints(p.getId());
-                                Log.i("PointsValue", "BPOS Points:" + bpospoints.toString());
-                                loadBPOSPointsUI(bpospoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            if (p.getProfile().equalsIgnoreCase(ProfileType.OTN.toString())) {
+                                HashMap otnPoints = OTNUtil.getOTNPoints(p.getId());
+                                Log.i("PointsValue", "OTN Points:" + otnPoints.toString());
+                                loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
@@ -1438,6 +1454,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         ImageButton specialScheduleImageButton = zoneDetails.findViewById(R.id.special_status_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView specialScheduleStatusText = zoneDetails.findViewById(R.id.special_status_status);
 
 
         ArrayList<String> scheduleArray = new ArrayList<>();
@@ -1474,40 +1491,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);   // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);
@@ -1534,6 +1549,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(status -> vacationStatusTV.setText(status));
+
+        Observable.fromCallable(() -> ScheduleManager.getInstance().getScheduleStateString(zoneId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(status -> specialScheduleStatusText.setText(status));
 
         String scheduleTypeId = getScheduleTypeId(equipId);
         final int mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
@@ -1622,9 +1642,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     }
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+
                     if (z != null && z.getScheduleRef() == null) {
                         HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +z.getId());
+
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         z.setScheduleRef(scheduleById.getId());
                         CCUHsApi.getInstance().updateZone(z, zoneId);
@@ -1649,6 +1671,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         if (zone.hasSchedule()) {
                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
+
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
@@ -1662,6 +1685,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              */
                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
+
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
                                 zone.setScheduleRef(schedule.get("id").toString());
@@ -1670,12 +1694,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
+
                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                         }
                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null && z.getScheduleRef() == null) {
@@ -1806,10 +1832,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
-            if (updatedEquip.getProfile().equalsIgnoreCase(ProfileType.BPOS.toString())) {
-                HashMap bposPoints = BPOSUtil.getbposPoints(updatedEquip.getId());
-                Log.i("PointsValue", "BPOS Points:" + bposPoints.toString());
-                loadBPOSPointsUI(bposPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            if (updatedEquip.getProfile().equalsIgnoreCase(ProfileType.OTN.toString())) {
+                HashMap otnPoints = OTNUtil.getOTNPoints(updatedEquip.getId());
+                Log.i("PointsValue", "OTN Points:" + otnPoints.toString());
+                loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
                 HashMap cpuEquipPoints = ZoneViewData.getHyperstatCPUEquipPoints(updatedEquip);
@@ -3991,14 +4017,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         });
     }
 
-    private void loadBPOSPointsUI(HashMap point, LayoutInflater inflater,
-                                  LinearLayout linearLayoutZonePoints,
-                                  String nodeAddress) {
+    private void loadOTNPointsUI(HashMap point, LayoutInflater inflater,
+                                 LinearLayout linearLayoutZonePoints,
+                                 String nodeAddress) {
 
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.bpos_zone_ui, null);
+        View viewPointRow1 = inflater.inflate(R.layout.otn_zone_ui, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
@@ -4013,7 +4039,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-        Log.d("BPOSUtil","Status="+point.get("Status").toString() +
+        Log.d("OTNUtil","Status="+point.get("Status").toString() +
                 "humidity ="+point.get("humidity").toString() +
                 "forceoccupied" + point.get("forceoccupied"));
 

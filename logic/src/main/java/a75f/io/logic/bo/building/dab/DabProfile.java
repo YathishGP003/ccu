@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
@@ -154,12 +155,13 @@ public class DabProfile extends ZoneProfile
             if (state != DEADBAND) {
                 state = DEADBAND;
             }
-            if (systemMode == SystemMode.OFF) {
-               damperOpController.reset();
-            } else if (prevState == COOLING) {
+            if (prevState == COOLING && conditioning == SystemController.State.COOLING) {
                 damperOpController.updateControlVariable(roomTemp, setTempCooling);
-            } else if (prevState == HEATING) {
+            } else if (prevState == HEATING && conditioning == SystemController.State.HEATING) {
                 damperOpController.updateControlVariable(setTempHeating, roomTemp);
+            } else {
+                prevState = DEADBAND;
+                damperOpController.reset();
             }
         }
         damperOpController.dump();
@@ -239,8 +241,7 @@ public class DabProfile extends ZoneProfile
         boolean  enabledCO2Control = dabEquip.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = dabEquip.getConfigNumVal("enable and iaq") > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
-        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-        boolean occupied = (occ == null ? false : occ.isOccupied());
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
     
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];

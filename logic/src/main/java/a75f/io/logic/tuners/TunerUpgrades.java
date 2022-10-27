@@ -18,7 +18,9 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.haystack.TagQueries;
+import a75f.io.logic.util.PreferenceUtil;
 
+import static a75f.io.logic.tuners.TunerConstants.GENERIC_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_BUILDING_VAL_LEVEL;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 
@@ -41,6 +43,7 @@ public class TunerUpgrades {
         createDefaultTempLockoutPoints(hayStack);
         addVavDischargeTempTuners(hayStack);
         migrateCelsiusSupportConfiguration(hayStack);
+        migrateAutoAwaySetbackTuner(hayStack);
     }
     
     /**
@@ -325,7 +328,7 @@ public class TunerUpgrades {
                         .setEquipRef(equipRef).setHisInterpolate("cov")
                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").addMarker("displayUnit")
                         .addMarker("system").addMarker("building").addMarker("enabled").addMarker("sp").setIncrementVal("1")
-                        .setEnums("false,true").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                        .setEnums("false,true").setTunerGroup(GENERIC_TUNER_GROUP)
                         .setMinVal("0")
                         .setMaxVal("1")
                         .setTz(tz)
@@ -340,4 +343,53 @@ public class TunerUpgrades {
        }
 
    }
+
+    private static void migrateAutoAwaySetbackTuner(CCUHsApi hayStack) {
+        if(!PreferenceUtil.getAutoAwaySetBackMigration()){
+            //Create the tuner point on all equips
+            ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav");
+            ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab");
+            ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hayStack.readAllEntities("equip and dualDuct");
+            ArrayList<HashMap<Object, Object>> ssEquips = hayStack.readAllEntities("equip and standalone and smartstat");
+            createPoint(hayStack,vavEquips);
+            createPoint(hayStack,dabEquips);
+            createPoint(hayStack,dabDualDuctEquips);
+            createPoint(hayStack,ssEquips);
+            PreferenceUtil.setAutoAwaySetBackMigration();
+        }
+    }
+    private static void createPoint(CCUHsApi hayStack,ArrayList<HashMap<Object, Object>> equips) {
+        for (HashMap<Object, Object> equip : equips) {
+            String equipRef = equip.get("id").toString();
+            HashMap<Object,Object> autoAwaySetBack =
+                    hayStack.readEntity("auto and away and setback and equipRef == \"" +equipRef+"\"");
+            if(autoAwaySetBack.isEmpty()){
+                String equipdis = equip.get("dis").toString();
+                String siteRef = equip.get("siteRef").toString();
+                String roomRef = equip.get("roomRef").toString();
+                String floorRef = equip.get("floorRef").toString();
+                String tz = equip.get("tz").toString();
+                createAutoAwayPoint(hayStack,equipdis,siteRef,equipRef,roomRef,floorRef,tz);
+            }
+        }
+    }
+    private static void createAutoAwayPoint(CCUHsApi hayStack, String equipdis, String siteRef,
+                                            String equipref, String roomRef, String floorRef ,String tz) {
+        Point autoAwaySetback = new Point.Builder()
+                .setDisplayName(equipdis + "-" + "autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
+        hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0);
+        hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
+    }
 }

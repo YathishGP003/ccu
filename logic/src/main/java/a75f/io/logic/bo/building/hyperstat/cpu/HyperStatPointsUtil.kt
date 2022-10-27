@@ -743,14 +743,6 @@ class HyperStatPointsUtil constructor(
                 if (hyperStatConfig.isEnableAutoAway) 1.0 else 0.0
             )
         )
-
-        autoForceAutoAwayConfigPointsList.add(
-            Pair(
-                enableAutoAwayControlPointPoint,
-                if (hyperStatConfig.isEnableAutoAway) 1.0 else 0.0
-            )
-        )
-
         autoForceAutoAwayConfigPointsList.addAll(createKeycardWindowSensingPoints())
         return autoForceAutoAwayConfigPointsList
     }
@@ -1654,6 +1646,49 @@ class HyperStatPointsUtil constructor(
             defaultValue = tempOffSetValue
         )
         return temperatureOffsetPointId
+    }
+
+    // Function to create device display configuration points
+    fun createDeviceDisplayConfigurationPoints(
+        isDisplayHumidityEnabled: Boolean,
+        isDisplayVOCEnabled: Boolean,
+        isDisplayP2p5Enabled: Boolean,
+        isDisplayCo2Enabled: Boolean,
+    ): MutableList<Pair<Point, Any>> {
+
+        val deviceConfigurationPoints: MutableList<Pair<Point, Any>> = LinkedList()
+        val humidityEnabled = arrayOf( "config", "writable", "zone", "sp","enabled","humidity")
+        val vocEnabled = arrayOf( "config", "writable", "zone", "sp","enabled" ,"voc")
+        val co2Enabled = arrayOf( "config", "writable", "zone", "sp","enabled" ,"co2")
+        val pm25Enabled = arrayOf( "config", "writable", "zone", "sp","enabled" ,"pm2p5")
+
+        val humidityEnabledPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-humidityDisplayEnabled" ,
+            humidityEnabled,
+            "off,on"
+        )
+        val vocEnabledPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-vocDisplayEnabled",
+            vocEnabled,
+            "off,on"
+        )
+        val co2EnabledPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-co2DisplayEnabled",
+            co2Enabled,
+            "off,on"
+
+        )
+        val pm25EnabledPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-pm25DisplayEnabled",
+            pm25Enabled,
+            "off,on"
+        )
+
+        deviceConfigurationPoints.add(Pair(humidityEnabledPoint, if(isDisplayHumidityEnabled)1.0 else 0.0))
+        deviceConfigurationPoints.add(Pair(vocEnabledPoint, if(isDisplayVOCEnabled)1.0 else 0.0))
+        deviceConfigurationPoints.add(Pair(co2EnabledPoint, if(isDisplayCo2Enabled)1.0 else 0.0))
+        deviceConfigurationPoints.add(Pair(pm25EnabledPoint, if(isDisplayP2p5Enabled)1.0 else 0.0))
+        return deviceConfigurationPoints
     }
 
     // function creates and temperature cur,desired Points

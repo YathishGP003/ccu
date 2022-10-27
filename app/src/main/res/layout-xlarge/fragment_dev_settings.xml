@@ -127,6 +127,23 @@
                     android:text="Save"
                     android:id="@+id/logCaptureBtn"/>
 
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_margin="10dp"
+                    android:textSize="20sp"
+                    android:text="Upload CCU logs to cloud"/>
+
+
+                <Button
+                    android:layout_margin="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upload"
+                    android:id="@+id/logUploadBtn"/>
+
             </LinearLayout>
 
             <LinearLayout
@@ -357,6 +374,7 @@
                     android:id="@+id/daikin_theme_config"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"/>
+
                 <Button
                     android:id="@+id/btnRestart"
                     android:layout_marginLeft="20dp"
@@ -371,6 +389,29 @@
                     android:gravity="center"
                     android:layout_gravity="center"
                     />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                tools:ignore="ExtraText">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_margin="10dp"
+                    android:textSize="20sp"
+                    android:text="Reset passwords"/>
+
+
+                <Button
+                    android:layout_margin="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reset"
+                    android:id="@+id/resetPassword"/>
             </LinearLayout>
             <!--Remove after we're satisfied with Crashlytics working -->
             <Button

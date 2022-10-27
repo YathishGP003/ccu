@@ -337,7 +337,7 @@ public abstract class VavSystemProfile extends SystemProfile
     }
     
     /**
-     * Check whether system is operation without only TI/BPOS zones.
+     * Check whether system is operation without only TI/OTN zones.
      * @param hayStack
      * @return
      */
@@ -350,7 +350,7 @@ public abstract class VavSystemProfile extends SystemProfile
         ArrayList<HashMap<Object, Object>> tiEquips = CCUHsApi
                                                           .getInstance()
                                                           .readAllEntities("(equip and zone and ti) or" +
-                                                                           "(equip and zone and bpos)"
+                                                                           "(equip and zone and otn)"
                                                           );
         if (!tiEquips.isEmpty()) {
             return true;

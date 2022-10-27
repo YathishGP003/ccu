@@ -28,6 +28,7 @@ public class MessagingClient {
 
     private final PriorityBlockingQueue<MessageToAck> messagesToAck = new PriorityBlockingQueue<>();
 
+    private OkSse okSse = null;
     public static MessagingClient getInstance() {
         if (instance == null) {
             synchronized(MessagingClient.class) {
@@ -46,7 +47,7 @@ public class MessagingClient {
 
         if (!useMessagingApi) {
             this.closeMessagingConnection();
-            PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
+            //PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
         } else {
             String ccuId = CCUHsApi.getInstance().getCcuId();
 
@@ -60,7 +61,8 @@ public class MessagingClient {
     }
 
     public boolean isSubscribed() {
-        return sse != null;
+        return sse != null &&
+               okSse.getClient().connectionPool().connectionCount() > 0;
     }
 
     public void queueMessageIdToAck(JsonObject message) {
@@ -93,6 +95,22 @@ public class MessagingClient {
         return channelsToMessageIdsLookup;
     }
 
+    /**
+     * Resets Messaging connection without restarting the MessagingAck thread.
+     * Could be called when Messaging client runs into error.
+     */
+    public void resetMessagingConnection() {
+        this.closeMessagingConnection();
+        String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
+        String ccuId = CCUHsApi.getInstance().getCcuId();
+        String bearerToken = CCUHsApi.getInstance().getJwt();
+
+        if (ccuId != null) {
+            this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
+        }
+
+    }
+
     private void openMessagingConnection(String bearerToken, String siteId, String ccuId) {
         if (sse != null) {
             return;
@@ -111,7 +129,8 @@ public class MessagingClient {
                 .header("Authorization", "Bearer " + bearerToken)
                 .build();
 
-        sse = new OkSse().newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl, bearerToken));
+        okSse = new OkSse();
+        sse = okSse.newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl, bearerToken));
         sse.setTimeout(1, TimeUnit.MINUTES);
     }
 
@@ -120,6 +139,10 @@ public class MessagingClient {
             sse.close();
             sse = null;
         }
+    }
+
+    public OkSse getOkSse() {
+        return okSse;
     }
 
     private class MessageToAck implements Comparable<MessageToAck> {

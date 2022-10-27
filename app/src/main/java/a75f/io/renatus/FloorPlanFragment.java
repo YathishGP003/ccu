@@ -66,6 +66,8 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.logic.cloud.CloudConnectionManager;
+import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
@@ -864,13 +866,14 @@ public class FloorPlanFragment extends Fragment {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
 
             if (floorToRename != null) {
-                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR,null);
-            }else {
-                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR,null);
+                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
+            } else {
+                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR, null);
             }
         }
         return false;
     }
+
 
     private void addRenamedFloor(){
         if (floorToRename != null) {
@@ -1022,7 +1025,6 @@ public class FloorPlanFragment extends Fragment {
             Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
             return;
         }
-
         isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
     }
 
@@ -1078,7 +1080,6 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
         };
-
         new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
     }
 
@@ -1128,6 +1129,7 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addRoomEdit)
     public boolean handleRoomChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
+            int maxZoneNameLength = 24;
 
             if (roomToRename != null) {
                 for (String z : siteRoomList) {
@@ -1138,6 +1140,11 @@ public class FloorPlanFragment extends Fragment {
                 }
                 roomList.remove(roomToRename);
                 siteRoomList.remove(roomToRename.getDisplayName());
+
+                if ((addRoomEdit.getText().toString().length() >  maxZoneNameLength)) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
 
                 Zone hsZone = new Zone.Builder()
                         .setDisplayName(addRoomEdit.getText().toString().trim())
@@ -1168,6 +1175,10 @@ public class FloorPlanFragment extends Fragment {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
+                }
+                if ((addRoomEdit.getText().toString().length() > maxZoneNameLength)) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Zone name should have less than 25 characters", Toast.LENGTH_SHORT).show();
+                    return true;
                 }
 
                 Toast.makeText(getActivity().getApplicationContext(),
@@ -1262,7 +1273,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isCCUPaired = false;
         boolean isPaired = false;
         boolean isSensePaired = false;
-        boolean isBPOSPaired = false;
+        boolean isOTNPaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1279,13 +1290,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("SENSE")) {
                     isSensePaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("BPOS")) {
-                    isBPOSPaired = true;
+                if (zoneEquips.get(i).getProfile().contains("OTN")) {
+                    isOTNPaired = true;
                 }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isBPOSPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isOTNPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1322,8 +1333,8 @@ public class FloorPlanFragment extends Fragment {
             if (isSensePaired) {
                 Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
-            if (isBPOSPaired) {
-                Toast.makeText(getActivity(), "BPOS is already paired in this zone", Toast.LENGTH_LONG).show();
+            if (isOTNPaired) {
+                Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1455,9 +1466,9 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
-                case BPOS:
-                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()),FragmentBPOSTempInfConfiguration.ID);
+                case OTN:
+                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)

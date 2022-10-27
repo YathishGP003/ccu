@@ -71,8 +71,8 @@ public class EquipScheduler {
             occ.setHeatingDeadBand(deadbands);
             Double heatingTemp;
             Double coolingTemp;
-            if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
-                Log.d("BPOSProfile", "in bpos vav: ");
+            if (equip.getMarkers().contains("otn") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
+                Log.d("OTNProfile", "in otn vav: ");
                 handleAutoaway(equip,
                         occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
             }

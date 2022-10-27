@@ -130,6 +130,10 @@ public class UpdatePointHandler
             TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
         }
 
+        if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
+            TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
@@ -205,12 +209,12 @@ public class UpdatePointHandler
         boolean updateZoneUi = false;
         boolean isScheduleType = false;
 
-        if (p.getMarkers().contains("desired")) {
+        if (p.getMarkers().contains("desired") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
             updateZoneUi = true;
         }
 
-        if (p.getMarkers().contains("scheduleType")) {
+        if (p.getMarkers().contains("scheduleType") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
             updateZoneUi = true;
             isScheduleType = true;

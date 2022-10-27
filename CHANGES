@@ -1,2 +1,59 @@
- - Merged PR 4712: Master control allowing overlapping with heating cooling limits
- - Merged PR 4622: All profile UI and Autoaway Autoforce support
+ - Merged PR 5275: Remove patches and update version
+ - Remove patches and update version
+ - Merged PR 5077: Objectbox trimming during app start up
+ - Merged PR 5105: Disable ventillation during AutoAway
+ - Merged PR 5064: Added Equipment Status on BPOS for Humidifier and Dehumidifier
+ - Merged PR 5052: Bug 14179: CCU: Time unit based tuners are converting to Fahernheit when Celsius toggle is Enabled
+ - Update SmartStat occupancy detection logic Publish System occupancy during vacation
+ - Merged PR 5130: Remove forced occupied handling for modbus equips
+ - Merged PR 5106: HSCPU: Disable test UI if pairing is not completed
+ - Merged PR 5129: Hidden Menu option to view and delete duplicate building schedule
+ - Merged PR 4777: Now showing site entity fm email instead of ccu fm email
+ - System status to show occupied during autoaway
+ - Version bump to 1.644.0
+ - Merged PR 5171: CCU build verification -1
+ - Merged PR 5169: Added space
+ - Added space
+ - Version bump to 1.643.0
+ - Fix duplicate detection point creation in smartstat FCU profiles
+ - Merged PR 5143: Release test
+ - Version bump to 1.642.0
+ - Version bump to 1.641.0
+ - Remove forced occupied handling for modbus equips
+ - AutforcedOccupied should consider next occupied temp
+ - Version bump to 1.640.0
+ - Version bump to 1.639.0
+ - Version bump to 1.638.0
+ - Version bump to 1.637.0
+ - Version bump to 1.636.0
+ - Log upload from CCU
+ - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
+ - Version bump to 1.635.0
+ - Version bump to 1.634.0
+ - Version bump to 1.633.0
+ - Version bump to 1.632.0
+ - Version bump to 1.631.0
+ - Merged PR 5059: Rebranding BPOS to OTN
+ - Version bump to 1.630.0
+ - Remove vacation check for triggering AutoForcedOccupied
+ - WIP
+ - Merged PR 4848: Bug 10703: CCU: Temporary Override UI discrepancy.
+ - updated toast message
+ - Merged PR 4952: Fixed status msg for both zone and system frags
+ - Disable ventillation during AutoAway
+ - HSCPU: Disable test UI if pairing is not completed
+ - UI to remove duplicate building schedule
+ - Objectbox trimming during app start up
+ - Merged PR 4949: implemented Toast message to notify primary CCU upgrade for celsius feature.
+ - Bug 14179: CCU: Time unit based tuners are converting to Fahernheit when Celsius toggle is Enabled
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 4908: Null check for equips without occupancyData
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Null check for equips without occupancyData
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Bug 13432: CCU : CELSIUS SUPPORT : UI discrepancies after Celsius toggle is Enabled
+ - Bug 13432: CCU : CELSIUS SUPPORT : UI discrepancies after Celsius toggle is Enabled
+ - Bug 10703: CCU: Temporary Override UI discrepancy.

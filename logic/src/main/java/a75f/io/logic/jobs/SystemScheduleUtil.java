@@ -1,5 +1,8 @@
 package a75f.io.logic.jobs;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+
 import android.util.Log;
 
 import org.joda.time.DateTime;
@@ -70,7 +73,20 @@ public class SystemScheduleUtil {
                                                                 HayStackConstants.FORCE_OVERRIDE_LEVEL,
                                                                 false);
                 }
-                setAppOverrideExpiry(point, System.currentTimeMillis() + 10*1000);
+
+                Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
+                DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
+                        .withHourOfDay(day.getEthh())
+                        .withMinuteOfHour(day.getEtmm())
+                        .withDayOfWeek(day.getDay() + 1)
+                        .withSecondOfMinute(0);
+
+                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.USER_APP_WRITE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
+                        - System.currentTimeMillis(), "ms"));
+                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
+                        - System.currentTimeMillis(), "ms"));
+                setAppOverrideExpiry(point, (overrideExpiry.getMillis()
+                        - System.currentTimeMillis())/1000);
                 CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());
                 CCUHsApi.getInstance().syncEntityTree();
             } else {
@@ -84,7 +100,8 @@ public class SystemScheduleUtil {
                 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                                                                                                                                                         - System.currentTimeMillis(), "ms"));
-                setAppOverrideExpiry(point, 10);
+                setAppOverrideExpiry(point, (overrideExpiry.getMillis()
+                        - System.currentTimeMillis())/1000);
 
 
             }
@@ -180,8 +197,8 @@ public class SystemScheduleUtil {
                 Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
                 
                 DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
-                                              .withHourOfDay(day.getEthh())
-                                              .withMinuteOfHour(day.getEtmm())
+                                              .withHourOfDay(getEndHour(day.getEthh()))
+                                              .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
                                               .withDayOfWeek(day.getDay() + 1)
                                               .withSecondOfMinute(0);
                 

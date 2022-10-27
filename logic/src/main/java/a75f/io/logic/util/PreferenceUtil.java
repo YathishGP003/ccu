@@ -28,11 +28,15 @@ public class PreferenceUtil {
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
-    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleType";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleTypes";
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
-
+    private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
+    private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
+    private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
+    private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
+    private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -282,7 +286,6 @@ public class PreferenceUtil {
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
-
     }
 
     public static boolean getScheduleRefactorMigration() {
@@ -348,5 +351,45 @@ public class PreferenceUtil {
         setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
     }
 
+    public static void setDCWBPointsMigration() {
+        setBooleanPreference(DCWB_POINTS_MIGRATION, true);
+    }
+    public static boolean getDCWBPointsMigration() {
+        return getBooleanPreference(DCWB_POINTS_MIGRATION);
+    }
+
+    public static boolean getSmartStatPointsMigration() {
+        return getBooleanPreference(SMART_STAT_POINTS_MIGRATION);
+    }
+
+    public static void setSmartStatPointsMigration() {
+        setBooleanPreference(SMART_STAT_POINTS_MIGRATION, true);
+
+    }
+
+    public static boolean getBPOSToOTNMigration() {
+        return getBooleanPreference(BPOS_TO_OTN_MIGRATION);
+    }
+
+    public static void setBPOSToOTNMigration() {
+        setBooleanPreference(BPOS_TO_OTN_MIGRATION, true);
+
+    }
+
+    public static boolean getAutoAwaySetBackMigration() {
+        return getBooleanPreference(AUTOAWAYSETBACK);
+    }
+
+    public static void setAutoAwaySetBackMigration() {
+        setBooleanPreference(AUTOAWAYSETBACK, true);
+    }
+    public static boolean getHyperStatDeviceDisplayConfigurationPointsMigration() {
+        return getBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION);
+    }
+
+    public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
+        setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
+
+    }
 
 }

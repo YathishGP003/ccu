@@ -123,7 +123,7 @@ public class VavSystemController extends SystemController
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and vav) or " +
                                                                             "(equip and zone and ti) or " +
-                                                                   "(equip and zone and bpos)"
+                                                                   "(equip and zone and otn)"
         );
 
         updateSystemTempHumidity(allEquips);
@@ -254,7 +254,7 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
             if (isZoneDead(equip)) {
                 zoneDeadCount++;
@@ -678,11 +678,11 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips)
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos")) {
+            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                     "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;

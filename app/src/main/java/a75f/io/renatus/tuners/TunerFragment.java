@@ -53,12 +53,16 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -258,6 +262,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             if (updatedTunerValues.size() <= 0){
                 return;
             }
+
+            if (!TunerValidationHandler.validateTunersForLimitsViolation(CCUHsApi.getInstance(), updatedTunerValues)) {
+                Toast.makeText(getActivity(), "Updated tuner value violates the building/user limits. " +
+                                "Please change building/user limits from Installer Options before proceeding.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
             saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
             LayoutInflater inflater = this.getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_apply_tuner, null);
@@ -328,6 +339,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                     val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                                 }
                             }
+                            ArrayList<String> valueList = new ArrayList<>();
+                            DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
+                            tunerPriorityArray.loadValueList(valueList);
+                            val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
                         }
                         textView_oldValue.setText(val);
                         if (newTunerValueItem.get("newValue") != null){
@@ -356,6 +371,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                 val = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(val)));
                             }
                         }
+                        ArrayList<String> valueList = new ArrayList<>();
+                        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(newTunerValueItem, tunerGroupType,tunerGroupOpened);
+                        tunerPriorityArray.loadValueList(valueList);
+                        val = String.valueOf(tunerPriorityArray.getClosestNumberOfTarget(valueList, Double.parseDouble(val)));
                     }
                     textView_oldValue.setText(val);
                     if (newTunerValueItem.get("newValue") != null){
@@ -383,17 +402,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                     Object tunerVal = newTunerValueItem.get("newValue");
                     try {
-                        if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit")) {
+                        if (newTunerValueItem.containsKey("unit") && !newTunerValueItem.containsKey("displayUnit") && tunerVal != null) {
                             if (isCelsiusTunerAvailableStatus()) {
-                                if (doesPointNeedRelativeConversion(newTunerValueItem)) {
-                                    tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
-                                } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)) {
-                                    tunerVal = convertingDeadBandValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
-                                } else {
-                                    tunerVal = celsiusToFahrenheitTuner(Double.parseDouble(String.valueOf(tunerVal)));
+                                if (newTunerValueItem.get("unit").toString().equals("\u00B0F") || newTunerValueItem.get("unit").toString().equals("\u00B0C")) {
+                                    if (doesPointNeedRelativeConversion(newTunerValueItem)) {
+                                        tunerVal = convertingRelativeValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
+                                    } else if (doesPointNeedRelativeDeadBandConversion(newTunerValueItem)) {
+                                        tunerVal = convertingDeadBandValueCtoF(Double.parseDouble(String.valueOf(tunerVal)));
+                                    } else {
+                                        tunerVal = celsiusToFahrenheitTuner(Double.parseDouble(String.valueOf(tunerVal)));
+                                    }
                                 }
                             }
-                            Log.d("TAG", "onViewCreated: newValue " + tunerVal);
 
 
                         }
@@ -719,6 +739,15 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void itemClicked(HashMap item, int position) {
+
+        if (HSUtil.isBuildingLimitPoint(item.get("id").toString(), CCUHsApi.getInstance())) {
+            Toast.makeText(getContext(),
+                    "Building limits can be edited only from Installer Options Screen ",
+                    Toast.LENGTH_LONG )
+                    .show();
+            return;
+        }
+
         if(childSelected == -1) {
             childSelected = position;
             Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
@@ -731,6 +760,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             } else if (radioButtonModule.isChecked()) {
                 tunerGroupType = "Module";
             }
+
             DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
             tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
             showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
@@ -829,4 +859,5 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             updatedTunerValues.remove(item);
         }
     }
+
 }

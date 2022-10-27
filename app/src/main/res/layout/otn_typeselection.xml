@@ -43,7 +43,7 @@
             android:layout_marginRight="180dp"
             android:layout_centerVertical="true"
             android:fontFamily="@font/lato_bold"
-            android:text="@string/title_bpos"
+            android:text="@string/title_otn"
             android:textAllCaps="true"
             android:textColor="?orange_75f"
             android:textSize="33.5dp"
@@ -70,7 +70,7 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
-                    android:id="@+id/rl_bpostempinf"
+                    android:id="@+id/rl_otntempinf"
                     android:layout_width="match_parent"
                     android:layout_height="92dp"
                     android:layout_marginLeft="180dp">

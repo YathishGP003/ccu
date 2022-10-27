@@ -552,7 +552,7 @@ public abstract class VavProfile extends ZoneProfile {
             return;
         }
         double currentCfm = TrueCFMUtil.calculateAndUpdateCfm(hayStack, equipId,"");
-    
+
         CcuLog.i(L.TAG_CCU_ZONE, " updateDamperPosForTrueCfm: doCFM - iaqCompensatedLoopOp "+damper.currentPosition);
         if (systemState == SystemController.State.COOLING) {
             updateDamperWhenSystemCooling(hayStack, equipId, currentCfm);

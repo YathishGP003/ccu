@@ -546,6 +546,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
@@ -558,6 +559,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
@@ -786,22 +788,24 @@ public class FourPipeFanCoilUnitEquip  {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-HPU-" + nodeAddr;
+        HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe4 and his and equipRef== \"" + equip.getId() + "\"");
         if(config.enableOccupancyControl){
-            Point occupancyDetection = new Point.Builder()
-                    .setDisplayName(equipDis+"-occupancyDetection")
-                    .setEquipRef(equip.getId())
-                    .setSiteRef(siteRef)
-                    .setRoomRef(equip.getRoomRef())
-                    .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                    .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe4").addMarker("his").addMarker("zone")
-                    .setGroup(String.valueOf(nodeAddr))
-                    .setEnums("false,true")
-                    .setTz(tz)
-                    .build();
-            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            if (occDetPoint.isEmpty()) {
+                Point occupancyDetection = new Point.Builder()
+                        .setDisplayName(equipDis + "-occupancyDetection")
+                        .setEquipRef(equip.getId())
+                        .setSiteRef(siteRef)
+                        .setRoomRef(equip.getRoomRef())
+                        .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                        .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe4").addMarker("his").addMarker("zone")
+                        .setGroup(String.valueOf(nodeAddr))
+                        .setEnums("false,true")
+                        .setTz(tz)
+                        .build();
+                String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+                CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+            }
         }else {
-            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe4 and his and equipRef== \"" + equip.getId() + "\"");
             if ((occDetPoint != null) && (occDetPoint.size() > 0))
                 CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
         }
@@ -1068,6 +1072,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
                 .addMarker("fcu").addMarker("pipe4").addMarker("zone")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
                 .build();
@@ -1085,6 +1090,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
                 .addMarker("pipe4").addMarker("fcu").addMarker("temp")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();

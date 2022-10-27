@@ -3,20 +3,23 @@ package a75f.io.logic.util;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -43,8 +46,11 @@ import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import kotlin.Pair;
@@ -108,12 +114,12 @@ public class MigrationUtil {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
         }
-        
+
         if (!PreferenceUtil.isTrueCFMDABMigrationDone()) {
             trueCFMDABMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMDABMigrationDone();
         }
-        
+
         if (!PreferenceUtil.getDamperFeedbackMigration()) {
             doDamperFeedbackMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDamperFeedbackMigration();
@@ -133,17 +139,20 @@ public class MigrationUtil {
             doDiagPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setDiagEquipMigration();
         }
+
         if(!PreferenceUtil.getScheduleRefactorMigration()) {
             scheduleRefactorMigration(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefactorMigration();
         }
 
-
-
         if(!PreferenceUtil.getNewOccupancy()){
             Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway build less");
             migrateNewOccupancy(CCUHsApi.getInstance());
             PreferenceUtil.setNewOccupancy();
+        }
+
+        if(isFanControlDelayDefaultValueUpdated(CCUHsApi.getInstance())){
+            updateFanControlDefaultValue(CCUHsApi.getInstance());
         }
 
         if(!PreferenceUtil.getSiteNameEquipMigration()){
@@ -186,6 +195,26 @@ public class MigrationUtil {
         if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
             updateScheduleType(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
+
+        if(!PreferenceUtil.getDCWBPointsMigration()){
+            migrateDCWBPoints(CCUHsApi.getInstance());
+            PreferenceUtil.setDCWBPointsMigration();
+        }
+
+        if(!PreferenceUtil.getSmartStatPointsMigration()){
+            doSmartStatPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setSmartStatPointsMigration();
+        }
+
+        if(!PreferenceUtil.getBPOSToOTNMigration()){
+            migrateBPOSToOTN(CCUHsApi.getInstance());
+            PreferenceUtil.setBPOSToOTNMigration();
+        }
+
+        if(!PreferenceUtil.getHyperStatDeviceDisplayConfigurationPointsMigration()){
+            createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHyperStatDeviceDisplayConfigurationPointsMigration();
         }
     }
 
@@ -431,8 +460,8 @@ public class MigrationUtil {
             }
         });
     }
-    
-    
+
+
 
     private static void addUnitToTuners(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
@@ -466,7 +495,7 @@ public class MigrationUtil {
     }
 
     private static boolean checkAppVersionUpgraded() {
-        
+
         PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
         try {
             PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
@@ -479,7 +508,7 @@ public class MigrationUtil {
         }
         return false;
     }
-    
+
     private static void updateAhuRefForBposEquips(CCUHsApi hayStack) {
         ArrayList<HashMap> bposEquips = CCUHsApi.getInstance().readAll("equip and bpos");
         HashMap systemEquip = hayStack.read("equip and system");
@@ -542,7 +571,7 @@ public class MigrationUtil {
             CcuLog.i(logTag, unsyncedAlert.toString());
         }
     }
-    
+
     /**
      * Addresses an issue pre-exisiting builds prior to 1.597.0 where system was following building
      * schedule for certain zones even after enabling zone schedules.
@@ -551,7 +580,7 @@ public class MigrationUtil {
     private static void updateZoneScheduleTypes(CCUHsApi hayStack) {
         List<HashMap<Object,Object>> allScheduleTypePoints = hayStack.readAllEntities("point and scheduleType");
         Set<String> zoneRefs = new HashSet<>();
-        
+
         allScheduleTypePoints.forEach( scheduleType -> {
             Point scheduleTypePoint = new Point.Builder().setHashMap(scheduleType).build();
             double scheduleTypeVal = hayStack.readPointPriorityVal(scheduleTypePoint.getId());
@@ -561,7 +590,7 @@ public class MigrationUtil {
                 zoneRefs.add(scheduleTypePoint.getRoomRef());
             }
         });
-        
+
         zoneRefs.forEach( zoneRef -> {
             HashMap<Object, Object> zone = hayStack.readMapById(zoneRef);
             CcuLog.i(L.TAG_CCU_SCHEDULER, " ZoneScheduleMigration "+zone);
@@ -577,18 +606,18 @@ public class MigrationUtil {
                 }
             }
         });
-        
+
     }
-    
+
     private static void cleanUpDuplicateZoneSchedules(CCUHsApi hayStack) {
         CcuLog.i("MIGRATION_UTIL", " cleanUpDuplicateZoneSchedules ");
         List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
-        
+
         rooms.forEach( zoneMap -> {
             Zone zone = new Zone.Builder().setHashMap(zoneMap).build();
             List<HashMap<Object,Object>> zoneSchedules = hayStack.readAllEntities("schedule and not vacation and " +
                                                                                   "roomRef == "+zone.getId());
-            
+
             //A zone is expected to have only one zone schedule.
             if (zoneSchedules.size() > 1) {
                 zoneSchedules.forEach( schedule -> {
@@ -775,7 +804,7 @@ public class MigrationUtil {
             }
         });
     }
-    
+
     private static void scheduleRefactorMigration(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
         rooms.forEach( room -> {
@@ -786,23 +815,23 @@ public class MigrationUtil {
                 hayStack.addZoneOccupancyPoint(roomEntity.getId(), roomEntity);
             }
         });
-    
+
         ArrayList<HashMap<Object, Object>> hyperStatCpus = hayStack.readAllEntities("equip and hyperstat and cpu");
         hyperStatCpus.forEach( cpuEquip -> {
             HashMap<Object, Object> keyCardConfig = hayStack.readEntity("keycard and sensing and enabled and equipRef" +
                                                                         " == \""+cpuEquip.get("id")+"\"");
-            
+
             if (keyCardConfig.isEmpty()) {
-    
+
                 Equip equip = new Equip.Builder().setHashMap(cpuEquip).build();
                 HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip, hayStack);
-    
+
                 hyperStatPointsUtil.createKeycardWindowSensingPoints().forEach(
                     point -> pushPointToHS(hyperStatPointsUtil, point)
                 );
             }
         });
-        
+
         ArrayList<HashMap<Object, Object>> occModePoints = hayStack.readAllEntities("occupancy and mode");
         occModePoints.forEach( occMode -> {
             Point occModePoint = new Point.Builder().setHashMap(occMode).build();
@@ -811,7 +840,6 @@ public class MigrationUtil {
         });
         hayStack.scheduleSync();
     }
-
 
     private static void migrateNewOccupancy(CCUHsApi hsApi) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");
@@ -921,6 +949,27 @@ public class MigrationUtil {
         String equipDis = siteDis+"-"+profileDisplayName+"-"+nodeAddr;
         ConfigUtil.Companion.addConfigPoints(profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,
                 equipDis,tags,0,0);
+    }
+
+    private static boolean isFanControlDelayDefaultValueUpdated(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl check");
+        HashMap<Object, Object> fanControlTuner =
+                hsApi.readEntity("point and tuner and fan and control and time and delay");
+        return !fanControlTuner.isEmpty();
+    }
+
+    private static void updateFanControlDefaultValue(CCUHsApi hsApi){
+        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl update");
+        ArrayList<HashMap<Object, Object>> fanControlTunerAll =
+                hsApi.readAllEntities("point and tuner and fan and control and time and delay");
+        if(!fanControlTunerAll.isEmpty()) {
+            for (HashMap<Object, Object> fanControlTuner: fanControlTunerAll) {
+                hsApi.clearPointArrayLevel(fanControlTuner.get("id").toString(), TUNER_EQUIP_VAL_LEVEL, false);
+
+                hsApi.writePointForCcuUser(fanControlTuner.get("id").toString(), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                        TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+            }
+        }
     }
 
     private static void updateScheduleRefs(CCUHsApi hayStack) {
@@ -1049,17 +1098,149 @@ public class MigrationUtil {
     private static void updateScheduleType(CCUHsApi hayStack){
         List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
         for(HashMap<Object,Object> room : rooms){
-            HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and not special and " +
-                    "roomRef == " +room.get("id"));
+            String scheduleId = room.containsKey("scheduleRef") ? room.get("scheduleRef").toString() : null;
+            if(scheduleId == null){
+                continue;
+            }
+            HashMap<Object, Object> schedule = hayStack.readMapById(scheduleId.replaceFirst("@",""));
+            boolean isScheduleRefZoneSchedule = schedule.containsKey("zone") && schedule.containsKey("schedule");
             boolean isScheduleTypeNamedSchedule =
                     hayStack.readHisValByQuery("scheduleType and point and roomRef == \""+room.get("id").toString()+"\"")
                             .intValue() == ScheduleType.NAMED.ordinal();
-            if(!zoneScheduleMap.isEmpty() && isScheduleTypeNamedSchedule) {
+
+            if(isScheduleRefZoneSchedule  && isScheduleTypeNamedSchedule) {
                 hayStack.writeDefaultVal("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
                 hayStack.writeHisValByQuery("scheduleType and point and  roomRef " +
                         "== \"" + room.get("id") + "\"", (double) ScheduleType.BUILDING.ordinal());
             }
         }
+    }
+
+    private static void migrateDCWBPoints(CCUHsApi ccuHsApi){
+        boolean isDCWBEnabled = ccuHsApi.readDefaultVal("dcwb and enabled") > 0;
+        if(isDCWBEnabled){
+            ArrayList<HashMap<Object, Object>> DCWBPoints = new ArrayList<>();
+            HashMap<Object, Object> analog4OutputEnabled = ccuHsApi.readEntity("system and analog4 and output and enabled");
+            DCWBPoints.add(analog4OutputEnabled);
+            HashMap<Object, Object> adaptiveDeltaEnabled = ccuHsApi.readEntity("system and adaptive and delta and enabled");
+            DCWBPoints.add(adaptiveDeltaEnabled);
+            HashMap<Object, Object> maximizedExitWaterTempEnabled = ccuHsApi.readEntity("system and maximized and exit and water and enabled");
+            DCWBPoints.add(maximizedExitWaterTempEnabled);
+            HashMap<Object, Object> analog1AtValveClosedPosition = ccuHsApi.readEntity("system and analog1 and valve and closed");
+            DCWBPoints.add(analog1AtValveClosedPosition);
+            HashMap<Object, Object> analog1AtValveFullPosition = ccuHsApi.readEntity("system and analog1 and valve and full");
+            DCWBPoints.add(analog1AtValveFullPosition);
+            HashMap<Object, Object> analog4LoopOutputType = ccuHsApi.readEntity("system and analog4 and loop and output");
+            DCWBPoints.add(analog4LoopOutputType);
+            HashMap<Object, Object> analog4AtMinCoolingLoop = ccuHsApi.readEntity("system and analog4 and min and loop");
+            DCWBPoints.add(analog4AtMinCoolingLoop);
+            HashMap<Object, Object> analog4AtMaxCoolingLoop = ccuHsApi.readEntity("system and analog4 and max and loop");
+            DCWBPoints.add(analog4AtMaxCoolingLoop);
+            HashMap<Object, Object> createChilledWaterConfigPoints = ccuHsApi.readEntity("system and chilled and water and target and delta");
+            DCWBPoints.add(createChilledWaterConfigPoints);
+            HashMap<Object, Object> chilledWaterExitMargin = ccuHsApi.readEntity("system and chilled and water and exit and temp and margin");
+            DCWBPoints.add(chilledWaterExitMargin);
+            HashMap<Object, Object> chilledWaterMaxFlowRate = ccuHsApi.readEntity("system and chilled and water and max and flow and rate");
+            DCWBPoints.add(chilledWaterMaxFlowRate);
+
+            for (HashMap<Object, Object> DCWBPoint: DCWBPoints ) {
+                Point updatedPoint = new Point.Builder().setHashMap(DCWBPoint).addMarker(Tags.DCWB).build();
+                ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        }else {
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "DCWB IS NOT ENABLED");
+        }
+    }
+
+    private static void doSmartStatPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("equip");
+
+        equipList.forEach(equip -> {
+            Equip equipMap = new Equip.Builder().setHashMap(equip).build();
+            String nodeAddress = equipMap.getGroup();
+            // Below list consists of smartStat points which does not have group tag
+            ArrayList<HashMap<Object, Object>> smartStatPoints = CCUHsApi.getInstance().readAllEntities("point and " +
+                    "not group and standalone and not tuner and not system and not diag and  " +
+                    "equipRef == \""+ equipMap.getId()+"\"");
+
+            for(HashMap<Object, Object> point : smartStatPoints){
+                Point up = new Point.Builder().setHashMap(point).setGroup(nodeAddress).build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        });
+    }
+
+    private static void migrateBPOSToOTN(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("bpos and equip");
+        equipList.forEach(objectObjectHashMap -> {
+            objectObjectHashMap.put("profile", "OTN");
+            String displayName = objectObjectHashMap.get("dis").toString();
+            displayName = displayName.replace("-BPOS-", "-OTN-");
+            objectObjectHashMap.put("dis", displayName);
+            Equip updatedEquip =
+                    new Equip.Builder().setHashMap(objectObjectHashMap).removeMarker("bpos").addMarker(Tags.OTN).
+                            build();
+            CCUHsApi.getInstance().updateEquip(updatedEquip, updatedEquip.getId());
+
+            HashMap device = CCUHsApi.getInstance().readEntity("device and equipRef == \"" +
+                    updatedEquip.getId()+"\"");
+            displayName = device.get("dis").toString();
+            displayName = displayName.replace("SN-", "OTN-");
+            device.put("dis", displayName);
+            Device updatedDevice =
+                    new Device.Builder().setHashMap(device).removeMarker("smartnode").addMarker(Tags.OTN).build();
+            CCUHsApi.getInstance().updateDevice(updatedDevice, updatedDevice.getId());
+        });
+
+        ArrayList <HashMap<Object, Object>> pointList = haystack.readAllEntities("bpos and point");
+        pointList.addAll(haystack.readAllEntities("tuner and point"));
+        Set<HashMap<Object, Object>> pointSet = new HashSet<>(pointList);
+        pointSet.forEach(pointHashMap -> {
+            String displayName = pointHashMap.get("dis").toString();
+            displayName = displayName.replace("-BPOS-", "-OTN-");
+            pointHashMap.put("dis", displayName);
+            if(pointHashMap.containsKey("tunerGroup") && pointHashMap.get("tunerGroup").toString().equals("BPOS")){
+                pointHashMap.put("tunerGroup", TunerConstants.OTN_TUNER_GROUP);
+            }
+            Point updatedPoint;
+            if(pointHashMap.containsKey("bpos")) {
+                updatedPoint = new Point.Builder().setHashMap(pointHashMap).removeMarker("bpos").
+                        addMarker(Tags.OTN).build();
+            }
+            else{
+                updatedPoint = new Point.Builder().setHashMap(pointHashMap).build();
+            }
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        });
+        CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
+        ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");
+        for (HashMap<Object, Object> rawEquip : equipList) {
+            if(!rawEquip.isEmpty()) {
+                createDeviceConfigurationPoints(haystack);
+            }
+        }
+    }
+    private static void createDeviceConfigurationPoints(CCUHsApi hayStack){
+
+        ArrayList<HashMap<Object, Object>> hyperStatCpus = hayStack.readAllEntities("equip and hyperstat and cpu");
+        hyperStatCpus.forEach( cpuEquip -> {
+            HashMap<Object, Object> deviceDisplayConfigurationPoint = hayStack.readEntity("humidity and enabled and equipRef" +
+                    " == \"" + cpuEquip.get("id") + "\"");
+
+            if (deviceDisplayConfigurationPoint.isEmpty()) {
+                Equip equip1 = new Equip.Builder().setHashMap(cpuEquip).build();
+                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip1, hayStack);
+                hyperStatPointsUtil.createDeviceDisplayConfigurationPoints(true,false,false,true).forEach(
+                        point -> pushPointToHS(hyperStatPointsUtil, point)
+                );
+            }
+        });
+
+
+
     }
 }

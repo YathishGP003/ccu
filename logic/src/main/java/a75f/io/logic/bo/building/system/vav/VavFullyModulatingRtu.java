@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
@@ -374,8 +375,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
-    
-        return status.toString().equals("")? "System OFF" : status.toString();
+
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn()) : status.toString() + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn());
     }
     
     public void addSystemEquip() {

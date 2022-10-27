@@ -234,7 +234,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         }
         SpecialScheduleCalendarFragment specialScheduleCalendarFragment =
                 new SpecialScheduleCalendarFragment(specialScheduleHDict,
-                        SpecialScheduleDialogFragment.this::displaySpecialScheduleDate);
+                        SpecialScheduleDialogFragment.this::displaySpecialScheduleDate, selectedDates);
         specialScheduleCalendarFragment.show(fragmentTransaction, "popup");
     }
 
@@ -332,4 +332,14 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
                 rangeSeekBarView.getCoolValue(), rangeSeekBarView.getHeatValue());
         dismiss();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(1165, 646);
+        }
+    }
+
 }

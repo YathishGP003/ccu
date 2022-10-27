@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -126,9 +130,9 @@ public class Schedule
                                                      .withMinuteOfHour(day.getStmm())
                                                      .withSecondOfMinute(0);
                     DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                                   .withHourOfDay(day.getEthh())
-                                                   .withMinuteOfHour(day.getEtmm())
-                                                   .withSecondOfMinute(0);
+                                                    .withHourOfDay(getEndHour(day.getEthh()))
+                                                    .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
+                                                    .withSecondOfMinute(getEndSec(day.getEthh()));
                     Interval scheduledInterval =
                             new Interval(startDateTime.withDayOfWeek(day.getDay() + 1), endDateTime
                                                                                                 .withDayOfWeek(

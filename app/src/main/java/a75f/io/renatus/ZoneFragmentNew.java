@@ -2282,7 +2282,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         }
         textViewLabel4.setText("Supply Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
         }

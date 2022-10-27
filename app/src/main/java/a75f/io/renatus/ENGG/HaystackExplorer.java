@@ -285,7 +285,6 @@ public class HaystackExplorer extends Fragment
         tunerMap.clear();
         expandableListDetail.clear();
         equipMap.clear();
-
         scheduleMap.clear();
 
         HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special and not named");

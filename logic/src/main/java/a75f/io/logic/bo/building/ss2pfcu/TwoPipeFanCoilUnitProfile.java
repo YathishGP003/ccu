@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -463,11 +464,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
 
         String fanstages = "";
-        Log.d("FANMODE","SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+relayStates.toString()+","+coolingDeadband+","+roomTemp+","+setTempCooling);
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if(((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband)))|| ((roomTemp <= setTempHeating) && (roomTemp > (setTempHeating - heatingDeadband)))){
+                    if(((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband)))
+                            || ((roomTemp <= setTempHeating) && (roomTemp > (setTempHeating - heatingDeadband)))
+                            || (!isFanMediumEnabled && !isFanHighEnabled && (roomTemp >= setTempCooling || roomTemp <= setTempHeating))){
                         if(getCmdSignal("fan and medium", addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             setCmdSignal("fan and medium", 0, addr);
@@ -599,6 +601,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     relayStates.put("HeatingStage1",1);
             }
         }
+        Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+                +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
@@ -622,11 +626,13 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
 
         String fanstages = "";
+
         switch (fanSpeed){
             case AUTO:
                 // Turn on only one relay at any given point of time say if 70 is dt, then 70-68- fan low on, 66-68 - fan medium on, 64-66 - fan high on,
                 if(isFanLowEnabled){
-                    if((roomTemp <= setTempHeating) &&(roomTemp > (setTempHeating - heatingDeadband)) ){
+                    if(((roomTemp <= setTempHeating) &&(roomTemp > (setTempHeating - heatingDeadband)))
+                        || (!isFanMediumEnabled && !isFanHighEnabled && roomTemp <= setTempHeating)){
                         if(getCmdSignal("fan and medium",addr) == 0) {
                             if(getCmdSignal("fan and low",addr) == 0)
                                 setCmdSignal("fan and low", 1.0, addr);
@@ -764,6 +770,9 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             if(getCmdSignal("aux and heating",addr) > 0)
                 setCmdSignal("aux and heating",0,addr);
         }
+
+        Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+                +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, HEATING,relayStates ,ZoneTempState.NONE);

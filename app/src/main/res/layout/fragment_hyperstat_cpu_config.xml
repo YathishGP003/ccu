@@ -741,11 +741,13 @@
                 <TextView
                     android:id="@+id/zoneCO2DamperOpeningRate"
                     style="@style/FanPositionLabel_HyperStat"
-                    android:text="@string/zoneCO2DamperOpeningRate" />
+                    android:text="@string/zoneCO2DamperOpeningRate"
+                    android:visibility="gone" />
 
                 <Spinner
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
-                    style="@style/Damper_HyperStat" />
+                    style="@style/Damper_HyperStat"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/zoneCO2Threshold"
@@ -860,6 +862,99 @@
 
 
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/display_device"
+                android:layout_marginStart="34dp"
+                style="@style/text_lite_header"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="@dimen/appbar_padding_top"
+                android:textAppearance="@style/text_label" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="48dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="wrap_content"
+                    android:text="@string/humidity"
+                    android:textAppearance="@style/text_label" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+                    <ToggleButton
+                        android:id="@+id/humidity"
+                        style="@style/ToggleButton_HyperStat"
+                        android:layout_marginStart="32dp" />
+                </LinearLayout>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="115dp"
+                    android:text="@string/co2"
+                    android:textAppearance="@style/text_label" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+                    <ToggleButton
+                        android:id="@+id/co2"
+                        style="@style/ToggleButton_HyperStat"
+                        android:layout_marginStart="32dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="48dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="wrap_content"
+                    android:text="@string/voc"
+                    android:textAppearance="@style/text_label" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+                    <ToggleButton
+                        android:id="@+id/voc"
+                        style="@style/ToggleButton_HyperStat"
+                        android:layout_marginStart="32dp" />
+                </LinearLayout>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="115dp"
+                    android:text="@string/p2pm"
+                    android:textAppearance="@style/text_label" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+                    <ToggleButton
+                        android:id="@+id/p2pm"
+                        style="@style/ToggleButton_HyperStat"
+                        android:layout_marginStart="32dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
 
 
             <Button

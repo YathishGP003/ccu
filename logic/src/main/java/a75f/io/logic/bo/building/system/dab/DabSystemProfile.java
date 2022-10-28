@@ -119,7 +119,7 @@ public abstract class DabSystemProfile extends SystemProfile
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
-                .setUnit("%").setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
+                .setUnit("%").setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and dab and relay and deactivation and hysteresis");
         ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
@@ -231,7 +231,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                                  .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                                  .addMarker("sp").addMarker("system")
-                                                 .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                                 .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                                  .setUnit("m")
                                                  .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                  .setTz(tz)
@@ -271,7 +271,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                             .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
-                                            .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                            .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                             .setUnit("m")
                                             .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                             .setTz(tz)

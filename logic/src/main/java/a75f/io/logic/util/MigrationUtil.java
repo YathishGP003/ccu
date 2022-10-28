@@ -109,7 +109,14 @@ public class MigrationUtil {
             airflowUnitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowVolumeUnitMigrationDone();
         }
-
+        if (!PreferenceUtil.isTimerCounterAndCFMCoolingMigrationDone()) {
+            timerCounterAndCFMCoolingMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTimerCounterAndCFMCoolingMigrationDone();
+        }
+        if (!PreferenceUtil.isRelayDeactivationAndReheatZoneToDATMigrationDone()) {
+            relayDeactivationAndReheatZoneToDATMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setRelayDeactivationAndReheatZoneToDATMinMigrationDone();
+        }
         if (!PreferenceUtil.isTrueCFMVAVMigrationDone()) {
             trueCFMVAVMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTrueCFMVAVMigrationDone();
@@ -398,6 +405,46 @@ public class MigrationUtil {
         String updatedAirflowUnit = "cfm";
         for (HashMap<Object, Object> airflow : airflowPoints) {
             Point updatedPoint = new Point.Builder().setHashMap(airflow).setUnit(updatedAirflowUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+    }
+
+    private static void relayDeactivationAndReheatZoneToDATMigration(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> relayDeactivationPointVav = ccuHsApi.readAllEntities("point and tuner and vav and relay and deactivation and hysteresis");
+        ArrayList<HashMap<Object, Object>> relayDeactivationPointDab = ccuHsApi.readAllEntities("point and tuner and dab and relay and deactivation and hysteresis");
+        ArrayList<HashMap<Object, Object>> reheatZoneToDATMinDifferentialPoint = ccuHsApi.readAllEntities("point and tuner and reheat and differential");
+        String updatedMaxValue = "60";
+        for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointDab) {
+            Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisDab).setMaxVal(updatedMaxValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+        for (HashMap<Object, Object> relayDeactivationHysteresisVav : relayDeactivationPointVav) {
+            Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisVav).setMaxVal(updatedMaxValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+        for (HashMap<Object, Object> reheatZoneToDATMinDifferential : reheatZoneToDATMinDifferentialPoint) {
+            Point updatedPoint = new Point.Builder().setHashMap(reheatZoneToDATMinDifferential).setMaxVal(updatedMaxValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+
+    }
+
+    private static void timerCounterAndCFMCoolingMigration(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> timerCounterPoint = ccuHsApi.readAllEntities("point and tuner and timer and counter");
+        ArrayList<HashMap<Object, Object>> maxCFMCoolingPoint = ccuHsApi.readAllEntities("point and trueCfm and cooling and max");
+        ArrayList<HashMap<Object, Object>> minCFMCoolingPoint = ccuHsApi.readAllEntities("point and trueCfm and cooling and min");
+        String updatedMaxValue = "60";
+        String updatedIncrementalValue = "5";
+        for (HashMap<Object, Object> timerCounter : timerCounterPoint) {
+            Point updatedPoint = new Point.Builder().setHashMap(timerCounter).setMaxVal(updatedMaxValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+        for (HashMap<Object, Object> maxCfmCooling : maxCFMCoolingPoint) {
+            Point updatedPoint = new Point.Builder().setHashMap(maxCfmCooling).setMaxVal(updatedMaxValue).setIncrementVal(updatedIncrementalValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+        for (HashMap<Object, Object> minCfmCooling : minCFMCoolingPoint) {
+            Point updatedPoint = new Point.Builder().setHashMap(minCfmCooling).setIncrementVal(updatedIncrementalValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
     }

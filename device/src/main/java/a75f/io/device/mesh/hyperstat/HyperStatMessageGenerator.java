@@ -95,8 +95,8 @@ public class HyperStatMessageGenerator {
                 .setDisplayVOC(isDisplayVov(equipRef))
                 .setDisplayPM25(isDisplayP2p5(equipRef))
             .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
-            .setPm25AlertThreshold((int)readVocThresholdValue(equipRef))
-            .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
+            .setPm25AlertThreshold((int)readPm2p5ThresholdValue(equipRef))
+            .setVocAlertThreshold((int)readVocThresholdValue(equipRef))
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
 

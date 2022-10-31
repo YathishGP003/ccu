@@ -145,14 +145,13 @@ class HyperStatCpuProfile : ZoneProfile() {
         when (state) {
             //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
             ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-                currentTemp, userIntents.zoneCoolingTargetTemperature
+                    currentTemp, userIntents.zoneCoolingTargetTemperature
             ).toInt().coerceAtLeast(0)
 
             //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
             ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-                userIntents.zoneHeatingTargetTemperature, currentTemp
+                    userIntents.zoneHeatingTargetTemperature, currentTemp
             ).toInt().coerceAtLeast(0)
-
             else -> Log.i(L.TAG_CCU_HSCPU, " Zone is in deadband")
         }
 
@@ -554,21 +553,17 @@ class HyperStatCpuProfile : ZoneProfile() {
         Log.i(TAG, "Current Mode handleRelayState: $currentOperatingMode")
         when {
             (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
-
-                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
-                    &&( basicSettings.fanMode != StandaloneFanStage.OFF )
-
-                ) {
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                    &&( basicSettings.fanMode != StandaloneFanStage.OFF)) {
                     runRelayForCooling(relayState, equip, port, config, tuner, relayStages)
                 }else{
                     updateLogicalPointIdValue(equip, logicalPointsList[port]!!, 0.0)
                 }
             }
             (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
-
-                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
                     &&(basicSettings.fanMode != StandaloneFanStage.OFF)
                 ) {
                     runRelayForHeating(relayState, equip, port, config, tuner, relayStages)
@@ -949,10 +944,9 @@ class HyperStatCpuProfile : ZoneProfile() {
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
             (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
-
-                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
-                    && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal )
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                    &&(basicSettings.fanMode != StandaloneFanStage.OFF)
                 ) {
                     runForAnalogOutCooling(equip, port)
                     dumpAnalogOutLoopStatus(coolingLoopOutput, AnalogOutput.COOLING.name, analogOutStages)
@@ -962,10 +956,10 @@ class HyperStatCpuProfile : ZoneProfile() {
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
 
-                if ((basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal)
-                        && ( basicSettings.fanMode.ordinal != StandaloneFanStage.OFF.ordinal ) )
-                {
+                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
+                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
+                    &&(basicSettings.fanMode != StandaloneFanStage.OFF)
+                ) {
                     dumpAnalogOutLoopStatus(heatingLoopOutput, AnalogOutput.HEATING.name, analogOutStages)
                     runForAnalogOutHeating(equip, port)
                 }else{

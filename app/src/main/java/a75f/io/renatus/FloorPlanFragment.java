@@ -66,6 +66,8 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.logic.cloud.CloudConnectionManager;
+import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
@@ -864,13 +866,14 @@ public class FloorPlanFragment extends Fragment {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
 
             if (floorToRename != null) {
-                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR,null);
-            }else {
-                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR,null);
+                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
+            } else {
+                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR, null);
             }
         }
         return false;
     }
+
 
     private void addRenamedFloor(){
         if (floorToRename != null) {
@@ -1022,7 +1025,6 @@ public class FloorPlanFragment extends Fragment {
             Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
             return;
         }
-
         isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
     }
 
@@ -1078,7 +1080,6 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
         };
-
         new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
     }
 

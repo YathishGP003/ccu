@@ -1,7 +1,5 @@
 package a75f.io.renatus.registration;
 
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
-
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -149,7 +147,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             @Override
             public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                Toast toast = new Toast(getApplicationContext());
+                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 if (response.getString("valid") == "true") {
                     getAllCCUs(response.getJSONObject("siteCode").getString("siteId"), response.getJSONArray("devices"));
@@ -318,7 +316,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             @Override
             public void onErrorResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                Toast toast = new Toast(getApplicationContext());
+                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 toast.setView(toastFail);
                 TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
@@ -334,7 +332,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
 
     private void deleteRenatusData(){
        try{
-            String packageName = getApplicationContext().getPackageName();
+            String packageName = Globals.getInstance().getApplicationContext().getPackageName();
             Runtime runtime = Runtime.getRuntime();
             runtime.exec("pm clear "+packageName);
         }
@@ -379,7 +377,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){
-        Toast toast = new Toast(getApplicationContext());
+        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
         toast.setGravity(Gravity.BOTTOM, 50, 50);
         toast.setView(toastCcuRestoreSuccess);
         TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);

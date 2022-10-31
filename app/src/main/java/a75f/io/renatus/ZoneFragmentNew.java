@@ -857,40 +857,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);           // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);
@@ -1014,8 +1012,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     } else {
 
                         Zone zone = Schedule.getZoneforEquipId(equipId[0]);
+
                         HashMap<Object, Object> scheduleHashmap = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         if (zone.hasSchedule()) {
 
@@ -1042,6 +1042,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         }
                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null && z.getScheduleRef() == null) {
@@ -1490,40 +1491,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent){
-                View v = convertView;
-                if (v == null) {
-                    Context mContext = this.getContext();
-                    LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.spinner_item_grey, null);
+                View row = null;
+                TextView tv = null;
+
+                Context mContext = this.getContext();
+                LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View v = vi.inflate(R.layout.spinner_item_grey, null);
+                // Giving margin for scheduleArray after index > 2
+                if(position > 2)
+                {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setPadding(50,12,50,12);
+                    if(namedScheds.isEmpty()) {
+                        v.setEnabled(false);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //NO-OP: Just intercept click on disabled item
+                            }
+                        });
+                    }
+                }
+                else if (position == 2) {
+                    row = super.getDropDownView(position, v, parent);
+                    tv = (TextView) row.findViewById(R.id.spinnerTarget);
+                    tv.setTextColor(Color.BLACK);   // Changing text color to Color.BLACK for Named Schedule item.
+                } else {
+                    row = super.getDropDownView(position, v, parent);
                 }
 
-                TextView tv = (TextView) v.findViewById(R.id.spinnerTarget);
-                tv.setText(scheduleArray.get(position));
 
-                switch (position) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        tv.setTextColor(Color.BLACK);
-                        break;
-                    case 3:
-                        tv.setPadding(50,12,50,12);
-                        if(namedScheds.isEmpty()) {
-                            v.setEnabled(false);
-                            v.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //NO-OP: Just intercept click on disabled item
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        tv.setPadding(50,12,50,12);
-                        break;
-                }
-                return v;
+                return row;
             }
         };
         scheduleSpinner.setAdapter(scheduleAdapter);
@@ -1643,9 +1642,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     }
                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                     Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
+
                     if (z != null && z.getScheduleRef() == null) {
                         HashMap<Object, Object> scheduleHashmap =CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +z.getId());
+
                         Schedule scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashmap.get("id").toString());
                         z.setScheduleRef(scheduleById.getId());
                         CCUHsApi.getInstance().updateZone(z, zoneId);
@@ -1670,6 +1671,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         if (zone.hasSchedule()) {
                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
+
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                             Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
@@ -1683,6 +1685,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                              */
                             HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
+
                             if (!schedule.isEmpty()) {
                                 Log.d(L.TAG_CCU_UI, " add scheduleRef "+schedule.toString());
                                 zone.setScheduleRef(schedule.get("id").toString());
@@ -1691,12 +1694,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             }
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
+
                             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and " +
                                     "not special and not vacation and roomRef " + "== " +zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
                         }
                         HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                 "not special and not vacation and roomRef " + "== " +zone.getId());
+
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
                         if (z != null && z.getScheduleRef() == null) {

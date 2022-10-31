@@ -58,6 +58,7 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -404,6 +405,11 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateZoneLocally(Zone z, String id)
+    {
+        tagsDb.updateZone(z, id);
     }
 
     /**
@@ -1835,10 +1841,14 @@ public class CCUHsApi
     {
         if (scheduleRef == null)
             return null;
-
-        HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
-        //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
-        return new Schedule.Builder().setHDict(hDict).build();
+        HDict hDict = null;
+        try {
+            hDict = tagsDb.readById(HRef.copy(scheduleRef));
+        } catch (UnknownRecException e) {
+            Log.d("CCU_HS", " getScheduleById : Schedule not found !! - " +scheduleRef);
+            importSchedule(scheduleRef);
+        }
+        return hDict == null ? null : new Schedule.Builder().setHDict(hDict).build() ;
     }
 
     public HDict getScheduleDictById(String scheduleId){
@@ -2469,6 +2479,33 @@ public class CCUHsApi
     
     public HisSyncHandler getHisSyncHandler() {
         return hisSyncHandler;
+    }
+
+    public String fetchRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
+    public void importSchedule(String id) {
+        Observable.fromCallable(() -> {
+                    String response = fetchRemoteEntity(id);
+                    if (response != null) {
+                        HZincReader hZincReader = new HZincReader(response);
+                        Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                        while (hZincReaderIterator.hasNext()) {
+                            HRow row = (HRow) hZincReaderIterator.next();
+                            tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+                            CcuLog.i("CCU_HS", "Schedule Imported "+row);
+                        }
+                    }
+                    return true;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
+
     }
     public void setAuthorised(boolean isAuthorised) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

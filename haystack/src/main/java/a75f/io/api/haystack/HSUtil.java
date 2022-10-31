@@ -389,9 +389,28 @@ public class HSUtil
         HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
         return ((pointEntity.containsKey("ti")
                 && pointEntity.containsKey("config"))
-        &&(pointEntity.containsKey("th1")
+                && (pointEntity.containsKey("th1")
                 || pointEntity.containsKey("th2")
-                ||pointEntity.containsKey("main")));
+                || pointEntity.containsKey("main")));
+    }
+    /**
+     * Checks a given point is a limit tuner.
+     * @param id
+     * @param hayStack
+     * @return
+     */
+    public static boolean isBuildingLimitPoint(String id, CCUHsApi hayStack) {
+        if (id == null) {
+            return false;
+        }
 
+        Point tunerPoint = new Point.Builder()
+                .setHashMap(hayStack.readMapById(id))
+                .build();
+
+        return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
+                !tunerPoint.getMarkers().contains("alert"))
+                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
+                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
     }
 }

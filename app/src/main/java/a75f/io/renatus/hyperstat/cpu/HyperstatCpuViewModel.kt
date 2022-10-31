@@ -335,6 +335,27 @@ class HyperStatCpuViewModel(application: Application) : AndroidViewModel(applica
         )
     }
 
+     fun onDisplayHumiditySelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayHumidityEnabled = checked )
+        )
+    }
+     fun onDisplayCo2Selected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayCo2Enabled = checked )
+        )
+    }
+     fun onDisplayVocSelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayVOCEnabled = checked )
+        )
+    }
+     fun onDisplayP2pmSelected(checked: Boolean){
+        viewState.onNext(
+            currentState.copy( isDisplayPp2p5Enabled = checked )
+        )
+    }
+
 }
 
 // Dropdown choice value ranges
@@ -358,7 +379,7 @@ private val OpeningRateMin = 0
 private val OpeningRateMax = 200
 
 private val CO2Min = 0
-private val CO2Max = 2000
+private val CO2Max = 4000
 
 private val INC = 10
 
@@ -370,6 +391,7 @@ private val VOCMax = 10000
 
 private val PMMin = 0
 private val PMMax = 1000
+const val DISABLED = 65535.0
 
 private fun tempOffsetIndexFromValue(tempOffset: Double) =
     offsetIndexFromValue(TEMP_OFFSET_LIMIT_MIN, TEMP_OFFSET_INC, tempOffset)
@@ -420,25 +442,46 @@ fun analogFanLevelSpeedValue(): Array<String?> {
 }
 
 private fun co2DCVDamperValueFromIndex(index: Int) = offsetFromIndex(CO2Min, INC.toDouble(), index)
-private fun OpeningDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
 
-private fun vocValueFromIndex(index: Int) = offsetFromIndex(VOCMin, VOC_INC.toDouble(), index)
-private fun pm25ValueFromIndex(index: Int) = offsetFromIndex(PMMin, PM_INC.toDouble(), index)
+//private fun OpeningDamperValueFromIndex(index: Int) = offsetFromIndex(OpeningRateMin, INC.toDouble(), index)
+private fun OpeningDamperValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else co2DCVDamperValue()[index].toString().replace(" ppm","").toDouble()
+}
 
+//private fun vocValueFromIndex(index: Int) = offsetFromIndex(VOCMin, VOC_INC.toDouble(), index)
+private fun vocValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else vocValues()[index].toString().replace(" ppb","").toDouble()
+}
 
-private fun co2DCVDamperSetIndexFromValue(value: Double) = offsetIndexFromValue(CO2Min, INC.toDouble(), value)
+//private fun pm25ValueFromIndex(index: Int) = offsetFromIndex(PMMin, PM_INC.toDouble(), index)
+private fun pm25ValueFromIndex(index: Int): Double{
+    return if (index == 0) DISABLED else pmValues()[index].toString().replace(" ug/㎥","").toDouble()
+}
+
+//private fun co2DCVDamperSetIndexFromValue(value: Double) = offsetIndexFromValue(CO2Min, INC.toDouble(), value)
+private fun co2DCVDamperSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(CO2Min, INC.toDouble(), value)+1
+}
+
 private fun co2DCVOpeningDamperSetIndexFromValue(value: Double) =
     offsetIndexFromValue(OpeningRateMin, INC.toDouble(), value)
 
-private fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
-private fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
-
+//private fun vocSetIndexFromValue(value: Double) = offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)
+private fun vocSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(VOCMin, VOC_INC.toDouble(), value)+1
+}
+//private fun pmSetIndexFromValue(value: Double) = offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)
+private fun pmSetIndexFromValue(value: Double): Int{
+    return if(value == DISABLED) 0 else offsetIndexFromValue(PMMin, PM_INC.toDouble(), value)+1
+}
 
 fun co2DCVDamperValue(): Array<String?> {
-    return offsetSpinnerValues(
+    val co2List: MutableList<String?> = offsetSpinnerValues(
         CO2Max, CO2Min,
         INC.toDouble(), true, " ppm"
-    )
+    ).toMutableList()
+    co2List.add(0,"Disabled")
+    return co2List.toTypedArray()
 }
 
 fun co2DCVOpeningDamperValue(): Array<String?> {
@@ -449,16 +492,21 @@ fun co2DCVOpeningDamperValue(): Array<String?> {
 }
 
 fun vocValues(): Array<String?> {
-    return offsetSpinnerValues(
+    val vocList: MutableList<String?> = offsetSpinnerValues(
         VOCMax, VOCMin,
         VOC_INC.toDouble(), true, " ppb"
-    )
+    ).toMutableList()
+    vocList.add(0,"Disabled")
+    return vocList.toTypedArray()
 }
 fun pmValues(): Array<String?> {
-    return offsetSpinnerValues(
+    val pmList: MutableList<String?> = offsetSpinnerValues(
         PMMax, PMMin,
         PM_INC.toDouble(), true, " ug/㎥"
-    )
+    ).toMutableList()
+    pmList.add(0,"Disabled")
+    return pmList.toTypedArray()
+
 }
 
 
@@ -544,6 +592,10 @@ data class CpuViewState(
     var zoneVocTargetPos: Int,
     var zonePm2p5ThresholdPos: Int,
     var zonePm2p5TargetPos: Int,
+    var isDisplayHumidityEnabled: Boolean,
+    var isDisplayVOCEnabled: Boolean,
+    var isDisplayPp2p5Enabled: Boolean,
+    var isDisplayCo2Enabled: Boolean,
 
     ) {
 
@@ -574,7 +626,11 @@ data class CpuViewState(
             zoneVocThresholdPos =  vocSetIndexFromValue(config.zoneVOCThreshold),
             zoneVocTargetPos =  vocSetIndexFromValue(config.zoneVOCTarget),
             zonePm2p5ThresholdPos =  pmSetIndexFromValue(config.zonePm2p5Threshold),
-            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target)
+            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target),
+            isDisplayHumidityEnabled = config.displayHumidity,
+            isDisplayCo2Enabled = config.displayCo2,
+            isDisplayVOCEnabled = config.displayVOC,
+            isDisplayPp2p5Enabled = config.displayPp2p5
 
         )
     }
@@ -607,6 +663,10 @@ data class CpuViewState(
             zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
             zonePm2p5Threshold = pm25ValueFromIndex(zonePm2p5ThresholdPos)
             zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
+            displayHumidity = isDisplayHumidityEnabled
+            displayCo2 = isDisplayCo2Enabled
+            displayVOC = isDisplayVOCEnabled
+            displayPp2p5 = isDisplayPp2p5Enabled
         }
     }
 }

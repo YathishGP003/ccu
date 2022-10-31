@@ -57,7 +57,7 @@ public class SyncWorker extends Worker {
     
         isSyncWorkInProgress = true;
         try {
-            if (CCUHsApi.getInstance().getAuthorised()) {
+            if (!CCUHsApi.getInstance().getAuthorised()) {
                 return Result.success();
             }
             if (!siteHandler.doSync()) {

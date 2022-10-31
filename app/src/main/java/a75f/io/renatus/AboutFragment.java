@@ -466,6 +466,7 @@ public class AboutFragment extends Fragment {
                 if (response.getString("valid").equals("true")) {
                     String ccuId = CCUHsApi.getInstance().getCcuId();
                     retriveCCUDetails(ccuId);
+                    CCUHsApi.getInstance().setAuthorised(true);
                 } else {
                     Toast.makeText(Globals.getInstance().getApplicationContext(), getString(R.string.error_msg), Toast.LENGTH_LONG).show();
                 }

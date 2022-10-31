@@ -27,9 +27,7 @@ public class MessagingAckJob {
             @Override
             public void run()
             {
-                if (CCUHsApi.getInstance().getAuthorised()) {
-                    doJob();
-                }
+                doJob();
             }
         };
     }

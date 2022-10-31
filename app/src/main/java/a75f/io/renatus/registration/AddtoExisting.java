@@ -1,21 +1,11 @@
 package a75f.io.renatus.registration;
 
-import a75f.io.api.haystack.BuildConfig;
-import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.constants.HttpConstants;
-import a75f.io.constants.SiteFieldConstants;
-import a75f.io.logger.CcuLog;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import com.google.android.material.textfield.TextInputLayout;
-
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -31,6 +21,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,10 +34,13 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.HttpConstants;
+import a75f.io.constants.SiteFieldConstants;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RenatusLandingActivity;
@@ -54,8 +52,6 @@ import a75f.io.renatus.util.retrofit.ApiInterface;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 public class AddtoExisting extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -246,14 +242,14 @@ public class AddtoExisting extends Fragment {
                     JSONObject jsonObject=new JSONObject(responseData);
                     if (jsonObject.getString("valid") == "true"){
                         JSONObject siteCode = jsonObject.getJSONObject("siteCode");
-                        Toast toast = new Toast(getApplicationContext());
+                        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
                         toast.setView(toastLayout);
                         toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
                         loadExistingSite(siteCode.getString("siteId"));
                     }else{
-                        Toast toast = new Toast(getApplicationContext());
+                        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
                         toast.setView(toast_Fail);
                         toast.setDuration(Toast.LENGTH_LONG);

@@ -57,6 +57,9 @@ public class SyncWorker extends Worker {
     
         isSyncWorkInProgress = true;
         try {
+            if (CCUHsApi.getInstance().getAuthorised()) {
+                return Result.success();
+            }
             if (!siteHandler.doSync()) {
                 CcuLog.e(TAG, "Site sync failed");
                 return Result.retry();
@@ -70,13 +73,11 @@ public class SyncWorker extends Worker {
                 return Result.retry();
             }
 
-            if (CCUHsApi.getInstance().getAuthorised()) {
                 if (!syncDeletedEntities()) {
                     CcuLog.e(TAG, "Deleted entity sync failed");
                     return Result.retry();
                 }
-            }
-            
+
             if (!syncUnSyncedEntities()) {
                 CcuLog.e(TAG, "Unsynced entity sync failed");
                 return Result.retry();
@@ -169,6 +170,7 @@ public class SyncWorker extends Worker {
                     CcuLog.d(TAG, "RemoveEntity Response : " + response);
                     if (Integer.parseInt(response) == 401) {
                         CCUHsApi.getInstance().setAuthorised(false);
+                        return;
                     }
                     if (response == null) {
                         return;

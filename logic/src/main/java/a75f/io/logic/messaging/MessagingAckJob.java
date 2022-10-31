@@ -59,19 +59,21 @@ public class MessagingAckJob {
             return;
         }
         emptyMessageWatchdogCounter = 0;
-        channelsToMessageIds.forEach((channel, messageIds) ->
-                messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
-                    .subscribe(
-                            response -> {
-                                if (response.isSuccessful()) {
-                                    CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
-                                } else if(response.code() == 401) {
-                                    CCUHsApi.getInstance().setAuthorised(false);
-                                } else {
-                                    CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
-                                }
-                            },
-                            error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
-                    ));
+        if (CCUHsApi.getInstance().getAuthorised()) {
+            channelsToMessageIds.forEach((channel, messageIds) ->
+                    messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
+                            .subscribe(
+                                    response -> {
+                                        if (response.isSuccessful()) {
+                                            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
+                                        } else if (response.code() == 401) {
+                                            CCUHsApi.getInstance().setAuthorised(false);
+                                        } else {
+                                            CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
+                                        }
+                                    },
+                                    error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
+                            ));
+        }
     }
 }

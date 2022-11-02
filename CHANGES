@@ -1,3 +1,5 @@
+ - Merged PR 5025: Hyperstat 2 Pipe profile configurations
+ - Version bump to 1.631.0
  - Merged PR 5390: App crash resolved when using Proxy.
  - Merged PR 5476: User Story 14414: [CCU]: Tuner values to be updated for some of the tuners
  - Merged PR 5493: Restored raygun
@@ -130,8 +132,6 @@
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
  - Version bump to 1.633.0
  - Version bump to 1.632.0
- - Version bump to 1.631.0
- - Merged PR 5059: Rebranding BPOS to OTN
  - Remove vacation check for triggering AutoForcedOccupied
  - WIP
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

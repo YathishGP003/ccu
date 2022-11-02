@@ -220,7 +220,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
-            CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
+            CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode, this);
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

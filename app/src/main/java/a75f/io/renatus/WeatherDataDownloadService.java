@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.LocationDetails;
@@ -71,7 +72,7 @@ public class WeatherDataDownloadService {
 
             String zipCode = spDefaultPrefs.getString("zipcode", "");
             String country = spDefaultPrefs.getString("country", "");
-            CCUUtils.getLocationInfo(country + " " +zipCode );
+            CCUUtils.getLocationInfo(country + " " +zipCode , Globals.getInstance().getApplicationContext());
 
 
         } else {

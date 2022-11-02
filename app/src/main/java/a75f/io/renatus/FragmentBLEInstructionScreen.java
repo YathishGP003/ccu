@@ -1,5 +1,11 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +16,8 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -22,21 +30,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.util.CCUUiUtil;
-import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
-
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
@@ -349,13 +349,26 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        HyperStatCpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
+                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
                                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
-                        HyperStatCpuFragment.ID);
+                        HyperStatFragment.ID);
             }
             else {
                 Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
+                                ProfileType.HYPERSTAT_TWO_PIPE_FCU),
+                        HyperStatFragment.ID);
+            }
+            else {
+                Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_TWO_PIPE_FCU);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

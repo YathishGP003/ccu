@@ -124,7 +124,9 @@ public class BuildingTuners
         AlertTuners.addDefaultAlertTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TemperatureLimitTuners.addDefaultTempLimitTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        HyperstatTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         OTNTuners.addDefaultOTNTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        HyperstatCpuTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        OAOTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        HyperStat2PipeTuners.Companion.addPipe2BuildingTuner(hayStack, siteRef, equipRef, equipDis, tz);
     }
 }

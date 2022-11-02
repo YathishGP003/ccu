@@ -294,13 +294,18 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
         FragmentManager fm = getSupportFragmentManager();
-        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
-            fm.popBackStackImmediate(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            if(fragment.getClass().toString().contains("CreateNewSite")){
-               getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        try {
+
+            for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                if (fragment.getClass().toString().contains("CreateNewSite")) {
+                    getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                }
+            }
+        }catch (IllegalStateException e){
+            e.printStackTrace();
         }
     }
 

@@ -28,7 +28,6 @@ public enum SensorType
     // update message unlike the other native sensors, which are sent as SensorReadings.
     KEY_CARD_SENSOR("Key_card_Sensor"),
     DOOR_WINDOW_SENSOR("Door_Window_sensor");
-
     String name;
     
     SensorType(String val) {

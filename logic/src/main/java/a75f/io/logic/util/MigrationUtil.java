@@ -1,5 +1,10 @@
 package a75f.io.logic.util;
 
+import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -8,10 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.AlertManager;
@@ -35,26 +38,20 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
-import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
+import a75f.io.logic.migration.point.PointMigrationHandler;
+import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
-
-import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
-
-import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.ccu.restore.RestoreCCU;
 import kotlin.Pair;
-import a75f.io.logic.migration.point.PointMigrationHandler;
 
 public class MigrationUtil {
     private static final String TAG = "MIGRATION_UTIL";
@@ -223,6 +220,11 @@ public class MigrationUtil {
             createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setHyperStatDeviceDisplayConfigurationPointsMigration();
         }
+
+        if(!PreferenceUtil.getHyperStatCpuTagMigration()){
+            CpuPointsMigration.Companion.doMigrationForProfilePoints();
+            PreferenceUtil.setHyperStatCpuTagMigration();
+        }
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -300,7 +302,7 @@ public class MigrationUtil {
             boolean isPm2p5ThresholdExist = isPointExist ("point and hyperstat and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
             boolean isPm2p5TargetExist = isPointExist ("point and hyperstat and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" ,instance);
 
-            HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip, instance);
+            HyperStatPointsUtil hyperStatPointsUtil = HyperStatReconfigureUtil.Companion.getEquipPointsUtil(equip, instance);
 
             List<Pair<Point, Object>> list = hyperStatPointsUtil.createPointVOCPmConfigPoint(
                     equip.getDisplayName(), 1000, 1000, 1000, 1000
@@ -871,10 +873,11 @@ public class MigrationUtil {
             if (keyCardConfig.isEmpty()) {
 
                 Equip equip = new Equip.Builder().setHashMap(cpuEquip).build();
-                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip, hayStack);
+
+                HyperStatPointsUtil hyperStatPointsUtil = HyperStatReconfigureUtil.Companion.getEquipPointsUtil(equip, hayStack);
 
                 hyperStatPointsUtil.createKeycardWindowSensingPoints().forEach(
-                    point -> pushPointToHS(hyperStatPointsUtil, point)
+                        point -> pushPointToHS(hyperStatPointsUtil, point)
                 );
             }
         });
@@ -1262,7 +1265,6 @@ public class MigrationUtil {
         });
         CCUHsApi.getInstance().scheduleSync();
     }
-
     private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
         ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");
         for (HashMap<Object, Object> rawEquip : equipList) {
@@ -1280,14 +1282,12 @@ public class MigrationUtil {
 
             if (deviceDisplayConfigurationPoint.isEmpty()) {
                 Equip equip1 = new Equip.Builder().setHashMap(cpuEquip).build();
-                HyperStatPointsUtil hyperStatPointsUtil = HSReconfigureUtil.Companion.getEquipPointsUtil(equip1, hayStack);
+                HyperStatPointsUtil hyperStatPointsUtil = HyperStatReconfigureUtil.Companion.getEquipPointsUtil(equip1, hayStack);
                 hyperStatPointsUtil.createDeviceDisplayConfigurationPoints(true,false,false,true).forEach(
                         point -> pushPointToHS(hyperStatPointsUtil, point)
                 );
             }
         });
-
-
-
     }
+
 }

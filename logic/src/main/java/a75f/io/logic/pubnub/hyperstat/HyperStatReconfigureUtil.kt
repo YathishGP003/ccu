@@ -1,8 +1,6 @@
-package a75f.io.logic.bo.building.hyperstat.common
+package a75f.io.logic.pubnub.hyperstat
 
-import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.*
 import a75f.io.api.haystack.Queries.Companion.ANALOG1_IN
 import a75f.io.api.haystack.Queries.Companion.ANALOG1_OUT
 import a75f.io.api.haystack.Queries.Companion.ANALOG2_IN
@@ -13,8 +11,8 @@ import a75f.io.api.haystack.Queries.Companion.OUT
 import a75f.io.api.haystack.Tags.*
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
-import a75f.io.logic.bo.building.hyperstat.cpu.CPUReconfiguration
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatPointsUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil
+import a75f.io.logic.bo.haystack.device.DeviceUtil
 import android.util.Log
 import com.google.gson.JsonObject
 import java.util.*
@@ -22,7 +20,7 @@ import java.util.*
 /**
  * Created by Manjunath K on 19-10-2021.
  */
-class HSReconfigureUtil {
+class HyperStatReconfigureUtil {
 
     companion object {
 
@@ -44,16 +42,8 @@ class HSReconfigureUtil {
             } else {
                 val equip = getEquip(configPoint.equipRef, haystack)
                 val updatedConfigValue = msgObject.get("val").asDouble
-                val configPointId = msgObject.get("id").asString
-                haystack.writeDefaultValById(configPointId, updatedConfigValue)
-
                 val configType = configType(configPoint.markers)
                 val portType = portType(configPoint.markers)
-                Log.i(
-                    L.TAG_CCU_HSCPU, "Reconfiguration Updated : \n" +
-                            "$configPointId -> $updatedConfigValue \n" +
-                            "configType $configType"
-                )
                 handleCreateReconfig(configPoint, updatedConfigValue, haystack, equip, configType!!, portType!!)
             }
 
@@ -68,36 +58,54 @@ class HSReconfigureUtil {
             val equip = getEquip(configPoint.equipRef, haystack)
             val configType = configType(configPoint.markers)
             val portType = portType(configPoint.markers)
-            handleUpdateReconfig(configPoint, equip, haystack, portType!!, configType!!)
+            updateAnalogActuatorType(configPoint, equip, haystack, portType!!, configType!!)
             Log.i(L.TAG_CCU_HSCPU, "Reconfiguration change Updated : $configPointId -> $updatedConfigValue")
             haystack.scheduleSync()
         }
 
-        fun updateAssociationPoint(msgObject: JsonObject, associationPoint: Point) {
+        fun updateAssociationPoint(msgObject: JsonObject, associationPoint: Point, haystack: CCUHsApi) {
             val updatedConfigValue = msgObject.get("val").asDouble
             val whichConfig = configType(associationPoint.markers)
+            val equip = getEquip(associationPoint.equipRef, haystack)
             val portType = portType(associationPoint.markers)
             Log.i(L.TAG_CCU_HSCPU, "Reconfiguration for Association Points $whichConfig $portType")
-            handleAssociationReconfig(whichConfig!!, portType!!, associationPoint, updatedConfigValue)
+            handleAssociationConfig(whichConfig!!, portType!!, associationPoint, updatedConfigValue,equip)
         }
 
 
-        // Handle when we enable Re-Config
-        private fun handleUpdateReconfig(
+        // If Configuration is changed for any of the analog out configuration we need
+        // We need to update the analog actuator types
+        // Based on actuator type analog voltage signals are decided
+        private fun updateAnalogActuatorType(
             point: Point,
             equip: Equip,
             haystack: CCUHsApi,
             portType: Port,
             configType: String
         ) {
+        // It is not to any profile specific it works for all the profiles (HS CPU,HPU,PIPE2,PIPE4)
+            if (point.markers.contains("out")) {
+                val analogOutTag = when (configType) {
+                    ANALOG1_OUT -> "analog1"
+                    ANALOG2_OUT -> "analog2"
+                    ANALOG3_OUT -> "analog3"
+                    else -> null
+                }
+                if (analogOutTag != null) {
+                    val minPointValue = haystack.readDefaultVal(
+                        "point and config and " +
+                                "$analogOutTag and output and min and equipRef == \"${equip.id}\""
+                    ).toInt()
+                    val maxPointValue = haystack.readDefaultVal(
+                        "point and config and " +
+                                "$analogOutTag and output and max and equipRef == \"${equip.id}\""
+                    ).toInt()
 
-            // configuration hyperstat cpu
-            if (point.markers.contains(CPU)) {
-                CPUReconfiguration.updateAnalogActuatorType(
-                    point, equip.id, equip.group.toInt(), haystack, portType, configType
-                )
+                    val pointType = "${minPointValue}-${maxPointValue}v"
+                    Log.i(L.TAG_CCU_HSCPU, "updateAnalogActuatorType: $pointType")
+                    DeviceUtil.updatePhysicalPointType(equip.group.toInt(), portType.name, pointType)
+                }
             }
-            // todo handler for all other profiles like HPU 2pipe 4pipe
         }
 
         // handle When we change the association
@@ -109,29 +117,38 @@ class HSReconfigureUtil {
             configType: String,
             portType: Port
         ) {
-            if (point.markers.contains(CPU)) {
-                CPUReconfiguration.configLogicalPoint(
-                    updatedConfigValue, haystack, equip, point, configType, portType,
+            if (equip.markers.contains(CPU)) {
+
+                CpuReconfiguration.updateConfiguration(
+                    updatedConfigValue, equip, portType,
                 )
             }
 
-            // todo handler for all other profiles like HPU 2pipe 4pipe
-
+            if (equip.markers.contains(PIPE2)) {
+                Pipe2Reconfiguration.updateConfiguration(
+                    updatedConfigValue, equip, portType,
+                )
+            }
         }
 
-        private fun handleAssociationReconfig(
+        private fun handleAssociationConfig(
             configType: String,
             portType: Port,
             point: Point,
-            updatedConfigValue: Double
+            updatedConfigValue: Double,
+            equip: Equip,
         ) {
-            if (point.markers.contains(CPU)) {
-                CPUReconfiguration.configAssociationPoint(
-                    configType, portType, updatedConfigValue, point
+            if (equip.markers.contains(CPU)) {
+                CpuReconfiguration.configAssociationPoint(
+                    portType, updatedConfigValue, equip
+                )
+            }
+            if (equip.markers.contains(PIPE2)) {
+                Pipe2Reconfiguration.configAssociationPoint(
+                    portType, updatedConfigValue, equip
                 )
             }
 
-            // todo handler for all other profiles like HPU 2pipe 4pipe
         }
 
         // Get Equip Points Util
@@ -152,7 +169,7 @@ class HSReconfigureUtil {
         // Function to Read point id
         fun readPointID(markers: String, equipRef: String, profileName: String, haystack: CCUHsApi): String? {
             val pointMap: HashMap<*, *> = haystack.read(
-                "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\""
+                "point and $markers and equipRef == \"$equipRef\""
             )
             return pointMap["id"] as String?
         }
@@ -190,7 +207,7 @@ class HSReconfigureUtil {
             haystack: CCUHsApi
         ): Double {
             return haystack.readDefaultVal(
-                "point and hyperstat and association and $profileName and config and $markers and equipRef == " +
+                "point and association and config and $markers and equipRef == " +
                         "\"$equipRef\""
             )
         }
@@ -212,7 +229,7 @@ class HSReconfigureUtil {
             if (markers.contains(ANALOG1) && markers.contains(IN)) return ANALOG1_IN
             if (markers.contains(ANALOG2) && markers.contains(IN)) return ANALOG2_IN
 
-            if (markers.contains(TH1)) return TH1
+            if (isAirflowConfig(markers)) return TH1
             if (markers.contains(TH2)) return TH2
             return null
         }
@@ -233,10 +250,15 @@ class HSReconfigureUtil {
             if (markers.contains(ANALOG2) && markers.contains(IN)) return Port.ANALOG_IN_TWO
 
 
-            if (markers.contains(TH1)) return Port.TH1_IN
+            if (isAirflowConfig(markers)) return Port.TH1_IN
             if (markers.contains(TH2)) return Port.TH2_IN
 
             return null
+        }
+
+        private fun isAirflowConfig(markers: ArrayList<String>): Boolean{
+            return (markers.contains(TEMP) && markers.contains(CMD) && markers.contains(CONFIG)
+                    && markers.contains(AIR) && markers.contains(DISCHARGE))
         }
 
     }

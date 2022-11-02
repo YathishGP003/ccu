@@ -42,6 +42,8 @@ public class PreferenceUtil {
     private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
     private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
     private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
+    private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -406,6 +408,14 @@ public class PreferenceUtil {
 
     public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
         setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
+
+    }
+    public static boolean getHyperStatCpuTagMigration() {
+        return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
+    }
+
+    public static void setHyperStatCpuTagMigration() {
+        setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
 
     }
 

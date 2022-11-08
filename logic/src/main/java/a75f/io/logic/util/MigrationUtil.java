@@ -893,12 +893,12 @@ public class MigrationUtil {
 
     private static void migrateNewOccupancy(CCUHsApi hsApi) {
         Log.d(TAG_CCU_MIGRATION_UTIL, "AutoForceOcccupied and Autoaway migration for DAB ");
-        ArrayList<HashMap<Object, Object>> dabEquips = hsApi.readAllEntities("equip and dab and smartnode");
-        ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hsApi.readAllEntities("equip and dualDuct and smartnode");
-        ArrayList<HashMap<Object, Object>> sseEquips = hsApi.readAllEntities("equip and sse and smartnode");
-        ArrayList<HashMap<Object, Object>> vavNoFanEquips = hsApi.readAllEntities("equip and vav and smartnode and not fanPowered");
-        ArrayList<HashMap<Object, Object>> vavSeriesEquips = hsApi.readAllEntities("equip and vav and series and smartnode");
-        ArrayList<HashMap<Object, Object>> vavParallelEquips = hsApi.readAllEntities("equip and vav and parallel and smartnode");
+        ArrayList<HashMap<Object, Object>> dabEquips = hsApi.readAllEntities("equip and dab and zone");
+        ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hsApi.readAllEntities("equip and dualDuct");
+        ArrayList<HashMap<Object, Object>> sseEquips = hsApi.readAllEntities("equip and sse");
+        ArrayList<HashMap<Object, Object>> vavNoFanEquips = hsApi.readAllEntities("equip and vav and zone and not fanPowered");
+        ArrayList<HashMap<Object, Object>> vavSeriesEquips = hsApi.readAllEntities("equip and vav and series");
+        ArrayList<HashMap<Object, Object>> vavParallelEquips = hsApi.readAllEntities("equip and vav and parallel");
         ArrayList<HashMap<Object, Object>> ssCPUEquips = hsApi.readAllEntities("equip and cpu and standalone and not hyperstat");
         ArrayList<HashMap<Object, Object>> ssHPUEquips = hsApi.readAllEntities("equip and hpu and standalone");
         ArrayList<HashMap<Object, Object>> ss2PFCUEquips = hsApi.readAllEntities("equip and pipe2 and fcu");

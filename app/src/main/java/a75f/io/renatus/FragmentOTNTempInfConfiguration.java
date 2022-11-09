@@ -30,13 +30,14 @@ import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
 /**
  * created by spoorthidev on 21-July-2021
  */
 public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
-
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     public static String ID = FragmentOTNTempInfConfiguration.class.getSimpleName();
     private static String LOG_TAG = "FragmentOTNTempInfConfiguration";
     static final int TEMP_OFFSET_LIMIT = 100;
@@ -139,37 +140,22 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
 
     @OnClick(R.id.setBtn)
     void setOnClick(View v) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                mSetbtn.setEnabled(false);
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration");
-                super.onPreExecute();
-            }
-
-            @Override
-            protected Void doInBackground(final String... params) {
-                setupOTNProfile();
-                L.saveCCUState();
-                return null;
-            }
-            
-
-            @Override
-            protected void onPostExecute(final Void result) {
-                ProgressDialogUtils.hideProgressDialog();
-                FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                RxjavaUtil.executeBackground(new Runnable() {
-                    @Override
-                    public void run() {
-                        LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, zoneRef,floorRef);
-                    }
-                });
-
-                
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        mSetbtn.setEnabled(false);
+        compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                ()->{
+                    ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration");
+                },
+                ()->{
+                    setupOTNProfile();
+                    L.saveCCUState();
+                    LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, zoneRef,floorRef);
+                },
+                ()->{
+                    ProgressDialogUtils.hideProgressDialog();
+                    FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();
+                    getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                }
+        ));
     }
 
     private void setupOTNProfile() {

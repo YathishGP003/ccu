@@ -26,29 +26,31 @@ class HyperStatSettingsUtil {
             val settings2 = HyperStatSettingsMessage2_t.newBuilder()
             val equip = getEquipDetails(nodeAddress)
 
+            // These all common configuration for all the profiles
+            settings2.enableForceOccupied = isAutoForceEnabled(hsApi, equipRef)
+            settings2.enableAutoAway = isAutoAwayEnabled(hsApi, equipRef)
+            settings2.hyperstatRelayConfig = getRelayConfigDetails(hsApi, equipRef)
+            settings2.hyperstatAnalogOutConfig = getAnalogOutConfigDetails(hsApi, equipRef)
+            settings2.hyperstatAnalogInConfig = getAnalogInConfigDetails(hsApi, equipRef)
+            settings2.thermistor1Enable = getTh1Enabled(hsApi, equipRef)
+            settings2.zoneCO2Target = readConfig(hsApi, equipRef, "co2 and target and config").toInt()
+            settings2.zoneCO2Threshold = readConfig(hsApi, equipRef, "co2 and threshold and config").toInt()
+            settings2.zoneCO2DamperOpeningRate = readConfig(hsApi, equipRef, "co2 and damper and config").toInt()
+            settings2.proportionalConstant = (TunerUtil.getProportionalGain(equipRef) * 100).toInt()
+            settings2.integralConstant = (TunerUtil.getIntegralGain(equipRef) * 100).toInt()
+            settings2.proportionalTemperatureRange = (TunerUtil.getProportionalSpread(equipRef) * 10).toInt()
+            settings2.integrationTime = TunerUtil.getIntegralTimeout(equipRef).toInt()
+
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
-
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
-
-                    settings2.enableForceOccupied = isAutoForceEnabled(hsApi, equipRef)
-                    settings2.enableAutoAway = isAutoAwayEnabled(hsApi, equipRef)
-                    settings2.hyperstatRelayConfig = getRelayConfigDetails(hsApi, equipRef)
-                    settings2.hyperstatAnalogOutConfig = getAnalogOutConfigDetails(hsApi, equipRef)
-                    settings2.hyperstatAnalogInConfig = getAnalogInConfigDetails(hsApi, equipRef)
-                    settings2.thermistor1Enable = getTh1Enabled(hsApi, equipRef)
-                    settings2.thermistor2Enable = getTh2Enabled(hsApi, equipRef)
-
-                    settings2.zoneCO2Target = readConfig(hsApi, equipRef, "co2 and target and config").toInt()
-                    settings2.zoneCO2Threshold = readConfig(hsApi, equipRef, "co2 and threshold and config").toInt()
-                    settings2.zoneCO2DamperOpeningRate =
-                        readConfig(hsApi, equipRef, "co2 and damper and config and damper").toInt()
-                    settings2.proportionalConstant = (TunerUtil.getProportionalGain(equipRef) * 100).toInt()
-                    settings2.integralConstant = (TunerUtil.getIntegralGain(equipRef) * 100).toInt()
-                    settings2.proportionalTemperatureRange = (TunerUtil.getProportionalSpread(equipRef) * 10).toInt()
-                    settings2.integrationTime = TunerUtil.getIntegralTimeout(equipRef).toInt()
-
+                    settings2.thermistor2Enable = getTh2DoorWindow(hsApi, equipRef)
                 }
+                ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
+                    settings2.thermistor2Enable = getTh2SupplyWaterTempEnabled(hsApi, equipRef)
+                }
+
                 ProfileType.HYPERSTAT_SENSE.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_SENSE
                 }
@@ -110,7 +112,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun isAutoAwayEnabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "auto and forced and control and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "auto and away and control and enabled") == 1.0)
         }
 
         /**
@@ -120,7 +122,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh1Enabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "th1 and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "air and temp and config and enabled") == 1.0)
         }
 
         /**
@@ -129,9 +131,20 @@ class HyperStatSettingsUtil {
          * @param hsApi
          * @return Boolean
          */
-        private fun getTh2Enabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "th2 and config and enabled") == 1.0)
+        private fun getTh2DoorWindow(hsApi: CCUHsApi, equipRef: String): Boolean {
+            return (readConfig(hsApi, equipRef, "air and discharge and config and enabled") == 1.0)
         }
+
+        /**
+         * Function to check the is Thermistor 2 toggle configuration enabled or not
+         * @param equipRef
+         * @param hsApi
+         * @return Boolean
+         */
+        private fun getTh2SupplyWaterTempEnabled(hsApi: CCUHsApi, equipRef: String): Boolean {
+            return (readConfig(hsApi, equipRef, "supply and water and temp and config and enabled") == 1.0)
+        }
+
 
         /**
          * Function which reads all the Relay toggle configuration and mapping details
@@ -185,53 +198,53 @@ class HyperStatSettingsUtil {
             val analogOutConfiguration = HyperStat.HyperstatAnalogOut_t.newBuilder()
 
             analogOutConfiguration.analogOut1Enable = readConfig(
-                hsApi, equipRef, "analog1 and out and config and enabled"
+                hsApi, equipRef, "analog1 and output and config and enabled"
             ) == 1.0
 
             analogOutConfiguration.analogOut2Enable = readConfig(
-                hsApi, equipRef, "analog2 and out and config and enabled"
+                hsApi, equipRef, "analog2 and output and config and enabled"
             ) == 1.0
 
             analogOutConfiguration.analogOut3Enable = readConfig(
-                hsApi, equipRef, "analog3 and out and config and enabled"
+                hsApi, equipRef, "analog3 and output and config and enabled"
             ) == 1.0
 
             if (analogOutConfiguration.analogOut1Enable) {
                 analogOutConfiguration.analogOut1Mapping = 1 + readConfig(
-                    hsApi, equipRef, "analog1 and out and config and association "
+                    hsApi, equipRef, "analog1 and output and config and association "
                 ).toInt()
 
                 analogOutConfiguration.analogOut1AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and out and config and min"
+                    hsApi, equipRef, "analog1 and output and config and min"
                 ) * 10).toInt()
                 analogOutConfiguration.analogOut1AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog1 and out and config and max "
+                    hsApi, equipRef, "analog1 and output and config and max "
                 ) * 10).toInt()
             }
 
             if (analogOutConfiguration.analogOut2Enable) {
                 analogOutConfiguration.analogOut2Mapping = 1 + readConfig(
-                    hsApi, equipRef, "analog2 and out and config and association "
+                    hsApi, equipRef, "analog2 and output and config and association "
                 ).toInt()
 
                 analogOutConfiguration.analogOut2AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and out and config and min"
+                    hsApi, equipRef, "analog2 and output and config and min"
                 ) * 10).toInt()
                 analogOutConfiguration.analogOut2AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog2 and out and config and max "
+                    hsApi, equipRef, "analog2 and output and config and max "
                 ) * 10).toInt()
             }
 
             if (analogOutConfiguration.analogOut3Enable) {
                 analogOutConfiguration.analogOut3Mapping = 1 + readConfig(
-                    hsApi, equipRef, "analog3 and out and config and association "
+                    hsApi, equipRef, "analog3 and output and config and association "
                 ).toInt()
 
                 analogOutConfiguration.analogOut3AtMinSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and out and config and min"
+                    hsApi, equipRef, "analog3 and output and config and min"
                 ) * 10).toInt()
                 analogOutConfiguration.analogOut3AtMaxSetting = (readConfig(
-                    hsApi, equipRef, "analog3 and out and config and max "
+                    hsApi, equipRef, "analog3 and output and config and max "
                 ) * 10).toInt()
             }
 
@@ -248,19 +261,19 @@ class HyperStatSettingsUtil {
             val analogIn = HyperStat.HyperstatAnalogIn_t.newBuilder()
 
             analogIn.analogIn1Enable = readConfig(
-                hsApi, equipRef, "analog1 and in and config and enabled"
+                hsApi, equipRef, "analog1 and input and config and enabled"
             ) == 1.0
 
             analogIn.analogIn2Enable = readConfig(
-                hsApi, equipRef, "analog2 and in and config and enabled"
+                hsApi, equipRef, "analog2 and input and config and enabled"
             ) == 1.0
 
             if (analogIn.analogIn1Enable) {
-                val mapping = readConfig(hsApi, equipRef, "analog1 and in and config and association ").toInt()
+                val mapping = readConfig(hsApi, equipRef, "analog1 and input and config and association ").toInt()
                 analogIn.analogIn1Mapping = HyperStat.HyperstatAnalogInMapping_t.values()[mapping]
             }
             if (analogIn.analogIn2Enable) {
-                val mapping = readConfig(hsApi, equipRef, "analog2 and in and config and association ").toInt()
+                val mapping = readConfig(hsApi, equipRef, "analog2 and input and config and association ").toInt()
                 analogIn.analogIn2Mapping = HyperStat.HyperstatAnalogInMapping_t.values()[mapping]
             }
 
@@ -277,7 +290,7 @@ class HyperStatSettingsUtil {
             genericTuners.unoccupiedSetback = (TunerUtil.readTunerValByQuery(
                 "unoccupied and setback", equipRef) * 10).toInt()
             genericTuners.relayActivationHysteresis =
-                TunerUtil.getHysteresisPoint("relay and  activation", equipRef).toInt()
+                TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =
                 (TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equipRef) * 10 ).toInt()
             genericTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equipRef).toInt()
@@ -298,7 +311,7 @@ class HyperStatSettingsUtil {
          */
         private fun readConfig(hsApi: CCUHsApi, equipRef: String, markers: String): Double {
             return hsApi.readDefaultVal(
-                "hyperstat and $markers and equipRef == \"$equipRef\""
+                "point and $markers and equipRef == \"$equipRef\""
             )
         }
 
@@ -309,9 +322,6 @@ class HyperStatSettingsUtil {
                 ccuControlMessageTimer = System.currentTimeMillis()}
             return field
 
-        }
-        set(value: Long) {
-            field = value
         }
 
     }

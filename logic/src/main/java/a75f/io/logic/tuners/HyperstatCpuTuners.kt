@@ -3,7 +3,6 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
-import a75f.io.api.haystack.Tags
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_ANALOG_SPEED_MULTIPLIER_DEFAULT
 import a75f.io.logic.tuners.TunersUtil.HyperstatTunerConstants.Companion.HYPERSTAT_COOLING_DEADBAND
@@ -32,7 +31,7 @@ import android.annotation.SuppressLint
  * @author Manjunath K
  * Created on 28-07-2021.
  */
-class HyperstatTuners {
+class HyperstatCpuTuners {
 
     companion object {
 
@@ -77,11 +76,7 @@ class HyperstatTuners {
                 // add common  markers
                 .addMarker("tuner").addMarker("default").addMarker("sp")
                 .addMarker("writable").addMarker("his")
-                .addMarker(Tags.STANDALONE)
 
-            if (!buildingDefault) {
-                point.addMarker("hyperstat")
-            }
 
             if (!roomRef.isNullOrEmpty()) point.setRoomRef(roomRef)
             if (!floorRef.isNullOrEmpty()) point.setFloorRef(floorRef)
@@ -107,16 +102,6 @@ class HyperstatTuners {
 
             // Create Tuner Points
 
-            // coolingDeadband = 2 (°F)
-            // Min = 0 ,  Max = 10.0 ,  Default = 2 , inc 0.5 unit = u00B0F
-            /*
-            val coolingDeadBandMarkers = arrayOf("cooling", "deadband")
-            val hsCoolingDeadBandPoint = createTunerPoint(
-                HYPERSTAT_COOLING_DEADBAND, coolingDeadBandMarkers, "0", "10.0", "0.5", "\u00B0F"
-            )
-            listOfTunerPoints[hsCoolingDeadBandPoint] = HYPERSTAT_COOLING_DEADBAND_DEFAULT
-
-            */
             // coolingDeadbandMultiplier = 0.5
             // min = 0 , max = 5.0 , Default = 0.5 inc 0.1 unit = ?
             val hsCoolingDeadbandMultiplierMarkers = arrayOf("cooling", "deadband", "multiplier")
@@ -165,26 +150,7 @@ class HyperstatTuners {
             )
             listOfTunerPoints[humidityHysteresisPoint] = HYPERSTAT_HUMIDITY_HISTERESIS_DEFAULT
 
-            /*
 
-            // autoAwayZoneSetbackTemp = 2 (°F)
-            // Min = 0 ,  Max = 10.0 ,  Default = 2 , inc 0.5  unit = "\u00B0F"
-            val autoAwayZoneSetbackTempMarkers = arrayOf("auto", "zone", "away", "setback", "temp")
-            val autoAwayZoneSetbackTempPoint = createTunerPoint(
-                HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP, autoAwayZoneSetbackTempMarkers, "0", "10.0", "0.5", "\u00B0F"
-            )
-            listOfTunerPoints[autoAwayZoneSetbackTempPoint] = HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP_DEFAULT
-
-            */
-
-            // heatingDeadband = 2 (°F)
-            // min = 0 max = 10.0 inc = 0.5 default = 2.0 unit "\u00B0F"
-           /* val heatingDeadbandMarkers = arrayOf("heating", "deadband")
-            val heatingDeadbandPoint = createTunerPoint(
-                HYPERSTAT_HEATING_DEADBAND, heatingDeadbandMarkers, "0", "10.0", "0.5", "\u00B0F"
-            )
-            listOfTunerPoints[heatingDeadbandPoint] = HYPERSTAT_HEATING_DEADBAND_DEFAULT
-            */
             val heatingDeadbandMultiplierMarkers = arrayOf("heating", "deadband", "multiplier")
             val heatingDeadbandMultiplierPoint = createTunerPoint(
                 HYPERSTAT_HEATING_DEADBAND_MULTIPLIER, heatingDeadbandMultiplierMarkers, "0", "5.0", "0.1", "", true
@@ -199,7 +165,7 @@ class HyperstatTuners {
 
             // integralKFactor = 0.5
             // min = 0.1 , max = 1.0 inc = 0.1 default = 0.5 unit = ?
-            val integralKFactorMarkers = arrayOf("proportional", "integral", "igain")
+            val integralKFactorMarkers = arrayOf("integral", "igain")
             val integralKFactorPoint = createTunerPoint(
                 HYPERSTAT_INTEGRAL_KFACTOR, integralKFactorMarkers, "0.1", "1.0", "0.1", "", true
             )
@@ -287,17 +253,6 @@ class HyperstatTuners {
             )
             listOfTunerPoints[humidityHysteresisPoint] = HYPERSTAT_HUMIDITY_HISTERESIS_DEFAULT
 
-            /*
-
-            // autoAwayZoneSetbackTemp = 2 (°F)
-            // Min = 0 ,  Max = 10.0 ,  Default = 2 , inc 0.5  unit = "\u00B0F"
-            val autoAwayZoneSetbackTempMarkers = arrayOf("auto", "zone", "away", "setback", "temp")
-            val autoAwayZoneSetbackTempPoint = createTunerPoint(
-                HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP, autoAwayZoneSetbackTempMarkers, "0", "10.0", "0.5", "\u00B0F"
-            )
-            listOfTunerPoints[autoAwayZoneSetbackTempPoint] = HYPERSTAT_AUTO_AWAY_ZONE_STEPBACK_TEMP_DEFAULT
-
-            */
 
             // heatingDeadband = 2 (°F)
             // min = 0 max = 10.0 inc = 0.5 default = 2.0 unit "\u00B0F"
@@ -375,6 +330,32 @@ class HyperstatTuners {
                 standaloneHeatingPreconditioningRateId,
                 HSUtil.getPriorityVal(standaloneHeatingPreconditioningRateId)
             )
+
+
+            val autoAwaySetback = Point.Builder()
+                .setDisplayName("$equipDis-autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setRoomRef(roomRef).setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his")
+                .addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback")
+                .addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1")
+                .setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build()
+            val autoAwaySetbackId = hayStack.addPoint(autoAwaySetback)
+            hayStack.writePointForCcuUser(
+                autoAwaySetbackId,
+                TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                2.0,
+                0
+            )
+            hayStack.writeHisValById(autoAwaySetbackId, 2.0)
+
         }
 
         fun addHyperstatModuleTuners(

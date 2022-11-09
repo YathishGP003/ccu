@@ -12,6 +12,11 @@ public class PreferenceUtil {
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
+    private static final String REHEAT_ZONE_TO_DAT_MIN = "reheatZoneToDATMinMigration";
+    private static final String RELAY_DEACTIVATION_MIGRATION = "relayDeactivationMigration";
+    private static final String MAX_CFM_COOLING_MIGRATION = "maxCFMCoolingMigration";
+    private static final String MIN_CFM_COOLING_MIGRATION = "minCFMCoolingMigration";
     private static final String TRUE_CFM_DAB_MIGRATION="trueCfmDabMigration";
     private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
     private static final String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
@@ -37,6 +42,8 @@ public class PreferenceUtil {
     private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
     private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
     private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
+    private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -218,9 +225,21 @@ public class PreferenceUtil {
     public static boolean isAirflowVolumeUnitMigrationDone() {
         return getBooleanPreference(AIRFLOW_UNIT_MIGRATION);
     }
-
+    public static boolean isTimerCounterAndCFMCoolingMigrationDone() {
+        return getBooleanPreference(TIMER_COUNTER_MIGRATION) || getBooleanPreference(MAX_CFM_COOLING_MIGRATION) || getBooleanPreference(MIN_CFM_COOLING_MIGRATION);
+    }
+    public static boolean isRelayDeactivationAndReheatZoneToDATMigrationDone() {
+        return getBooleanPreference(RELAY_DEACTIVATION_MIGRATION) || getBooleanPreference(REHEAT_ZONE_TO_DAT_MIN);
+    }
+    public static void setRelayDeactivationAndReheatZoneToDATMinMigrationDone() {
+        setBooleanPreference(RELAY_DEACTIVATION_MIGRATION, true);
+        setBooleanPreference(REHEAT_ZONE_TO_DAT_MIN,true);
+    }
     public static void setAirflowVolumeUnitMigrationDone() {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
+    }
+    public static void setTimerCounterAndCFMCoolingMigrationDone() {
+        setBooleanPreference(TIMER_COUNTER_MIGRATION, true);
     }
     public static boolean isTrueCFMVAVMigrationDone() {
         return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
@@ -389,6 +408,14 @@ public class PreferenceUtil {
 
     public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
         setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
+
+    }
+    public static boolean getHyperStatCpuTagMigration() {
+        return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
+    }
+
+    public static void setHyperStatCpuTagMigration() {
+        setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
 
     }
 

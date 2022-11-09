@@ -1,6 +1,5 @@
 package a75f.io.api.haystack;
 
-import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import org.projecthaystack.HDict;
@@ -269,10 +268,12 @@ public class HSUtil
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 
-    public static boolean isHSCPUConfig(String id, CCUHsApi hayStack) {
-        HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.CPU)
-                && pointEntity.containsKey(Tags.HYPERSTAT);
+    public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
+        return equip.containsKey(Tags.HYPERSTAT) &&
+                ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
+                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU));
     }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {
@@ -413,4 +414,25 @@ public class HSUtil
                 || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
                 || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
     }
+
+//    /**
+//     * Checks a given point is a limit tuner.
+//     * @param id
+//     * @param hayStack
+//     * @return
+//     */
+//    public static boolean isBuildingLimitPoint(String id, CCUHsApi hayStack) {
+//        if (id == null) {
+//            return false;
+//        }
+//
+//        Point tunerPoint = new Point.Builder()
+//                .setHashMap(hayStack.readMapById(id))
+//                .build();
+//
+//        return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
+//                !tunerPoint.getMarkers().contains("alert"))
+//                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
+//                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
+//    }
 }

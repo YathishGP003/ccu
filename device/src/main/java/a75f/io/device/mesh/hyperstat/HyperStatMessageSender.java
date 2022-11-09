@@ -33,12 +33,11 @@ public class HyperStatMessageSender {
      * @param zone
      * @param address
      * @param equipRef
-     * @param profile
      */
-    public static void sendSeedMessage(String zone,int address,String equipRef, String profile,
+    public static void sendSeedMessage(String zone, int address, String equipRef,
                                        boolean checkDuplicate) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
-                                                                                                 equipRef, profile);
+                                                                                                 equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());

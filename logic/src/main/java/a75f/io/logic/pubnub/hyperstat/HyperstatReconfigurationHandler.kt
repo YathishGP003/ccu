@@ -1,4 +1,4 @@
-package a75f.io.logic.pubnub
+package a75f.io.logic.pubnub.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
@@ -6,36 +6,35 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.common.HSReconfigureUtil
 import android.util.Log
 import com.google.gson.JsonObject
 
 /**
  * Created by Manjunath K on 14-10-2021.
  */
-class HyperstatCPUConfigHandler {
+class HyperstatReconfigurationHandler {
 
     companion object {
 
-        fun updateConfigPoint(msgObject: JsonObject, configPoint: Point, hayStack: CCUHsApi) {
+        fun handleHyperStatConfigChange(msgObject: JsonObject, configPoint: Point, hayStack: CCUHsApi) {
             try{
 
             CcuLog.i(
-                L.TAG_CCU_PUBNUB, "\n **** Reconfig ****${L.TAG_CCU_HSCPU} " + configPoint + " " + msgObject.toString()
+                L.TAG_CCU_PUBNUB, "\n **** Reconfiguration ****${L.TAG_CCU_HSCPU} " + configPoint + " " + msgObject.toString()
                         + " Markers =" + configPoint.markers +"\n "
             )
             when {
                 configPoint.markers.contains(Tags.ENABLED) -> {
-                    HSReconfigureUtil.updateConfigPoint(msgObject, configPoint, hayStack)
+                    HyperStatReconfigureUtil.updateConfigPoint(msgObject, configPoint, hayStack)
                     Log.i(L.TAG_CCU_HSCPU, "Reconfiguration for config Points")
                 }
                 configPoint.markers.contains(Tags.ASSOCIATION) -> {
-                    HSReconfigureUtil.updateAssociationPoint(msgObject, configPoint)
+                    HyperStatReconfigureUtil.updateAssociationPoint(msgObject, configPoint,hayStack)
                     Log.i(L.TAG_CCU_HSCPU, "Reconfiguration for Association Points")
                 }
                 else -> {
                     Log.i(L.TAG_CCU_HSCPU, "Reconfiguration for Points values")
-                    HSReconfigureUtil.updateConfigValues(msgObject, hayStack,configPoint)
+                    HyperStatReconfigureUtil.updateConfigValues(msgObject, hayStack,configPoint)
                 }
             }
             }catch (e: Exception){

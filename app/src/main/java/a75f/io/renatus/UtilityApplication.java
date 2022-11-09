@@ -30,6 +30,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.raygun.raygun4android.RaygunClient;
 import com.renovo.bacnet4j.LocalDevice;
 import com.renovo.bacnet4j.RemoteDevice;
 import com.renovo.bacnet4j.event.DeviceEventAdapter;
@@ -207,7 +208,7 @@ public abstract class UtilityApplication extends Application {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         // initialize crash reports as early as possible
-        //initializeCrashReporting();
+        initializeCrashReporting();
 
         Globals.getInstance().setApplicationContext(this);
 
@@ -244,7 +245,7 @@ public abstract class UtilityApplication extends Application {
 
     }
 
-    /*private void initializeCrashReporting() {
+    private void initializeCrashReporting() {
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
     
         RaygunClient.init(this);
@@ -262,7 +263,7 @@ public abstract class UtilityApplication extends Application {
         }
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");
     
-    }*/
+    }
 
     private String versionName() {
         try {

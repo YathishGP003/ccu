@@ -72,7 +72,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     public static final String ID = FragmentVAVConfiguration.class.getSimpleName();
     
     static final int TEMP_OFFSET_LIMIT = 100;
-    static final int STEP = 10;
+    static final int STEP = 5;
     
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -424,13 +424,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setWrapSelectorWheel(false);
 
         numMaxCFMCooling = view.findViewById(R.id.numMaxCFMCooling);
-        String[] numberValues = new String[TrueCFMConstants.MAX_VAL - TrueCFMConstants.MIN_VAL + 1];
+        String[] numberValues = new String[(TrueCFMConstants.MAX_VAL - TrueCFMConstants.MIN_VAL + 1)*2];
         for (int i = 0; i < numberValues.length; i++) {
             numberValues[i] = String.valueOf(i * STEP);
         }
         numMaxCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMCooling.setMinValue(0);
-        numMaxCFMCooling.setMaxValue(150);
+        numMaxCFMCooling.setMaxValue(1000);
         numMaxCFMCooling.setValue(TrueCFMConstants.DEFAULT_VALUE);
         numMaxCFMCooling.setDisplayedValues(numberValues);
         numMaxCFMCooling.setWrapSelectorWheel(false);
@@ -438,7 +438,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMCooling = view.findViewById(R.id.numMinCFMCooling);
         numMinCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMCooling.setMinValue(0);
-        numMinCFMCooling.setMaxValue(50);
+        numMinCFMCooling.setMaxValue(100);
         numMinCFMCooling.setValue(10);
         numMinCFMCooling.setWrapSelectorWheel(false);
         numMinCFMCooling.setDisplayedValues(numberValues);

@@ -2285,7 +2285,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         }
         textViewLabel4.setText("Supply Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
         }
@@ -2463,7 +2463,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Discharge Airflow : ");
         try {
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("DischargeAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
         }

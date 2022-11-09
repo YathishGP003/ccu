@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,9 @@ public class SyncWorker extends Worker {
     
         isSyncWorkInProgress = true;
         try {
+            if (!CCUHsApi.getInstance().getAuthorised()) {
+                return Result.success();
+            }
             if (!siteHandler.doSync()) {
                 CcuLog.e(TAG, "Site sync failed");
                 return Result.retry();
@@ -68,12 +72,12 @@ public class SyncWorker extends Worker {
                 CcuLog.e(TAG, "CCU sync failed");
                 return Result.retry();
             }
-    
-            if (!syncDeletedEntities()) {
-                CcuLog.e(TAG, "Deleted entity sync failed");
-                return Result.retry();
-            }
-            
+
+                if (!syncDeletedEntities()) {
+                    CcuLog.e(TAG, "Deleted entity sync failed");
+                    return Result.retry();
+                }
+
             if (!syncUnSyncedEntities()) {
                 CcuLog.e(TAG, "Unsynced entity sync failed");
                 return Result.retry();
@@ -147,33 +151,37 @@ public class SyncWorker extends Worker {
         if (!syncStatusService.hasDeletedData()) {
             return true;
         }
-    
-        List<String> deletedItems = syncStatusService.getDeletedData();
-        synchronized ( deletedItems ) {
-            List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
-            List<String> deletedSyncedItems = new ArrayList<>();
-            
-            pointListBatches.forEach(entityList -> {
-                ArrayList<HDict> entities = new ArrayList<>();
-                for (String deletedId : entityList) {
-                    HDictBuilder b = new HDictBuilder();
-                    b.add("id", HRef.make(deletedId.replace("@", "")));
-                    entities.add(b.toDict());
-                }
-                HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-                
-                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
-                                                       HZincWriter.gridToString(gridData));
-                CcuLog.d(TAG, "RemoveEntity Response : " + response);
-                if (response == null) {
-                    return;
-                }
-                deletedSyncedItems.addAll(entityList);
-            });
-            
-            updateDeleteStatus(deletedSyncedItems);
-        }
-        return true;
+            List<String> deletedItems = syncStatusService.getDeletedData();
+            synchronized (deletedItems) {
+                List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
+                List<String> deletedSyncedItems = new ArrayList<>();
+
+                pointListBatches.forEach(entityList -> {
+                    ArrayList<HDict> entities = new ArrayList<>();
+                    for (String deletedId : entityList) {
+                        HDictBuilder b = new HDictBuilder();
+                        b.add("id", HRef.make(deletedId.replace("@", "")));
+                        entities.add(b.toDict());
+                    }
+                    HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+
+                    String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
+                            HZincWriter.gridToString(gridData));
+                    CcuLog.d(TAG, "RemoveEntity Response : " + response);
+                    if (Integer.parseInt(response) == 401) {
+                        CCUHsApi.getInstance().setAuthorised(false);
+                        return;
+                    }
+                    if (response == null) {
+                        return;
+                    }
+                    deletedSyncedItems.addAll(entityList);
+                });
+
+                updateDeleteStatus(deletedSyncedItems);
+            }
+            return true;
+
     }
     
     /**

@@ -70,6 +70,7 @@ public class CCUHsApi
     public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
+    public static boolean IS_AUTHORISED = true;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
 
@@ -2516,4 +2517,13 @@ public class CCUHsApi
         }
         return true;
     }
+    public void setAuthorised(boolean isAuthorised) {
+        IS_AUTHORISED = isAuthorised;
+    }
+
+    public boolean getAuthorised(){
+        return IS_AUTHORISED;
+    }
+
+
 }

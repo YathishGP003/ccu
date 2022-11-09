@@ -69,7 +69,10 @@ public class AlertSyncHandler
                                             a.setSyncStatus(true);
                                             syncedAlerts.add(a);
                                             dataStore.updateAlert(a);
-                                        } else {
+                                        } else if (response.code() == 401) {
+                                            CCUHsApi.getInstance().setAuthorised(false);
+                                        }
+                                        else {
                                             handleCreateAlertErrorResponse(response, a, dataStore);
                                         }
                                     },

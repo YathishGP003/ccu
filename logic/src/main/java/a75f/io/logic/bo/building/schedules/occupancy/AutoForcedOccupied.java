@@ -61,6 +61,10 @@ public class AutoForcedOccupied implements OccupancyTrigger {
         }
         
         Occupied occStatus = ScheduleUtil.getOccupied(occupancyUtil.getEquipRef());
+        if (occStatus == null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupied entry not found , disable auto forced occupied");
+            return false;
+        }
         Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
 
         if ((!occStatus.isOccupied() || occStatus.getVacation() != null)

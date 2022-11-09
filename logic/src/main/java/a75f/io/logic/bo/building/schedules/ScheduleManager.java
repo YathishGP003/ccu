@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -55,7 +56,7 @@ public class ScheduleManager {
     
     private final HashMap<String, Occupied> occupiedHashMap = new HashMap<>();
     private final Map<String, Occupancy> zoneOccupancy = new HashMap<>();
-    private final Map<String, OccupancyData> equipOccupancy = new HashMap<>();
+    private final Map<String, OccupancyData> equipOccupancy = new ConcurrentHashMap<>();
     
     private Occupied currentOccupiedInfo = null;
     private Occupied nextOccupiedInfo = null;

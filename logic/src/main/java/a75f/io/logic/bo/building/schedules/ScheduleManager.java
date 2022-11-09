@@ -1,5 +1,19 @@
 package a75f.io.logic.bo.building.schedules;
 
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
+import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
+import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
+import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
+
 import android.content.Intent;
 import android.util.Log;
 
@@ -12,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -33,22 +48,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
-import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-
 public class ScheduleManager {
     
     
@@ -57,7 +56,7 @@ public class ScheduleManager {
     
     private final HashMap<String, Occupied> occupiedHashMap = new HashMap<>();
     private final Map<String, Occupancy> zoneOccupancy = new HashMap<>();
-    private final Map<String, OccupancyData> equipOccupancy = new HashMap<>();
+    private final Map<String, OccupancyData> equipOccupancy = new ConcurrentHashMap<>();
     
     private Occupied currentOccupiedInfo = null;
     private Occupied nextOccupiedInfo = null;
@@ -309,30 +308,34 @@ public class ScheduleManager {
     
     
     public void updateDesiredTemp() {
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
-            if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
-                continue;
+        try {
+            for (ZoneProfile profile : L.ccu().zoneProfiles) {
+                if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
+                    continue;
+                }
+                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+                Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
+                OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
+
+                if (updatedOccupancy == null) {
+                    CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for " + occupancyHandler.getEquipRef());
+                    continue;
+                }
+
+                Equip equip = profile.getEquip();
+                Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
+                        .replace("@", ""), false);
+
+                CcuLog.i(TAG_CCU_SCHEDULER,
+                        " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
+                                + " -> " + updatedOccupancy.occupancy);
+                profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule);
+                if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
+                    zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
+                }
             }
-            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-            Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
-            OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
-            
-            if (updatedOccupancy == null) {
-                CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for "+occupancyHandler.getEquipRef());
-                continue;
-            }
-            
-            Equip equip = profile.getEquip();
-            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
-                                                                      .replace("@", ""), false);
-    
-            CcuLog.i(TAG_CCU_SCHEDULER,
-                     " updateDesiredTemp "+equip.getDisplayName()+" : occupancy "+currentOccupiedMode
-                     +" -> "+updatedOccupancy.occupancy);
-            profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule);
-            if((zoneDataInterface != null) /*&& (cachedOccupied != null)*/){
-                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
-            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
     

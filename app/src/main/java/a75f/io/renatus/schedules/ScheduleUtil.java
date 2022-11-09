@@ -24,7 +24,7 @@ public class ScheduleUtil {
 
             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
-                    "vacation and roomRef == " +z.getId());
+                    "vacation and not special and roomRef == " +z.getId());
             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
             ArrayList<Interval> spills = spillsMap.get(zoneId);
 

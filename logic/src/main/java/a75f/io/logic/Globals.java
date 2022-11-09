@@ -31,7 +31,8 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -507,6 +508,12 @@ public class Globals {
                             HyperStatCpuProfile cpuProfile = new HyperStatCpuProfile();
                             cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuProfile);
+                            break;
+
+                        case HYPERSTAT_TWO_PIPE_FCU:
+                            HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
+                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();

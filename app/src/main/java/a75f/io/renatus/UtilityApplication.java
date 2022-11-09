@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
+
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -24,6 +26,9 @@ import android.os.IBinder;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.raygun.raygun4android.RaygunClient;
 import com.renovo.bacnet4j.LocalDevice;
@@ -90,10 +95,6 @@ import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 import a75f.io.usbserial.UsbServiceActions;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatDelegate;
-
-import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -212,7 +213,7 @@ public abstract class UtilityApplication extends Application {
         Globals.getInstance().setApplicationContext(this);
 
         // we now have haystack
-        RaygunClient.setUser(userNameForCrashReportsFromHaystack());
+        //RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
         //Modbus EquipmendManager
         EquipsManager.getInstance(this).setApplicationContext(this);

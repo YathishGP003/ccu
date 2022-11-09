@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
@@ -33,6 +34,23 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import org.apache.commons.lang3.StringUtils;
+
+
+import android.app.Application;
+import android.content.Context;
+import android.net.SSLCertificateSocketFactory;
+import android.net.SSLSessionCache;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class HttpUtil
 {
@@ -361,4 +379,80 @@ public class HttpUtil
         }
         return null;
     }
+
+    public String getMapLocationData(String stringUrl, String httpMethod, Context context) throws IOException {
+        URL url;
+        HttpsURLConnection connection = null;
+
+            try {
+                //Create connection
+                url = new URL(stringUrl);
+
+                if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
+                    connection = (HttpsURLConnection)url.openConnection();
+                } else {
+                    connection = NetCipher.getHttpsURLConnection(url);
+                }
+
+                javax.net.ssl.SSLSocketFactory sf = ClientSSLSocketFactory.getSocketFactory(context);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
+
+                CcuLog.i("CCU_WEATHER", Objects.toString(url.toString(),""));
+
+                connection.setSSLSocketFactory(sf);
+                connection.setRequestProperty("Content-Language", "en-US");
+
+
+                connection.setUseCaches (false);
+                connection.setRequestMethod(httpMethod);
+
+                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
+
+                if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
+                    connection.setDoOutput(false);
+                }
+                else {
+                    connection.setDoOutput(true);
+
+                    //Send request
+                    DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+
+                    wr.flush();
+                }
+
+                int responseCode = connection.getResponseCode();
+                CcuLog.i("CCU_WEATHER","HttpResponse: responseCode "+responseCode);
+
+                if (responseCode >= 400) {
+
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuffer responsee = new StringBuffer();
+                    while((linee = rde.readLine()) != null) {
+                        responsee.append(linee);
+                        responsee.append('\n');
+                    }
+                    CcuLog.i("CCU_WEATHER","Response error stream: " + responsee.toString());
+                }
+
+                //Get Response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringBuffer response = new StringBuffer();
+                while((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\n');
+                }
+
+                return responseCode == 200 ? response.toString() : null;
+
+            } finally {
+                if(connection != null) {
+                    connection.disconnect();
+                }
+            }
+    }
+
 }

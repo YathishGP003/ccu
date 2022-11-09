@@ -3,7 +3,6 @@ package a75f.io.device.mesh;
 import android.os.Build;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import org.javolution.io.Struct;
 
@@ -443,7 +442,7 @@ public class LSerial
         }
     }
     
-    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef, String profile) {
+    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef) {
         if (isConnected()) {
             isNodeSeeding = true;
             CcuLog.d(L.TAG_CCU_DEVICE,
@@ -451,7 +450,7 @@ public class LSerial
             Device d = HSUtil.getDevice(addr);
             Zone zone = HSUtil.getZone(roomRef, floorRef);
             HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                   d.getEquipRef(), profile, false);
+                                                   d.getEquipRef(), false);
             LSerial.getInstance().setNodeSeeding(false);
         }
     }

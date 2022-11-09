@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.hyperstat.cpu
+package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 
@@ -22,15 +22,15 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var relay5State = RelayState(false, CpuRelayAssociation.HEATING_STAGE_2)
    var relay6State = RelayState(false, CpuRelayAssociation.FAN_HIGH_SPEED)
 
-   var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0, 10.0,30.0,60.0,100.0)
+   var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,30.0,60.0,100.0)
    var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,30.0,60.0,100.0)
    var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,30.0,60.0,100.0)
 
    var isEnableAirFlowTempSensor = false
    var isEnableDoorWindowSensor = false
 
-   var analogIn1State = AnalogInState(false, CpuAnalogInAssociation.KEY_CARD_SENSOR)
-   var analogIn2State = AnalogInState(false, CpuAnalogInAssociation.CURRENT_TX_0_20)
+   var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
+   var analogIn2State = AnalogInState(false, AnalogInAssociation.CURRENT_TX_0_20)
 
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0
@@ -56,7 +56,7 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
  */
 data class RelayState(
    val enabled: Boolean,
-   val association: CpuRelayAssociation
+   var association: CpuRelayAssociation
 )
 
 data class AnalogOutState(
@@ -71,7 +71,7 @@ data class AnalogOutState(
 
 data class AnalogInState(
    val enabled: Boolean,
-   val association: CpuAnalogInAssociation
+   val association: AnalogInAssociation
 )
 
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
@@ -92,7 +92,7 @@ enum class CpuRelayAssociation {
    DEHUMIDIFIER
 }
 
-// Order is important -- see comment above.
+// Order is important -- FAN_HIGH_SPEED
 enum class CpuAnalogOutAssociation {
    COOLING,
    FAN_SPEED,
@@ -101,7 +101,7 @@ enum class CpuAnalogOutAssociation {
 }
 
 // Order is important -- see comment above.
-enum class CpuAnalogInAssociation {
+enum class AnalogInAssociation {
    CURRENT_TX_0_10,
    CURRENT_TX_0_20,
    CURRENT_TX_0_50,

@@ -14,8 +14,8 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -32,8 +32,7 @@ public class ZoneViewData {
     private static final String AIRFLOW_SENSOR = "airflow sensor";
     public static final String ACTION_STATUS_CHANGE = "status_change";
     private static final String THERMISTER_QUERY_POINT = "point and config and standalone and enable and th1 and equipRef == \"";
-    
-    
+
     public static HashMap getDABEquipPoints(String equipID) {
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
@@ -85,6 +84,7 @@ public class ZoneViewData {
         }
         return tiPoints;
     }
+
     public static HashMap getSSEEquipPoints(String equipID) {
         
         HashMap ssePoints = new HashMap();
@@ -170,9 +170,7 @@ public class ZoneViewData {
         
         return vavPoints;
     }
-    
-    
-    
+
     public static HashMap get2PFCUEquipPoints(String equipID) {
         HashMap p2FCUPoints = new HashMap();
         
@@ -216,8 +214,7 @@ public class ZoneViewData {
             p2FCUPoints.put("fanEnabled","No Fan");
         return p2FCUPoints;
     }
-    
-    
+
     public static HashMap get4PFCUEquipPoints(String equipID) {
         HashMap p4FCUPoints = new HashMap();
         
@@ -325,80 +322,7 @@ public class ZoneViewData {
             cpuPoints.put("fanEnabled","No Fan");
         return cpuPoints;
     }
-    public static HashMap<String,Object> getHyperstatCPUEquipPoints(Equip equipDetails) {
-        
-        String  profileName ="cpu";
-        // All the result points
-        HashMap<String,Object> cpuPoints = new HashMap<>();
-        
-        // Get points util ref
-        HSHaystackUtil hsHaystackUtil = new HSHaystackUtil(
-            profileName,equipDetails.getId(), CCUHsApi.getInstance()
-        );
-        
-        // Get Existing Configuration
-        HyperStatCpuConfiguration config = HyperStatCpuEquip.Companion.getHyperstatEquipRef(
-            Short.parseShort(equipDetails.getGroup())).getConfiguration();
-        
-        String equipLiveStatus = hsHaystackUtil.getEquipLiveStatus();
-        if(equipLiveStatus!=null)
-            cpuPoints.put(HSZoneStatus.STATUS.name(),equipLiveStatus);
-        else
-            cpuPoints.put(HSZoneStatus.STATUS.name(),"OFF");
-        
-        
-        double fanOpModePoint = hsHaystackUtil.readPointPriorityVal("zone and fan and mode and operation");
-        Log.i(L.TAG_CCU_HSCPU, "Saved fan mode "+fanOpModePoint);
-        int fanPosition = HSHaystackUtil.Companion.getFanSelectionMode(equipDetails.getGroup(),(int)fanOpModePoint);
-        Log.i(L.TAG_CCU_HSCPU, "converted fan mode "+fanPosition);
-        cpuPoints.put(HSZoneStatus.FAN_MODE.name(),fanPosition);
-        
-        double conditionModePoint = hsHaystackUtil.readPointPriorityVal(
-            "zone and temp and mode and conditioning");
-        Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode "+conditionModePoint);
-        int selectedConditioningMode = HSHaystackUtil.Companion.getSelectedConditioningMode(equipDetails.getGroup(),
-                                                                                            (int)conditionModePoint);
-        Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode "+selectedConditioningMode);
-        cpuPoints.put(HSZoneStatus.CONDITIONING_MODE.name(),selectedConditioningMode);
-        
-        
-        double dischargePoint = hsHaystackUtil.readHisVal(
-            "zone and sensor and discharge and air and temp and his");
-        cpuPoints.put(HSZoneStatus.DISCHARGE_AIRFLOW.name(), dischargePoint + " \u2109");
-        
-        
-        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier(config)){
-            double  targetHumidity = hsHaystackUtil.readPointPriorityVal("target and humidifier and his");
-            cpuPoints.put(HSZoneStatus.TARGET_HUMIDITY.name(),targetHumidity);
-        }
-        if(HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToDeHumidifier(config)){
-            double  targetDeHumidity = hsHaystackUtil.readPointPriorityVal("target and dehumidifier and his");
-            cpuPoints.put(HSZoneStatus.TARGET_DEHUMIDIFY.name(),targetDeHumidity);
-        }
-        
-        int fanLevel = HyperStatAssociationUtil.Companion.getSelectedFanLevel(config);
-        cpuPoints.put(HSZoneStatus.FAN_LEVEL.name(),fanLevel);
-        
-        // Add conditioning status
-        String status = "Off";
-        PossibleConditioningMode possibleConditioningMode =
-            HSHaystackUtil.Companion.getPossibleConditioningModeSettings(Integer.parseInt(equipDetails.getGroup()));
-        
-        switch (possibleConditioningMode){
-            case OFF: status ="Off"; break;
-            case BOTH: status ="Both"; break;
-            case COOLONLY: status ="Cool Only"; break;
-            case HEATONLY: status ="Heat Only"; break;
-        }
-        
-        cpuPoints.put(HSZoneStatus.CONDITIONING_ENABLED.name(),status);
-        cpuPoints.forEach((s, o) -> Log.i(L.TAG_CCU_HSCPU, "Config "+s+ " : "+o));
-        return cpuPoints;
-    }
-    
-    
-    
-    
+
     public static HashMap getHPUEquipPoints(String equipID) {
         HashMap hpuPoints = new HashMap();
         
@@ -460,8 +384,7 @@ public class ZoneViewData {
             hpuPoints.put("fanEnabled","No Fan");
         return hpuPoints;
     }
-    
-    
+
     public static HashMap getEMEquipPoints(String equipID) {
         HashMap emPoints = new HashMap();
         
@@ -497,8 +420,7 @@ public class ZoneViewData {
         
         return emPoints;
     }
-    
-    
+
     public static HashMap getPiEquipPoints(String equipID) {
         HashMap plcPoints = new HashMap();
         

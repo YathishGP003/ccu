@@ -8,6 +8,7 @@
 
     <!-- Title -->
     <TextView
+        android:id="@+id/profile_name"
         style="@style/Title_HyperStat"
         android:text="@string/conventional_package_unit" />
 
@@ -130,7 +131,7 @@
                             <Spinner
                                 android:id="@+id/relay1Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
+
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -161,7 +162,6 @@
                             <Spinner
                                 android:id="@+id/relay2Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -192,7 +192,6 @@
                             <Spinner
                                 android:id="@+id/relay3Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -224,7 +223,6 @@
                             <Spinner
                                 android:id="@+id/relay4Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
                                 tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
@@ -257,7 +255,6 @@
                             <Spinner
                                 android:id="@+id/relay5Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -289,7 +286,6 @@
                             <Spinner
                                 android:id="@+id/relay6Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -322,7 +318,6 @@
                             <Spinner
                                 android:id="@+id/analog1Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_analog_out_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
 
                         </LinearLayout>
@@ -333,7 +328,6 @@
                                 android:id="@+id/analog1TestSpinner"
                                 style="@style/TableSpinner"
                                 android:layout_width="120dp"
-                                android:entries="@array/hyperstat_analog_out_test_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
 
@@ -358,7 +352,6 @@
                             <Spinner
                                 android:id="@+id/analog2Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_analog_out_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
 
                         </LinearLayout>
@@ -439,6 +432,7 @@
                                 style="@style/ToggleButton_HyperStat" />
 
                             <TextView
+                                android:id="@+id/th2Label"
                                 style="@style/ToggleLabel"
                                 android:text="@string/door_window_sensor" />
                         </LinearLayout>
@@ -742,12 +736,12 @@
                     android:id="@+id/zoneCO2DamperOpeningRate"
                     style="@style/FanPositionLabel_HyperStat"
                     android:text="@string/zoneCO2DamperOpeningRate"
-                    android:visibility="gone" />
+                    android:visibility="gone"/>
 
                 <Spinner
                     android:id="@+id/zoneCO2DamperOpeningRateSpinner"
                     style="@style/Damper_HyperStat"
-                    android:visibility="gone" />
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/zoneCO2Threshold"
@@ -802,6 +796,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="match_parent"
+                    android:textColor="@drawable/label_textselector"
                     android:textAppearance="@style/label_values"
                     android:gravity="left"
                     android:paddingLeft="@dimen/appbar_padding_top"
@@ -849,6 +844,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="match_parent"
+                    android:textColor="@drawable/label_textselector"
                     android:textAppearance="@style/label_values"
                     android:gravity="left"
                     android:paddingLeft="@dimen/appbar_padding_top"
@@ -862,6 +858,8 @@
 
 
             </LinearLayout>
+
+
 
             <TextView
                 android:layout_width="wrap_content"
@@ -956,12 +954,12 @@
             </LinearLayout>
 
 
-
             <Button
                 android:id="@+id/setButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:layout_marginTop="24dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginBottom="57dp"
                 android:background="@null"

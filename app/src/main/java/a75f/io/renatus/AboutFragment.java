@@ -10,11 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -30,6 +25,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -44,6 +43,7 @@ import java.util.HashMap;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.Globals;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
@@ -52,8 +52,6 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 /**
  * Created by Mahesh on 17-07-2019.
@@ -455,7 +453,7 @@ public class AboutFragment extends Fragment {
                 validateBuildingPassCode(enteredPassCode);
 
             } else {
-                Toast.makeText(getApplicationContext(), "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Globals.getInstance().getApplicationContext(), "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -468,8 +466,9 @@ public class AboutFragment extends Fragment {
                 if (response.getString("valid").equals("true")) {
                     String ccuId = CCUHsApi.getInstance().getCcuId();
                     retriveCCUDetails(ccuId);
+                    CCUHsApi.getInstance().setAuthorised(true);
                 } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_msg), Toast.LENGTH_LONG).show();
+                    Toast.makeText(Globals.getInstance().getApplicationContext(), getString(R.string.error_msg), Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -479,10 +478,10 @@ public class AboutFragment extends Fragment {
                 ProgressDialogUtils.hideProgressDialog();
                 String errResponse = "No address associated with hostname";
                 if ((response.get("response").toString()).contains(errResponse)) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.no_internet),
+                    Toast.makeText(Globals.getInstance().getApplicationContext(), getString(R.string.no_internet),
                             Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_msg),
+                    Toast.makeText(Globals.getInstance().getApplicationContext(), getString(R.string.error_msg),
                             Toast.LENGTH_LONG).show();
                 }
             }
@@ -507,7 +506,7 @@ public class AboutFragment extends Fragment {
 
             @Override
             public void onErrorResponse(JSONObject response) throws JSONException {
-                Toast.makeText(getApplicationContext(),R.string.token_error_msg,Toast.LENGTH_LONG).show();
+                Toast.makeText(Globals.getInstance().getApplicationContext(),R.string.token_error_msg,Toast.LENGTH_LONG).show();
             }
         };
         new OtpManager().postBearerToken(ccu, enteredPassCode, responseCallBack);

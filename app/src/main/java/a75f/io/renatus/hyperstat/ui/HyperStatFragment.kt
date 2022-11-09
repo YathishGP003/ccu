@@ -1,20 +1,21 @@
-package a75f.io.renatus.hyperstat.cpu
-
+package a75f.io.renatus.hyperstat.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.HyperStat
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.cpu.CpuAnalogOutAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
+import a75f.io.renatus.hyperstat.AnalogInWidgets
+import a75f.io.renatus.hyperstat.AnalogOutWidgets
+import a75f.io.renatus.hyperstat.RelayWidgets
+import a75f.io.renatus.hyperstat.viewModels.*
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
@@ -30,17 +31,15 @@ import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-
 /**
- * @author tcase@75f.io
- * Created on 6/14/21.
+ * Created by Manjunath K on 15-07-2022.
  */
-class HyperStatCpuFragment : BaseDialogFragment() {
-    private val disposables =
-        CompositeDisposable()           // All of our fragment Rx subscriptions, for easy management.
-    private val configurationDisposable = CompositeDisposable()
-    private val viewModel: HyperStatCpuViewModel by viewModels()
 
+class HyperStatFragment : BaseDialogFragment() {
+    private val disposables = CompositeDisposable()
+    private val configurationDisposable = CompositeDisposable()
+
+    private lateinit var  viewModel: HyperStatModel
     private val meshAddress: Short
         get() = requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
     private val roomName: String
@@ -52,8 +51,8 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     private val profileType: ProfileType
         get() = ProfileType.values()[requireArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
 
-    //   The UI widgets we're holding references to.
-    //   Butterknife and kotlin synthetics are deprecated, so we're binding the old fashioned way
+    lateinit var profileName: TextView
+    lateinit var th2Label: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
     lateinit var forceOccupiedSwitch: ToggleButton
@@ -66,27 +65,27 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
     lateinit var airflowSensorSwitch: ToggleButton
-    lateinit var doorWindowSensorSwitch: ToggleButton
+    lateinit var th2Switch: ToggleButton
 
     // 2 rows, 1 for each analog in.
     lateinit var analogInUIs: List<AnalogInWidgets>
 
     lateinit var setButton: Button
     lateinit var zoneCO2Layout: View
-    private lateinit var tvzoneCO2DamperOpeningRate: TextView
     private lateinit var zoneCO2DamperOpeningRate: Spinner
     private lateinit var zoneCO2Threshold: Spinner
     private lateinit var zoneCO2Target: Spinner
+    private lateinit var tvZoneCO2DamperOpeningRate: TextView
 
     lateinit var zoneVOCThreshold: Spinner
     lateinit var zoneVOCTarget: Spinner
     lateinit var zonePMThreshold: Spinner
     lateinit var zonePMTarget: Spinner
+
     lateinit var displayHumidity: ToggleButton
     lateinit var displayVOC: ToggleButton
     lateinit var displayPp2p5: ToggleButton
     lateinit var displayCo2: ToggleButton
-
 
 
     /**
@@ -102,13 +101,13 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     lateinit var analogOut2Test: Spinner
     lateinit var analogOut3Test: Spinner
     companion object {
-        const val ID = "HyperStatCpuFragment"
+        const val ID = "HyperStatFragment"
 
         @JvmStatic
         fun newInstance(
             meshAddress: Short, roomName: String, floorName: String, nodeType: NodeType,
             profileType: ProfileType
-        ): HyperStatCpuFragment {
+        ): HyperStatFragment {
             val args = Bundle()
 
             args.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress)
@@ -117,7 +116,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             args.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString())
             args.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
 
-            val fragment = HyperStatCpuFragment()
+            val fragment = HyperStatFragment()
             fragment.arguments = args
             return fragment
         }
@@ -131,25 +130,37 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        when(profileType){
+            ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT-> {
+                val cpuViewModel: CpuViewModel by viewModels()
+                viewModel = cpuViewModel
+                viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)
+
+            }
+            ProfileType.HYPERSTAT_TWO_PIPE_FCU->{
+                val pipe2ViewModel: Pipe2ViewModel by viewModels()
+                viewModel = pipe2ViewModel
+                viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)
+
+            }
+            else -> {}
+        }
+
         bindViews()
         setUpSpinners()
         setUpViewListeners()
 
-
-        // register with view model
-        viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)
-
         disposables.add(
-            viewModel.viewState
+            viewModel.getState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ viewState -> render(viewState) },
                     { error -> handleError(error) })
         )
-
         if (!viewModel.isProfileConfigured()) {
             disableTestUI()
         }
-        CcuLog.i("CCU_HYPERSTAT", "View created for Hyperstat Cpu Fragment")
+
+
     }
 
     override fun onStart() {
@@ -227,7 +238,15 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             )
 
             airflowSensorSwitch = findViewById(R.id.airflowTempToggle)
-            doorWindowSensorSwitch = findViewById(R.id.doorWindowEnableToggle)
+            th2Switch = findViewById(R.id.doorWindowEnableToggle)
+
+            displayHumidity = findViewById(R.id.humidity)
+            displayCo2 = findViewById(R.id.co2)
+            displayVOC = findViewById(R.id.voc)
+            displayPp2p5 = findViewById(R.id.p2pm)
+
+
+            configUIOnProfile(this)
 
             analogInUIs = listOf(
                 AnalogInWidgets(findViewById(R.id.toggle_analog_in1), findViewById(R.id.analog1_in_spinner)),
@@ -235,20 +254,14 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             )
 
             zoneCO2Layout = findViewById(R.id.dcvCo2Config)
-            tvzoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             zoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRateSpinner)
             zoneCO2Threshold = findViewById(R.id.zoneCO2ThresholdSpinner)
             zoneCO2Target = findViewById(R.id.zoneCO2TargetSpinner)
-
+            tvZoneCO2DamperOpeningRate = findViewById(R.id.zoneCO2DamperOpeningRate)
             zoneVOCThreshold = findViewById(R.id.zoneVocThresholdSpinner)
             zoneVOCTarget = findViewById(R.id.zoneVocTargetSpinner)
             zonePMThreshold = findViewById(R.id.zonepmThresholdSpinner)
             zonePMTarget = findViewById(R.id.zonepmTargetSpinner)
-
-            displayHumidity = findViewById(R.id.humidity)
-            displayCo2 = findViewById(R.id.co2)
-            displayVOC = findViewById(R.id.voc)
-            displayPp2p5 = findViewById(R.id.p2pm)
 
             setButton = findViewById(R.id.setButton)
 
@@ -284,13 +297,14 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             analogOut2Test.adapter = adapterTestSignal
             analogOut3Test.adapter = adapterTestSignal
 
-            analogOut1Test.setSelection(0, false)
-            analogOut2Test.setSelection(0, false)
-            analogOut3Test.setSelection(0, false)
+            analogOut1Test.setSelection(0,false)
+            analogOut2Test.setSelection(0,false)
+            analogOut3Test.setSelection(0,false)
             analogOut1Test.setOnItemSelected { sendControl() }
             analogOut2Test.setOnItemSelected { sendControl() }
             analogOut3Test.setOnItemSelected { sendControl() }
-            }
+
+        }
     }
 
     private fun disableTestUI() {
@@ -304,6 +318,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         analogOut2Test.isEnabled = false
         analogOut3Test.isEnabled = false
     }
+
     /**
      * Setting all the spinner values
      */
@@ -317,31 +332,12 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         tempOffsetSelector.wrapSelectorWheel = false
         // We want to set text size, but cannot do with our NumberPicker until API 29
         //val pickerTextSize = resources.getDimensionPixelSize(R.dimen.text_numberpicker_hyperstat)
-        //temperatureOffset.setTextSize()
-
-        // default values  10 , 800 , 1000
-        val co2Values = co2DCVDamperValue()
-        val co2OpeningValues = co2DCVOpeningDamperValue()
-
-        val co2Adapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-            requireContext(), R.layout.larger_spinner_item,
-            co2Values
-        )
-        val co2OpeningAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-            requireContext(), R.layout.larger_spinner_item,
-            co2OpeningValues
-        )
-
-        val vocAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-            requireContext(), R.layout.larger_spinner_item,
-            vocValues()
-        )
-        val pmAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-            requireContext(), R.layout.larger_spinner_item,
-            pmValues()
-        )
 
 
+        val co2Adapter = getAdapterValue(co2DCVDamperValue())
+        val co2OpeningAdapter = getAdapterValue(co2DCVOpeningDamperValue())
+        val vocAdapter = getAdapterValue(vocValues())
+        val pmAdapter = getAdapterValue(pmValues())
 
         zoneCO2DamperOpeningRate.adapter = co2OpeningAdapter
         zoneCO2Threshold.adapter = co2Adapter
@@ -361,47 +357,15 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         zonePMThreshold.setSelection(zonePMThreshold.adapter.count -1)
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
-        zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
-        zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
 
         analogOutUIs.forEach {
-
-            val vValues = analogVoltageAtSpinnerValues()
-            // Create the instance of ArrayAdapter
-            // having the list of courses
-            val adapterVAtMin: ArrayAdapter<*> = ArrayAdapter<String?>(
-                requireContext(),
-                R.layout.larger_spinner_item,
-                vValues
-            )
-
-            it.vAtMinDamperSelector.adapter = adapterVAtMin
-            val adapterVAtMax: ArrayAdapter<*> = ArrayAdapter<String?>(
-                requireContext(),
-                R.layout.larger_spinner_item,
-                vValues
-            )
-            it.vAtMaxDamperSelector.adapter = adapterVAtMax
-
-            val percentValues = analogFanLevelSpeedValue()
-
-            val lowAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-                requireContext(), R.layout.larger_spinner_item,
-                percentValues
-            )
-            val mediumAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-                requireContext(), R.layout.larger_spinner_item,
-                percentValues
-            )
-            val highAdapter: ArrayAdapter<*> = ArrayAdapter<String?>(
-                requireContext(), R.layout.larger_spinner_item,
-                percentValues
-            )
-
-            it.analogOutAtFanLow.adapter = lowAdapter
-            it.analogOutAtFanMedium.adapter = mediumAdapter
-            it.analogOutAtFanHigh.adapter = highAdapter
-
+            val minMaxAdapter = getAdapterValue(analogVoltageAtSpinnerValues())
+            it.vAtMinDamperSelector.adapter = minMaxAdapter
+            it.vAtMaxDamperSelector.adapter = minMaxAdapter
+            val adapter = getAdapterValue(analogFanLevelSpeedValue())
+            it.analogOutAtFanLow.adapter = adapter
+            it.analogOutAtFanMedium.adapter = adapter
+            it.analogOutAtFanHigh.adapter = adapter
         }
     }
 
@@ -429,16 +393,14 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             }
             widgets.selector.setOnItemSelected { position -> viewModel.analogOutMappingSelected(index, position) }
 
-            val minDamper = true
-            val maxDamper = false
             widgets.vAtMinDamperSelector.setOnItemSelected { position ->
                 viewModel.voltageAtDamperSelected(
-                    minDamper, index, position
+                    true, index, position
                 )
             }
             widgets.vAtMaxDamperSelector.setOnItemSelected { position ->
                 viewModel.voltageAtDamperSelected(
-                    maxDamper, index, position
+                    false, index, position
                 )
             }
             widgets.analogOutAtFanLow.setOnItemSelected { position ->
@@ -458,8 +420,8 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         airflowSensorSwitch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.airflowTempSensorSwitchChanged(isChecked)
         }
-        doorWindowSensorSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.doorWindowSensorSwitchChanged(isChecked)
+        th2Switch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.th2SwitchChanged(isChecked)
         }
 
         analogInUIs.forEachIndexed { index, widgets ->
@@ -492,23 +454,22 @@ class HyperStatCpuFragment : BaseDialogFragment() {
                 viewModel.onDisplayVocSelected(isChecked)
         }
         displayPp2p5.setOnCheckedChangeListener { _, isChecked ->
-            if (enableDisplay(displayPp2p5))
+            if(enableDisplay(displayPp2p5))
                 viewModel.onDisplayP2pmSelected(isChecked)
         }
-
 
         // On Click save the CPU configuration
         setButton.setOnClickListener {
             setButton.isEnabled = false
             configurationDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
-                    ProgressDialogUtils.showProgressDialog(activity, "Saving Hyperstat CPU Configuration")
+                    ProgressDialogUtils.showProgressDialog(activity, "Saving HyperStat Configuration")
                 }, {
                     CCUHsApi.getInstance().resetCcuReady()
                     viewModel.setConfigSelected()
                     CCUHsApi.getInstance().setCcuReady()
                     LSerial.getInstance().sendHyperStatSeedMessage(
-                        this.meshAddress, roomName, floorName, "hyperstatcpu"
+                        this.meshAddress, roomName, floorName
                     )
                 }, {
                     ProgressDialogUtils.hideProgressDialog()
@@ -528,7 +489,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     /**
      * This rendor method will be called in UI change
      */
-    private fun render(viewState: CpuViewState) {
+    private fun render(viewState: ViewState) {
 
         tempOffsetSelector.value = viewState.tempOffsetPosition
 
@@ -539,7 +500,7 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             with(relayUIs[index]) {
                 switch.isChecked = relayState.enabled
                 selector.isEnabled = relayState.enabled
-                selector.setSelection(relayState.association.ordinal)
+                selector.setSelection(relayState.association)
             }
         }
         var isDampSelected = false
@@ -547,52 +508,57 @@ class HyperStatCpuFragment : BaseDialogFragment() {
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
                 selector.isEnabled = analogOutState.enabled
-                selector.setSelection(analogOutState.association.ordinal)
+                selector.setSelection(analogOutState.association)
                 vAtMinDamperLabel.text = String.format(
                     "%s%d at \nMin %s",
                     getString(R.string.hyperstat_analog_out),
                     index + 1,
-                    getString(analogOutState.association.displayName)
+                    getString(getAnalogOutDisplayName(profileType,analogOutState.association))
                 )
                 vAtMinDamperLabel.isEnabled = analogOutState.enabled
                 vAtMinDamperSelector.isEnabled = analogOutState.enabled
-                vAtMinDamperSelector.setSelection(analogOutState.vAtMinDamperPosition)
+                vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+
                 vAtMaxDamperLabel.text = String.format(
                     "%s%d at \nMax %s",
                     getString(R.string.hyperstat_analog_out),
                     index + 1,
-                    getString(analogOutState.association.displayName)
+                    getString(getAnalogOutDisplayName(profileType,analogOutState.association))
                 )
                 vAtMaxDamperLabel.isEnabled = analogOutState.enabled
                 vAtMaxDamperSelector.isEnabled = analogOutState.enabled
-                vAtMaxDamperSelector.setSelection(analogOutState.vAtMaxDamperPosition)
-
+                vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
 
                 analogOutFanConfig.visibility =
-                    if (analogOutState.enabled && analogOutState.association.ordinal == 1) View.VISIBLE else View.GONE
-                analogOutAtFanLow.setSelection(analogOutState.perAtFanLowPosition)
-                analogOutAtFanMedium.setSelection(analogOutState.perAtFanMediumPosition)
-                analogOutAtFanHigh.setSelection(analogOutState.perAtFanHighPosition)
+                    if (analogOutState.enabled && analogOutState.association == 1) View.VISIBLE else View.GONE
 
-                if (analogOutState.enabled && analogOutState.association.ordinal == CpuAnalogOutAssociation.DCV_DAMPER.ordinal) {
-                    isDampSelected = true
-                }
+                analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
+                analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))
+                analogOutAtFanHigh.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanHigh))
+
+                if (!isDampSelected && analogOutState.enabled)
+                    isDampSelected = viewModel.isDamperSelected(analogOutState.association)
+
             }
         }
 
         airflowSensorSwitch.isChecked = viewState.airflowTempSensorEnabled
-        doorWindowSensorSwitch.isChecked = viewState.doorWindowSensor1Enabled
-
+        if(viewModel is Pipe2ViewModel) {
+            th2Switch.isChecked = true
+            th2Switch.isEnabled = false
+        }else{
+            th2Switch.isChecked = viewState.th2Enabled
+        }
         viewState.analogIns.forEachIndexed { index, analogInState ->
             with(analogInUIs[index]) {
                 switch.isChecked = analogInState.enabled
                 selector.isEnabled = analogInState.enabled
-                selector.setSelection(analogInState.association.ordinal)
+                selector.setSelection(analogInState.association)
             }
         }
 
         zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
-        tvzoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
+        tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         zoneCO2DamperOpeningRate.setSelection(viewState.zoneCO2DamperOpeningRatePos)
         zoneCO2Threshold.setSelection(viewState.zoneCO2ThresholdPos)
         zoneCO2Target.setSelection(viewState.zoneCO2TargetPos)
@@ -607,7 +573,9 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         displayVOC.isChecked = viewState.isDisplayVOCEnabled
         displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
 
+
     }
+
 
     private fun getDisplayDeviceCount(): Int{
         var count = 0
@@ -618,15 +586,15 @@ class HyperStatCpuFragment : BaseDialogFragment() {
         return count
     }
 
-        private fun enableDisplay(toggle: ToggleButton): Boolean{
-            val count = getDisplayDeviceCount()
-            if(count > 2) {
-                Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()
-                toggle.isChecked = false
-                return false
-            }
-            return true
+    private fun enableDisplay(toggle: ToggleButton): Boolean{
+        val count = getDisplayDeviceCount()
+        if(count > 2) {
+            Toast.makeText(requireContext(),"Only two items can be displayed in home screen", Toast.LENGTH_SHORT).show()
+            toggle.isChecked = false
+            return false
         }
+        return true
+    }
 
     // Just dispose the
     override fun onDestroy() {
@@ -643,27 +611,27 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     private fun sendControl() {
         if (!viewModel.isProfileConfigured()) {
             Log.i(L.TAG_CCU_HSCPU,
-                "--------------Hyperstat CPU test signal sendControl: Not Ready")
+                "--------------HyperStat CPU test signal sendControl: Not Ready")
             return
         }
         val testSignalControlMessage: HyperStat.HyperStatControlsMessage_t  = getControlMessage()
         Log.i(L.TAG_CCU_HSCPU,
             "--------------Hyperstat CPU test signal sendControl: ------------------\n" +
-                "Node address  ${meshAddress.toInt()}\n" +
-                "setTemp Heating  ${testSignalControlMessage.setTempHeating}\n" +
-                "setTemp Cooling  ${testSignalControlMessage.setTempCooling}\n" +
-                "conditioningMode  ${testSignalControlMessage.conditioningMode}\n" +
-                "Fan Mode  ${testSignalControlMessage.fanSpeed}\n" +
-                "Relay1 ${testSignalControlMessage.relay1}\n" +
-                "Relay2 ${testSignalControlMessage.relay2}\n" +
-                "Relay3 ${testSignalControlMessage.relay3}\n" +
-                "Relay4 ${testSignalControlMessage.relay4}\n" +
-                "Relay5 ${testSignalControlMessage.relay5}\n" +
-                "Relay6 ${testSignalControlMessage.relay6}\n" +
-                "Analog Out1 ${testSignalControlMessage.analogOut1.percent}\n" +
-                "Analog Out2 ${testSignalControlMessage.analogOut2.percent}\n" +
-                "Analog Out3 ${testSignalControlMessage.analogOut3.percent}\n" +
-                "-------------------------------------------------------------")
+                    "Node address  ${meshAddress.toInt()}\n" +
+                    "setTemp Heating  ${testSignalControlMessage.setTempHeating}\n" +
+                    "setTemp Cooling  ${testSignalControlMessage.setTempCooling}\n" +
+                    "conditioningMode  ${testSignalControlMessage.conditioningMode}\n" +
+                    "Fan Mode  ${testSignalControlMessage.fanSpeed}\n" +
+                    "Relay1 ${testSignalControlMessage.relay1}\n" +
+                    "Relay2 ${testSignalControlMessage.relay2}\n" +
+                    "Relay3 ${testSignalControlMessage.relay3}\n" +
+                    "Relay4 ${testSignalControlMessage.relay4}\n" +
+                    "Relay5 ${testSignalControlMessage.relay5}\n" +
+                    "Relay6 ${testSignalControlMessage.relay6}\n" +
+                    "Analog Out1 ${testSignalControlMessage.analogOut1.percent}\n" +
+                    "Analog Out2 ${testSignalControlMessage.analogOut2.percent}\n" +
+                    "Analog Out3 ${testSignalControlMessage.analogOut3.percent}\n" +
+                    "-------------------------------------------------------------")
         HyperStatMessageSender.writeControlMessage(
             testSignalControlMessage, meshAddress.toInt(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
             false
@@ -739,41 +707,33 @@ class HyperStatCpuFragment : BaseDialogFragment() {
     private fun getAnalogVal(min: Double, max: Double, voltage : Double): Int {
         return if (max > min) (10 * (min + (max - min) * voltage / 100)).toInt() else (10 * (min - (min - max) * voltage /
                 100)).toInt()
-
     }
 
-}
+    private fun configUIOnProfile(view: View){
 
-// Extenstion method to kotlinize and pretty up our code above
-private fun Spinner.setOnItemSelected(onItemSelected: (position: Int) -> Unit) {
-    onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            onItemSelected.invoke(position)
+        profileName = view.findViewById(R.id.profile_name)
+        th2Label = view.findViewById(R.id.th2Label)
+
+        profileName.text = viewModel.getProfileName()
+        th2Label.text = viewModel.getTh2SensorLabel()
+
+        val adapterRelayMapping = getAdapter(viewModel.getRelayMapping())
+        val adapterAnalogOutMapping = getAdapter(viewModel.getAnalogOutMapping())
+
+        relayUIs.forEach {
+                relayWidgets -> relayWidgets.selector.adapter = adapterRelayMapping
         }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {} // no implementation
+        analogOutUIs.forEach {
+                analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping
+        }
     }
+
+    private fun getAdapter(values: Array<String>): ArrayAdapter<*> {
+        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+    }
+    private fun getAdapterValue(values: Array<String?>): ArrayAdapter<*> {
+        return ArrayAdapter( requireContext(), R.layout.spinner_dropdown_item, values)
+    }
+
 }
 
-class RelayWidgets(
-    val switch: ToggleButton,
-    val selector: Spinner,
-)
-
-class AnalogOutWidgets(
-    val switch: ToggleButton,
-    val selector: Spinner,
-    val vAtMinDamperLabel: TextView,
-    val vAtMinDamperSelector: Spinner,
-    val vAtMaxDamperLabel: TextView,
-    val vAtMaxDamperSelector: Spinner,
-    val analogOutFanConfig: View,
-    val analogOutAtFanLow: Spinner,
-    val analogOutAtFanMedium: Spinner,
-    val analogOutAtFanHigh: Spinner
-)
-
-class AnalogInWidgets(
-    val switch: ToggleButton,
-    val selector: Spinner
-)

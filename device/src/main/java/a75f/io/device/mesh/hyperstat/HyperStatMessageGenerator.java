@@ -18,6 +18,7 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
@@ -47,10 +48,9 @@ public class HyperStatMessageGenerator {
      * @param zone
      * @param address
      * @param equipRef
-     * @param profile
      * @return
      */
-    public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
+    public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef) {
         HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
         HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address, equipRef).build();
         HyperStat.HyperStatSettingsMessage2_t hyperStatSettingsMessage2_t = getSetting2Message(address, equipRef);
@@ -90,15 +90,16 @@ public class HyperStatMessageGenerator {
             .setHumidityMinSetpoint(getHumidityMinSp(address, CCUHsApi.getInstance()))
             .setHumidityMaxSetpoint(getHumidityMaxSp(address, CCUHsApi.getInstance()))
             .setShowCentigrade(DeviceConfigurationUtil.Companion.getUserConfiguration() == 1)
-                .setDisplayHumidity(isDisplayHumidity(equipRef))
-                .setDisplayCO2(isDisplayCo2(equipRef))
-                .setDisplayVOC(isDisplayVov(equipRef))
-                .setDisplayPM25(isDisplayP2p5(equipRef))
+            .setDisplayHumidity(isDisplayHumidity(equipRef))
+            .setDisplayCO2(isDisplayCo2(equipRef))
+            .setDisplayVOC(isDisplayVov(equipRef))
+            .setDisplayPM25(isDisplayP2p5(equipRef))
             .setCo2AlertThreshold((int)readCo2ThresholdValue(equipRef))
-            .setPm25AlertThreshold((int)readVocThresholdValue(equipRef))
-            .setVocAlertThreshold((int)readPm2p5ThresholdValue(equipRef))
+            .setPm25AlertThreshold((int)readPm2p5ThresholdValue(equipRef))
+            .setVocAlertThreshold((int)readVocThresholdValue(equipRef))
             .setTemperatureMode(HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
+
 
     }
     
@@ -119,7 +120,10 @@ public class HyperStatMessageGenerator {
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
         controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
         controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef) * 2));
-        BasicSettings settings = HSHaystackUtil.Companion.getBasicSettings(address);
+        BasicSettings settings = new BasicSettings(
+                StandaloneConditioningMode.values()[(int)getFanMode(equipRef)],
+                StandaloneFanStage.values()[(int)getConditioningMode(equipRef)]
+        );
         Log.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
@@ -134,8 +138,6 @@ public class HyperStatMessageGenerator {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
                 int mappedVal;
-                       /* = (DeviceUtil.isAnalog(rawPoint.getPort()) ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                     : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));*/
                 if (Globals.getInstance().isTemporaryOverrideMode()) {
                     mappedVal = (short)logicalVal;
                 } else {
@@ -305,6 +307,7 @@ public class HyperStatMessageGenerator {
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and co2 and threshold and equipRef == \""+equipRef+ "\"");
     }
+
     public static double readVocThresholdValue(String equipRef) {
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and voc and threshold and equipRef == \""+equipRef+ "\"");
@@ -321,15 +324,18 @@ public class HyperStatMessageGenerator {
                 "point and config and enabled and humidity and equipRef == \""+equipRef+ "\"") == 1;
     }
 
+
     public static boolean isDisplayVov(String equipRef){
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and config and enabled and voc and equipRef == \""+equipRef+ "\"") == 1;
     }
 
+
     public static boolean isDisplayCo2(String equipRef){
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and config and enabled and co2 and equipRef == \""+equipRef+ "\"") == 1;
     }
+
 
     public static boolean isDisplayP2p5(String equipRef){
         return CCUHsApi.getInstance().readDefaultVal(
@@ -348,6 +354,15 @@ public class HyperStatMessageGenerator {
         String equipRef =equip.get("id").toString();
         Log.d(L.TAG_CCU_SERIAL,"Reset set to true");
         return getControlMessage(address,equipRef).setReset(true).build();
+    }
+
+    public static double getFanMode(String equipRef){
+        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                "point and zone and sp and conditioning and mode and equipRef == \""+equipRef+ "\"");
+    }
+    public static double getConditioningMode(String equipRef){
+        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                "point and zone and fan and mode and operation and equipRef == \""+equipRef+ "\"");
     }
 
 }

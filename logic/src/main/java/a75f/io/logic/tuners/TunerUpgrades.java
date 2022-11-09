@@ -44,6 +44,7 @@ public class TunerUpgrades {
         addVavDischargeTempTuners(hayStack);
         migrateCelsiusSupportConfiguration(hayStack);
         migrateAutoAwaySetbackTuner(hayStack);
+        GenericTuners.createCcuNetworkWatchdogTimeoutTuner(hayStack);
     }
     
     /**

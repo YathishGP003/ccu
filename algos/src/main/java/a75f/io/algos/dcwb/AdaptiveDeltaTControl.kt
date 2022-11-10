@@ -40,11 +40,10 @@ class AdaptiveDeltaTControlAlgo {
                 }
             } else {
                 linearModeLoop = true
-                val chilledWaterDeltaTValveLoop = data.piLoop.loopOutput
-
-                val linearIncrementRange = 100 - chilledWaterDeltaTValveLoop
+                val invertedChilledWaterDeltaTValveLoop = 100 - data.piLoop.loopOutput
+                val linearIncrementRange = data.piLoop.loopOutput
                 val chilledWaterTargetLinearDelta = chilledWaterTargetTemp - adaptiveComfortThreshold
-                chilledWaterDeltaTValveLoop + linearIncrementRange * chilledWaterTargetLinearDelta / data.adaptiveComfortThresholdMargin
+                invertedChilledWaterDeltaTValveLoop + linearIncrementRange * chilledWaterTargetLinearDelta / data.adaptiveComfortThresholdMargin
             }
         }
     }

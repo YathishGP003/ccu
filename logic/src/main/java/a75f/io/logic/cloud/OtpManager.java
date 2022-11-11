@@ -216,16 +216,22 @@ public class OtpManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try{
-                    if(response.isSuccessful()){
-                        JSONObject responseJSON = new JSONObject(response.body().string());
-                        CCUHsApi.getInstance().setJwt(responseJSON.getString("accessToken"));
+                    JSONObject responseJSON = new JSONObject(response.body().string());
+                    String accessToken = responseJSON.getString("accessToken");
+                    if(response.isSuccessful() && accessToken != null && !accessToken.isEmpty()){
+                        CCUHsApi.getInstance().setJwt(accessToken);
                         responseCallBack.onSuccessResponse(responseJSON);
                     }
                     else{
                         responseCallBack.onErrorResponse(new JSONObject("{\"response\": \"ERROR\"}"));
                     }
-                } catch(Exception ex){
+                } catch(IOException | JSONException ex){
                     ex.printStackTrace();
+                    try {
+                        responseCallBack.onErrorResponse(new JSONObject("{\"response\": \"ERROR\"}"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -236,7 +242,7 @@ public class OtpManager {
                     responseCallBack.onErrorResponse(new JSONObject("{\"response\": \"ERROR\"}"));
                     t.printStackTrace();
                 }
-                catch(Exception e){
+                catch(JSONException e){
                     e.printStackTrace();
                 }
             }

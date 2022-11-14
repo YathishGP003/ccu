@@ -68,6 +68,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
     @BindView(R.id.toggleth2)
     ToggleButton toggleTh2;
 
+
     private ProfileType             mProfileType;
     private CazProfile              mCcuAsZoneProfile;
     private CazProfileConfig mProfileConfig;

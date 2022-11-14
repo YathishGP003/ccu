@@ -65,6 +65,7 @@ import org.joda.time.Interval;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -2212,7 +2213,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
-                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(", "));
+                                String equipType = equipTypes.get(0);
+                                tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);

@@ -47,7 +47,9 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
@@ -58,7 +60,7 @@ import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 public class FragmentDABConfiguration extends BaseDialogFragment
 {
     public static final String ID = FragmentDABConfiguration.class.getSimpleName();
-    
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     static final int TEMP_OFFSET_LIMIT = 100;
     static final int STEP = 10;
     
@@ -448,34 +450,27 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<Void, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final Void ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupDabZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentDABConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            
+
+                setButton.setEnabled(false);
+                compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                        ()->{
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                        },
+                        ()->{
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupDabZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().setCcuReady();
+                            LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        },
+                        ()->{
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentDABConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+
+                ));
+
             }
         });
         configSpinnerDropDownColor();

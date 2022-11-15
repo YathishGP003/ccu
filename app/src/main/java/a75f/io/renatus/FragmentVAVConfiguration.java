@@ -60,7 +60,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
 /**
@@ -70,7 +70,7 @@ import butterknife.ButterKnife;
 public class FragmentVAVConfiguration extends BaseDialogFragment implements AdapterView.OnItemSelectedListener, CheckBox.OnCheckedChangeListener
 {
     public static final String ID = FragmentVAVConfiguration.class.getSimpleName();
-    
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     static final int TEMP_OFFSET_LIMIT = 100;
     static final int STEP = 5;
     
@@ -527,37 +527,27 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<String, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupVavZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().syncEntityTree();
-                        CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        RxjavaUtil.executeBackground(() -> LSerial.getInstance()
-                                   .sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef));
-                        
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            
+
+                setButton.setEnabled(false);
+                compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                        ()->{
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
+                        },
+                        ()->{
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupVavZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().syncEntityTree();
+                            CCUHsApi.getInstance().setCcuReady();
+                            LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        },
+                        ()->{
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+
+                ));
             }
         });
     }

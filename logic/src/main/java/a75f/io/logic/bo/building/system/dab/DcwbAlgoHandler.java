@@ -8,6 +8,8 @@ import a75f.io.algos.dcwb.AdaptiveDeltaTInput;
 import a75f.io.algos.dcwb.MaximizedDeltaTControl;
 import a75f.io.algos.dcwb.MaximizedDeltaTInput;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
@@ -66,7 +68,8 @@ class DcwbAlgoHandler {
      * Runs the appropriate DCWB algorithm and update system chilledWaterValveLoopOutput.
      */
     public void runLoopAlgorithm() {
-    
+
+        CcuLog.i(L.TAG_CCU_SYSTEM, "DCWB runLoopAlgorithm");
         initializeTuners();
         DcwbBtuMeterDao btuDao = DcwbBtuMeterDao.getInstance();
         
@@ -83,6 +86,7 @@ class DcwbAlgoHandler {
                 chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
             }
         } else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "DCWB disabled. Flow rate is higher than threshold "+btuDao.getCWMaxFlowRate(hayStack));
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
     }

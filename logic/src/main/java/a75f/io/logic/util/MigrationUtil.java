@@ -22,7 +22,6 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -225,6 +224,7 @@ public class MigrationUtil {
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
+        L.saveCCUState();
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {
@@ -1263,7 +1263,6 @@ public class MigrationUtil {
             }
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         });
-        CCUHsApi.getInstance().scheduleSync();
     }
     private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
         ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");

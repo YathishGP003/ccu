@@ -51,7 +51,7 @@ class DcwbAlgoHandler {
      * received via pubnub wont be picked till next app-restart.
      */
     private void initializeTuners() {
-     
+        dcwbControlLoop.useNegativeProportionalError(false);
         dcwbControlLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef));
         dcwbControlLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef));
         dcwbControlLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dcwb and pspread", systemEquipRef));

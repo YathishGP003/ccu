@@ -2214,7 +2214,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
-                                tvEquipmentType.setText(modbusDevices.get(i).getName()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(", "));
+                                String equipType = equipTypes.get(0);
+                                tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);

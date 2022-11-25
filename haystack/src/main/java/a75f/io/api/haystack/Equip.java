@@ -16,6 +16,7 @@ public class Equip extends Entity
     private String siteRef;
     private String roomRef;
     private String floorRef;
+    private String createByApplication;
 
     public String getVendor() {
         return vendor;
@@ -110,6 +111,7 @@ public class Equip extends Entity
     {
         return siteRef;
     }
+    public String getCreateByApplication() { return createByApplication; }
     public String toString() {
         return displayName;
     }
@@ -120,6 +122,8 @@ public class Equip extends Entity
         private String roomRef;
         private String floorRef;
         private String group;
+        private String createdByApplication;
+
         public Builder setAhuRef(String ahuRef)
         {
             this.ahuRef = ahuRef;
@@ -203,6 +207,10 @@ public class Equip extends Entity
             this.siteRef = siteRef;
             return this;
         }
+        public Builder setCreatedByApplication(String createdByApplication) {
+            this.createdByApplication = createdByApplication;
+            return this;
+        }
         public Equip build() {
             
             Equip q = new Equip();
@@ -220,6 +228,7 @@ public class Equip extends Entity
             q.tz = this.tz;
             q.model = this.model;
             q.vendor = this.vendor;
+            q.createByApplication = this.createdByApplication;
             return q;
         }
         
@@ -286,6 +295,10 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("model"))
                 {
                     this.model = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("createdByApplication"))
+                {
+                    this.createdByApplication = pair.getValue().toString();
                 }
                 //it.remove();
             }

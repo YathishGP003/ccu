@@ -9,6 +9,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshNetwork;
 import a75f.io.device.modbus.ModbusNetwork;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -42,7 +43,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     
         deviceStatusUpdateJob = new DeviceStatusUpdateJob();
         deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", 60,
-                                    15, TimeUnit.SECONDS);
+                                    45, TimeUnit.SECONDS);
     }
     
     public void doJob()
@@ -61,8 +62,13 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         }
         if (jobLock.tryLock()) {
             try {
-                deviceNw.sendMessage();
-                deviceNw.sendSystemControl();
+                if (Globals.getInstance().getBuildingProcessStatus()) {
+                    deviceNw.sendMessage();
+                    deviceNw.sendSystemControl();
+                } else {
+                    CcuLog.e(L.TAG_CCU_DEVICE, "Device update skipped , buildingProcess not running");
+                }
+
                 modbusNetwork.sendMessage();
                 CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
             }

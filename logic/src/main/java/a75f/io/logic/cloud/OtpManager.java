@@ -14,7 +14,6 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.cloudservice.OtpService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -216,9 +215,10 @@ public class OtpManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try{
-                    if(response.isSuccessful()){
-                        JSONObject responseJSON = new JSONObject(response.body().string());
-                        CCUHsApi.getInstance().setJwt(responseJSON.getString("accessToken"));
+                    JSONObject responseJSON = new JSONObject(response.body().string());
+                    String token = responseJSON.getString("accessToken");
+                    if(response.isSuccessful() && StringUtils.isNotEmpty(token)){
+                        CCUHsApi.getInstance().setJwt(token);
                         responseCallBack.onSuccessResponse(responseJSON);
                     }
                     else{
@@ -226,6 +226,11 @@ public class OtpManager {
                     }
                 } catch(Exception ex){
                     ex.printStackTrace();
+                    try {
+                        responseCallBack.onErrorResponse(new JSONObject("{\"response\": \"ERROR\"}"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }

@@ -297,6 +297,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                             replaceCCUErrorDailog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialogInterface, i) -> {
                                                 deleteRenatusData();
                                             });
+                                            Log.i(TAG, "Replace CCU abrupted");
                                             replaceCCUErrorDailog.setIcon(R.drawable.ic_alert);
                                             replaceCCUErrorDailog.show();
                                         }
@@ -308,22 +309,25 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                 displayToastMessageOnRestoreSuccess(ccu);
                                 loadRenatusLandingIntent();
                                 updatePreference();
+                                Log.i(TAG, "Replace CCU successfully completed");
                             }
 
                         }
                     );
             }
             @Override
-            public void onErrorResponse(JSONObject response) throws JSONException {
+            public void onErrorResponse(JSONObject response){
                 ProgressDialogUtils.hideProgressDialog();
                 Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 toast.setView(toastFail);
                 TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
-                textView.setText(ccu.getName()+"  replace is failed. Please try again");
+                textView.setText(ccu.getName()+"  replace is failed as Bearer token cannot be generated. Please try " +
+                        "again");
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
                 deleteRenatusData();
+                Log.i(TAG, "Replace CCU abrupted");
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");
@@ -343,6 +347,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     }
 
     private void initRestoreCCUProcess(CCU ccu) {
+        Log.i(TAG, "Replace CCU Started");
         new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@", ""),
                 ccu.getCcuId().replaceFirst("@", ""));
         new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),

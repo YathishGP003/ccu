@@ -18,8 +18,10 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.InputActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -291,7 +293,7 @@ public class SingleStageEquip {
                 .setEquipRef(equipRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("config").addMarker("analog1").addMarker("input")
+                .addMarker("config").addMarker("analog1").addMarker("input").addMarker("writable")
                 .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association")
                 .setEnums(getSensorNameByType(config.analogInAssociation))
                 .setGroup(String.valueOf(nodeAddr))
@@ -370,11 +372,11 @@ public class SingleStageEquip {
     public String getSensorNameByType(int analogInAssociation) {
 
         if (analogInAssociation == 0) {
-            return "CURRENT_TX_0_10";
+            return "zero_to_10_current_transformer";
         } else if (analogInAssociation == 1) {
-            return "CURRENT_TX_0_20";
+            return "zero_to_20_current_transformer";
         } else {
-            return "CURRENT_TX_0_50";
+            return "zero_to_50_current_transformer";
         }
     }
 
@@ -472,6 +474,9 @@ public class SingleStageEquip {
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
         CCUHsApi.getInstance().writeDefaultValById(enableTh1Id, (config.enableThermistor1 ? 1.0 : 0));
 
+        SmartNode.setPointEnabled(nodeAddr,Port.ANALOG_IN_ONE.name(), config.analogIn1);
+        mapPhysicalToLogicalPoint();
+
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
@@ -481,6 +486,26 @@ public class SingleStageEquip {
         setConfigNumVal("input and association", config.analogInAssociation);
         SingleStageEquipUtil.createRelay1Config(config.enableRelay1, enableRelay1);
         SingleStageEquipUtil.createRelay2Config(config.enableRelay2, enableRelay2);
+    }
+
+    private void mapPhysicalToLogicalPoint() {
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> analogInPoint;
+        if (getProfileConfiguration().analogInAssociation == 0) {
+            analogInPoint = hayStack.readEntity("point and transformer10 and sensor and " +
+                    "equipRef == \""+equipRef+"\"");
+        } else if (getProfileConfiguration().analogInAssociation == 1) {
+            analogInPoint = hayStack.readEntity("point and transformer20 and sensor and " +
+                    "equipRef == \""+equipRef+"\"");
+        } else {
+            analogInPoint = hayStack.readEntity("point and transformer50 and sensor and " +
+                    "equipRef == \""+equipRef+"\"");
+        }
+        if (!analogInPoint.isEmpty()) {
+            SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), analogInPoint.get("id").toString());
+        }
+
     }
 
     public void setProfilePoint(String tags, double val) {
@@ -521,6 +546,7 @@ public class SingleStageEquip {
                 CCUHsApi.getInstance().read("point and config and analog1 and input and association and group == \""+nodeAddr+ "\"");
         Point analogInAssociation = new Point.Builder().setHashMap(analogInAssociationMap).build();
         SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation, analogInAssociation);
+        mapPhysicalToLogicalPoint();
 
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
@@ -571,6 +597,16 @@ public class SingleStageEquip {
             relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
             config.getOutputs().add(relay2);
         }
+
+        RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_IN_ONE.toString());
+            if (a1 != null && a1.getEnabled()) {
+                Input analog1 = new Input();
+                analog1.setAddress((short) nodeAddr);
+                analog1.setPort(Port.ANALOG_IN_ONE);
+                analog1.mInputActuatorType = InputActuatorType.getEnum(a1.getType());
+                config.getInputs().add(analog1);
+            }
+
         return config;
     }
     public double getCurrentTemp()

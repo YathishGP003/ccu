@@ -17,6 +17,15 @@ public enum InputActuatorType
 	}
 
 	public static InputActuatorType getEnum (String value) {
+
+		if (value.equals("0")){
+			value = "zero_to_10_current_transformer";
+		} else if (value.equals("1")) {
+			value = "zero_to_20_current_transformer";
+		} else {
+			value = "zero_to_50_current_transformer";
+		}
+
 		for (InputActuatorType v : values())
 			if (v.displayName.equalsIgnoreCase(value)) return  v;
 		Log.d("CCU", "Actuator Not found: "+value);

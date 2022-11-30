@@ -109,7 +109,6 @@ public class SingleStageProfile extends ZoneProfile
                 CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
                         "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
             }
-            return;
         }
 
             Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + sseEquip.nodeAddr + "\"")).build();

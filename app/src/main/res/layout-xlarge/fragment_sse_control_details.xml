@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:id="@+id/layoutHeader"
@@ -26,8 +26,7 @@
                     android:id="@+id/textTitleFragment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
+                    android:layout_centerInParent="true"
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_sseinput"
                     android:textAllCaps="true"
@@ -64,8 +63,8 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginLeft="40dp"
+                            android:layout_weight="1"
                             android:text="@string/title_enable"
                             android:textAppearance="@style/text_label" />
 
@@ -239,11 +238,10 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_weight="1"
                 android:layout_marginLeft="25dp"
                 android:layout_marginTop="10dp"
+                android:layout_weight="1"
                 android:orientation="horizontal">
-
 
 
                 <TextView
@@ -262,8 +260,8 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_gravity="center_vertical"
-                    android:background="@drawable/toggle_selector"
                     android:layout_marginLeft="10dp"
+                    android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
@@ -278,18 +276,20 @@
                     android:layout_marginLeft="20dp"
                     android:text="TH2 - Use external 10k Temperature Sensor"
                     android:textAppearance="@style/text_appearance" />
+
                 <ToggleButton
                     android:id="@+id/sse_thermister2_switch"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_gravity="center_vertical"
-                    android:background="@drawable/toggle_selector"
                     android:layout_marginStart="10dp"
+                    android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
@@ -312,7 +312,7 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="140dp"
+                    android:layout_marginStart="40dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
@@ -332,11 +332,40 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="220dp"
+                    android:layout_marginStart="40dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textAnalogIn1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:text="@string/analogin1"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/sse_analogin1"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <Spinner
+                    android:id="@+id/sseAnalogActuator"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:entries="@array/sse_relay1_mode"
+                    tools:listitem="@layout/spinner_dropdown_item" />
 
 
             </LinearLayout>
@@ -346,34 +375,31 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginTop="42dp"
+                android:layout_marginRight="10dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textTempOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_tempoffset"
                         android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_tempoffset"
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
-                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/temperatureOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        />
+                        android:theme="?DefaultNumberPickerTheme" />
                 </LinearLayout>
-
-
 
 
             </LinearLayout>

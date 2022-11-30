@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.sse;
 
+import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
+
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -55,6 +59,9 @@ public class SingleStageEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis+"-SSE-"+nodeAddr;
         String ahuRef = null;
+
+        Log.d(TAG, "setupSSEZoneProfile: association cvalue " + config.analogInAssociation);
+
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
@@ -278,6 +285,41 @@ public class SingleStageEquip {
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
 
+        Point analogInAssociation = new Point.Builder()
+                .setDisplayName(equipDis + "-analogIn1Association")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("analog1").addMarker("input")
+                .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association")
+                .setEnums(getSensorNameByType(config.analogInAssociation))
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+
+        String analogInAssociationId = CCUHsApi.getInstance().addPoint(analogInAssociation);
+        CCUHsApi.getInstance().writeDefaultValById(analogInAssociationId, Double.valueOf(config.analogInAssociation));
+
+        Point analogIn = new Point.Builder()
+                .setDisplayName(equipDis + "-analogIn1Enabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("writable").addMarker("zone").addMarker("input")
+                .addMarker("analog1").addMarker("enabled").addMarker("sse").addMarker("standalone")
+                .setEnums("false,true")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+
+        String analogIn1Id = CCUHsApi.getInstance().addPoint(analogIn);
+        CCUHsApi.getInstance().writeDefaultValById(analogIn1Id, (config.analogIn1 ? 1.0 : 0));
+
+        Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddr, config.analogInAssociation);
+        CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
+
         ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
                 equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAway ? 1:0
                 ,config.enableAutoForceOccupied ?1:0);
@@ -298,6 +340,8 @@ public class SingleStageEquip {
         device.relay2.setEnabled(config.enableRelay1 > 0 ? true : false);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
+        device.analog1In.setEnabled(config.analogIn1);
+        device.analog1In.setPointRef(analogIn1Id);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
@@ -322,6 +366,18 @@ public class SingleStageEquip {
     String getId(){
         return equipRef;
     }
+
+    public String getSensorNameByType(int analogInAssociation) {
+
+        if (analogInAssociation == 0) {
+            return "CURRENT_TX_0_10";
+        } else if (analogInAssociation == 1) {
+            return "CURRENT_TX_0_20";
+        } else {
+            return "CURRENT_TX_0_50";
+        }
+    }
+
     private void createSSEConfigPoints(SingleStageConfig config, String equipRef, String floorRef, String roomRef) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -421,7 +477,8 @@ public class SingleStageEquip {
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
-
+        setConfigNumVal("analog1 and input and enabled",config.analogIn1 ? 1.0 : 0);
+        setConfigNumVal("input and association", config.analogInAssociation);
         SingleStageEquipUtil.createRelay1Config(config.enableRelay1, enableRelay1);
         SingleStageEquipUtil.createRelay2Config(config.enableRelay2, enableRelay2);
     }
@@ -443,6 +500,7 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
+        SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), config.analogIn1);
 
         if(config.enableAutoAway != getProfileConfiguration().enableAutoAway
                 || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){
@@ -459,6 +517,11 @@ public class SingleStageEquip {
         Point enableRelay2 = new Point.Builder().setHashMap(enableRelay2Map).build();
         SingleStageEquipUtil.updateRelay2Config(config.enableRelay2, enableRelay2);
 
+        HashMap analogInAssociationMap =
+                CCUHsApi.getInstance().read("point and config and analog1 and input and association and group == \""+nodeAddr+ "\"");
+        Point analogInAssociation = new Point.Builder().setHashMap(analogInAssociationMap).build();
+        SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation, analogInAssociation);
+
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
@@ -468,6 +531,8 @@ public class SingleStageEquip {
         setConfigNumVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 : 0 );
         setHisVal("auto and away",config.enableAutoAway ? 1.0 : 0 );
         setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 : 0 );
+        setConfigNumVal("analog1 and input and enabled",config.analogIn1 ? 1.0 : 0);
+        setConfigNumVal("input and association", config.analogInAssociation);
 
         CCUHsApi.getInstance().scheduleSync();
     }
@@ -483,6 +548,8 @@ public class SingleStageEquip {
         config.enableRelay2 = (int)getConfigNumVal("enable and relay2");
         config.enableAutoAway = getConfigNumVal("auto and away") > 0;
         config.enableAutoForceOccupied = getConfigNumVal("auto and occupied and forced") > 0;
+        config.analogIn1 = getConfigNumVal("analog1 and input and enabled") > 0 ? true : false;
+        config.analogInAssociation = (int) getConfigNumVal("input and association");
 
         config.setNodeType(NodeType.SMART_NODE);
 

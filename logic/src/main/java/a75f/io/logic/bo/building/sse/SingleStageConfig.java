@@ -12,4 +12,6 @@ public class SingleStageConfig extends BaseProfileConfiguration {
     public boolean enableAutoForceOccupied;
 
     public double temperaturOffset;
+    public boolean analogIn1;
+    public int analogInAssociation;
 }

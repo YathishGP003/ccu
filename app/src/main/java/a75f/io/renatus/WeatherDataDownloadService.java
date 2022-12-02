@@ -79,22 +79,19 @@ public class WeatherDataDownloadService {
                         current = response.getJSONObject("currentWeather");
 
                         mCurrentTemp = current.getDouble("airTemp");
-
-                        // TODO: Resolve Icons
-                        micon = current.getString("icon");
                         mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
-                        mSummary = StringUtils.capitalize(current.getString("description"));
+                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
 
-                        // TODO: Verify
+                        mSummary = StringUtils.capitalize(current.getString("description"));
+                        micon = current.getString("icon");
+
                         // Convert mm/min to mm/hr
-                        mPrecipIntensity = current.getDouble("precipitation") * 25.4 * 60;
+                        mPrecipIntensity = current.getDouble("precipitation") * 60;
 
                         cloudCover = current.getDouble("cloudage");
                         windSpeed = current.getDouble("windSpeed");
                         windGust = current.getDouble("windGust");
                         windBearing = current.getDouble("windBearing");
-                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
-
 
                         maxtemp = current.getDouble("maxDailyTemp");
                         mintemp = current.getDouble("minDailyTemp");

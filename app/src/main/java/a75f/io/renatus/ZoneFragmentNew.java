@@ -6,7 +6,6 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -115,7 +114,6 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
-import a75f.io.renatus.util.LocationDetails;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
@@ -125,7 +123,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
@@ -284,7 +282,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
-                WeatherDataDownloadService.getWeatherData(ZoneFragmentNew.this);
+                WeatherDataDownloadService.getWeatherData();
                 if (weatherUpdateHandler != null)
                     weatherUpdateHandler.post(weatherUpdate);
             }
@@ -562,9 +560,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
 
             weather_condition.setText(WeatherDataDownloadService.getSummary());
-            String weather_icon_string = WeatherDataDownloadService.getIcon().toString().replaceAll("-", "");
+            String weatherIconId = WeatherDataDownloadService.getIcon();
             Context context = weather_icon.getContext();
-            int id = context.getResources().getIdentifier(weather_icon_string, "drawable", context.getPackageName());
+            int id = context.getResources().getIdentifier("weather_icon_" + weatherIconId, "drawable", context.getPackageName());
             weather_icon.setImageResource(id);
         }
     }
@@ -3517,11 +3515,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
-    }
-
-    @Override
-    public void onDataReceived() {
-        UpdateWeatherData();
     }
 
     class FloorComparator implements Comparator<Floor> {

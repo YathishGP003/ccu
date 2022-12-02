@@ -363,24 +363,6 @@ public class CCUTagsDb extends HServer {
         }
     }
 
-    public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area, String org, String fcManager,String installer) {
-        HDict site = new HDictBuilder()
-                .add("id", HRef.make(dis))
-                .add("dis", dis)
-                .add("site", HMarker.VAL)
-                .add("geoCity", geoCity)
-                .add("geoState", geoState)
-                .add("geoAddr", "" + geoCity + "," + geoState)
-                .add("tz", timeZone)
-                .add("area", HNum.make(area, "ft\u00B2"))
-                .add("organization", org)
-                .add("fmEmail", fcManager)
-                .add("installerEmail", installer)
-                .toDict();
-        tagsMap.put(dis, site);
-        return site;
-    }
-
     public String addSite(Site s) {
         return addSiteWithId(s, UUID.randomUUID().toString());
     }
@@ -424,7 +406,8 @@ public class CCUTagsDb extends HServer {
                 .add("organization", s.getOrganization())
                 .add("fmEmail", s.getFcManagerEmail())
                 .add("installerEmail", s.getInstallerEmail())
-                .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+                .add("area", HNum.make(s.getArea(), "ft\u00B2"))
+                .add("weatherRef", HRef.copy(s.getWeatherRef()));
 
         for (String m : s.getMarkers()) {
             site.add(m);

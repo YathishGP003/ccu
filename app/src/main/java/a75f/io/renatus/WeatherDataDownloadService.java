@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,16 +70,6 @@ public class WeatherDataDownloadService {
         String weatherRef = site.get("weatherRef").toString();
 
 
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-        double lat = spDefaultPrefs.getFloat("lat", 0);
-        double lng = spDefaultPrefs.getFloat("lng", 0);
-        CcuLog.i(L.TAG_CCU_WEATHER, "Lat :  "+lat+ ", Lng: "+lng);
-
-        if ((lat < 0.05 && lat > -0.05) || (lng < 0.05 && lng > -0.05)) {
-            CcuLog.w(L.TAG_CCU_WEATHER, "Failed to get weather conditions - Site not correctly Geo-Coded");
-            return;
-        }
-
         AsyncTask<Void, Integer, JSONObject> downloader = new AsyncTask<Void, Integer, JSONObject>() {
             @Override
             protected void onPostExecute(JSONObject response) {
@@ -92,7 +83,7 @@ public class WeatherDataDownloadService {
                         // TODO: Resolve Icons
                         micon = current.getString("icon");
                         mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
-                        mSummary = current.getString("description");
+                        mSummary = StringUtils.capitalize(current.getString("description"));
 
                         // TODO: Verify
                         // Convert mm/min to mm/hr
@@ -128,14 +119,14 @@ public class WeatherDataDownloadService {
                         mPrecipIntensity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_precip", (float) mPrecipIntensity);
                     }
                 } catch (JSONException | NullPointerException e) {
-                    CcuLog.i(L.TAG_CCU_WEATHER,"Exception: " + e.getMessage());
+                    CcuLog.i(L.TAG_CCU_WEATHER,"Failed to process weather response. Exception: " + e.getMessage());
                 }
             }
 
             @Override
             protected JSONObject doInBackground(Void... params) {
                 JSONObject jsonResponse = null;
-                String requestUrl = String.format(weatherUrl + "%s/current/@%s", weatherUrl, weatherRef);
+                String requestUrl = String.format("%s/current/%s", weatherUrl, weatherRef);
                 String response = HttpUtil.executeJson(
                         requestUrl,
                         null,

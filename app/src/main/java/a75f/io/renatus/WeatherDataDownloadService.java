@@ -80,7 +80,7 @@ public class WeatherDataDownloadService {
 
                         mCurrentTemp = current.getDouble("airTemp");
                         mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
-                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
+                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity * 100);
 
                         mSummary = StringUtils.capitalize(current.getString("description"));
                         micon = current.getString("icon");
@@ -112,7 +112,7 @@ public class WeatherDataDownloadService {
                     } else {
                         mCurrentTemp = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_cur_temp", (float) mCurrentTemp);
                         mCurrentHumidity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_hum", (float) mCurrentHumidity);
-                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
+                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity * 100);
                         mPrecipIntensity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_precip", (float) mPrecipIntensity);
                     }
                 } catch (JSONException | NullPointerException e) {

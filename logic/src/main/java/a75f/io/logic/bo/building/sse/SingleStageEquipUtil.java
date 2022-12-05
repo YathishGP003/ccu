@@ -234,6 +234,8 @@ public class SingleStageEquipUtil {
         }
 
         Log.d(TAG, "Bharath points creating points" + point);
+        String id = point.getId();
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id,0.0);
 
 
         return point;
@@ -252,10 +254,10 @@ public class SingleStageEquipUtil {
             return;
         }
         if (curConfig == 0) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer20  and sensor and equipRef== \""
+            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer  and sensor and equipRef== \""
                     + configPoint.getEquipRef() + "\"");
         } else if (curConfig == 1) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer30  and sensor and equipRef== \""
+            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer20  and sensor and equipRef== \""
                     + configPoint.getEquipRef() + "\"");
         } else if (curConfig == 2) {
             configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer50  and sensor and equipRef== \""

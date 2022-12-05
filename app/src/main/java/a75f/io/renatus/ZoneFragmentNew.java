@@ -1899,11 +1899,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double targetValue = (double) plcPoints.get("Target Value");
                     double inputValue = (double) plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                        nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
+                        nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
+                        nonTempControl.setPiInputUnitText("\u00B0C");
+                    } else {
+                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    }
+
                     if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                    } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")){
+                        nonTempControl.setPiOutputUnitText("\u00B0C");
                     } else {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                     }
@@ -2170,16 +2179,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            if( isCelsiusTunerAvailableStatus()) {
+                            if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
+                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                             } else {
                                 nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                                 nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             }
-                            nonTempControl.setPiOutputText(String.valueOf(targetValue));
+
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                                nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                             }
@@ -3411,7 +3424,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             } else {
                 labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                    textViewTargetAir.setText(fahrenheitToCelsius(Double.parseDouble(plcPoints.get("Target Value").toString())) + " " + "\u00B0C");
+                } else {
+                    textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                }
                 viewPointRow1.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);

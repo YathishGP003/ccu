@@ -8,7 +8,7 @@ import android.util.Log;
 
 public enum InputActuatorType
 {
-	ZeroTo10ACurrentTransformer("zero_to_10_current_transformer"), ZeroTo20ACurrentTransformer("zero_to_20_current_transformer"), ZeroTo50CurrentTransformer("zero_to_50_current_transformer");
+	ZeroTo10ACurrentTransformer("transformerZeroTo10"), ZeroTo20ACurrentTransformer("transformerZeroTo20"), ZeroTo50CurrentTransformer("transformerZeroTo50");
 
 	public String displayName;
 
@@ -19,11 +19,11 @@ public enum InputActuatorType
 	public static InputActuatorType getEnum (String value) {
 
 		if (value.equals("0")){
-			value = "zero_to_10_current_transformer";
+			value = "transformerZeroTo10";
 		} else if (value.equals("1")) {
-			value = "zero_to_20_current_transformer";
+			value = "transformerZeroTo20";
 		} else {
-			value = "zero_to_50_current_transformer";
+			value = "transformerZeroTo50";
 		}
 
 		for (InputActuatorType v : values())

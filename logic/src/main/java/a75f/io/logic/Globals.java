@@ -637,5 +637,8 @@ public class Globals {
         if(heatDTMin >= heatDTMax ||  heatDTMindf >= heatDTMaxdf) return false;
         else return true;
     }
-    
+
+    public boolean getBuildingProcessStatus() {
+        return mProcessJob.getStatus();
+    }
 }

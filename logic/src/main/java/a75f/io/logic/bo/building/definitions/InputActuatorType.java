@@ -19,11 +19,11 @@ public enum InputActuatorType
 	public static InputActuatorType getEnum (String value) {
 
 		if (value.equals("0")){
-			value = "transformerZeroTo10";
+			value = ZeroTo10ACurrentTransformer.displayName;
 		} else if (value.equals("1")) {
-			value = "transformerZeroTo20";
+			value = ZeroTo20ACurrentTransformer.displayName;
 		} else {
-			value = "transformerZeroTo50";
+			value = ZeroTo50CurrentTransformer.displayName;
 		}
 
 		for (InputActuatorType v : values())

@@ -12,6 +12,7 @@ import com.google.gson.InstanceCreator;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HBin;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HCoord;
@@ -406,8 +407,12 @@ public class CCUTagsDb extends HServer {
                 .add("organization", s.getOrganization())
                 .add("fmEmail", s.getFcManagerEmail())
                 .add("installerEmail", s.getInstallerEmail())
-                .add("area", HNum.make(s.getArea(), "ft\u00B2"))
-                .add("weatherRef", HRef.copy(s.getWeatherRef()));
+                .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+
+        String weatherRef = s.getWeatherRef();
+        if (StringUtils.isNotEmpty(weatherRef)) {
+            site.add("weatherRef", weatherRef);
+        }
 
         for (String m : s.getMarkers()) {
             site.add(m);

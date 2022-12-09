@@ -144,8 +144,8 @@ public class UpdatePointHandler
             logPointArray(localPoint);
         
             try {
-                Thread.sleep(100);
                 updatePoints(localPoint);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

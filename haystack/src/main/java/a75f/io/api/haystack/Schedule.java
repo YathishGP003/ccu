@@ -6,6 +6,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
@@ -210,8 +211,7 @@ public class Schedule extends Entity
         return specialSchedule;
     }
 
-    public static Schedule getScheduleForZone(String zoneId, boolean vacation)
-    {
+    public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
@@ -222,12 +222,10 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        if (ref != null && !ref.equals("")) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
             
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
@@ -477,23 +475,24 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
+                                        "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
+        //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
+        if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
-                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
+                CcuLog.d("CCU_SCHEDULER", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
                         + schedule.toString());
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule "+scheduleType);
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0) {
             Schedule schedule = retVal.get(0);
             schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
-            CcuLog.d("Schedule", "Building Schedule with special schedule:  "+schedule);
+            CcuLog.d("CCU_SCHEDULER", "Building Schedule with special schedule:  "+schedule);
             return schedule;
         }
         return null;

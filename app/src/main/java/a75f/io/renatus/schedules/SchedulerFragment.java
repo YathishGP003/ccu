@@ -221,7 +221,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
         scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
         scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
-        scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
@@ -310,6 +309,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
+        textViewScheduletitle.setFocusable(true);
 
 
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.

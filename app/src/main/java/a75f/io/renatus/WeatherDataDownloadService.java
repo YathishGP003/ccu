@@ -79,7 +79,7 @@ public class WeatherDataDownloadService {
                         current = response.getJSONObject("currentWeather");
 
                         mCurrentTemp = current.getDouble("airTemp");
-                        mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
+                        mCurrentHumidity = CCUUtils.roundToTwoDecimal(current.getDouble("humidity"));
                         mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
 
                         mSummary = StringUtils.capitalize(current.getString("description"));

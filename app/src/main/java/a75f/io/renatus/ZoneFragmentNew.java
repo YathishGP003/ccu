@@ -537,7 +537,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
-            double weatherHumidity = WeatherDataDownloadService.getHumidity();
+            double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
             weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
             note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());

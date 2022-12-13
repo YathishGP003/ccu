@@ -170,7 +170,7 @@ public class SyncWorker extends Worker {
                     CCUHsApi.getInstance().setAuthorised(false);
                     return;
                 }
-                if (response == null || response.getErrRespString() == null) {
+                if (response == null || response.getRespString() == null) {
                     return;
                 }
                 deletedSyncedItems.addAll(entityList);

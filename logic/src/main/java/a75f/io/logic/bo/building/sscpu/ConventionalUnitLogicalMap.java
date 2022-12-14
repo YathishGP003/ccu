@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -27,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -91,6 +93,8 @@ public class ConventionalUnitLogicalMap {
         createConventionalConfigPoints(config, equipRef,floor,room);
 
         addProfilePoints(siteRef,equipRef,equipDis,tz,floor,room);
+        ConfigUtil.Companion.addConfigPoints("cpu",siteRef,room,floor,equipRef,tz,String.valueOf(nodeAddr),equipDis,"standalone",
+                config.enableAutoAway ? 1:0 ,config.enableAutoForceOccupied ?1:0);
         Point currentTemp = new Point.Builder()
                 .setDisplayName(equipDis+"-currentTemp")
                 .setEquipRef(equipRef)
@@ -499,6 +503,7 @@ public class ConventionalUnitLogicalMap {
         device.relay4.setEnabled(config.isOpConfigured(Port.RELAY_FOUR));
         device.relay5.setEnabled(config.isOpConfigured(Port.RELAY_FIVE));
         device.relay6.setEnabled(config.isOpConfigured(Port.RELAY_SIX));
+
         SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[config.relay6Type];
         switch (fanRelayType){
             case FAN_STAGE2:
@@ -566,8 +571,10 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his")
+                .addMarker("sp").addMarker("zone").addMarker("cpu")
+                .setGroup(String.valueOf(nodeAddr))
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);
@@ -578,7 +585,9 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
+                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode")
+                .addMarker("his").addMarker("sp").addMarker("zone").addMarker("cpu")
+                .setGroup(String.valueOf(nodeAddr))
                 .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
@@ -849,7 +858,12 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("relay6 and type",(double)config.relay6Type);
         setConfigNumVal("enable and fan and stage1",config.enableFanStage1 == true ? 1.0 : 0);
-        
+
+        setConfigNumVal("auto and away",config.enableAutoAway? 1:0);
+        setConfigNumVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+        setHisVal("auto and away",config.enableAutoAway? 1:0);
+        setHisVal("auto and forced and occupied",config.enableAutoForceOccupied? 1:0);
+
         updateConditioningMode(equip, config, CCUHsApi.getInstance());
         updateFanMode(equip, config, CCUHsApi.getInstance());
         CCUHsApi.getInstance().syncEntityTree();
@@ -866,6 +880,9 @@ public class ConventionalUnitLogicalMap {
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);//TODO - revisit
         config.relay6Type = (int)getConfigNumVal("relay6 and type"); //TODO need to revisit once ui is done
+
+        config.enableAutoAway = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and forced and occupied") > 0;
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -1071,6 +1088,10 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+
     public double getConfigNumVal(String tags) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
@@ -1111,7 +1132,9 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setFloorRef(floor)
                 .setRoomRef(room).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                .addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
                 .addMarker("cpu").addMarker("zone")
                 .setEnums("off,auto,low,high")
                 .setTz(tz)
@@ -1128,7 +1151,9 @@ public class ConventionalUnitLogicalMap {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                .addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
                 .addMarker("cpu").addMarker("temp")
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
@@ -1143,15 +1168,22 @@ public class ConventionalUnitLogicalMap {
         Point targetDehumidifier = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetDehumidifier")
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("his")
-                .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                .addMarker("target").addMarker("his")
+                .setTz(tz).addMarker("dehumidifier").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
+                .build();
+
         String targetDehumidifierId = CCUHsApi.getInstance().addPoint(targetDehumidifier);
         CCUHsApi.getInstance().writePointForCcuUser(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
         CCUHsApi.getInstance().writeHisValById(targetDehumidifierId, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER);
+
         Point targetHumidty = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetHumidity")
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("humidity").addMarker("sp")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable")
+                .addMarker("target").addMarker("humidity").addMarker("sp")
+                .setGroup(String.valueOf(nodeAddr))
                 .addMarker("his").setTz(tz).build();
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
         CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);

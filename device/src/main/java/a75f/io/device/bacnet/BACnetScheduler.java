@@ -51,7 +51,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class BACnetScheduler {
 
@@ -74,6 +74,7 @@ public class BACnetScheduler {
 
         HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not vacation and " +
                 "roomRef == " +zone.getId());
+
         schedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
         systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
@@ -378,7 +379,7 @@ public class BACnetScheduler {
             CCUHsApi.getInstance().updateSchedule(systemSchedule);
         }
         CCUHsApi.getInstance().syncEntityTree();
-        ScheduleProcessJob.updateSchedules();
+        ScheduleManager.getInstance().updateSchedules();
     }
 
     private static Schedule.Days getCurrentDaySchedule(ArrayList<Schedule.Days> weekDays) {
@@ -445,7 +446,7 @@ public class BACnetScheduler {
                         bacnetVacation.getEndDate().equals(convertDateTimetoStartDate(ccuVacation.getEndDate()))) {
                     DefaultSchedules.upsertVacation(ccuVacation.getId(), ccuVacation.getDis(), convertDatetoStartDateTime(bacnetVacation.getStartDate()), convertDatetoEndDateTime(bacnetVacation.getEndDate()));
                     CCUHsApi.getInstance().saveTagsData();
-                    ScheduleProcessJob.updateSchedules();
+                    ScheduleManager.getInstance().updateSchedules();
                     CCUHsApi.getInstance().syncEntityTree();
                     try {
                         Thread.sleep(3000);
@@ -468,7 +469,7 @@ public class BACnetScheduler {
                             DefaultSchedules.upsertVacation(null, "BACnetVacation", new DateTime(bacnetVacation.getStartDate()), new DateTime(bacnetVacation.getEndDate()));
                             CCUHsApi.getInstance().saveTagsData();
                             CCUHsApi.getInstance().syncEntityTree();
-                            ScheduleProcessJob.updateSchedules();
+                            ScheduleManager.getInstance().updateSchedules();
                             try {
                                 Thread.sleep(3000);
                                 vacationsBacnet.remove(bacnetVacation);
@@ -484,7 +485,7 @@ public class BACnetScheduler {
                     DefaultSchedules.upsertVacation(null, "BACnetVacation", new DateTime(bacnetVacation.getStartDate()), new DateTime(bacnetVacation.getEndDate()));
                     CCUHsApi.getInstance().saveTagsData();
                     CCUHsApi.getInstance().syncEntityTree();
-                    ScheduleProcessJob.updateSchedules();
+                    ScheduleManager.getInstance().updateSchedules();
                     try {
                         Thread.sleep(3000);
                         vacationsBacnet.remove(bacnetVacation);
@@ -513,7 +514,7 @@ public class BACnetScheduler {
                         CCUHsApi.getInstance().deleteEntity("@" + ccuVacation.getId());
                         CCUHsApi.getInstance().saveTagsData();
                         CCUHsApi.getInstance().syncEntityTree();
-                        ScheduleProcessJob.updateSchedules();
+                        ScheduleManager.getInstance().updateSchedules();
                         try {
                             Thread.sleep(3000);
                         } catch (InterruptedException e) {
@@ -555,7 +556,7 @@ public class BACnetScheduler {
                 }
             }
             CCUHsApi.getInstance().syncEntityTree();
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
         }
     }
 

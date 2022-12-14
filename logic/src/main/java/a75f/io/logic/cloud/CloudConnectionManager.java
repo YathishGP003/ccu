@@ -1,6 +1,10 @@
 package a75f.io.logic.cloud;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloudservice.CloudConnectionService;
@@ -29,6 +33,9 @@ public class CloudConnectionManager {
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(50, TimeUnit.SECONDS)
+                .writeTimeout(50, TimeUnit.SECONDS)
+                .readTimeout(50, TimeUnit.SECONDS)
                 .build();
         return okHttpClient;
     }
@@ -36,14 +43,19 @@ public class CloudConnectionManager {
     public void getCloudConnectivityStatus(CloudConnectionResponseCallback responseCallback){
         Retrofit retrofit = getRetrofitForHaystackBaseUrl();
         Call<ResponseBody> call = retrofit.create(CloudConnectionService.class).getAbout();
+        long requestTime = new Date().getTime();
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                CcuLog.i(TAG_CLOUD_CONNECTION_STATUS,
+                        "Time taken for the success response "+(new Date().getTime() - requestTime));
                 responseCallback.onSuccessResponse(response.isSuccessful());
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                CcuLog.i(TAG_CLOUD_CONNECTION_STATUS,
+                        "Time taken for the failed  response "+(new Date().getTime() - requestTime));
                 CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "Error while Checking cloud connection status "+t.getMessage(),
                         t);
                 responseCallback.onErrorResponse(false);

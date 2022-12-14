@@ -21,6 +21,7 @@ public class Zone extends Entity
     private String            siteRef;
     private String            scheduleRef;
     private String            vacationRef;
+    private String            createdByApplication;
 
     public boolean isSystemSchedule()
     {
@@ -98,6 +99,8 @@ public class Zone extends Entity
         scheduleRef = scheduleId;
     }
 
+    public String getCreatedByApplication() { return createdByApplication; }
+
     public HDict getHDict()
     {
         HDictBuilder b = new HDictBuilder()
@@ -134,6 +137,7 @@ public class Zone extends Entity
         private String id;
         private String scheduleRef;
         private String vacationRef;
+        private String createdByApplication;
 
         public Builder setDisplayName(String displayName)
         {
@@ -165,6 +169,12 @@ public class Zone extends Entity
             return this;
         }
 
+        public Builder createdByApplication(String application)
+        {
+            this.createdByApplication = createdByApplication;
+            return this;
+        }
+
         public Zone build()
         {
             Zone z = new Zone();
@@ -175,6 +185,7 @@ public class Zone extends Entity
             z.scheduleRef = this.scheduleRef;
             z.vacationRef = this.vacationRef;
             z.id = this.id;
+            z.createdByApplication = this.createdByApplication;
             return z;
         }
 
@@ -205,6 +216,9 @@ public class Zone extends Entity
                 } else if (pair.getKey().equals("vacationRef"))
                 {
                     this.vacationRef = pair.getValue().toString();
+                } else if (pair.getKey().equals("createdByApplication"))
+                {
+                    this.createdByApplication = pair.getValue().toString();
                 }
                 //it.remove();
             }

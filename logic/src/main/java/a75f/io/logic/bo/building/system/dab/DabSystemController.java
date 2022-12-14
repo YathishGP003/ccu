@@ -14,12 +14,12 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -125,7 +124,7 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("equip and zone and (dab or dualDuct or " +
-                                                                            "ti or bpos)");
+                                                                            "ti or otn)");
     
         updateSystemTempHumidity(allEquips);
         
@@ -188,7 +187,7 @@ public class DabSystemController extends SystemController
         weightedAverageChangeoverLoadSum = 0;
         weightedAverageChangeoverLoad = 0;
     
-        Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
+        Occupancy occupancy = ScheduleManager.getInstance().getSystemOccupancy();
         if (currSystemOccupancy == Occupancy.OCCUPIED ||
             currSystemOccupancy == Occupancy.PRECONDITIONING ||
             currSystemOccupancy == Occupancy.FORCEDOCCUPIED ||
@@ -231,7 +230,7 @@ public class DabSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
             if (isZoneDead(equip)) {
                 zoneDeadCount++;
@@ -292,8 +291,8 @@ public class DabSystemController extends SystemController
             if(sysEquip != null) {
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
                 if(isCMTempDead(cmCurrentTemp)) {
-                    double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
-                    double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+                    double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
+                    double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
                     double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
                     
                     double cmCoolingLoad = cmCurrentTemp > tempMidPoint ? cmCurrentTemp - desiredTempCooling :
@@ -670,8 +669,8 @@ public class DabSystemController extends SystemController
     public void updateSystemDesiredTemp(){
         try {
 
-            double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
-            double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+            double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
+            double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
             HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
                                                             .readEntity("point and system and cm and cooling" +
                                                                     " and desired and temp and equipRef == \"" +
@@ -700,11 +699,11 @@ public class DabSystemController extends SystemController
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
-                    equip.getMarkers().contains("bpos") || equip.getMarkers().contains("ti")) {
+                    equip.getMarkers().contains("otn") || equip.getMarkers().contains("ti")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                         "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;

@@ -96,7 +96,7 @@ public class TunerConstants
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
 	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 7;
     public static final double USE_CELSIUS_FLAG_ENABLED = 1.0;
-    public static final int USE_CELSIUS_FLAG_DISABLED = 0;
+    public static final double USE_CELSIUS_FLAG_DISABLED = 0.0;
 
     public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
     public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 2.0;
@@ -148,8 +148,9 @@ public class TunerConstants
     public static final String ALERT_TUNER = "ALERT";
     public static final String LCM_TUNER = "LCM";
     public static final String DUAL_DUCT_TUNER_GROUP = "DAB";
-    public static final String BPOS_TUNER_GROUP = "BPOS";
-    
+    public static final String OTN_TUNER_GROUP = "OTN";
+    public static final String HYPERSTAT_TUNER_GROUP = "HYPERSTAT";
+
     public static final double DEFAULT_COOLING_DB = 2.0; //Default deadband value based on dual temp diff 70 and 74 (// (74-70)/2.0)
     public static final double DEFAULT_HEATING_DB = 2.0;
     public static final double DEFAULT_COOLING_DB_MULTPLIER = 0.5;

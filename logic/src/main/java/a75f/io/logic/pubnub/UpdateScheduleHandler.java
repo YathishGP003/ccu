@@ -27,7 +27,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 
 public class UpdateScheduleHandler
 {
@@ -144,9 +144,9 @@ public class UpdateScheduleHandler
                 }
                 CCUHsApi.getInstance().setSynced("@" + uid);
             }
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
         }
-        refreshSchedulesScreen(Schedule.getScheduleByEquipId(uid));
+        refreshSchedulesScreen();
         refreshIntrinsicSchedulesScreen();
     }
     
@@ -235,9 +235,9 @@ public class UpdateScheduleHandler
         }
     }
     
-    public static void refreshSchedulesScreen(Schedule updatedSchedule) {
+    public static void refreshSchedulesScreen() {
         if (scheduleListener != null) {
-            scheduleListener.refreshScreen(updatedSchedule);
+            scheduleListener.refreshScreen();
         }
     }
 

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -480,7 +481,7 @@ public class CCUUtils {
 
 
 	static boolean isRunning = false;
-	public static List<Address> getLocationInfo(final String locadd) {
+	public static List<Address> getLocationInfo(final String locadd, Context context) {
 		Log.d("CCU_WEATHER",locadd);
 		if(locadd.isEmpty() || isRunning)
 
@@ -517,26 +518,12 @@ public class CCUUtils {
 						StrictMode.setThreadPolicy(policy);
 					}
 
-					HttpClient client = HTTPUtils.getNewHttpClient();
 					try {
-						//String address = locadd.replaceAll(" ", "%20");
                         String address = locadd.replaceAll(" ", "+");
-						//https://maps.google.com/maps/api/geocode/json?address=54016, United States&sensor=false&key=AIzaSyD3mUArjl1fvA7EBy6M8x8FJSKpKS3RmOg
-						HttpPost httppost = new HttpPost( "https://maps.google.com/maps/api/geocode/json?address=" + address + "&key="+getEnvGoogleMapKeys());
 
-						org.apache.http.HttpResponse response;
-						StringBuilder stringBuilder = new StringBuilder();
+						String response = new HttpUtil().getMapLocationData("https://maps.google.com/maps/api/geocode/json?address=" + address + "&key="+getEnvGoogleMapKeys(),"GET", context);
 
-						response = client.execute(httppost);
-						HttpEntity entity = response.getEntity();
-						InputStream stream = entity.getContent();
-						int b;
-						while ((b = stream.read()) != -1) {
-							stringBuilder.append((char) b);
-						}
-						client.getConnectionManager().closeExpiredConnections();
-						Log.d("CCU_WEATHER","success auto on response="+response.getStatusLine() + ","+stringBuilder.toString());
-						JSONObject jsonObject = new JSONObject(stringBuilder.toString());
+						JSONObject jsonObject = new JSONObject(response);
 						JSONArray array = (JSONArray) jsonObject.get("results");
 						if(array.length() > 0) {
 							for (int i = 0; i < 1; i++) {
@@ -564,14 +551,8 @@ public class CCUUtils {
 								}
 							}
 						}
-					} catch (JSONException e) {
+					} catch (JSONException | IOException e) {
 						e.printStackTrace();
-					}
-					catch (ClientProtocolException e1) {
-					}
-					catch (IOException e2) {
-					}finally {
-						client.getConnectionManager().closeExpiredConnections();
 					}
 					return locAddress;
 				}
@@ -652,5 +633,25 @@ public class CCUUtils {
 			return BuildConfig.GOOGLE_MAPS_KEY;
 	}
 
+	public static void resetPasswords(Context context) {
+		Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
+		final String DEFAULT_RESET_PASSWORD = "7575";
+		if (prefs.getBoolean(context.getString(R.string.SET_ZONE_PASSWORD))) {
+			prefs.setString(context.getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_SYSTEM_PASSWORD))) {
+			prefs.setString(context.getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_BUILDING_PASSWORD))) {
+			prefs.setString(context.getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+		if (prefs.getBoolean(context.getString(R.string.SET_SETUP_PASSWORD))) {
+			prefs.setString(context.getString(R.string.USE_SETUP_PASSWORD_KEY), DEFAULT_RESET_PASSWORD);
+		}
+
+	}
 
 }

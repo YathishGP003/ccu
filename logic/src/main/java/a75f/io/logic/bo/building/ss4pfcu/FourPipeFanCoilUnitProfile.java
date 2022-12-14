@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.ss4pfcu;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -11,20 +12,18 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -106,7 +105,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
-                fourPfcuDevice.setProfilePoint("occupancy and mode",Occupancy.UNOCCUPIED.ordinal());
                 continue;
 
             }
@@ -124,7 +122,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             setTempCooling = fourPfcuDevice.getDesiredTempCooling();
             setTempHeating = fourPfcuDevice.getDesiredTempHeating();
             String zoneId = HSUtil.getZoneIdFromEquipId(fourPfcuEquip.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(fourPfcuEquip.getId(),0);
 
             boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
@@ -165,11 +163,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
             }else {
                 resetRelays(fourPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
-            }
-            if (occuStatus != null) {
-                fourPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            } else {
-                fourPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
         }
     }
@@ -402,13 +395,13 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                     relayStates.put("CoolingStage1",1);
             }
         }
-        Log.d("FANMODE","SmartStat - 111 4PFCcool only :"+fanSpeed.name()+","+relayStates.toString()+","+coolingDeadband+","+roomTemp+","+setTempCooling);
 
         String fanstages = "";
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband))){
+                    if((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband))
+                    || (!isFanMediumEnabled && !isFanHighEnabled && roomTemp >= setTempCooling)){
                         if(getCmdSignal("fan and medium", addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";
@@ -507,6 +500,8 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
+        Log.d("FANMODE",Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+coolingDeadband+","+roomTemp+","
+                +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isHeatingWaterValve+" "+isCoolingWaterValve);
         //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("CoolingStage") ? COOLING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
         //if(fourPfcuDeviceMap.get(addr).getStatus() != state.ordinal())
@@ -543,10 +538,12 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
         String fanstages = "";
+
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if( (roomTemp <= setTempHeating ) && (roomTemp > (setTempHeating - heatingDeadband))){ //68-70
+                    if( (roomTemp <= setTempHeating ) && (roomTemp > (setTempHeating - heatingDeadband))
+                    || (!isFanMediumEnabled && !isFanHighEnabled && roomTemp <= setTempHeating) ){ //68-70
                         if(getCmdSignal("fan and medium",addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";
@@ -644,6 +641,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
+        Log.d("FANMODE",Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+                +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isHeatingWaterValve+" "+isCoolingWaterValve);
+
         //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, HEATING,relayStates,ZoneTempState.NONE);
         fourPfcuDeviceMap.get(addr).setStatus(HEATING.ordinal());

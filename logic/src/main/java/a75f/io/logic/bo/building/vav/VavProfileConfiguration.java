@@ -17,6 +17,8 @@ public class VavProfileConfiguration extends BaseProfileConfiguration
     public boolean enableOccupancyControl;
     public boolean enableCO2Control;
     public boolean enableIAQControl;
+    public boolean enableAutoAwayControl;
+    public boolean enableAutoForceoccupied;
     
     public int minDamperCooling;
     public int maxDamperCooling;

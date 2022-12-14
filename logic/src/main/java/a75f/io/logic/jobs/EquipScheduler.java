@@ -18,7 +18,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class EquipScheduler {
@@ -36,7 +37,7 @@ public class EquipScheduler {
         
         //When schedule is deleted
         if (occ == null) {
-            ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
+            //ScheduleManager.getInstance().occupiedHashMap.remove(equip.getRoomRef());
             return null;
         }
 
@@ -62,7 +63,7 @@ public class EquipScheduler {
             occ.setPreconditioning(true);
         else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
             occ.setForcedOccupied(true);
-        if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
+        if (occ != null && ScheduleManager.getInstance().putOccupiedModeCache(equip.getRoomRef(), occ)) {
 
             double avgTemp = (occ.getCoolingVal() + occ.getHeatingVal()) / 2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0;
@@ -70,8 +71,8 @@ public class EquipScheduler {
             occ.setHeatingDeadBand(deadbands);
             Double heatingTemp;
             Double coolingTemp;
-            if (equip.getMarkers().contains("bpos") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
-                Log.d("BPOSProfile", "in bpos vav: ");
+            if (equip.getMarkers().contains("otn") && occupancyvalue == Occupancy.AUTOAWAY.ordinal()) {
+                Log.d("OTNProfile", "in otn vav: ");
                 handleAutoaway(equip,
                         occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
             }
@@ -142,7 +143,7 @@ public class EquipScheduler {
 
     private static void setDesiredatLevel3(Point p,Double desiredTemp, boolean isForcedOccupied, Equip equip, String flag){
 
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(p.getRoomRef());
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(p.getRoomRef());
         CcuLog.d(L.TAG_CCU_SCHEDULER, "setDesiredatlevel3 Equip: " + equip.getDisplayName() + " Temp: " + desiredTemp + " Flag: " + flag+","+isForcedOccupied);
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
         if (point == null || point.size() == 0) {

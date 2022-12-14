@@ -1,11 +1,20 @@
 package a75f.io.logic.tuners;
 
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Queries;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 
 class GenericTuners {
-    
+
     public static void addDefaultGenericTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                              String tz) {
         Point heatingPreconditioingRate = new Point.Builder()
@@ -60,8 +69,8 @@ class GenericTuners {
                 .setTz(tz)
                 .build();
         String useCelsiusId = hayStack.addPoint(useCelsius);
-        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED,TunerConstants.USE_CELSIUS_FLAG_ENABLED, 0);
-        hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_ENABLED);
+        hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.USE_CELSIUS_FLAG_DISABLED, 0);
+        hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED);
 
         Point buildingLimitMax = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"buildingLimitMax")
@@ -283,6 +292,36 @@ class GenericTuners {
         String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, 2.0);
-    
+        createCcuNetworkWatchdogTimeoutTuner(hayStack);
     }
+
+    public static void createCcuNetworkWatchdogTimeoutTuner(CCUHsApi hayStack) {
+
+        ArrayList<HashMap<Object, Object>> watchdogTuner = hayStack.readAllEntities("point and tuner and network" +
+                " and watchdog and timeout");
+        if (!watchdogTuner.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_TUNER, "ccuNetworkWatchdogTimeout exists");
+            return;
+        }
+
+        CcuLog.e(L.TAG_CCU_TUNER, "create ccuNetworkWatchdogTimeout ");
+        //Create the tuner point on building tuner equip.
+        HashMap<Object, Object> buildTuner = hayStack.readEntity(Queries.EQUIP_AND_TUNER);
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+
+        Point ccuNetworkWatchdogTimeout  = new Point.Builder()
+                .setDisplayName(tunerEquip.getDisplayName()+"-"+"ccuNetworkWatchdogTimeout")
+                .setSiteRef(tunerEquip.getSiteRef())
+                .setEquipRef(tunerEquip.getId()).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("network").addMarker("watchdog").addMarker("timeout").addMarker("sp")
+                .setMinVal("0").setMaxVal("1440").setIncrementVal("15").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("minute")
+                .setTz(tunerEquip.getTz())
+                .build();
+        String ccuNetworkWatchdogTimeoutId = hayStack.addPoint(ccuNetworkWatchdogTimeout);
+        hayStack.writePointForCcuUser(ccuNetworkWatchdogTimeoutId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,45.0, 0);
+        hayStack.writeHisValById(ccuNetworkWatchdogTimeoutId, 45.0);
+    }
+
 }

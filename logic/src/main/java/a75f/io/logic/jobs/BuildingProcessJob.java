@@ -3,6 +3,7 @@ package a75f.io.logic.jobs;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.joda.time.IllegalInstantException;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
@@ -29,6 +30,8 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     boolean watchdogMonitor = false;
 
     private final Lock jobLock  = new ReentrantLock();
+
+    private boolean status = false;
 
     @Override
     public void bark() {
@@ -79,16 +82,18 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 runOAOAlgorithm();
                 
                 runSystemControlAlgorithm();
-                
-                handleSync();
-    
+
+                status = true;
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
+
             } catch (Exception e) {
                 CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
+                status = false;
             } finally {
                 jobLock.unlock();
                 
             }
+            handleSync();
         } else {
             CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob : Previous Instance of job still running");
         }
@@ -156,5 +161,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 }
             }
         }.start();
+    }
+
+    public boolean getStatus() {
+        return status;
     }
 }

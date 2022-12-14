@@ -47,7 +47,9 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
@@ -58,7 +60,7 @@ import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 public class FragmentDABConfiguration extends BaseDialogFragment
 {
     public static final String ID = FragmentDABConfiguration.class.getSimpleName();
-    
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     static final int TEMP_OFFSET_LIMIT = 100;
     static final int STEP = 10;
     
@@ -91,7 +93,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     ToggleButton enableTrueCFMControl;
     TextView textKFactor;
     LinearLayout minCFMForIAQ;
-    
+    ToggleButton enableAutoForceOccupied;
+    ToggleButton enableAutoAway;
+
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;
     private DabProfileConfiguration mProfileConfig;
@@ -298,6 +302,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
         textKFactor = view.findViewById(R.id.textKFactor);
         kFactor = view.findViewById(R.id.enableKFactor);
+        enableAutoForceOccupied = view.findViewById(R.id.enableAFOControl);
+        enableAutoAway = view.findViewById(R.id.enableAutoAwayControl);
+
         ArrayList<String> spinnerArray = new ArrayList<>();
         double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
         double MAX_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.max_val_for_kfactor));
@@ -415,6 +422,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
+            enableAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            enableAutoAway.setChecked(mProfileConfig.enableAutoAwayControl);
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
             int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
@@ -441,34 +450,27 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<Void, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final Void ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupDabZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentDABConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            
+
+                setButton.setEnabled(false);
+                compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                        ()->{
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                        },
+                        ()->{
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupDabZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().setCcuReady();
+                            LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        },
+                        ()->{
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentDABConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+
+                ));
+
             }
         });
         configSpinnerDropDownColor();
@@ -489,6 +491,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         dabConfig.enableCO2Control = enableCO2Control.isChecked();
         dabConfig.enableIAQControl = enableIAQControl.isChecked();
+        dabConfig.enableAutoForceOccupied = enableAutoForceOccupied.isChecked();
+        dabConfig.enableAutoAwayControl = enableAutoAway.isChecked();
         dabConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
         dabConfig.minDamperCooling = (minCoolingDamperPos.getValue());
         dabConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());

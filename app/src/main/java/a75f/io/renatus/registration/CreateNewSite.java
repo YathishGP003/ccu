@@ -56,6 +56,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -388,6 +389,7 @@ public class CreateNewSite extends Fragment {
                     Toast.makeText(getActivity(), "Edited details saved successfully", Toast.LENGTH_LONG).show();
                     enableViews(false);
                     btnEditSite.setText(getResources().getString(R.string.title_edit));
+                    ControlMote.updateOnSiteNameChange();
                 } else {
                     Toast.makeText(getActivity(), "Please fill proper details", Toast.LENGTH_LONG).show();
                 }
@@ -429,11 +431,18 @@ public class CreateNewSite extends Fragment {
             if (ccu.size() > 0) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
-                ccuFmEmail = ccu.get("fmEmail").toString();
-                ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteCCU.setText(ccuName);
-                mSiteEmailId.setText(ccuFmEmail);
+                ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteInstallerEmailId.setText(ccuInstallerEmail);
+
+//
+//                As per Lukee's comment in the Bug 12630: " there is no concept of a CCU-level Facility Manager Role in the User Management system"
+//                So we are commenting following code and we are showing the site entity fm email details
+//
+//                ccuFmEmail = ccu.get("fmEmail").toString();
+//                mSiteEmailId.setText(ccuFmEmail);
+//
+
             }
 
         }

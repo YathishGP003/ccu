@@ -58,6 +58,7 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -69,6 +70,7 @@ public class CCUHsApi
     public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
+    public static boolean IS_AUTHORISED = true;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
 
@@ -305,9 +307,27 @@ public class CCUHsApi
         return tagsDb.addFloorWithId(f, id);
     }
 
+    //TODO - Replace CCU support
+    public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
+        Point occupancy = new Point.Builder()
+                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              //.setEquipRef(equipRef)
+                              .setSiteRef(zone.getSiteRef())
+                              .setRoomRef(zoneRef)
+                              .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                              .addMarker("occupancy").addMarker("state")
+                              .addMarker("zone").addMarker("his")
+                              .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
+                                        "emergencyconditioning, keycardautoaway, windowopen")
+                              .setTz(getTimeZone())
+                              .build();
+        CCUHsApi.getInstance().addPoint(occupancy);
+    }
+    
     public String addZone(Zone z) {
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
+        addZoneOccupancyPoint(zoneId, z);
         return zoneId;
     }
 
@@ -386,6 +406,11 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateZoneLocally(Zone z, String id)
+    {
+        tagsDb.updateZone(z, id);
     }
 
     /**
@@ -628,7 +653,6 @@ public class CCUHsApi
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
-        Log.i("CCU_HSCPU", "clearPointArrayLevel: ");
         deletePointArrayLevel(id, level);
         if (!local) {
             HDictBuilder b = new HDictBuilder()
@@ -785,7 +809,28 @@ public class CCUHsApi
 
         return readPointPriorityVal(id.toString());
     }
-
+    
+    /**
+     *
+     * @param id
+     * @param offset Level from which priority evaluation is done.
+     * @return
+     */
+    public static double readPointPriorityValFromOffset(String id, int offset){
+        
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = offset; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+        
+    }
+    
     public String readId(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
@@ -1029,10 +1074,19 @@ public class CCUHsApi
         } else if (entity.get("room") != null) {
 
             ArrayList<HashMap<Object, Object>> schedules = readAllEntities("schedule and roomRef == "+ id );
-            Log.d("CCU","  delete Schedules in room "+schedules.size());
+            CcuLog.i("CCU_HS","  delete Schedules in room "+schedules.size());
             for (HashMap<Object, Object> schedule : schedules) {
                 deleteEntityItem(schedule.get("id").toString());
             }
+    
+            //TODO - This should be made generic. but querying all points with roomRef needs more thought.
+            ArrayList<HashMap<Object, Object>> points =
+                readAllEntities("point and occupancy and state and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete occupancy state of room "+points.size());
+            for (HashMap<Object, Object> point : points) {
+                deleteEntityItem(point.get("id").toString());
+            }
+            
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
 
@@ -1169,69 +1223,7 @@ public class CCUHsApi
             HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             hDicts.add(pid);
         }
-
-        int partitionSize = 25;
-        List<List<HDict>> partitions = new ArrayList<>();
-        for (int i = 0; i<hDicts.size(); i += partitionSize) {
-            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
-        }
-
-        for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints = hClient.call("pointWriteMany",
-                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-
-            //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
-            if (writableArrayPoints == null) {
-                CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
-                return false;
-            }
-
-            ArrayList<HDict> hDictList = new ArrayList<>();
-
-            Iterator rowIterator = writableArrayPoints.iterator();
-            while (rowIterator.hasNext()) {
-                HRow row = (HRow) rowIterator.next();
-                String id = row.get("id").toString();
-                String kind = row.get("kind").toString();
-                HVal data = row.get("data");
-
-                if (data instanceof HList && ((HList) data).size() > 0) {
-                    HList dataList = (HList) data;
-
-                    for (int i = 0; i < dataList.size(); i++) {
-                        HDict dataElement = (HDict) dataList.get(i);
-
-                        String who = dataElement.getStr("who");
-                        String level = dataElement.get("level").toString();
-                        HVal val = dataElement.get("val");
-
-                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
-                                .add("level", Integer.parseInt(level))
-                                .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ?
-                                        HStr.make(val.toString()) : val).toDict();
-                        hDictList.add(pid);
-
-                        HDict rec = hsClient.readById(HRef.copy(id));
-
-                        //save points on tagsDb
-                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
-                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                        val, who, HNum.make(0), rec);
-
-                    }
-                    //save his data to local cache
-                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
-                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
-                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
-                            true);
-                }
-
-            }
-
-            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
-        }
-        return true;
+        return importPointArrays(hDicts, hClient);
     }
 
     public void importNamedSchedule(HClient hClient){
@@ -1268,7 +1260,7 @@ public class CCUHsApi
 
     }
 
-    private void importBuildingSchedule(String siteId, HClient hClient){
+    public void importBuildingSchedule(String siteId, HClient hClient){
 
         HashMap currentBuildingSchedule = read("schedule and building and not named and not special");
         if (!currentBuildingSchedule.isEmpty()) {
@@ -1390,6 +1382,7 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
+                            CcuLog.i(TAG, "Added Building Tuner "+p);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -1788,10 +1781,14 @@ public class CCUHsApi
     {
         if (scheduleRef == null)
             return null;
-
-        HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
-        //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
-        return new Schedule.Builder().setHDict(hDict).build();
+        HDict hDict = null;
+        try {
+            hDict = tagsDb.readById(HRef.copy(scheduleRef));
+        } catch (UnknownRecException e) {
+            Log.d("CCU_HS", " getScheduleById : Schedule not found !! - " +scheduleRef);
+            importSchedule(scheduleRef);
+        }
+        return hDict == null ? null : new Schedule.Builder().setHDict(hDict).build() ;
     }
 
     public HDict getScheduleDictById(String scheduleId){
@@ -2423,4 +2420,110 @@ public class CCUHsApi
     public HisSyncHandler getHisSyncHandler() {
         return hisSyncHandler;
     }
+
+    public String fetchRemoteEntity(String uid) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+    }
+
+    public void importSchedule(String id) {
+        Observable.fromCallable(() -> {
+                    String response = fetchRemoteEntity(id);
+                    if (response != null) {
+                        HZincReader hZincReader = new HZincReader(response);
+                        Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                        while (hZincReaderIterator.hasNext()) {
+                            HRow row = (HRow) hZincReaderIterator.next();
+                            tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+                            CcuLog.i("CCU_HS", "Schedule Imported "+row);
+                        }
+                    }
+                    return true;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
+
+    }
+
+    public boolean importPointArrays(List<HDict> hDicts, HClient hClient) {
+
+        if (hClient == null) {
+            hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        }
+
+        int partitionSize = 25;
+        List<List<HDict>> partitions = new ArrayList<>();
+        for (int i = 0; i<hDicts.size(); i += partitionSize) {
+            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
+        }
+
+        for (List<HDict> sublist : partitions) {
+            HGrid writableArrayPoints = hClient.call("pointWriteMany",
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
+            //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
+            if (writableArrayPoints == null) {
+                CcuLog.e(TAG, "Failed to fetch point array values while importing existing data.");
+                return false;
+            }
+
+            ArrayList<HDict> hDictList = new ArrayList<>();
+
+            Iterator rowIterator = writableArrayPoints.iterator();
+            while (rowIterator.hasNext()) {
+                HRow row = (HRow) rowIterator.next();
+                String id = row.get("id").toString();
+                String kind = row.get("kind").toString();
+                HVal data = row.get("data");
+                CcuLog.i(TAG, "Import point array "+row);
+                if (data instanceof HList && ((HList) data).size() > 0) {
+                    HList dataList = (HList) data;
+
+                    for (int i = 0; i < dataList.size(); i++) {
+                        HDict dataElement = (HDict) dataList.get(i);
+
+                        String who = dataElement.getStr("who");
+                        String level = dataElement.get("level").toString();
+                        HVal val = dataElement.get("val");
+
+                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                                .add("level", Integer.parseInt(level))
+                                .add("who", who)
+                                .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                        HStr.make(val.toString()) : val).toDict();
+                        hDictList.add(pid);
+
+                        HDict rec = hsClient.readById(HRef.copy(id));
+
+                        //save points on tagsDb
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
+                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
+                                        val, who, HNum.make(0), rec);
+
+                    }
+                    //save his data to local cache
+                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
+                            true);
+                }
+
+            }
+
+            hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
+        }
+        return true;
+    }
+    public void setAuthorised(boolean isAuthorised) {
+        IS_AUTHORISED = isAuthorised;
+    }
+
+    public boolean getAuthorised(){
+        return IS_AUTHORISED;
+    }
+
+
 }

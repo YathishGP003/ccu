@@ -9,17 +9,11 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.util.PreferenceUtil;
-
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
-import static a75f.io.logic.tuners.TunerConstants.VAV_TUNER_GROUP;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -130,7 +124,9 @@ public class BuildingTuners
         AlertTuners.addDefaultAlertTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TemperatureLimitTuners.addDefaultTempLimitTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        HyperstatTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        BPOSTuners.addDefaultBPOSTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        OTNTuners.addDefaultOTNTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        HyperstatCpuTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        OAOTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        HyperStat2PipeTuners.Companion.addPipe2BuildingTuner(hayStack, siteRef, equipRef, equipDis, tz);
     }
 }

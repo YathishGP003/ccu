@@ -1,6 +1,5 @@
 package a75f.io.api.haystack;
 
-import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import org.projecthaystack.HDict;
@@ -99,9 +98,14 @@ public class HSUtil
         return equip.getRoomRef();
     }
     public static Equip getEquipInfo(String equipId) {
+        return getEquip( CCUHsApi.getInstance(), equipId);
+    }
+    
+    public static Equip getEquip(CCUHsApi hayStack, String equipId) {
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         return new Equip.Builder().setHashMap(equipHashMap).build();
     }
+    
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();
@@ -154,9 +158,12 @@ public class HSUtil
     }
     
     public static double getPriorityVal(String id) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        return getPriorityVal(id, CCUHsApi.getInstance());
+    }
+    
+    public static double getPriorityVal(String id, CCUHsApi hayStack) {
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
                 if (valMap.get("val") != null) {
@@ -180,7 +187,11 @@ public class HSUtil
     }
     
     public static HashMap getPriorityLevel(String id, int level) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        return getPriorityLevel(id, level, CCUHsApi.getInstance());
+    }
+    
+    public static HashMap<Object, Object> getPriorityLevel(String id, int level, CCUHsApi hayStack) {
+        ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
             return ((HashMap) values.get(level-1));
         }
@@ -257,10 +268,12 @@ public class HSUtil
                 && pointEntity.containsKey(Tags.HYPERSTAT);
     }
 
-    public static boolean isHSCPUConfig(String id, CCUHsApi hayStack) {
-        HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.CPU)
-                && pointEntity.containsKey(Tags.HYPERSTAT);
+    public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+        HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
+        return equip.containsKey(Tags.HYPERSTAT) &&
+                ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
+                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU));
     }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {
@@ -372,4 +385,54 @@ public class HSUtil
         }
         return new Equip.Builder().setHashMap(equipMap).build();
     }
+
+    public static boolean isTIProfile(String pointUid, CCUHsApi instance) {
+        HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
+        return ((pointEntity.containsKey("ti")
+                && pointEntity.containsKey("config"))
+                && (pointEntity.containsKey("th1")
+                || pointEntity.containsKey("th2")
+                || pointEntity.containsKey("main")));
+    }
+    /**
+     * Checks a given point is a limit tuner.
+     * @param id
+     * @param hayStack
+     * @return
+     */
+    public static boolean isBuildingLimitPoint(String id, CCUHsApi hayStack) {
+        if (id == null) {
+            return false;
+        }
+
+        Point tunerPoint = new Point.Builder()
+                .setHashMap(hayStack.readMapById(id))
+                .build();
+
+        return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
+                !tunerPoint.getMarkers().contains("alert"))
+                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
+                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
+    }
+
+//    /**
+//     * Checks a given point is a limit tuner.
+//     * @param id
+//     * @param hayStack
+//     * @return
+//     */
+//    public static boolean isBuildingLimitPoint(String id, CCUHsApi hayStack) {
+//        if (id == null) {
+//            return false;
+//        }
+//
+//        Point tunerPoint = new Point.Builder()
+//                .setHashMap(hayStack.readMapById(id))
+//                .build();
+//
+//        return (tunerPoint.getMarkers().contains("building") && tunerPoint.getMarkers().contains("limit") &&
+//                !tunerPoint.getMarkers().contains("alert"))
+//                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
+//                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
+//    }
 }

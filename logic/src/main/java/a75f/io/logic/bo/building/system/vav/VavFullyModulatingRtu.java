@@ -18,17 +18,18 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
 /**
  * Default System handles PI controlled op
@@ -350,7 +351,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
-        String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
+        String scheduleStatus = ScheduleManager.getInstance().getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
@@ -374,8 +375,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
-    
-        return status.toString().equals("")? "System OFF" : status.toString();
+
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn()) : status.toString() + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn());
     }
     
     public void addSystemEquip() {

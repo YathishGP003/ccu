@@ -181,5 +181,6 @@ public class ZoneTuners {
         BuildingTunerUtil.updateTunerLevels(abnormalCurTempRiseTriggerId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(abnormalCurTempRiseTriggerId));
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
+
     }
 }

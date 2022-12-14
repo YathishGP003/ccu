@@ -1,5 +1,9 @@
 package a75f.io.renatus.views.MasterControl;
 
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,8 +14,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.res.ResourcesCompat;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -22,14 +24,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.tuners.TunerConstants;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.res.ResourcesCompat;
+
 import a75f.io.renatus.R;
-
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
-
-import java.util.HashMap;
 
 
 public class MasterControl extends View {
@@ -76,9 +74,7 @@ public class MasterControl extends View {
     private float lowerCoolingTemp = 70;
     private float upperCoolingTemp = 75;
     private float lowerBuildingTemp = 55;
-    private float upperBuildingTemp = 90;
-
-    private HashMap<Object, Object> useCelsius;
+    private float upperBuildingTemp = 90; 
 
     Rect bounds = new Rect();
 
@@ -109,8 +105,6 @@ public class MasterControl extends View {
         super(context);
         init();
     }
-
-    private static final boolean DEBUG = true;
 
     enum MasterControlState {
         NONE,
@@ -155,7 +149,7 @@ public class MasterControl extends View {
 
         //The 2 and 1.5 are used to slide the number on the bitmap image.
         //Text centered left to right and 1/3 the way down the icon.
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
                     xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
@@ -192,50 +186,56 @@ public class MasterControl extends View {
                 getParent().requestDisallowInterceptTouchEvent(false);
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i("Movement", "mSelected - " + mSelected.name()
-                        + " Temps: " + getTempForPX((int) event.getX()));
-                if (getTempForPX((int) event.getX()) >= mLowerBound && getTempForPX((int) event.getX()) <= mUpperBound) {
+                float selectedTemp = getTempForPX((int) event.getX());
 
-                    Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
+                Log.i("DEV_DEBUG", "mSelected - " + mSelected.name() +
+                        "onTouchEvent: selected temp "+selectedTemp+
+                        "\n UPPER_HEATING_LIMIT "+temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()]+
+                        "\n LOWER_COOLING_LIMIT "+temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]+
+                        "\n UPPER_COOLING_LIMIT "+temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]+
+                        "\n hdb"+hdb+ "cdb "+cdb+
+                        "\n first "+(selectedTemp>= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb)+
+                        "\n second old"+(selectedTemp <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()])+
+                        "\n second new"+(selectedTemp <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()])
+
+                );
+                if (selectedTemp >= mLowerBound && selectedTemp <= mUpperBound) {
+
                     if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] - cdb) {
+                        if (selectedTemp >= (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()]+(hdb+cdb)) && selectedTemp <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] - cdb) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
-                        } /*else {
-                            if (temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] == temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()])
-                                mSelected = (event.getX() / getWidth() > 0.5f) ? MasterControlState.UPPER_COOLING_LIMIT : MasterControlState.LOWER_COOLING_LIMIT;
-                        }*/
+                            temps[mSelected.ordinal()] = selectedTemp;
+                        }
                     } else if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb && getTempForPX((int) event.getX()) <= (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential)) {
+                        if (selectedTemp >= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb &&
+                                selectedTemp >= (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()]+(cdb+hdb))&&
+                                selectedTemp <= (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential)) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
-                        }/* else {
-                            if (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] == temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()])
-                                mSelected = (event.getX() / getWidth() > 0.5f) ? MasterControlState.UPPER_COOLING_LIMIT : MasterControlState.LOWER_COOLING_LIMIT;
-                        }*/
-                    } else if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb && getTempForPX((int) event.getX()) <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]) {
+                            temps[mSelected.ordinal()] = selectedTemp;
+                        }
+                    }
+                    else if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
+                        if (selectedTemp>= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb && selectedTemp <= (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]-(cdb+hdb))) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
-                        } /*else {
-                            mSelected = (event.getX() / getWidth() > 0.5f) ? MasterControlState.LOWER_HEATING_LIMIT : MasterControlState.UPPER_HEATING_LIMIT;
-                        }*/
-                    } else if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) <= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - hdb && getTempForPX((int) event.getX()) >= (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
+                            temps[mSelected.ordinal()] = selectedTemp;
+                        }
+                    }
+                    else if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
+                        if (selectedTemp <= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - hdb &&
+                                 selectedTemp<= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]-(cdb+hdb) &&
+                                selectedTemp >= (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
-                        } /*else {
-                            mSelected = (event.getX() / getWidth() > 0.5f) ? MasterControlState.LOWER_HEATING_LIMIT : MasterControlState.UPPER_HEATING_LIMIT;
-                        }*/
+                            temps[mSelected.ordinal()] = selectedTemp;
+                        }
                     } else if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) <= ((temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack) - mZoneDifferential)) {
+                        if (selectedTemp <= ((temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack) - mZoneDifferential)) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
+                            temps[mSelected.ordinal()] = selectedTemp;
                         }
                     } else if (mSelected == MasterControlState.UPPER_BUILDING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) >= (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
+                        if (selectedTemp >= (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
                             getParent().requestDisallowInterceptTouchEvent(true);
-                            temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
+                            temps[mSelected.ordinal()] = selectedTemp;
                         }
                     }
 
@@ -289,7 +289,6 @@ public class MasterControl extends View {
             this.setNestedScrollingEnabled(true);
 
         }
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
         this.setBackgroundColor(Color.WHITE);
 
@@ -300,7 +299,7 @@ public class MasterControl extends View {
         mArrowHeadLeftBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_left);
         mArrowHeadRightBitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_arrowhead_right);
 
-        if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
 
             bitmaps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = bitmaps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] =
                     getBitmapFromVectorDrawable(getContext(), R.drawable.black_teardrop_small);
@@ -762,7 +761,7 @@ public class MasterControl extends View {
 
             mDebugTextPaint.setTextSize(mArrowTextSize);
             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
-            if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+            if(isCelsiusTunerAvailableStatus()) {
                 canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.valueOf(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
             } else {
                 canvas.drawText(temp+ " \u00B0F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);

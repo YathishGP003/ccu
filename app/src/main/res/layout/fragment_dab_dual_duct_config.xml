@@ -301,13 +301,37 @@
                     android:textOn="" />
 
                 <TextView
+                    android:id="@+id/textEnableautoforceoccupied"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableOccupancy"
+                    android:layout_alignStart="@+id/textEnableOccupancy"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/autoforceoccupied"
+                    android:textAppearance="@style/label_values"/>
+
+                <ToggleButton
+                    android:id="@+id/enableAFOControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/enableOccupancyControl"
+                    android:layout_alignEnd="@id/enableOccupancyControl"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
                     android:id="@+id/textEnableCO2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/enableCO2Control"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:layout_marginRight="16dp"
+                    android:layout_toStartOf="@+id/enableCO2Control"
                     android:text="@string/label_enableCO2"
                     android:textAppearance="@style/label_values" />
 
@@ -323,13 +347,38 @@
                     android:textOff=""
                     android:textOn="" />
 
+                <TextView
+                    android:id="@+id/textEnableautoAway"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableCO2"
+                    android:layout_alignStart="@+id/textEnableCO2"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/autoaway"
+                    android:textAppearance="@style/label_values" />
+
+                <ToggleButton
+                    android:id="@+id/enableAutoAwayControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/enableCO2Control"
+                    android:layout_alignEnd="@id/enableCO2Control"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+
 
                 <TextView
                     android:id="@+id/textEnableIAQ"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/textEnableOccupancy"
-                    android:layout_alignStart="@+id/textEnableOccupancy"
+                    android:layout_below="@+id/textEnableautoforceoccupied"
+                    android:layout_alignStart="@+id/textEnableautoforceoccupied"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enableIAQ"
@@ -339,8 +388,8 @@
                     android:id="@+id/enableIAQControl"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_below="@+id/enableOccupancyControl"
-                    android:layout_alignEnd="@id/enableOccupancyControl"
+                    android:layout_below="@+id/enableAFOControl"
+                    android:layout_alignEnd="@id/enableAFOControl"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
                     android:background="@drawable/toggle_selector"

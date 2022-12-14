@@ -2,10 +2,6 @@ package a75f.io.logic.bo.building.vav;
 
 import java.util.Objects;
 
-import a75.io.algos.CO2Loop;
-import a75.io.algos.ControlLoop;
-import a75.io.algos.GenericPIController;
-import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -15,13 +11,12 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
-import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -79,14 +74,15 @@ public class VavSeriesFanProfile extends VavProfile
             }
             
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            int loopOp = getLoopOp(conditioning, roomTemp,vavEquip.getId());
+            int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
             
             SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
                 valve.currentPosition = 0;
             }
             
-            boolean occupied = getZoneOccupancy(vavEquip.getId());
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), vavEquip.getRoomRef());
+            CcuLog.i(L.TAG_CCU_ZONE, " Zone occupied "+occupied);
             updateIaqCompensatedMinDamperPos(occupied, node);
     
             if (loopOp == 0) {
@@ -128,7 +124,7 @@ public class VavSeriesFanProfile extends VavProfile
         setDamperLimits(node, damper);
     }
     
-    private int getLoopOp(SystemController.State conditioning, double roomTemp, String vavEquip) {
+    private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip vavEquip) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
@@ -144,10 +140,14 @@ public class VavSeriesFanProfile extends VavProfile
             if (state != HEATING) {
                 handleHeatingChangeOver();
             }
-            loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-            if (conditioning == VavSystemController.State.COOLING ) {
-                updateReheatDuringSystemCooling(loopOp,vavEquip);
+            int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            if (conditioning == SystemController.State.COOLING) {
+                updateReheatDuringSystemCooling(heatingLoopOp, vavEquip.getId());
+                loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
+            } else if (conditioning == SystemController.State.HEATING) {
+                loopOp = heatingLoopOp;
             }
+            
         } else {
             //Zone is in deadband
             handleDeadband();
@@ -233,7 +233,7 @@ public class VavSeriesFanProfile extends VavProfile
     
     private boolean getZoneOccupancy(String equipId) {
         String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         return occ != null && occ.isOccupied();
     }
     

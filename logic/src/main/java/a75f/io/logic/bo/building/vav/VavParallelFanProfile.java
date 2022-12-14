@@ -2,10 +2,6 @@ package a75f.io.logic.bo.building.vav;
 
 import java.util.Objects;
 
-import a75.io.algos.CO2Loop;
-import a75.io.algos.ControlLoop;
-import a75.io.algos.GenericPIController;
-import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -15,13 +11,12 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -81,9 +76,8 @@ public class VavParallelFanProfile extends VavProfile
                 valve.currentPosition = 0;
             }
             
-            boolean occupied = getZoneOccupancy(vavEquip.getId());
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), vavEquip.getRoomRef());
             updateIaqCompensatedMinDamperPos(occupied, node);
-            
             if (loopOp == 0) {
                 damper.currentPosition = damper.iaqCompensatedMinPos;
             } else {
@@ -229,7 +223,7 @@ public class VavParallelFanProfile extends VavProfile
     
     private boolean getZoneOccupancy(String equipId) {
         String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
-        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
         return occ != null && occ.isOccupied();
     }
     

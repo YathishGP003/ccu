@@ -1,6 +1,8 @@
 package a75f.io.renatus.schedules;
 
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
+import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.usbserial.UsbModbusService.TAG;
@@ -12,24 +14,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-
-import a75f.io.api.haystack.Tags;
-import a75f.io.logic.pubnub.BuildingScheduleListener;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
@@ -64,24 +48,42 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.pubnub.BuildingScheduleListener;
+import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.logic.schedule.SpecialSchedule;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import static a75f.io.usbserial.UsbModbusService.TAG;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
+    private static final String PARAM_IS_SPECIAL_SCHEDULE = "PARAM_IS_SPECIAL_SCHEDULE";
     private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final int ID_DIALOG_VACATION = 02;
     private static final int ID_DIALOG_SCHEDULE = 01;
@@ -160,11 +162,13 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         return schedulerFragment;
     }
 
-    public static SchedulerFragment newInstance(String scheduleId, boolean isVacation, String roomRef) {
+    public static SchedulerFragment newInstance(String scheduleId, boolean isVacation, String roomRef,
+                                                boolean isSpecialSchedule) {
         SchedulerFragment schedulerFragment = new SchedulerFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
         args.putBoolean(PARAM_IS_VACATION, isVacation);
+        args.putBoolean(PARAM_IS_SPECIAL_SCHEDULE, isSpecialSchedule);
         args.putString(PARAM_ROOM_REF, roomRef);
         schedulerFragment.setArguments(args);
         return schedulerFragment;
@@ -438,7 +442,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                             }
 
                             CCUHsApi.getInstance().saveTagsData();
-                            ScheduleProcessJob.updateSchedules();
+                            ScheduleManager.getInstance().updateSchedules();
                             CCUHsApi.getInstance().syncEntityTree();
 
                             new Handler(Looper.getMainLooper()).post(() -> {
@@ -479,7 +483,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
 
                 CCUHsApi.getInstance().saveTagsData();
-                ScheduleProcessJob.updateSchedules();
+                ScheduleManager.getInstance().updateSchedules();
                 CCUHsApi.getInstance().syncEntityTree();
 
                 new Handler().postDelayed(() -> {
@@ -523,7 +527,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting special Schedule...");
 
             CCUHsApi.getInstance().deleteEntity(scheduleId);
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
 
@@ -547,7 +551,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting vacation...");
 
             CCUHsApi.getInstance().deleteEntity("@"+vacationId);
-            ScheduleProcessJob.updateSchedules();
+            ScheduleManager.getInstance().updateSchedules();
             CCUHsApi.getInstance().syncEntityTree();
             alertDialog.dismiss();
 
@@ -717,7 +721,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 for (Interval overlap : overlaps) {
                     Log.d("CCU_UI"," overLap "+overlap);
                     overlapDays.append(getDayString(overlap.getStart())+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
-                                       +" - " +overlap.getEnd().hourOfDay().get()+":"+(overlap.getEnd().minuteOfHour().get()  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
+                                       +" - " +(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()))+":"+(getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
                 }
             }
         
@@ -747,7 +751,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 {
                     for (Interval i : spillsMap.get(zone))
                     {
-                        spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+                        spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) + ":" + (getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
                     }
                 }
                 
@@ -799,14 +803,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                                 spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
                                 namedheaders.add(f.getDisplayName());
                             }
-                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }else {
                             schedules = schedules.concat(Tags.ZONE);
                             if (!zoneheaders.contains(f.getDisplayName())) {
                                 spillZones.append("\t").append(f.getDisplayName()).append("->\n");
                                 zoneheaders.add(f.getDisplayName());
                             }
-                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(i.getEnd().hourOfDay().get()).append(":").append(i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
                     }
                 }
@@ -889,7 +893,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
         CCUHsApi.getInstance().syncEntityTree();
         updateUI();
-        ScheduleProcessJob.updateSchedules();
+        ScheduleManager.getInstance().updateSchedules();
     }
     
     private HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(Schedule.Days d) {
@@ -1107,10 +1111,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {
 
 
-        HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
         String unit = "\u00B0F";
 
-        if(getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if(isCelsiusTunerAvailableStatus()) {
             coolingTemp = roundToHalf((float) fahrenheitToCelsius(coolingTemp));
             heatingTemp = roundToHalf((float) fahrenheitToCelsius(heatingTemp));
             unit = "\u00B0C";
@@ -1222,11 +1225,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setId(ViewCompat.generateViewId());
         textViewTemp.setTag(position);
 
-        if (getArguments() != null && getArguments().containsKey(PARAM_IS_VACATION)) {
-            boolean isVacation = getArguments().getBoolean(PARAM_IS_VACATION);
-            if (isVacation){
+        if (getArguments() != null) {
+            boolean isVacation =
+                    getArguments().containsKey(PARAM_IS_VACATION) && getArguments().getBoolean(PARAM_IS_VACATION);
+            boolean isSpecialSchedule =
+                    getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
+            if (isVacation || isSpecialSchedule){
                 scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
-                if (schedule.getDis().equals("Building Schedule")) {
+                if (!schedule.getDis().equals("Zone Schedule")) {
                     textViewaddEntry.setEnabled(false);
                     textViewaddEntryIcon.setEnabled(false);
                     textViewTemp.setEnabled(false);
@@ -1357,8 +1363,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         super.onPause();
         UpdateScheduleHandler.setBuildingScheduleListener(null);
     }
-    public void refreshScreen(Schedule updatedSchedule) {
-        if(getActivity() != null && updatedSchedule.getId().equals(schedule.getId()) && !updatedSchedule.equals(schedule)) {
+    public void refreshScreen() {
+        if(getActivity() != null) {
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

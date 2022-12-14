@@ -14,6 +14,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 
 public class UpdateEntityHandler {
     public static final String CMD = "updateEntity";
@@ -51,6 +54,7 @@ public class UpdateEntityHandler {
         HDict[] dictArr  = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        CcuLog.i(L.TAG_CCU_MESSAGING, "Updated Zone Fetched: "+response);
         if (response != null) {
             HZincReader hZincReader = new HZincReader(response);
             Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
@@ -63,7 +67,7 @@ public class UpdateEntityHandler {
                         .build();
                 zone.setId(row.get("id").toString());
                 zone.setScheduleRef(row.get("scheduleRef").toString());
-                CCUHsApi.getInstance().updateZone(zone, entity.get("id").toString());
+                CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
             }
         }
     }

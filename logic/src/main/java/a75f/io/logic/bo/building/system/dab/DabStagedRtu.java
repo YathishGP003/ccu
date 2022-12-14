@@ -1,12 +1,10 @@
 package a75f.io.logic.bo.building.system.dab;
 
 import android.content.Intent;
-import android.media.audiofx.DynamicsProcessing;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -16,15 +14,15 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
@@ -46,7 +44,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
-import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 
 /**
  * Created by samjithsadasivan on 11/5/18.
@@ -190,7 +188,7 @@ public class DabStagedRtu extends DabSystemProfile
         
         setSystemPoint("operating and mode", getSystemController().systemState.ordinal());
         String systemStatus = getStatusMessage();
-        String scheduleStatus =  ScheduleProcessJob.getSystemStatusString();
+        String scheduleStatus =  ScheduleManager.getInstance().getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
@@ -288,10 +286,12 @@ public class DabStagedRtu extends DabSystemProfile
         }
     
         //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
-        //even if the loopOp is 0
+        //even if the loopOp is 0 ( Both fan stage1 and stage2 are turned on here)
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
-            int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
-            tempStatus[FAN_1.ordinal()] = fanStatus;
+            int fan1Status = isStageEnabled(FAN_1) ? 1 : 0;
+            tempStatus[FAN_1.ordinal()] = fan1Status;
+            int fan2Status = isStageEnabled(FAN_2) ? 1 : 0;
+            tempStatus[FAN_2.ordinal()] = fan2Status;
         }
     
         for (int stageIndex = FAN_1.ordinal(); stageIndex <= DEHUMIDIFIER.ordinal(); stageIndex++) {
@@ -465,8 +465,8 @@ public class DabStagedRtu extends DabSystemProfile
                 case HUMIDIFIER:
                 case DEHUMIDIFIER:
                     if (systemMode == SystemMode.OFF ||
-                        ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED ||
-                        ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.UNOCCUPIED ||
+                        ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.VACATION) {
                         relayState = 0;
                     } else {
                         double humidity = getSystemController().getAverageSystemHumidity();
@@ -537,7 +537,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.append((stageStatus[COOLING_4.ordinal()] > 0) ? ",4" : "");
             status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
         }
-        
+
         if (isHeatingActive()) {
             status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
@@ -555,7 +555,7 @@ public class DabStagedRtu extends DabSystemProfile
                 status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
             }
         }
-        return status.toString().equals("")? "System OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn()+SystemProfileUtil.isHumidifierOn() : status.toString()+SystemProfileUtil.isDeHumidifierOn()+(SystemProfileUtil.isHumidifierOn());
     }
     
     public void updateStagesSelected() {

@@ -545,12 +545,6 @@ public class HClient extends HProj
     return res;
   }
 
-  public HGrid call(String op, String req)
-  {
-    String resStr = postString(uri + op, req);
-    return (resStr == null? null : new HZincReader(resStr).readGrid());
-  }
-
   private HGrid postGrid(String op, HGrid req)
   {
     String reqStr = HZincWriter.gridToString(req, this.version);
@@ -734,5 +728,77 @@ public class HClient extends HProj
 
   private AuthClientContext auth;
   private HashMap watches = new HashMap();
+
+  ///////////////////////////////////////////////////////////////////////
+  public HGrid invoke(String op, HGrid req) throws IOException {
+    CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
+    CcuLog.d("CCU_HCLIENT", "HClient Req: ");
+    req.dump();
+    String reqStr = HZincWriter.gridToString(req, getVersion());
+    String resStr = postStringWithIOException(uri + op, reqStr);
+    HGrid res = (resStr == null? null : new HZincReader(resStr).readGrid());
+    if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
+    return res;
+  }
+
+  // Assuming this old, alternate code is only for Haystack calls since it attaches Haystack API key
+  private String postStringWithIOException(String uriStr, String req) throws IOException {
+    String bearerToken = CCUHsApi.getInstance().getJwt();
+    String apiKey = BuildConfig.HAYSTACK_API_KEY;
+    if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
+      Log.d("CCU_HCLIENT", "Request to " + uriStr);
+      Log.d("CCU_HCLIENT", "Request body: " + req);
+
+      Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
+      URL url = new URL(uriStr);
+      HttpURLConnection c = openHttpConnection(url, "POST");
+      try {
+        c.setDoOutput(true);
+        c.setDoInput(true);
+        c.setRequestProperty("Connection", "Close");
+        c.setRequestProperty("Content-Type", "text/zinc");
+        c.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
+        if (StringUtils.isNotBlank(bearerToken)) {
+          c.setRequestProperty("Authorization", "Bearer " + bearerToken);
+        } else {
+          c.setRequestProperty("api-key", apiKey);
+        }
+        c.setConnectTimeout(60000);
+        c.setReadTimeout(60000);
+        c.connect();
+
+        // post expression
+        Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
+        cout.write(req);
+        cout.close();
+
+        Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
+
+        // read response into string
+        StringBuffer s = new StringBuffer(1024);
+        Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
+        int n;
+        while ((n = r.read()) > 0) s.append((char)n);
+        c.getInputStream().close();
+
+        return s.toString();
+      } finally {
+        try {
+          c.disconnect();
+        } catch(Exception e) {
+          CcuLog.e("CCU_HCLIENT", "Could not disconnect");
+        }
+      }
+    }
+    return null;
+  }
+
+
+
+
+
+
+
+
 
 }

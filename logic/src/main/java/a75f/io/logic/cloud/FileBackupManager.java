@@ -1,12 +1,13 @@
 package a75f.io.logic.cloud;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloudservice.FileBackupService;
 import static a75f.io.logic.L.TAG_CCU_BACKUP;
-import static a75f.io.logic.L.TAG_CCU_RESTORE;
+import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
 import android.util.Log;
 import com.google.gson.Gson;
@@ -41,6 +42,9 @@ public class FileBackupManager {
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         return okHttpClient;
     }
@@ -58,8 +62,8 @@ public class FileBackupManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_RESTORE, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_RESTORE,
+                    CcuLog.e(TAG_CCU_REPLACE, new Gson().toJson(response.errorBody()));
+                    CcuLog.i(TAG_CCU_REPLACE,
                             "Error while Retrieving CCU Config files for Site ID " + siteId +" and CCU ID " + ccuId);
                     return;
                 }
@@ -77,7 +81,7 @@ public class FileBackupManager {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 t.printStackTrace();
-                CcuLog.e(TAG_CCU_RESTORE, t.getStackTrace().toString());
+                CcuLog.e(TAG_CCU_REPLACE, t.getStackTrace().toString());
             }
         });
     }
@@ -89,8 +93,8 @@ public class FileBackupManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_RESTORE, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_RESTORE,
+                    CcuLog.e(TAG_CCU_REPLACE, new Gson().toJson(response.errorBody()));
+                    CcuLog.i(TAG_CCU_REPLACE,
                             "Error while Retrieving Modbus side loaded JSON files for Site ID " + siteId +" and CCU" +
                                     " ID " + ccuId);
                     return;
@@ -108,7 +112,7 @@ public class FileBackupManager {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 t.printStackTrace();
-                CcuLog.e(TAG_CCU_RESTORE, t.getStackTrace().toString());
+                CcuLog.e(TAG_CCU_REPLACE, t.getStackTrace().toString());
             }
         });
     }

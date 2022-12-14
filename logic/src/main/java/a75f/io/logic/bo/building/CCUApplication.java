@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.system.SystemProfile;
@@ -18,7 +19,7 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 public class CCUApplication
 {
     /*
-        These need to be moved into tuners
+        These need to be moved into Tuners.
      */
     private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
     private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();
@@ -60,7 +61,7 @@ public class CCUApplication
     
     
     public SystemProfile   systemProfile = null;
-    public Set<ZoneProfile> zoneProfiles  = new HashSet<>();
+    public Set<ZoneProfile> zoneProfiles  = ConcurrentHashMap.newKeySet();
     public OAOProfile oaoProfile = null;
     
     public Site defaultSite = null;

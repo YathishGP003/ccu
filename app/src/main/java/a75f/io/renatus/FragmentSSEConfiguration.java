@@ -70,6 +70,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
     @BindView(R.id.sseRelay2ForceTestBtn)ToggleButton testFanRelay2;
     ToggleButton switchExtTempSensor;
     ToggleButton switchAirflowTempSensor;
+    ToggleButton autoAway;
+    ToggleButton autoForceOccupied;
     Button setButton;
     NumberPicker temperatureOffset;
     public FragmentSSEConfiguration()
@@ -163,6 +165,10 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         sseRelay1Actuator = (Spinner)view.findViewById(R.id.sseRelay1Actuator);
         sseRelay2Actuator = (Spinner)view.findViewById(R.id.sseRelay2Actuator);
+
+        autoAway = (ToggleButton) view.findViewById(R.id.sse_autoAway);
+        autoForceOccupied = (ToggleButton) view.findViewById(R.id.sse_autoforceoccupied);
+
         CCUUiUtil.setSpinnerDropDownColor(sseRelay1Actuator,getContext());
         CCUUiUtil.setSpinnerDropDownColor(sseRelay2Actuator,getContext());
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -185,12 +191,12 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                 getActivity(), R.array.sse_relay1_mode, R.layout.spinner_dropdown_item);
         sseRelay1TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay1Actuator.setAdapter(sseRelay1TypeAdapter);
-        
+
         ArrayAdapter<CharSequence> sseRelay2TypeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.sse_relay2_mode, R.layout.spinner_dropdown_item);
         sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
-    
+
         sseRelay2Actuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -205,8 +211,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             {
             }
         });
-        
-        
+
+
         setButton = (Button) view.findViewById(R.id.setBtn);
 
         if (mProfileConfig != null) {
@@ -216,6 +222,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             switchAirflowTempSensor.setChecked(mProfileConfig.enableThermistor1);
             sseRelay1Actuator.setSelection(mProfileConfig.enableRelay1 -1,false);
             sseRelay2Actuator.setSelection(mProfileConfig.enableRelay2,false);
+            autoAway.setChecked(mProfileConfig.enableAutoAway);
+            autoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
             if(mProfileConfig.getOutputs().size() > 0) {
                 for(Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -231,27 +239,27 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         }else{
             sseRelay2Actuator.setSelection(0,false);
         }
-        
+
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
+
                 new AsyncTask<String, Void, Void>() {
-                
+
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
                         ProgressDialogUtils.showProgressDialog(getActivity(), "Saving SSE Configuration");
                         super.onPreExecute();
                     }
-                
+
                     @Override
                     protected Void doInBackground( final String ... params ) {
                         setupSSEZoneProfile();
                         L.saveCCUState();
                         return null;
                     }
-                
+
                     @Override
                     protected void onPostExecute( final Void result ) {
                         ProgressDialogUtils.hideProgressDialog();
@@ -260,7 +268,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                         LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, roomRef,floorRef);
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            
+
             }
         });
     }
@@ -274,6 +282,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         sseConfig.enableThermistor1 = switchAirflowTempSensor.isChecked();
         sseConfig.enableThermistor2 = switchExtTempSensor.isChecked();
+        sseConfig.enableAutoAway = autoAway.isChecked();
+        sseConfig.enableAutoForceOccupied = autoForceOccupied.isChecked();
         if(switchCoolHeatR1.isChecked()) sseConfig.enableRelay1 = sseRelay1Actuator.getSelectedItemPosition()+1;
         else sseConfig.enableRelay1 = 0;
         if(switchFanR2.isChecked()) sseConfig.enableRelay2 = sseRelay2Actuator.getSelectedItemPosition();
@@ -309,7 +319,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
 
     @Override
     @OnCheckedChanged({R.id.sseRelay1ForceTestBtn,R.id.sseRelay2ForceTestBtn,
-                       R.id.sseRelay2Switch})
+            R.id.sseRelay2Switch})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {

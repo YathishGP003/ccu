@@ -62,6 +62,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -70,6 +71,10 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -97,6 +102,7 @@ public class InstallerOptions extends Fragment {
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
+    private static InstallerOptions instance;
     //
     float lowerHeatingTemp;
     float upperHeatingTemp;
@@ -156,7 +162,14 @@ public class InstallerOptions extends Fragment {
     };
 
     public InstallerOptions() {
-        // Required empty public constructor
+          instance=this;
+    }
+
+    public static InstallerOptions getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Api is not initialized");
+        }
+        return instance;
     }
 
     /**
@@ -247,15 +260,8 @@ public class InstallerOptions extends Fragment {
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
         toggleCelsius.setVisibility(View.VISIBLE);
-        HashMap<Object, Object> useCelsius;
 
-        useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
-
-        if( (double) getTuner(useCelsius.get("id").toString())==TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-           toggleCelsius.setChecked(true);
-        } else {
-           toggleCelsius.setChecked(false);
-        }
+        setToggleCheck();
 
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
@@ -409,14 +415,22 @@ public class InstallerOptions extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
-                if(isChecked) {
-                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+                if (!useCelsius.isEmpty()) {
+                    if (isChecked) {
+                        CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                                CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
+                    } else {
+                        CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                                CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                    }
                 } else {
-                    CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                            CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
+                    Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
                 }
                 getTempValues();
+                initializeTempLockoutUI(CCUHsApi.getInstance());
+                if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
+                    TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+                }
             }
         });
 
@@ -518,7 +532,15 @@ public class InstallerOptions extends Fragment {
         buttonSendIAM.setEnabled(true);
         buttonSendIAM.setVisibility(View.GONE);
     }
-    
+
+    public void setToggleCheck() {
+        if (toggleCelsius!=null && isCelsiusTunerAvailableStatus()) {
+            toggleCelsius.setChecked(true);
+        } else {
+            toggleCelsius.setChecked(false);
+        }
+    }
+
     private void hideTempLockoutUI() {
         toggleCoolingLockout.setVisibility(View.GONE);
         toggleHeatingLockout.setVisibility(View.GONE);
@@ -537,29 +559,48 @@ public class InstallerOptions extends Fragment {
             hideTempLockoutUI();
             return;
         }
-        
-        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
+
+        ArrayAdapter<Double> coolingLockoutAdapter;
+        if (isCelsiusTunerAvailableStatus()){
+            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(0)),Math.round(fahrenheitToCelsius(70)),1, getActivity());
+        } else {
+            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
+        }
         spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
         spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(ccu().systemProfile.getCoolingLockoutVal()),
                                                                                                         false);
     
         spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+                if (isCelsiusTunerAvailableStatus()) {
+                    setCoolingLockoutVal(hayStack, Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()))));
+                } else {
+                    setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {
                 //Not handled
             }
         });
-        
-        ArrayAdapter<Double> heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+
+        ArrayAdapter<Double> heatingLockoutAdapter;
+        if (isCelsiusTunerAvailableStatus()){
+            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(50)),Math.round(fahrenheitToCelsius(100)),1, getActivity());
+        } else {
+            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+        }
         spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
         spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(ccu().systemProfile.getHeatingLockoutVal())
                                                                                                         , false);
         spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setHeatingLockoutVal(hayStack,
-                                     Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
+                if (isCelsiusTunerAvailableStatus()) {
+                    setHeatingLockoutVal(hayStack,
+                            Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()))));
+                } else {
+                    setHeatingLockoutVal(hayStack,
+                            Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {
                 //Not handled

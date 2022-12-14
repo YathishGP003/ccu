@@ -19,16 +19,22 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
+import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.modbusbox.EquipsManager;
+import a75f.io.logic.pubnub.hyperstat.HyperstatReconfigurationHandler;
 
 public class UpdatePointHandler
 {
     public static final String CMD = "updatePoint";
     private static ZoneDataInterface zoneDataInterface = null;
     private static ModbusDataInterface modbusDataInterface = null;
+    private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
     public static void handleMessage(final JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
@@ -86,8 +92,8 @@ public class UpdatePointHandler
             return;
         }
 
-        if (HSUtil.isHSCPUConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperstatCPUConfigHandler.Companion.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+        if (HSUtil.isHyperStatConfig(pointUid, CCUHsApi.getInstance())) {
+            HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
@@ -125,6 +131,10 @@ public class UpdatePointHandler
             TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
         }
 
+        if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
+            TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
+        }
+
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
@@ -134,8 +144,8 @@ public class UpdatePointHandler
             logPointArray(localPoint);
         
             try {
-                Thread.sleep(100);
                 updatePoints(localPoint);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -155,7 +165,7 @@ public class UpdatePointHandler
     private static void fetchRemotePoint(String pointUid) {
         HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
         if (pointGrid == null) {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointUid);
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point : " + pointUid);
             return;
         }
         //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
@@ -200,12 +210,12 @@ public class UpdatePointHandler
         boolean updateZoneUi = false;
         boolean isScheduleType = false;
 
-        if (p.getMarkers().contains("desired")) {
+        if (p.getMarkers().contains("desired") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleDesiredTempUpdate(p, false, 0);
             updateZoneUi = true;
         }
 
-        if (p.getMarkers().contains("scheduleType")) {
+        if (p.getMarkers().contains("scheduleType") && !p.getMarkers().contains("modbus")) {
             SystemScheduleUtil.handleScheduleTypeUpdate(p);
             updateZoneUi = true;
             isScheduleType = true;
@@ -224,6 +234,9 @@ public class UpdatePointHandler
         if (p.getMarkers().contains("modbus")){
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);
+            }
+            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(p.getId());
             }
         }
         if(isScheduleType){
@@ -246,7 +259,7 @@ public class UpdatePointHandler
     public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
-    
+    public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {
         HashMap ccu = hayStack.read("ccu");
         String ccuName = ccu.get("dis").toString();
@@ -260,7 +273,8 @@ public class UpdatePointHandler
         //Notification for updates which are local to a CCU.
         //Some places we still update the user as ccu_displayName. Until that is removed, we will keep name
         //comparison too.
-        if (pbSource.equals("ccu_"+ccuName) || pbSource.equals("Scheduler") || pbSource.equals("manual")) {
+        if (pbSource.equals("ccu_"+ccuName) || pbSource.equals("Scheduler") || pbSource.equals("manual")
+            || pbSource.equals("OccupancySensor")) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore");
             return true;
         }

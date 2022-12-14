@@ -15,14 +15,14 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.SSEStage;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -122,8 +122,8 @@ public class SingleStageProfile extends ZoneProfile
             SSEStage sseStage = SSEStage.values()[(int) getConfigEnabled("enable and relay1",(short)sseEquip.nodeAddr)];
             double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
             String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
-            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-            boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
+            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
             String stageStatus = "";
             Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
             if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {

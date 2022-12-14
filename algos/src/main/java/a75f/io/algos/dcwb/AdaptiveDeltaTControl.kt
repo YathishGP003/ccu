@@ -32,19 +32,20 @@ class AdaptiveDeltaTControlAlgo {
             val chilledWaterTargetTemp = data.inletWaterTemperature + data.chilledWaterTargetDeltaT
             val actualDeltaT = data.outletWaterTemperature - data.inletWaterTemperature;
             return if (chilledWaterTargetTemp < adaptiveComfortThreshold) {
-                if (linearModeLoop) {
+                /*if (linearModeLoop) {
                     linearModeLoop = false
                     data.piLoop.loopOutput
                 } else {
                     data.piLoop.getLoopOutput(data.chilledWaterTargetDeltaT, actualDeltaT)
-                }
+                }*/
+                linearModeLoop = false
+                data.piLoop.getLoopOutput(data.chilledWaterTargetDeltaT, actualDeltaT)
             } else {
                 linearModeLoop = true
-                val chilledWaterDeltaTValveLoop = data.piLoop.loopOutput
-
-                val linearIncrementRange = 100 - chilledWaterDeltaTValveLoop
+                val invertedChilledWaterDeltaTValveLoop = 100 - data.piLoop.loopOutput
+                val linearIncrementRange = data.piLoop.loopOutput
                 val chilledWaterTargetLinearDelta = chilledWaterTargetTemp - adaptiveComfortThreshold
-                chilledWaterDeltaTValveLoop + linearIncrementRange * chilledWaterTargetLinearDelta / data.adaptiveComfortThresholdMargin
+                invertedChilledWaterDeltaTValveLoop + linearIncrementRange * chilledWaterTargetLinearDelta / data.adaptiveComfortThresholdMargin
             }
         }
     }

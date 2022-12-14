@@ -1,44 +1,45 @@
 package a75f.io.renatus.ENGG;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import a75f.io.logic.jobs.SystemScheduleUtil;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
-import a75f.io.renatus.FloorPlanFragment;
-import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
 
 public class HaystackExplorer extends Fragment
 {
@@ -50,10 +51,12 @@ public class HaystackExplorer extends Fragment
     
     HashMap<String, String> tunerMap = new HashMap();
     HashMap<String, String> equipMap = new HashMap();
+    HashMap<String, String> scheduleMap = new HashMap();
     int lastExpandedPosition;
 
     // require pass code for environments QA and up.
-    private boolean passCodeValidationRequired = !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev"));
+    private boolean passCodeValidationRequired =
+        !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa"));
     
     public HaystackExplorer()
     {
@@ -198,7 +201,7 @@ public class HaystackExplorer extends Fragment
                         .setMessage("Do you want to delete "+equip+" and all its points?")
                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                public void onClick(DialogInterface dialog, int which) {
-                                   deleteEntity(equipMap.get(equip));
+                                   deleteEntity(equipMap.get(equip), false);
                                }
                            })
                        .setNegativeButton(android.R.string.no, null)
@@ -207,7 +210,6 @@ public class HaystackExplorer extends Fragment
                     return true;
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
                            ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                    
                     int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
                     int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
                 
@@ -221,7 +223,23 @@ public class HaystackExplorer extends Fragment
                                     "Do you want to delete the point "+point+"?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteEntity(tunerMap.get(point));
+
+                                if (point.contains("Building Schedule")) {
+                                    CcuLog.i("CCU_UI", " scheduleMap.size  "+scheduleMap.size());
+                                    if (scheduleMap.size() == 1) {
+                                        Toast.makeText(parent.getContext(),
+                                                "Delete Failed ! Cant delete the only building schedule",
+                                                Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    //Its a hack based on the current point length
+                                    int startIndex = point.indexOf("-");
+                                    String id = point.substring(startIndex+1, startIndex+37);
+                                    CcuLog.i("CCU_UI", " Delete Schedule : id "+id);
+                                    deleteEntity(id , true);
+                                } else {
+                                    deleteEntity(tunerMap.get(point), false);
+                                }
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
@@ -233,7 +251,7 @@ public class HaystackExplorer extends Fragment
         });
     }
     
-    private void deleteEntity(String entityId) {
+    private void deleteEntity(String entityId, boolean schedule) {
     
         new AsyncTask<Void, Void, Void>() {
         
@@ -245,7 +263,11 @@ public class HaystackExplorer extends Fragment
         
             @Override
             protected Void doInBackground( final Void ... params ) {
-                CCUHsApi.getInstance().deleteEntityTree(entityId);
+                if (schedule) {
+                    CCUHsApi.getInstance().deleteEntityItem(entityId);
+                } else {
+                    CCUHsApi.getInstance().deleteEntityTree(entityId);
+                }
                 updateAllData();
                 CCUHsApi.getInstance().syncEntityTree();
                 return null;
@@ -263,6 +285,20 @@ public class HaystackExplorer extends Fragment
         tunerMap.clear();
         expandableListDetail.clear();
         equipMap.clear();
+        scheduleMap.clear();
+
+        HGrid buildingSchedulesGrid = CCUHsApi.getInstance().getHSClient().readAll("schedule and building and not vacation and not special and not named");
+        List<String> schedulesList = new ArrayList<>();
+        Iterator it = buildingSchedulesGrid.iterator();
+        int scheduleNameCounter = 0;
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
+            schedulesList.add(new Schedule.Builder().setHDict(r).build().toString());
+            scheduleMap.put(++scheduleNameCounter+""+r.get("dis").toString(), r.get("id").toString());
+        }
+
+        expandableListDetail.put("Building Schedule", schedulesList);
+
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
@@ -287,6 +323,7 @@ public class HaystackExplorer extends Fragment
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
+            Collections.sort(tunerList);
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
     
@@ -307,40 +344,36 @@ public class HaystackExplorer extends Fragment
     
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("writable"))
-            {
-                ArrayList values = hayStack.readPoint(id);
-                if (values != null && values.size() > 0)
-                {
-                    for (int l = 1; l <= values.size(); l++)
-                    {
-                        HashMap valMap = ((HashMap) values.get(l - 1));
-                        System.out.println(valMap);
-                        if (valMap.get("val") != null)
-                        {
-                            try
-                            {
+        try {
+            Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+            for (String marker : p.getMarkers()) {
+                if (marker.equals("writable")) {
+                    ArrayList values = hayStack.readPoint(id);
+                    if (values != null && values.size() > 0) {
+                        for (int l = 1; l <= values.size(); l++) {
+                            HashMap valMap = ((HashMap) values.get(l - 1));
+                            System.out.println(valMap);
+                            if (valMap.get("val") != null) {
                                 return Double.parseDouble(valMap.get("val").toString());
-                            }catch (Exception e) {
-                                return 0;
                             }
                         }
                     }
                 }
             }
-        }
-    
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("his"))
+            for (String marker : p.getMarkers())
             {
-                return hayStack.readHisValById(p.getId());
+                if (marker.equals("his"))
+                {
+                    return hayStack.readHisValById(p.getId());
+                }
             }
+
+        } catch (Exception e) {
+            return 0;
         }
-        
+
+    
+
         return 0;
     }
     
@@ -366,7 +399,7 @@ public class HaystackExplorer extends Fragment
                 if (p.getMarkers().contains("his"))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    hayStack.writeHisValById(id, val);
+                    hayStack.writeHisValueByIdWithoutCOV(id, val);
                 }
                 return null;
             }

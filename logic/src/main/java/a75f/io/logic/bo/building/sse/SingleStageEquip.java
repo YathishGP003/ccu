@@ -13,17 +13,16 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.building.hvac.SSEStage;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.util.RxTask;
 
@@ -72,14 +71,14 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-    
+
         RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(),
-                                                                       siteRef,
-                                                                       siteDis + "-SSE-" + nodeAddr,
-                                                                       equipRef,
-                                                                       roomRef,
-                                                                       floorRef
-                                                                        , tz));
+                siteRef,
+                siteDis + "-SSE-" + nodeAddr,
+                equipRef,
+                roomRef,
+                floorRef
+                , tz));
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-currentTemp")
@@ -182,7 +181,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
-        
+
         Point equipStatus = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-equipStatus")
                 .setEquipRef(equipRef)
@@ -273,16 +272,20 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("sse")
-                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforceoccupy,autoaway")
+                .setEnums(Occupancy.getEnumStringDefinition())
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
 
+        ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
+                equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAway ? 1:0
+                ,config.enableAutoForceOccupied ?1:0);
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "sse", tz));
 
-		SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
@@ -301,13 +304,16 @@ public class SingleStageEquip {
         device.addSensor(Port.SENSOR_VOC, vocId);
         device.addPointsToDb();
 
-        
+        ConfigUtil.Companion.addOccupancyPointsSN(device,"sse",siteRef,roomRef,floorRef,
+                equipRef,tz,String.valueOf(nodeAddr),equipDis);
+
+
         setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
         setDesiredTempHeating(70.0);
-    
+
         createSSEConfigPoints(config, equipRef,floorRef,roomRef);
-        
+
         CCUHsApi.getInstance().syncEntityTree();
 
 
@@ -409,13 +415,13 @@ public class SingleStageEquip {
                 .build();
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
         CCUHsApi.getInstance().writeDefaultValById(enableTh1Id, (config.enableThermistor1 ? 1.0 : 0));
-        
+
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
-        
+
         SingleStageEquipUtil.createRelay1Config(config.enableRelay1, enableRelay1);
         SingleStageEquipUtil.createRelay2Config(config.enableRelay2, enableRelay2);
     }
@@ -437,23 +443,32 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
-    
+
+        if(config.enableAutoAway != getProfileConfiguration().enableAutoAway
+                || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){
+            ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
+        }
+
         HashMap enableRelay1Map =
-            CCUHsApi.getInstance().read("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
+                CCUHsApi.getInstance().read("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
         Point enableRelay1 = new Point.Builder().setHashMap(enableRelay1Map).build();
         SingleStageEquipUtil.updateRelay1Config(config.enableRelay1, enableRelay1);
-    
+
         HashMap enableRelay2Map =
-            CCUHsApi.getInstance().read("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
+                CCUHsApi.getInstance().read("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
         Point enableRelay2 = new Point.Builder().setHashMap(enableRelay2Map).build();
         SingleStageEquipUtil.updateRelay2Config(config.enableRelay2, enableRelay2);
-        
-		setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
+
+        setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
-    
+        setConfigNumVal("auto and away",config.enableAutoAway ? 1.0 : 0 );
+        setConfigNumVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 : 0 );
+        setHisVal("auto and away",config.enableAutoAway ? 1.0 : 0 );
+        setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 : 0 );
+
         CCUHsApi.getInstance().scheduleSync();
     }
 
@@ -466,6 +481,9 @@ public class SingleStageEquip {
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.enableRelay1 = (int)getConfigNumVal("enable and relay1");
         config.enableRelay2 = (int)getConfigNumVal("enable and relay2");
+        config.enableAutoAway = getConfigNumVal("auto and away") > 0;
+        config.enableAutoForceOccupied = getConfigNumVal("auto and occupied and forced") > 0;
+
         config.setNodeType(NodeType.SMART_NODE);
 
 
@@ -650,13 +668,13 @@ public class SingleStageEquip {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
-                if(!sseStatus.isEmpty()){
-                    if(sseStatus.equals("Fan ON"))
-                        message = "Recirculating Air, " + sseStatus;
-                    else
-                        message = message + ","+sseStatus;
-                }
+            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+            if(!sseStatus.isEmpty()){
+                if(sseStatus.equals("Fan ON"))
+                    message = "Recirculating Air, " + sseStatus;
+                else
+                    message = message + ","+sseStatus;
+            }
         }
 
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
@@ -678,5 +696,9 @@ public class SingleStageEquip {
     public double getZonePriorityValue(){
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
         return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
+    }
+
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and sse and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 }

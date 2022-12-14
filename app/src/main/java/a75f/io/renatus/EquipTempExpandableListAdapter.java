@@ -6,10 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-
-import a75f.io.logic.jobs.SystemScheduleUtil;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,13 +33,16 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.renatus.ENGG.HaystackExplorer.getPointVal;
-
 
 /**
  * Created by samjithsadasivan on 1/31/19.
@@ -109,6 +108,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             Spinner     scheduleSpinner     = convertView.findViewById(R.id.schedule_spinner);
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
             TextView vacationStatusTV = convertView.findViewById(R.id.vacation_status);
+            TextView specialScheduleStatusText = convertView.findViewById(R.id.special_status_status);
             ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
             LinearLayout smartStatLayout = convertView.findViewById(R.id.ss_layout);
             TextView ssStatus = convertView.findViewById(R.id.ss_conditioning_status_tv);
@@ -119,9 +119,11 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             Spinner ssHumiDifierSpinner = convertView.findViewById(R.id.ss_humidity_spinner);
             
             String zoneId = Schedule.getZoneIdByEquipId(equipId);
-            String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
-            String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+            String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
+            String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
+            String specialScheduleStatus = getScheduleStateString(zoneId);
+            specialScheduleStatusText.setText(specialScheduleStatus);
             scheduleStatus.setText(status);
             String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
             mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
@@ -142,7 +144,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                                            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                                                            mSchedule = Schedule.getScheduleByEquipId(equipId);
                                                            //CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId)
-                                                           ScheduleProcessJob.updateSchedules();
+                                                           ScheduleManager.getInstance().updateSchedules();
                                                            
                                                            
                                                        });
@@ -394,7 +396,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
                                if (checkContainment(mSchedule))
                                {
-                                   ScheduleProcessJob.updateSchedules();
+                                   ScheduleManager.getInstance().updateSchedules();
                                }
                            });
                        }

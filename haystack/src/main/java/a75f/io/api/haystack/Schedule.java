@@ -1,7 +1,12 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
+import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
+
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
@@ -83,7 +88,7 @@ public class Schedule extends Entity
 
     }
 
-    private static int getInt(String intString){
+    public static int getInt(String intString){
         if(intString.contains(".")){
             String[] numerics = intString.split("\\.");
             return Integer.parseInt(numerics[0]);
@@ -120,16 +125,16 @@ public class Schedule extends Entity
             int beginMin = getInt(range.get(Tags.STMM).toString());
             String endDate = range.get(Tags.ETDT).toString();
             int endHour = getInt(range.get(Tags.ETHH).toString());
-            endHour  = endHour == 24 ? 23 : endHour;
             int endMin = getInt(range.get(Tags.ETMM).toString());
-            endMin = endHour == 24 ? 59 : endMin;
+
+            endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
 
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)
                     .withMinuteOfHour(beginMin);
             DateTime endDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(endDate)
-                    .withHourOfDay(endHour)
-                    .withMinuteOfHour(endMin);
+                    .withHourOfDay(getEndHour(endHour))
+                    .withMinuteOfHour(getEndMinute(endHour, endMin));
 
             int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
 
@@ -206,8 +211,7 @@ public class Schedule extends Entity
         return specialSchedule;
     }
 
-    public static Schedule getScheduleForZone(String zoneId, boolean vacation)
-    {
+    public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
@@ -218,12 +222,10 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        if (ref != null && !ref.equals("")) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
             
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
@@ -257,34 +259,33 @@ public class Schedule extends Entity
         Hence +1*/
         int dayAdjustConst = 1;
         DateTime morePriorityScheduleBeginTime =
-                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getSthh(),
-                morePrioritySchedule.getStmm(),
+                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(morePrioritySchedule.getSthh(), morePrioritySchedule.getStmm(),
                 0, 0);
         DateTime morePriorityScheduleEndTime =
-                new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst).withTime(morePrioritySchedule.getEthh(),
-                morePrioritySchedule.getEtmm(),
-                0, 0);
+        new DateTime().withDayOfWeek(morePrioritySchedule.getDay() + dayAdjustConst)
+                .withTime(getEndHour(morePrioritySchedule.getEthh()),
+                        getEndMinute(morePrioritySchedule.getEthh(), morePrioritySchedule.getEtmm()),
+                        getEndSec(morePrioritySchedule.getEthh()), 0);
         Interval morePriorityScheduleInterval = new Interval(morePriorityScheduleBeginTime,
                 morePriorityScheduleEndTime);
 
         DateTime lessPriorityScheduleBeginTime =
-                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getSthh(),
-                lessPrioritySchedule.getStmm(),
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(lessPrioritySchedule.getSthh(), lessPrioritySchedule.getStmm(),
                 0, 0);
         DateTime lessPriorityScheduleEndTime =
-                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst).withTime(lessPrioritySchedule.getEthh(),
-                lessPrioritySchedule.getEtmm(),
-                0, 0);
+                new DateTime().withDayOfWeek(lessPrioritySchedule.getDay() + dayAdjustConst)
+                        .withTime(getEndHour(lessPrioritySchedule.getEthh()),
+                                getEndMinute(lessPrioritySchedule.getEthh(), lessPrioritySchedule.getEtmm()),
+                                getEndSec(lessPrioritySchedule.getEthh()), 0);
         Interval lessPriorityScheduleInterval = new Interval(lessPriorityScheduleBeginTime,
                 lessPriorityScheduleEndTime);
         return morePriorityScheduleInterval.overlaps(lessPriorityScheduleInterval);
     }
 
-    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
-                                                             Set<Schedule.Days> lessPriorityScheduleList){
-        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
-        daysList.addAll(morePriorityScheduleList);
-        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
+    private static void combineSchedules(Set<Schedule.Days> morePriorityScheduleList, Set<Schedule.Days> lessPriorityScheduleList,
+                                         Set<Schedule.Days> intermediateScheduleList, Set<Schedule.Days> daysList){
         for(Schedule.Days morePrioritySchedule : morePriorityScheduleList){
             for(Schedule.Days lessPrioritySchedule : lessPriorityScheduleList){
                 if (!isLessPriorityScheduleAvailableOnTheDayMorePrioritySchedulePresent(lessPrioritySchedule,
@@ -349,7 +350,17 @@ public class Schedule extends Entity
                 }
             }
         }
-        for(Schedule.Days intermediateSchedule : intermediateScheduleList){
+    }
+
+    private static Set<Schedule.Days> schedulesWithPriority(Set<Schedule.Days> morePriorityScheduleList,
+                                                             Set<Schedule.Days> lessPriorityScheduleList){
+        Set<Schedule.Days> daysList = new TreeSet<>(sortSchedules());
+        daysList.addAll(morePriorityScheduleList);
+        Set<Schedule.Days> intermediateScheduleList = new TreeSet<>(sortSchedules());
+        combineSchedules(morePriorityScheduleList, lessPriorityScheduleList, intermediateScheduleList, daysList);
+        Set<Schedule.Days> intermediateScheduleListWithoutCollision = new TreeSet<>(sortSchedules());
+        combineSchedules(morePriorityScheduleList, intermediateScheduleList, intermediateScheduleListWithoutCollision, daysList);
+        for(Schedule.Days intermediateSchedule : intermediateScheduleListWithoutCollision){
             if(!isScheduleColliding(morePriorityScheduleList, intermediateSchedule)){
                 daysList.add(intermediateSchedule);
             }
@@ -464,23 +475,24 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
+                                        "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
+        //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
+        if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
-                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
+                CcuLog.d("CCU_SCHEDULER", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
                         + schedule.toString());
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule "+scheduleType);
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0) {
             Schedule schedule = retVal.get(0);
             schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
-            CcuLog.d("Schedule", "Building Schedule with special schedule:  "+schedule);
+            CcuLog.d("CCU_SCHEDULER", "Building Schedule with special schedule:  "+schedule);
             return schedule;
         }
         return null;
@@ -712,21 +724,20 @@ public class Schedule extends Entity
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
-                    boolean isLastHour = daysSorted.get(i-1).getEthh() == 24;
                     if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(getEndHour(daysSorted.get(i - 1).getEthh()))
+                                .withMinuteOfHour(getEndMinute(daysSorted.get(i - 1).getEthh(), daysSorted.get(i - 1).getEtmm()))
                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
-                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                                .withSecondOfMinute(getEndSec(daysSorted.get(i - 1).getEthh()));
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
 					}else {
                         DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                .withHourOfDay(isLastHour ? 23 : daysSorted.get(i - 1).getEthh())
-                                .withMinuteOfHour(isLastHour ? 59 : daysSorted.get(i - 1).getEtmm())
+                                .withHourOfDay(getEndHour(daysSorted.get(i - 1).getEthh()))
+                                .withMinuteOfHour(getEndMinute(daysSorted.get(i - 1).getEthh(), daysSorted.get(i - 1).getEtmm()))
                                 .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
-                                .withSecondOfMinute(isLastHour ? 59 : 0);
+                                .withSecondOfMinute(getEndSec(daysSorted.get(i - 1).getEthh()));
                         occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
                     }
@@ -753,12 +764,11 @@ public class Schedule extends Entity
                     .withSecondOfMinute(0);
             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 
-            boolean isLastHour = daysSorted.get(j).getEthh() == 24;
             DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                    .withHourOfDay(isLastHour? 23 : daysSorted.get(j).getEthh())
-                    .withMinuteOfHour(isLastHour? 59 : daysSorted.get(j).getEtmm())
+                    .withHourOfDay(getEndHour(daysSorted.get(j).getEthh()))
+                    .withMinuteOfHour(getEndMinute(daysSorted.get(j).getEthh(), daysSorted.get(j).getEtmm()))
                     .withDayOfWeek(daysSorted.get(j).getDay() + 1)
-                    .withSecondOfMinute(isLastHour? 59 : 0);
+                    .withSecondOfMinute(getEndSec(daysSorted.get(j).getEthh()));
             occupied.setPreviouslyOccupiedSchedule(daysSorted.get(j));
             occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() - endDateTime.getMillis());
             
@@ -885,7 +895,11 @@ public class Schedule extends Entity
     
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(mDis).append(" ");
+
+        b.append(mDis).append("-");
+        if (mId != null) {
+            b.append(mId).append(" ");
+        }
         if (isVacation()) {
             b.append(mStartDate.toString()+"-"+mEndDate.toString());
         }else
@@ -967,11 +981,10 @@ public class Schedule extends Entity
                     .withDayOfWeek(day.getDay() + 1)
                     .withSecondOfMinute(0)
                     .withMillisOfSecond(0);
-            boolean isLastHour = day.getEthh() == 24;
             DateTime endDateTime = new DateTime(now)
-                    .withHourOfDay(isLastHour ? 23 : day.getEthh())
-                    .withMinuteOfHour(isLastHour? 59 :day.getEtmm())
-                    .withSecondOfMinute(isLastHour ? 59 :0).withMillisOfSecond(0).withDayOfWeek(
+                    .withHourOfDay(getEndHour(day.getEthh()))
+                    .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
+                    .withSecondOfMinute(getEndSec(day.getEthh())).withMillisOfSecond(0).withDayOfWeek(
                             day.getDay() +
                                     1);
 
@@ -1013,9 +1026,9 @@ public class Schedule extends Entity
                                          .withSecondOfMinute(0)
                                          .withMillisOfSecond(0);
         DateTime endDateTime = new DateTime(now)
-                                       .withHourOfDay(day.getEthh())
-                                       .withMinuteOfHour(day.getEtmm())
-                                       .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
+                .withHourOfDay(getEndHour(day.getEthh()))
+                .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
+                .withSecondOfMinute(getEndSec(day.getEthh())).withMillisOfSecond(0).withDayOfWeek(
                         day.getDay() +
                         1);
         

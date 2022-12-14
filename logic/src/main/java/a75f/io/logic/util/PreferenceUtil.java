@@ -12,6 +12,11 @@ public class PreferenceUtil {
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
+    private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
+    private static final String REHEAT_ZONE_TO_DAT_MIN = "reheatZoneToDATMinMigration";
+    private static final String RELAY_DEACTIVATION_MIGRATION = "relayDeactivationMigration";
+    private static final String MAX_CFM_COOLING_MIGRATION = "maxCFMCoolingMigration";
+    private static final String MIN_CFM_COOLING_MIGRATION = "minCFMCoolingMigration";
     private static final String TRUE_CFM_DAB_MIGRATION="trueCfmDabMigration";
     private static final String ADDED_UNIT_TO_TUNERS ="unitAddedToTuners";
     private static final String REMOVED_DUPLICATE_ALERTS = "removedDuplicateAlerts";
@@ -20,9 +25,25 @@ public class PreferenceUtil {
     private static final String DAMPER_FEEDBACK_MIGRATION = "damperFeedbackMigration";
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
+    private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
     private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefForZoneMigration";
+    private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
 
     private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRefs";
+    private static final String SITE_NAME_MIGRATION = "siteNameMigration";
+    private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
+    private static final String TI_UPDATE = "updateTIThermister";
+    private static final String UPDATE_SCHEDULE_TYPE = "updateScheduleTypes";
+
+
+    private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
+    private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
+    private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
+    private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
+    private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
+    private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -204,9 +225,21 @@ public class PreferenceUtil {
     public static boolean isAirflowVolumeUnitMigrationDone() {
         return getBooleanPreference(AIRFLOW_UNIT_MIGRATION);
     }
-
+    public static boolean isTimerCounterAndCFMCoolingMigrationDone() {
+        return getBooleanPreference(TIMER_COUNTER_MIGRATION) || getBooleanPreference(MAX_CFM_COOLING_MIGRATION) || getBooleanPreference(MIN_CFM_COOLING_MIGRATION);
+    }
+    public static boolean isRelayDeactivationAndReheatZoneToDATMigrationDone() {
+        return getBooleanPreference(RELAY_DEACTIVATION_MIGRATION) || getBooleanPreference(REHEAT_ZONE_TO_DAT_MIN);
+    }
+    public static void setRelayDeactivationAndReheatZoneToDATMinMigrationDone() {
+        setBooleanPreference(RELAY_DEACTIVATION_MIGRATION, true);
+        setBooleanPreference(REHEAT_ZONE_TO_DAT_MIN,true);
+    }
     public static void setAirflowVolumeUnitMigrationDone() {
         setBooleanPreference(AIRFLOW_UNIT_MIGRATION, true);
+    }
+    public static void setTimerCounterAndCFMCoolingMigrationDone() {
+        setBooleanPreference(TIMER_COUNTER_MIGRATION, true);
     }
     public static boolean isTrueCFMVAVMigrationDone() {
         return getBooleanPreference(TRUE_CFM_VAV_MIGRATION);
@@ -263,10 +296,31 @@ public class PreferenceUtil {
     public static boolean getDiagEquipMigration() {
         return getBooleanPreference(DIAG_POINTS_MIGRATION);
     }
+    public static void setSiteNameEquipMigration() {
+        setBooleanPreference(SITE_NAME_MIGRATION, true);
+    }
+    public static boolean getSiteNameEquipMigration() {
+        return getBooleanPreference(SITE_NAME_MIGRATION);
+    }
 
     public static void setSmartNodeMigration() {
         setBooleanPreference(SMART_NODE_MIGRATION, true);
+    }
 
+    public static boolean getScheduleRefactorMigration() {
+        return getBooleanPreference(SCHEDULE_REFACTOR_MIGRATION);
+    }
+
+    public static void setScheduleRefactorMigration() {
+        setBooleanPreference(SCHEDULE_REFACTOR_MIGRATION, true);
+
+    }
+
+    public static void setNewOccupancy() {
+        setBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION, true);
+    }
+    public static boolean getNewOccupancy() {
+        return getBooleanPreference(AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION);
     }
 
     public static void setScheduleRefForZoneMigration() {
@@ -283,4 +337,86 @@ public class PreferenceUtil {
     public static void setScheduleRefUpdateMigration() {
         setBooleanPreference(UPDATE_SCHEDULE_REFS, true);
     }
+
+    public static void setVocPm2p5MigrationV1() {
+        setBooleanPreference(VOC_PM2P5_MIGRATION_V1, true);
+    }
+    public static boolean getVocPm2p5MigrationV1() {
+        return getBooleanPreference(VOC_PM2P5_MIGRATION_V1);
+    }
+
+    public static boolean getStageTimerForDABMigration() {
+        return getBooleanPreference(STAGE_UP_TIMER_FOR_DAB);
+    }
+
+    public static void setStageTimerForDABMigration() {
+        setBooleanPreference(STAGE_UP_TIMER_FOR_DAB, true);
+    }
+
+
+    public static void setTIUpdate() {
+        setBooleanPreference(TI_UPDATE, true);
+    }
+    public static boolean getTIUpdate() {
+        return getBooleanPreference(TI_UPDATE);
+    }
+
+
+    public static boolean getScheduleTypeUpdateMigration() {
+        return getBooleanPreference(UPDATE_SCHEDULE_TYPE);
+    }
+
+    public static void setScheduleTypeUpdateMigration() {
+        setBooleanPreference(UPDATE_SCHEDULE_TYPE, true);
+    }
+
+    public static void setDCWBPointsMigration() {
+        setBooleanPreference(DCWB_POINTS_MIGRATION, true);
+    }
+    public static boolean getDCWBPointsMigration() {
+        return getBooleanPreference(DCWB_POINTS_MIGRATION);
+    }
+
+    public static boolean getSmartStatPointsMigration() {
+        return getBooleanPreference(SMART_STAT_POINTS_MIGRATION);
+    }
+
+    public static void setSmartStatPointsMigration() {
+        setBooleanPreference(SMART_STAT_POINTS_MIGRATION, true);
+
+    }
+
+    public static boolean getBPOSToOTNMigration() {
+        return getBooleanPreference(BPOS_TO_OTN_MIGRATION);
+    }
+
+    public static void setBPOSToOTNMigration() {
+        setBooleanPreference(BPOS_TO_OTN_MIGRATION, true);
+
+    }
+
+    public static boolean getAutoAwaySetBackMigration() {
+        return getBooleanPreference(AUTOAWAYSETBACK);
+    }
+
+    public static void setAutoAwaySetBackMigration() {
+        setBooleanPreference(AUTOAWAYSETBACK, true);
+    }
+    public static boolean getHyperStatDeviceDisplayConfigurationPointsMigration() {
+        return getBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION);
+    }
+
+    public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
+        setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
+
+    }
+    public static boolean getHyperStatCpuTagMigration() {
+        return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
+    }
+
+    public static void setHyperStatCpuTagMigration() {
+        setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
+
+    }
+
 }

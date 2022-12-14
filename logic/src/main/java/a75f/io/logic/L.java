@@ -15,14 +15,9 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.Node;
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.Schedulable;
-import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.util.RxTask;
 
 /**
@@ -47,13 +42,14 @@ public class L
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
     public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
     public static final String TAG_CCU_BACKUP = "CCU_BACKUP";
-    public static final String TAG_CCU_RESTORE = "CCU_RESTORE";
+    public static final String TAG_CCU_REPLACE = "CCU_REPLACE";
 
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
+    public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
-    public static final String TAG_BPOS = "CCU_BPOS";
+    public static final String TAG_OTN = "CCU_OTN";
 
     public static Context app()
     {
@@ -116,6 +112,7 @@ public class L
         }
         return existingSlaveIds;
     }
+    
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getSmartNodeAddressBand();
@@ -146,30 +143,13 @@ public class L
     {
         return ZoneBLL.findZoneByName(mFloorName, mRoomName);
     }
-
-
-    public static void sendLightControlsMessage(Zone zone)
-    {
-        //TODO: revist
-        //ZoneBLL.sendControlsMessage(zone);
-    }
-
-
-    public static void addZoneProfileToZone(Node node, Zone zone, LightProfile mLightProfile)
-    {
-        saveCCUState();
-    }
-
+    
 
     public static void saveCCUState()
     {
         Globals.getInstance().saveTags();
     }
-
-    public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
-    {
-        return LZoneProfile.resolveZoneProfileLogicalValue(profile);
-    }
+    
 
     public static float getDesiredTemp(ZoneProfile profile)
     {
@@ -202,32 +182,7 @@ public class L
             CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         }
     }
-
-
-    public static float resolveZoneProfileLogicalValue(ZoneProfile profile, Output snOutput)
-    {
-        return LZoneProfile.resolveZoneProfileLogicalValue(profile, snOutput);
-    }
-
-
-    public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
-    {
-        /*if (isNamedSchedule(schedulable))
-        {
-            return ccu().getLCMNamedSchedules().get(schedulable.getNamedSchedule()).getSchedule();
-        }
-        else if (schedulable.hasSchedules())
-        {
-            return schedulable.getSchedules();
-        }
-        else if(schedulable.getScheduleMode() == ScheduleMode.SystemSchedule)
-        {
-            return ccu().getDefaultTemperatureSchedule();
-        }*/
-        return null;
-    }
-
-
+    
     /****
      *
      * @return
@@ -248,31 +203,6 @@ public class L
     {
         return Globals.getInstance().isSimulation();
     }
-
-
-
-
-    public static void forceOverride(Zone zone, ZoneProfile zoneProfile, float desireTemp)
-    {
-        /*zoneProfile.setOverride(System.currentTimeMillis() +
-                                (int) resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_FORCED_OCCU_TIME) *
-                                60 * 1000, OverrideType.RELEASE_TIME, (short) Math.round(
-                desireTemp * 2));*/
-    }
-
-
-    public static Object resolveTuningParameter(Zone zone, String key)
-    {
-        if (zone.getTuningParameters().containsKey(key))
-        {
-            return zone.getTuningParameters().get(key);
-        }
-        else
-        {
-            return null;//TODO - ccu().getDefaultCCUTuners().get(key);
-        }
-    }
-
 
     public static boolean isOccupied(Zone zone, ZoneProfile zoneProfile)
     {

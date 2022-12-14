@@ -635,7 +635,8 @@ public class VavTuners {
                                                 .setTz(tz)
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
-        CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
+        hayStack.writePointForCcuUser(fanControlOnFixedTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY ,0);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
     
         Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(true, equipDis, equipRef,
@@ -731,7 +732,7 @@ public class VavTuners {
                                                        .addMarker("stageUp")
                                                        .addMarker("timer").addMarker("counter").addMarker("sp")
                                                        .setMinVal("0")
-                                                       .setMaxVal("30")
+                                                       .setMaxVal("60")
                                                        .setIncrementVal("1")
                                                        .setUnit("m")
                                                        .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
@@ -751,7 +752,7 @@ public class VavTuners {
                                                          .addMarker("stageDown")
                                                          .addMarker("timer").addMarker("counter").addMarker("sp")
                                                          .setMinVal("0")
-                                                         .setMaxVal("30")
+                                                         .setMaxVal("60")
                                                          .setIncrementVal("1")
                                                          .setUnit("m")
                                                          .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
@@ -1019,6 +1020,24 @@ public class VavTuners {
         BuildingTunerUtil.updateTunerLevels(reheatZoneDischargeTempOffSetTunerId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(reheatZoneDischargeTempOffSetTunerId));
 
+
+        Point autoAwaySetback   = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"autoAwaySetback")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("his")
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("setback").addMarker("sp")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String autoAwaySetbackId = hayStack.addPoint(autoAwaySetback);
+        BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
+        hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
+        hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
+
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
     
@@ -1033,7 +1052,7 @@ public class VavTuners {
                                                     .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("vav")
                                                     .addMarker("reheat").addMarker("dat").addMarker("min").addMarker("differential").addMarker("sp")
                                                     .setMinVal("0")
-                                                    .setMaxVal("20")
+                                                    .setMaxVal("60")
                                                     .setIncrementVal("0.5")
                                                     .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                                     .setUnit("\u00B0F")

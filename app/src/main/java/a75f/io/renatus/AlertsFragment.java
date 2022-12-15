@@ -146,32 +146,31 @@ public class AlertsFragment extends Fragment
 	}
 
 	String formatMessageToCelsius(String alertMessage) {
-		String[] alertMessageArray = alertMessage.split(getString(R.string.space));
+
 		boolean limit = false;
-		for(int i=0; i<alertMessageArray.length; i++){
-			if (alertMessageArray[i].equals("limit")){
-				limit = true;
-			}
-			try {
-				if (alertMessageArray[i].contains("\u00B0")) {
-					String temp = alertMessageArray[i - 1];
-					DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
-					alertMessageArray[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(temp)));
-					alertMessageArray[i] = "\u00B0C";
-					if (limit) {
-						alertMessageArray[i - 1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(temp))));
-					}
+		if (alertMessage.contains("limit")){
+			limit = true;
+		}
+		String[] strings = null;
+		strings = alertMessage.split(" ");
+		for (int i =0 ; i<strings.length;i++) {
+			if (strings[i].contains("\u00B0")) {
+				DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
+				strings[i] = "\u00B0C" ;
+				if (limit) {
+					strings[i-1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i-1]))));
+				} else {
+					strings[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
 				}
-			} catch (NumberFormatException numberFormatException) {
-				numberFormatException.printStackTrace();
 			}
 		}
-		StringBuffer alertMessageBuffer = new StringBuffer();
-		for (String s : alertMessageArray) {
-			alertMessageBuffer.append(s).append(R.string.space);
+		StringBuilder sb = new StringBuilder();
+
+		for (String string : strings) {
+			sb.append(string);
+			sb.append(" ");
 		}
-		alertMessage = alertMessageBuffer.toString();
-		return alertMessage;
+		return sb.toString();
 	}
 	
 	String getFormattedDate(long millis) {

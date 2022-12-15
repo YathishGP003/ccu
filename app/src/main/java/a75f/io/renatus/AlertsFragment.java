@@ -148,27 +148,38 @@ public class AlertsFragment extends Fragment
 	String formatMessageToCelsius(String alertMessage) {
 
 		boolean limit = false;
+		boolean currentTemp = true;
+		StringBuilder sb = new StringBuilder();
 		if (alertMessage.contains("limit")){
 			limit = true;
 		}
 		String[] strings = null;
 		strings = alertMessage.split(" ");
-		for (int i =0 ; i<strings.length;i++) {
-			if (strings[i].contains("\u00B0")) {
-				DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
-				strings[i] = "\u00B0C" ;
-				if (limit) {
-					strings[i-1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i-1]))));
-				} else {
-					strings[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
+		try {
+			for (int i = 0; i < strings.length; i++) {
+				if (strings[i].contains("\u00B0")) {
+					DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
+					strings[i] = "\u00B0C";
+					if (currentTemp) {
+						strings[i - 1] = tempValueFormatter.format(((Double.parseDouble(strings[i-1]) - 32) * 5 / 9));
+						currentTemp = false;
+						continue;
+					}
+					if (limit) {
+						strings[i - 1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1]))));
+					} else {
+						strings[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
+					}
 				}
 			}
-		}
-		StringBuilder sb = new StringBuilder();
 
-		for (String string : strings) {
-			sb.append(string);
-			sb.append(" ");
+			for (String string : strings) {
+				sb.append(string);
+				sb.append(" ");
+			}
+		}catch (NumberFormatException e) {
+			e.printStackTrace();
+			return alertMessage;
 		}
 		return sb.toString();
 	}

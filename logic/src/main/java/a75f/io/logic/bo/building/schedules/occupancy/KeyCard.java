@@ -2,6 +2,12 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 
 import org.projecthaystack.UnknownRecException;
 
+import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
+
 public class KeyCard implements OccupancyTrigger {
     
     private OccupancyUtil occupancyUtil;
@@ -22,6 +28,21 @@ public class KeyCard implements OccupancyTrigger {
         if (!isEnabled()) {
             return false;
         }
-        return occupancyUtil.getSensorStatus("keycard and input");
+        Occupied occStatus = ScheduleUtil.getOccupied(occupancyUtil.getEquipRef());
+        if (occStatus == null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupied entry not found , disable auto forced occupied");
+            return false;
+        }
+        Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
+        if(occStatus.isOccupied() &&
+                (occupancyMode == Occupancy.OCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED
+                        || occupancyMode == Occupancy.KEYCARD_AUTOAWAY)){
+            return occupancyUtil.getSensorStatus("keycard and input");
+        }
+        if(!occStatus.isOccupied() &&
+                (occupancyMode == Occupancy.UNOCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED)) {
+            return (!occupancyUtil.getSensorStatus("keycard and input"));
+        }
+        return false;
     }
 }

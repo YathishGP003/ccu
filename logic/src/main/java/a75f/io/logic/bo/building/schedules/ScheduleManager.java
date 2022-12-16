@@ -329,7 +329,7 @@ public class ScheduleManager {
                 CcuLog.i(TAG_CCU_SCHEDULER,
                         " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
                                 + " -> " + updatedOccupancy.occupancy);
-                profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule);
+                profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
                 if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
                     zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
                 }

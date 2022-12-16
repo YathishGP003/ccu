@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.schedules;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -30,7 +32,7 @@ public class EquipScheduleHandler implements Schedulable {
         return null;
     }
     
-    public void updateDesiredTemp(Occupancy currentOccupancy, Occupancy updatedOccupancy, Schedule schedule) {
+    public void updateDesiredTemp(Occupancy currentOccupancy, Occupancy updatedOccupancy, Schedule schedule,OccupancyData occupancyData) {
         //This is required to avoid zone immediately switching to autoway due lack of occupancy detection.
         if (updatedOccupancy == Occupancy.OCCUPIED && currentOccupancy != updatedOccupancy) {
             initOccupancyDetection(true);
@@ -42,7 +44,8 @@ public class EquipScheduleHandler implements Schedulable {
                  && (currentOccupancy == Occupancy.OCCUPIED || currentOccupancy == Occupancy.AUTOAWAY)) {
             initOccupancyDetection(false);
         }
-        
+
+        Log.i("CCU_SCHEDULER", "updateDesiredTemp: "+updatedOccupancy);
         //Write to Level 8 all the time.
         if (updatedOccupancy == Occupancy.OCCUPIED ||
             updatedOccupancy == Occupancy.PRECONDITIONING ||
@@ -57,14 +60,23 @@ public class EquipScheduleHandler implements Schedulable {
         if (updatedOccupancy == Occupancy.AUTOAWAY ||updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY) {
             updateDesiredTempForAutoAway();
         }
+
+
         
         //Write to Level 4 when AutoForcedOccupied
         if (updatedOccupancy == Occupancy.AUTOFORCEOCCUPIED) {
+
+            double forcedOccupiedMinutes = ScheduleUtil.getForcedOccupiedTime(equipRef, hayStack);
+            if(!occupancyData.isOccupied && occupancyData.unoccupiedTrigger.ordinal() == UnoccupiedTrigger.KeyCardInput.ordinal()){
+                updateDesiredTempAutoForceOccupied(forcedOccupiedMinutes);
+                return;
+            }
+
             Date lastOccupancy = new OccupancyUtil(hayStack, equipRef).getLastOccupancyDetectionTime();
             if (lastOccupancy == null) {
                 return;
             }
-            double forcedOccupiedMinutes = ScheduleUtil.getForcedOccupiedTime(equipRef, hayStack);
+
             if (forcedOccupiedMinutes > 0) {
                 double currentExpiry = ScheduleUtil.getTemporaryHoldExpiry(equipRef);
                 CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForcedOccupied OccDet time "+lastOccupancy.getTime());
@@ -103,7 +115,7 @@ public class EquipScheduleHandler implements Schedulable {
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equipRef);
     
         double avgTemp = (occupiedSchedule.getCoolingVal() + occupiedSchedule.getHeatingVal()) / 2.0;
-        
+
         double heatingDt;
         double coolingDt;
         if (updatedOccupancy == Occupancy.OCCUPIED || updatedOccupancy == Occupancy.PRECONDITIONING

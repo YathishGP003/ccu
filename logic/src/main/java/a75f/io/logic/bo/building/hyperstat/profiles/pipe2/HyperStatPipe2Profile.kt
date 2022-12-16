@@ -637,7 +637,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         if (equip.waterSamplingStartTime == 0L) {
             val minutes = milliToMin(System.currentTimeMillis() - equip.lastWaterValveTurnedOnTime)
             Log.i(L.TAG_CCU_HSPIPE2, "sampling will start in : ${waitTimeToDoSampling-minutes} current : $minutes")
-            if(minutes > waitTimeToDoSampling){
+            if(minutes >= waitTimeToDoSampling){
                 doWaterSampling(equip, relayStages)
             }
         }else{

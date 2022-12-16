@@ -627,7 +627,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn1State)
         ) {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "analog1 and input and logical and window and sensor"
+                "door and window2 and logical and sensor"
             )
             Log.i(L.TAG_CCU_HSCPU, "Analog In 1 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
@@ -638,7 +638,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn2State)
         ) {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "analog2 and input and logical and window and sensor"
+                "door and window3 and logical and sensor"
             )
             Log.i(L.TAG_CCU_HSCPU, "Analog In 2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
@@ -673,7 +673,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         ) {
             analog1KeycardEnabled = true
             analog1Sensor = equip.hsHaystackUtil.getSensorPointValue(
-                "analog1 and input and logical and  keycard and sensor"
+                "keycard and sensor and logical"
             )
         }
 
@@ -682,7 +682,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         ) {
             analog2KeycardEnabled = true
             analog2Sensor = equip.hsHaystackUtil.getSensorPointValue(
-                "analog2 and input and logical and  keycard and sensor"
+                "keycard2 and sensor and logical"
             )
         }
 

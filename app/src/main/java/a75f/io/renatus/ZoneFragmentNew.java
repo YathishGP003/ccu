@@ -101,6 +101,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -347,6 +348,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
+                loadGrid(parentRootView);
             });
         }
     }
@@ -3466,6 +3468,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
+        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {
@@ -3490,6 +3493,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        UpdatePointHandler.setZoneDataInterface(null);
     }
 
     @Override

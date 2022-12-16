@@ -40,6 +40,8 @@ public class UpdatePointHandler
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
+
 
         if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
@@ -48,10 +50,12 @@ public class UpdatePointHandler
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
+            if (localPoint.getMarkers().contains("displayUnit")) {
+                updateUI(localPoint);
+            }
             return;
         }
 
-        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " HandlePubnub for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
 

@@ -23,7 +23,9 @@ public class Site extends Entity
     public String  organization;
     public String  installerEmail;
     public String  fcManagerEmail;
+    public String  weatherRef;
     private String id;
+
     public String getId()
     {
         return id;
@@ -69,9 +71,11 @@ public class Site extends Entity
     public String getInstallerEmail() {
         return installerEmail;
     }
-
     public String getFcManagerEmail() {
         return fcManagerEmail;
+    }
+    public String getWeatherRef() {
+        return weatherRef;
     }
 
     public String toString() {
@@ -97,6 +101,7 @@ public class Site extends Entity
         public String  organization;
         public String  fcManagerEmail;
         public String  installerEmail;
+        public String  weatherRef;
 
 
         public Builder setGeoZip(String siteZip) {
@@ -186,6 +191,7 @@ public class Site extends Entity
             s.organization = this.organization;
             s.fcManagerEmail = this.fcManagerEmail;
             s.installerEmail = this.installerEmail;
+            s.weatherRef = this.weatherRef;
             return s;
         }
 
@@ -247,6 +253,10 @@ public class Site extends Entity
                 {
                     this.installerEmail = pair.getValue().toString();
                 }
+                else if(pair.getKey().equals("weatherRef"))
+                {
+                    this.weatherRef = pair.getValue().toString();
+                }
 
                 //it.remove();
             }
@@ -276,7 +286,8 @@ public class Site extends Entity
             tz.equals(site.tz) &&
             organization.equals(site.organization) &&
             installerEmail.equals(site.installerEmail) &&
-            fcManagerEmail.equals(site.fcManagerEmail)) {
+            fcManagerEmail.equals(site.fcManagerEmail) &&
+            weatherRef.equals(site.weatherRef)) {
             return true;
         }
         return false;

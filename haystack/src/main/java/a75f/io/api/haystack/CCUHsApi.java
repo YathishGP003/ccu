@@ -353,12 +353,9 @@ public class CCUHsApi
     private void updateLocationDataForWeatherUpdate(Site updatedSite) {
 
         SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
+        spPrefsEditor.putString("address", updatedSite.getGeoAddress());
+        spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
-
-        //Reset lat & lng so that WeatherService regenerates it using updated address.
-        spPrefsEditor.putFloat("lat", 0);
-        spPrefsEditor.putFloat("lng", 0);
 
         spPrefsEditor.commit();
     }

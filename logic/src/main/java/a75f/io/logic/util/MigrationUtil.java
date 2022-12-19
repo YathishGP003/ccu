@@ -170,15 +170,21 @@ public class MigrationUtil {
             Log.d(TAG,"isTIThermisterMigrated is false");
         }
 
-        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
-                updateScheduleRefForZones(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleRefForZoneMigration();
-        }
-
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){
             updateScheduleRefs(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefUpdateMigration();
        }
+
+        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
+            updateScheduleType(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
+
+        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
+            updateScheduleRefForZones(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefForZoneMigration();
+        }
+
         if(!PreferenceUtil.getVocPm2p5MigrationV1()){
             migrateHisInterpolateIssueFix(CCUHsApi.getInstance());
             PreferenceUtil.setVocPm2p5MigrationV1();
@@ -193,11 +199,6 @@ public class MigrationUtil {
             Log.d(TAG, "hasTIProfile");
             MigrateTIChanges(CCUHsApi.getInstance());
             PreferenceUtil.setTIUpdate();
-        }
-
-        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
-            updateScheduleType(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleTypeUpdateMigration();
         }
 
         if(!PreferenceUtil.getDCWBPointsMigration()){
@@ -1104,6 +1105,10 @@ public class MigrationUtil {
                         !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
                     HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
                             "roomRef == " +room.get("id"));
+                    if(zoneScheduleMap.isEmpty()){
+                        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Seems like no schedule entity has roomRef: "+room.get("id"));
+                        continue;
+                    }
                     Schedule zoneSchedule =
                             CCUHsApi.getInstance().getScheduleById(zoneScheduleMap.get("id").toString());
                     Zone zone = new Zone.Builder().setHashMap(room).build();

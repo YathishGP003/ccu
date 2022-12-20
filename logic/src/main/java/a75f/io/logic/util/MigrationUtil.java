@@ -413,18 +413,14 @@ public class MigrationUtil {
     }
 
     private static void relayDeactivationAndReheatZoneToDATMigration(CCUHsApi ccuHsApi) {
-        ArrayList<HashMap<Object, Object>> relayDeactivationPointVav = ccuHsApi.readAllEntities("point and tuner and vav and relay and deactivation and hysteresis");
-        ArrayList<HashMap<Object, Object>> relayDeactivationPointDab = ccuHsApi.readAllEntities("point and tuner and dab and relay and deactivation and hysteresis");
+        ArrayList<HashMap<Object, Object>> relayDeactivationPointAll = ccuHsApi.readAllEntities("point and tuner and relay and deactivation and hysteresis");
         ArrayList<HashMap<Object, Object>> reheatZoneToDATMinDifferentialPoint = ccuHsApi.readAllEntities("point and tuner and reheat and differential");
         String updatedMaxValue = "60";
-        for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointDab) {
+        for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointAll) {
             Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisDab).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
-        for (HashMap<Object, Object> relayDeactivationHysteresisVav : relayDeactivationPointVav) {
-            Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisVav).setMaxVal(updatedMaxValue).build();
-            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
-        }
+
         for (HashMap<Object, Object> reheatZoneToDATMinDifferential : reheatZoneToDATMinDifferentialPoint) {
             Point updatedPoint = new Point.Builder().setHashMap(reheatZoneToDATMinDifferential).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());

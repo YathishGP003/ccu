@@ -892,11 +892,14 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
      fun updateFanMode(config: HyperStatCpuConfiguration) {
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-        var fallbackFanSpeed = StandaloneFanStage.OFF.ordinal.toDouble() // Indicating always OFF
          Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
-        if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
-            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal.toDouble()
-        }
+         val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
+             if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
+                 StandaloneFanStage.AUTO.ordinal.toDouble()
+             } else {
+                 curFanSpeed
+             }
+         }
          val fanModePointId = hsHaystackUtil.readPointID("zone and sp and fan and operation and mode")
          Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
          if(fanModePointId != null)

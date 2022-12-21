@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -55,6 +56,9 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
 
     @BindView(R.id.setBtn)
     Button setButton;
+
+    @BindView(R.id.supplyTemp)
+    Spinner supplyTempSp;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.togglemainsensor)
@@ -134,6 +138,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
 
 
         mCcuAsZoneProfile = (CazProfile) L.getProfile(mSmartNodeAddress);
+        CCUUiUtil.setSpinnerDropDownColor(supplyTempSp,getContext());
 
         if (mCcuAsZoneProfile != null) {
             Log.d("CPUConfig", "Get Config: "+mCcuAsZoneProfile.getProfileType()+","+mCcuAsZoneProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
@@ -166,6 +171,15 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         toggleTh1.setChecked(false);
         toggleTh2.setChecked(false);
 
+        ArrayList<String> supplyTempArr = new ArrayList<>();
+        supplyTempArr.add("External 10K Temp Sensor");
+        supplyTempArr.add("Supply Air Temp");
+
+        ArrayAdapter<String> supplyTempAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, supplyTempArr);
+        supplyTempAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        supplyTempSp.setAdapter(supplyTempAdapter);
+        supplyTempSp.setEnabled(false);
+
         toggleTh1.setOnCheckedChangeListener((compoundButton, checked) -> handleTH1SenorChange(checked));
 
         toggleTh2.setOnCheckedChangeListener((compoundButton, checked) -> handleTH2SenorChange(checked));
@@ -177,8 +191,11 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             mainSensor.setChecked(mProfileConfig.isEnableMain);
             toggleTh1.setChecked(mProfileConfig.enableThermistor1);
             toggleTh2.setChecked(mProfileConfig.enableThermistor2 );
+            supplyTempSp.setSelection(mProfileConfig.thermistor2association, false);
+            supplyTempSp.setEnabled(mProfileConfig.enableThermistor2);
         }else {
             zonePriority.setSelection(2);
+            supplyTempSp.setEnabled(false);
         }
         
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -219,7 +236,9 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         if(checked){
             mainSensor.setChecked(false);
             toggleTh1.setChecked(false);
+            supplyTempSp.setEnabled(true);
         }else{
+            supplyTempSp.setEnabled(false);
             if(!toggleTh1.isChecked())
                 mainSensor.setChecked(true);
         }
@@ -247,12 +266,13 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         cazConfig.isEnableMain = mainSensor.isChecked();
         cazConfig.enableThermistor1 = toggleTh1.isChecked();
         cazConfig.enableThermistor2 = toggleTh2.isChecked();
+        cazConfig.thermistor2association = supplyTempSp.getSelectedItemPosition();
 
         mCcuAsZoneProfile.getProfileConfiguration().put(mSmartNodeAddress, cazConfig);
         if (mProfileConfig == null) {
             mCcuAsZoneProfile.addCcuAsZoneEquip(mSmartNodeAddress, cazConfig, floorRef, zoneRef );
         } else {
-            mCcuAsZoneProfile.updateCcuAsZone(cazConfig);
+            mCcuAsZoneProfile.updateCcuAsZone(cazConfig, floorRef, zoneRef);
         }
         L.ccu().zoneProfiles.add(mCcuAsZoneProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set CCU As Zone Config: Profiles - "+L.ccu().zoneProfiles.size());

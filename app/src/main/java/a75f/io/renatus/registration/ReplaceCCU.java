@@ -318,18 +318,17 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                     );
             }
             @Override
-            public void onErrorResponse(JSONObject response){
+            public void onErrorResponse(JSONObject response) {
                 ProgressDialogUtils.hideProgressDialog();
                 Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 toast.setView(toastFail);
                 TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
-                textView.setText(ccu.getName()+"  replace is failed as Bearer token cannot be generated. Please try " +
-                        "again");
+                textView.setText(ccu.getName()+"  replace is failed as Bearer token cannot be generated. Please try again");
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
                 deleteRenatusData();
-                Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
+                Log.i(TAG, "Replace CCU abrupted");
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");

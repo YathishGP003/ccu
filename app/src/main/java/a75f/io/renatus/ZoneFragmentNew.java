@@ -2281,7 +2281,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
@@ -2379,6 +2379,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
@@ -2393,12 +2394,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Discharge Airflow : ");
+        textViewLabel2.setText("Supply Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
-            textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+            textViewValue2.setText(dabPoints.get("Supply Airflow").toString());
         }
         if (!Boolean.TRUE.equals(dabPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
@@ -2406,6 +2407,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
+
+        View viewReheat = null;
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+            viewReheat = inflater.inflate(R.layout.zone_item_type3, null);
+            TextView reheatText = viewReheat.findViewById(R.id.text_label);
+            TextView reheatVal = viewReheat.findViewById(R.id.text_value);
+            reheatText.setText("      Reheat Coil : ");
+            reheatVal.setText(dabPoints.get("Reheat Coil").toString());
+            linearLayoutZonePoints.addView(viewReheat);
+        }
+
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
@@ -2413,7 +2425,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {
-            viewPointRow1.setPadding(0, 0, 0, 40);
+            if (viewReheat != null) {
+                viewReheat.setPadding(0, 0, 0, 40);
+            } else {
+                viewPointRow1.setPadding(0, 0, 0, 40);
+            }
         }
     }
 

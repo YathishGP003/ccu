@@ -206,4 +206,7 @@ public class TunerConstants
     public static final double AIR_FLOW_CFM_INTEGRAL_K_FACTOR = 0.5;
 
     public static final String DAB = "dab";
+
+    public static final double DAB_REHEAT_OFFSET_DEFAULT_VAL = 2;
+    public static final double DAB_RELAY_HYSTERESIS_DEFAULT_VAL = 10;
 }

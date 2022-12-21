@@ -215,6 +215,7 @@ public class OtpManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try{
+
                     JSONObject responseJSON = new JSONObject(response.body().string());
                     String token = responseJSON.getString("accessToken");
                     if(response.isSuccessful() && StringUtils.isNotEmpty(token)){

@@ -210,8 +210,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             hDicts.add(pid);
                         }
                         CCUHsApi.getInstance().importPointArrays(hDicts, null);
-                        HGrid useCelsius = CCUHsApi.getInstance().readGrid("point and tuner and displayUnit");
-                        CcuLog.i("CCU_SAM","useCelsius \n"+ HZincWriter.gridToString(useCelsius));
                     },
                     () -> {
                         ProgressDialogUtils.hideProgressDialog();
@@ -219,21 +217,17 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             ));
         });
         
-        deleteHis.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d("CCU"," deleteHis data ");
-                new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
+        deleteHis.setOnClickListener(view15 -> {
+            Log.d("CCU"," deleteHis data ");
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
+                    () -> {
                         CCUHsApi.getInstance().deleteHistory();
+                    },
+                    () -> {
+                        ProgressDialogUtils.hideProgressDialog();
                     }
-                }.start();
-            }
+            ));
         });
     
         forceSyncBtn.setOnClickListener(new View.OnClickListener()

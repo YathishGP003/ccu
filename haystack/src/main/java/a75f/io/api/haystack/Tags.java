@@ -137,6 +137,9 @@ public class Tags
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
     public static final String SPECIAL = "special";
+    public static final String AUTO = "auto";
+    public static final String AWAY = "away";
+    public static final String SETBACK = "setback";
 
 
     public static final String TEMP = "temp";

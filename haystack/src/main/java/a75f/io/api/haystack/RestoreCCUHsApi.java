@@ -20,6 +20,10 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HStdOps;
+import org.projecthaystack.server.HStdOps;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -462,6 +466,38 @@ public class RestoreCCUHsApi {
        return responseHGrid;
     }
 
+    private HGrid invokeWithRetry(String op, HClient hClient, HGrid req){
+        HGrid responseHGrid;
+        try{
+            responseHGrid = hClient.invoke(op, req);
+        }
+        catch(Exception exception){
+            try {
+                if (exception instanceof SocketTimeoutException) {
+                    CcuLog.i(TAG, "SocketTimeoutException occurred, hence retrying " + op);
+                    responseHGrid = hClient.invoke(op, req);
+                } else if (exception instanceof IOException) {
+                    CcuLog.i(TAG, exception.getClass().getSimpleName() +" occurred, while " + op + " waiting " +
+                            "for 30 seconds.....");
+                    Thread.sleep(30000);
+                    CcuLog.i(TAG, " retrying after 30 seconds.....");
+                    responseHGrid = hClient.invoke(op, req);
+                }
+                else{
+                    exception.printStackTrace();
+                    CcuLog.i(TAG, "Exception occurred while calling "+op );
+                    throw new NullHGridException("Exception occurred while calling "+op);
+                }
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+                CcuLog.i(TAG, "Exception occurred while calling "+op);
+                throw new NullHGridException("Exception occurred while calling "+op);
+            }
+        }
+        return responseHGrid;
+    }
+
     private void writeValueToPoints(List<HDict> points, HClient hClient){
         int partitionSize = 15;
         List<List<HDict>> partitions = new ArrayList<>();
@@ -469,9 +505,9 @@ public class RestoreCCUHsApi {
             partitions.add(points.subList(i, Math.min(i + partitionSize, points.size())));
         }
         for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints;
-            writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
-                        HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing Profile.");
                 throw new NullHGridException("Failed to fetch point array values during syncing Profile.");
@@ -645,7 +681,7 @@ public class RestoreCCUHsApi {
 
             HDict tunerPointsDict = new HDictBuilder().add("filter",
                     "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict));
+            HGrid tunerPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict));
             if (tunerPointsGrid == null) {
                 throw new NullHGridException("Null occurred while importing building tuner");
             }
@@ -698,8 +734,7 @@ public class RestoreCCUHsApi {
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
 
-    public HGrid getRemoteSite(String siteId)
-    {
+    public HGrid getRemoteSite(String siteId) {
         /* Sync a site*/
         HClient hClient   = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
@@ -763,9 +798,9 @@ public class RestoreCCUHsApi {
         }
 
         for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints;
-            writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
+            HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
                     HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
             //We cannot proceed replacing an existing CCU without fetching all the point array values.
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
@@ -841,7 +876,7 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict settingPoints = new HDictBuilder().add("filter",
                 "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
-        HGrid settingPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints));
+        HGrid settingPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints));
 
         List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
 

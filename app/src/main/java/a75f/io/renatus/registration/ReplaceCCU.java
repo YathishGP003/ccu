@@ -328,7 +328,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
                 deleteRenatusData();
-                Log.i(TAG, "Replace CCU abrupted");
+                Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");

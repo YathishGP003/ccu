@@ -43,7 +43,6 @@ public class NotificationHandler {
                     .setContentTitle("CM Connection Status");
 
     static private NotificationHandler mHandler = new NotificationHandler();
-    private static Prefs prefs  = new Prefs(Globals.getInstance().getApplicationContext());
 
 
     private NotificationHandler () {

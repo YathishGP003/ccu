@@ -10,5 +10,5 @@ public interface Schedulable {
     //Currently active schedule.
     Schedule getSchedule();
    
-    void updateDesiredTemp(Occupancy current, Occupancy updated, Schedule schedule);
+    void updateDesiredTemp(Occupancy current, Occupancy updated, Schedule schedule,OccupancyData occupancyData);
 }

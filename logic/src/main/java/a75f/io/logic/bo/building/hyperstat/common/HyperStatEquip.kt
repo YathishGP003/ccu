@@ -125,12 +125,12 @@ open class HyperStatEquip {
             hyperStatPointsUtil.addDefaultValueForPoint(
                 enabledId, if (isNewEnableDoorWindowSensor) 1.0 else 0.0
             )
-            val logicalPointId = LogicalPointsUtil.readDoorWindowSensor(hsHaystackUtil.equipRef,1)
+            val logicalPointId = LogicalPointsUtil.readDoorWindowSensor(hsHaystackUtil.equipRef,LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
             if (logicalPointId.isNotEmpty()) {
                 hsHaystackUtil.removePoint(logicalPointId[Tags.ID].toString())
             }
             if (isNewEnableDoorWindowSensor) {
-                val pointData: Point = hyperStatPointsUtil.createPointForDoorWindowSensor(1)
+                val pointData: Point = hyperStatPointsUtil.createPointForDoorWindowSensor(LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
                 val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
                 if (pointData.markers.contains("his")) {
                     hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)

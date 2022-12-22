@@ -20,6 +20,10 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HStdOps;
+import org.projecthaystack.server.HStdOps;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -469,9 +473,9 @@ public class RestoreCCUHsApi {
             partitions.add(points.subList(i, Math.min(i + partitionSize, points.size())));
         }
         for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints;
-            writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
-                        HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing Profile.");
                 throw new NullHGridException("Failed to fetch point array values during syncing Profile.");
@@ -645,7 +649,7 @@ public class RestoreCCUHsApi {
 
             HDict tunerPointsDict = new HDictBuilder().add("filter",
                     "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict));
+            HGrid tunerPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict));
             if (tunerPointsGrid == null) {
                 throw new NullHGridException("Null occurred while importing building tuner");
             }
@@ -698,8 +702,7 @@ public class RestoreCCUHsApi {
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
 
-    public HGrid getRemoteSite(String siteId)
-    {
+    public HGrid getRemoteSite(String siteId) {
         /* Sync a site*/
         HClient hClient   = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
@@ -763,9 +766,9 @@ public class RestoreCCUHsApi {
         }
 
         for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints;
-            writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
+            HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
                     HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
             //We cannot proceed replacing an existing CCU without fetching all the point array values.
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
@@ -841,7 +844,7 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict settingPoints = new HDictBuilder().add("filter",
                 "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
-        HGrid settingPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints));
+        HGrid settingPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints));
 
         List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
 

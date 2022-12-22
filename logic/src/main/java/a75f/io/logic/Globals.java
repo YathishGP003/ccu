@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
@@ -121,7 +122,8 @@ public class Globals {
     private int tempOverCount = 0;
 
     private long ccuUpdateTriggerTimeToken;
-    
+
+    private boolean recoveryMode = false;
     private Globals() {
     }
 
@@ -233,6 +235,7 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
+        setRecoveryMode();
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -637,5 +640,16 @@ public class Globals {
         if(heatDTMin >= heatDTMax ||  heatDTMindf >= heatDTMaxdf) return false;
         else return true;
     }
-    
+
+    public void setRecoveryMode() {
+        recoveryMode = SystemProperties.getInt("renatus_recovery",0) > 0;
+    }
+
+    public boolean isRecoveryMode() {
+        return recoveryMode;
+   }
+
+    public boolean getBuildingProcessStatus() {
+        return mProcessJob.getStatus();
+    }
 }

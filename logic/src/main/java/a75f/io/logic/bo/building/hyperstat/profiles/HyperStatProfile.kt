@@ -30,7 +30,8 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     lateinit var hsHaystackUtil: HSHaystackUtil
     var logicalPointsList: HashMap<Any, String> = HashMap()
-    open var occuStatus: Occupied = Occupied()
+    //open var occuStatus: Occupied = Occupied()
+    open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
     private val haystack = CCUHsApi.getInstance()
 
 
@@ -167,9 +168,9 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
 
-        if (occuStatus.isOccupied || fanLoopOutput > 0) {
+        if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             updateLogicalPointIdValue(logicalPointsList[whichPort]!!, 1.0)
-        } else if (!occuStatus.isOccupied || (currentState == ZoneState.COOLING && currentState == ZoneState.HEATING)) {
+        } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             updateLogicalPointIdValue(logicalPointsList[whichPort]!!, 0.0)
         }
     }
@@ -178,11 +179,11 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         // Relay will be turned on when module is in occupied state
         updateLogicalPointIdValue(
             logicalPointsList[relayPort]!!,
-            if (occuStatus.isOccupied) 1.0 else 0.0
+            if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0
         )
         Log.i(
             L.TAG_CCU_HSCPU,
-            "$relayPort = DeHumidifier  ${if (occuStatus.isOccupied) 1.0 else 0.0}"
+            "$relayPort = DeHumidifier  ${if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0}"
         )
 
     }
@@ -208,7 +209,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         )
 
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occuStatus.isOccupied) {
+        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
             if (currentHumidity < targetMinInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -241,7 +242,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
                     "| Hysteresis : $humidityHysteresis \n"
         )
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occuStatus.isOccupied) {
+        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
             if (currentHumidity > targetMaxInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {

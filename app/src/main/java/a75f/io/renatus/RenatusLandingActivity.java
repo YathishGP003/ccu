@@ -216,11 +216,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
             setViewPager();
             ScheduleManager.getInstance().updateSchedules();
-            HashMap site = CCUHsApi.getInstance().read("site");
-            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-            String siteCountry = site.get("geoCountry").toString();
-            String siteZipCode = site.get("geoPostalCode").toString();
-            CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode, this);
+
+            WeatherDataDownloadService.getWeatherData();
+
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

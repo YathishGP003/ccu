@@ -26,8 +26,11 @@ public class GenericPIController
     
     protected double controlVariable;
 
+    private boolean isNegativeProportionErrNeeded;
+
     public GenericPIController() {
         this.isNegativeCumulativeErrNeeded = true;
+        this.isNegativeProportionErrNeeded = true;
     }
 
     public void updateControlVariable(double setPoint, double controlPoint) {
@@ -57,7 +60,11 @@ public class GenericPIController
     }
     
     public void calculateProportionalError() {
-        proportionalError = limitedError * proportionalGain;
+        if (isNegativeProportionErrNeeded) {
+            proportionalError = limitedError * proportionalGain;
+        } else {
+            proportionalError = Math.max(limitedError * proportionalGain, 0);
+        }
     }
     
     public void calculateIntegralError() {
@@ -94,7 +101,6 @@ public class GenericPIController
 
     public void calculateControlVariable() {
         controlVariable = proportionalError + cumulativeError;
-        
     }
     
     public double getProportionalGain()
@@ -140,6 +146,10 @@ public class GenericPIController
 
     public void setNegativeCumulativeErrNeeded(boolean negativeCumulativeErrNeeded) {
         isNegativeCumulativeErrNeeded = negativeCumulativeErrNeeded;
+    }
+
+    public void setNegativeProportionalErrNeeded(boolean negativeProportionalErrNeeded) {
+        isNegativeCumulativeErrNeeded = negativeProportionalErrNeeded;
     }
 
     public double getControlVariable() {

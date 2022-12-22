@@ -11,4 +11,5 @@ public class CazProfileConfig extends BaseProfileConfiguration {
     public boolean isEnableMain;
     public boolean enableThermistor1;
 
+    public int thermistor2association;
 }

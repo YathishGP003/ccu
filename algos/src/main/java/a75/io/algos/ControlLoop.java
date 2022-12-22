@@ -81,6 +81,11 @@ public class ControlLoop
     public void useNegativeCumulativeError(boolean isRequired) {
         piController.setNegativeCumulativeErrNeeded(isRequired);
     }
+
+    public void useNegativeProportionalError(boolean isRequired) {
+        piController.setNegativeProportionalErrNeeded(isRequired);
+    }
+
     public void dump() {
         piController.dump();
     }

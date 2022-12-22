@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -765,7 +764,6 @@ class HyperStatPointsUtil(
             )
         )
         autoForceAutoAwayConfigPointsList.addAll(createKeycardWindowSensingPoints())
-        autoForceAutoAwayConfigPointsList.addAll(createKeycardWindowSensingPoints())
         return autoForceAutoAwayConfigPointsList
     }
 
@@ -1382,8 +1380,8 @@ class HyperStatPointsUtil(
        return LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
     }
 
-    fun createPointForDoorWindowSensor(windowType: Int): Point{
-       return LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,windowType)
+    fun createPointForDoorWindowSensor(windowSensorType: LogicalPointsUtil.WindowSensorType): Point{
+       return LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,windowSensorType)
     }
 
     fun createConfigThermistorInLogicalPoints(
@@ -1402,7 +1400,7 @@ class HyperStatPointsUtil(
                 val waterSupplySensor = LogicalPointsUtil.createPointForWaterSupplyTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
                 configLogicalPointsList.add(Triple(waterSupplySensor, Port.TH2_IN, 0.0))
             }else{
-                val doorWindowSensorTh2Point = LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,1)
+                val doorWindowSensorTh2Point = LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
                 configLogicalPointsList.add(Triple(doorWindowSensorTh2Point, Port.TH2_IN, 0.0))
             }
         }
@@ -1426,24 +1424,25 @@ class HyperStatPointsUtil(
 
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "10", inc = "0.1", unit = "amps",10
+                    min = "0", max = "10", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER
                 )
             }
             (HyperStatAssociationUtil.isAnalogInAssociatedToCurrentTX20(analogInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "20", inc = "0.1", unit = "amps",20
+                    min = "0", max = "20", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_20
                 )
             }
             (HyperStatAssociationUtil.isAnalogInAssociatedToCurrentTX50(analogInState)) -> {
                 LogicalPointsUtil.createPointForCurrentTx(
                     equipDis,siteRef,equipRef,roomRef,floorRef,tz,
-                    min = "0", max = "50", inc = "0.1", unit = "amps",50
+                    min = "0", max = "50", inc = "0.1", unit = "amps",LogicalPointsUtil.TransformerSensorType.TRANSFORMER_50
                 )
             }
             (HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(analogInState)) -> {
 
-                 LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,(if(analogTag.contentEquals("analog1")) 2 else 3))
+                 LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,
+                     (if(analogTag.contentEquals("analog1")) LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR_2 else LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR_3))
             }
             (HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(analogInState)) -> {
                 LogicalPointsUtil.createPointForKeyCardSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,(if(analogTag.contentEquals("analog1")) 1 else 2))

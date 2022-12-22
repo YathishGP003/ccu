@@ -84,7 +84,7 @@ class HyperStatReconfigureUtil {
             configType: String
         ) {
         // It is not to any profile specific it works for all the profiles (HS CPU,HPU,PIPE2,PIPE4)
-            if (point.markers.contains("out")) {
+            if (point.markers.contains("output")) {
                 val analogOutTag = when (configType) {
                     ANALOG1_OUT -> "analog1"
                     ANALOG2_OUT -> "analog2"

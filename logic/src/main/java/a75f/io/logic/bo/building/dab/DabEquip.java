@@ -1,5 +1,13 @@
 package a75f.io.logic.bo.building.dab;
 
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatMinDamper;
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatPosPoint;
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
+import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -9,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75.io.algos.CO2Loop;
+import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
@@ -27,8 +36,10 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -39,9 +50,6 @@ import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
-
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -65,6 +73,8 @@ public class DabEquip
     double   co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
     double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
+
+    private ControlLoop heatingLoop;
     
     public DabEquip(ProfileType type, int node)
     {
@@ -72,6 +82,7 @@ public class DabEquip
         nodeAddr = node;
         co2Loop = new CO2Loop();
         vocLoop = new VOCLoop();
+        heatingLoop = new ControlLoop();
     }
     
     public void init() {
@@ -96,6 +107,15 @@ public class DabEquip
     
             vocLoop.setVOCTarget(vocTarget);
             vocLoop.setVOCThreshold(vocThreshold);
+
+            heatingLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("reheat and " +
+                    "proportional and spread and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("reheat and " +
+                    "integral and time and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("reheat and " +
+                    "proportional and kFactor and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("reheat and " +
+                    "integral and kFactor and equipRef == \"" + equipRef + "\""));
         }
     
     }
@@ -125,7 +145,7 @@ public class DabEquip
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-    
+
         RxTask.executeAsync(() -> DabTuners.addEquipDabTuners( hayStack,
                                                                siteRef,
                                                                equipDis,
@@ -357,35 +377,35 @@ public class DabEquip
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         hisItems.add(new HisItem(equipScheduleTypeId, new Date(System.currentTimeMillis()), 0.0));
     
-        Point dischargeAirTemp1 = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp1")
+        Point supplyAirTemp1 = new Point.Builder()
+                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp1")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef)
                                     .addMarker("zone").addMarker("dab").setHisInterpolate("cov")
-                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge").addMarker("primary").addMarker("his").addMarker("logical")
+                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("primary").addMarker("his").addMarker("logical")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
-        String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
-        hisItems.add(new HisItem(dat1Id, new Date(System.currentTimeMillis()), 0.0));
+        String sat1Id = CCUHsApi.getInstance().addPoint(supplyAirTemp1);
+        hisItems.add(new HisItem(sat1Id, new Date(System.currentTimeMillis()), 0.0));
     
-        Point dischargeAirTemp2 = new Point.Builder()
-                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp2")
+        Point supplyAirTemp2 = new Point.Builder()
+                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp2")
                                        .setEquipRef(equipRef)
                                        .setSiteRef(siteRef)
                                        .setRoomRef(roomRef)
                                        .setFloorRef(floorRef)
                                        .addMarker("zone").addMarker("dab").setHisInterpolate("cov")
-                                       .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge").addMarker("secondary").addMarker("his").addMarker("logical")
+                                       .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("secondary").addMarker("his").addMarker("logical")
                                        .setGroup(String.valueOf(nodeAddr))
                                        .setUnit("\u00B0F")
                                        .setTz(tz)
                                        .build();
-        String dat2Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp2);
-        hisItems.add(new HisItem(dat2Id, new Date(System.currentTimeMillis()), 0.0));
+        String sat2Id = CCUHsApi.getInstance().addPoint(supplyAirTemp2);
+        hisItems.add(new HisItem(sat2Id, new Date(System.currentTimeMillis()), 0.0));
     
         Point occupancy = new Point.Builder()
                                   .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-occupancy")
@@ -434,7 +454,6 @@ public class DabEquip
                 roomRef,floorRef,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
 
-
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
@@ -442,9 +461,9 @@ public class DabEquip
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
-        device.th1In.setPointRef(dat1Id);
+        device.th1In.setPointRef(sat1Id);
         device.th1In.setEnabled(true);
-        device.th2In.setPointRef(dat2Id);
+        device.th2In.setPointRef(sat2Id);
         device.th2In.setEnabled(true);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
@@ -462,13 +481,37 @@ public class DabEquip
                 case ANALOG_OUT_TWO:
                     device.analog2Out.setType(op.getAnalogActuatorType());
                     break;
+                case RELAY_ONE:
+                    device.relay1.setType(op.getRelayActuatorType());
+                    break;
+                case RELAY_TWO:
+                    device.relay2.setType(op.getRelayActuatorType());
+                    break;
             }
         }
         device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
         device.analog1Out.setPointRef(normalizedDamper1PosId);
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
-        device.analog2Out.setPointRef(normalizedDamper2PosId);
-    
+
+        Equip dabEquip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build();
+        createReheatType(dabEquip, config.reheatType, hayStack);
+        createEquipReheatTuners(hayStack, dabEquip);
+        if (config.reheatType > 0) {
+            createReheatMinDamper(dabEquip, config.minReheatDamperPos, hayStack);
+            String reheatPosId = createReheatPosPoint(dabEquip, 0, hayStack);
+
+            if (config.reheatType <= ReheatType.OneStage.ordinal()) {
+                device.analog2Out.setPointRef(reheatPosId);
+            } else {
+                device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
+                device.relay1.setPointRef(reheatPosId);
+                device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
+                device.relay1.setPointRef(reheatPosId);
+            }
+        } else {
+            device.analog2Out.setPointRef(normalizedDamper2PosId);
+        }
+
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
         device.addSensor(Port.SENSOR_VOC, vocId);
@@ -758,12 +801,32 @@ public class DabEquip
             analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
             config.getOutputs().add(analogTwo);
         }
-        
+
+        RawPoint r1 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
+        if (r1 != null && r1.getEnabled()) {
+            Output relay1 = new Output();
+            relay1.setAddress((short)nodeAddr);
+            relay1.setPort(Port.RELAY_ONE);
+            relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
+            config.getOutputs().add(relay1);
+        }
+
+        RawPoint r2 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
+        if (r2 != null && r2.getEnabled()) {
+            Output relay2 = new Output();
+            relay2.setAddress((short)nodeAddr);
+            relay2.setPort(Port.RELAY_TWO);
+            relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
+            config.getOutputs().add(relay2);
+        }
+        config.reheatType = (int)getConfigNumVal("reheat and type");
+        config.minReheatDamperPos = (int)getConfigNumVal("reheat and min and damper");
         return config;
     }
     
     public void update(DabProfileConfiguration config) {
         for (Output op : config.getOutputs()) {
+            SmartNode.setPointEnabled(nodeAddr, op.getPort().toString(), true);
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
@@ -774,8 +837,16 @@ public class DabEquip
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
+                case RELAY_ONE:
+                case RELAY_TWO:
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
+                    break;
             }
         }
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
+        SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
+
         boolean curTrueCfmEnabled = getConfigNumVal("trueCfm and enable and dab") > 0;
         if(curTrueCfmEnabled && !config.enableCFMControl ) {
             TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equipRef);
@@ -799,8 +870,6 @@ public class DabEquip
         setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1 :0);
         setHisVal("auto and away",config.enableAutoAwayControl ? 1 :0);
 
-
-        
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
@@ -825,6 +894,13 @@ public class DabEquip
         setHisVal("min and iaq and trueCfm and dab",config.minCFMForIAQ);
         setConfigNumVal("trueCfm and kfactor and dab",config.kFactor);
         setHisVal("trueCfm and kfactor and dab",config.kFactor);
+
+        updateReheatType(config.reheatType, config.minReheatDamperPos, equipRef, hayStack);
+        setConfigNumVal("reheat and type",config.reheatType);
+        if (config.reheatType > 0) {
+            setConfigNumVal("reheat and min and damper", config.minReheatDamperPos);
+        }
+        hayStack.scheduleSync();
     }
 
     public void setConfigNumVal(String tags,double val) {
@@ -1070,5 +1146,9 @@ public class DabEquip
                 .build();
 
         return ccuHsApi.addPoint(damperFeedback);
+    }
+
+    public ControlLoop getHeatingLoop () {
+        return heatingLoop;
     }
 }

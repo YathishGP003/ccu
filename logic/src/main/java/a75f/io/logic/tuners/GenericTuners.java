@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
@@ -323,5 +322,4 @@ class GenericTuners {
         hayStack.writePointForCcuUser(ccuNetworkWatchdogTimeoutId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,45.0, 0);
         hayStack.writeHisValById(ccuNetworkWatchdogTimeoutId, 45.0);
     }
-
 }

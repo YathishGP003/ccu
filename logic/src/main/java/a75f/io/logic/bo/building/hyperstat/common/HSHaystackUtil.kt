@@ -412,13 +412,13 @@ class HSHaystackUtil(
 
     private fun getOccupancySensorPointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and  occupancy and sensor and his and equipRef == \"$equipRef\""
+            "point and occupancy and sensor and his and equipRef == \"$equipRef\""
         )
     }
 
     fun getOccupancyModePointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and  occupancy " +
+            "point and occupancy " +
                     "and mode and his and equipRef == \"$equipRef\""
         )
     }
@@ -476,7 +476,7 @@ class HSHaystackUtil(
         return (readConfigStatus("air and discharge and temp").toInt() == 1)
     }
     fun isDoorWindowSensorTh2Enabled(): Boolean{
-        return (readConfigStatus("window").toInt() == 1)
+        return (readConfigStatus("window and not sensing").toInt() == 1)
     }
 
     fun isSupplyWaterSensorTh2Enabled(): Boolean{

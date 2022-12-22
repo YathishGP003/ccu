@@ -589,16 +589,15 @@ class LogicalPointsUtil {
 
         fun createPointForDoorWindowSensor(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String, windowType: Int
+            roomRef: String, floorRef: String, tz: String, windowSensorType: WindowSensorType
         ): Point {
             var window = "window"
-            var doorWindowName= "doorWindowSensor"
+            var doorWindowName = "doorWindowSensor"
 
-              if(windowType == 2){
+            if(windowSensorType == WindowSensorType.WINDOW_SENSOR_2){
                   window = "window2"
                   doorWindowName = "doorWindowSensor_2"
-              }
-              else if(windowType == 3) {
+              } else if(windowSensorType == WindowSensorType.WINDOW_SENSOR_3) {
                   window = "window3"
                   doorWindowName = "doorWindowSensor_3"
               }
@@ -644,16 +643,16 @@ class LogicalPointsUtil {
          fun createPointForCurrentTx(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
-            min: String, max: String, inc: String, unit: String, tranferType: Int
+            min: String, max: String, inc: String, unit: String, tranferType: TransformerSensorType
         ): Point {
 
             var transformerTag = "transformer"
             var name = "currentDrawn_10"
-            if(tranferType == 20) {
+            if(tranferType == TransformerSensorType.TRANSFORMER_20) {
                 transformerTag = "transformer20"
                 name = "currentDrawn_20"
             }
-            if(tranferType == 50) {
+            if(tranferType == TransformerSensorType.TRANSFORMER_50) {
                 transformerTag = "transformer50"
                 name = "currentDrawn_50"
             }
@@ -701,20 +700,20 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "current and logical and sensor and $transferTag and equipRef == \"$equipRef\"")
         }
-        fun readDoorWindowSensor(equipRef: String, windowType: Int): HashMap<Any, Any> {
+        fun readDoorWindowSensor(equipRef: String, windowType: WindowSensorType): HashMap<Any, Any> {
             var window = "window"
-            if(windowType == 2){
+            if(windowType == WindowSensorType.WINDOW_SENSOR_2){
                 window = "window2"
-            } else if(windowType == 3) {
+            } else if(windowType == WindowSensorType.WINDOW_SENSOR_3) {
                 window = "window3"
             }
             return CCUHsApi.getInstance().readEntity(
                 "logical and sensor and contact and door and $window and equipRef == \"$equipRef\"")
         }
 
-        private fun readKeycardSensor(equipRef: String, keycardType: Int): HashMap<Any, Any> {
+        private fun readKeycardSensor(equipRef: String, keycardType: KeyCardSensorType): HashMap<Any, Any> {
             var keycardMarker ="keycard"
-            if(keycardType == 2 ){
+            if(keycardType == KeyCardSensorType.KEYCARD2 ){
                 keycardMarker = "keycard2"
             }
             return CCUHsApi.getInstance().readEntity(
@@ -832,13 +831,13 @@ class LogicalPointsUtil {
             if(!HyperStatAssociationUtil.isAnyAnalogInMappedCT50(analogIn1State,analogIn2State))
                 removePoint(readCurrentTransferSensor(equipRef,"transformer50"))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn1State, AnalogInAssociation.KEY_CARD_SENSOR))
-                removePoint(readKeycardSensor(equipRef,1))
+                removePoint(readKeycardSensor(equipRef,KeyCardSensorType.KEYCARD))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn2State, AnalogInAssociation.KEY_CARD_SENSOR))
-                removePoint(readKeycardSensor(equipRef,2))
+                removePoint(readKeycardSensor(equipRef,KeyCardSensorType.KEYCARD2))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn1State, AnalogInAssociation.DOOR_WINDOW_SENSOR))
-                removePoint(readDoorWindowSensor(equipRef,2))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR_2))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn2State, AnalogInAssociation.DOOR_WINDOW_SENSOR))
-                removePoint(readDoorWindowSensor(equipRef,3))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR_3))
         }
         private fun removePoint(point: HashMap<Any, Any>){
             if(point.isNotEmpty()){
@@ -847,4 +846,14 @@ class LogicalPointsUtil {
         }
     }
 
+
+    enum class WindowSensorType {
+        WINDOW_SENSOR,WINDOW_SENSOR_2,WINDOW_SENSOR_3,
+    }
+    enum class TransformerSensorType {
+        TRANSFORMER,TRANSFORMER_20,TRANSFORMER_50
+    }
+    enum class KeyCardSensorType {
+        KEYCARD, KEYCARD2
+    }
 }

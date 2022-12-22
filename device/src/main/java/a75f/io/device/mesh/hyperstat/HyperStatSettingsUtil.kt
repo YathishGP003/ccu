@@ -161,6 +161,11 @@ class HyperStatSettingsUtil {
             relayConfiguration.relay5Enable = readConfig(hsApi, equipRef, "relay5 and config and enabled") == 1.0
             relayConfiguration.relay6Enable = readConfig(hsApi, equipRef, "relay6 and config and enabled") == 1.0
 
+            /**
+             * Firmware mapping enum has "none" at 0 position but ccu will will not use none.
+             * So we are adding 1 to avoid the 0 position all the time
+             */
+
             if (relayConfiguration.relay1Enable)
                 relayConfiguration.relay1Mapping = 1 + readConfig(hsApi, equipRef, "relay1 and config and association ")
                     .toInt()
@@ -210,7 +215,7 @@ class HyperStatSettingsUtil {
             ) == 1.0
 
             if (analogOutConfiguration.analogOut1Enable) {
-                analogOutConfiguration.analogOut1Mapping = 1 + readConfig(
+                analogOutConfiguration.analogOut1Mapping = readConfig(
                     hsApi, equipRef, "analog1 and output and config and association "
                 ).toInt()
 
@@ -223,7 +228,7 @@ class HyperStatSettingsUtil {
             }
 
             if (analogOutConfiguration.analogOut2Enable) {
-                analogOutConfiguration.analogOut2Mapping = 1 + readConfig(
+                analogOutConfiguration.analogOut2Mapping = readConfig(
                     hsApi, equipRef, "analog2 and output and config and association "
                 ).toInt()
 
@@ -236,7 +241,7 @@ class HyperStatSettingsUtil {
             }
 
             if (analogOutConfiguration.analogOut3Enable) {
-                analogOutConfiguration.analogOut3Mapping = 1 + readConfig(
+                analogOutConfiguration.analogOut3Mapping = readConfig(
                     hsApi, equipRef, "analog3 and output and config and association "
                 ).toInt()
 

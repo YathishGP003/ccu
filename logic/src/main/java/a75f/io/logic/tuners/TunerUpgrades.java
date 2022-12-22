@@ -44,7 +44,10 @@ public class TunerUpgrades {
         addVavDischargeTempTuners(hayStack);
         migrateCelsiusSupportConfiguration(hayStack);
         migrateAutoAwaySetbackTuner(hayStack);
+        migrateAutoAwayCpuSetbackTuner(hayStack);
         GenericTuners.createCcuNetworkWatchdogTimeoutTuner(hayStack);
+        Equip buildingTunerEquip = new Equip.Builder().setHashMap(hayStack.readEntity("equip and tuner")).build();
+        DabReheatTunersKt.createDefaultReheatTuners(hayStack, buildingTunerEquip);
     }
     
     /**
@@ -246,7 +249,7 @@ public class TunerUpgrades {
         ArrayList<HashMap<Object, Object>> dischargeTempOffsetTuner = hayStack.readAllEntities(
                 "air and discharge and offset and vav and tuner and default");
         ArrayList<HashMap<Object, Object>> maxDischargeTempTuner = hayStack.readAllEntities(
-                "air and discharge and offset and vav and tuner and max and default");
+                "air and discharge and vav and tuner and max and default");
 
         //Create the tuner point on building tuner equip.
         HashMap<Object, Object> buildTuner = hayStack.readEntity(Queries.EQUIP_AND_TUNER);
@@ -262,8 +265,8 @@ public class TunerUpgrades {
 
                 String maxDischargeTempTunerID = hayStack.addPoint(reheatZoneMaxDischargeTempTuner);
                 hayStack.writePointForCcuUser(maxDischargeTempTunerID, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
-                        BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and max"), 0);
-                CCUHsApi.getInstance().writeHisValById(maxDischargeTempTunerID, BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and max"));
+                        TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP, 0);
+                CCUHsApi.getInstance().writeHisValById(maxDischargeTempTunerID, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
 
                 CcuLog.i(L.TAG_CCU_TUNER,"maxDischargeTempTuner tuners not found, Creating new tuners");
                 vavEquips.forEach(equip -> {
@@ -274,8 +277,11 @@ public class TunerUpgrades {
                             hayStack.getTimeZone());
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
-                    BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
-                    hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
+                   //  BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
+                  //  hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
+
+                    hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP, 0);
+                    hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
                 });
             }else{
                 CcuLog.i(L.TAG_CCU_TUNER,"maxDischargeTempTuner found "+maxDischargeTempTuner.size());
@@ -289,9 +295,9 @@ public class TunerUpgrades {
 
                 String reheatZoneDischargeTempOffSetTunerId = hayStack.addPoint(reheatZoneMaxDischargeTempOffsetTuner);
                 hayStack.writePointForCcuUser(reheatZoneDischargeTempOffSetTunerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
-                        BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"), 0);
+                        TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET, 0);
                 hayStack.writeHisValById(reheatZoneDischargeTempOffSetTunerId,
-                        BuildingTunerFallback.getDefaultTunerVal("discharge and air and temp and offset"));
+                        TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
 
 
                 vavEquips.forEach(equip -> {
@@ -302,8 +308,11 @@ public class TunerUpgrades {
                             hayStack.getTimeZone());
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
-                    BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
-                    hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
+
+                   //  BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
+                  //  hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
+                    hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET, 0);
+                    hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
                   });
             }else
                 CcuLog.i(L.TAG_CCU_TUNER,"dischargeTempOffsetTuner found "+dischargeTempOffsetTuner.size());
@@ -359,6 +368,15 @@ public class TunerUpgrades {
             PreferenceUtil.setAutoAwaySetBackMigration();
         }
     }
+    private static void migrateAutoAwayCpuSetbackTuner(CCUHsApi hayStack) {
+        if(!PreferenceUtil.getAutoAwaySetBackCpuMigration()){
+            //Create the tuner point on all equips
+            ArrayList<HashMap<Object, Object>> cpuEquips = hayStack.readAllEntities("equip and cpu");
+            createPoint(hayStack,cpuEquips);
+            PreferenceUtil.setAutoAwaySetBackCpuMigration();
+        }
+    }
+
     private static void createPoint(CCUHsApi hayStack,ArrayList<HashMap<Object, Object>> equips) {
         for (HashMap<Object, Object> equip : equips) {
             String equipRef = equip.get("id").toString();

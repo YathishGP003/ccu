@@ -853,10 +853,13 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     fun updateFanMode(config: HyperStatPipe2Configuration) {
         val fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-        var fallbackFanSpeed = StandaloneFanStage.OFF.ordinal.toDouble() // Indicating always OFF
         Log.i(L.TAG_CCU_HSPIPE2, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
-        if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
-            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal.toDouble()
+        val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
+            if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
+                StandaloneFanStage.AUTO.ordinal.toDouble()
+            } else {
+                curFanSpeed
+            }
         }
         Log.i(L.TAG_CCU_HSPIPE2, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
         hsHaystackUtil.writeDefaultVal("zone and sp and fan and operation and mode", fallbackFanSpeed)
@@ -922,9 +925,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         physicalPort: Port
     ) {
         val analogInId = hsHaystackUtil.readPointID("config and $analogInTag and input and enabled") as String
-        val analogInAssociatedId =
-            hsHaystackUtil.readPointID("config and $analogInTag and input and association") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
+        val analogInAssociatedId = hsHaystackUtil.readPointID("config and $analogInTag and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
         hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal.toDouble())
 
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogInState.enabled)

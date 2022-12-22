@@ -1,6 +1,14 @@
 package a75f.io.logic.util;
 
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
+import static a75f.io.logic.L.getProfile;
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
+
+import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
@@ -13,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +40,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.ccu.CazEquip;
+import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -50,10 +61,12 @@ import a75f.io.logic.migration.point.PointMigrationHandler;
 import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.VavTuners;
 import kotlin.Pair;
 
 public class MigrationUtil {
     private static final String TAG = "MIGRATION_UTIL";
+    private static final String MIGRATION_DEBUG = "MIGRATION_DEBUG";
 
     /**
      * All the migration tasks needed to be run during an application version upgrade should be called from here.
@@ -170,15 +183,21 @@ public class MigrationUtil {
             Log.d(TAG,"isTIThermisterMigrated is false");
         }
 
-        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
-                updateScheduleRefForZones(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleRefForZoneMigration();
-        }
-
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){
             updateScheduleRefs(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefUpdateMigration();
-       }
+        }
+
+        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
+            updateScheduleType(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleTypeUpdateMigration();
+        }
+
+        if(!PreferenceUtil.getScheduleRefForZoneMigration()){
+            updateScheduleRefForZones(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleRefForZoneMigration();
+        }
+
         if(!PreferenceUtil.getVocPm2p5MigrationV1()){
             migrateHisInterpolateIssueFix(CCUHsApi.getInstance());
             PreferenceUtil.setVocPm2p5MigrationV1();
@@ -218,6 +237,16 @@ public class MigrationUtil {
         if(!PreferenceUtil.getHyperStatDeviceDisplayConfigurationPointsMigration()){
             createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setHyperStatDeviceDisplayConfigurationPointsMigration();
+        }
+        Log.i(MIGRATION_DEBUG, "Migration started :getVavDiscargeTunerMigration Key exist ?"+PreferenceUtil.getVavDiscargeTunerMigration());
+        if(!PreferenceUtil.getVavDiscargeTunerMigration()){
+            migrationForVAVTunerDefaultValue(CCUHsApi.getInstance());
+            PreferenceUtil.setVavDiscargeTunerMigration();
+        }
+
+        if (!PreferenceUtil.getDabReheatSupportMigrationStatus()) {
+            doDabReheatMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setDabReheatSupportMigrationStatus();
         }
 
         if(!PreferenceUtil.getHyperStatCpuTagMigration()){
@@ -357,7 +386,6 @@ public class MigrationUtil {
             String nodeAddress = currentTemp.get("group").toString();
             createTIThermisterPoints(tiEquipRef,nodeAddress);
         }
-
     }
 
     private static boolean isTIThermisterMigrated() {
@@ -1104,6 +1132,10 @@ public class MigrationUtil {
                         !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
                     HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
                             "roomRef == " +room.get("id"));
+                    if(zoneScheduleMap.isEmpty()){
+                        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Seems like no schedule entity has roomRef: "+room.get("id"));
+                        continue;
+                    }
                     Schedule zoneSchedule =
                             CCUHsApi.getInstance().getScheduleById(zoneScheduleMap.get("id").toString());
                     Zone zone = new Zone.Builder().setHashMap(room).build();
@@ -1263,6 +1295,7 @@ public class MigrationUtil {
             }
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         });
+        CCUHsApi.getInstance().scheduleSync();
     }
     private static void createHyperStatDeviceDisplayConfigurationPointsMigration(CCUHsApi haystack){
         ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("hyperstat and cpu and equip");
@@ -1287,6 +1320,66 @@ public class MigrationUtil {
                 );
             }
         });
+    }
+    private static void migrationForVAVTunerDefaultValue(CCUHsApi hayStack) {
+        Log.i(MIGRATION_DEBUG, "migrationForVAVTunerDefaultValue we started the migration");
+        CCUHsApi api = CCUHsApi.getInstance();
+        ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav");
+
+        vavEquips.forEach(equip -> {
+            Equip vavEquip = new Equip.Builder().setHashMap(equip).build();
+            HashMap<Object, Object> dischargeOffset = api.readEntity("air and discharge and offset and vav and tuner and equipRef == \"" + equip.get("id")+"\"");
+            HashMap<Object, Object> dischargeMax = api.readEntity("air and discharge and vav and tuner and max and equipRef == \"" + equip.get("id")+"\"");
+            Log.i(MIGRATION_DEBUG, "vavEquip "+vavEquip.getDisplayName() );
+            Log.i(MIGRATION_DEBUG, "dischargeOffset "+dischargeOffset.isEmpty() );
+            if(dischargeOffset.isEmpty()) {
+                Point equipTunerPoint = VavTuners.createDischargeTempOffsetTuner(false,
+                        vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getRoomRef(), vavEquip.getSiteRef(),
+                        hayStack.getTimeZone());
+                Log.i(MIGRATION_DEBUG, "dischargeOffset Points created");
+                String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
+                VavTuners.writeDischargeOffsetValue(equipTunerPointId);
+            }else{
+                VavTuners.writeDischargeOffsetValue(dischargeOffset.get(Tags.ID).toString());
+            }
+
+            if(dischargeMax.isEmpty()){
+                Point reheatZoneMaxDischargeTempOffsetTuner = VavTuners.createMaxDischargeTempTuner(false,
+                        vavEquip.getDisplayName(), vavEquip.getId(),
+                        vavEquip.getRoomRef(), vavEquip.getSiteRef(),
+                        hayStack.getTimeZone());
+                String equipTunerPointId = hayStack.addPoint(reheatZoneMaxDischargeTempOffsetTuner);
+                VavTuners.writeDischargeMaxValue(equipTunerPointId);
+            }else {
+                VavTuners.writeDischargeMaxValue(dischargeMax.get(Tags.ID).toString());
+            }
+        });
+    }
+
+    private static void doDabReheatMigration(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab and zone");
+
+        dabEquips.forEach( dabEquip -> {
+            Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
+            createEquipReheatTuners(hayStack, equip);
+            createReheatType(equip, 0, hayStack);
+
+            ArrayList<HashMap<Object, Object>> supplyAirTemps = hayStack.readAllEntities("discharge and air and temp and equipRef ==\""+equip.getId()+"\"");
+            supplyAirTemps.forEach( supplyAirTemp -> {
+                Point supplyAirTempPoint = new Point.Builder().setHashMap(supplyAirTemp).build();
+                if (supplyAirTempPoint.getMarkers().contains(Tags.PRIMARY)) {
+                    supplyAirTempPoint.setDisplayName("supplyAirTemp1");
+                } else {
+                    supplyAirTempPoint.setDisplayName("supplyAirTemp2");
+                }
+                supplyAirTempPoint.getMarkers().remove("discharge");
+                supplyAirTempPoint.getMarkers().add("supply");
+                hayStack.updatePoint(supplyAirTempPoint, supplyAirTemp.get("id").toString());
+            });
+
+        });
+
     }
 
 }

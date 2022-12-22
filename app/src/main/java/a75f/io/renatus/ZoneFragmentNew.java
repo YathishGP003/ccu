@@ -348,11 +348,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
-                loadGrid(parentRootView);
             });
         }
     }
-    
+
+    @Override
+    public void loadGrid() {
+        loadGrid(parentRootView);
+    }
+
     HashMap<String, View> zoneStatus = new HashMap<>();
     
     public void refreshHeartBeatStatus(String id) {

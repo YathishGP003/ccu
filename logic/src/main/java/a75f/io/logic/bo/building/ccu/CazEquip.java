@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.ccu;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -244,14 +246,98 @@ public class CazEquip
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyId, 0.0);
 
+        Point supplyAirTempPoint = new Point.Builder()
+                .setDisplayName(equipDis+"-supplyAirTemperature")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("ti").addMarker("temp").addMarker("supply").addMarker("cur").addMarker("sensor")
+                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air").addMarker("discharge")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String supplyAirTempId = CCUHsApi.getInstance().addPoint(supplyAirTempPoint);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(supplyAirTempId,0.0);
+
+        Point roomTempSensorPoint = new Point.Builder()
+                .setDisplayName(equipDis+"-roomTempSensorPoint")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("ti").addMarker("temp").addMarker("room").addMarker("cur").addMarker("sensor")
+                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String roomTempSensorId = CCUHsApi.getInstance().addPoint(roomTempSensorPoint);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(roomTempSensorId,0.0);
+
+        Point supplyAirTemperatureType = new Point.Builder()
+                .setDisplayName(equipDis+"-supplyAirTemperatureType")
+                .setEquipRef(equipRef).setRoomRef(roomRef)
+                .setSiteRef(siteRef).setFloorRef(floorRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("supply").addMarker("sp").addMarker("type").addMarker("temp")
+                .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setTz(tz)
+                .build();
+        String supplyAirTempTypeId =CCUHsApi.getInstance().addPoint(supplyAirTemperatureType);
+        CCUHsApi.getInstance().writeDefaultValById(supplyAirTempTypeId, Double.valueOf(config.supplyTempSensor.ordinal()));
+
+        Point roomTemperatureType = new Point.Builder()
+                .setDisplayName(equipDis+"-roomTemperatureType")
+                .setEquipRef(equipRef).setRoomRef(roomRef)
+                .setSiteRef(siteRef).setFloorRef(floorRef)
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("room").addMarker("sp").addMarker("type").addMarker("temp")
+                .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setTz(tz)
+                .build();
+        String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);
+        CCUHsApi.getInstance().writeDefaultValById(roomTempTypeId, Double.valueOf(config.roomTempSensor.ordinal()));
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "ti", tz, false));
 
         //4 TODO map system device?
         ControlMote device = new ControlMote(nodeAddr,siteRef, floorRef, roomRef, equipRef);
-        device.currentTemp.setPointRef(ctID);
+
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
+        if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.NONE) {
+            device.currentTemp.setEnabled(true);
+            device.currentTemp.setPointRef(ctID);
+        } else if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_1) {
+            device.currentTemp.setEnabled(true);
+            device.currentTemp.setPointRef(ctID);
+            device.th1In.setEnabled(true);
+            device.th1In.setPointRef(supplyAirTempId);
+        } else if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_2) {
+            device.currentTemp.setEnabled(true);
+            device.currentTemp.setPointRef(ctID);
+            device.th2In.setEnabled(true);
+            device.th2In.setPointRef(supplyAirTempId);
+        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_1 && config.supplyTempSensor == SupplyTempSensor.NONE) {
+            device.th1In.setEnabled(true);
+            device.th1In.setPointRef(roomTempSensorId);
+        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_1 && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_2) {
+            device.th1In.setEnabled(true);
+            device.th1In.setPointRef(roomTempTypeId);
+            device.th2In.setEnabled(true);
+            device.th2In.setPointRef(supplyAirTempId);
+        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_2 && config.supplyTempSensor == SupplyTempSensor.NONE) {
+            device.th2In.setEnabled(true);
+            device.th2In.setPointRef(roomTempSensorId);
+        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_2 && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_1) {
+            device.th1In.setEnabled(true);
+            device.th1In.setPointRef(supplyAirTempId);
+            device.th2In.setEnabled(true);
+            device.th2In.setPointRef(roomTempSensorId);
+        }
 
 
         device.addSensor(Port.SENSOR_RH, humidityId);
@@ -267,7 +353,7 @@ public class CazEquip
         setHumidity(0);
 
         CCUHsApi.getInstance().syncEntityTree();
-        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
+        updateCurrentTemp(config.roomTempSensor,config.supplyTempSensor);
     }
 
     String getId(){
@@ -278,12 +364,11 @@ public class CazEquip
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
-        String equipDis = siteDis+"-TI-"+nodeAddr;
+        String equipDis = siteDis + "-TI-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
 
-
         Point zonePriority = new Point.Builder()
-                .setDisplayName(equipDis+"-zonePriority")
+                .setDisplayName(equipDis + "-zonePriority")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setHisInterpolate("cov")
@@ -294,11 +379,11 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
-        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)config.getPriority().ordinal());
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double)config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double) config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double) config.getPriority().ordinal());
 
         Point temperatureOffset = new Point.Builder()
-                .setDisplayName(equipDis+"-temperatureOffset")
+                .setDisplayName(equipDis + "-temperatureOffset")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
@@ -308,79 +393,100 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
+        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double) config.temperaturOffset);
 
-        Point mainSensor = new Point.Builder()
-                .setDisplayName(equipDis+"-mainTemperatureSensor")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp")
-                .addMarker("enable")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
-        CCUHsApi.getInstance().writeDefaultValById(mainSensorId, config.isEnableMain ? 1.0:0.0);
-
-        Point th1Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th1")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th1").addMarker("sp").addMarker("enable")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
-        CCUHsApi.getInstance().writeDefaultValById(th1ConfigId, config.enableThermistor1 ? 1.0:0.0);
-
-        Point th2Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th2")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th2").addMarker("sp").addMarker("enable")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
-        CCUHsApi.getInstance().writeDefaultValById(th2ConfigId, config.enableThermistor2 ? 1.0:0.0);
     }
 
-    public void updateCurrentTemp(boolean isMain,boolean isEnableth1, boolean isEnableth2) {
+    private void updateCurrentTemp(RoomTempSensor roomTempSensor, SupplyTempSensor supplyTempSensor) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object,Object> device = hayStack.readEntity("cm and device ");
-        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
-                "temp and equipRef == \""+equipRef+"\"");
+        HashMap<Object, Object> device = hayStack.readEntity("cm and device ");
+        HashMap<Object, Object> currentTemp = hayStack.readEntity("point and current and " +
+                "temp and equipRef == \"" + equipRef + "\"");
+
         if (!device.isEmpty() && !currentTemp.isEmpty()) {
-            if (isEnableth1) {
+            if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+            } else if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.THERMISTOR_1) {
                 ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
-                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), currentTemp.get(
-                        "id").toString());
-            } else if (isEnableth2) {
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
+                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!roomTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
+                }
+            } else if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.THERMISTOR_2) {
                 ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr,Port.SENSOR_RT.name(), false);
-                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), currentTemp.get(
-                        "id").toString());
-            } else if (isMain) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
+                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!roomTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
+                }
+            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
+                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
+                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!supplyTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
+                }
                 ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 && roomTempSensor == RoomTempSensor.THERMISTOR_2) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
+                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
+                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!supplyTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), supplyTempSensorPoint.get("id").toString());
+                }
+                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!roomTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
+                }
+            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
+                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
+                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!supplyTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
+                }
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
+            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 && roomTempSensor == RoomTempSensor.THERMISTOR_1) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
+                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
+                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!supplyTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
+                }
+                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                if (!roomTempSensorPoint.isEmpty()) {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
+                }
             }
         }
     }
+
+
 
     public CazProfileConfig getProfileConfiguration() {
         CazProfileConfig config = new CazProfileConfig();
         config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
-        config.isEnableMain = getConfigNumVal("main and current and temperature and enable") > 0;
-        config.enableThermistor1 = getConfigNumVal("th1 and enable") > 0;
-        config.enableThermistor2 = getConfigNumVal("th2 and enable") > 0;
+        config.setRoomTempSensor(RoomTempSensor.values()[(int) getRoomTempSensorValue()]);
+        config.setSupplyTempSensor(SupplyTempSensor.values()[(int) getSupplyAirTempValue()]);
         return config;
     }
 
@@ -388,11 +494,9 @@ public class CazEquip
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
-        setConfigNumVal("enable and main and current and temperature",config.isEnableMain ? 1.0 : 0);
-        setConfigNumVal("enable and th1",config.enableThermistor1 ? 1.0 : 0);
-        setConfigNumVal("enable and th2",config.enableThermistor2 ? 1.0 : 0);
-        updateCurrentTemp(config.isEnableMain,config.enableThermistor1,config.enableThermistor2);
+        setConfigNumVal("supply and type",config.getSupplyTempSensor().ordinal());
+        setConfigNumVal("room and type",config.getRoomTempSensor().ordinal());
+        updateCurrentTemp(config.roomTempSensor, config.supplyTempSensor);
 
     }
 
@@ -551,6 +655,16 @@ public class CazEquip
     public double getZonePriorityValue(){
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
         return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
+    }
+
+    public double getSupplyAirTempValue(){
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("supply and type and config and equipRef == \""+equip.get("id")+"\"");
+    }
+
+    public double getRoomTempSensorValue(){
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("room and type and config and equipRef == \""+equip.get("id")+"\"");
     }
 }
 

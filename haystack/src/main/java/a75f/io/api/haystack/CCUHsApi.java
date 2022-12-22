@@ -1006,6 +1006,7 @@ public class CCUHsApi
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
+        removeId(id);
     }
 
     public void removeId(String id) {

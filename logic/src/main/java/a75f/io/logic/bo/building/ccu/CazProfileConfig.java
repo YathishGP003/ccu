@@ -6,9 +6,23 @@ public class CazProfileConfig extends BaseProfileConfiguration {
 
 
     public double temperaturOffset;
-    public boolean enableThermistor2;
 
-    public boolean isEnableMain;
-    public boolean enableThermistor1;
+    public RoomTempSensor roomTempSensor;
+    public SupplyTempSensor supplyTempSensor;
 
+    public SupplyTempSensor getSupplyTempSensor() {
+        return supplyTempSensor;
+    }
+
+    public void setSupplyTempSensor(SupplyTempSensor supplyTempSensor) {
+        this.supplyTempSensor = supplyTempSensor;
+    }
+
+    public RoomTempSensor getRoomTempSensor() {
+        return roomTempSensor;
+    }
+
+    public void setRoomTempSensor(RoomTempSensor roomTempSensor) {
+        this.roomTempSensor = roomTempSensor;
+    }
 }

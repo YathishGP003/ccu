@@ -102,22 +102,23 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="20dp">
                     <TextView
-                        android:id="@+id/textmainsensor"
+                        android:id="@+id/textRoomTemSensor"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
-                        android:paddingEnd="240dp"
-                        android:text="@string/mainsensor"
+                        android:paddingEnd="220dp"
+                        android:text="@string/room_temperature"
                         android:textAppearance="@style/title_normal"
                         tools:ignore="RtlSymmetry" />
 
-                    <ToggleButton
-                        android:id="@+id/togglemainsensor"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="true"
-                        android:textOff=""
-                        android:textOn="" />
+                    <Spinner
+                        android:id="@+id/roomTempSpinner"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:textAppearance="@style/title_normal"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -126,46 +127,23 @@
                     android:orientation="horizontal"
                     android:paddingTop="20dp">
                     <TextView
-                        android:id="@+id/textth1"
+                        android:id="@+id/textSupplyAirTemp"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:paddingEnd="330dp"
-                        android:text="@string/thermistor1"
+                        android:layout_height="60dp"
+                        android:paddingEnd="220dp"
+                        android:text="@string/supply_air_temperature"
                         android:textAppearance="@style/title_normal"
                         tools:ignore="RtlSymmetry" />
 
-                    <ToggleButton
-                        android:id="@+id/toggleth1"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="20dp">
-                    <TextView
-                        android:id="@+id/textth2"
+                    <Spinner
+                        android:id="@+id/supplyAirTempSpinner"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:paddingEnd="330dp"
-                        android:text="@string/thermistor2"
-                        android:textAppearance="@style/title_normal"
-                        tools:ignore="RtlSymmetry" />
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:textSize="40sp"
+                        tools:listitem="@layout/spinner_dropdown_item" />
 
-                    <ToggleButton
-                        android:id="@+id/toggleth2"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
                 </LinearLayout>
             </LinearLayout>
 

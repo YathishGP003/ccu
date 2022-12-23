@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -646,8 +647,8 @@ public class ScheduleManager {
                 return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Occupied mode",
                         cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                         cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
-                        cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
-                        cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+                        TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                        TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
         }
         
         long th = ScheduleUtil.getTemporaryHoldExpiry(equip);
@@ -773,8 +774,8 @@ public class ScheduleManager {
                 }
                 return String.format(Locale.US, "%sIn %s | Changes to Energy saving Unoccupied mode at %02d:%02d",
                                      epidemicString,"Occupied mode",
-                                     currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),
-                                     currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm());
+                                     TimeUtil.getEndTimeHr(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()),
+                                     TimeUtil.getEndTimeMin(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()));
             
             case PRECONDITIONING:
                 return "In Preconditioning";

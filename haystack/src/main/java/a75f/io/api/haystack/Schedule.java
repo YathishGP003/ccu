@@ -3,7 +3,7 @@ package a75f.io.api.haystack;
 import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
-
+import org.apache.commons.lang3.StringUtils;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +35,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 
 /***
@@ -128,6 +129,7 @@ public class Schedule extends Entity
             int endMin = getInt(range.get(Tags.ETMM).toString());
 
             endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
+            endHour = TimeUtil.getEndHour(endHour);
 
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)
@@ -476,7 +478,7 @@ public class Schedule extends Entity
             ref = build.getScheduleRef();
 
         Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
-                                        "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
+                "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
         //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
         if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
@@ -487,7 +489,7 @@ public class Schedule extends Entity
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule "+scheduleType);
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule"+scheduleType);
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0) {
             Schedule schedule = retVal.get(0);

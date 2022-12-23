@@ -42,13 +42,10 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 LModbus.setHeartbeatUpdateReceived(false);
                 for (Register register : modbusDevice.getRegisters()) {
                     LModbus.readRegister(slaveId, register, getRegisterCount(register));
-                    LModbus.setHeartbeatUpdateReceived(true);
                 }
-                if (LModbus.getHeartbeatUpdateReceived()){
-                    updateHeartBeat(slaveId,CCUHsApi.getInstance(),true);
-                } else {
-                    updateHeartBeat(slaveId,CCUHsApi.getInstance(), false);
-                }
+                if (LModbus.getHeartbeatUpdateReceived())
+                    updateHeartBeat(slaveId,CCUHsApi.getInstance());
+
             } catch (Exception e) {
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
@@ -56,17 +53,13 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         }
     }
 
-    private static void updateHeartBeat(int slaveId, CCUHsApi hayStack, boolean messageRead){
+    private static void updateHeartBeat(int slaveId, CCUHsApi hayStack){
         HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
         HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
         if(heartBeatPoint.size() == 0){
             return;
         }
-        if (messageRead) {
-            hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
-        } else {
-            hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 0.0);
-        }
+        hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
     }
 
     private int getRegisterCount(Register register) {

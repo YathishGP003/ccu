@@ -740,7 +740,6 @@ public class HClient extends HProj
     if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
     return res;
   }
-
   // Assuming this old, alternate code is only for Haystack calls since it attaches Haystack API key
   private String postStringWithIOException(String uriStr, String req) throws IOException {
     String bearerToken = CCUHsApi.getInstance().getJwt();
@@ -748,7 +747,6 @@ public class HClient extends HProj
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       Log.d("CCU_HCLIENT", "Request to " + uriStr);
       Log.d("CCU_HCLIENT", "Request body: " + req);
-
       Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
       URL url = new URL(uriStr);
       HttpURLConnection c = openHttpConnection(url, "POST");
@@ -766,21 +764,17 @@ public class HClient extends HProj
         c.setConnectTimeout(60000);
         c.setReadTimeout(60000);
         c.connect();
-
         // post expression
         Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
         cout.write(req);
         cout.close();
-
         Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
-
         // read response into string
         StringBuffer s = new StringBuffer(1024);
         Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
         int n;
         while ((n = r.read()) > 0) s.append((char)n);
         c.getInputStream().close();
-
         return s.toString();
       } finally {
         try {
@@ -792,13 +786,6 @@ public class HClient extends HProj
     }
     return null;
   }
-
-
-
-
-
-
-
 
 
 }

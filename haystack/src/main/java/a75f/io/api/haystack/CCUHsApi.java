@@ -2436,7 +2436,7 @@ public class CCUHsApi
                         while (hZincReaderIterator.hasNext()) {
                             HRow row = (HRow) hZincReaderIterator.next();
                             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                            CcuLog.i("CCU_HS", "Schedule Imported "+row);
+                            CcuLog.i("CCU_HS", "Schedule Imported " + row);
                         }
                     }
                     return true;

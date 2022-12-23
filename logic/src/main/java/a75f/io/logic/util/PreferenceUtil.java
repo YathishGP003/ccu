@@ -10,6 +10,7 @@ public class PreferenceUtil {
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
+    private static final String SUPPLY_AIR_TEMP_MIGRATION = "supplyAirTempMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
     private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
@@ -36,14 +37,17 @@ public class PreferenceUtil {
     private static final String UPDATE_SCHEDULE_TYPE = "updateSchedulesTypes";
 
 
-    private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "newOccupancyPointsMigration";
+    private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "RerunOccupancyPointsMigration";
     private static final String DCWB_POINTS_MIGRATION = "DCWBPointsMigration";
     private static final String SMART_STAT_POINTS_MIGRATION = "smartStatPointsMigration";
     private static final String BPOS_TO_OTN_MIGRATION = "bposToOtnMigration";
     private static final String AUTOAWAYSETBACK = "autoAwaySetBackTuner";
     private static final String HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION = "HyperStatDeviceDisplayConfigurationPointsMigration";
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
+    private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
+    private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
 
+    private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
 
     public static void setContext(Context c) {
         context= c;
@@ -361,6 +365,12 @@ public class PreferenceUtil {
         return getBooleanPreference(TI_UPDATE);
     }
 
+    public static boolean getDabReheatSupportMigrationStatus() {
+        return getBooleanPreference(DAB_REHEAT_SUPPORT);
+    }
+    public static void setDabReheatSupportMigrationStatus() {
+        setBooleanPreference(DAB_REHEAT_SUPPORT, true);
+    }
 
     public static boolean getScheduleTypeUpdateMigration() {
         return getBooleanPreference(UPDATE_SCHEDULE_TYPE);
@@ -402,13 +412,33 @@ public class PreferenceUtil {
     public static void setAutoAwaySetBackMigration() {
         setBooleanPreference(AUTOAWAYSETBACK, true);
     }
+
     public static boolean getHyperStatDeviceDisplayConfigurationPointsMigration() {
         return getBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION);
+    }
+    public static boolean getAutoAwaySetBackCpuMigration() {
+        return getBooleanPreference(AUTOAWAY_SETBACK_CPU);
+    }
+    public static void setAutoAwaySetBackCpuMigration() {
+        setBooleanPreference(AUTOAWAY_SETBACK_CPU, true);
     }
 
     public static void setHyperStatDeviceDisplayConfigurationPointsMigration() {
         setBooleanPreference(HYPERSTAT_DEVICE_DISPLAY_CONFIGURATON_POINTSMIGRATION, true);
+    }
+    public static boolean getVavDiscargeTunerMigration() {
+        return getBooleanPreference(VAV_DISCHARGE_TUNER_MIGRATION);
+    }
 
+    public static void setVavDiscargeTunerMigration() {
+        setBooleanPreference(VAV_DISCHARGE_TUNER_MIGRATION, true);
+    }
+    public static boolean getSupplyAirTempMigration() {
+        return getBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION);
+    }
+
+    public static void setSupplyAirTempMigration() {
+        setBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION, true);
     }
     public static boolean getHyperStatCpuTagMigration() {
         return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);

@@ -749,7 +749,6 @@
     <string name="title_dabinput">DAB</string>
     <string name="label_damper2type">Damper2 Type</string>
 
-
     <!--PI LOOP CONTROLLER Screen-->
     <string name="title_piloop">PI LOOP CONTROLLER</string>
     <string name="label_analogin1">Analog-in1 Input Sensor</string>
@@ -1259,5 +1258,8 @@
     <string name="room_temperature">Room Temperature</string>
     <string name="supply_air_temperature">Supply Air temperature</string>
 
-
+    <string name="label_usereheat">Use Reheat</string>
+    <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>
+    <string name="label_analog2_max_reheat">Analog2-Out at\nMax Reheat</string>
+    <string name="label_min_reheat_damper_pos">Min Reheat \nDamper Pos</string>
 </resources>

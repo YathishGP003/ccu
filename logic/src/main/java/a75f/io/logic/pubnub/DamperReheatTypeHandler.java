@@ -1,5 +1,7 @@
 package a75f.io.logic.pubnub;
 
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
+
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -25,12 +27,34 @@ public class DamperReheatTypeHandler {
         int typeVal = msgObject.get("val").getAsInt();
         
         if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.DAB)) {
+
             if (configPoint.getMarkers().contains(Tags.PRIMARY)) {
                 SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
                                                   DamperType.values()[typeVal].displayName);
             } else if (configPoint.getMarkers().contains(Tags.SECONDARY)) {
                 SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
                                                   DamperType.values()[typeVal].displayName);
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), typeVal != DamperType.MAT.ordinal());
+            }
+        } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.DAB)) {
+            updateReheatType(typeVal, 40, configPoint.getEquipRef(), hayStack);
+            if (typeVal == 0) {
+                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false );
+                SmartNode.setPointEnabled(address, Port.RELAY_TWO.name(), false );
+            } else if ((typeVal - 1) <= ReheatType.Pulse.ordinal()) {
+                //Modulating Reheat -> Enable AnalogOut2 and disable relays
+                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal-1].displayName);
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false );
+                SmartNode.setPointEnabled(address, Port.RELAY_TWO.name(), false );
+            } else {
+                SmartNode.updatePhysicalPointType(address, Port.RELAY_ONE.toString(),
+                        OutputRelayActuatorType.NormallyClose.displayName);
+                SmartNode.setPointEnabled(address, Port.RELAY_ONE.toString(), true);
+                if ((typeVal - 1) == ReheatType.TwoStage.ordinal()) {
+                    SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
+                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                }
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {
             SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),

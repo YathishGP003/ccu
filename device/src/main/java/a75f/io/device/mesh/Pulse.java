@@ -537,6 +537,7 @@ public class Pulse
 			boolean isTh2Enabled = false;
 			boolean isTh1Enabled = false;
 			boolean isTI = false;
+			double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 			for (HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
@@ -560,7 +561,6 @@ public class Pulse
 						break;
 					case SENSOR_RT:
 						val = cmRegularUpdateMessage_t.roomTemperature.get();
-						double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 						curTempVal = getCMRoomTempConversion(val,tempOffset);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
 						logicalCurTempPoint = logPoint.get("id").toString();
@@ -571,10 +571,9 @@ public class Pulse
 						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th2 " + phyPoint.get("id").toString() );
 						if (isTh2Enabled) {
-							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+							th2TempVal = getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10,tempOffset);
 							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
-							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+							double curTh2TempVal = getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10,tempOffset);
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
 							if(logPoint.keySet().contains(Tags.TI)){
 								curTempVal=curTh2TempVal;
@@ -609,8 +608,7 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th1 " + phyPoint.get("id").toString() );
 
 						if(isTh1Enabled){
-							double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-							curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
+							double curTh1TempVal = getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10,tempOffset);
 							th1TempVal = curTh1TempVal;
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(logPoint.keySet().contains(Tags.TI)){

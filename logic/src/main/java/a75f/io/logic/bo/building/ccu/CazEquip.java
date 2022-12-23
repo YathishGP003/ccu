@@ -33,6 +33,7 @@ public class CazEquip
     public int nodeAddr;
     ProfileType profileType;
     String equipRef = null;
+    CCUHsApi mHayStack = CCUHsApi.getInstance();
 
     public CazEquip(ProfileType type, int node)
     {
@@ -367,6 +368,7 @@ public class CazEquip
         String equipDis = siteDis + "-TI-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
 
+
         Point zonePriority = new Point.Builder()
                 .setDisplayName(equipDis + "-zonePriority")
                 .setEquipRef(equipRef)
@@ -478,8 +480,6 @@ public class CazEquip
             }
         }
     }
-
-
 
     public CazProfileConfig getProfileConfiguration() {
         CazProfileConfig config = new CazProfileConfig();

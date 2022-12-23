@@ -358,6 +358,8 @@ class HyperStatFragment : BaseDialogFragment() {
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
 
+        zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
+        zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
         analogOutUIs.forEach {
             val minMaxAdapter = getAdapterValue(analogVoltageAtSpinnerValues())
             it.vAtMinDamperSelector.adapter = minMaxAdapter

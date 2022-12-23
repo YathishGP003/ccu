@@ -35,7 +35,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
-    override lateinit var occuStatus: Occupied
+    override lateinit var occupancyStatus: Occupancy
     private val hyperstatCPUAlgorithm = HyperstatLoopController()
 
     lateinit var curState: ZoneState
@@ -75,144 +75,151 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     // Run the profile logic and algorithm for an equip.
     fun processHyperStatCPUProfile(equip: HyperStatCpuEquip) {
 
-        if (Globals.getInstance().isTestMode) {
-            Log.i(TAG, "Test mode is on: ${equip.equipRef}")
-            return
+            if (Globals.getInstance().isTestMode) {
+                Log.i(TAG, "Test mode is on: ${equip.equipRef}")
+                return
+            }
+
+            val relayStages = HashMap<String, Int>()
+            val analogOutStages = HashMap<String, Int>()
+            logicalPointsList = equip.getLogicalPointList()
+            hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
+            curState = ZoneState.DEADBAND
+
+            if (mInterface != null) mInterface.refreshView()
+
+            if (isZoneDead) {
+                handleDeadZone(equip)
+                return
+            }
+
+            // get current state from data store (e.g. from Equip)
+            val config = equip.getConfiguration()
+
+            // get latest tuner points
+            val hyperStatTuners = fetchHyperstatTuners(equip)
+            val userIntents = fetchUserIntents(equip)
+            val averageDesiredTemp = (
+                    userIntents.zoneCoolingTargetTemperature + userIntents.zoneHeatingTargetTemperature) / 2.0
+
+            if (averageDesiredTemp != equip.hsHaystackUtil.getDesiredTemp()) {
+                equip.hsHaystackUtil.setDesiredTemp(averageDesiredTemp)
+            }
+            // occuStatus = equip.hsHaystackUtil.getOccupancyStatus()
+            occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+
+            //StandaloneFanStage  StandaloneConditioningMode
+            var basicSettings = fetchBasicSettings(equip)
+
+            val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
+
+            // Updating the current fan mode based on the current occupied status
+            updateFanMode(equip, basicSettings, fanModeSaved)
+
+            // Collect the update basic settings
+            basicSettings = fetchBasicSettings(equip)
+
+            hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)
+            hyperstatCPUAlgorithm.dumpLogs()
+
+            if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
+                hyperstatCPUAlgorithm.resetCoolingControl()
+                state = ZoneState.COOLING
+                Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
+            } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
+                hyperstatCPUAlgorithm.resetHeatingControl()
+                state = ZoneState.HEATING
+                Log.i(L.TAG_CCU_HSCPU,"Resetting heating")
+            }
+            coolingLoopOutput = 0
+            heatingLoopOutput = 0
+            fanLoopOutput = 0
+
+            when (state) {
+                //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
+                ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
+                    currentTemp, userIntents.zoneCoolingTargetTemperature
+                ).toInt().coerceAtLeast(0)
+
+                //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
+                ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
+                    userIntents.zoneHeatingTargetTemperature, currentTemp
+                ).toInt().coerceAtLeast(0)
+
+                else -> Log.i(L.TAG_CCU_HSCPU, " Zone is in deadband")
+            }
+
+            if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+                        ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
+                fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
+            }
+            if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                        ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+                fanLoopOutput = ((heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
+            }
+
+
+            equip.hsHaystackUtil.updateOccupancyDetection()
+            runForDoorWindowSensor(config, equip)
+            runForKeycardSensor(config, equip)
+            equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput)
+            val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
+
+            Log.i(L.TAG_CCU_HSCPU,
+                "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n"+
+                     "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n"+
+                     "Current Temp : $currentTemp \n"+
+                     "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} \n"+
+                     "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} \n"+
+                     "Heating Loop Output: $heatingLoopOutput \n"+
+                     "Cooling Loop Output:: $coolingLoopOutput \n"+
+                     "Fan Loop Output:: $fanLoopOutput \n"
+            )
+            Log.i("Loop Output", "Current Temp : $currentTemp"+
+                    "Desired Heating: ${userIntents.zoneHeatingTargetTemperature}"+
+                    "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} "+
+                    "Heating Loop Output: $heatingLoopOutput "+
+                    "Cooling Loop Output:: $coolingLoopOutput "+
+                    "Fan Loop Output:: $fanLoopOutput")
+
+
+        if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+            runRelayOperations(
+                equip,
+                config,
+                hyperStatTuners,
+                userIntents,
+                basicSettings,
+                relayStages
+            )
+            runAnalogOutOperations(equip, config, basicSettings, analogOutStages)
+        }else{
+            resetAllLogicalPointValues()
         }
+            var zoneOperatingMode = ZoneState.DEADBAND.ordinal
+            if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY) {
+                  zoneOperatingMode = ZoneState.HEATING.ordinal
+            }
+            if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+                  zoneOperatingMode = ZoneState.COOLING.ordinal
+            }
+            Log.i(L.TAG_CCU_HSCPU,
+                "averageDesiredTemp $averageDesiredTemp" + "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}"
+            )
+            equip.hsHaystackUtil.setProfilePoint("operating and mode", zoneOperatingMode.toDouble())
+            if (equip.hsHaystackUtil.getStatus() != curState.ordinal.toDouble())
+                equip.hsHaystackUtil.setStatus(curState.ordinal.toDouble())
+            var temperatureState = ZoneTempState.NONE
+            if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
 
-        val relayStages = HashMap<String, Int>()
-        val analogOutStages = HashMap<String, Int>()
-        logicalPointsList = equip.getLogicalPointList()
-        hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-        curState = ZoneState.DEADBAND
-
-        if (mInterface != null) mInterface.refreshView()
-
-        if (isZoneDead) {
-            handleDeadZone(equip)
-            return
-        }
-
-        // get current state from data store (e.g. from Equip)
-        val config = equip.getConfiguration()
-
-        // get latest tuner points
-        val hyperStatTuners = fetchHyperstatTuners(equip)
-        val userIntents = fetchUserIntents(equip)
-        val averageDesiredTemp = (
-                userIntents.zoneCoolingTargetTemperature + userIntents.zoneHeatingTargetTemperature) / 2.0
-
-        if (averageDesiredTemp != equip.hsHaystackUtil.getDesiredTemp()) {
-            equip.hsHaystackUtil.setDesiredTemp(averageDesiredTemp)
-        }
-        occuStatus = equip.hsHaystackUtil.getOccupancyStatus()
-
-        //StandaloneFanStage  StandaloneConditioningMode
-        var basicSettings = fetchBasicSettings(equip)
-
-        val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
-
-        // Updating the current fan mode based on the current occupied status
-        updateFanMode(equip, basicSettings, fanModeSaved)
-
-        // Collect the update basic settings
-        basicSettings = fetchBasicSettings(equip)
-
-        hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)
-        hyperstatCPUAlgorithm.dumpLogs()
-
-        if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
-            hyperstatCPUAlgorithm.resetCoolingControl()
-            state = ZoneState.COOLING
-            Log.i(L.TAG_CCU_HSCPU,"Resetting cooling")
-        } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
-            hyperstatCPUAlgorithm.resetHeatingControl()
-            state = ZoneState.HEATING
-            Log.i(L.TAG_CCU_HSCPU,"Resetting heating")
-        }
-        coolingLoopOutput = 0
-        heatingLoopOutput = 0
-        fanLoopOutput = 0
-
-        when (state) {
-            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
-            ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-                currentTemp, userIntents.zoneCoolingTargetTemperature
-            ).toInt().coerceAtLeast(0)
-
-            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
-            ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-                userIntents.zoneHeatingTargetTemperature, currentTemp
-            ).toInt().coerceAtLeast(0)
-
-            else -> Log.i(L.TAG_CCU_HSCPU, " Zone is in deadband")
-        }
-
-        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
-            fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier.coerceAtMost(100.0)).toInt())
-        }
-        if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
-            fanLoopOutput = (heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier.coerceAtMost(100.0)).toInt()
-        }
-
-
-        equip.hsHaystackUtil.updateOccupancyDetection()
-        runForDoorWindowSensor(config, equip)
-        runForKeycardSensor(config, equip)
-        equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput)
-        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
-
-        Log.i(L.TAG_CCU_HSCPU,
-            "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n"+
-                 "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n"+
-                 "isForcedOccupied : ${occuStatus.isForcedOccupied} \n"+
-                 "isOccupancySensed : ${occuStatus.isOccupancySensed} \n"+
-                 "isPreconditioning : ${occuStatus.isPreconditioning} \n"+
-                 "Current Temp : $currentTemp \n"+
-                 "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} \n"+
-                 "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} \n"+
-                 "Heating Loop Output: $heatingLoopOutput \n"+
-                 "Cooling Loop Output:: $coolingLoopOutput \n"+
-                 "Fan Loop Output:: $fanLoopOutput \n"
-        )
-        Log.i("Loop Output", "Current Temp : $currentTemp"+
-                "Desired Heating: ${userIntents.zoneHeatingTargetTemperature}"+
-                "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} "+
-                "Heating Loop Output: $heatingLoopOutput "+
-                "Cooling Loop Output:: $coolingLoopOutput "+
-                "Fan Loop Output:: $fanLoopOutput")
-
-
-        runRelayOperations(equip, config, hyperStatTuners, userIntents, basicSettings, relayStages)
-        runAnalogOutOperations(equip, config, basicSettings , analogOutStages)
-        var zoneOperatingMode = ZoneState.DEADBAND.ordinal
-        if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY) {
-              zoneOperatingMode = ZoneState.HEATING.ordinal
-        }
-        if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
-              zoneOperatingMode = ZoneState.COOLING.ordinal
-        }
-        Log.i(L.TAG_CCU_HSCPU,
-            "averageDesiredTemp $averageDesiredTemp" +
-                "currentTemp $currentTemp"+
-                "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}"
-        )
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", zoneOperatingMode.toDouble())
-        if (equip.hsHaystackUtil.getStatus() != curState.ordinal.toDouble())
-            equip.hsHaystackUtil.setStatus(curState.ordinal.toDouble())
-        var temperatureState = ZoneTempState.NONE
-        if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
-
-        Log.i(L.TAG_CCU_HSCPU, "Equip Running : $curState")
-        HyperStatUserIntentHandler.updateHyperStatStatus(
-            equipId = equip.equipRef!!,
-            portStages = relayStages,
-            analogOutStages = analogOutStages,
-            temperatureState = temperatureState
-        )
-        Log.i(L.TAG_CCU_HSCPU, "**********************************************")
+            Log.i(L.TAG_CCU_HSCPU, "Equip Running : $curState")
+            HyperStatUserIntentHandler.updateHyperStatStatus(
+                equipId = equip.equipRef!!,
+                portStages = relayStages,
+                analogOutStages = analogOutStages,
+                temperatureState = temperatureState
+            )
+            Log.i(L.TAG_CCU_HSCPU, "**********************************************")
     }
 
     private fun fetchBasicSettings(equip: HyperStatCpuEquip) =
@@ -567,8 +574,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         fanModeSaved: Int
     ) {
 
-        Log.i(L.TAG_CCU_HSCPU, "Fan Details :${occuStatus.isOccupied}  ${basicSettings.fanMode}  $fanModeSaved")
-        if (!occuStatus.isOccupied && basicSettings.fanMode != StandaloneFanStage.OFF
+        Log.i(L.TAG_CCU_HSCPU, "Fan Details $occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
+        if (occupancyStatus != Occupancy.OCCUPIED && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO
             && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME
             && basicSettings.fanMode != StandaloneFanStage.MEDIUM_ALL_TIME
@@ -582,7 +589,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             )
         }
 
-        if (occuStatus.isOccupied && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+        if (occupancyStatus != Occupancy.OCCUPIED && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             Log.i(L.TAG_CCU_HSCPU, "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
 
             val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)

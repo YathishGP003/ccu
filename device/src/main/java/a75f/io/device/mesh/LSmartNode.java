@@ -32,6 +32,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -256,6 +257,28 @@ public class LSmartNode
                     {
                         //In case of sse , relay actuator maps to normally open by default
                         mappedVal = mapSSEDigitalOut(p.getType(), logicalVal > 0);
+                    } else if (isEquipType("dab", node)) {
+                        double relay2Threshold = 50;
+                        if (p.getPort().equals(RELAY_TWO)) {
+                            double relayActivationHysteresis = TunerUtil.readTunerValByQuery("relay and activation and hysteresis", equipRef);
+                            if (hayStack.readHisValById(p.getId()) == 0) {
+                                relay2Threshold = 50 + relayActivationHysteresis;
+                            }
+                        }
+
+                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                            mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
+                                                             logicalVal > relay2Threshold : logicalVal > 0));
+                        //Analog2 on DAB profile could be mapped to reheat or damper2. When damper 2 is MAT, type is not configured via
+                        //analog.
+                        if (p.getPort().equals(ANALOG_OUT_TWO)) {
+                            double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+node+"\"");
+                            if (damperType == DamperType.MAT.ordinal()) {
+                                double damperPos = hayStack.readHisValByQuery("normalized and damper and secondary and cmd and equipRef == \""+node+"\"");
+                                controls_t.damperPosition.set((short)damperPos);
+                            }
+                        }
+
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
@@ -266,6 +289,7 @@ public class LSmartNode
                         mappedVal |= 0x80;
                     }
 
+                    //TODo -MAT is currently configured on analog2 , what if reheat is also configured.
                     if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;

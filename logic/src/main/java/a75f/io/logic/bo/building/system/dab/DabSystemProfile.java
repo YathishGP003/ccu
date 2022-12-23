@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -168,6 +169,7 @@ public abstract class DabSystemProfile extends SystemProfile
         addModeChangeHysteresisChangeOverTuner(equipRef);
         addStageUpTimerCounterTuner(equipRef);
         addStageDownTimerCounterTuner(equipRef);
+        addEffectiveSatConditioningPoint(equipRef, CCUHsApi.getInstance());
     }
     
     private void addModeChangeHysteresisChangeOverTuner(String equipRef) {
@@ -366,5 +368,23 @@ public abstract class DabSystemProfile extends SystemProfile
     @Override
     public void reset() {
         getSystemController().reset();
+    }
+
+    private void addEffectiveSatConditioningPoint(String equipRef, CCUHsApi hayStack) {
+        if (hayStack.readEntity("system and effective and sat and conditioning").isEmpty()) {
+            Site site = hayStack.getSite();
+            Point effectiveSatConditioning = new Point.Builder()
+                    .setDisplayName(HSUtil.getDis(equipRef) + "-effectiveSatConditioning")
+                    .setSiteRef(site.getId())
+                    .setEquipRef(equipRef)
+                    .setHisInterpolate("cov")
+                    .addMarker("system").addMarker("dab").addMarker("his")
+                    .addMarker("effective").addMarker("sat").addMarker("conditioning").addMarker("sp")
+                    .setEnums("not_available,cooling,heating")
+                    .setTz(site.getTz())
+                    .build();
+            String effectiveSatConditioningId = hayStack.addPoint(effectiveSatConditioning);
+            hayStack.writeHisValById(effectiveSatConditioningId, 0.0);
+        }
     }
 }

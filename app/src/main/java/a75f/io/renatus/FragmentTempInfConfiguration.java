@@ -302,7 +302,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         if (mProfileConfig == null) {
             mCcuAsZoneProfile.addCcuAsZoneEquip(mSmartNodeAddress, cazConfig, floorRef, zoneRef );
         } else {
-            mCcuAsZoneProfile.updateCcuAsZone(cazConfig);
+            mCcuAsZoneProfile.updateCcuAsZone(cazConfig, floorRef, zoneRef);
         }
         L.ccu().zoneProfiles.add(mCcuAsZoneProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set CCU As Zone Config: Profiles - "+L.ccu().zoneProfiles.size());

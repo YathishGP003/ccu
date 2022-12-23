@@ -268,7 +268,7 @@ public class CazEquip
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("ti").addMarker("temp").addMarker("room").addMarker("cur").addMarker("sensor")
+                .addMarker("ti").addMarker("temp").addMarker("space").addMarker("cur").addMarker("sensor")
                 .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -294,7 +294,7 @@ public class CazEquip
                 .setEquipRef(equipRef).setRoomRef(roomRef)
                 .setSiteRef(siteRef).setFloorRef(floorRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("room").addMarker("sp").addMarker("type").addMarker("temp")
+                .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
                 .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
@@ -416,7 +416,7 @@ public class CazEquip
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
                 ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
                 HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
                 if (!roomTempSensorPoint.isEmpty()) {
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
                 }
@@ -425,7 +425,7 @@ public class CazEquip
                 ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
                 ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
                 HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
                 if (!roomTempSensorPoint.isEmpty()) {
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
                 }
@@ -449,7 +449,7 @@ public class CazEquip
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), supplyTempSensorPoint.get("id").toString());
                 }
                 HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
                 if (!roomTempSensorPoint.isEmpty()) {
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
                 }
@@ -473,7 +473,7 @@ public class CazEquip
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
                 }
                 HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and room and not type and temp and equipRef == \"" + equipRef + "\"");
+                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
                 if (!roomTempSensorPoint.isEmpty()) {
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
                 }
@@ -490,12 +490,12 @@ public class CazEquip
         return config;
     }
 
-    public void updateCcuAsZoneConfig(CazProfileConfig config) {
+    public void updateCcuAsZoneConfig(CazProfileConfig config, String floorRef, String zoneRef) {
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("supply and type",config.getSupplyTempSensor().ordinal());
-        setConfigNumVal("room and type",config.getRoomTempSensor().ordinal());
+        setConfigNumVal("space and type",config.getRoomTempSensor().ordinal());
         updateCurrentTemp(config.roomTempSensor, config.supplyTempSensor);
 
     }
@@ -664,7 +664,7 @@ public class CazEquip
 
     public double getRoomTempSensorValue(){
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("room and type and config and equipRef == \""+equip.get("id")+"\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("space and type and config and equipRef == \""+equip.get("id")+"\"");
     }
 }
 

@@ -224,16 +224,15 @@ public class SingleStageEquipUtil {
         
         if (analogInAssociation == 0) {
             point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-            ,"0","10","0.1","amps",10);
+            ,"0","10","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER);
         } else if (analogInAssociation == 1) {
             point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-                    ,"0","20","0.1","amps",20);
+                    ,"0","20","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER_20);
         } else if (analogInAssociation == 2) {
             point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-                    ,"0","50","0.1","amps",50);
+                    ,"0","50","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER_50);
         }
 
-        Log.d(TAG, "Bharath points creating points" + point);
         String id = point.getId();
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id,0.0);
 

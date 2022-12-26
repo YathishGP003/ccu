@@ -36,10 +36,10 @@ import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
-import a75f.io.logic.bo.building.definitions.InputActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.sse.SingleStageEquip;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
@@ -208,8 +208,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
 
-        ArrayAdapter<CharSequence> sseAnalogActuatorAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.sse_analog_in_1, R.layout.spinner_dropdown_item);
+        ArrayAdapter<InputActuatorType> sseAnalogActuatorAdapter = new ArrayAdapter<InputActuatorType>(getActivity(),
+                R.layout.spinner_dropdown_item,InputActuatorType.values());
         sseAnalogIn1Spinner.setAdapter(sseAnalogActuatorAdapter);
 
         analogIn1.setOnCheckedChangeListener((compoundButton, checked) -> handleAnalog1InChange(checked));
@@ -242,7 +242,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             autoAway.setChecked(mProfileConfig.enableAutoAway);
             autoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
             analogIn1.setChecked(mProfileConfig.analogIn1);
-            sseAnalogIn1Spinner.setSelection(mProfileConfig.analogInAssociation);
+            sseAnalogIn1Spinner.setSelection(mProfileConfig.analogInAssociation.ordinal());
             if(mProfileConfig.getOutputs().size() > 0) {
                 for(Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -308,8 +308,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseConfig.enableAutoAway = autoAway.isChecked();
         sseConfig.enableAutoForceOccupied = autoForceOccupied.isChecked();
         sseConfig.analogIn1 = analogIn1.isChecked();
-        if (analogIn1.isChecked()) sseConfig.analogInAssociation = sseAnalogIn1Spinner.getSelectedItemPosition();
-        else sseConfig.analogInAssociation = 0;
+        if (analogIn1.isChecked()) sseConfig.setAnalogInAssociation(InputActuatorType.values()[sseAnalogIn1Spinner.getSelectedItemPosition()]);
+        else sseConfig.setAnalogInAssociation(InputActuatorType.values()[0]);
         if(switchCoolHeatR1.isChecked()) sseConfig.enableRelay1 = sseRelay1Actuator.getSelectedItemPosition()+1;
         else sseConfig.enableRelay1 = 0;
         if(switchFanR2.isChecked()) sseConfig.enableRelay2 = sseRelay2Actuator.getSelectedItemPosition();
@@ -319,7 +319,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             Input analogIn = new Input();
             analogIn.setAddress(mSmartNodeAddress);
             analogIn.setPort(Port.ANALOG_IN_ONE);
-            analogIn.mInputActuatorType = InputActuatorType.ZeroTo10ACurrentTransformer;
+            analogIn.mInputActuatorType = InputActuatorType.values()[sseAnalogIn1Spinner.getSelectedItemPosition()];
             sseConfig.getInputs().add(analogIn);
         }
 

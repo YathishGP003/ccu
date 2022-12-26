@@ -13,5 +13,14 @@ public class SingleStageConfig extends BaseProfileConfiguration {
 
     public double temperaturOffset;
     public boolean analogIn1;
-    public int analogInAssociation;
+
+    public InputActuatorType getAnalogInAssociation() {
+        return analogInAssociation;
+    }
+
+    public void setAnalogInAssociation(InputActuatorType analogInAssociation) {
+        this.analogInAssociation = analogInAssociation;
+    }
+
+    public InputActuatorType analogInAssociation;
 }

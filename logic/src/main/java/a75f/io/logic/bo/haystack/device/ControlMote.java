@@ -38,7 +38,6 @@ public class ControlMote
     public String floorRef;
     public String roomRef;
     public String equipRef;
-    private static ControlMote instance;
 
     String tz;
     public ControlMote(String systemEquipRef) {
@@ -403,9 +402,6 @@ public class ControlMote
     }
     public static boolean getRelay7() {
         return ControlMote.getRelayState(Tags.RELAY7) > 0.01;
-    }
-    public RawPoint getTh2In() {
-        return th2In;
     }
 
 

@@ -545,7 +545,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0);
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
-                        value = value * 0.01;
+                        value = value * 0.001;
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");

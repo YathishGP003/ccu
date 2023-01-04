@@ -83,4 +83,10 @@ public class CazEquipUtil {
     public static double getConfigNumVal(String tags, String nodeAddr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and ti and "+tags+" and group == \""+nodeAddr+"\"");
     }
+
+    public static boolean isPortMappedToSupplyAirTemprature(String pointRef){
+        HashMap<Object, Object> logicalPoint = CCUHsApi.getInstance().readEntity("point and id == " + pointRef);
+        return logicalPoint.containsKey("supply");
+    }
+
 }

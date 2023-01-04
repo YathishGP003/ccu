@@ -782,7 +782,7 @@
     <string name="label_maintempoffset">MAIN SENSOR\nTEMP OFFSET</string>
 
     <!--TEMPERATURE INFLUENCING Screen-->
-    <string name="label_tempoffsetnp">TEMP OFFSET</string>
+    <string name="label_tempoffsetnp">ROOM TEMP OFFSET</string>
 
     <!--SYSTEM DEVICES AND OAO Screen-->
     <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>

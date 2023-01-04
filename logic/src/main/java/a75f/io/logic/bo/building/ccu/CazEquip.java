@@ -254,7 +254,7 @@ public class CazEquip
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("ti").addMarker("temp").addMarker("supply").addMarker("cur").addMarker("sensor")
-                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air").addMarker("discharge")
+                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -263,7 +263,7 @@ public class CazEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(supplyAirTempId,0.0);
 
         Point roomTempSensorPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-roomTempSensorPoint")
+                .setDisplayName(equipDis+"-RoomTemperature")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -282,7 +282,7 @@ public class CazEquip
                 .setEquipRef(equipRef).setRoomRef(roomRef)
                 .setSiteRef(siteRef).setFloorRef(floorRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("supply").addMarker("sp").addMarker("type").addMarker("temp")
+                .addMarker("supply").addMarker("sp").addMarker("type").addMarker("temp").addMarker("air")
                 .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
@@ -385,13 +385,12 @@ public class CazEquip
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(zonePriorityId, (double) config.getPriority().ordinal());
 
         Point temperatureOffset = new Point.Builder()
-                .setDisplayName(equipDis + "-temperatureOffset")
+                .setDisplayName(equipDis + "-roomTemperatureOffset")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);

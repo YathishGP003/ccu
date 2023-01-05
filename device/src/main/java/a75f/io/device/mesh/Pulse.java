@@ -538,7 +538,8 @@ public class Pulse
 			double th1TempVal = 0.0;
 			boolean isTh2Enabled = false;
 			boolean isTh1Enabled = false;
-			boolean isRoomTempInTI = false;
+			boolean isTh1RoomTempInTI = false;
+			boolean isTh2RoomTempInTI = false;
 			double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 			for (HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
@@ -587,7 +588,7 @@ public class Pulse
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
 							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh2TempVal;
-								isRoomTempInTI = true;
+								isTh2RoomTempInTI = true;
 							}
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(oldTh2TempVal != curTh2TempVal)
@@ -630,7 +631,7 @@ public class Pulse
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh1TempVal;
-								isRoomTempInTI = true;
+								isTh1RoomTempInTI = true;
 							}
 							if(oldTh1TempVal != curTh1TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
@@ -651,14 +652,14 @@ public class Pulse
 				}
 			}
 
-			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isRoomTempInTI) {
+			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTh1RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
 				if (currentTempInterface != null) {
 					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			}//Write Current temp point based on th2 enabled or not,
-			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isRoomTempInTI) {
+			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isTh2RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if (currentTempInterface != null) {
 					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);

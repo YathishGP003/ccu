@@ -26,14 +26,14 @@ public class PreferenceUtil {
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
     private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
-    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneMigration";
+    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneReMigration";
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
 
-    private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRef";
+    private static final String UPDATE_SCHEDULE_REFS = "reUpdateScheduleRef";
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
-    private static final String UPDATE_SCHEDULE_TYPE = "updateSchedulesTypes";
+    private static final String UPDATE_SCHEDULE_TYPE = "reUpdateSchedulesTypes";
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "RerunOccupancyPointsMigration";

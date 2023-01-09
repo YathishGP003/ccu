@@ -10,7 +10,6 @@ public class PreferenceUtil {
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
-    private static final String SUPPLY_AIR_TEMP_MIGRATION = "supplyAirTempMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
     private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
@@ -433,13 +432,7 @@ public class PreferenceUtil {
     public static void setVavDiscargeTunerMigration() {
         setBooleanPreference(VAV_DISCHARGE_TUNER_MIGRATION, true);
     }
-    public static boolean getSupplyAirTempMigration() {
-        return getBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION);
-    }
 
-    public static void setSupplyAirTempMigration() {
-        setBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION, true);
-    }
     public static boolean getHyperStatCpuTagMigration() {
         return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
     }

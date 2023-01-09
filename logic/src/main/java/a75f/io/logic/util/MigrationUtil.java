@@ -214,11 +214,6 @@ public class MigrationUtil {
             PreferenceUtil.setTIUpdate();
         }
 
-        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
-            updateScheduleType(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleTypeUpdateMigration();
-        }
-
         if(!PreferenceUtil.getDCWBPointsMigration()){
             migrateDCWBPoints(CCUHsApi.getInstance());
             PreferenceUtil.setDCWBPointsMigration();
@@ -1059,7 +1054,7 @@ public class MigrationUtil {
             if (zone.getScheduleRef() == null) {
                 CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs : for Zone "+zone.getDisplayName());
                 Map<Object,Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
-                                                                                      "roomRef == "+zone.getId());
+                                                                                      "not special and roomRef == "+zone.getId());
                 if (!zoneScheduleMap.isEmpty()) {
                     zone.setScheduleRef(zoneScheduleMap.get("id").toString());
                     hayStack.updateZone(zone, zone.getId());
@@ -1131,7 +1126,7 @@ public class MigrationUtil {
                         room.get("id").toString()) &&
                         !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
                     HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
-                            "roomRef == " +room.get("id"));
+                            "not special and roomRef == " +room.get("id"));
                     if(zoneScheduleMap.isEmpty()){
                         CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Seems like no schedule entity has roomRef: "+room.get("id"));
                         continue;

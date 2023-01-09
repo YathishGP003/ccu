@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.mesh.MeshUtil;
@@ -320,6 +321,16 @@ public class OTAUpdateService extends IntentService {
             case "system":
                 //update everything
                 HashMap<Object, Object> deviceList= CCUHsApi.getInstance().readEntity("device and cm");
+                HashMap equipment =  CCUHsApi.getInstance().readEntity("equip and oao");
+
+                if(!equipment.isEmpty()){
+                    Device OAOdevice = HSUtil.getDevice(Short.parseShort(equipment.get(Tags.GROUP).toString()));
+                    if(OAOdevice.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                        Log.d(TAG, "[VALIDATION] Adding OAO device " + OAOdevice.getAddr() + " to update");
+                        mLwMeshAddresses.add(Integer.parseInt(OAOdevice.getAddr()));
+                    }
+                }
+
 
                 if(deviceList.containsKey( deviceType.getHsMarkerName())){
                         mLwMeshAddresses.add(99+ L.ccu().getSmartNodeAddressBand());

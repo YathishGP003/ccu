@@ -12,7 +12,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -38,8 +37,8 @@ public class CazProfile extends ZoneProfile {
         cazEquip.init();
     }
 
-    public void updateCcuAsZone(CazProfileConfig config, String floorRef, String zoneRef) {
-        cazEquip.updateCcuAsZoneConfig(config, floorRef, zoneRef);
+    public void updateCcuAsZone(CazProfileConfig config) {
+        cazEquip.updateCcuAsZoneConfig(config);
     }
     @Override
     public ProfileType getProfileType() {

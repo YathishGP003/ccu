@@ -246,9 +246,16 @@ public class SingleStageEquipUtil {
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         double curConfig = getConfigNumVal("input and association", nodeAddr);
+        double curAnalogInEnabled = getConfigNumVal("analog1 and input and enabled", nodeAddr);
+        int configAnalogIn1Enabled;
+        if (analogIn1Enabled) {
+            configAnalogIn1Enabled = 1;
+        } else {
+            configAnalogIn1Enabled = 0;
+        }
         HashMap configAnalogInPoint = null;
 
-        if (configVal == curConfig) {
+        if (configVal == curConfig && curAnalogInEnabled == configAnalogIn1Enabled) {
             CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 - No Action required : configVal "+configVal);
             return;
         }

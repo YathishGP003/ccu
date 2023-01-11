@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.tuners.BuildingTunerUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -51,6 +52,7 @@ import a75f.io.logic.util.RxTask;
 
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -769,23 +771,11 @@ public class VavEquip
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
 
-        HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
-                                                                          .read("tuner and default and fan and " +
-                                                                                "control and time and delay");
-        ArrayList<HashMap> fanControlOnFixedTimeDelayPointArr =
-            CCUHsApi.getInstance().readPoint(fanControlOnFixedTimeDelayPoint.get("id").toString());
-        for (HashMap valMap : fanControlOnFixedTimeDelayPointArr) {
-            if (valMap.get("val") != null) {
-                CCUHsApi.getInstance().pointWrite(HRef.copy(fanControlOnFixedTimeDelayId),
-                             (int) Double.parseDouble(valMap.get("level").toString()),
-                                                       valMap.get("who").toString(),
-                                                       HNum.make(Double.parseDouble(valMap.get("val").toString())),
-                                                       HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(fanControlOnFixedTimeDelayId, roomRef, hayStack);
+        hayStack.writePointForCcuUser(fanControlOnFixedTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                                            DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+        hayStack.writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
 
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, 1.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }
 
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {

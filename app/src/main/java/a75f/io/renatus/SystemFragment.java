@@ -245,9 +245,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	@Override
-	public void loadGrid() {
+	public void reloadScreen() {
 
 	}
+
 
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}

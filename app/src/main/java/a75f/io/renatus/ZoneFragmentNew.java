@@ -353,9 +353,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     @Override
-    public void loadGrid() {
+    public void reloadScreen() {
         loadGrid(parentRootView);
     }
+
 
     HashMap<String, View> zoneStatus = new HashMap<>();
     

@@ -51,7 +51,7 @@ public class UpdatePointHandler
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit")) {
-                zoneDataInterface.loadGrid();
+                zoneDataInterface.reloadScreen();
             }
             return;
         }

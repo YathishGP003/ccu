@@ -600,7 +600,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         Globals.getInstance().setTestMode(true);
         if (tag.equals(Tags.ANALOG2)) {
             ControlMote.setAnalogOut(tag, 10 * val);
-        }if (tag.contains("analog")) {
+        } else if (tag.contains("analog")) {
             ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
                                                                            systemProfile.getConfigVal(tag+" and max"),
                                                                            val));

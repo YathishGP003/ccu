@@ -1,10 +1,15 @@
 package a75f.io.logic.bo.building.ccu;
 
+import static a75f.io.api.haystack.CCUHsApi.TAG;
+
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -12,13 +17,16 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.sse.SingleStageEquipUtil;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.TITuners;
 import a75f.io.logic.util.RxTask;
 
@@ -244,6 +252,8 @@ public class CazEquip
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyId, 0.0);
 
+
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "ti", tz, false));
 
@@ -385,6 +395,7 @@ public class CazEquip
     }
 
     public void updateCcuAsZoneConfig(CazProfileConfig config) {
+
         setConfigNumVal("priority",config.getPriority().ordinal());
         setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);

@@ -4,10 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -55,6 +55,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
 
     @BindView(R.id.setBtn)
     Button setButton;
+
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.togglemainsensor)
@@ -167,7 +168,6 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         toggleTh2.setChecked(false);
 
         toggleTh1.setOnCheckedChangeListener((compoundButton, checked) -> handleTH1SenorChange(checked));
-
         toggleTh2.setOnCheckedChangeListener((compoundButton, checked) -> handleTH2SenorChange(checked));
 
         if(mProfileConfig != null) {

@@ -25,8 +25,8 @@ enum class HSZoneStatus {
  * Basic settings a user in the space might set.  These might be included (moved to) UserIntents
  */
 data class BasicSettings(
-   val conditioningMode: StandaloneConditioningMode,
-   val fanMode: StandaloneFanStage,
+    val conditioningMode: StandaloneConditioningMode,
+    var fanMode: StandaloneFanStage,
 )
 
 /**

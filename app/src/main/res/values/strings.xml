@@ -749,7 +749,6 @@
     <string name="title_dabinput">DAB</string>
     <string name="label_damper2type">Damper2 Type</string>
 
-
     <!--PI LOOP CONTROLLER Screen-->
     <string name="title_piloop">PI LOOP CONTROLLER</string>
     <string name="label_analogin1">Analog-in1 Input Sensor</string>
@@ -1256,5 +1255,8 @@
     <string name="step_for_kactor_values">.01</string>
     <string name="default_val_for_kfactor">100</string>
 
-
+    <string name="label_usereheat">Use Reheat</string>
+    <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>
+    <string name="label_analog2_max_reheat">Analog2-Out at\nMax Reheat</string>
+    <string name="label_min_reheat_damper_pos">Min Reheat \nDamper Pos</string>
 </resources>

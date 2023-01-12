@@ -170,7 +170,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         watchdogMonitor = false;
         
         if (!CCUHsApi.getInstance().isCCURegistered() ||
-                            !CCUHsApi.getInstance().isCCUConfigured()) {
+                            !CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode()) {
             CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob <- CCU not configured ");
             return;
         }

@@ -217,27 +217,14 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             //switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
-            if (mProfileConfig.getOutputs().size() > 0) {
-                for (Output output : mProfileConfig.getOutputs()) {
-                    switch (output.getPort()) {
-                        case RELAY_ONE:
-                            switchFanMediumY1.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
-                            break;
-                        case RELAY_TWO:
-                            switchFanHighY2.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
-                            break;
-                        case RELAY_THREE:
-                            switchFanLowG.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
-                            break;
-                        case RELAY_FOUR:
-                            switchHeatingW1.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
-                            break;
-                        case RELAY_SIX:
-                            switchWaterValve.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
-                            break;
-                    }
-                }
-            }
+
+                switchFanMediumY1.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_ONE));
+                switchFanHighY2.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_TWO));
+                switchFanLowG.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_THREE));
+                onCheckedChanged(switchFanLowG,mProfileConfig.isOpConfigured(Port.RELAY_THREE));
+                switchHeatingW1.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_FOUR));
+                switchWaterValve.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_SIX));
+
         }else{
             switchFanLowG.setEnabled(true);
             switchFanMediumY1.setEnabled(false);

@@ -138,20 +138,19 @@ public class ScheduleManager {
         }
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupiedSchedule: put occ for "+equip.getRoomRef());
     }
-    
-    public void processSchedules() {
-        
+
+    private void doProcessSchedules() {
         if (!CCUHsApi.getInstance().isCCURegistered()){
             return;
         }
         zoneOccupancy.clear();
         equipOccupancy.clear();
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
-        
+
         Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
-        
+
         Log.d(TAG_CCU_SCHEDULER, " #### processSchedules activeSystemVacation ####" + activeSystemVacation);
-        
+
         //Read all equips
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
         for(HashMap hs : equips) {
@@ -161,10 +160,10 @@ public class ScheduleManager {
                 processScheduleForEquip(equip, activeSystemVacation);
             }
         }
-    
+
         updateOccupancy(CCUHsApi.getInstance());
         updateDesiredTemp();
-    
+
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
@@ -172,19 +171,31 @@ public class ScheduleManager {
         }
         ScheduleUtil.deleteExpiredVacation();
         ScheduleUtil.deleteExpiredSpecialSchedules();
-    
+
         //TODO - refactor. This can only be done after updating desired temp.
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             if (profile instanceof ModbusProfile) {
                 continue;
             }
-            
+
             EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
             OccupancyData occupancyData = equipOccupancy.get(occupancyHandler.getEquipRef());
             if (occupancyData != null) {
-            occupancyHandler.writeOccupancyMode(occupancyData.occupancy);
+                occupancyHandler.writeOccupancyMode(occupancyData.occupancy);
             }
         }
+    }
+    public void processSchedules() {
+        try {
+            doProcessSchedules();
+        } catch (Exception e) {
+            //An exception here is mostly result of schedules by deleted from UI/Apps/Portal
+            // or a profile/equip itself being deleted/added while it is being processed.
+            // The error is recovered in the next iteration.
+            CcuLog.e(TAG_CCU_SCHEDULER, "Process Schedules error !"+e);
+            e.printStackTrace();
+        }
+
     }
     
     private void processScheduleForEquip(Equip equip, Schedule activeSystemVacation) {
@@ -309,34 +320,30 @@ public class ScheduleManager {
     
     
     public void updateDesiredTemp() {
-        try {
-            for (ZoneProfile profile : L.ccu().zoneProfiles) {
-                if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
-                    continue;
-                }
-                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-                Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
-                OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
-
-                if (updatedOccupancy == null) {
-                    CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for " + occupancyHandler.getEquipRef());
-                    continue;
-                }
-
-                Equip equip = profile.getEquip();
-                Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
-                        .replace("@", ""), false);
-
-                CcuLog.i(TAG_CCU_SCHEDULER,
-                        " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
-                                + " -> " + updatedOccupancy.occupancy);
-                profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
-                if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
-                    zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
-                }
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+            if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
+                continue;
             }
-        }catch (Exception e){
-            e.printStackTrace();
+            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+            Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
+            OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
+
+            if (updatedOccupancy == null) {
+                CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for " + occupancyHandler.getEquipRef());
+                continue;
+            }
+
+            Equip equip = profile.getEquip();
+            Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
+                    .replace("@", ""), false);
+
+            CcuLog.i(TAG_CCU_SCHEDULER,
+                    " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
+                            + " -> " + updatedOccupancy.occupancy);
+            profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
+            if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
+                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "", "");
+            }
         }
     }
     

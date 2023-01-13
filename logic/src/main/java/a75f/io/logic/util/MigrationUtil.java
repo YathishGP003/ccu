@@ -214,11 +214,6 @@ public class MigrationUtil {
             PreferenceUtil.setTIUpdate();
         }
 
-        if(!PreferenceUtil.getScheduleTypeUpdateMigration()){
-            updateScheduleType(CCUHsApi.getInstance());
-            PreferenceUtil.setScheduleTypeUpdateMigration();
-        }
-
         if(!PreferenceUtil.getDCWBPointsMigration()){
             migrateDCWBPoints(CCUHsApi.getInstance());
             PreferenceUtil.setDCWBPointsMigration();
@@ -440,18 +435,14 @@ public class MigrationUtil {
     }
 
     private static void relayDeactivationAndReheatZoneToDATMigration(CCUHsApi ccuHsApi) {
-        ArrayList<HashMap<Object, Object>> relayDeactivationPointVav = ccuHsApi.readAllEntities("point and tuner and vav and relay and deactivation and hysteresis");
-        ArrayList<HashMap<Object, Object>> relayDeactivationPointDab = ccuHsApi.readAllEntities("point and tuner and dab and relay and deactivation and hysteresis");
+        ArrayList<HashMap<Object, Object>> relayDeactivationPointAll = ccuHsApi.readAllEntities("point and tuner and relay and deactivation and hysteresis");
         ArrayList<HashMap<Object, Object>> reheatZoneToDATMinDifferentialPoint = ccuHsApi.readAllEntities("point and tuner and reheat and differential");
         String updatedMaxValue = "60";
-        for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointDab) {
+        for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointAll) {
             Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisDab).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
-        for (HashMap<Object, Object> relayDeactivationHysteresisVav : relayDeactivationPointVav) {
-            Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisVav).setMaxVal(updatedMaxValue).build();
-            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
-        }
+
         for (HashMap<Object, Object> reheatZoneToDATMinDifferential : reheatZoneToDATMinDifferentialPoint) {
             Point updatedPoint = new Point.Builder().setHashMap(reheatZoneToDATMinDifferential).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
@@ -1059,7 +1050,7 @@ public class MigrationUtil {
             if (zone.getScheduleRef() == null) {
                 CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs : for Zone "+zone.getDisplayName());
                 Map<Object,Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
-                                                                                      "roomRef == "+zone.getId());
+                                                                                      "not special and roomRef == "+zone.getId());
                 if (!zoneScheduleMap.isEmpty()) {
                     zone.setScheduleRef(zoneScheduleMap.get("id").toString());
                     hayStack.updateZone(zone, zone.getId());
@@ -1131,7 +1122,7 @@ public class MigrationUtil {
                         room.get("id").toString()) &&
                         !isZoneFollowingNamedSchedule(hayStack, scheduleType)){
                     HashMap<Object, Object> zoneScheduleMap = hayStack.readEntity("schedule and not vacation and " +
-                            "roomRef == " +room.get("id"));
+                            "not special and roomRef == " +room.get("id"));
                     if(zoneScheduleMap.isEmpty()){
                         CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Seems like no schedule entity has roomRef: "+room.get("id"));
                         continue;

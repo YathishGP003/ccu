@@ -28,6 +28,7 @@ public class PreferenceUtil {
     private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
     private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneReMigration";
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
+    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
     private static final String UPDATE_SCHEDULE_REFS = "reUpdateScheduleRef";
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
@@ -442,4 +443,11 @@ public class PreferenceUtil {
 
     }
 
+    public static boolean getSSEFanStageMigration() {
+        return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
+    }
+
+    public static void setSSEFanStageMigration() {
+        setBooleanPreference(SSE_FAN_STAGE_MIGRATION, true);
+    }
 }

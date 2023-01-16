@@ -319,8 +319,10 @@ public class SingleStageEquip {
         String analogIn1Id = CCUHsApi.getInstance().addPoint(analogIn);
         CCUHsApi.getInstance().writeDefaultValById(analogIn1Id, (config.analogIn1 ? 1.0 : 0));
 
-        Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddr, config.analogInAssociation.ordinal());
-        CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
+        if (config.analogIn1) {
+            Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddr, config.analogInAssociation.ordinal());
+            CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
+        }
 
         ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
                 equipRef,tz,String.valueOf(nodeAddr),equipDis,"",config.enableAutoAway ? 1:0
@@ -524,12 +526,14 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
 
-        if (config.analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
-            SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "10");
-        } else if (config.analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
-            SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "9");
-        } else {
-            SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "8");
+        if (config.analogIn1) {
+            if (config.analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "10");
+            } else if (config.analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "9");
+            } else {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "8");
+            }
         }
 
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), config.analogIn1);
@@ -551,8 +555,10 @@ public class SingleStageEquip {
         HashMap analogInAssociationMap =
                 CCUHsApi.getInstance().read("point and config and analog1 and input and association and group == \""+nodeAddr+ "\"");
         Point analogInAssociation = new Point.Builder().setHashMap(analogInAssociationMap).build();
-        SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation.ordinal(), analogInAssociation);
-        mapPhysicalToLogicalPoint(config.analogInAssociation);
+        SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation.ordinal(), analogInAssociation, config.analogIn1);
+        if (config.analogIn1) {
+            mapPhysicalToLogicalPoint(config.analogInAssociation);
+        }
 
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);

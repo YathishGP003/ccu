@@ -240,15 +240,22 @@ public class SingleStageEquipUtil {
         return point;
     }
 
-    public static void updateAnalogIn1Config(int configVal, Point configPoint) {
+    public static void updateAnalogIn1Config(int configVal, Point configPoint, boolean analogIn1Enabled) {
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         double curConfig = getConfigNumVal("input and association", nodeAddr);
+        double curAnalogInEnabled = getConfigNumVal("analog1 and input and enabled", nodeAddr);
+        int configAnalogIn1Enabled;
+        if (analogIn1Enabled) {
+            configAnalogIn1Enabled = 1;
+        } else {
+            configAnalogIn1Enabled = 0;
+        }
         HashMap configAnalogInPoint = null;
 
-        if (configVal == curConfig) {
+        if (configVal == curConfig && curAnalogInEnabled == configAnalogIn1Enabled) {
             CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 - No Action required : configVal "+configVal);
             return;
         }
@@ -268,9 +275,11 @@ public class SingleStageEquipUtil {
             CCUHsApi.getInstance().deleteEntity(configAnalogInPoint.get("id").toString());
         }
 
-        String analogAssociationId = String.valueOf(createAnalogInLogicalPoints(equip.getDisplayName(),equip.getSiteRef(),equip.getId(),equip.getRoomRef(),equip.getFloorRef(),equip.getTz(), Integer.parseInt(nodeAddr),configVal));
-        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.ANALOG_IN_ONE.name(), analogAssociationId);
-        SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), configVal > 0 ? true : false );
-        CCUHsApi.getInstance().scheduleSync();
+        if (analogIn1Enabled) {
+            String analogAssociationId = String.valueOf(createAnalogInLogicalPoints(equip.getDisplayName(), equip.getSiteRef(), equip.getId(), equip.getRoomRef(), equip.getFloorRef(), equip.getTz(), Integer.parseInt(nodeAddr), configVal));
+            SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.ANALOG_IN_ONE.name(), analogAssociationId);
+            SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), configVal > 0 ? true : false);
+            CCUHsApi.getInstance().scheduleSync();
+        }
     }
 }

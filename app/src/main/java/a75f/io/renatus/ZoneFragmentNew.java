@@ -1112,7 +1112,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
 
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
 
         double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
@@ -1222,7 +1222,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             ScaleControlToNormal(270,210,nonTempControl);
@@ -1253,7 +1253,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
@@ -1275,7 +1275,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -1293,7 +1293,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
@@ -2052,7 +2052,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
 
                                         }
                                         isExpanded = false;
@@ -3858,7 +3858,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
         zoneDetails.setTag(gridItemObj);
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         seekArc.setSense(true);
@@ -3928,10 +3928,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            ScaleControlToNormal(260, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
@@ -3960,7 +3960,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
                             //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -3983,7 +3983,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -4001,7 +4001,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
                     //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();

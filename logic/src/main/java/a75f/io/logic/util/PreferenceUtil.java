@@ -10,12 +10,11 @@ public class PreferenceUtil {
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
-    private static final String SUPPLY_AIR_TEMP_MIGRATION = "supplyAirTempMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
     private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
     private static final String REHEAT_ZONE_TO_DAT_MIN = "reheatZoneToDATMinMigration";
-    private static final String RELAY_DEACTIVATION_MIGRATION = "relayDeactivationMigration";
+    private static final String RELAY_DEACTIVATION_MIGRATION = "relayDeactivationMigrationFixed";
     private static final String MAX_CFM_COOLING_MIGRATION = "maxCFMCoolingMigration";
     private static final String MIN_CFM_COOLING_MIGRATION = "minCFMCoolingMigration";
     private static final String TRUE_CFM_DAB_MIGRATION="trueCfmDabMigration";
@@ -233,7 +232,7 @@ public class PreferenceUtil {
         return getBooleanPreference(TIMER_COUNTER_MIGRATION) || getBooleanPreference(MAX_CFM_COOLING_MIGRATION) || getBooleanPreference(MIN_CFM_COOLING_MIGRATION);
     }
     public static boolean isRelayDeactivationAndReheatZoneToDATMigrationDone() {
-        return getBooleanPreference(RELAY_DEACTIVATION_MIGRATION) || getBooleanPreference(REHEAT_ZONE_TO_DAT_MIN);
+        return getBooleanPreference(RELAY_DEACTIVATION_MIGRATION) && getBooleanPreference(REHEAT_ZONE_TO_DAT_MIN);
     }
     public static void setRelayDeactivationAndReheatZoneToDATMinMigrationDone() {
         setBooleanPreference(RELAY_DEACTIVATION_MIGRATION, true);
@@ -433,13 +432,7 @@ public class PreferenceUtil {
     public static void setVavDiscargeTunerMigration() {
         setBooleanPreference(VAV_DISCHARGE_TUNER_MIGRATION, true);
     }
-    public static boolean getSupplyAirTempMigration() {
-        return getBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION);
-    }
 
-    public static void setSupplyAirTempMigration() {
-        setBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION, true);
-    }
     public static boolean getHyperStatCpuTagMigration() {
         return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
     }

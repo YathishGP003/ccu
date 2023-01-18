@@ -47,6 +47,8 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
+    private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -442,4 +444,11 @@ public class PreferenceUtil {
 
     }
 
+    public static boolean getTiProfileMigration() {
+        return getBooleanPreference(TI_PROFILE_MIGRATION);
+    }
+
+    public static void setTiProfileMigration() {
+        setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
 }

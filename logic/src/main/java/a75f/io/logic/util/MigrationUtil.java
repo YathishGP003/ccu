@@ -42,12 +42,14 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazProfileConfig;
+import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
@@ -248,7 +250,106 @@ public class MigrationUtil {
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
+
+        if(!PreferenceUtil.getTiProfileMigration()){
+            doTiProfileMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setTiProfileMigration();
+        }
+
         L.saveCCUState();
+    }
+
+    private static void doTiProfileMigration(CCUHsApi instance) {
+
+        ArrayList<HashMap<Object, Object>> tiEquips = instance.readAllEntities("equip and ti");
+        for (HashMap<Object, Object> equipMap : tiEquips) {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            HashMap<Object,Object> currentTemp = instance.readEntity("point and current and " +
+                    "temp and ti and equipRef == \""+equip.getId()+"\"");
+            String nodeAddress = currentTemp.get("group").toString();
+            deleteExistingLogicalAndConfigPoints(instance, equip);
+            createNewLogicalPoints(equip, nodeAddress);
+        }
+
+    }
+
+    private static void createNewLogicalPoints(Equip equip, String nodeAddress) {
+
+        Point roomTempSensorPoint = new Point.Builder()
+                .setDisplayName(equip.getDisplayName()+"-RoomTemperature")
+                .setEquipRef(equip.getId())
+                .setSiteRef(equip.getSiteRef())
+                .setRoomRef(equip.getRoomRef())
+                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                .addMarker("ti").addMarker("temp").addMarker("space").addMarker("cur").addMarker("sensor")
+                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
+                .setGroup(String.valueOf(nodeAddress))
+                .setUnit("\u00B0F")
+                .setTz(CCUHsApi.getInstance().getTimeZone())
+                .build();
+        String roomTempSensorId = CCUHsApi.getInstance().addPoint(roomTempSensorPoint);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(roomTempSensorId,0.0);
+
+        Point supplyAirTemperatureType = new Point.Builder()
+                .setDisplayName(equip.getDisplayName()+"-supplyAirTemperatureType")
+                .setEquipRef(equip.getId()).setRoomRef(equip.getRoomRef())
+                .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("supply").addMarker("sp").addMarker("type").addMarker("temp").addMarker("air")
+                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setTz(CCUHsApi.getInstance().getTimeZone())
+                .build();
+        String supplyAirTempTypeId =CCUHsApi.getInstance().addPoint(supplyAirTemperatureType);
+        CCUHsApi.getInstance().writeDefaultValById(supplyAirTempTypeId, 0.0);
+
+        Point roomTemperatureType = new Point.Builder()
+                .setDisplayName(equip.getDisplayName()+"-roomTemperatureType")
+                .setEquipRef(equip.getId()).setRoomRef(equip.getRoomRef())
+                .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
+                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
+                .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
+                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setTz(CCUHsApi.getInstance().getTimeZone())
+                .build();
+        String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);
+        CCUHsApi.getInstance().writeDefaultValById(roomTempTypeId, 0.0);
+
+        HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        String tz = siteMap.get("tz").toString();
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equip.getDisplayName(), equip.getId(),
+                equip.getSiteRef(), equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress), "ti", tz, false));
+
+        ControlMote device = new ControlMote(Integer.parseInt(nodeAddress), equip.getSiteRef(), equip.getFloorRef(), equip.getRoomRef(), equip.getId());
+
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
+        device.addPointsToDb();
+
+        CCUHsApi.getInstance().syncEntityTree();
+
+    }
+
+    private static void deleteExistingLogicalAndConfigPoints(CCUHsApi instance, Equip equip) {
+
+        HashMap<Object,Object> mainSensorPoint = instance.readEntity("point and main and " +
+                "temperature and ti and equipRef == \""+equip.getId()+"\"");
+        if (!mainSensorPoint.isEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(mainSensorPoint.get("id").toString());
+        }
+
+        HashMap<Object,Object> th1ConfigPoint = instance.readEntity("point and th1 and " +
+                "enable and ti and equipRef == \""+equip.getId()+"\"");
+        if (!th1ConfigPoint.isEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(th1ConfigPoint.get("id").toString());
+        }
+
+        HashMap<Object,Object> th2ConfigPoint = instance.readEntity("point and th2 and " +
+                "enable and ti and equipRef == \""+equip.getId()+"\"");
+        if (!th2ConfigPoint.isEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(th2ConfigPoint.get("id").toString());
+        }
+
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {

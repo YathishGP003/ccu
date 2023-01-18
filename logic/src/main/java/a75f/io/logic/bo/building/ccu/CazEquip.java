@@ -1,12 +1,11 @@
 package a75f.io.logic.bo.building.ccu;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -247,20 +246,23 @@ public class CazEquip
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(occupancyId, 0.0);
 
-        Point supplyAirTempPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-supplyAirTemperature")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("ti").addMarker("temp").addMarker("supply").addMarker("cur").addMarker("sensor")
-                .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
-                .setGroup(String.valueOf(nodeAddr))
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String supplyAirTempId = CCUHsApi.getInstance().addPoint(supplyAirTempPoint);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(supplyAirTempId,0.0);
+        String supplyAirTempId = null;
+        if (config.supplyTempSensor.ordinal() != SupplyTempSensor.NONE.ordinal()) {
+            Point supplyAirTempPoint = new Point.Builder()
+                    .setDisplayName(equipDis + "-supplyAirTemperature")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("ti").addMarker("temp").addMarker("supply").addMarker("cur").addMarker("sensor")
+                    .addMarker("logical").addMarker("zone").addMarker("his").addMarker("air")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setUnit("\u00B0F")
+                    .setTz(tz)
+                    .build();
+            supplyAirTempId = CCUHsApi.getInstance().addPoint(supplyAirTempPoint);
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(supplyAirTempId, 0.0);
+        }
 
         Point roomTempSensorPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-RoomTemperature")
@@ -309,42 +311,21 @@ public class CazEquip
 
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
-        if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.NONE) {
+
+        if (config.roomTempSensor == RoomTempSensor.THERMISTOR_1 || config.supplyTempSensor == SupplyTempSensor.THERMISTOR_1) {
+            device.th1In.setEnabled(true);
+        }
+        if (config.roomTempSensor == RoomTempSensor.THERMISTOR_2 || config.supplyTempSensor == SupplyTempSensor.THERMISTOR_2) {
+            device.th2In.setEnabled(true);
+        }
+        if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
             device.currentTemp.setEnabled(true);
-            device.currentTemp.setPointRef(ctID);
-        } else if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_1) {
-            device.currentTemp.setEnabled(true);
-            device.currentTemp.setPointRef(ctID);
-            device.th1In.setEnabled(true);
-            device.th1In.setPointRef(supplyAirTempId);
-        } else if (config.roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_2) {
-            device.currentTemp.setEnabled(true);
-            device.currentTemp.setPointRef(ctID);
-            device.th2In.setEnabled(true);
-            device.th2In.setPointRef(supplyAirTempId);
-        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_1 && config.supplyTempSensor == SupplyTempSensor.NONE) {
-            device.th1In.setEnabled(true);
-            device.th1In.setPointRef(roomTempSensorId);
-        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_1 && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_2) {
-            device.th1In.setEnabled(true);
-            device.th1In.setPointRef(roomTempTypeId);
-            device.th2In.setEnabled(true);
-            device.th2In.setPointRef(supplyAirTempId);
-        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_2 && config.supplyTempSensor == SupplyTempSensor.NONE) {
-            device.th2In.setEnabled(true);
-            device.th2In.setPointRef(roomTempSensorId);
-        } else if (config.roomTempSensor == RoomTempSensor.THERMISTOR_2 && config.supplyTempSensor == SupplyTempSensor.THERMISTOR_1) {
-            device.th1In.setEnabled(true);
-            device.th1In.setPointRef(supplyAirTempId);
-            device.th2In.setEnabled(true);
-            device.th2In.setPointRef(roomTempSensorId);
         }
 
+        setSensorPointRef(device, config.roomTempSensor, config.supplyTempSensor, ctID, roomTempSensorId, supplyAirTempId);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
-
         device.addPointsToDb();
-
 
         setCurrentTemp(0);
         setDesiredTempCooling(74.0);
@@ -354,7 +335,29 @@ public class CazEquip
         setHumidity(0);
 
         CCUHsApi.getInstance().syncEntityTree();
-        updateCurrentTemp(config.roomTempSensor,config.supplyTempSensor);
+    }
+
+    private void setSensorPointRef(ControlMote device, RoomTempSensor roomTempSensor, SupplyTempSensor supplyTempSensor, String ctID, String roomTempSensorId, String supplyAirTempId) {
+
+        switch (roomTempSensor) {
+            case SENSOR_BUS_TEMPERATURE:
+                device.currentTemp.setPointRef(ctID);
+                break;
+            case THERMISTOR_1:
+                device.th1In.setPointRef(roomTempSensorId);
+                break;
+            case THERMISTOR_2:
+                device.th2In.setPointRef(roomTempSensorId);
+                break;
+        }
+        switch (supplyTempSensor) {
+            case THERMISTOR_1:
+                device.th1In.setPointRef(supplyAirTempId);
+                break;
+            case THERMISTOR_2:
+                device.th2In.setPointRef(supplyAirTempId);
+                break;
+        }
     }
 
     String getId(){
@@ -400,85 +403,82 @@ public class CazEquip
     }
 
     private void updateCurrentTemp(RoomTempSensor roomTempSensor, SupplyTempSensor supplyTempSensor) {
+
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> device = hayStack.readEntity("cm and device ");
-        HashMap<Object, Object> currentTemp = hayStack.readEntity("point and current and " +
+        HashMap<Object, Object> currentTempPoint = hayStack.readEntity("point and current and " +
                 "temp and equipRef == \"" + equipRef + "\"");
 
-        if (!device.isEmpty() && !currentTemp.isEmpty()) {
-            if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
-                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
-            } else if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.THERMISTOR_1) {
+        if (!device.isEmpty() && !currentTempPoint.isEmpty()) {
+
+            ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
+            ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
+            ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
+
+            if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 || roomTempSensor == RoomTempSensor.THERMISTOR_1) {
                 ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
-                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!roomTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
-                }
-            } else if (supplyTempSensor == SupplyTempSensor.NONE && roomTempSensor == RoomTempSensor.THERMISTOR_2) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
-                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!roomTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
-                }
-            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
-                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
-                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!supplyTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
-                }
-                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
-            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_1 && roomTempSensor == RoomTempSensor.THERMISTOR_2) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
-                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
-                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!supplyTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), supplyTempSensorPoint.get("id").toString());
-                }
-                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!roomTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), roomTempSensorPoint.get("id").toString());
-                }
-            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 && roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
-                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
-                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!supplyTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
-                }
-                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), currentTemp.get("id").toString());
-            } else if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 && roomTempSensor == RoomTempSensor.THERMISTOR_1) {
-                ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
-                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), false);
-                HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
-                        "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!supplyTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), supplyTempSensorPoint.get("id").toString());
-                }
-                HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
-                        "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
-                if (!roomTempSensorPoint.isEmpty()) {
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), roomTempSensorPoint.get("id").toString());
-                }
             }
+            if (supplyTempSensor == SupplyTempSensor.THERMISTOR_2 || roomTempSensor == RoomTempSensor.THERMISTOR_2) {
+                ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name(), true);
+            }
+            if (roomTempSensor == RoomTempSensor.SENSOR_BUS_TEMPERATURE) {
+                ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name(), true);
+            }
+            updateSensorPoints(supplyTempSensor,roomTempSensor, currentTempPoint);
+
         }
+    }
+
+    private void updateSensorPoints(SupplyTempSensor supplyTempSensor, RoomTempSensor roomTempSensor, HashMap<Object, Object> currentTempPoint) {
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+
+        HashMap<Object, Object> equipHash = CCUHsApi.getInstance().readEntity("equip and group == \""+nodeAddr+"\"");
+        Equip equip = new Equip.Builder().setHashMap(equipHash).build();
+
+        HashMap<Object, Object> supplyTempSensorPoint = hayStack.readEntity(
+                "point and supply and not type and temp and equipRef == \"" + equipRef + "\"");
+        HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+                "point and space and not type and temp and equipRef == \"" + equipRef + "\"");
+
+        boolean supplyTempSensorPointExists = !supplyTempSensorPoint.isEmpty();
+
+        switch (supplyTempSensor) {
+            case NONE:
+                if (supplyTempSensorPointExists) {
+                    CCUHsApi.getInstance().deleteEntity(Objects.requireNonNull(supplyTempSensorPoint.get("id")).toString());
+                }
+                break;
+            case THERMISTOR_1:
+                if (!supplyTempSensorPointExists) {
+                    String supplyAirTempId = CazEquipUtil.createSupplyAirTempPoint(equip, nodeAddr);
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), Objects.requireNonNull(supplyAirTempId));
+                } else {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), Objects.requireNonNull(supplyTempSensorPoint.get("id")).toString());
+                }
+                break;
+            case THERMISTOR_2:
+                if (!supplyTempSensorPointExists) {
+                    String supplyAirTempId = CazEquipUtil.createSupplyAirTempPoint(equip, nodeAddr);
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), Objects.requireNonNull(supplyAirTempId));
+                } else {
+                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), Objects.requireNonNull(supplyTempSensorPoint.get("id")).toString());
+                }
+                break;
+        }
+
+        switch (roomTempSensor) {
+            case SENSOR_BUS_TEMPERATURE:
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name(), Objects.requireNonNull(currentTempPoint.get("id")).toString());
+                break;
+            case THERMISTOR_1:
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), Objects.requireNonNull(roomTempSensorPoint.get("id")).toString());
+                break;
+            case THERMISTOR_2:
+                ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name(), Objects.requireNonNull(roomTempSensorPoint.get("id")).toString());
+                break;
+        }
+
     }
 
     public CazProfileConfig getProfileConfiguration() {

@@ -316,12 +316,11 @@ public class MigrationUtil {
 
         String analogIn1Id = CCUHsApi.getInstance().addPoint(analogIn);
         CCUHsApi.getInstance().writeDefaultValById(analogIn1Id, (config.analogIn1 ? 1.0 : 0));
+        SmartNode.setPointEnabled(Integer.parseInt(nodeAddr),Port.ANALOG_IN_ONE.name(), false);
+        SmartNode.updatePhysicalPointType(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), String.valueOf(8));
+        SmartNode.updatePhysicalPointRef(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), analogIn1Id);
 
-        SmartNode device = new SmartNode(Integer.parseInt(nodeAddr), siteRef, actualEquip.getFloorRef(), actualEquip.getRoomRef(), equipRef);
-        device.analog1In.setEnabled(config.analogIn1);
-        device.analog1In.setPointRef(analogIn1Id);
-        device.analog1In.setType(String.valueOf(8));
-        device.addPointsToDb();
+
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {

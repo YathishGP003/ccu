@@ -315,16 +315,6 @@ public class MigrationUtil {
         CCUHsApi.getInstance().writeDefaultValById(roomTempTypeId, 0.0);
 
         HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
-        String tz = siteMap.get("tz").toString();
-
-        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equip.getDisplayName(), equip.getId(),
-                equip.getSiteRef(), equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress), "ti", tz, false));
-
-        ControlMote device = new ControlMote(Integer.parseInt(nodeAddress), equip.getSiteRef(), equip.getFloorRef(), equip.getRoomRef(), equip.getId());
-
-        device.rssi.setPointRef(heartBeatId);
-        device.rssi.setEnabled(true);
-        device.addPointsToDb();
 
         CCUHsApi.getInstance().syncEntityTree();
 

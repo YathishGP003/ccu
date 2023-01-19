@@ -54,6 +54,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
@@ -248,7 +249,27 @@ public class MigrationUtil {
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
+
+        if(!PreferenceUtil.getHyperStatCpuAirTagMigration()){
+            doAirTagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHyperStatCpuAirTagMigration();
+        }
+
         L.saveCCUState();
+    }
+
+    private static void doAirTagMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip and hyperstat");
+        for (HashMap<Object, Object> hsEquip : hsEquips) {
+            String equipRef = hsEquip.get("id").toString();
+            ArrayList<HashMap<Object, Object>> sensorPoints = ccuHsApi.readAllEntities("point and hyperstat and sensor and (co2 or voc) and equipRef == \"" +equipRef+"\"");
+            String updatedTag = "air";
+            for (HashMap<Object, Object> sensorPoint : sensorPoints) {
+                Point updatedPoint = new Point.Builder().setHashMap(sensorPoint).addMarker(updatedTag).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        }
     }
 
     private static void MigrateTIChanges(CCUHsApi instance) {

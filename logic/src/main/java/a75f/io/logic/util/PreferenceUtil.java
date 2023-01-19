@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -442,4 +443,11 @@ public class PreferenceUtil {
 
     }
 
+    public static boolean getHyperStatCpuAirTagMigration() {
+        return false;
+    }
+
+    public static void setHyperStatCpuAirTagMigration() {
+        setBooleanPreference(HYPERSTAT_AIR_TAG_MIGRATION, true);
+    }
 }

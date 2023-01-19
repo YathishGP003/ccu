@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
@@ -31,7 +32,8 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -120,7 +122,8 @@ public class Globals {
     private int tempOverCount = 0;
 
     private long ccuUpdateTriggerTimeToken;
-    
+
+    private boolean recoveryMode = false;
     private Globals() {
     }
 
@@ -232,6 +235,7 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
+        setRecoveryMode();
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -508,6 +512,12 @@ public class Globals {
                             cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuProfile);
                             break;
+
+                        case HYPERSTAT_TWO_PIPE_FCU:
+                            HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
+                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(pipe2Profile);
+                            break;
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
                             hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
@@ -630,5 +640,16 @@ public class Globals {
         if(heatDTMin >= heatDTMax ||  heatDTMindf >= heatDTMaxdf) return false;
         else return true;
     }
-    
+
+    public void setRecoveryMode() {
+        recoveryMode = SystemProperties.getInt("renatus_recovery",0) > 0;
+    }
+
+    public boolean isRecoveryMode() {
+        return recoveryMode;
+   }
+
+    public boolean getBuildingProcessStatus() {
+        return mProcessJob.getStatus();
+    }
 }

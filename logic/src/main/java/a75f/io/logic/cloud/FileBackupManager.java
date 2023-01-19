@@ -1,15 +1,28 @@
 package a75f.io.logic.cloud;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloudservice.FileBackupService;
 import static a75f.io.logic.L.TAG_CCU_BACKUP;
-import static a75f.io.logic.L.TAG_CCU_RESTORE;
+import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
 import android.util.Log;
 import com.google.gson.Gson;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
@@ -41,6 +54,9 @@ public class FileBackupManager {
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         return okHttpClient;
     }
@@ -51,35 +67,41 @@ public class FileBackupManager {
         }
     }
 
-    public void getConfigFiles(String siteId, String ccuId){
+    public Map<String, Integer> getConfigFiles(String siteId, String ccuId){
         Retrofit retrofit = getRetrofitForFileStorageService();
         Call<ResponseBody> call = retrofit.create(FileBackupService.class).getConfigFiles(siteId, ccuId);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_RESTORE, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_RESTORE,
-                            "Error while Retrieving CCU Config files for Site ID " + siteId +" and CCU ID " + ccuId);
-                    return;
-                }
-                try {
-                    String fileName = FileConstants.CCU_CONFIG_FILE_PATH + FileConstants.CCU_CONFIG_ZIP_FILE_NAME;
-                    FileOperationsUtil.zipBytes(fileName, response.body().bytes());
-                    FileOperationsUtil.unzipFile(fileName,
-                            FileConstants.CCU_CONFIG_FILE_PATH);
-                    deleteZipFileFromCCU(new File(fileName));
-                } catch (IOException e) {
-                    e.printStackTrace();
+        Map<String, Integer> modbusConfigs = new HashMap<>();
+        try {
+            Response<ResponseBody> response = call.execute();
+            if(response.isSuccessful()){
+                String fileName = FileConstants.CCU_CONFIG_FILE_PATH + FileConstants.CCU_CONFIG_ZIP_FILE_NAME;
+                FileOperationsUtil.zipBytes(fileName, response.body().bytes());
+                FileOperationsUtil.unzipFile(fileName,
+                        FileConstants.CCU_CONFIG_FILE_PATH);
+                deleteZipFileFromCCU(new File(fileName));
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                Document doc = db.parse(new File(FileConstants.CCU_CONFIG_FILE_PATH + FileConstants.CCU_CONFIG_FILE_NAME));
+                doc.getDocumentElement().normalize();
+                NodeList intList = doc.getElementsByTagName("int");
+                for (int temp = 0; temp < intList.getLength(); temp++) {
+                    Node node = intList.item(temp);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) node;
+                        String name = element.getAttribute("name");
+                        String value = element.getAttribute("value");
+                        modbusConfigs.put(name, Integer.parseInt(value));
+                        CcuLog.e(TAG_CCU_REPLACE, "name:" + name +"-"+ "value:" + value);
+                    }
                 }
             }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
-                CcuLog.e(TAG_CCU_RESTORE, t.getStackTrace().toString());
-            }
-        });
+        } catch (IOException | SAXException e) {
+            e.printStackTrace();
+            CcuLog.e(TAG_CCU_REPLACE,  e.getMessage());
+        }
+        finally{
+            return modbusConfigs;
+        }
     }
 
     public void getModbusSideLoadedJsonsFiles(String siteId, String ccuId){
@@ -89,8 +111,8 @@ public class FileBackupManager {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
-                    CcuLog.e(TAG_CCU_RESTORE, new Gson().toJson(response.errorBody()));
-                    CcuLog.i(TAG_CCU_RESTORE,
+                    CcuLog.e(TAG_CCU_REPLACE, new Gson().toJson(response.errorBody()));
+                    CcuLog.i(TAG_CCU_REPLACE,
                             "Error while Retrieving Modbus side loaded JSON files for Site ID " + siteId +" and CCU" +
                                     " ID " + ccuId);
                     return;
@@ -108,7 +130,7 @@ public class FileBackupManager {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 t.printStackTrace();
-                CcuLog.e(TAG_CCU_RESTORE, t.getStackTrace().toString());
+                CcuLog.e(TAG_CCU_REPLACE, t.getStackTrace().toString());
             }
         });
     }

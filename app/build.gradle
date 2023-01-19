@@ -194,7 +194,7 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 
     // crash reporting
-    //implementation 'com.raygun:raygun4android:4.+'
+    implementation 'com.raygun:raygun4android:4.+'
 
     implementation 'com.opencsv:opencsv:4.0'
     implementation 'org.jsoup:jsoup:1.10.3'
@@ -227,7 +227,7 @@ def getVersionCodeTimestamp() {
     Since 2022, the date format cannot be converted to int as it exceeds the int limit.
     With the below fix, version code can be used for many years as we are changing only the last four digits
      */
-    def code = 2112240001 +  LocalDate.now().getYear() + LocalDate.now().getDayOfYear()
+    def code = 2112240001 +  (1000 * LocalDate.now().getYear()) + LocalDate.now().getDayOfYear()
     return code
 }
 

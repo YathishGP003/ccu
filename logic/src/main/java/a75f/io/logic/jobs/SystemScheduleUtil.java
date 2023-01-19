@@ -391,8 +391,6 @@ public class SystemScheduleUtil {
         }
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null){
             CCUHsApi.getInstance().updateScheduleNoSync(schedule, schedule.getRoomRef());
-        } else {
-            CCUHsApi.getInstance().updateScheduleNoSync(schedule, null);
         }
     
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getEquipRef()+"\"");

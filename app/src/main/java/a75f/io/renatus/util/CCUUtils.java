@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -480,107 +481,7 @@ public class CCUUtils {
 
 
 	static boolean isRunning = false;
-	public static List<Address> getLocationInfo(final String locadd) {
-		Log.d("CCU_WEATHER",locadd);
-		if(locadd.isEmpty() || isRunning)
 
-			return locAddress;
-		else {
-			final AsyncTask<Void, Integer, List<Address>> task = new AsyncTask<Void, Integer, List<Address>>() {
-
-				@Override
-				protected void onPostExecute(List<Address> addresses) {
-					isRunning = false;
-					Log.d("CCU_WEATHER","ccutils onPostExe="+addresses.size());
-					if (!addresses.isEmpty()) {
-						double lat = (float) addresses.get(0).getLatitude();
-						double lng = (float) addresses.get(0).getLongitude();
-						String address = addresses.get(0).getAddressLine(0) ;
-						SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-						spDefaultPrefs.edit().putFloat("lat", (float) lat).commit();
-						spDefaultPrefs.edit().putFloat("lng",  (float) lng).commit();
-						spDefaultPrefs.edit().putString("address",address).commit();
-						WeatherDataDownloadService.getWeatherData(null);
-					}
-					super.onPostExecute(addresses);
-				}
-
-				@Override
-				protected List<Address> doInBackground(Void... params) {
-					isRunning = true;
-					locAddress.clear();
-					SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
-
-					if (BuildConfig.DEBUG)
-					{
-						StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-						StrictMode.setThreadPolicy(policy);
-					}
-
-					HttpClient client = HTTPUtils.getNewHttpClient();
-					try {
-						//String address = locadd.replaceAll(" ", "%20");
-                        String address = locadd.replaceAll(" ", "+");
-						//https://maps.google.com/maps/api/geocode/json?address=54016, United States&sensor=false&key=AIzaSyD3mUArjl1fvA7EBy6M8x8FJSKpKS3RmOg
-						HttpPost httppost = new HttpPost( "https://maps.google.com/maps/api/geocode/json?address=" + address + "&key="+getEnvGoogleMapKeys());
-
-						org.apache.http.HttpResponse response;
-						StringBuilder stringBuilder = new StringBuilder();
-
-						response = client.execute(httppost);
-						HttpEntity entity = response.getEntity();
-						InputStream stream = entity.getContent();
-						int b;
-						while ((b = stream.read()) != -1) {
-							stringBuilder.append((char) b);
-						}
-						client.getConnectionManager().closeExpiredConnections();
-						Log.d("CCU_WEATHER","success auto on response="+response.getStatusLine() + ","+stringBuilder.toString());
-						JSONObject jsonObject = new JSONObject(stringBuilder.toString());
-						JSONArray array = (JSONArray) jsonObject.get("results");
-						if(array.length() > 0) {
-							for (int i = 0; i < 1; i++) {
-								double lon = 0;
-								double lat = 0;
-								String name = "";
-								try {
-									lon = array.getJSONObject(i).getJSONObject("geometry")
-											.getJSONObject("location").optDouble("lng");
-
-									lat = array.getJSONObject(i).getJSONObject("geometry")
-											.getJSONObject("location").optDouble("lat");
-									name = array.getJSONObject(i)
-											.optString("formatted_address");
-									Address addr = new Address(Locale.getDefault());
-									addr.setLatitude(lat);
-									addr.setLongitude(lon);
-									addr.setAddressLine(0, name != null ? name : "");
-									spDefaultPrefs.edit().putFloat("lat", (float) lat).commit();
-									spDefaultPrefs.edit().putFloat("lng", (float) lon).commit();
-									locAddress.add(addr);
-								} catch (JSONException e) {
-									e.printStackTrace();
-
-								}
-							}
-						}
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-					catch (ClientProtocolException e1) {
-					}
-					catch (IOException e2) {
-					}finally {
-						client.getConnectionManager().closeExpiredConnections();
-					}
-					return locAddress;
-				}
-			};
-			task.execute();
-		}
-		return locAddress;
-
-	}
 	public static String getTimeFromTimeStamp(long timeStamp, String timezone) {
 		String ret= null;
 

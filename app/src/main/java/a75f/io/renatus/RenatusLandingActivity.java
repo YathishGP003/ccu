@@ -216,11 +216,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
             setViewPager();
             ScheduleManager.getInstance().updateSchedules();
-            HashMap site = CCUHsApi.getInstance().read("site");
-            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-            String siteCountry = site.get("geoCountry").toString();
-            String siteZipCode = site.get("geoPostalCode").toString();
-            CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
+
+            WeatherDataDownloadService.getWeatherData();
+
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -294,13 +292,18 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
         FragmentManager fm = getSupportFragmentManager();
-        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
-            fm.popBackStackImmediate(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            if(fragment.getClass().toString().contains("CreateNewSite")){
-               getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        try {
+
+            for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                if (fragment.getClass().toString().contains("CreateNewSite")) {
+                    getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                }
+            }
+        }catch (IllegalStateException e){
+            e.printStackTrace();
         }
     }
 

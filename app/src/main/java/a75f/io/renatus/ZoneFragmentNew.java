@@ -1,5 +1,15 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
+import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
+import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -42,18 +52,25 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.joda.time.Interval;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -71,29 +88,24 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage;
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus;
-import a75f.io.logic.bo.building.hyperstat.common.SettingsKt;
+import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
-import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.HyperStatScheduler;
+import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.model.ZoneViewData;
@@ -102,36 +114,16 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
-import a75f.io.renatus.util.LocationDetails;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.util.RelayUtil;
 import a75f.io.renatus.util.SeekArc;
-import androidx.annotation.Nullable;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
-import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
-import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
-import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
-import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
-import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
-
-
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
@@ -290,7 +282,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
-                WeatherDataDownloadService.getWeatherData(ZoneFragmentNew.this);
+                WeatherDataDownloadService.getWeatherData();
                 if (weatherUpdateHandler != null)
                     weatherUpdateHandler.post(weatherUpdate);
             }
@@ -545,8 +537,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
-            double weatherHumidity = WeatherDataDownloadService.getHumidity();
-            weatherHumidity = weatherHumidity * 100;
+            double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
             weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
             note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
@@ -568,9 +559,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
 
             weather_condition.setText(WeatherDataDownloadService.getSummary());
-            String weather_icon_string = WeatherDataDownloadService.getIcon().toString().replaceAll("-", "");
+            String weatherIconId = WeatherDataDownloadService.getIcon();
             Context context = weather_icon.getContext();
-            int id = context.getResources().getIdentifier(weather_icon_string, "drawable", context.getPackageName());
+            int id = context.getResources().getIdentifier("weather_icon_" + weatherIconId, "drawable", context.getPackageName());
             weather_icon.setImageResource(id);
         }
     }
@@ -717,7 +708,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             profileType.contains(profileDualDuct) ||
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
                             profileType.contains(profileOTN)||
-                            profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())
+                            profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
+                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())
                     ) {
                         tempModule = true;
                     }
@@ -1120,7 +1112,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
 
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
 
         double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
@@ -1230,7 +1222,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             ScaleControlToNormal(270,210,nonTempControl);
@@ -1261,7 +1253,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
@@ -1283,7 +1275,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -1301,7 +1293,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
@@ -1397,10 +1389,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                                HashMap cpuEquipPoints = ZoneViewData.getHyperstatCPUEquipPoints(p);
-                                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                                loadHyperstatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup());
-                                //isCPUloaded = true;
+                                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
+                                HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                            }
+
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(p);
+                                HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
                         }
                     }
@@ -1838,15 +1833,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                HashMap cpuEquipPoints = ZoneViewData.getHyperstatCPUEquipPoints(updatedEquip);
+                Log.i("DEV_DEBUG", "1867: ");
+                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                loadHyperstatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup());
+                HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
 
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_VRV.name())) {
                 HyperStatVrvZoneViewKt.loadView(inflater, linearLayoutZonePoints,
                                                 updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
                                                 p.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
+                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
+                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
+                HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+
             }
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");
@@ -2050,7 +2052,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
 
                                         }
                                         isExpanded = false;
@@ -2209,7 +2211,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
-                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
+                                String equipType = equipTypes.get(0);
+                                equipType.trim();
+                                tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
@@ -2276,13 +2281,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
         textViewLabel4.setText("Supply Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue4.setText(String.valueOf(fahrenheitToCelsius(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
         }
@@ -2374,6 +2379,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
@@ -2388,12 +2394,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Discharge Airflow : ");
+        textViewLabel2.setText("Supply Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
-            textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+            textViewValue2.setText(dabPoints.get("Supply Airflow").toString());
         }
         if (!Boolean.TRUE.equals(dabPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
@@ -2401,6 +2407,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
+
+        View viewReheat = null;
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+            viewReheat = inflater.inflate(R.layout.zone_item_type3, null);
+            TextView reheatText = viewReheat.findViewById(R.id.text_label);
+            TextView reheatVal = viewReheat.findViewById(R.id.text_value);
+            reheatText.setText("      Reheat Coil : ");
+            reheatVal.setText(dabPoints.get("Reheat Coil").toString());
+            linearLayoutZonePoints.addView(viewReheat);
+        }
+
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
@@ -2408,7 +2425,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {
-            viewPointRow1.setPadding(0, 0, 0, 40);
+            if (viewReheat != null) {
+                viewReheat.setPadding(0, 0, 0, 40);
+            } else {
+                viewPointRow1.setPadding(0, 0, 0, 40);
+            }
         }
     }
 
@@ -2460,7 +2481,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewLabel2.setText("Discharge Airflow : ");
         try {
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dualDuctPoints.get("DischargeAirflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
         }
@@ -3453,7 +3474,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
     @Override
     public void onResume() {
-        // TODO Auto-generated method stub
         super.onResume();
         // loadGrid(parentRootView);
         if (weather_data.getVisibility() == View.VISIBLE) {
@@ -3472,7 +3492,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
-            HyperStatScheduler.Companion.setZoneDataInterface(this);
+            HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         }
     }
 
@@ -3484,7 +3504,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         ScheduleManager.getInstance().setScheduleDataInterface(null);
         ScheduleManager.getInstance().setZoneDataInterface(null);
         StandaloneScheduler.setZoneDataInterface(null);
-        HyperStatScheduler.Companion.setZoneDataInterface(this);
+        HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
     }
 
@@ -3498,7 +3518,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             ScheduleManager.getInstance().setScheduleDataInterface(this);
             ScheduleManager.getInstance().setZoneDataInterface(this);
             StandaloneScheduler.setZoneDataInterface(this);
-            HyperStatScheduler.Companion.setZoneDataInterface(this);
+            HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
         } else {
 
@@ -3507,14 +3527,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             ScheduleManager.getInstance().setScheduleDataInterface(null);
             ScheduleManager.getInstance().setZoneDataInterface(null);
             StandaloneScheduler.setZoneDataInterface(null);
-            HyperStatScheduler.Companion.setZoneDataInterface(null);
+            HyperStatUserIntentHandler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
-    }
-
-    @Override
-    public void onDataReceived() {
-        UpdateWeatherData();
     }
 
     class FloorComparator implements Comparator<Floor> {
@@ -3843,7 +3858,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
         zoneDetails.setTag(gridItemObj);
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         seekArc.setSense(true);
@@ -3913,10 +3928,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            ScaleControlToNormal(260, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
@@ -3945,7 +3960,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
                             //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -3968,7 +3983,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -3986,7 +4001,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
                     //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
@@ -4068,265 +4083,4 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         linearLayoutZonePoints.addView(viewPointRow1);
 
     }
-
-
-    public void loadHyperstatCpuProfile(HashMap cpuEquipPoints, LayoutInflater inflater,
-                                        LinearLayout linearLayoutZonePoints,
-                                        String equipId, String nodeAddress) {
-
-        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
-        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
-        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
-        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
-
-        setTitleStatusConfig(viewTitle,viewStatus,nodeAddress,
-                cpuEquipPoints.get(HSZoneStatus.STATUS.name()).toString());
-
-        setUpConditionFanConfig(viewPointRow1,cpuEquipPoints,equipId,nodeAddress);
-
-        setUpHumidifierDeHumidifier(viewPointRow2,cpuEquipPoints,equipId);
-
-        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        if( isCelsiusTunerAvailableStatus()) {
-            textAirflowValue.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(Float.parseFloat(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString().replaceAll("[^0-9\\.]",""))))))+ " \u00B0C");
-        } else {
-            textAirflowValue.setText(cpuEquipPoints.get(HSZoneStatus.DISCHARGE_AIRFLOW.name()).toString());
-        }
-
-        linearLayoutZonePoints.addView(viewTitle);
-        linearLayoutZonePoints.addView(viewStatus);
-        linearLayoutZonePoints.addView(viewPointRow2);
-        linearLayoutZonePoints.addView(viewPointRow1);
-        linearLayoutZonePoints.addView(viewDischarge);
-
-
-    }
-
-
-
-    private void setTitleStatusConfig(View viewTitle,View viewStatus, String nodeAddress, String status ){
-        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
-        textViewTitle.setText(SettingsKt.PROFILE + " - (" + nodeAddress + ")");
-        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
-
-        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        textViewStatus.setText(status);
-        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
-        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
-    }
-
-
-    private void setUpConditionFanConfig(View viewPointRow1, HashMap cpuEquipPoints , String equipId, String nodeAddress){
-
-        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
-        textViewLabel1.setText("Conditioning Mode : ");
-        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
-        textViewLabel2.setText("Fan Mode : ");
-        Spinner conditioningModeSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
-        Spinner fanModeSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
-        CCUUiUtil.setSpinnerDropDownColor(conditioningModeSpinner,getContext());
-        CCUUiUtil.setSpinnerDropDownColor(fanModeSpinner,getContext());
-
-        int conditionMode = 0;
-        int fanMode = 0;
-        try {
-            conditionMode = (int) (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_MODE.name()));
-            fanMode = (int)cpuEquipPoints.get(HSZoneStatus.FAN_MODE.name());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-
-        if (cpuEquipPoints.containsKey(HSZoneStatus.CONDITIONING_ENABLED.name())) {
-            if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Cool Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                        R.layout.spinner_zone_item);
-                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
-                    conditionMode = conModeAdapter.getCount() - 1;
-                }
-            } else if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Heat Only")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                        R.layout.spinner_zone_item);
-                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
-                    conditionMode = conModeAdapter.getCount() - 1;
-                }
-            }
-            if (cpuEquipPoints.get(HSZoneStatus.CONDITIONING_ENABLED.name()).toString().contains("Off")) {
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
-                conditionMode = 0;
-            }
-
-        }
-        try {
-            conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-            conditioningModeSpinner.setAdapter(conModeAdapter);
-            conditioningModeSpinner.setSelection(conditionMode, false);
-        }catch (Exception e){
-            Log.i(L.TAG_CCU_ZONE, "Exception while setting condition ode: "+e.getMessage()+ " Con Mode "+fanMode);
-            e.printStackTrace();
-        }
-        
-        int fanSpinnerSelectionValues =
-                RelayUtil.getFanOptionByLevel((Integer)cpuEquipPoints.get(HSZoneStatus.FAN_LEVEL.name()));
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(),fanSpinnerSelectionValues, R.layout.spinner_zone_item);
-
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        try {
-            fanModeSpinner.setAdapter(fanModeAdapter);
-            fanModeSpinner.setSelection(fanMode, false);
-        }catch (Exception e){
-            Log.i(L.TAG_CCU_ZONE, "Exception while setting fan ode: "+e.getMessage()+ " fan Mode "+fanMode);
-            e.printStackTrace();
-        }
-        setSpinnerListenerForHyperstat(conditioningModeSpinner,HSZoneStatus.CONDITIONING_MODE,equipId,conditionMode, nodeAddress);
-        setSpinnerListenerForHyperstat(fanModeSpinner,HSZoneStatus.FAN_MODE,equipId,fanMode, nodeAddress);
-
-    }
-
-    private void setUpHumidifierDeHumidifier(View viewPointRow2,HashMap cpuEquipPoints,  String equipId){
-
-        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
-        TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
-
-        Spinner humiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue1);
-        Spinner dehumiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue2);
-
-        ArrayList<String> arrayHumdityTargetList = new ArrayList<>();
-        for (int pos = 1; pos <= 100; pos++)
-            arrayHumdityTargetList.add(pos+"%");
-        ArrayAdapter<String> humiditytargetadapter = new ArrayAdapter<>(
-                getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
-        humiditytargetadapter.setDropDownViewResource(R.layout.spinner_item_grey);
-
-        if(cpuEquipPoints.containsKey(HSZoneStatus.TARGET_HUMIDITY.name())){
-            textViewLabel3.setText("Target Humidity :");
-
-            humiditySpinner.setAdapter(humiditytargetadapter);
-            double targetHumidity = (double) cpuEquipPoints.get(HSZoneStatus.TARGET_HUMIDITY.name());
-            humiditySpinner.setSelection((int) targetHumidity - 1, false);
-
-            humiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    handleHumidityMode((int)targetHumidity,position,equipId);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
-        }else{
-            (viewPointRow2.findViewById(R.id.lt_column1)).setVisibility(View.GONE);
-        }
-        if(cpuEquipPoints.containsKey(HSZoneStatus.TARGET_DEHUMIDIFY.name())){
-            textViewLabel4.setText("Target Dehumidity :");
-            dehumiditySpinner.setAdapter(humiditytargetadapter);
-            double targetDeHumidity = (double) cpuEquipPoints.get(HSZoneStatus.TARGET_DEHUMIDIFY.name());
-            dehumiditySpinner.setSelection((int) targetDeHumidity - 1, false);
-          /*  setSpinnerListenerForHyperstat(
-                    dehumiditySpinner,HSZoneStatus.TARGET_DEHUMIDIFY,equipId,(int) targetDeHumidity);*/
-            dehumiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    handleDeHumidityMode((int)targetDeHumidity,position,equipId);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            if((viewPointRow2.findViewById(R.id.lt_column1)).getVisibility() == (View.GONE)){
-                textViewLabel4.setPadding(52,0,0,0);
-            }
-
-        }else{
-            (viewPointRow2.findViewById(R.id.lt_column2)).setVisibility(View.GONE);
-        }
-    }
-
-    private void setSpinnerListenerForHyperstat(View view, HSZoneStatus spinnerType,String equipId,
-                                                int previousPosition, String nodeAddress){
-        AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (spinnerType){
-                    case CONDITIONING_MODE : handleConditionMode(previousPosition,position,equipId,nodeAddress); break;
-                    case FAN_MODE : handleFanMode(previousPosition,position,equipId, nodeAddress); break;
-                    case TARGET_HUMIDITY : handleHumidityMode(previousPosition,position,equipId);break;
-                    case TARGET_DEHUMIDIFY : handleDeHumidityMode(previousPosition,position,equipId);break;
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        };
-        ((Spinner)view).setOnItemSelectedListener(onItemSelectedListener);
-    }
-
-    private void handleConditionMode(int previousPosition,int selectedPosition, String equipId,String nodeAddress){
-        Log.i(L.TAG_CCU_HSCPU, "handleConditionMode: selectedPosition "+selectedPosition);
-        int actualConditioningMode = HSHaystackUtil.Companion.getActualConditioningMode(nodeAddress,selectedPosition);
-        Log.i(L.TAG_CCU_HSCPU, "handleConditionMode: actualConditioningMode "+actualConditioningMode);
-        HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
-                "temp and conditioning and mode and cpu", actualConditioningMode);
-    }
-
-    private void handleFanMode(int previousPosition, int selectedPosition, String equipId, String nodeAddress){
-        if (isCPUFromPubNub) {
-            if (previousPosition != selectedPosition) {
-                updateFanMode(equipId,selectedPosition, nodeAddress);
-            }
-            isCPUFromPubNub = false;
-        } else {
-            updateFanMode(equipId,selectedPosition, nodeAddress);
-        }
-    }
-
-    // Save the fan mode in cache
-    private void updateFanMode(String equipId,int selectedPosition, String nodeAddress){
-
-        FanModeCacheStorage cacheStorage = new FanModeCacheStorage();
-        int actualFanMode = HSHaystackUtil.Companion.getActualFanMode(nodeAddress,selectedPosition);
-        HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                equipId, "fan and operation and mode and cpu", actualFanMode);
-
-        if ((selectedPosition != 0) && (selectedPosition % 3 == 0))
-            cacheStorage.saveFanModeInCache(equipId,selectedPosition);
-        else
-            cacheStorage.removeFanModeFromCache(equipId);
-    }
-
-    private void handleHumidityMode(int targetHumidity,int selectedPosition, String equipId){
-        if (isHPUFromPubNub) {
-            if (targetHumidity != (selectedPosition + 1)) {
-                HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                        equipId, "target and humidifier and cpu", selectedPosition + 1);
-            }
-        }else{
-            HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                    equipId, "target and humidifier and cpu", selectedPosition + 1);
-        }
-    }
-
-    private void handleDeHumidityMode(int targetDeHumidity,int selectedPosition, String equipId){
-        if (isHPUFromPubNub) {
-            if (targetDeHumidity != (selectedPosition + 1)) {
-                HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                        equipId, "target and dehumidifier and cpu", selectedPosition + 1);
-            }
-        }else{
-            HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                    equipId, "target and dehumidifier and cpu", selectedPosition + 1);
-        }
-    }
-
 }

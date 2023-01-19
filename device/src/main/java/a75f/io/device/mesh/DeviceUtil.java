@@ -37,10 +37,10 @@ public class DeviceUtil {
                 return val;
             case "10-0v":
                 return (short) (100 - val);
-            case "2-10v":
+           /* case "2-10v":
                 return (short) (20 + scaleAnalog(val, 80));
             case "10-2v":
-                return (short) (100 - scaleAnalog(val, 80));
+                return (short) (100 - scaleAnalog(val, 80));*/
             default:
             String [] arrOfStr = type.split("-");
             if (arrOfStr.length == 2)

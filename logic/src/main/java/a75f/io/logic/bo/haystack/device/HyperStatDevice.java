@@ -248,12 +248,14 @@ public class HyperStatDevice {
                                                          .read("equip and group == \""+hyperStatNodeAddress+"\"")).build();
         String sensorUnit = "";
         boolean isOccupancySensor = false;
+        boolean hasAirMarker = false;
         switch (p){
             case SENSOR_NO:
             case SENSOR_CO2_EQUIVALENT:
             case SENSOR_CO:
             case SENSOR_CO2:
                 sensorUnit = "ppm";
+                hasAirMarker = true;
                 break;
             case SENSOR_ILLUMINANCE:
                 sensorUnit = "lux";
@@ -266,6 +268,7 @@ public class HyperStatDevice {
                 break;
             case SENSOR_VOC:
                 sensorUnit = "ppb";
+                hasAirMarker = true;
                 break;
             case SENSOR_PM2P5:
             case SENSOR_PM10:
@@ -307,6 +310,10 @@ public class HyperStatDevice {
         }
         if (equip.getMarkers().contains(Tags.SENSE)) {
             equipSensor.addMarker(Tags.SENSE);
+        }
+
+        if (hasAirMarker) {
+            equipSensor.addMarker(Tags.AIR);
         }
         String pointRef = CCUHsApi.getInstance().addPoint(equipSensor.build());
 

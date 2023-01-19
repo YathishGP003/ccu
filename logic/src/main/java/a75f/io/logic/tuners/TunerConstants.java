@@ -149,7 +149,8 @@ public class TunerConstants
     public static final String LCM_TUNER = "LCM";
     public static final String DUAL_DUCT_TUNER_GROUP = "DAB";
     public static final String OTN_TUNER_GROUP = "OTN";
-    
+    public static final String HYPERSTAT_TUNER_GROUP = "HYPERSTAT";
+
     public static final double DEFAULT_COOLING_DB = 2.0; //Default deadband value based on dual temp diff 70 and 74 (// (74-70)/2.0)
     public static final double DEFAULT_HEATING_DB = 2.0;
     public static final double DEFAULT_COOLING_DB_MULTPLIER = 0.5;
@@ -205,4 +206,7 @@ public class TunerConstants
     public static final double AIR_FLOW_CFM_INTEGRAL_K_FACTOR = 0.5;
 
     public static final String DAB = "dab";
+
+    public static final double DAB_REHEAT_OFFSET_DEFAULT_VAL = 2;
+    public static final double DAB_RELAY_HYSTERESIS_DEFAULT_VAL = 10;
 }

@@ -66,9 +66,7 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.logic.cloud.CloudConnectionManager;
-import a75f.io.logic.cloud.CloudConnectionResponseCallback;
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
@@ -1476,9 +1474,10 @@ public class FloorPlanFragment extends Fragment {
                     break;
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddress)
+                case HYPERSTAT_TWO_PIPE_FCU:
+                    showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatSenseFragment.ID);
+                            HyperStatFragment.ID);
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

@@ -148,8 +148,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
                 }
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
-			boolean usedByOtherCcu = HSUtilKtKt.isFloorUsedByOtherCcuAsync(floorId);
-			if (usedByOtherCcu) {
+			boolean usedByOtherApplication = HSUtilKtKt.isFloorUsedByOtherApplicationAsync(floorId);
+			if (usedByOtherApplication) {
 				CCUHsApi.getInstance().deleteFloorEntityTreeLeavingRemoteFloorIntact(floorId);
 			} else {
 				CCUHsApi.getInstance().deleteEntityTree(floorId);

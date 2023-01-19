@@ -5,13 +5,13 @@ package a75f.io.api.haystack
  */
 class Queries {
     companion object{
-        const val OUT = "out"
-        const val IN = "in"
-        const val ANALOG1_OUT = "analog1 and out"
-        const val ANALOG2_OUT = "analog2 and out"
-        const val ANALOG3_OUT = "analog3 and out"
-        const val ANALOG1_IN = "analog1 and in"
-        const val ANALOG2_IN = "analog2 and in"
+        const val OUT = "output"
+        const val IN = "input"
+        const val ANALOG1_OUT = "analog1 and output"
+        const val ANALOG2_OUT = "analog2 and output"
+        const val ANALOG3_OUT = "analog3 and output"
+        const val ANALOG1_IN = "analog1 and input"
+        const val ANALOG2_IN = "analog2 and input"
         const val EQUIP_AND_TUNER = "equip and tuner"
         const val SENSE_EQUIP = "equip and sense"
         const val PI_LOOP_EQUIP = "equip and pid"

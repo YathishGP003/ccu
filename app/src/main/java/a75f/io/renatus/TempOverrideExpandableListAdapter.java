@@ -49,8 +49,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -545,7 +545,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setSelection(0);
                         spinner_relay.setSelection(0,false);
                     } else if (expandedListText.startsWith("Th")) {
-                        value = value * 0.01;
+                        value = value * 0.001;
                         String thermistorMapped = getZoneMapping("Thermistor" + expandedListText.substring(2, 3), listPosition, convertView);
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3) + "\n(" + thermistorMapped + ")");
                         expandedListTextVal.setText("" + value + " " + "Kilo ohms");

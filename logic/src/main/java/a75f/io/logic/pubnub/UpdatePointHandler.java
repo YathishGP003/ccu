@@ -27,6 +27,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.logic.pubnub.hyperstat.HyperstatReconfigurationHandler;
 
 public class UpdatePointHandler
 {
@@ -91,8 +92,11 @@ public class UpdatePointHandler
             return;
         }
 
-        if (HSUtil.isHSCPUConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperstatCPUConfigHandler.Companion.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+        if (HSUtil.isHyperStatConfig(pointUid, CCUHsApi.getInstance())
+                && !localPoint.getMarkers().contains(Tags.DESIRED)
+                && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
+                && !localPoint.getMarkers().contains(Tags.TUNER)) {
+            HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
@@ -143,7 +147,7 @@ public class UpdatePointHandler
             logPointArray(localPoint);
         
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
                 updatePoints(localPoint);
             } catch (InterruptedException e) {
                 e.printStackTrace();

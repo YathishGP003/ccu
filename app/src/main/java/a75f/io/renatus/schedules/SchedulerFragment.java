@@ -311,6 +311,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
+        textViewScheduletitle.setFocusable(true);
 
 
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
@@ -1231,7 +1232,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             boolean isSpecialSchedule =
                     getArguments().containsKey(PARAM_IS_SPECIAL_SCHEDULE) && getArguments().getBoolean(PARAM_IS_SPECIAL_SCHEDULE);
             if (isVacation || isSpecialSchedule){
-                scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
                 if (!schedule.getDis().equals("Zone Schedule")) {
                     textViewaddEntry.setEnabled(false);
                     textViewaddEntryIcon.setEnabled(false);

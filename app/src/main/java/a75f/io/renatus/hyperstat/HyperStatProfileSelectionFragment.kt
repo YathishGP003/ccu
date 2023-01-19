@@ -1,4 +1,4 @@
-package a75f.io.renatus.hyperstat.cpu
+package a75f.io.renatus.hyperstat
 
 import a75f.io.api.haystack.HSUtil
 import a75f.io.logger.CcuLog
@@ -86,6 +86,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
       cpuCell.setOnClickListener { showCPUConfigFragment() }
+      twoPipeCell.setOnClickListener { showPipe2ConfigFragment() }
       senseCell.setOnClickListener{ showSenseconfigFragment() }
       vrvCell.setOnClickListener{ showVrvConfigFragment() }
    }
@@ -97,6 +98,18 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
             mRoomName,
             mFloorName,
             ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,
+            NodeType.HYPER_STAT
+         ), FragmentBLEInstructionScreen.ID
+      )
+   }
+
+   private fun showPipe2ConfigFragment() {
+      showDialogFragment(
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTAT_TWO_PIPE_FCU,
             NodeType.HYPER_STAT
          ), FragmentBLEInstructionScreen.ID
       )
@@ -129,14 +142,6 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
                NodeType.HYPER_STAT
             ), FragmentBLEInstructionScreen.ID
          )
-
-         /*showDialogFragment(
-            HyperStatVrvFragment.newInstance(
-               mNodeAddress,
-               mRoomName,
-               mFloorName,
-            ),HyperStatVrvFragment.ID
-         )*/
       }else{
          Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();
       }

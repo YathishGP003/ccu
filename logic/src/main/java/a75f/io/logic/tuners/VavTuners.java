@@ -732,7 +732,7 @@ public class VavTuners {
                                                        .addMarker("stageUp")
                                                        .addMarker("timer").addMarker("counter").addMarker("sp")
                                                        .setMinVal("0")
-                                                       .setMaxVal("30")
+                                                       .setMaxVal("60")
                                                        .setIncrementVal("1")
                                                        .setUnit("m")
                                                        .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
@@ -752,7 +752,7 @@ public class VavTuners {
                                                          .addMarker("stageDown")
                                                          .addMarker("timer").addMarker("counter").addMarker("sp")
                                                          .setMinVal("0")
-                                                         .setMaxVal("30")
+                                                         .setMaxVal("60")
                                                          .setIncrementVal("1")
                                                          .setUnit("m")
                                                          .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
@@ -1013,13 +1013,13 @@ public class VavTuners {
         String reheatZoneMaxDischargeTempTunerId = CCUHsApi.getInstance().addPoint(reheatZoneMaxDischargeTempTuner);
         BuildingTunerUtil.updateTunerLevels(reheatZoneMaxDischargeTempTunerId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(reheatZoneMaxDischargeTempTunerId));
-
+        writeDischargeMaxValue(reheatZoneMaxDischargeTempTunerId);
 
         Point reheatZoneDischargeTempOffSetTuner = createDischargeTempOffsetTuner(false, equipdis, equipref,   roomRef, siteRef, tz);
         String reheatZoneDischargeTempOffSetTunerId = CCUHsApi.getInstance().addPoint(reheatZoneDischargeTempOffSetTuner);
         BuildingTunerUtil.updateTunerLevels(reheatZoneDischargeTempOffSetTunerId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(reheatZoneDischargeTempOffSetTunerId));
-
+        writeDischargeOffsetValue(reheatZoneDischargeTempOffSetTunerId);
 
         Point autoAwaySetback   = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"autoAwaySetback")
@@ -1052,7 +1052,7 @@ public class VavTuners {
                                                     .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("vav")
                                                     .addMarker("reheat").addMarker("dat").addMarker("min").addMarker("differential").addMarker("sp")
                                                     .setMinVal("0")
-                                                    .setMaxVal("20")
+                                                    .setMaxVal("60")
                                                     .setIncrementVal("0.5")
                                                     .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                                     .setUnit("\u00B0F")
@@ -1126,5 +1126,16 @@ public class VavTuners {
         }
 
         return reheatZoneMaxDischargeTempOffSet.build();
+    }
+
+    public static void writeDischargeOffsetValue(String equipTunerPointId){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET, 0);
+        hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
+    }
+    public static void writeDischargeMaxValue(String equipTunerPointId){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP, 0);
+        hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
     }
 }

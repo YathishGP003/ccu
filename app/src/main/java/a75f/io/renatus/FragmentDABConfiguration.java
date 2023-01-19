@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
@@ -39,15 +41,21 @@ import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
+
+import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
@@ -58,7 +66,8 @@ import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 public class FragmentDABConfiguration extends BaseDialogFragment
 {
     public static final String ID = FragmentDABConfiguration.class.getSimpleName();
-    
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     static final int TEMP_OFFSET_LIMIT = 100;
     static final int STEP = 10;
     
@@ -109,7 +118,10 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     
     String floorRef;
     String zoneRef;
-    
+
+    private Spinner reheatSpinner;
+    private NumberPicker minReheatDamperPos;
+    private LinearLayout minReheatDamperPosLayout;
     public FragmentDABConfiguration()
     {
     }
@@ -221,10 +233,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             CcuLog.d(L.TAG_CCU_UI, "Create DABProfile: ");
             mDabProfile = new DabProfile();
         }
-        
-        
 
-        
         damper1Size = view.findViewById(R.id.damper1Size);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.damper_size, R.layout.spinner_dropdown_item);
@@ -302,6 +311,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         kFactor = view.findViewById(R.id.enableKFactor);
         enableAutoForceOccupied = view.findViewById(R.id.enableAFOControl);
         enableAutoAway = view.findViewById(R.id.enableAutoAwayControl);
+
+        reheatSpinner = view.findViewById(R.id.useReheat);
 
         ArrayList<String> spinnerArray = new ArrayList<>();
         double MIN_VAL_FOR_KFactor = Double.parseDouble(getString(R.string.min_val_for_kfactor));
@@ -381,24 +392,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         
         damper2Type = view.findViewById(R.id.damper2Type);
 
-        ArrayList<String> damper2Types = new ArrayList<>();
-        for (DamperType damper : DamperType.values()) {
-            damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
-        }
-        damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper2Types);
-        damper2TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        damper2Type.setAdapter(damper2TypesAdapter);
+        configureDamper2Type();
     
         damper2Type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 damper2TypeSelected = DamperType.values()[position];
-                damper2Type.setSelection(position);
-               /* if(position == 4)
-                    damper2layout.setVisibility(View.INVISIBLE);
-                else
-                    damper2layout.setVisibility(View.VISIBLE);
-                damper2layout.invalidate();*/
+                damper2Type.setSelection(position, false);
             }
         
             @Override
@@ -438,9 +438,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 kFactor.setSelection((int) Math.ceil(((mProfileConfig.kFactor)*100)-100));
                 minCFMForIAQPos.setValue(mProfileConfig.minCFMForIAQ/STEP);
             }
-
-            
-            
         } else {
             zonePriority.setSelection(2);//NORMAL
         }
@@ -448,37 +445,55 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<Void, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final Void ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupDabZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentDABConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            
+
+
+                setButton.setEnabled(false);
+
+                compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                        ()->{
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                        },()->{
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupDabZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().setCcuReady();
+                            LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        },()->{
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentDABConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+                ));
             }
         });
         configSpinnerDropDownColor();
+        configureReheatOption();
+
+        reheatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    minReheatDamperPosLayout.setVisibility(View.GONE);
+                } else {
+                    minReheatDamperPosLayout.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        minReheatDamperPos = view.findViewById(R.id.numMinReheatDamperPos);
+        minReheatDamperPosLayout = view.findViewById(R.id.minReheatDamperPos);
+        minReheatDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        minReheatDamperPos.setMinValue(0);
+        minReheatDamperPos.setMaxValue(100);
+        minReheatDamperPos.setValue(mProfileConfig != null && reheatSpinner.getSelectedItemPosition() > 0
+                                                        ? mProfileConfig.minReheatDamperPos : 40);
+        minReheatDamperPos.setWrapSelectorWheel(false);
+        minReheatDamperPosLayout.setVisibility(reheatSpinner.getSelectedItemPosition() == 0 ? View.GONE : View.VISIBLE);
     }
     
     private void setupDabZoneProfile() {
@@ -507,19 +522,30 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.enableCFMControl = enableTrueCFMControl.isChecked();
         dabConfig.minCFMForIAQ = minCFMForIAQPos.getValue()*STEP;
         dabConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);
+        dabConfig.minReheatDamperPos = minReheatDamperPos.getValue();
 
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
         analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damper1TypeSelected.displayName);
         dabConfig.getOutputs().add(analog1Op);
-    
-        Output analog2Op = new Output();
-        analog2Op.setAddress(mSmartNodeAddress);
-        analog2Op.setPort(Port.ANALOG_OUT_TWO);
-        analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damper2TypeSelected.displayName);
-        dabConfig.getOutputs().add(analog2Op);
-    
+
+        if (reheatSpinner.getSelectedItemPosition() != 0 ) {
+            ReheatType reheatTypeSelected = ReheatType.values()[reheatSpinner.getSelectedItemPosition() - 1];
+            updateDabReheatConfig(reheatTypeSelected, dabConfig);
+        }
+        if (reheatSpinner.getSelectedItemPosition() == 0 ||
+                    reheatSpinner.getSelectedItemPosition() > ReheatType.OneStage.ordinal()) {
+            Output analog2Op = new Output();
+            analog2Op.setAddress(mSmartNodeAddress);
+            analog2Op.setPort(Port.ANALOG_OUT_TWO);
+            analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damper2TypeSelected.displayName);
+            dabConfig.getOutputs().add(analog2Op);
+        }
+
+
+        dabConfig.reheatType = reheatSpinner.getSelectedItemPosition();
+
         mDabProfile.getProfileConfiguration().put(mSmartNodeAddress, dabConfig);
         if (mProfileConfig == null) {
             mDabProfile.addDabEquip(mSmartNodeAddress, dabConfig, floorRef, zoneRef );
@@ -561,5 +587,115 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         CCUUiUtil.setSpinnerDropDownColor(damper2Size,getContext());
         CCUUiUtil.setSpinnerDropDownColor(damper2Shape,getContext());
         CCUUiUtil.setSpinnerDropDownColor(kFactor, getContext());
+        CCUUiUtil.setSpinnerDropDownColor(reheatSpinner, getContext());
+    }
+
+    private void configureDamper2Type() {
+        ArrayList<String> damper2Types = new ArrayList<>();
+        for (DamperType damper : DamperType.values()) {
+            damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
+        }
+
+        ArrayAdapter<String> damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, damper2Types) {
+
+            @Override
+            public boolean isEnabled(int position) {
+                if (position < DamperType.MAT.ordinal()) {
+                    return reheatSpinner.getSelectedItemPosition() == 0 ||
+                            reheatSpinner.getSelectedItemPosition() > ReheatType.OneStage.ordinal() ;
+                }
+                return true;
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent){
+                TextView view = (TextView)super.getDropDownView(position, convertView, parent);
+                if (position < DamperType.MAT.ordinal()
+                        && reheatSpinner.getSelectedItemPosition() > 0
+                        && reheatSpinner.getSelectedItemPosition() <= ReheatType.OneStage.ordinal()) {
+                    view.setTextColor(Color.LTGRAY);
+                } else {
+                    view.setTextColor(Color.BLACK);
+                }
+                return view;
+            }
+        };
+
+        damper2Type.setAdapter(damper2TypesAdapter);
+    }
+
+    private void configureReheatOption() {
+        ArrayList<String> reheatTypes = new ArrayList<>();
+        reheatTypes.add("Not Installed");
+        for (ReheatType actuator : ReheatType.values()) {
+            reheatTypes.add(actuator.displayName);
+        }
+
+        ArrayAdapter<String> reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, reheatTypes) {
+
+            @Override
+            public boolean isEnabled(int position) {
+                if (position > 0 && position <= ReheatType.OneStage.ordinal()) {
+                    return damper2Type.getSelectedItemPosition() == DamperType.MAT.ordinal();
+                }
+                return true;
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent){
+                TextView view = (TextView)super.getDropDownView(position, convertView, parent);
+                if (position > 0
+                        && position <= ReheatType.OneStage.ordinal()
+                        && damper2Type.getSelectedItemPosition() != DamperType.MAT.ordinal()) {
+                            view.setTextColor(Color.LTGRAY);
+                } else {
+                    view.setTextColor(Color.BLACK);
+                }
+
+                return view;
+            }
+        };
+
+        reheatSpinner.setAdapter(reheatTypesAdapter);
+        reheatSpinner.setSelection(mProfileConfig == null ? 0 : mProfileConfig.reheatType, false);
+    }
+
+    private void updateDabReheatConfig(ReheatType reheatTypeSelected, DabProfileConfiguration dabConfig) {
+        switch (reheatTypeSelected) {
+            case ZeroToTenV:
+            case TwoToTenV:
+            case TenToZeroV:
+            case TenToTwov:
+            case Pulse:
+                Output analog2Op = new Output();
+                analog2Op.setAddress(mSmartNodeAddress);
+                analog2Op.setPort(Port.ANALOG_OUT_TWO);
+                analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(reheatTypeSelected.displayName);
+                dabConfig.getOutputs().add(analog2Op);
+                break;
+            case TwoStage:
+                Output relay2Op = new Output();
+                relay2Op.setAddress(mSmartNodeAddress);
+                relay2Op.setPort(Port.RELAY_TWO);
+                relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+                dabConfig.getOutputs().add(relay2Op);
+            case OneStage:
+                Output relay1Op = new Output();
+                relay1Op.setAddress(mSmartNodeAddress);
+                relay1Op.setPort(Port.RELAY_ONE);
+                relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;;
+                dabConfig.getOutputs().add(relay1Op);
+                break;
+        }
     }
 }

@@ -17,6 +17,7 @@ public class Floor extends Entity
     private double floorNum;
     private double orientation;
     private String id;
+    private String createdByApplication;
 
     public void setId(String id)
     {
@@ -58,6 +59,8 @@ public class Floor extends Entity
         this.orientation = orientation;
     }
 
+    public String getCreatedByApplication() { return createdByApplication; }
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();;
@@ -65,6 +68,8 @@ public class Floor extends Entity
         private double floorNum;
         private double orientation;
         private String id;
+        private String createdByApplication;
+
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -80,6 +85,12 @@ public class Floor extends Entity
             this.siteRef = siteRef;
             return this;
         }
+
+        public Builder createdByApplication(String application)
+        {
+            this.createdByApplication = createdByApplication;
+            return this;
+        }
         
         public Floor build(){
             Floor f = new Floor();
@@ -89,6 +100,7 @@ public class Floor extends Entity
             f.id = this.id;
             f.floorNum = this.floorNum;
             f.orientation = this.orientation;
+            f.createdByApplication = this.createdByApplication;
             return f;
         }
     
@@ -121,6 +133,10 @@ public class Floor extends Entity
                 else if(pair.getKey().equals("orientation"))
                 {
                     this.orientation = Double.parseDouble(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("createdByApplication"))
+                {
+                    this.createdByApplication = pair.getValue().toString();
                 }
                 //it.remove();
             }

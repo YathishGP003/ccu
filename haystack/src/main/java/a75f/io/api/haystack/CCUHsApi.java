@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -42,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -70,6 +72,7 @@ public class CCUHsApi
     public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
+    public static boolean IS_AUTHORISED = true;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
 
@@ -352,12 +355,9 @@ public class CCUHsApi
     private void updateLocationDataForWeatherUpdate(Site updatedSite) {
 
         SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
+        spPrefsEditor.putString("address", updatedSite.getGeoAddress());
+        spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
-
-        //Reset lat & lng so that WeatherService regenerates it using updated address.
-        spPrefsEditor.putFloat("lat", 0);
-        spPrefsEditor.putFloat("lng", 0);
 
         spPrefsEditor.commit();
     }
@@ -1008,6 +1008,7 @@ public class CCUHsApi
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
+        removeId(id);
     }
 
     public void removeId(String id) {
@@ -1222,69 +1223,7 @@ public class CCUHsApi
             HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             hDicts.add(pid);
         }
-
-        int partitionSize = 25;
-        List<List<HDict>> partitions = new ArrayList<>();
-        for (int i = 0; i<hDicts.size(); i += partitionSize) {
-            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
-        }
-
-        for (List<HDict> sublist : partitions) {
-            HGrid writableArrayPoints = hClient.call("pointWriteMany",
-                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-
-            //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
-            if (writableArrayPoints == null) {
-                CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
-                return false;
-            }
-
-            ArrayList<HDict> hDictList = new ArrayList<>();
-
-            Iterator rowIterator = writableArrayPoints.iterator();
-            while (rowIterator.hasNext()) {
-                HRow row = (HRow) rowIterator.next();
-                String id = row.get("id").toString();
-                String kind = row.get("kind").toString();
-                HVal data = row.get("data");
-
-                if (data instanceof HList && ((HList) data).size() > 0) {
-                    HList dataList = (HList) data;
-
-                    for (int i = 0; i < dataList.size(); i++) {
-                        HDict dataElement = (HDict) dataList.get(i);
-
-                        String who = dataElement.getStr("who");
-                        String level = dataElement.get("level").toString();
-                        HVal val = dataElement.get("val");
-
-                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
-                                .add("level", Integer.parseInt(level))
-                                .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ?
-                                        HStr.make(val.toString()) : val).toDict();
-                        hDictList.add(pid);
-
-                        HDict rec = hsClient.readById(HRef.copy(id));
-
-                        //save points on tagsDb
-                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
-                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                        val, who, HNum.make(0), rec);
-
-                    }
-                    //save his data to local cache
-                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
-                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
-                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
-                            true);
-                }
-
-            }
-
-            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
-        }
-        return true;
+        return importPointArrays(hDicts, hClient);
     }
 
     public void importNamedSchedule(HClient hClient){
@@ -1321,7 +1260,7 @@ public class CCUHsApi
 
     }
 
-    private void importBuildingSchedule(String siteId, HClient hClient){
+    public void importBuildingSchedule(String siteId, HClient hClient){
 
         HashMap currentBuildingSchedule = read("schedule and building and not named and not special");
         if (!currentBuildingSchedule.isEmpty()) {
@@ -1443,6 +1382,7 @@ public class CCUHsApi
                             p.setEquipRef(equiUuid);
                             String pointLuid = hsApi.addRemotePoint(p, p.getId().replace("@", ""));
                             hsApi.setSynced(pointLuid);
+                            CcuLog.i(TAG, "Added Building Tuner "+p);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -2498,7 +2438,7 @@ public class CCUHsApi
                         while (hZincReaderIterator.hasNext()) {
                             HRow row = (HRow) hZincReaderIterator.next();
                             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                            CcuLog.i("CCU_HS", "Schedule Imported "+row);
+                            CcuLog.i("CCU_HS", "Schedule Imported " + row);
                         }
                     }
                     return true;
@@ -2507,4 +2447,95 @@ public class CCUHsApi
                 .subscribe();
 
     }
+
+    public boolean importPointArrays(List<HDict> hDicts, HClient hClient) {
+
+        if (hClient == null) {
+            hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        }
+
+        int partitionSize = 25;
+        List<List<HDict>> partitions = new ArrayList<>();
+        for (int i = 0; i<hDicts.size(); i += partitionSize) {
+            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
+        }
+
+        for (List<HDict> sublist : partitions) {
+            HGrid writableArrayPoints = hClient.call("pointWriteMany",
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+
+            //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
+            if (writableArrayPoints == null) {
+                CcuLog.e(TAG, "Failed to fetch point array values while importing existing data.");
+                return false;
+            }
+
+            ArrayList<HDict> hDictList = new ArrayList<>();
+
+            Iterator rowIterator = writableArrayPoints.iterator();
+            while (rowIterator.hasNext()) {
+                HRow row = (HRow) rowIterator.next();
+                String id = row.get("id").toString();
+                String kind = row.get("kind").toString();
+                HVal data = row.get("data");
+                CcuLog.i(TAG, "Import point array "+row);
+                if (data instanceof HList && ((HList) data).size() > 0) {
+                    HList dataList = (HList) data;
+
+                    for (int i = 0; i < dataList.size(); i++) {
+                        HDict dataElement = (HDict) dataList.get(i);
+
+                        String who = dataElement.getStr("who");
+                        String level = dataElement.get("level").toString();
+                        HVal val = dataElement.get("val");
+
+                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                                .add("level", Integer.parseInt(level))
+                                .add("who", who)
+                                .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                        HStr.make(val.toString()) : val).toDict();
+                        hDictList.add(pid);
+
+                        HDict rec = hsClient.readById(HRef.copy(id));
+
+                        //save points on tagsDb
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level),
+                                kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
+                                        val, who, HNum.make(0), rec);
+
+                    }
+                    //save his data to local cache
+                    tagsDb.saveHisItemsToCache(hsClient.readById(HRef.copy(id)),
+                            new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                    HStr.make(String.valueOf(HSUtil.getPriorityVal(id))) )},
+                            true);
+                }
+
+            }
+
+            hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
+        }
+        return true;
+    }
+    public void setAuthorised(boolean isAuthorised) {
+        IS_AUTHORISED = isAuthorised;
+    }
+
+    public boolean getAuthorised(){
+        return IS_AUTHORISED;
+    }
+
+    public void updateTimeZoneInBackground(String tz) {
+        CCUHsApi.getInstance().updateTimeZone(tz);
+        String[] tzIds = TimeZone.getAvailableIDs();
+        for (String timeZone : tzIds) {
+            if (timeZone.contains(tz)) {
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.setTimeZone(timeZone);
+                break;
+            }
+        }
+        CCUHsApi.getInstance().syncEntityTree();
+    }
+
 }

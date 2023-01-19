@@ -20,6 +20,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 public abstract class SystemController
 {
     public enum State {OFF, COOLING, HEATING};
+    public enum EffectiveSatConditioning {SAT_OFF, SAT_COOLING, SAT_HEATING}
     public State systemState = OFF;
     
     public boolean emergencyMode = false;

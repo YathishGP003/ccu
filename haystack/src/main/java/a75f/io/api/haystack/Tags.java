@@ -137,4 +137,18 @@ public class Tags
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
     public static final String SPECIAL = "special";
+    public static final String AUTO = "auto";
+    public static final String AWAY = "away";
+    public static final String SETBACK = "setback";
+
+
+    public static final String TEMP = "temp";
+    public static final String CMD = "cmd";
+    public static final String DISCHARGE = "discharge";
+    public static final String AIR = "air";
+    public static final String LOGICAL = "logical";
+    public static final String SENSOR = "sensor";
+    public static final String DOOR = "door";
+    public static final String WINDOW = "window";
+
 }

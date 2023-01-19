@@ -42,9 +42,10 @@ public class L
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
     public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
     public static final String TAG_CCU_BACKUP = "CCU_BACKUP";
-    public static final String TAG_CCU_RESTORE = "CCU_RESTORE";
+    public static final String TAG_CCU_REPLACE = "CCU_REPLACE";
 
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
+    public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";

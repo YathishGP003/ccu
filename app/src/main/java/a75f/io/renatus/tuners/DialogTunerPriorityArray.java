@@ -56,6 +56,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     public static final String TUNER_ITEM = "tunerItem";
     public static final String TUNER_GROUP_ITEM = "TunerGroupItem";
     public static final String TUNER_GROUP_TYPE = "TunerGroupType";
+    private static final String EMPTY_STRING = "";
     HashMap tunerItemSelected = null;
     TunerGroupItem tunerGroupSelected = null;
     RecyclerView recyclerViewPriority;
@@ -466,14 +467,19 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             String levelName = "Building";
             prefs = new Prefs(getContext().getApplicationContext());
             int level;
+            String currentTunerValue = EMPTY_STRING;
             if (position == 15) {
                 levelName = "Building";
+                currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "16");
             } else if (position == 13) {
                 levelName = "System";
+                currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "14");
             } else if (position == 9) {
                 levelName = "Zone";
+                currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "10");
             } else {
                 levelName = "Module";
+                currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "8");
             }
             if (tunerItemSelected.containsKey("hideRefresh")) {
                 tunerItemSelected.remove("hideRefresh");
@@ -564,7 +570,15 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
                 npTunerRange.setMinValue(0);
                 npTunerRange.setMaxValue(valueList.size() - 1);
-                npTunerRange.setValue(currentValPos);
+
+                int index = valueList.indexOf(String.valueOf(defaultVal));
+                if(!currentTunerValue.equalsIgnoreCase(EMPTY_STRING)) {
+                    index = valueList.indexOf(currentTunerValue);
+                    if(index == -1)
+                        index =  valueList.indexOf(String.valueOf(Double.parseDouble(currentTunerValue)));
+                }
+                npTunerRange.setValue(index);
+
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
 
                 npTunerRange.setWrapSelectorWheel(false);

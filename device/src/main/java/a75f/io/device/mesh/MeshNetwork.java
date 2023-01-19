@@ -26,8 +26,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
-import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.diag.DiagEquip;
 
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -48,11 +46,11 @@ public class MeshNetwork extends DeviceNetwork
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
         
-        if (!LSerial.getInstance().isConnected()) {
+        /*if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }
+        }*/
         if(LSerial.getInstance().isNodesSeeding())
             return;
         MeshUtil.sendHeartbeat((short)0);
@@ -153,7 +151,7 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
                                                               "SEEDS ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                                           d.getEquipRef(), hyperStatProfile, false);
+                                                                           d.getEquipRef(), false);
                                     if (equip.getMarkers().contains("vrv") ){
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU " +
                                                                    "Controls ===================== "+d.getAddr());

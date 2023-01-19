@@ -11,9 +11,7 @@ class DeviceConfigurationUtil {
 
     companion object{
         fun getUserConfiguration(): Double{
-            Log.i("DEV_DEBUG", "getUserConfiguration: ")
             val useCelsius = CCUHsApi.getInstance().readEntity("displayUnit")
-            Log.i("DEV_DEBUG", "getUserConfiguration: "+TunerUtil.getTuner(useCelsius["id"].toString()))
             return TunerUtil.getTuner(useCelsius["id"].toString())
         }
     }

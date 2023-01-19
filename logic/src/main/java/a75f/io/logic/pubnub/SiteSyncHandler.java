@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
+import a75f.io.logic.util.RxTask;
 
 public class SiteSyncHandler
 {
@@ -31,6 +32,9 @@ public class SiteSyncHandler
             //"sync" pubnubs are generated for other entities in a Site too.
             //SiteSyncHandler should take care of only the Site entity updates.
             if (remoteSite != null && !remoteSite.equals(hayStack.getSite())) {
+                if(!remoteSite.getTz().equals(hayStack.getSite().getTz()))
+                    RxTask.executeAsync(() -> hayStack.updateTimeZoneInBackground(remoteSite.getTz()) );
+
                 hayStack.updateSiteLocal(remoteSite, hayStack.getSiteIdRef().toString());
                 Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
                 context.sendBroadcast(locationUpdateIntent);

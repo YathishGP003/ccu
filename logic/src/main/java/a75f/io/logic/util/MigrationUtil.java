@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.dab.DabEquip;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -248,6 +249,11 @@ public class MigrationUtil {
         if(!PreferenceUtil.getHyperStatCpuTagMigration()){
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
+        }
+
+        if(!PreferenceUtil.getSmartNodeDamperMigration()){
+            doMigrateForSmartNodeDamperType(CCUHsApi.getInstance());
+            PreferenceUtil.setSmartNodeDamperMigration();
         }
 
         if(!PreferenceUtil.getHyperStatCpuAirTagMigration()){
@@ -1392,6 +1398,23 @@ public class MigrationUtil {
 
         });
 
+    }
+
+    private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
+
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (vav or dab) and group");
+        equips.forEach(equip -> {
+            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
+            int nodeAddress = Integer.parseInt(actualEquip.getGroup());
+            RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
+            if(rawPoint!=null && rawPoint.getType().equalsIgnoreCase("MAT")){
+                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_OUT_ONE.name(),DamperType.MAT.displayName);
+            }
+            RawPoint rawPoint2 = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_TWO.toString());
+            if(rawPoint2!=null && rawPoint2.getType().equalsIgnoreCase("MAT")){
+                SmartNode.updatePhysicalPointType(nodeAddress, ANALOG_OUT_TWO.name(),DamperType.MAT.displayName);
+            }
+         });
     }
 
 }

@@ -46,6 +46,7 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
+    private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
 
@@ -449,5 +450,12 @@ public class PreferenceUtil {
 
     public static void setHyperStatCpuAirTagMigration() {
         setBooleanPreference(HYPERSTAT_AIR_TAG_MIGRATION, true);
+    }
+    public static boolean getSmartNodeDamperMigration() {
+        return getBooleanPreference(SMART_NODE_DAMPER_MIGRATION);
+    }
+
+    public static void setSmartNodeDamperMigration() {
+        setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
     }
 }

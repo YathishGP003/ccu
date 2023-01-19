@@ -6,6 +6,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -2421,7 +2422,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
-            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString());
+            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString() + " cfm" );
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {

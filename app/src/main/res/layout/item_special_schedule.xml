@@ -39,23 +39,22 @@
         android:gravity="center_horizontal"
         android:orientation="horizontal">
 
-        <ImageButton
+        <TextView
             android:id="@+id/specialScheduleEditButton"
             android:layout_width="?actionBarSize"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_marginRight="24dp"
-            android:src="@android:drawable/ic_menu_edit"
-            android:text="Special Schedule"
-            android:textSize="10sp" />
+            android:text="@string/edit_icon"
+            android:textColor="?orange_75f"
+            android:textSize="20sp" />
 
-        <ImageButton
+        <TextView
             android:id="@+id/specialScheduleDeleteButton"
             android:layout_width="?actionBarSize"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@android:drawable/ic_menu_delete"
-            android:text="Special Schedule"
-            android:textSize="10sp" />
+            android:layout_marginRight="24dp"
+            android:text="@string/delete_icon"
+            android:textColor="?orange_75f"
+            android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>

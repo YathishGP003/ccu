@@ -57,7 +57,8 @@ public class HttpUtil
     
     public static final int HTTP_RESPONSE_OK = 200;
     public static final int HTTP_RESPONSE_ERR_REQUEST = 400;
-    
+    public static final int HTTP_RESPONSE_UNAUTHORIZED = 401;
+
     private static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
 
     public static String executePost(String targetURL, String urlParameters) {

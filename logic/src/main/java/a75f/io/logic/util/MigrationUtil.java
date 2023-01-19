@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -261,6 +262,12 @@ public class MigrationUtil {
             PreferenceUtil.setHyperStatCpuAirTagMigration();
         }
 
+
+        if(!PreferenceUtil.getFreeInternalDiskStorageMigration()){
+            createFreeInternalDiskStorageDiagPointMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setFreeInternalDiskStorageMigration();
+        }
+
         L.saveCCUState();
     }
 
@@ -289,7 +296,6 @@ public class MigrationUtil {
             ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
             ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(),
                     currentTemp.get("id").toString());
-
         }
     }
 
@@ -1417,4 +1423,29 @@ public class MigrationUtil {
          });
     }
 
+    private static void createFreeInternalDiskStorageDiagPointMigration(CCUHsApi instance) {
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        if(siteMap.size()>0){
+            String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+            String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
+            HashMap diagEquip = instance.read("equip and diag");
+            Point internalDiskStorage = new Point.Builder()
+                    .setDisplayName(diagEquip.get("dis")+"-availableInternalDiskStorage")
+                    .setEquipRef(diagEquip.get("id")+"")
+                    .setSiteRef(siteRef).setHisInterpolate("linear")
+                    .addMarker("diag").addMarker("available").addMarker("internal").addMarker("disk").addMarker("storage").addMarker("his").addMarker("cur")
+                    .setUnit("MB")
+                    .setTz(tz)
+                    .build();
+            instance.addPoint(internalDiskStorage);
+
+            // adding 'cur' tag to all available memory.
+            ArrayList<HashMap<Object, Object>> allMemoryPoints = CCUHsApi.getInstance().readAllEntities("memory and diag");
+
+            for(HashMap<Object, Object> point : allMemoryPoints){
+                Point up = new Point.Builder().setHashMap(point).addMarker("cur").build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        }
+    }
 }

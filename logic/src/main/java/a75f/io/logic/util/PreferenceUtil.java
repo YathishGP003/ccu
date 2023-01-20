@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -46,6 +47,8 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
+    private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
+    private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
 
@@ -440,9 +443,30 @@ public class PreferenceUtil {
 
     public static void setHyperStatCpuTagMigration() {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
-
     }
 
+    public static void setFreeInternalDiskStorageMigration() {
+        setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
+    }
+
+    public static boolean getFreeInternalDiskStorageMigration() {
+        return getBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION);
+    }
+
+    public static boolean getHyperStatCpuAirTagMigration() {
+        return false;
+    }
+
+    public static void setHyperStatCpuAirTagMigration() {
+        setBooleanPreference(HYPERSTAT_AIR_TAG_MIGRATION, true);
+    }
+    public static boolean getSmartNodeDamperMigration() {
+        return getBooleanPreference(SMART_NODE_DAMPER_MIGRATION);
+    }
+
+    public static void setSmartNodeDamperMigration() {
+        setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
+    }
     public static boolean getSSEFanStageMigration() {
         return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
     }

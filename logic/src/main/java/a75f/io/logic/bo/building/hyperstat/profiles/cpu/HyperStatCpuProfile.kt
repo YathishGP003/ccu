@@ -589,7 +589,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             )
         }
 
-        if (occupancyStatus != Occupancy.OCCUPIED && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+        if (occupancyStatus == Occupancy.OCCUPIED && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             Log.i(L.TAG_CCU_HSCPU, "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
 
             val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)

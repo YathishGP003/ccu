@@ -660,7 +660,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "sensor", "zone", "his", "logical", transformerTag
+                    "current", "sensor", "zone", "his", "logical", "cur", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")

@@ -292,22 +292,21 @@ public class MigrationUtil {
             String siteDis = (String) siteMap.get("dis");
             String tz = siteMap.get("tz").toString();
             String equipDis = siteDis + "-TI-" + nodeAddr;
-            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
             SingleStageConfig config = new SingleStageConfig();
-            createAnalogInEnablePoint(equipDis, siteRef, equipRef, actualEquip, nodeAddr, tz, config);
-            createAnalogIn1AssociationPoint(equipDis, siteRef, equipRef, actualEquip, nodeAddr, tz, config);
+            createAnalogInEnablePoint(equipDis, siteRef, equipRef, equip, nodeAddr, tz, config, currentTemp);
+            createAnalogIn1AssociationPoint(equipDis, siteRef, equipRef, equip, nodeAddr, tz, config);
             CCUHsApi.getInstance().syncEntityTree();
         }
 
     }
 
-    private static void createAnalogIn1AssociationPoint(String equipDis, String siteRef, String equipRef, Equip actualEquip, String nodeAddr, String tz, SingleStageConfig config) {
+    private static void createAnalogIn1AssociationPoint(String equipDis, String siteRef, String equipRef, HashMap<Object, Object> actualEquip, String nodeAddr, String tz, SingleStageConfig config) {
         Point analogInAssociation = new Point.Builder()
                 .setDisplayName(equipDis + "-analogIn1Association")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
-                .setRoomRef(actualEquip.getRoomRef())
-                .setFloorRef(actualEquip.getFloorRef())
+                .setRoomRef(actualEquip.get("roomRef").toString())
+                .setFloorRef(actualEquip.get("floorRef").toString())
                 .addMarker("config").addMarker("analog1").addMarker("input").addMarker("writable")
                 .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association")
                 .setEnums(InputActuatorType.getEnumStringDefinition())
@@ -320,13 +319,13 @@ public class MigrationUtil {
 
     }
 
-    private static void createAnalogInEnablePoint(String equipDis, String siteRef, String equipRef, Equip actualEquip, String nodeAddr, String tz, SingleStageConfig config) {
+    private static void createAnalogInEnablePoint(String equipDis, String siteRef, String equipRef, HashMap<Object, Object> actualEquip, String nodeAddr, String tz, SingleStageConfig config, HashMap<Object, Object> currentTemp) {
         Point analogIn = new Point.Builder()
                 .setDisplayName(equipDis + "-analogIn1Enabled")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
-                .setRoomRef(actualEquip.getRoomRef())
-                .setFloorRef(actualEquip.getFloorRef())
+                .setRoomRef(actualEquip.get("roomRef").toString())
+                .setFloorRef(actualEquip.get("floorRef").toString())
                 .addMarker("config").addMarker("writable").addMarker("zone").addMarker("input")
                 .addMarker("analog1").addMarker("enabled").addMarker("sse").addMarker("standalone")
                 .setEnums("false,true")

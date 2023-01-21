@@ -27,7 +27,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
-import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.util.RxTask;
@@ -322,6 +321,7 @@ public class SingleStageEquip {
         if (config.analogIn1) {
             Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddr, config.analogInAssociation.ordinal());
             CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
+            mapPhysicalToLogicalPoint(config.analogInAssociation, analogInAssociation);
         }
 
         ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
@@ -484,27 +484,30 @@ public class SingleStageEquip {
         SingleStageEquipUtil.createRelay1Config(config.enableRelay1, enableRelay1);
         SingleStageEquipUtil.createRelay2Config(config.enableRelay2, enableRelay2);
 
-        mapPhysicalToLogicalPoint(config.analogInAssociation);
     }
 
-    private void mapPhysicalToLogicalPoint(InputActuatorType analogInAssociation) {
+    private void mapPhysicalToLogicalPoint(InputActuatorType analogInAssociation, Point configPoint) {
+
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> analogInPoint;
 
         if (analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
             analogInPoint = hayStack.readEntity("point and transformer50 and sensor and " +
-                    "equipRef == \""+equipRef+"\"");
+                    "equipRef == \""+equip.getId()+"\"");
         } else if (analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
             analogInPoint = hayStack.readEntity("point and transformer20 and sensor and " +
-                    "equipRef == \""+equipRef+"\"");
+                    "equipRef == \""+equip.getId()+"\"");
         } else {
             analogInPoint = hayStack.readEntity("point and transformer and sensor and " +
-                    "equipRef == \""+equipRef+"\"");
+                    "equipRef == \""+equip.getId()+"\"");
         }
         if (!analogInPoint.isEmpty()) {
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), analogInPoint.get("id").toString());
         }
+        CCUHsApi.getInstance().scheduleSync();
 
     }
 
@@ -527,6 +530,9 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
 
         if (config.analogIn1) {
+
+            SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), config.analogIn1);
+
             if (config.analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
                 SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "10");
             } else if (config.analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
@@ -536,7 +542,6 @@ public class SingleStageEquip {
             }
         }
 
-        SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), config.analogIn1);
         if(config.enableAutoAway != getProfileConfiguration().enableAutoAway
                 || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){
             ScheduleUtil.resetOccupancyDetection(CCUHsApi.getInstance(),equipRef);
@@ -557,7 +562,7 @@ public class SingleStageEquip {
         Point analogInAssociation = new Point.Builder().setHashMap(analogInAssociationMap).build();
         SingleStageEquipUtil.updateAnalogIn1Config(config.analogInAssociation.ordinal(), analogInAssociation, config.analogIn1);
         if (config.analogIn1) {
-            mapPhysicalToLogicalPoint(config.analogInAssociation);
+            mapPhysicalToLogicalPoint(config.analogInAssociation, analogInAssociation);
         }
 
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);

@@ -4,6 +4,8 @@ import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
 import android.util.Log;
 
+import org.apache.commons.logging.LogFactory;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -260,13 +262,13 @@ public class SingleStageEquipUtil {
             return;
         }
         if (curConfig == 0) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer  and sensor and equipRef== \""
+            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer and sensor and equipRef== \""
                     + configPoint.getEquipRef() + "\"");
         } else if (curConfig == 1) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer20  and sensor and equipRef== \""
+            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer20 and sensor and equipRef== \""
                     + configPoint.getEquipRef() + "\"");
         } else if (curConfig == 2) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer50  and sensor and equipRef== \""
+            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer50 and sensor and equipRef== \""
                     + configPoint.getEquipRef() + "\"");
         }
         CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 : " + configAnalogInPoint);
@@ -277,8 +279,8 @@ public class SingleStageEquipUtil {
 
         if (analogIn1Enabled) {
             String analogAssociationId = String.valueOf(createAnalogInLogicalPoints(equip.getDisplayName(), equip.getSiteRef(), equip.getId(), equip.getRoomRef(), equip.getFloorRef(), equip.getTz(), Integer.parseInt(nodeAddr), configVal));
+            SmartNode.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), configVal > 0);
             SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.ANALOG_IN_ONE.name(), analogAssociationId);
-            SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), configVal > 0 ? true : false);
             CCUHsApi.getInstance().scheduleSync();
         }
     }

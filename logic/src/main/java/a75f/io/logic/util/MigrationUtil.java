@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -56,6 +58,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
@@ -251,6 +254,23 @@ public class MigrationUtil {
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
 
+        if(!PreferenceUtil.getSmartNodeDamperMigration()){
+            doMigrateForSmartNodeDamperType(CCUHsApi.getInstance());
+            PreferenceUtil.setSmartNodeDamperMigration();
+        }
+
+        if(!PreferenceUtil.getHyperStatCpuAirTagMigration()){
+            doAirTagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setHyperStatCpuAirTagMigration();
+        }
+
+
+        if(!PreferenceUtil.getFreeInternalDiskStorageMigration()){
+            createFreeInternalDiskStorageDiagPointMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setFreeInternalDiskStorageMigration();
+        }
+
+
         if(!PreferenceUtil.getTiProfileMigration()){
             doTiProfileMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTiProfileMigration();
@@ -342,6 +362,20 @@ public class MigrationUtil {
 
     }
 
+    private static void doAirTagMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> hsEquips = ccuHsApi.readAllEntities("equip and hyperstat");
+        for (HashMap<Object, Object> hsEquip : hsEquips) {
+            String equipRef = hsEquip.get("id").toString();
+            ArrayList<HashMap<Object, Object>> sensorPoints = ccuHsApi.readAllEntities("point and hyperstat and sensor and (co2 or voc) and equipRef == \"" +equipRef+"\"");
+            String updatedTag = "air";
+            for (HashMap<Object, Object> sensorPoint : sensorPoints) {
+                Point updatedPoint = new Point.Builder().setHashMap(sensorPoint).addMarker(updatedTag).build();
+                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            }
+        }
+    }
+
     private static void MigrateTIChanges(CCUHsApi instance) {
         ArrayList<HashMap<Object, Object>> tiEquips = instance.readAllEntities("equip and ti");
         for (HashMap<Object, Object> equip:tiEquips) {
@@ -353,7 +387,6 @@ public class MigrationUtil {
             ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
             ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(),
                     currentTemp.get("id").toString());
-
         }
     }
 
@@ -1464,4 +1497,46 @@ public class MigrationUtil {
 
     }
 
+    private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
+
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (vav or dab) and group");
+        equips.forEach(equip -> {
+            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
+            int nodeAddress = Integer.parseInt(actualEquip.getGroup());
+            RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
+            if(rawPoint!=null && rawPoint.getType().equalsIgnoreCase("MAT")){
+                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_OUT_ONE.name(),DamperType.MAT.displayName);
+            }
+            RawPoint rawPoint2 = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_TWO.toString());
+            if(rawPoint2!=null && rawPoint2.getType().equalsIgnoreCase("MAT")){
+                SmartNode.updatePhysicalPointType(nodeAddress, ANALOG_OUT_TWO.name(),DamperType.MAT.displayName);
+            }
+         });
+    }
+
+    private static void createFreeInternalDiskStorageDiagPointMigration(CCUHsApi instance) {
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        if(siteMap.size()>0){
+            String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
+            String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
+            HashMap diagEquip = instance.read("equip and diag");
+            Point internalDiskStorage = new Point.Builder()
+                    .setDisplayName(diagEquip.get("dis")+"-availableInternalDiskStorage")
+                    .setEquipRef(diagEquip.get("id")+"")
+                    .setSiteRef(siteRef).setHisInterpolate("linear")
+                    .addMarker("diag").addMarker("available").addMarker("internal").addMarker("disk").addMarker("storage").addMarker("his").addMarker("cur")
+                    .setUnit("MB")
+                    .setTz(tz)
+                    .build();
+            instance.addPoint(internalDiskStorage);
+
+            // adding 'cur' tag to all available memory.
+            ArrayList<HashMap<Object, Object>> allMemoryPoints = CCUHsApi.getInstance().readAllEntities("memory and diag");
+
+            for(HashMap<Object, Object> point : allMemoryPoints){
+                Point up = new Point.Builder().setHashMap(point).addMarker("cur").build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        }
+    }
 }

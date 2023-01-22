@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -42,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -2523,5 +2525,17 @@ public class CCUHsApi
         return IS_AUTHORISED;
     }
 
+    public void updateTimeZoneInBackground(String tz) {
+        CCUHsApi.getInstance().updateTimeZone(tz);
+        String[] tzIds = TimeZone.getAvailableIDs();
+        for (String timeZone : tzIds) {
+            if (timeZone.contains(tz)) {
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.setTimeZone(timeZone);
+                break;
+            }
+        }
+        CCUHsApi.getInstance().syncEntityTree();
+    }
 
 }

@@ -2,12 +2,8 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import a75f.io.api.haystack.CCUHsApi;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +16,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -565,7 +563,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         DualDuctProfileConfiguration dualDuctConfig = createDualDuctConfig();
         mDualDuctProfile.getProfileConfiguration().put(mSmartNodeAddress, dualDuctConfig);
         if (mProfileConfig == null) {
-            mDualDuctProfile.addDualDuctEquip(mSmartNodeAddress, dualDuctConfig, floorRef, zoneRef );
+            mDualDuctProfile.addDualDuctEquip(mSmartNodeAddress, dualDuctConfig, floorRef, zoneRef,mNodeType );
         } else {
             mDualDuctProfile.updateDualDuctEquip(dualDuctConfig);
         }

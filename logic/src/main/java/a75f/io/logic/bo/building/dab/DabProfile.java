@@ -1,5 +1,10 @@
 package a75f.io.logic.bo.building.dab;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import android.util.Log;
 
 import java.util.HashMap;
@@ -18,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -30,11 +36,6 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -56,11 +57,10 @@ public class DabProfile extends ZoneProfile
     ZoneState prevState = DEADBAND;
     
     private static final int LOOP_OP_MIDPOINT = 50;
-
     private ControlLoop heatingLoop;
-    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef) {
+    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
         dabEquip = new DabEquip(getProfileType(), addr);
-        dabEquip.createEntities(config, floorRef, roomRef);
+        dabEquip.createEntities(config, floorRef, roomRef, nodeType);
         dabEquip.init();
     }
     

@@ -1,3 +1,5 @@
+ - Merged PR 5100: Provided different pairing option to HelioNode
+ - Version bump to 1.633.0
  - Merged PR 6182: HPU Profile
  - Merged PR 5617: Error handling while parsing accessToken from caretaker
  - Merge
@@ -218,7 +220,6 @@
  - Version bump to 1.635.0
  - Version bump to 1.634.0
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Version bump to 1.633.0
  - Remove vacation check for triggering AutoForcedOccupied
  - WIP
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

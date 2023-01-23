@@ -166,7 +166,7 @@ public class HyperStatMessageGenerator {
         return controls;
     }
     
-    private static double getDesiredTempCooling(String equipRef) {
+    public static double getDesiredTempCooling(String equipRef) {
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
                     "cooling and equipRef == \"" + equipRef + "\"");
@@ -176,7 +176,7 @@ public class HyperStatMessageGenerator {
         return 0;
     }
     
-    private static double getDesiredTempHeating(String equipRef) {
+    public static double getDesiredTempHeating(String equipRef) {
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
                     "heating and equipRef == \"" + equipRef +

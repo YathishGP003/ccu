@@ -358,40 +358,47 @@ public class HyperStatMsgReceiver {
     
     private static void writeDesiredTemp(HyperStatLocalControlsOverrideMessage_t message, Equip hsEquip,
                                          CCUHsApi hayStack) {
-        HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
+
         double coolingDesiredTemp = (double)message.getSetTempCooling()/2;
         double heatingDesiredTemp = (double)message.getSetTempHeating()/2;
-        double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
-        
-        if (!coolingDtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: "+hsEquip.getDisplayName());
+
+
+        double currentCoolingDesiredTemp = HyperStatMessageGenerator.getDesiredTempCooling(hsEquip.getId());
+        double currentHeatingDesiredTemp = HyperStatMessageGenerator.getDesiredTempHeating(hsEquip.getId());
+
+        if(currentHeatingDesiredTemp != heatingDesiredTemp || currentCoolingDesiredTemp != coolingDesiredTemp) {
+            double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
+
+            HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!coolingDtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+
+            HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!heatingDtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+            HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!dtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double) message.getSetTempCooling());
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+            SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                    new Point.Builder().setHashMap(heatingDtPoint).build(),
+                    new Point.Builder().setHashMap(dtPoint).build(),
+                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
         }
-    
-    
-        HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
-        if (!heatingDtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: "+hsEquip.getDisplayName());
-        }
-    
-        HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
-        if (!dtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double)message.getSetTempCooling());
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: "+hsEquip.getDisplayName());
-        }
-    
-        SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                                                         new Point.Builder().setHashMap(heatingDtPoint).build(),
-                                                         new Point.Builder().setHashMap(dtPoint).build(),
-                                                         coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
-    
     }
 
     public static void setCurrentTempInterface(ZoneDataInterface in) {
@@ -447,6 +454,11 @@ public class HyperStatMsgReceiver {
             possibleConditioningMode = PossibleConditioningMode.BOTH;
             possibleFanMode = HSHaystackUtil.Companion.getPipePossibleFanModeSettings(nodeAddress);
         }
+        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())){
+            possibleConditioningMode = PossibleConditioningMode.BOTH;
+            possibleFanMode = HSHaystackUtil.Companion.getHpuPossibleFanModeSettings(nodeAddress);
+        }
+
 
         updateFanMode(equipId,fanMode,possibleFanMode);
         updateConditioningMode(equipId,conditioningMode,possibleConditioningMode);

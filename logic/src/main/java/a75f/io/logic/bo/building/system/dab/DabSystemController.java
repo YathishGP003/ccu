@@ -1086,7 +1086,7 @@ public class DabSystemController extends SystemController
             limitedSecondaryDamperPos = Math.max(limitedSecondaryDamperPos, minLimit);
             hayStack.writeHisValById(secondoryDamperPosPoint.get("id").toString(), limitedSecondaryDamperPos);
 
-            if (hayStack.readHisValByQuery("reheat and pos and equipRef ==\""+equipRef+"\"") > 0) {
+            if (hayStack.readHisValByQuery("reheat and cmd and equipRef ==\""+equipRef+"\"") > 0) {
                 double reheatMinDamper = hayStack.readDefaultVal("config and reheat and min and damper and equipRef ==\""+equipRef+"\"");
 
                 if (limitedPrimaryDamperPos < reheatMinDamper) {
@@ -1166,9 +1166,11 @@ public class DabSystemController extends SystemController
     }
 
     private double getAverageDesiredTemp(String type, ArrayList<HashMap<Object, Object>> dabEquips, CCUHsApi hayStack) {
-        return dabEquips.stream()
+        double sum = dabEquips.stream()
                     .map( equip -> hayStack.readHisValByQuery("desired and temp and "+type+" and equipRef ==\""+equip.get("id")+"\""))
                     .reduce(0.0, Double::sum);
+
+        return sum/dabEquips.size();
     }
 
 

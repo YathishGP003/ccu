@@ -70,13 +70,6 @@ data class Pipe2AnalogOutState(
     val perAtFanHigh: Double,
 )
 
-/*
-// Analog in configuration are commom so no need for all the profiles
-data class AnalogInState(
-    val enabled: Boolean,
-    val association: AnalogInAssociation
-)*/
-
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
 // Do not change order without a migration.
 enum class Pipe2RelayAssociation {
@@ -90,7 +83,6 @@ enum class Pipe2RelayAssociation {
     OCCUPIED_ENABLED,
     HUMIDIFIER,
     DEHUMIDIFIER
-
 }
 
 // Order is important -- see comment above.

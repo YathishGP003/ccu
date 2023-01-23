@@ -46,6 +46,10 @@ class HyperStatSettingsUtil {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_CONVENTIONAL_PACKAGE_UNIT
                     settings2.thermistor2Enable = getTh2DoorWindow(hsApi, equipRef)
                 }
+                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_HEAT_PUMP_UNIT
+                    settings2.thermistor2Enable = getTh2DoorWindow(hsApi, equipRef)
+                }
                 ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT
                     settings2.thermistor2Enable = getTh2SupplyWaterTempEnabled(hsApi, equipRef)
@@ -73,6 +77,8 @@ class HyperStatSettingsUtil {
             val equip = getEquipDetails(nodeAddress)
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
+                    settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                }ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_SENSE.name -> {

@@ -1,5 +1,10 @@
 package a75f.io.logic.bo.building.dab;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import android.util.Log;
 
 import java.util.HashMap;
@@ -18,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -30,11 +36,6 @@ import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -56,11 +57,10 @@ public class DabProfile extends ZoneProfile
     ZoneState prevState = DEADBAND;
     
     private static final int LOOP_OP_MIDPOINT = 50;
-
     private ControlLoop heatingLoop;
-    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef) {
+    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
         dabEquip = new DabEquip(getProfileType(), addr);
-        dabEquip.createEntities(config, floorRef, roomRef);
+        dabEquip.createEntities(config, floorRef, roomRef, nodeType);
         dabEquip.init();
     }
     
@@ -167,7 +167,7 @@ public class DabProfile extends ZoneProfile
 
         } else {
             damperOpController.reset();
-            CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"", 0.0);
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
         }
 
         updateZoneState(roomTemp, setTempCooling, setTempHeating);
@@ -231,7 +231,7 @@ public class DabProfile extends ZoneProfile
             dabEquip.setDamperPos(damperPos, "secondary");
             dabEquip.setNormalizedDamperPos(damperPos, "primary");
             dabEquip.setNormalizedDamperPos(damperPos, "secondary");
-            CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"", 0.0);
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
@@ -287,7 +287,18 @@ public class DabProfile extends ZoneProfile
                                             dabEquip.getId()+"\"");
         double heatingLoopOp = Math.max(0, heatingLoop.getLoopOutput(desiredTempHeating - reheatOffset, currentTemp));
         CcuLog.i(L.TAG_CCU_ZONE, "handleReheat : reheatOffset "+reheatOffset+" heatingLoopOp "+heatingLoopOp);
-        CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"",
-                                                Double.valueOf((int)heatingLoopOp));
+        if (isSystemFanOn()) {
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"",
+                    Double.valueOf((int) heatingLoopOp));
+        } else {
+            CcuLog.i(L.TAG_CCU_ZONE, "handleReheat disabled. System Fan not active");
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"", 0.0);
+        }
+    }
+
+    private boolean isSystemFanOn() {
+        //This is short cut and not a way to do this. But currently required only for Dab profile.
+        String systemStatusMessage = L.ccu().systemProfile.getStatusMessage();
+        return systemStatusMessage.contains("Fan");
     }
 }

@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.dab;
 
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
+
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatMinDamper;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatPosPoint;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
@@ -45,6 +48,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -75,7 +79,7 @@ public class DabEquip
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
 
     private ControlLoop heatingLoop;
-    
+
     public DabEquip(ProfileType type, int node)
     {
         profileType = type;
@@ -92,10 +96,10 @@ public class DabEquip
         {
             equipRef = equipMap.get("id").toString();
             damperController = new GenericPIController();
-            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and equipRef == \"" + equipRef + "\""));
-            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and equipRef == \"" + equipRef + "\""));
-            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and equipRef == \"" + equipRef + "\""));
-            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and equipRef == \"" + equipRef + "\""));
+            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and not reheat and equipRef == \"" + equipRef + "\""));
     
             co2Target = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and target and equipRef == \""+equipRef+"\"");
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and threshold and equipRef == \""+equipRef+"\"");
@@ -108,20 +112,21 @@ public class DabEquip
             vocLoop.setVOCTarget(vocTarget);
             vocLoop.setVOCThreshold(vocThreshold);
 
-            heatingLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("reheat and " +
-                    "proportional and spread and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("reheat and " +
-                    "integral and time and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("reheat and " +
-                    "proportional and kFactor and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("reheat and " +
-                    "integral and kFactor and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "pspread and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "itimeout and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "pgain and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "igain and equipRef == \"" + equipRef + "\""));
         }
     
     }
 
-    public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef)
+    public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)
     {
+        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -132,7 +137,7 @@ public class DabEquip
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
-    
+
         Equip.Builder b = new Equip.Builder()
                                   .setSiteRef(siteRef)
                                   .setDisplayName(equipDis)
@@ -141,11 +146,11 @@ public class DabEquip
                                   .setProfile(profileType.name())
                                   .setPriority(config.getPriority().name())
                                   .addMarker("equip").addMarker("dab").addMarker("zone")
-                                  .addMarker("smartnode").setAhuRef(ahuRef)
+                                  .addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE).setAhuRef(ahuRef)
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-
+    
         RxTask.executeAsync(() -> DabTuners.addEquipDabTuners( hayStack,
                                                                siteRef,
                                                                equipDis,
@@ -454,9 +459,17 @@ public class DabEquip
                 roomRef,floorRef,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
 
+
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+
+        SmartNode device;
+        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
+            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }else  {
+            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }
+
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);

@@ -212,7 +212,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                 hyperStatConfig.zonePm2p5Threshold,hyperStatConfig.zonePm2p5Target
             )
 
-        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints()
+        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints(false)
 
         val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createIsRelayEnabledConfigPoints(
             ConfigState(hyperStatConfig.relay1State.enabled, hyperStatConfig.relay1State.association.ordinal),
@@ -818,45 +818,6 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             updateConditioningMode()
         }
     }
-
-
-    // Function to check the changes in the point and do the update with new value
-    private fun updatePointValueChangeRequired(pointId: String, newValue: Double){
-        val presentValue = haystack.readDefaultValById(pointId)
-        if(presentValue != newValue)
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)
-    }
-
-    // Function which updates the Analog In new configurations
-    private fun updateAnalogInDetails(
-        analogInState: AnalogInState,
-        analogInTag: String,
-        physicalPort: Port
-    ) {
-        val analogInId = hsHaystackUtil.readPointID("config and $analogInTag and input and enabled") as String
-        val analogInAssociatedId =
-            hsHaystackUtil.readPointID("config and $analogInTag and input and association") as
-                    String
-        hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
-        hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal.toDouble())
-
-        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogInState.enabled)
-        if (analogInState.enabled) {
-            val pointData: Point = hyperStatPointsUtil.analogInConfiguration(
-                analogInState = analogInState,
-                analogTag = analogInTag
-            )
-            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
-
-            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
-            val pointType = HyperStatAssociationUtil.getSensorNameByType(analogInState.association)
-            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
-        }
-
-    }
-
 
      private fun updateConditioningMode() {
          CcuLog.i(L.TAG_CCU_ZONE, "updateConditioningMode: ")

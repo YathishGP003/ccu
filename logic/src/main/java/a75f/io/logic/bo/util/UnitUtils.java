@@ -124,7 +124,8 @@ public class UnitUtils {
         }
         if (myDoubles.size() > 0) {
             try {
-                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
+                DecimalFormat timeFormatter = new DecimalFormat("00");
+                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return temp;

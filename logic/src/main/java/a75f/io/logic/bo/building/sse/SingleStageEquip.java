@@ -294,7 +294,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("analog1").addMarker("input").addMarker("writable")
-                .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association")
+                .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association").addMarker("sp")
                 .setEnums(InputActuatorType.getEnumStringDefinition())
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -510,10 +510,22 @@ public class SingleStageEquip {
             analogInPoint = hayStack.readEntity("point and transformer and sensor and " +
                     "equipRef == \""+equip.getId()+"\"");
         }
+
+        updateMarker(analogInPoint);
+
         if (!analogInPoint.isEmpty()) {
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), analogInPoint.get("id").toString());
         }
         CCUHsApi.getInstance().scheduleSync();
+
+    }
+
+    private static void updateMarker(HashMap<Object, Object> point) {
+
+        if (!point.containsKey("standalone") || !point.containsKey("sse")) {
+            Point point1 = new Point.Builder().setHashMap(point).addMarker("standalone").addMarker("sse").build();
+            CCUHsApi.getInstance().updatePoint(point1, point.get("id").toString());
+        }
 
     }
 

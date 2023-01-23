@@ -580,11 +580,22 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:layout_weight">1</item>
+        <item name="android:layout_weight">0.8</item>
     </style>
 
+    <style name="RelayTableBasicItemWrapper">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_marginStart">34dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_weight">1.5</item>
+    </style>
+
+
     <style name="TableSpinner" parent="Widget.AppCompat.Spinner.Underlined">
-        <item name="android:layout_width">196dp</item>
+        <item name="android:layout_width">280dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
     </style>

@@ -8,9 +8,12 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
+import a75f.io.renatus.R
 import android.app.Application
+import android.content.Context
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -293,6 +296,14 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
             currentState.copy( isDisplayPp2p5Enabled = checked )
         )
     }
+
+    override fun getRelayMappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
+        return ArrayAdapter(context , R.layout.spinner_dropdown_item, values)
+    }
+
+    override fun validateProfileConfig() = true
+
+    override fun getValidationMessage() = ""
 }
 
 

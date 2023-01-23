@@ -17,7 +17,8 @@ public class DcwbConfigHandler {
         
         int val = msgObject.get("val").getAsInt();
         DabFullyModulatingRtu systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
-        if (configPoint.getMarkers().contains(Tags.DCWB) && configPoint.getMarkers().contains(Tags.ENABLED)) {
+        if (isDcwbEnabledPoint(configPoint)) {
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateDcwbEnabled status "+val);
             if (val > 0)
                 systemProfile.enableDcwb(hayStack);
             else
@@ -43,5 +44,12 @@ public class DcwbConfigHandler {
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }
+    }
+
+    //Many points have "dcwb" and "enabled" tags , this is getting messy.
+    private static boolean isDcwbEnabledPoint(Point configPoint) {
+        return configPoint.getMarkers().contains(Tags.DCWB) && configPoint.getMarkers().contains(Tags.ENABLED) &&
+                (!configPoint.getMarkers().contains(Tags.ANALOG4) && !configPoint.getMarkers().contains(Tags.ADAPTIVE) &&
+                        !configPoint.getMarkers().contains(Tags.MAXIMIZED));
     }
 }

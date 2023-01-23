@@ -119,7 +119,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxCooling", "writable"),
+                    arrayOf("dxCooling"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -138,7 +138,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxHeating", "writable"),
+                    arrayOf("dxHeating"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -157,7 +157,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "low"),
+                    arrayOf("speed", "low"),
                     arrayOf(relay, "enum", "stage1"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -177,7 +177,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "medium"),
+                    arrayOf("speed", "medium"),
                     arrayOf(relay, "enum", "stage2"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -196,7 +196,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "high"),
+                    arrayOf("speed", "high"),
                     arrayOf(relay, "enum", "stage3"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -215,7 +215,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled"),
+                    arrayOf("enabled"),
                     arrayOf(relay, "enum", "enable"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -234,7 +234,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled","occupied"),
+                    arrayOf( "enabled","occupied"),
                     arrayOf(relay, "enum", "enable","occupancy"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -253,7 +253,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable"),
+                    arrayOf(),
                     arrayOf(relay, "enum", "fan"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -382,7 +382,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf(),
-                    arrayOf("$analog", "cmd", "in"), "$equipDis-currentDrawn_10"
+                    arrayOf(analog, "cmd", "in"), "$equipDis-currentDrawn_10"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -397,7 +397,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer20"),
-                    arrayOf("$analog", "cmd", "in", "transformer"), "$equipDis-currentDrawn_20"
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_20"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -412,7 +412,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer50"),
-                    arrayOf("$analog", "cmd", "in", "transformer"), "$equipDis-currentDrawn_50"
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_50"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -820,19 +820,19 @@ class CpuPointsMigration {
             if (coolingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     coolingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-coolingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-coolingLoopOutput"
                 )
             }
             if (heatingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     heatingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-heatingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-heatingLoopOutput"
                 )
             }
             if (fanLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     fanLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-fanLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-fanLoopOutput"
                 )
             }
         }

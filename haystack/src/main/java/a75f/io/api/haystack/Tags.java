@@ -150,5 +150,10 @@ public class Tags
     public static final String SENSOR = "sensor";
     public static final String DOOR = "door";
     public static final String WINDOW = "window";
+    public static final String OPERATING = "operating";
+    public static final String OFFSET = "offset";
+    public static final String HUMIDITY = "humidity";
+    public static final String VOC = "voc";
+    public static final String PM2P5 = "pm2p5";
 
 }

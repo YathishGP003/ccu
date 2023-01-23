@@ -7,6 +7,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 
@@ -145,6 +146,34 @@ open class HyperStatEquip {
             }
         }
     }
+    // Function which updates the Analog In new configurations
+    fun updateAnalogInDetails(
+        analogInState: AnalogInState,
+        analogInTag: String,
+        physicalPort: Port
+    ) {
+        val analogInId = hsHaystackUtil.readPointID("config and $analogInTag and input and enabled") as String
+        val analogInAssociatedId = hsHaystackUtil.readPointID("config and $analogInTag and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
+        hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal.toDouble())
+
+        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogInState.enabled)
+        if (analogInState.enabled) {
+            val pointData: Point = hyperStatPointsUtil.analogInConfiguration(
+                analogInState = analogInState,
+                analogTag = analogInTag
+            )
+            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
+            val pointType = HyperStatAssociationUtil.getSensorNameByType(analogInState.association)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
+        }
+
+    }
+
 
     fun updatePm25Values(
         oldPm2p5Threshold: Double, newPm2p5Threshold: Double,
@@ -375,4 +404,14 @@ open class HyperStatEquip {
         )
     }
 
+    // Function to check the changes in the point and do the update with new value
+     fun updatePointValueChangeRequired(pointId: String, newValue: Double){
+        val presentValue = CCUHsApi.getInstance().readDefaultValById(pointId)
+        if(presentValue != newValue)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)
+    }
+    fun putPointToMap(pointData: HashMap<Any, Any>, outputPointMap: HashMap<Int, String>, mapping: Int){
+        if (pointData.isNotEmpty() && pointData.containsKey(Tags.ID))
+            outputPointMap[mapping] = pointData[Tags.ID].toString()
+    }
 }

@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Occupied
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.ZoneProfile
@@ -30,7 +29,6 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     lateinit var hsHaystackUtil: HSHaystackUtil
     var logicalPointsList: HashMap<Any, String> = HashMap()
-    //open var occuStatus: Occupied = Occupied()
     open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
     private val haystack = CCUHsApi.getInstance()
 
@@ -96,6 +94,80 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
                 relayStages[Stage.COOLING_3.displayName] = 1
             }
             Log.i(L.TAG_CCU_HSCPU, "$port = CoolingStage3:  $relayState")
+        }
+    }
+
+
+    override fun doCompressorStage1(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > relayActivationHysteresis)
+            relayState = 1.0
+        if (compressorLoopOutput == 0)
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_1.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_1.displayName] = 1
+            }
+            Log.i(L.TAG_CCU_HSCPU, "$port = COMPRESSOR_STAGE1:  $relayState")
+        }
+    }
+
+    override fun doCompressorStage2(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        divider: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > (divider + (relayActivationHysteresis / 2)))
+            relayState = 1.0
+        if (compressorLoopOutput <= (divider - (relayActivationHysteresis / 2)))
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_2.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_2.displayName] = 1
+            }
+            Log.i(L.TAG_CCU_HSCPU, "$port = COMPRESSOR_STAGE2:  $relayState")
+        }
+    }
+
+    override fun doCompressorStage3(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > (66 + (relayActivationHysteresis / 2)))
+            relayState = 1.0
+        if (compressorLoopOutput <= (66 - (relayActivationHysteresis / 2)))
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_3.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_3.displayName] = 1
+            }
+            Log.i(L.TAG_CCU_HSCPU, "$port = COMPRESSOR_STAGE3:  $relayState")
         }
     }
 
@@ -368,7 +440,25 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
         }
     }
-
+    override fun doAnalogCompressorSpeed(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        compressorLoopOutput: Int,
+        zoneMode: ZoneState
+    ) {
+        if (conditioningMode !=  StandaloneConditioningMode.OFF) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, compressorLoopOutput.toDouble())
+            if (compressorLoopOutput > 0){
+                if(zoneMode == ZoneState.COOLING)
+                    analogOutStages[AnalogOutput.COOLING.name] = compressorLoopOutput
+                if(zoneMode == ZoneState.HEATING)
+                    analogOutStages[AnalogOutput.HEATING.name] = compressorLoopOutput
+            }
+        } else {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+        }
+    }
     override fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double) {
         hsHaystackUtil.updateDoorWindowValues(doorWindowEnabled,doorWindowSensor)
     }
@@ -407,5 +497,9 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
     }
 
+    // To run specific fan speed while running aux heating
+    enum class FanSpeed {
+        OFF,LOW,MEDIUM,HIGH
+    }
 
 }

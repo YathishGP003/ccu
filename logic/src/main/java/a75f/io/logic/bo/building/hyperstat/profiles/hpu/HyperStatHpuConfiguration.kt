@@ -1,34 +1,34 @@
-package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
+package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration
+import a75f.io.logic.bo.building.Thermistor
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 
 /**
- * Created by Manjunath K on 26-07-2022.
+ * Created by Manjunath K on 28-12-2022.
  */
 
-class HyperStatPipe2Configuration: BaseProfileConfiguration() {
+class HyperStatHpuConfiguration: BaseProfileConfiguration() {
 
     var temperatureOffset = 0.0
-
     var isEnableAutoForceOccupied = false
     var isEnableAutoAway = false
 
-    var relay1State = Pipe2RelayState(false, Pipe2RelayAssociation.FAN_MEDIUM_SPEED)
-    var relay2State = Pipe2RelayState(false, Pipe2RelayAssociation.FAN_HIGH_SPEED)
-    var relay3State = Pipe2RelayState(false, Pipe2RelayAssociation.FAN_LOW_SPEED)
-    var relay4State = Pipe2RelayState(false, Pipe2RelayAssociation.AUX_HEATING_STAGE1)
-    var relay5State = Pipe2RelayState(false, Pipe2RelayAssociation.AUX_HEATING_STAGE2)
-    var relay6State = Pipe2RelayState(false, Pipe2RelayAssociation.WATER_VALVE)
+    var relay1State = HpuRelayState(false, HpuRelayAssociation.COMPRESSOR_STAGE1)
+    var relay2State = HpuRelayState(false, HpuRelayAssociation.COMPRESSOR_STAGE2)
+    var relay3State = HpuRelayState(false, HpuRelayAssociation.FAN_LOW_SPEED)
+    var relay4State = HpuRelayState(false, HpuRelayAssociation.AUX_HEATING_STAGE1)
+    var relay5State = HpuRelayState(false, HpuRelayAssociation.FAN_MEDIUM_SPEED)
+    var relay6State = HpuRelayState(false, HpuRelayAssociation.CHANGE_OVER_O_COOLING)
 
-    var analogOut1State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.WATER_VALVE, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,30.0,60.0,100.0)
+    var analogOut1State = HpuAnalogOutState(false, HpuAnalogOutAssociation.COMPRESSOR_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut2State = HpuAnalogOutState(false, HpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut3State = HpuAnalogOutState(false, HpuAnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
     var isEnableAirFlowTempSensor = false
-    var isSupplyWaterSensor = true
+    var isEnableDoorWindowSensor = false
 
     var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
     var analogIn2State = AnalogInState(false, AnalogInAssociation.DOOR_WINDOW_SENSOR)
@@ -52,44 +52,47 @@ class HyperStatPipe2Configuration: BaseProfileConfiguration() {
     }
 }
 
+
 /**
  * State for a single relay: enabled and its mapping.
  */
-data class Pipe2RelayState(
-    val enabled: Boolean,
-    val association: Pipe2RelayAssociation
-)
 
-data class Pipe2AnalogOutState(
+data class HpuAnalogOutState(
     val enabled: Boolean,
-    val association: Pipe2AnalogOutAssociation,
+    val association: HpuAnalogOutAssociation,
     val voltageAtMin: Double,   // create position to value mapping here.
     val voltageAtMax: Double,    // create position to value mapping here.
     val perAtFanLow: Double,
     val perAtFanMedium: Double,
     val perAtFanHigh: Double,
 )
+data class HpuRelayState(
+    val enabled: Boolean,
+    val association: HpuRelayAssociation
+)
 
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
 // Do not change order without a migration.
-enum class Pipe2RelayAssociation {
+enum class HpuRelayAssociation {
+    COMPRESSOR_STAGE1,
+    COMPRESSOR_STAGE2,
+    COMPRESSOR_STAGE3,
+    AUX_HEATING_STAGE1,
+    AUX_HEATING_STAGE2,
     FAN_LOW_SPEED,
     FAN_MEDIUM_SPEED,
     FAN_HIGH_SPEED,
-    AUX_HEATING_STAGE1,
-    AUX_HEATING_STAGE2,
-    WATER_VALVE,
     FAN_ENABLED,
     OCCUPIED_ENABLED,
     HUMIDIFIER,
-    DEHUMIDIFIER
+    DEHUMIDIFIER,
+    CHANGE_OVER_O_COOLING,
+    CHANGE_OVER_B_HEATING
 }
 
 // Order is important -- see comment above.
-enum class Pipe2AnalogOutAssociation {
-    WATER_VALVE,
+enum class HpuAnalogOutAssociation {
+    COMPRESSOR_SPEED,
     FAN_SPEED,
     DCV_DAMPER
 }
-
-

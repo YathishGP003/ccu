@@ -175,7 +175,8 @@ public class UnitUtils {
              return   tunerItem.containsKey("spread") || tunerItem.containsKey("abnormal") ||
                 (tunerItem.containsKey("chilled") || tunerItem.containsKey("pspread")) ||
                 tunerItem.containsKey("leeway") || tunerItem.containsKey("setback") ||
-                     tunerItem.containsKey("differential")|| tunerItem.containsKey("sat") ;
+                     tunerItem.containsKey("differential")|| tunerItem.containsKey("sat")
+                     || (tunerItem.containsKey("reheat") && tunerItem.containsKey("offset"));
     }
 
     public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {

@@ -1,36 +1,30 @@
-package a75f.io.logic.bo.building.hyperstat.profiles.cpu
+package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
-import a75f.io.logger.CcuLog
+import a75f.io.api.haystack.Tags
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
-import a75f.io.logic.tuners.HyperstatCpuTuners
+import a75f.io.logic.tuners.HyperStatHpuTuners
 import a75f.io.logic.util.RxTask
 import android.util.Log
 
 /**
- * Models CPU Equipment in its interface, calls through to datastore (haystack)
- * to get its state.
- * We will have one of these for each HyperStat in the zone profile.
- *
- * @author tcase@75f.io
- * Created on 7/9/21.
+ * Created by Manjunath K on 02-01-2023.
  */
-class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
+class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
     val haystack: CCUHsApi = CCUHsApi.getInstance()
-    private val profileTag = "hyperstatcpu"
-
+    private val profileTag = "hyperstathpu"
     private var masterPoints: HashMap<Any, String> = HashMap()
 
     private var siteDis: String? = null
@@ -43,71 +37,17 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     private var systemEquip = haystack.readEntity("equip and system") as HashMap<Any, Any>
 
     companion object {
-        fun getHyperStatEquipRef(nodeAddress: Short): HyperStatCpuEquip {
-            val hyperStatCpuEquip = HyperStatCpuEquip(nodeAddress)
-            hyperStatCpuEquip.initEquipReference(nodeAddress)
-            return hyperStatCpuEquip
+        fun getHyperStatEquipRef(nodeAddress: Short): HyperStatHpuEquip {
+            val hyperStatHpuEquip = HyperStatHpuEquip(nodeAddress)
+            hyperStatHpuEquip.initEquipReference(nodeAddress)
+            return hyperStatHpuEquip
         }
     }
 
-    override fun initializePoints(
-        baseConfig: BaseProfileConfiguration,
-        room: String,
-        floor: String,
-        node: Short
-    ) {
-        val config = baseConfig as HyperStatCpuConfiguration
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  Initialising Points: ")
-        nodeAddress = node.toInt()
-        floorRef = floor
-        roomRef = room
-        siteDis = basicInfo.siteDis
-        tz = basicInfo.timeZone
-        equipDis = "$siteDis-$profileTag-$nodeAddress"
-        gatewayRef = systemEquip["id"].toString()
-
-        // get general profile
-        val profileEquip =  HyperStatEquip()
-
-        // Create Equip Point
-        equipRef =  profileEquip.createNewEquip(
-            HyperstatProfileNames.HSCPU,
-            roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
-            equipDis!!, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-        )
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  New Equip Created: $equipRef")
-
-        // Init required reference
-        init(HyperstatProfileNames.HSCPU, equipRef!!,floorRef!!,roomRef!!,nodeAddress,equipDis!!)
-
-        // add Tuner Points
-        createHyperStatTunerPoints(
-            equipRef!!, equipDis!!, roomRef!!, floorRef!!
-        )
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  Tuners Created")
-
-        // Create config points
-        createProfileConfigurationPoints(hyperStatConfig = config)
-
-        Log.i(L.TAG_CCU_HSCPU, "New Profile Profile configuration points are created ")
-        // Create Logical Points
-       createProfileLogicalPoints(hyperStatConfig = config)
-
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  logical points are created")
-
-        configHyperStatDevice(config, profileEquip)
-
-        updateConditioningMode()
-        // Syncing the Points
-        haystack.syncEntityTree()
-
-        return
-    }
-
     fun initEquipReference(node: Short) {
-        val equip = haystack.read("equip and hyperstat and cpu and group == \"$node\"")
+        val equip = haystack.readEntity("equip and hyperstat and hpu and group == \"$node\"")
         if (equip.isEmpty()) {
-            Log.i(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $node ")
+            Log.i(L.TAG_CCU_HSHPU, " Unable to find the equip details for node $node ")
             return
         }
         equipRef = equip["id"].toString()
@@ -119,32 +59,210 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         nodeAddress = node.toInt()
 
         // Init required reference
-        init(HyperstatProfileNames.HSCPU, equipRef!!,floorRef!!,roomRef!!,node.toInt(),equipDis!!)
+        init(HyperstatProfileNames.HSHPU, equipRef!!,floorRef!!,roomRef!!,node.toInt(),equipDis!!)
     }
+
+    override fun initializePoints(
+        baseConfig: BaseProfileConfiguration,
+        room: String,
+        floor: String,
+        node: Short
+    ) {
+        val config = baseConfig as HyperStatHpuConfiguration
+
+        Log.i(L.TAG_CCU_HSHPU, "New Profile  Initialising Points: ")
+        nodeAddress = node.toInt()
+        floorRef = floor
+        roomRef = room
+        siteDis = basicInfo.siteDis
+        tz = basicInfo.timeZone
+        equipDis = "$siteDis-$profileTag-$nodeAddress"
+        gatewayRef = systemEquip[Tags.ID].toString()
+
+        // get general profile
+        val profileEquip =  HyperStatEquip()
+
+        // Create Equip Point
+        equipRef =  profileEquip.createNewEquip(
+            HyperstatProfileNames.HSHPU,
+            roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
+            equipDis!!, ProfileType.HYPERSTAT_HEAT_PUMP_UNIT , arrayOf(Tags.HPU)
+        )
+        Log.i(L.TAG_CCU_HSHPU, "New Profile  New Equip Created: $equipRef")
+
+        // Init required reference
+        init(HyperstatProfileNames.HSHPU, equipRef!!,floorRef!!,roomRef!!,nodeAddress,equipDis!!)
+
+        // add Tuner Points
+        createHyperStatTunerPoints(
+            equipRef!!, equipDis!!, roomRef!!, floorRef!!
+        )
+        Log.i(L.TAG_CCU_HSHPU, "New Profile  Tuners Created")
+
+        // Create config points
+        createProfileConfigurationPoints(hyperStatConfig = config)
+
+        Log.i(L.TAG_CCU_HSHPU, "New Profile Profile configuration points are created ")
+        // Create Logical Points
+        createProfileLogicalPoints(hyperStatConfig = config)
+
+        Log.i(L.TAG_CCU_HSHPU, "New Profile  logical points are created")
+
+        configHyperStatDevice(config, profileEquip)
+
+        // Syncing the Points
+        haystack.syncEntityTree()
+    }
+
 
     private fun createHyperStatTunerPoints(
         equipRef: String, equipDis: String, roomRef: String, floorRef: String,
     ) {
         RxTask.executeAsync {
-            HyperstatCpuTuners.addHyperstatModuleTuners(
+            HyperStatHpuTuners.addHyperStatModuleTuners(
                 CCUHsApi.getInstance(), basicInfo.siteRef,
                 equipRef, equipDis, basicInfo.timeZone, roomRef, floorRef
             )
         }
     }
 
+    //function which creates Profile configuration Points
+    private fun createProfileConfigurationPoints(hyperStatConfig: HyperStatHpuConfiguration) {
+
+        hyperStatPointsUtil.addProfilePoints()
+
+        hyperStatPointsUtil.createTemperatureOffSetPoint(hyperStatConfig.temperatureOffset * 10)
+
+        // List Of Configuration Points
+        val configPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createAutoForceAutoAwayConfigPoints(
+            hyperStatConfig.isEnableAutoForceOccupied, hyperStatConfig.isEnableAutoAway
+        )
+
+        val co2ConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createPointCO2ConfigPoint(
+                hyperStatConfig.zoneCO2DamperOpeningRate,hyperStatConfig.zoneCO2Threshold,hyperStatConfig.zoneCO2Target
+            )
+
+        val vocPmPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createPointVOCPmConfigPoint( equipDis!!,
+                hyperStatConfig.zoneVOCThreshold,hyperStatConfig.zoneVOCTarget,
+                hyperStatConfig.zonePm2p5Threshold,hyperStatConfig.zonePm2p5Target
+            )
+
+        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints(true)
+
+        val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createIsRelayEnabledConfigPoints(
+            ConfigState(hyperStatConfig.relay1State.enabled, hyperStatConfig.relay1State.association.ordinal),
+            ConfigState(hyperStatConfig.relay2State.enabled, hyperStatConfig.relay2State.association.ordinal),
+            ConfigState(hyperStatConfig.relay3State.enabled, hyperStatConfig.relay3State.association.ordinal),
+            ConfigState(hyperStatConfig.relay4State.enabled, hyperStatConfig.relay4State.association.ordinal),
+            ConfigState(hyperStatConfig.relay5State.enabled, hyperStatConfig.relay5State.association.ordinal),
+            ConfigState(hyperStatConfig.relay6State.enabled, hyperStatConfig.relay6State.association.ordinal),
+            ProfileType.HYPERSTAT_HEAT_PUMP_UNIT
+        )
+
+        val analogOutConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createIsAnalogOutEnabledConfigPoints(
+                ConfigState(hyperStatConfig.analogOut1State.enabled, hyperStatConfig.analogOut1State.association.ordinal),
+                ConfigState(hyperStatConfig.analogOut2State.enabled, hyperStatConfig.analogOut2State.association.ordinal),
+                ConfigState(hyperStatConfig.analogOut3State.enabled, hyperStatConfig.analogOut3State.association.ordinal),
+                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT
+            )
+
+        val analogInConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createIsAnalogInEnabledConfigPoints(
+                ConfigState(hyperStatConfig.analogIn1State.enabled, hyperStatConfig.analogIn1State.association.ordinal),
+                ConfigState(hyperStatConfig.analogIn2State.enabled, hyperStatConfig.analogIn2State.association.ordinal),
+            )
+
+        val thConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createIsThermistorEnabledConfigPoints(
+                ConfigState(hyperStatConfig.isEnableAirFlowTempSensor, 0), //  aiflow sensor is constant
+                ConfigState(hyperStatConfig.isEnableDoorWindowSensor, 0),
+                false
+            )
+
+        // For user intent Point CCU level default values need to be added
+        val userIntentPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createUserIntentPoints(
+                hyperStatPointsUtil.getHpuDefaultFanSpeed(hyperStatConfig),
+                hyperStatPointsUtil.getHpuDefaultConditioningMode()
+            )
+
+        // device display configuration
+        val deviceDisplayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
+            .createDeviceDisplayConfigurationPoints(
+                hyperStatConfig.displayHumidity,hyperStatConfig.displayVOC,
+                hyperStatConfig.displayPp2p5,hyperStatConfig.displayCo2
+            )
+
+        val allConfigPoints = arrayOf(
+            configPointsList, relayConfigPoints, analogOutConfigPoints,
+            analogInConfigPoints, thConfigPointsList, userIntentPointsList,
+            co2ConfigPointsList, loopOutputPoints,vocPmPointsList, deviceDisplayConfigPoints
+        )
+        Log.i(L.TAG_CCU_HSHPU, "adding : points default value ")
+        hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
+
+    }
+
+
+    //Function to create Logical Points
+    private fun createProfileLogicalPoints(hyperStatConfig: HyperStatHpuConfiguration) {
+
+        Log.i(L.TAG_CCU_HSHPU, "createProfileLogicalPoints: ")
+
+        val temperaturePointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
+            .temperatureScheduleLogicalPoints()
+
+
+        val relayPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
+            .createHpuRelayLogicalPoints(
+                hyperStatConfig = hyperStatConfig
+            )
+
+        val analogOutPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
+            .createHpuAnalogOutLogicalPoints(
+                hyperStatConfig = hyperStatConfig
+            )
+
+        val analogInPointsList: MutableList<Triple<Point, Any, Any>> =
+            hyperStatPointsUtil.createConfigAnalogInLogicalPoints(
+                hyperStatConfig.analogIn1State,hyperStatConfig.analogIn2State
+            )
+        val thermistorInPointsList: MutableList<Triple<Point, Any, Any>> =
+            hyperStatPointsUtil.createConfigThermistorInLogicalPoints(
+                hyperStatConfig.isEnableAirFlowTempSensor,
+                hyperStatConfig.isEnableDoorWindowSensor,
+                false
+            )
+        // Device Class will create all the sensor points dynamically based on the input message
+        // which is received by the Hyper state device
+        val sensorPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil.createLogicalSensorPoints()
+
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = sensorPointsList))
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = temperaturePointsList))
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = relayPointsList))
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogOutPointsList))
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogInPointsList))
+        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = thermistorInPointsList))
+
+        Log.i(L.TAG_CCU_HSHPU, "Done with Logical points creation")
+    }
+
+
     // Function which configure HyperStat Device configurations
-    private fun configHyperStatDevice(config: HyperStatCpuConfiguration, profileEquip: HyperStatEquip) {
+    private fun configHyperStatDevice(config: HyperStatHpuConfiguration, profileEquip: HyperStatEquip) {
 
         val hyperStatDevice = HyperStatDevice(
-            nodeAddress, basicInfo.siteRef, floorRef, roomRef, equipRef, HyperstatProfileNames.HSCPU
+            nodeAddress, basicInfo.siteRef, floorRef, roomRef, equipRef, HyperstatProfileNames.HSHPU
         )
 
         val heartBeatId = CCUHsApi.getInstance().addPoint(
             nodeAddress.let {
                 HeartBeat.getHeartBeatPoint(
                     equipDis, equipRef,
-                    basicInfo.siteRef, roomRef, floorRef, it, HyperstatProfileNames.HSCPU, tz
+                    basicInfo.siteRef, roomRef, floorRef, it, HyperstatProfileNames.HSHPU, tz
                 )
             }
         )
@@ -162,17 +280,18 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         )
 
         profileEquip.setupDeviceAnalogIns(
-            config.analogIn1State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
-            config.analogIn1State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
+            config.analogIn1State.enabled, HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
+            config.analogIn1State.enabled, HyperStatAssociationUtil.getSensorNameByType(config.analogIn1State.association),
             masterPoints, hyperStatDevice
         )
 
-        // In Hyperstat CPU profile th1 will be always configured with Airflow Sensor so
+        // In Hyperstat  profiles th1 will be always configured with Airflow Sensor so
         // it is 3 constant because in sensor manager class Airflow Sensor position in external sensor list is 3
         // do not change it
+        // Added new sensor type as supply water temp at 19 position
         profileEquip.setupDeviceThermistors(
-            config.isEnableDoorWindowSensor, "3",
-            config.isEnableDoorWindowSensor,HyperStatAssociationUtil.getSensorNameByType(AnalogInAssociation.DOOR_WINDOW_SENSOR),
+            config.isEnableAirFlowTempSensor, "3",
+            config.isEnableDoorWindowSensor,"0", // No need mention type
             masterPoints, hyperStatDevice
         )
 
@@ -189,185 +308,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     }
 
 
-    //function which creates Profile configuration Points
-    private fun createProfileConfigurationPoints(hyperStatConfig: HyperStatCpuConfiguration) {
-
-        hyperStatPointsUtil.addProfilePoints()
-
-        hyperStatPointsUtil.createTemperatureOffSetPoint(hyperStatConfig.temperatureOffset * 10)
-
-        // List Of Configuration Points
-        val configPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createAutoForceAutoAwayConfigPoints(
-             hyperStatConfig.isEnableAutoForceOccupied, hyperStatConfig.isEnableAutoAway
-        )
-
-        val co2ConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createPointCO2ConfigPoint(
-                 hyperStatConfig.zoneCO2DamperOpeningRate,hyperStatConfig.zoneCO2Threshold,hyperStatConfig.zoneCO2Target
-        )
-
-        val vocPmPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createPointVOCPmConfigPoint( equipDis!!,
-                hyperStatConfig.zoneVOCThreshold,hyperStatConfig.zoneVOCTarget,
-                hyperStatConfig.zonePm2p5Threshold,hyperStatConfig.zonePm2p5Target
-            )
-
-        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints(false)
-
-        val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createIsRelayEnabledConfigPoints(
-            ConfigState(hyperStatConfig.relay1State.enabled, hyperStatConfig.relay1State.association.ordinal),
-            ConfigState(hyperStatConfig.relay2State.enabled, hyperStatConfig.relay2State.association.ordinal),
-            ConfigState(hyperStatConfig.relay3State.enabled, hyperStatConfig.relay3State.association.ordinal),
-            ConfigState(hyperStatConfig.relay4State.enabled, hyperStatConfig.relay4State.association.ordinal),
-            ConfigState(hyperStatConfig.relay5State.enabled, hyperStatConfig.relay5State.association.ordinal),
-            ConfigState(hyperStatConfig.relay6State.enabled, hyperStatConfig.relay6State.association.ordinal),
-            ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-        )
-
-        val analogOutConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createIsAnalogOutEnabledConfigPoints(
-                ConfigState(hyperStatConfig.analogOut1State.enabled, hyperStatConfig.analogOut1State.association.ordinal),
-                ConfigState(hyperStatConfig.analogOut2State.enabled, hyperStatConfig.analogOut2State.association.ordinal),
-                ConfigState(hyperStatConfig.analogOut3State.enabled, hyperStatConfig.analogOut3State.association.ordinal),
-                ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-            )
-
-        val analogInConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createIsAnalogInEnabledConfigPoints(
-                ConfigState(hyperStatConfig.analogIn1State.enabled, hyperStatConfig.analogIn1State.association.ordinal),
-                ConfigState(hyperStatConfig.analogIn2State.enabled, hyperStatConfig.analogIn2State.association.ordinal),
-            )
-
-        val thConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createIsThermistorEnabledConfigPoints(
-                ConfigState(hyperStatConfig.isEnableAirFlowTempSensor, 0), // aiflow sensor is constant
-                ConfigState(hyperStatConfig.isEnableDoorWindowSensor, 0) // this is cpu config not 2 pipe configuration
-            ,false
-            )
-
-        // For user intent Point CCU level default values need to be added
-        val userIntentPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createUserIntentPoints(
-            hyperStatPointsUtil.getCPUDefaultFanSpeed(hyperStatConfig),
-            hyperStatPointsUtil.getCPUDefaultConditioningMode(hyperStatConfig)
-        )
-
-        // device display configuration
-        val deviceDisplayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
-            .createDeviceDisplayConfigurationPoints(
-                hyperStatConfig.displayHumidity,hyperStatConfig.displayVOC,
-                hyperStatConfig.displayPp2p5,hyperStatConfig.displayCo2
-        )
-
-        val allConfigPoints = arrayOf(
-            configPointsList, relayConfigPoints, analogOutConfigPoints,
-            analogInConfigPoints, thConfigPointsList, userIntentPointsList,
-            co2ConfigPointsList, loopOutputPoints,vocPmPointsList,deviceDisplayConfigPoints
-        )
-        Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
-        hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
-
-    }
-
-    //Function to create Logical Points
-    private fun createProfileLogicalPoints(hyperStatConfig: HyperStatCpuConfiguration) {
-        Log.i(L.TAG_CCU_HSCPU, "createProfileLogicalPoints: ")
-
-        val temperaturePointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
-            .temperatureScheduleLogicalPoints()
-
-        val relayPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
-            .createConfigRelayLogicalPoints(
-                hyperStatConfig = hyperStatConfig
-            )
-        val analogOutPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
-            .createConfigAnalogOutLogicalPoints(
-                hyperStatConfig = hyperStatConfig
-            )
-        val analogInPointsList: MutableList<Triple<Point, Any, Any>> =
-            hyperStatPointsUtil.createConfigAnalogInLogicalPoints(
-                hyperStatConfig.analogIn1State,hyperStatConfig.analogIn2State,
-            )
-        val thermistorInPointsList: MutableList<Triple<Point, Any, Any>> =
-            hyperStatPointsUtil.createConfigThermistorInLogicalPoints(
-                 hyperStatConfig.isEnableAirFlowTempSensor,
-                 hyperStatConfig.isEnableDoorWindowSensor, false
-            )
-        // Device Class will create all the sensor points dynamically based on the input message
-        // which is received by the Hyper state device
-        val sensorPointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil.createLogicalSensorPoints()
-
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = sensorPointsList))
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = temperaturePointsList))
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = relayPointsList))
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogOutPointsList))
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogInPointsList))
-        masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = thermistorInPointsList))
-
-        Log.i(L.TAG_CCU_HSCPU, "Done with Logical points creation")
-
-    }
-
-
-    // Function to update the existing profile
-    override fun updateConfiguration(configuration: BaseProfileConfiguration) {
-        Log.i(L.TAG_CCU_HSCPU, "===========HyperStat profile Update  ============")
-
-        val updatedHyperStatConfig =  configuration as HyperStatCpuConfiguration
-        val presetConfiguration = getConfiguration()
-
-        updateGeneralConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAirFlowTempSensorConfiguration(presetConfiguration.isEnableAirFlowTempSensor,updatedHyperStatConfig.isEnableAirFlowTempSensor)
-        updateDoorWindowSensorTh2Configuration(presetConfiguration.isEnableDoorWindowSensor,updatedHyperStatConfig.isEnableDoorWindowSensor)
-        updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-
-        LogicalPointsUtil.cleanCpuLogicalPoints(updatedHyperStatConfig,equipRef!!)
-        Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
-        haystack.syncEntityTree()
-
-    }
-
-    // function to update (If change in configuration)
-    // Temp Off set , CO2 threshold and target, VOC threshold and target, pm2.5 threshold and target
-    private fun updateGeneralConfiguration(
-        newConfiguration: HyperStatCpuConfiguration,
-        existingConfiguration: HyperStatCpuConfiguration){
-
-        updateTempOffset(existingConfiguration.temperatureOffset ,newConfiguration.temperatureOffset)
-
-        updateAutoAwayAutoForceOccupy(
-            existingConfiguration.isEnableAutoAway, newConfiguration.isEnableAutoAway,
-            existingConfiguration.isEnableAutoForceOccupied, newConfiguration.isEnableAutoForceOccupied,
-        )
-
-        updateCO2Values(
-            existingConfiguration.zoneCO2DamperOpeningRate,newConfiguration.zoneCO2DamperOpeningRate,
-            existingConfiguration.zoneCO2Threshold,newConfiguration.zoneCO2Threshold,
-            existingConfiguration.zoneCO2Target,newConfiguration.zoneCO2Target
-        )
-
-        updateVOCValues(
-            existingConfiguration.zoneVOCThreshold, newConfiguration.zoneVOCThreshold,
-            existingConfiguration.zoneVOCTarget, newConfiguration.zoneVOCTarget
-        )
-
-        updatePm25Values(
-            existingConfiguration.zonePm2p5Threshold, newConfiguration.zonePm2p5Threshold,
-            existingConfiguration.zonePm2p5Target, newConfiguration.zonePm2p5Target
-        )
-        updateDeviceDisplayConfiguration(
-            existingConfiguration.displayHumidity,newConfiguration.displayHumidity,
-            existingConfiguration.displayVOC,newConfiguration.displayVOC,
-            existingConfiguration.displayPp2p5,newConfiguration.displayPp2p5,
-            existingConfiguration.displayCo2,newConfiguration.displayCo2
-            )
-    }
-
     // collect the existing profile configurations
-    fun getConfiguration(): HyperStatCpuConfiguration {
-        val config = HyperStatCpuConfiguration()
+    fun getConfiguration(): HyperStatHpuConfiguration {
+        val config = HyperStatHpuConfiguration()
 
         getRelayConfigurations(config)
         getAnalogOutConfigurations(config)
@@ -394,9 +337,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         return config
     }
 
+
     //  To show the existing profile configurations
     // config relays
-    private fun getRelayConfigurations(config: HyperStatCpuConfiguration) {
+    private fun getRelayConfigurations(config: HyperStatHpuConfiguration) {
         val r1 =  hsHaystackUtil.readConfigStatus("relay1").toInt()
         val r2 =  hsHaystackUtil.readConfigStatus("relay2").toInt()
         val r3 =  hsHaystackUtil.readConfigStatus("relay3").toInt()
@@ -412,22 +356,22 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         val r6AssociatedTo = hsHaystackUtil.readConfigAssociation("relay6")
 
         config.relay1State =
-            RelayState(r1 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r1AssociatedTo.toInt()))
+            HpuRelayState(r1 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r1AssociatedTo.toInt()))
         config.relay2State =
-            RelayState(r2 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r2AssociatedTo.toInt()))
+            HpuRelayState(r2 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r2AssociatedTo.toInt()))
         config.relay3State =
-            RelayState(r3 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r3AssociatedTo.toInt()))
+            HpuRelayState(r3 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r3AssociatedTo.toInt()))
         config.relay4State =
-            RelayState(r4 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r4AssociatedTo.toInt()))
+            HpuRelayState(r4 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r4AssociatedTo.toInt()))
         config.relay5State =
-            RelayState(r5 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r5AssociatedTo.toInt()))
+            HpuRelayState(r5 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r5AssociatedTo.toInt()))
         config.relay6State =
-            RelayState(r6 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r6AssociatedTo.toInt()))
+            HpuRelayState(r6 == 1, HyperStatAssociationUtil.getHpuRelayAssociatedStage(r6AssociatedTo.toInt()))
 
     }
 
     //config Analog Out
-    private fun getAnalogOutConfigurations(config: HyperStatCpuConfiguration) {
+    private fun getAnalogOutConfigurations(config: HyperStatHpuConfiguration) {
         val ao1 = hsHaystackUtil.readConfigStatus("analog1 and output  ").toInt()
         val ao2 = hsHaystackUtil.readConfigStatus("analog2 and output ").toInt()
         val ao3 = hsHaystackUtil.readConfigStatus("analog3 and output ").toInt()
@@ -530,25 +474,25 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             }
         }
 
-        config.analogOut1State = AnalogOutState(
+        config.analogOut1State = HpuAnalogOutState(
             ao1 == 1,
-            HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao1AssociatedTo.toInt()),
+            HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(ao1AssociatedTo.toInt()),
             ao1MinVal, ao1MaxVal, ao1fanLow, ao1fanMedium, ao1fanHigh
         )
-        config.analogOut2State = AnalogOutState(
+        config.analogOut2State = HpuAnalogOutState(
             ao2 == 1,
-            HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao2AssociatedTo.toInt()),
+            HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(ao2AssociatedTo.toInt()),
             ao2MinVal, ao2MaxVal, ao2fanLow, ao2fanMedium, ao2fanHigh
         )
-        config.analogOut3State = AnalogOutState(
+        config.analogOut3State = HpuAnalogOutState(
             ao3 == 1,
-            HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao3AssociatedTo.toInt()),
+            HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(ao3AssociatedTo.toInt()),
             ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh
         )
     }
 
     //config Analog In
-    private fun getAnalogInConfigurations(config: HyperStatCpuConfiguration) {
+    private fun getAnalogInConfigurations(config: HyperStatHpuConfiguration) {
         val ai1 = hsHaystackUtil.readConfigStatus("analog1 and input").toInt()
         val ai2 = hsHaystackUtil.readConfigStatus("analog2 and input").toInt()
 
@@ -564,97 +508,107 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     }
 
+    // Update configuration
+    // Function to update the existing profile
+    override fun updateConfiguration(configuration: BaseProfileConfiguration) {
+        Log.i(L.TAG_CCU_HSHPU, "===========Hyperstat profile Update  ============")
+
+        val updatedHyperStatConfig =  configuration as HyperStatHpuConfiguration
+        val presetConfiguration = getConfiguration()
+
+        updateGeneralConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAirFlowTempSensorConfiguration(presetConfiguration.isEnableAirFlowTempSensor,updatedHyperStatConfig.isEnableAirFlowTempSensor)
+        updateDoorWindowSensorTh2Configuration(presetConfiguration.isEnableDoorWindowSensor,updatedHyperStatConfig.isEnableDoorWindowSensor)
+        updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+
+        LogicalPointsUtil.cleanHpuLogicalPoints(updatedHyperStatConfig,equipRef!!)
+        Log.i(L.TAG_CCU_HSHPU, "Profile update has been completed  ")
+        haystack.syncEntityTree()
+
+    }
+
+
+
+    // function to update (If change in configuration)
+    // Temp Off set , CO2 threshold and target, VOC threshold and target, pm2.5 threshold and target
+    private fun updateGeneralConfiguration(
+        newConfiguration: HyperStatHpuConfiguration,
+        existingConfiguration: HyperStatHpuConfiguration){
+
+        updateTempOffset(existingConfiguration.temperatureOffset ,newConfiguration.temperatureOffset)
+
+        updateAutoAwayAutoForceOccupy(
+            existingConfiguration.isEnableAutoAway, newConfiguration.isEnableAutoAway,
+            existingConfiguration.isEnableAutoForceOccupied, newConfiguration.isEnableAutoForceOccupied,
+        )
+
+        updateCO2Values(
+            existingConfiguration.zoneCO2DamperOpeningRate,newConfiguration.zoneCO2DamperOpeningRate,
+            existingConfiguration.zoneCO2Threshold,newConfiguration.zoneCO2Threshold,
+            existingConfiguration.zoneCO2Target,newConfiguration.zoneCO2Target
+        )
+
+        updateVOCValues(
+            existingConfiguration.zoneVOCThreshold, newConfiguration.zoneVOCThreshold,
+            existingConfiguration.zoneVOCTarget, newConfiguration.zoneVOCTarget
+        )
+
+        updatePm25Values(
+            existingConfiguration.zonePm2p5Threshold, newConfiguration.zonePm2p5Threshold,
+            existingConfiguration.zonePm2p5Target, newConfiguration.zonePm2p5Target
+        )
+        updateDeviceDisplayConfiguration(
+            existingConfiguration.displayHumidity,newConfiguration.displayHumidity,
+            existingConfiguration.displayVOC,newConfiguration.displayVOC,
+            existingConfiguration.displayPp2p5,newConfiguration.displayPp2p5,
+            existingConfiguration.displayCo2,newConfiguration.displayCo2
+        )
+    }
 
     // To Update the existing profile configurations
     private fun updateRelaysConfig(
-        newConfiguration: HyperStatCpuConfiguration,
-        existingConfiguration: HyperStatCpuConfiguration
+        newConfiguration: HyperStatHpuConfiguration,
+        existingConfiguration: HyperStatHpuConfiguration
     ) {
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay1State, existingConfiguration.relay1State)) {
             updateRelayDetails(newConfiguration.relay1State, "relay1", Port.RELAY_ONE, newConfiguration)
         }
 
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay2State, existingConfiguration.relay2State)) {
             updateRelayDetails(newConfiguration.relay2State, "relay2", Port.RELAY_TWO, newConfiguration)
         }
 
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay3State, existingConfiguration.relay3State)) {
             updateRelayDetails(newConfiguration.relay3State, "relay3", Port.RELAY_THREE, newConfiguration)
         }
 
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay4State, existingConfiguration.relay4State)) {
             updateRelayDetails(newConfiguration.relay4State, "relay4", Port.RELAY_FOUR, newConfiguration)
         }
 
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay5State, existingConfiguration.relay5State)) {
             updateRelayDetails(newConfiguration.relay5State, "relay5", Port.RELAY_FIVE, newConfiguration)
         }
 
-        if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
+        if (!HyperStatAssociationUtil.isHpuBothRelayHasSameConfigs
                 (newConfiguration.relay6State, existingConfiguration.relay6State)) {
             updateRelayDetails(newConfiguration.relay6State, "relay6", Port.RELAY_SIX, newConfiguration)
         }
     }
 
-    private fun updateAnalogOutConfig(
-        newConfiguration: HyperStatCpuConfiguration,
-        existingConfiguration: HyperStatCpuConfiguration
-    ) {
-        if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
-                (newConfiguration.analogOut1State, existingConfiguration.analogOut1State)
-        ) {
-            val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-                newConfiguration.analogOut1State, existingConfiguration.analogOut1State
-            )
-            updateAnalogOutDetails(newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn, newConfiguration)
-        }
-        if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
-                (newConfiguration.analogOut2State, existingConfiguration.analogOut2State)
-        ) {
-            val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-                newConfiguration.analogOut2State, existingConfiguration.analogOut2State
-            )
-            updateAnalogOutDetails(newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn, newConfiguration)
-        }
-        if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
-                (newConfiguration.analogOut3State, existingConfiguration.analogOut3State)
-        ) {
-            val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
-                newConfiguration.analogOut3State, existingConfiguration.analogOut3State
-            )
-            updateAnalogOutDetails(newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn, newConfiguration)
-        }
-    }
-
-    private fun updateAnalogInConfig(
-        newConfiguration: HyperStatCpuConfiguration,
-        existingConfiguration: HyperStatCpuConfiguration
-    ) {
-        if (!HyperStatAssociationUtil.isBothAnalogInHasSameConfigs
-                (newConfiguration.analogIn1State, existingConfiguration.analogIn1State)
-        ) {
-            updateAnalogInDetails(newConfiguration.analogIn1State, "analog1", Port.ANALOG_IN_ONE)
-        }
-        if (!HyperStatAssociationUtil.isBothAnalogInHasSameConfigs
-                (newConfiguration.analogIn2State, existingConfiguration.analogIn2State)
-        ) {
-            updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
-        }
-        Log.i(L.TAG_CCU_HSCPU, "updateAnalogInConfig: Done")
-    }
-
-
     // Function which updates the Relay new configurations
     private fun updateRelayDetails(
-        relayState: RelayState,
+        relayState: HpuRelayState,
         relayTag: String,
         physicalPort: Port,
-        newConfiguration: HyperStatCpuConfiguration?,
+        newConfiguration: HyperStatHpuConfiguration,
     ) {
 
         val relayId = hsHaystackUtil.readPointID("config and $relayTag and enabled") as String
@@ -662,13 +616,20 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             "config and $relayTag and association"
         ) as String
 
+
+        val relayLogicalPointId: String? = hyperStatPointsUtil.getHpuRelayLogicalPoint(relayState.association).id
+
         hyperStatPointsUtil.addDefaultValueForPoint(relayId, if (relayState.enabled) 1.0 else 0.0)
         hyperStatPointsUtil.addDefaultValueForPoint(relayAssociatedId, relayState.association.ordinal.toDouble())
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, relayState.enabled)
 
+        if (relayLogicalPointId != null && HyperStatAssociationUtil.isDeletionRequiredForHpu(newConfiguration,relayState)) {
+            hsHaystackUtil.removePoint(relayLogicalPointId)
+        }
+
         if (relayState.enabled) {
-            val pointData: Point = hyperStatPointsUtil.relayConfiguration(
-                relayState = relayState
+            val pointData: Point = hyperStatPointsUtil.relayHpuConfiguration(
+                relayState = relayState,
             )
             val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
 
@@ -680,23 +641,50 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
         }
 
-        CcuLog.i(L.TAG_CCU_ZONE, "updateRelayDetails: ${relayState.association.name} ${relayState.enabled}")
-        CcuLog.i(L.TAG_CCU_ZONE, "isRelayAssociatedToAnyOfConditioningModes: "+HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
-       if ( newConfiguration != null && HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)){
-           updateFanMode(newConfiguration)
-       }
-        if(HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
-            updateConditioningMode()
+        /*if (HyperStatAssociationUtil.isHpuRelayAssociatedToFan(relayState)){
+            updateFanMode(newConfiguration)
+        }*/
+        updateFanMode(newConfiguration)
+
     }
 
+    private fun updateAnalogOutConfig(
+        newConfiguration: HyperStatHpuConfiguration,
+        existingConfiguration: HyperStatHpuConfiguration
+    ) {
+        if (!HyperStatAssociationUtil.isHpuBothAnalogOutHasSameConfigs
+                (newConfiguration.analogOut1State, existingConfiguration.analogOut1State)
+        ) {
+            val changeIn = HyperStatAssociationUtil.findHpuChangeInAnalogOutConfig(
+                newConfiguration.analogOut1State, existingConfiguration.analogOut1State
+            )
+            updateAnalogOutDetails(newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn, newConfiguration)
+        }
+        if (!HyperStatAssociationUtil.isHpuBothAnalogOutHasSameConfigs
+                (newConfiguration.analogOut2State, existingConfiguration.analogOut2State)
+        ) {
+            val changeIn = HyperStatAssociationUtil.findHpuChangeInAnalogOutConfig(
+                newConfiguration.analogOut2State, existingConfiguration.analogOut2State
+            )
+            updateAnalogOutDetails(newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn, newConfiguration)
+        }
+        if (!HyperStatAssociationUtil.isHpuBothAnalogOutHasSameConfigs
+                (newConfiguration.analogOut3State, existingConfiguration.analogOut3State)
+        ) {
+            val changeIn = HyperStatAssociationUtil.findHpuChangeInAnalogOutConfig(
+                newConfiguration.analogOut3State, existingConfiguration.analogOut3State
+            )
+            updateAnalogOutDetails(newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn, newConfiguration)
+        }
+    }
 
     // Function which updates the Analog Out new configurations
     private fun updateAnalogOutDetails(
-        analogOutState: AnalogOutState,
+        analogOutState: HpuAnalogOutState,
         analogOutTag: String,
         physicalPort: Port,
         changeIn: AnalogOutChanges,
-        newConfiguration: HyperStatCpuConfiguration?
+        newConfiguration: HyperStatHpuConfiguration
     ) {
 
         // Read enable/disable Point ID
@@ -709,6 +697,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             "config and $analogOutTag and output and association"
         ) as String
 
+
         // Read Analog Out min max fan config Point Id's
         val minPointId = hsHaystackUtil.readPointID("$analogOutTag and output and min")
         val maxPointId = hsHaystackUtil.readPointID("$analogOutTag and output and max")
@@ -717,7 +706,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         val fanMediumPointId = hsHaystackUtil.readPointID("$analogOutTag and output and medium")
         val fanHighPointId = hsHaystackUtil.readPointID("$analogOutTag and output and high")
 
-        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration changeIn $changeIn")
+        Log.i(L.TAG_CCU_HSHPU, "Reconfiguration changeIn $changeIn")
 
 
         // Do the update when change is found in configuration
@@ -759,11 +748,11 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         if (fanMediumPointId != null) hsHaystackUtil.removePoint(fanMediumPointId)
         if (fanHighPointId != null) hsHaystackUtil.removePoint(fanHighPointId)
 
-        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
+        Log.i(L.TAG_CCU_HSHPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
         if (analogOutState.enabled) {
 
-            val pointData: Triple<Any, Any, Any> = hyperStatPointsUtil.analogOutConfiguration(
+            val pointData: Triple<Any, Any, Any> = hyperStatPointsUtil.analogOutHpuConfiguration(
                 analogOutState = analogOutState,
                 analogTag = analogOutTag
             )
@@ -788,7 +777,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             // check if the new state of analog is mapped to Fan Speed
             // then will create new Points for fan configurations
 
-            if (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) {
+            if (analogOutState.association == HpuAnalogOutAssociation.FAN_SPEED) {
 
                 // Create Fan configuration Points
                 val fanConfigPoints: Triple<Point, Point, Point> = hyperStatPointsUtil.createFanLowMediumHighPoint(
@@ -807,66 +796,51 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             }
 
         }
-        CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Analog $changeIn  ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
-        if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
-                    && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
+
+        /*if ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
+            && analogOutState.association == HpuAnalogOutAssociation.FAN_SPEED
+        ) {
             updateFanMode(newConfiguration)
-        }
-
-        if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
-                    && HyperStatAssociationUtil.isAnalogAssociatedToAnyOfConditioningModes(analogOutState))) {
-            updateConditioningMode()
-        }
+        }*/
+        updateFanMode(newConfiguration)
     }
 
-     private fun updateConditioningMode() {
-         CcuLog.i(L.TAG_CCU_ZONE, "updateConditioningMode: ")
 
-        val conditioningModeId = hsHaystackUtil.readPointID("zone and sp and conditioning and mode")
-
-        if (conditioningModeId!!.isEmpty()) {
-            CcuLog.e(L.TAG_CCU_ZONE, "ConditioningMode point does not exist ")
-            return
+    private fun updateAnalogInConfig(
+        newConfiguration: HyperStatHpuConfiguration,
+        existingConfiguration: HyperStatHpuConfiguration
+    ) {
+        if (!HyperStatAssociationUtil.isBothAnalogInHasSameConfigs
+                (newConfiguration.analogIn1State, existingConfiguration.analogIn1State)
+        ) {
+            updateAnalogInDetails(newConfiguration.analogIn1State, "analog1", Port.ANALOG_IN_ONE)
         }
-
-        val curCondMode = haystack.readDefaultValById(conditioningModeId)
-        var conditioningMode = curCondMode
-        Log.i(L.TAG_CCU_HSCPU, "updateConditioningMode: curCondMode $curCondMode")
-
-         when(HSHaystackUtil.getPossibleConditioningModeSettings(nodeAddress)){
-             PossibleConditioningMode.BOTH -> {
-                 if(curCondMode != StandaloneConditioningMode.AUTO.ordinal.toDouble())
-                     conditioningMode = StandaloneConditioningMode.AUTO.ordinal.toDouble()
-             }
-             PossibleConditioningMode.COOLONLY, PossibleConditioningMode.HEATONLY , PossibleConditioningMode.OFF -> {
-                 if(curCondMode != StandaloneConditioningMode.OFF.ordinal.toDouble())
-                     conditioningMode = StandaloneConditioningMode.OFF.ordinal.toDouble()
-             }
-         }
-        CcuLog.i(L.TAG_CCU_ZONE, "adjustCPUConditioningMode $curCondMode -> $conditioningMode")
-        if (curCondMode != conditioningMode) {
-            haystack.writeDefaultValById(conditioningModeId, conditioningMode)
-            haystack.writeHisValById(conditioningModeId, conditioningMode)
+        if (!HyperStatAssociationUtil.isBothAnalogInHasSameConfigs
+                (newConfiguration.analogIn2State, existingConfiguration.analogIn2State)
+        ) {
+            updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
+        Log.i(L.TAG_CCU_HSHPU, "updateAnalogInConfig: Done")
     }
 
-     fun updateFanMode(config: HyperStatCpuConfiguration) {
-        val fanLevel = getSelectedFanLevel(config)
+    private fun updateFanMode(config: HyperStatHpuConfiguration) {
+        val fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
-         val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
-             if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
-                 StandaloneFanStage.AUTO.ordinal.toDouble()
-             } else {
-                 curFanSpeed
-             }
-         }
-         val fanModePointId = hsHaystackUtil.readPointID("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
-         if(fanModePointId != null)
-            hsHaystackUtil.writeDefaultWithHisValue(fanModePointId, fallbackFanSpeed)
+        Log.i(L.TAG_CCU_HSHPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
+        val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
+            if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
+                StandaloneFanStage.AUTO.ordinal.toDouble()
+            } else {
+                curFanSpeed
+            }
+        }
+        Log.i(L.TAG_CCU_HSHPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
+        hsHaystackUtil.writeDefaultVal("zone and sp and fan and operation and mode", fallbackFanSpeed)
+        CCUHsApi.getInstance().writeHisValByQuery(
+            "zone and sp and fan and operation and mode and equipRef == \"$equipRef\"",
+            fallbackFanSpeed
+        )
     }
-
     fun getCurrentTemp(): Double {
         return hsHaystackUtil.getCurrentTemp()
     }
@@ -878,20 +852,78 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         val config = getConfiguration()
         val logicalPoints: HashMap<Any, String> = HashMap()
 
-        if (config.relay1State.enabled) logicalPoints[Port.RELAY_ONE] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay1State.association).id
-        if (config.relay2State.enabled) logicalPoints[Port.RELAY_TWO] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay2State.association).id
-        if (config.relay3State.enabled) logicalPoints[Port.RELAY_THREE] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay3State.association).id
-        if (config.relay4State.enabled) logicalPoints[Port.RELAY_FOUR] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay4State.association).id
-        if (config.relay5State.enabled) logicalPoints[Port.RELAY_FIVE] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay5State.association).id
-        if (config.relay6State.enabled) logicalPoints[Port.RELAY_SIX] = hyperStatPointsUtil.getCpuRelayLogicalPoint(config.relay6State.association).id
+        if (config.relay1State.enabled) logicalPoints[Port.RELAY_ONE] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay1State.association).id
+        if (config.relay2State.enabled) logicalPoints[Port.RELAY_TWO] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay2State.association).id
+        if (config.relay3State.enabled) logicalPoints[Port.RELAY_THREE] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay3State.association).id
+        if (config.relay4State.enabled) logicalPoints[Port.RELAY_FOUR] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay4State.association).id
+        if (config.relay5State.enabled) logicalPoints[Port.RELAY_FIVE] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay5State.association).id
+        if (config.relay6State.enabled) logicalPoints[Port.RELAY_SIX] = hyperStatPointsUtil.getHpuRelayLogicalPoint(config.relay6State.association).id
 
-        if (config.analogOut1State.enabled) logicalPoints[Port.ANALOG_OUT_ONE] = hyperStatPointsUtil.getCpuAnalogOutLogicalPoint(config.analogOut1State.association).id
-        if (config.analogOut2State.enabled) logicalPoints[Port.ANALOG_OUT_TWO] = hyperStatPointsUtil.getCpuAnalogOutLogicalPoint(config.analogOut2State.association).id
-        if (config.analogOut3State.enabled) logicalPoints[Port.ANALOG_OUT_THREE] = hyperStatPointsUtil.getCpuAnalogOutLogicalPoint(config.analogOut3State.association).id
+        if (config.analogOut1State.enabled) logicalPoints[Port.ANALOG_OUT_ONE] = hyperStatPointsUtil.getHpuAnalogOutLogicalPoint(config.analogOut1State.association).id
+        if (config.analogOut2State.enabled) logicalPoints[Port.ANALOG_OUT_TWO] = hyperStatPointsUtil.getHpuAnalogOutLogicalPoint(config.analogOut2State.association).id
+        if (config.analogOut3State.enabled) logicalPoints[Port.ANALOG_OUT_THREE] = hyperStatPointsUtil.getHpuAnalogOutLogicalPoint(config.analogOut3State.association).id
 
-        Log.i(L.TAG_CCU_HSCPU, "====== Logical Points list : ====")
+        Log.i(L.TAG_CCU_HSHPU, "====== Logical Points list : ====")
         logicalPoints.forEach { (key, id) -> Log.i(L.TAG_CCU_HSCPU, "key : $key  : $id") }
-        Log.i(L.TAG_CCU_HSCPU, "=================================")
+        Log.i(L.TAG_CCU_HSHPU, "=================================")
         return logicalPoints
     }
+
+    fun getRelayOutputPoints() : HashMap<Int, String>{
+        val relayOutputPoints: HashMap<Int, String> = HashMap()
+        putPointToMap(LogicalPointsUtil.readCompressorStage1RelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.COMPRESSOR_STAGE1.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readCompressorStage2RelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.COMPRESSOR_STAGE2.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readCompressorStage3RelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.COMPRESSOR_STAGE3.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readHeatingAux1RelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readHeatingAux2RelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readFanLowRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.FAN_LOW_SPEED.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readFanMediumRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readFanHighRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.FAN_HIGH_SPEED.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readFanEnabledRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.FAN_ENABLED.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readOccupiedEnabledRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.OCCUPIED_ENABLED.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readHumidifierRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.HUMIDIFIER.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readDeHumidifierRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.DEHUMIDIFIER.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readChangeOverCoolingRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.CHANGE_OVER_O_COOLING.ordinal)
+
+        putPointToMap(LogicalPointsUtil.readChangeOverHeatingRelayLogicalPoint(equipRef!!),relayOutputPoints,
+            HpuRelayAssociation.CHANGE_OVER_B_HEATING.ordinal)
+
+        return relayOutputPoints
+    }
+    fun getAnalogOutputPoints() : HashMap<Int, String>{
+        val analogOutputPoints: HashMap<Int, String> = HashMap()
+        putPointToMap(LogicalPointsUtil.readAnalogOutCompressorSpeedLogicalPoint(equipRef!!),analogOutputPoints,
+            HpuAnalogOutAssociation.COMPRESSOR_SPEED.ordinal)
+        putPointToMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef!!),analogOutputPoints,
+            HpuAnalogOutAssociation.FAN_SPEED.ordinal)
+        putPointToMap(LogicalPointsUtil.readAnalogOutDcvLogicalPoint(equipRef!!),analogOutputPoints,
+            HpuAnalogOutAssociation.DCV_DAMPER.ordinal)
+        return analogOutputPoints
+    }
+
 }

@@ -709,7 +709,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
                             profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
-                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())
+                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
+                            profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())
                     ) {
                         tempModule = true;
                     }
@@ -1389,10 +1390,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
-
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(p);
+                                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                            }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
                                 HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
@@ -1833,7 +1837,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                Log.i("DEV_DEBUG", "1867: ");
+
                 HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
@@ -1844,11 +1848,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                                 updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
                                                 p.getGroup());
             }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(updatedEquip);
+                Log.i("PointsValue", "Hpu Points:" + cpuEquipPoints);
+                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+            }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
-                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
-
             }
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");

@@ -46,6 +46,7 @@ public class L
 
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
     public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
+    public static final String TAG_CCU_HSHPU = "CCU_HSHPU";
     public static final String TAG_CCU_MESSAGING = "CCU_MESSAGING";
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";

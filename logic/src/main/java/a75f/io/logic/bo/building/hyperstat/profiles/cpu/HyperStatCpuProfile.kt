@@ -162,7 +162,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             equip.hsHaystackUtil.updateOccupancyDetection()
             runForDoorWindowSensor(config, equip)
             runForKeycardSensor(config, equip)
-            equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput)
+            equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
             val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
 
             Log.i(L.TAG_CCU_HSCPU,
@@ -482,8 +482,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             resetPort(whichPort)
             return
         }
-        val highestStage = HyperStatAssociationUtil.getHighestFanStage(config).ordinal
-        val divider = if (highestStage == 7) 50 else 33
+        val highestStage = HyperStatAssociationUtil.getHighestFanStage(config)
+        val divider = if (highestStage == CpuRelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
 
         when (relayAssociation.association) {
             CpuRelayAssociation.FAN_LOW_SPEED -> {
@@ -537,12 +537,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
             }
             (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
-
                 doAnalogDCVAction(
                     port,analogOutStages,config.zoneCO2Threshold,config.zoneCO2DamperOpeningRate,isDoorOpenState(config,equip)
                 )
             }
-
         }
     }
 
@@ -573,9 +571,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         basicSettings: BasicSettings,
         fanModeSaved: Int
     ) {
-
+        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
         Log.i(L.TAG_CCU_HSCPU, "Fan Details $occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
-        if (occupancyStatus != Occupancy.OCCUPIED && basicSettings.fanMode != StandaloneFanStage.OFF
+        if (occupancyStatus != Occupancy.OCCUPIED && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
+            && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO
             && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME
             && basicSettings.fanMode != StandaloneFanStage.MEDIUM_ALL_TIME
@@ -589,7 +588,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             )
         }
 
-        if (occupancyStatus == Occupancy.OCCUPIED && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+        if ((occupancyStatus == Occupancy.OCCUPIED || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING)
+            && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             Log.i(L.TAG_CCU_HSCPU, "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
 
             val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
@@ -731,7 +731,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private fun resetAllLogicalPointValues(equip: HyperStatCpuEquip) {
 
-        equip.hsHaystackUtil.updateAllLoopOutput(0,0,0)
+        equip.hsHaystackUtil.updateAllLoopOutput(0,0,0,false,0)
 
         resetAllLogicalPointValues()
 

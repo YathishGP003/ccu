@@ -1475,6 +1475,7 @@ public class FloorPlanFragment extends Fragment {
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                 case HYPERSTAT_TWO_PIPE_FCU:
+                case HYPERSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
                             HyperStatFragment.ID);

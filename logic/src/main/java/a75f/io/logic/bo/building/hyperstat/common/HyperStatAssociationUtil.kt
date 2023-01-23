@@ -1,9 +1,9 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.*
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.*
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.sensors.SensorType
 import android.util.Log
@@ -488,44 +488,6 @@ class HyperStatAssociationUtil {
         }
 
 
-
-
-        // function which checks the any of Port (Can be relay or Analog) while reconfiguration
-        fun isPortEffectedConditioningModes(configuration: HyperStatCpuConfiguration, port: Port): Boolean{
-
-            when(port){
-                Port.RELAY_ONE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay1State))
-                Port.RELAY_TWO-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay2State))
-                Port.RELAY_THREE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay3State))
-                Port.RELAY_FOUR-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay4State))
-                Port.RELAY_FIVE-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay5State))
-                Port.RELAY_SIX-> return (isRelayAssociatedToAnyOfConditioningModes(configuration.relay6State))
-                Port.ANALOG_OUT_ONE-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut1State))
-                Port.ANALOG_OUT_TWO-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut2State))
-                Port.ANALOG_OUT_THREE-> return (isAnalogAssociatedToAnyOfConditioningModes(configuration.analogOut3State))
-                else -> {}
-            }
-            return false
-        }
-
-        // function which checks the any of Port (Can be relay or Analog) while reconfiguration
-        fun isPortEffectedFanModes(configuration: HyperStatCpuConfiguration, port: Port): Boolean{
-
-            when(port){
-                Port.RELAY_ONE-> return (isRelayAssociatedToFan(configuration.relay1State))
-                Port.RELAY_TWO-> return (isRelayAssociatedToFan(configuration.relay2State))
-                Port.RELAY_THREE-> return (isRelayAssociatedToFan(configuration.relay3State))
-                Port.RELAY_FOUR-> return (isRelayAssociatedToFan(configuration.relay4State))
-                Port.RELAY_FIVE-> return (isRelayAssociatedToFan(configuration.relay5State))
-                Port.RELAY_SIX-> return (isRelayAssociatedToFan(configuration.relay6State))
-                Port.ANALOG_OUT_ONE-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut1State))
-                Port.ANALOG_OUT_TWO-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut2State))
-                Port.ANALOG_OUT_THREE-> return (isAnalogOutAssociatedToFanSpeed(configuration.analogOut3State))
-                else -> {}
-            }
-            return false
-        }
-
         // function which checks the any of the relay is associated to any conditioning
         fun isRelayAssociatedToAnyOfConditioningModes(relayState: RelayState): Boolean{
             if(isRelayAssociatedToCoolingStage(relayState)) return true
@@ -592,7 +554,6 @@ class HyperStatAssociationUtil {
 
             return CpuRelayAssociation.values()[highestValue]
         }
-
         private fun verifyFanState(state: RelayState, highestValue: Int): Int {
             if (state.enabled && isRelayAssociatedToFan(state)
                 && state.association.ordinal > highestValue
@@ -602,8 +563,47 @@ class HyperStatAssociationUtil {
         }
 
 
+        // Function returns highest selected cooling stage
+        fun getHighestCompressorStage(configuration: HyperStatHpuConfiguration): HpuRelayAssociation {
+            var highestValue = 0
+            highestValue = verifyCompressorState(configuration.relay1State, highestValue)
+            highestValue = verifyCompressorState(configuration.relay2State, highestValue)
+            highestValue = verifyCompressorState(configuration.relay3State, highestValue)
+            highestValue = verifyCompressorState(configuration.relay4State, highestValue)
+            highestValue = verifyCompressorState(configuration.relay5State, highestValue)
+            highestValue = verifyCompressorState(configuration.relay6State, highestValue)
 
-        fun getPipe2HighestFanStage(configuration: HyperStatPipe2Configuration): CpuRelayAssociation {
+            return HpuRelayAssociation.values()[highestValue]
+        }
+
+        private fun verifyCompressorState(state: HpuRelayState, highestValue: Int): Int {
+            if (state.enabled && isRelayAssociatedToCompressorStage(state)
+                && state.association.ordinal > highestValue
+            )
+                return state.association.ordinal
+            return highestValue
+        }
+
+        fun getHpuHighestFanStage(configuration: HyperStatHpuConfiguration): HpuRelayAssociation {
+            var highestValue = 0
+            highestValue = verifyHpuFanState(configuration.relay1State, highestValue)
+            highestValue = verifyHpuFanState(configuration.relay2State, highestValue)
+            highestValue = verifyHpuFanState(configuration.relay3State, highestValue)
+            highestValue = verifyHpuFanState(configuration.relay4State, highestValue)
+            highestValue = verifyHpuFanState(configuration.relay5State, highestValue)
+            highestValue = verifyHpuFanState(configuration.relay6State, highestValue)
+
+            return HpuRelayAssociation.values()[highestValue]
+        }
+        private fun verifyHpuFanState(state: HpuRelayState, highestValue: Int): Int {
+            if (state.enabled && isHpuRelayAssociatedToFan(state)
+                && state.association.ordinal > highestValue
+            )
+                return state.association.ordinal
+            return highestValue
+        }
+
+        fun getPipe2HighestFanStage(configuration: HyperStatPipe2Configuration): Pipe2RelayAssociation {
             var highestValue = 0
             highestValue = verifyPipe2FanState(configuration.relay1State, highestValue)
             highestValue = verifyPipe2FanState(configuration.relay2State, highestValue)
@@ -612,7 +612,7 @@ class HyperStatAssociationUtil {
             highestValue = verifyPipe2FanState(configuration.relay5State, highestValue)
             highestValue = verifyPipe2FanState(configuration.relay6State, highestValue)
 
-            return CpuRelayAssociation.values()[highestValue]
+            return Pipe2RelayAssociation.values()[highestValue]
         }
         private fun verifyPipe2FanState(state: Pipe2RelayState, highestValue: Int): Int {
             if (state.enabled && isPipe2RelayAssociatedToFan(state)
@@ -833,6 +833,14 @@ class HyperStatAssociationUtil {
             return true
         }
 
+        fun isHpuBothRelayHasSameConfigs(relayState1: HpuRelayState, relayState2: HpuRelayState): Boolean {
+            when {
+                (relayState1.enabled != relayState2.enabled) -> return false
+                (relayState1.association != relayState2.association) -> return false
+            }
+            return true
+        }
+
         // checks two Analog out configurations and return based on the match
         fun isPipe2BothAnalogOutHasSameConfigs(analogOut1: Pipe2AnalogOutState, analogOut2: Pipe2AnalogOutState): Boolean {
             when {
@@ -841,6 +849,22 @@ class HyperStatAssociationUtil {
                 (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
                 (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
                 (analogOut1.association == Pipe2AnalogOutAssociation.FAN_SPEED) -> {
+                    when {
+                        (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
+                        (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return false
+                        (analogOut1.perAtFanHigh != analogOut2.perAtFanHigh) -> return false
+                    }
+                }
+            }
+            return true
+        }
+        fun isHpuBothAnalogOutHasSameConfigs(analogOut1: HpuAnalogOutState, analogOut2: HpuAnalogOutState): Boolean {
+            when {
+                (analogOut1.enabled != analogOut2.enabled) -> return false
+                (analogOut1.association != analogOut2.association) -> return false
+                (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
+                (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
+                (analogOut1.association == HpuAnalogOutAssociation.FAN_SPEED) -> {
                     when {
                         (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
                         (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return false
@@ -862,6 +886,16 @@ class HyperStatAssociationUtil {
             return count < 2
         }
 
+        fun isDeletionRequiredForHpu(config: HyperStatHpuConfiguration, relayState: HpuRelayState):  Boolean{
+            var count = 0
+            if(config.relay1State.association == relayState.association) count++
+            if(config.relay2State.association == relayState.association) count++
+            if(config.relay3State.association == relayState.association) count++
+            if(config.relay4State.association == relayState.association) count++
+            if(config.relay5State.association == relayState.association) count++
+            if(config.relay5State.association == relayState.association) count++
+            return count < 2
+        }
 
         // Function finds the analog out changes
         fun findPipe2ChangeInAnalogOutConfig(analogOut1: Pipe2AnalogOutState, analogOut2: Pipe2AnalogOutState): AnalogOutChanges{
@@ -881,6 +915,23 @@ class HyperStatAssociationUtil {
             return AnalogOutChanges.NOCHANGE
         }
 
+        // Function finds the analog out changes
+        fun findHpuChangeInAnalogOutConfig(analogOut1: HpuAnalogOutState, analogOut2: HpuAnalogOutState): AnalogOutChanges{
+            when {
+                (analogOut1.enabled != analogOut2.enabled) -> return AnalogOutChanges.ENABLED
+                (analogOut1.association != analogOut2.association) -> return AnalogOutChanges.MAPPING
+                (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return AnalogOutChanges.MIN
+                (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return AnalogOutChanges.MAX
+                (analogOut1.association == HpuAnalogOutAssociation.FAN_SPEED) -> {
+                    when {
+                        (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return AnalogOutChanges.LOW
+                        (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return AnalogOutChanges.MED
+                        (analogOut1.perAtFanHigh != analogOut2.perAtFanHigh) -> return AnalogOutChanges.HIGH
+                    }
+                }
+            }
+            return AnalogOutChanges.NOCHANGE
+        }
 
         fun isAnyRelayAssociatedToAuxHeatingStage1(config: HyperStatPipe2Configuration): Boolean {
             return isAnyPipe2RelayMapped(config,Pipe2RelayAssociation.AUX_HEATING_STAGE1)
@@ -934,7 +985,7 @@ class HyperStatAssociationUtil {
         fun isAnyPipe2AnalogAssociatedToDCV(config: HyperStatPipe2Configuration): Boolean {
             return isPipe2AnalogOutMapped(config,Pipe2AnalogOutAssociation.DCV_DAMPER)
         }
-        fun isPipe2AnalogOutMapped(config: HyperStatPipe2Configuration, association: Pipe2AnalogOutAssociation): Boolean{
+        private fun isPipe2AnalogOutMapped(config: HyperStatPipe2Configuration, association: Pipe2AnalogOutAssociation): Boolean{
             return when {
                 (config.analogOut1State.enabled && config.analogOut1State.association == association) -> true
                 (config.analogOut2State.enabled && config.analogOut2State.association == association) -> true
@@ -952,8 +1003,21 @@ class HyperStatAssociationUtil {
             return (analogIn.enabled && analogIn.association == analogInAssociation)
         }
 
+        fun isHpuRelayAssociatedToFan(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.FAN_LOW_SPEED
+                    || relayState.association == HpuRelayAssociation.FAN_MEDIUM_SPEED
+                    || relayState.association == HpuRelayAssociation.FAN_HIGH_SPEED)
+        }
 
 
+        private fun isHpuAnalogOutMapped(config: HyperStatHpuConfiguration, association: HpuAnalogOutAssociation): Boolean{
+            return when {
+                (config.analogOut1State.enabled && config.analogOut1State.association == association) -> true
+                (config.analogOut2State.enabled && config.analogOut2State.association == association) -> true
+                (config.analogOut3State.enabled && config.analogOut3State.association == association) -> true
+                else -> false
+            }
+        }
 
         fun getPipe2SelectedFanLevel(configuration: HyperStatPipe2Configuration): Int {
 
@@ -1016,6 +1080,67 @@ class HyperStatAssociationUtil {
             return fanLevel
         }
 
+        fun getHpuSelectedFanLevel(configuration: HyperStatHpuConfiguration): Int {
+
+            var fanLevel = 0
+            var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
+                first = false,  //  Fan low
+                second = false, //  Fan Medium
+                third = false   //  Fan High
+            )
+
+            if(isAnyHpuAnalogAssociatedToFanSpeed(configuration)) return 21 // All options are enabled due to
+            // analog fan speed
+
+            if (configuration.relay1State.enabled && isHpuRelayAssociatedToFan(configuration.relay1State))
+                fanEnabledStages = updateSelectedFanLevels(configuration.relay1State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (configuration.relay2State.enabled && isHpuRelayAssociatedToFan(configuration.relay2State))
+                fanEnabledStages = updateSelectedFanLevels(configuration.relay2State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (configuration.relay3State.enabled && isHpuRelayAssociatedToFan(configuration.relay3State))
+                fanEnabledStages = updateSelectedFanLevels(configuration.relay3State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (configuration.relay4State.enabled && isHpuRelayAssociatedToFan(configuration.relay4State))
+                fanEnabledStages = updateSelectedFanLevels(configuration.relay4State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (configuration.relay5State.enabled && isHpuRelayAssociatedToFan(configuration.relay5State))
+                fanEnabledStages = updateSelectedFanLevels(configuration.relay5State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (configuration.relay6State.enabled && isHpuRelayAssociatedToFan(configuration.relay6State))
+                fanEnabledStages = updateSelectedFanLevels(
+                    configuration.relay6State.association.ordinal, fanEnabledStages,
+                    HpuRelayAssociation.FAN_LOW_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal,
+                    HpuRelayAssociation.FAN_HIGH_SPEED.ordinal
+                )
+
+            if (fanEnabledStages.first) fanLevel += 6
+            if (fanEnabledStages.second) fanLevel += 7
+            if (fanEnabledStages.third) fanLevel += 8
+            return fanLevel
+        }
+
         private fun updateSelectedFanLevels(
             association: Int, currentFoundDetails: Triple<Boolean, Boolean, Boolean>,
             low: Int, medium: Int, high: Int
@@ -1032,6 +1157,174 @@ class HyperStatAssociationUtil {
             }
             return currentStatus
         }
+
+        // Hpu to association
+        // COMPRESSOR_STAGE1,COMPRESSOR_STAGE2,COMPRESSOR_STAGE3,AUX_HEATING_STAGE1,AUX_HEATING_STAGE2,
+        // FAN_LOW_SPEED,FAN_MEDIUM_SPEED,FAN_HIGH_SPEED,FAN_ENABLED,OCCUPIED_ENABLED,HUMIDIFIER,
+        // DEHUMIDIFIER,CHANGE_OVER_O_COOLING,CHANGE_OVER_B_HEATING
+
+        fun isHpuRelayCompressorStage1(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE1)
+        }
+        fun isHpuRelayCompressorStage2(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE2)
+        }
+        fun isHpuRelayCompressorStage3(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE3)
+        }
+        fun isHpuRelayAuxHeatingStage1(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.AUX_HEATING_STAGE1)
+        }
+        fun isHpuRelayAuxHeatingStage2(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.AUX_HEATING_STAGE2)
+        }
+        fun isHpuRelayFanLowSpeed(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.FAN_LOW_SPEED)
+        }
+        fun isHpuRelayFanMediumSpeed(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.FAN_MEDIUM_SPEED)
+        }
+        fun isHpuRelayFanHighSpeed(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.FAN_HIGH_SPEED)
+        }
+        fun isHpuRelayFanEnabled(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.FAN_ENABLED)
+        }
+        fun isHpuRelayOccupiedEnabled(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.OCCUPIED_ENABLED)
+        }
+        fun isHpuRelayHumidifierEnabled(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.HUMIDIFIER)
+        }
+        fun isHpuRelayDeHumidifierEnabled(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.DEHUMIDIFIER)
+        }
+        fun isHpuRelayChangeOverCooling(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.CHANGE_OVER_O_COOLING)
+        }
+        fun isHpuRelayChangeOverHeating(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.CHANGE_OVER_B_HEATING)
+        }
+
+        //Function which checks the Relay is Associated  to Compressor Stage
+        fun isRelayAssociatedToCompressorStage(relayState: HpuRelayState): Boolean {
+            return (relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE1
+                    || relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE2
+                    || relayState.association == HpuRelayAssociation.COMPRESSOR_STAGE3)
+
+        }
+
+        // Analog mapping
+        fun isHpuAnalogOutMappedToFanSpeed(analogOut: HpuAnalogOutState): Boolean{
+            return analogOut.association == HpuAnalogOutAssociation.FAN_SPEED
+        }
+        fun isHpuAnalogOutMappedToDcvDamper(analogOut: HpuAnalogOutState): Boolean{
+            return analogOut.association == HpuAnalogOutAssociation.DCV_DAMPER
+        }
+        fun isHpuAnalogOutMappedToCompressorSpeed(analogOut: HpuAnalogOutState): Boolean{
+            return analogOut.association == HpuAnalogOutAssociation.COMPRESSOR_SPEED
+        }
+        // Function which returns the Relay Mapped state
+        fun getHpuRelayAssociatedStage(state: Int): HpuRelayAssociation {
+            return when (state) {
+                // Order is important here
+                0 -> HpuRelayAssociation.COMPRESSOR_STAGE1
+                1 -> HpuRelayAssociation.COMPRESSOR_STAGE2
+                2 -> HpuRelayAssociation.COMPRESSOR_STAGE3
+                3 -> HpuRelayAssociation.AUX_HEATING_STAGE1
+                4 -> HpuRelayAssociation.AUX_HEATING_STAGE2
+                5 -> HpuRelayAssociation.FAN_LOW_SPEED
+                6 -> HpuRelayAssociation.FAN_MEDIUM_SPEED
+                7 -> HpuRelayAssociation.FAN_HIGH_SPEED
+                8 -> HpuRelayAssociation.FAN_ENABLED
+                9 -> HpuRelayAssociation.OCCUPIED_ENABLED
+                10 -> HpuRelayAssociation.HUMIDIFIER
+                11 -> HpuRelayAssociation.DEHUMIDIFIER
+                12 -> HpuRelayAssociation.CHANGE_OVER_O_COOLING
+                13 -> HpuRelayAssociation.CHANGE_OVER_B_HEATING
+                else -> HpuRelayAssociation.FAN_LOW_SPEED
+            }
+        }
+        // Function which returns the Relay Mapped state
+        fun getHpuAnalogOutAssociatedStage(state: Int): HpuAnalogOutAssociation {
+            return when (state) {
+                // Order is important here
+                0 -> HpuAnalogOutAssociation.COMPRESSOR_SPEED
+                1 -> HpuAnalogOutAssociation.FAN_SPEED
+                2 -> HpuAnalogOutAssociation.DCV_DAMPER
+
+                // assuming it never going to call
+                else -> HpuAnalogOutAssociation.COMPRESSOR_SPEED
+            }
+        }
+
+        fun isAnyHpuRelayAssociatedToCompressorStage1(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.COMPRESSOR_STAGE1)
+        }
+        fun isAnyHpuRelayAssociatedToCompressorStage2(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.COMPRESSOR_STAGE2)
+        }
+        fun isAnyHpuRelayAssociatedToCompressorStage3(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.COMPRESSOR_STAGE3)
+        }
+        fun isAnyHpuRelayAssociatedToAuxHeatingStage1(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.AUX_HEATING_STAGE1)
+        }
+        fun isAnyHpuRelayAssociatedToAuxHeatingStage2(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.AUX_HEATING_STAGE2)
+        }
+
+        fun isAnyHpuRelayAssociatedToFanLow(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.FAN_LOW_SPEED)
+        }
+        fun isAnyHpuRelayAssociatedToFanMedium(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.FAN_MEDIUM_SPEED)
+        }
+        fun isAnyHpuRelayAssociatedToFanHigh(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.FAN_HIGH_SPEED)
+        }
+        fun isAnyHpuRelayAssociatedToFanEnabled(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.FAN_ENABLED)
+        }
+        fun isAnyHpuRelayAssociatedToOccupiedEnabled(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.OCCUPIED_ENABLED)
+        }
+        fun isAnyHpuRelayEnabledAssociatedToHumidifier(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.HUMIDIFIER)
+        }
+        fun isAnyHpuRelayEnabledAssociatedToDeHumidifier(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.DEHUMIDIFIER)
+        }
+        fun isAnyHpuRelayEnabledAssociatedToChangeOverCooling(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.CHANGE_OVER_O_COOLING)
+        }
+        fun isAnyHpuRelayEnabledAssociatedToChangeOverHeating(config: HyperStatHpuConfiguration): Boolean {
+            return isAnyHpuRelayMapped(config,HpuRelayAssociation.CHANGE_OVER_B_HEATING)
+        }
+
+
+        fun isAnyHpuAnalogAssociatedToCompressorSpeed(config: HyperStatHpuConfiguration): Boolean {
+            return isHpuAnalogOutMapped(config,HpuAnalogOutAssociation.COMPRESSOR_SPEED)
+        }
+        fun isAnyHpuAnalogAssociatedToFanSpeed(config: HyperStatHpuConfiguration): Boolean {
+            return isHpuAnalogOutMapped(config,HpuAnalogOutAssociation.FAN_SPEED)
+        }
+        fun isAnyHpuAnalogAssociatedToDCV(config: HyperStatHpuConfiguration): Boolean {
+            return isHpuAnalogOutMapped(config,HpuAnalogOutAssociation.DCV_DAMPER)
+        }
+
+        private fun isAnyHpuRelayMapped(config: HyperStatHpuConfiguration, association: HpuRelayAssociation): Boolean{
+            return when {
+                (config.relay1State.enabled && config.relay1State.association == association) -> true
+                (config.relay2State.enabled && config.relay2State.association == association) -> true
+                (config.relay3State.enabled && config.relay3State.association == association) -> true
+                (config.relay4State.enabled && config.relay4State.association == association) -> true
+                (config.relay5State.enabled && config.relay5State.association == association) -> true
+                (config.relay6State.enabled && config.relay6State.association == association) -> true
+                else -> false
+            }
+        }
+
     }
 
 }

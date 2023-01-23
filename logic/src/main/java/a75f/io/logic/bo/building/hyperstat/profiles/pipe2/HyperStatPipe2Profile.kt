@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -16,6 +17,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
@@ -201,7 +203,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             equip.hsHaystackUtil.updateAllLoopOutput(
                 coolingLoopOutput,
                 heatingLoopOutput,
-                fanLoopOutput
+                fanLoopOutput,false ,0
             )
             val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
             Log.i(
@@ -261,11 +263,12 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         fanModeSaved: Int
     ): StandaloneFanStage {
         val basicSettings = fetchBasicSettings(equip)
+        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
         Log.i(
             L.TAG_CCU_HSPIPE2,
             "Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved"
         )
-        if (occupancyStatus != Occupancy.OCCUPIED && basicSettings.fanMode != StandaloneFanStage.OFF
+        if (occupancyStatus != Occupancy.OCCUPIED && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO
             && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME
             && basicSettings.fanMode != StandaloneFanStage.MEDIUM_ALL_TIME
@@ -280,7 +283,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             return StandaloneFanStage.AUTO
         }
 
-        if (occupancyStatus == Occupancy.OCCUPIED && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+        if ((occupancyStatus == Occupancy.OCCUPIED|| Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING )
+            && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             Log.i(
                 L.TAG_CCU_HSPIPE2,
                 "Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}"
@@ -780,8 +784,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     ) {
         if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)) {
             val highestStage =
-                HyperStatAssociationUtil.getPipe2HighestFanStage(configuration).ordinal
-            val divider = if (highestStage == 7) 50 else 33
+                HyperStatAssociationUtil.getPipe2HighestFanStage(configuration)
+            val divider = if (highestStage == Pipe2RelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
 
             doFanLowSpeed(
                 relayOutputPoints[Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal]!!,
@@ -1147,9 +1151,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
-    enum class FanSpeed {
-        OFF,LOW,MEDIUM,HIGH
-    }
+
     private fun runSpecificAnalogFanSpeed(config: HyperStatPipe2Configuration, fanSpeed: FanSpeed, analogOutStages: HashMap<String, Int>) {
 
         var doWeHaveAnalog = false

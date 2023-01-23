@@ -511,9 +511,9 @@ public class SingleStageEquip {
                     "equipRef == \""+equip.getId()+"\"");
         }
 
-        updateMarker(analogInPoint);
 
         if (!analogInPoint.isEmpty()) {
+            updateMarker(analogInPoint);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), analogInPoint.get("id").toString());
         }
         CCUHsApi.getInstance().scheduleSync();

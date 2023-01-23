@@ -61,6 +61,7 @@ import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.api.haystack.CCUHsApi.TAG;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
@@ -567,6 +568,12 @@ public class Pulse
 						curTempVal = getCMRoomTempConversion(val,tempOffset);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
 						logicalCurTempPoint = logPoint.get("id").toString();
+						if (phyPoint.get("portEnabled").toString().equals("true") && device.containsKey("ti")) {
+							String roomTempSensorId = getRoomTempSensorId(deviceInfo);
+							if (roomTempSensorId != null) {
+								hayStack.writeHisValById(roomTempSensorId, curTempVal);
+							}
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset+","+val);
 						break;
 					case TH2_IN:
@@ -696,7 +703,19 @@ public class Pulse
 		//Done as per requirement from support team and not used in system operation.
 		updateCMPhysicalPoints(cmRegularUpdateMessage_t);
 	}
-	
+
+	private static String getRoomTempSensorId(Device deviceInfo) {
+
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		String roomTempId = null;
+		HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+				"point and space and not type and temp and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
+		if (!roomTempSensorPoint.isEmpty()) {
+			roomTempId = roomTempSensorPoint.get("id").toString();
+		}
+		return roomTempId;
+	}
+
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
 		
 		CCUHsApi hayStack = CCUHsApi.getInstance();

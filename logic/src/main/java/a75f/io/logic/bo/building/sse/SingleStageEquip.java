@@ -322,7 +322,6 @@ public class SingleStageEquip {
         if (config.analogIn1) {
             Point po = SingleStageEquipUtil.createAnalogInLogicalPoints(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddr, config.analogInAssociation.ordinal());
             CCUHsApi.getInstance().writeDefaultValById(po.getId(), 0.0);
-            mapPhysicalToLogicalPoint(config.analogInAssociation, analogInAssociation);
         }
 
         ConfigUtil.Companion.addConfigPoints("sse",siteRef,roomRef,floorRef,
@@ -374,6 +373,7 @@ public class SingleStageEquip {
         setDesiredTempHeating(70.0);
 
         createSSEConfigPoints(config, equipRef,floorRef,roomRef);
+        mapPhysicalToLogicalPoint(config.analogInAssociation, analogInAssociation);
 
         CCUHsApi.getInstance().syncEntityTree();
 

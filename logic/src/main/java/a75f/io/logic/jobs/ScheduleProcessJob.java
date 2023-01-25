@@ -1,58 +1,20 @@
 package a75f.io.logic.jobs;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPANCYSENSING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
-import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
-import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 
-import android.content.Intent;
-import android.os.StrictMode;
 import android.util.Log;
 
-import org.joda.time.DateTime;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
-import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.bo.building.schedules.ScheduleUtil;
-import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.building.system.SystemController;
-import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.pubnub.ZoneDataInterface;
-import a75f.io.logic.schedule.SpecialSchedule;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
 /*

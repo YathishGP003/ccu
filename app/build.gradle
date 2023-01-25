@@ -217,6 +217,8 @@ dependencies {
     implementation "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
     implementation 'com.github.vihtarb:tooltip:0.1.9'
     implementation 'org.apache.commons:commons-collections4:4.4'
+
+    implementation project(':messaging')
 }
 
 

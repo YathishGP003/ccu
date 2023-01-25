@@ -87,7 +87,11 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.service.MessagingAckJob;
+import a75f.io.messaging.service.MessageProcessService;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
@@ -106,6 +110,11 @@ public abstract class UtilityApplication extends Application {
     public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
+
+    private MessagingAckJob messagingAckJob = null;
+    private static final int TASK_SEPARATION = 15;
+    private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
+    private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
@@ -241,6 +250,8 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+
+        initMessaging();
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
 
     }
@@ -880,6 +891,27 @@ public abstract class UtilityApplication extends Application {
         }
         String response = ipRoutes.get(0);
         return response;
+    }
+
+    private void initMessaging() {
+        if (CCUHsApi.getInstance().getSite() != null) {
+            if (CCUHsApi.getInstance().siteSynced()) {
+                MessagingClient.getInstance().init();
+            }
+        }
+        scheduleMessagingAckJob();
+        //startService(new Intent(this, MessageProcessService.class));
+    }
+
+    private void scheduleMessagingAckJob() {
+        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
+            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+            String bearerToken = CCUHsApi.getInstance().getJwt();
+
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+        }
     }
 
 }

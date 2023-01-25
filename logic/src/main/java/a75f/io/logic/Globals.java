@@ -19,25 +19,24 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
-import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
+import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
@@ -61,19 +60,16 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
-import a75f.io.logic.messaging.MessagingAckJob;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
-import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.messaging.MessagingClient;
-import a75f.io.logic.pubnub.PbSubscriptionHandler;
+import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
@@ -109,8 +105,6 @@ public class Globals {
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
 
     AlertProcessJob mAlertProcessJob;
-
-    MessagingAckJob messagingAckJob;
 
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
@@ -324,15 +318,6 @@ public class Globals {
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);
 
-                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
-                {
-                    if (!site.isEmpty()) {
-                        if (CCUHsApi.getInstance().siteSynced()) {
-                            MessagingClient.getInstance().init();
-                        }
-                    }
-                }
-
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                         TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
@@ -355,17 +340,6 @@ public class Globals {
 
         if (isTestMode()) {
             setTestMode(false);
-        }
-    }
-
-    public void scheduleMessagingAckJob() {
-        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
-            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
-            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
-            String bearerToken = CCUHsApi.getInstance().getJwt();
-
-            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
-            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 

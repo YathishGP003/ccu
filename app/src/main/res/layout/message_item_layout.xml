@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="38dp">
+
+    <TextView
+        android:id="@+id/messageId"
+        android:layout_width="300sp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="Message ID"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/messageCmd"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:text="Command"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toEndOf="@+id/messageId"
+        app:layout_constraintTop_toTopOf="@+id/messageId"
+        app:layout_constraintBottom_toBottomOf="@+id/messageId"
+        />
+
+    <TextView
+        android:id="@+id/pointId"
+        android:layout_width="380sp"
+        android:layout_height="wrap_content"
+        tools:text="PointId"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/messageId"
+        app:layout_constraintBottom_toBottomOf="@+id/messageId"
+        />
+
+    <!--   The placement of this view is a bit hack, using its margins against the parents to position it
+           correctly between the other columns.  Overall this view won't scale well.  Redo using %'s for column widths. -->
+    <TextView
+        android:id="@+id/handlingStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="460sp"
+        android:layout_marginEnd="360sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:singleLine="false"
+        android:clickable="true"
+        tools:text="handlingStatus"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/messageId"
+        app:layout_constraintBottom_toBottomOf="@+id/messageId"
+        android:focusable="true" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

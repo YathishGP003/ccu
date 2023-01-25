@@ -1,0 +1,18 @@
+package a75f.io.messaging.database
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+@Entity(tableName = "messages")
+data class Message(
+    @PrimaryKey val messageId: String,
+    @ColumnInfo(name = "command") val command: String?,
+    @ColumnInfo(name = "id") val id: String?,
+    @ColumnInfo(name = "value") val value: String?,
+    @ColumnInfo(name = "who") val who: String?,
+    @ColumnInfo(name = "level") val level: Int?,
+    @ColumnInfo(name = "handlingStatus") val handlingStatus: Boolean?,
+    @ColumnInfo(name = "retryCount") val retryCount : Int,
+    @ColumnInfo(name = "error") val error: String?
+)
+

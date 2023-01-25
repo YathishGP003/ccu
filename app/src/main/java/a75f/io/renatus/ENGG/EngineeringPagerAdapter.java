@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import a75f.io.renatus.ENGG.alertdefs.AlertDefsFragment;
 import a75f.io.renatus.ENGG.logger.LogFragment;
+import a75f.io.renatus.ENGG.messages.MessageListFragment;
 
 /**
  * Created by samjithsadasivan isOn 8/17/17.
@@ -47,7 +48,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = OTAUpdateTestFragment.newInstance();
 				break;
 			case 5:
-				fragment = FieldTestFragment.newInstance();
+				fragment = new MessageListFragment();
+				//fragment = FieldTestFragment.newInstance();
 				//fragment = SerialMessageFragment.newInstance();
 				break;
 		}

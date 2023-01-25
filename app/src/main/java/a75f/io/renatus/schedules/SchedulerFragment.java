@@ -2,9 +2,8 @@ package a75f.io.renatus.schedules;
 
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.usbserial.UsbModbusService.TAG;
 
 import android.app.AlertDialog;
@@ -31,6 +30,20 @@ import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.apache.commons.lang3.StringUtils;
 import org.javolution.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -54,32 +67,17 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.pubnub.BuildingScheduleListener;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.schedule.SpecialSchedule;
+import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import static a75f.io.usbserial.UsbModbusService.TAG;
-
-public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";

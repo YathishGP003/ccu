@@ -1,13 +1,6 @@
 package a75f.io.renatus.modbus;
 
 import android.content.Context;
-
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import androidx.annotation.NonNull;
-import androidx.core.text.HtmlCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,26 +10,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.modbus.LModbus;
-import a75f.io.logic.pubnub.ModbusDataInterface;
-import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ModbusDataInterface;
+import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.CCUUiUtil;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 

@@ -1,5 +1,14 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -50,19 +60,9 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
-import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
 
 /**
  * Created by Yinten on 9/15/2017.

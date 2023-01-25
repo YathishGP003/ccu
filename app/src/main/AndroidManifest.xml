@@ -105,6 +105,8 @@
             android:value="7jO0gpjtHlBZhyN4cZuHQ" />
 
         <service android:name=".WeatherDataDownloadService"/>
+
+        <service android:name="a75f.io.messaging.service.MessageProcessService" android:enabled="true"></service>
     </application>
 
 </manifest>

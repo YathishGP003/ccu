@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -33,8 +35,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.tooltip.Tooltip;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -57,8 +57,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -76,14 +74,13 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
-import a75f.io.logic.pubnub.IntrinsicScheduleListener;
-import a75f.io.logic.pubnub.UpdatePointHandler;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
-import a75f.io.logic.pubnub.ZoneDataInterface;
+import a75f.io.logic.interfaces.IntrinsicScheduleListener;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.messaging.handler.UpdatePointHandler;
+import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -92,21 +89,6 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.OaoArc;
-import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */

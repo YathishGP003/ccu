@@ -1,10 +1,7 @@
 package a75f.io.logic.jobs;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
-import org.joda.time.IllegalInstantException;
-import java.util.HashMap;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,8 +12,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
@@ -74,7 +69,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 
                 BuildingTunerCache.getInstance().updateTuners();
                 
-                handleMessagingRegistration();
+                //handleMessagingRegistration();
     
                 runZoneProfilesAlgorithm();
                 
@@ -100,7 +95,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
     
     //This could go away once messaging is stabilized.
-    private void handleMessagingRegistration() {
+    /*private void handleMessagingRegistration() {
         boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
         if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
             CCUHsApi.getInstance().syncEntityTree();
@@ -110,7 +105,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                                                                  siteUID);
             }
         }
-    }
+    }*/
     
     private void runZoneProfilesAlgorithm() {
         for (ZoneProfile profile : L.ccu().zoneProfiles) {

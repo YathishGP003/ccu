@@ -8,6 +8,7 @@ import android.util.Log;
 
 public class PreferenceUtil {
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
+    private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -465,5 +466,13 @@ public class PreferenceUtil {
 
     public static void setSmartNodeDamperMigration() {
         setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
+    }
+
+    public static boolean getstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        return getBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET);
+    }
+
+    public static void setstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        setBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET, true);
     }
 }

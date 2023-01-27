@@ -268,6 +268,11 @@ public class MigrationUtil {
             PreferenceUtil.setFreeInternalDiskStorageMigration();
         }
 
+        if(!PreferenceUtil.getstandaloneCoolingAirflowTempLowerOffsetMigration()){
+            createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setstandaloneCoolingAirflowTempLowerOffsetMigration();
+        }
+
         L.saveCCUState();
     }
 
@@ -1447,5 +1452,16 @@ public class MigrationUtil {
                 CCUHsApi.getInstance().updatePoint(up,up.getId());
             }
         }
+    }
+
+    private static void createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> standaloneAirflowTempLowerOffsetPoints = ccuHsApi.readAllEntities("point and airflow and standalone and cooling and lower and not stage2");
+        String updatedUnit = "\u00B0F";
+        for (HashMap<Object, Object> standaloneAirflowTempLowerOffsetPoint : standaloneAirflowTempLowerOffsetPoints) {
+            Point updatedPoint = new Point.Builder().setHashMap(standaloneAirflowTempLowerOffsetPoint).setUnit(updatedUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+
     }
 }

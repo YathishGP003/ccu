@@ -385,7 +385,7 @@ public class StandAloneTuners {
                                                             .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                             .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                                                             .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
-                                                            .setUnit("minute")
+                                                            .setUnit("\u00B0F")
                                                             .setTz(tz)
                                                             .build();
         String standaloneCoolingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempLowerOffset);

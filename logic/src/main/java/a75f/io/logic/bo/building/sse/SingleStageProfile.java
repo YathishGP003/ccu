@@ -110,7 +110,7 @@ public class SingleStageProfile extends ZoneProfile
                 CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
                         "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
             }
-            controlFanStage();
+            sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
             return;
         }
 

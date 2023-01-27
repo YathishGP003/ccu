@@ -806,7 +806,7 @@ public class SingleStageEquip {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+            message = (status == 3 ? "Zone Temp Dead" : status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             if(!sseStatus.isEmpty()){
                 if(sseStatus.equals("Fan ON"))
                     message = "Recirculating Air, " + sseStatus;

@@ -90,6 +90,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.service.MessageHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.messaging.service.MessageProcessService;
 import a75f.io.modbusbox.EquipsManager;
@@ -900,7 +901,7 @@ public abstract class UtilityApplication extends Application {
             }
         }
         scheduleMessagingAckJob();
-        //startService(new Intent(this, MessageProcessService.class));
+        MessageHandlerWork.Companion.schedulePeriodicMessageWork(context);
     }
 
     private void scheduleMessagingAckJob() {

@@ -13,4 +13,5 @@ interface DatabaseHelper {
     suspend fun deleteAll(message: List<Message>)
     suspend fun getAllUnhandledMessage(): Flow<List<Message>>
     suspend fun getAllFailedMessages(): Flow<List<Message>>
+    suspend fun getMessageById(messageId : String) : Message
 }

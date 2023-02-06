@@ -25,11 +25,14 @@ interface MessageDao {
     fun updateAll(messages: List<Message>)
 
     @Query("SELECT * FROM messages")
-            fun getAllMessages(): LiveData<List<Message>>
+     fun getAllMessages(): LiveData<List<Message>>
 
     @Query("SELECT * FROM messages WHERE handlingStatus = 0")
     fun getAllUnhandledMessage(): List<Message>
 
     @Query("SELECT * FROM messages WHERE retryCount >= 5")
     fun getAllFailedMessages(): List<Message>
+
+    @Query("SELECT * FROM messages WHERE messageId = :messageId")
+    fun getMessageById(messageId : String) : Message
 }

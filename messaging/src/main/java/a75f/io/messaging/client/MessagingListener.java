@@ -15,7 +15,7 @@ import a75f.io.messaging.database.Message;
 import a75f.io.messaging.database.MessageDbUtilKt;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.messaging.service.AcknowledgeRequest;
-import a75f.io.messaging.service.MessageHandler;
+import a75f.io.messaging.service.MessageHandlerService;
 import a75f.io.messaging.service.MessagingService;
 import a75f.io.messaging.service.ServiceGenerator;
 import io.reactivex.rxjava3.core.Single;
@@ -29,7 +29,6 @@ public class MessagingListener implements ServerSentEvent.Listener {
     private final String bearerToken;
 
     private MessagingService messagingService;
-
     public MessagingListener(String siteId, String ccuId, String messagingUrl, String bearerToken) {
         super();
 
@@ -37,7 +36,6 @@ public class MessagingListener implements ServerSentEvent.Listener {
         this.ccuId = ccuId;
         this.messagingUrl = messagingUrl;
         this.bearerToken = bearerToken;
-
     }
 
     @Override
@@ -77,7 +75,9 @@ public class MessagingListener implements ServerSentEvent.Listener {
                     messageContents.getAsJsonObject().get("level").getAsInt(), false, 0, "");
 
             MessageDbUtilKt.insert(msg);
-            MessageHandler.Companion.enqueueMessageWork(Globals.getInstance().getApplicationContext(), 0);
+            MessageHandlerService.Companion.getInstance(Globals.getInstance().getApplicationContext())
+                                .handleMessage(msg);
+            //MessageHandler.Companion.enqueueMessageWork(Globals.getInstance().getApplicationContext(), 0);
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_MESSAGING, "UnsupportedMessage ", e);
         }

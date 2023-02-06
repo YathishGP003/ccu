@@ -11,8 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.message_list_layout.*
-
+@AndroidEntryPoint
 class MessageListFragment : Fragment(){
 
     private val viewModel : MessageListViewModel by viewModels()
@@ -27,7 +28,6 @@ class MessageListFragment : Fragment(){
         messageListView.adapter = messageListAdapter
         messageListView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        viewModel.init(requireContext())
         viewModel.getMessageList().observe(viewLifecycleOwner, Observer {
             messageListAdapter.addItems(it)
             messageListView.smoothScrollToPosition(messageListAdapter.itemCount - 1)

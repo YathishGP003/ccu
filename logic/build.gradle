@@ -18,11 +18,11 @@ android {
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
-        javaCompileOptions {
+        /*javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath true
             }
-        }
+        }*/
 
         // Default base IP is empty string.  We only need it for local env, where we overwrite it.
         buildConfigField "String", 'API_BASE_IP', '\"\"'

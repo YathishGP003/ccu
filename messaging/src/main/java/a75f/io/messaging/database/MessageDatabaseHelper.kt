@@ -19,4 +19,5 @@ class MessageDatabaseHelper(private val messagesDb: MessageDatabase) : DatabaseH
     override suspend fun getAllFailedMessages() : Flow<List<Message>> = flow {
         emit(messagesDb.messageDao().getAllFailedMessages())
     }
+    override suspend fun getMessageById(messageId: String) : Message = messagesDb.messageDao().getMessageById(messageId)
 }

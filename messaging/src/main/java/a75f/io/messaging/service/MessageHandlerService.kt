@@ -7,59 +7,71 @@ import a75f.io.messaging.database.Message
 import a75f.io.messaging.database.MessageDatabaseBuilder
 import a75f.io.messaging.database.MessageDatabaseHelper
 import a75f.io.messaging.handler.*
-import a75f.io.messaging.handler.AlertMessageHandler.Companion.instanceOf
 import android.content.Context
-import androidx.work.*
+import android.os.Handler
+import android.os.HandlerThread
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.*
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 
-class MessageHandler(context: Context, params: WorkerParameters) :
-    CoroutineWorker(context, params) {
+class MessageHandlerService private constructor(context: Context){
+    private val appContext = context
+    private val dispatcher = HandlerThread("MessageHandlerService")
+                                        .apply { start() }
+                                        .looper.let { Handler(it) }
+                                        .asCoroutineDispatcher()
+    private val messagingScope = CoroutineScope(dispatcher + SupervisorJob())
+    private val messagingDbHelper = MessageDatabaseHelper(MessageDatabaseBuilder.getInstance(appContext))
 
     private var alertMessageHandler: AlertMessageHandler? = null
-    private var appContext : Context = context
     private fun alertMessageHandler(): AlertMessageHandler? {
         if (alertMessageHandler == null) {
-            alertMessageHandler = instanceOf()
+            alertMessageHandler = AlertMessageHandler.instanceOf()
         }
         return alertMessageHandler
     }
 
-    private val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    companion object {
+        private var instance : MessageHandlerService? = null
 
-    override suspend fun doWork(): Result {
-        return try {
-            handleMessages()
-            Result.success()
-        } catch (e: java.lang.Exception) {
-            Result.failure()
+        fun  getInstance(context: Context): MessageHandlerService {
+            synchronized(this) {
+                if (instance == null)  // NOT thread safe!
+                    instance = MessageHandlerService(context)
+            }
+            return instance!!
         }
     }
 
-
-    private fun handleMessages() {
-        val messagingDbHelper = MessageDatabaseHelper(MessageDatabaseBuilder.getInstance(appContext))
-        appScope.launch {
+    fun handleMessages() {
+        messagingScope.launch {
             messagingDbHelper.getAllUnhandledMessage().collect {
                 for (message in it) {
-                    CcuLog.i(L.TAG_CCU_MESSAGING, " handleMessage $message");
-                    handleMessage(messageToJson(message), appContext)
+                    doHandleMessage(messageToJson(message), appContext)
                 }
             }
         }
     }
 
+    fun handleMessage(message : Message) {
+        messagingScope.launch {
+            doHandleMessage(messageToJson(message), appContext)
+        }
+    }
+
     private fun messageToJson(message : Message) : JsonObject {
         val gson: Gson = GsonBuilder().create()
-        val messageType = object : TypeToken<Message>() {}.type
+        val messageType = object : TypeToken<a75f.io.messaging.database.Message>() {}.type
         return gson.toJsonTree(message, messageType).asJsonObject
     }
 
-    private fun handleMessage(msg: JsonObject, context: Context) {
+    private fun doHandleMessage(msg: JsonObject, context: Context) {
+        CcuLog.i(L.TAG_CCU_MESSAGING, " handleMessage $msg")
         when (val cmd = if (msg["command"] != null) msg["command"].asString else "") {
             UpdateEntityHandler.CMD -> UpdateEntityHandler.updateEntity(msg)
             UpdatePointHandler.CMD -> UpdatePointHandler.handleMessage(msg)
@@ -92,17 +104,4 @@ class MessageHandler(context: Context, params: WorkerParameters) :
             else -> CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : $cmd")
         }
     }
-
-    companion object {
-        fun enqueueMessageWork(context: Context, delaySeconds: Long = 0) {
-            val workRequest = OneTimeWorkRequest.Builder(MessageHandler::class.java)
-                                            .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
-                                            .addTag("MessageProcessingWork")
-                                            .build()
-            WorkManager.getInstance(context).enqueueUniqueWork("MessageProcessingWork",
-                ExistingWorkPolicy.KEEP, workRequest
-            )
-        }
-    }
 }
-

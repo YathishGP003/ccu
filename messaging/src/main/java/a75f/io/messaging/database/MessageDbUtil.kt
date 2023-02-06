@@ -29,3 +29,12 @@ fun delete(message: Message) {
             .getInstance(Globals.getInstance().applicationContext)).delete(message)
     }
 }
+
+fun updateMessage(messageId : String) {
+    appScope.launch {
+        val dbHelper = MessageDatabaseHelper(MessageDatabaseBuilder
+                        .getInstance(Globals.getInstance().applicationContext))
+        val message = dbHelper.getMessageById(messageId)
+        dbHelper.update(message)
+    }
+}

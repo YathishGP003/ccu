@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
@@ -48,6 +49,7 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
+    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
 
@@ -466,4 +468,21 @@ public class PreferenceUtil {
     public static void setSmartNodeDamperMigration() {
         setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
     }
+
+    public static boolean getAirflowSampleWaitTImeMigration() {
+        return getBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION);
+    }
+
+    public static void setAirflowSampleWaitTimeMigration() {
+        setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
+    }
+
+    public static boolean getstaticPressureSpTrimMigration() {
+        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+    }
+
+    public static void setStaticPressureSpTrimMigration() {
+        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
 }

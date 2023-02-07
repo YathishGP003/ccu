@@ -268,6 +268,22 @@ public class MigrationUtil {
             PreferenceUtil.setFreeInternalDiskStorageMigration();
         }
 
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
+            staticPressureSpTrimMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setStaticPressureSpTrimMigration();
+        }
+
+
         L.saveCCUState();
     }
 
@@ -1448,4 +1464,31 @@ public class MigrationUtil {
             }
         }
     }
+
+    private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
+        String updatedMaxVal = "-0.5";
+        String updatedMinVal = "-0.01";
+        String updatedIncrementalVal = "-0.01";
+        for (HashMap<Object,Object> staticPressureSPTrim : staticPressureSPTrimPoint) {
+            Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
+            CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+        }
+
+    }
+
+    private static void airflowSampleWaitTimeMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> airflowSampleWaitTimePoint = ccuHsApi.readAllEntities("point and tuner and airflow and sample and wait and time and not standalone");
+        String updatedMaxVal = "150";
+        String updatedMinVal = "0";
+        String updatedUnit = "m";
+        for (HashMap<Object,Object> airflowSampleWait : airflowSampleWaitTimePoint) {
+            Point updatedAirflowSampleWaitTimePoint = new Point.Builder().setHashMap(airflowSampleWait).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setUnit(updatedUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedAirflowSampleWaitTimePoint, updatedAirflowSampleWaitTimePoint.getId());
+        }
+
+    }
+
 }

@@ -314,6 +314,9 @@ public class Pulse
 					updateOTNOccupancyStatus(sp, val, device);
 					break;
 				case ILLUMINANCE:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val * 10) );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val*10));
+					break;
 				case CO2:
 				case CO:
 				case NO:

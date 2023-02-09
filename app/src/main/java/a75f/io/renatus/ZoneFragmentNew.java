@@ -1939,6 +1939,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
@@ -1989,6 +1992,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             String equipId = p.getId();
             HashMap zoneEquips = zoneMap.get(0);
             if ((zoneEquips.get("profile").toString()).contains("PLC")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(1);
                 nonTempControl.setImage(R.drawable.ic_zone_piloop);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
@@ -2002,16 +2008,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
             }
             if ((zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(0);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
@@ -3871,7 +3886,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
         linearLayoutstatusPoints.setVisibility(View.GONE);
         linearLayoutschedulePoints.setVisibility(View.GONE);
-
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
         gridItemObj.setGridItem("Sense");
@@ -3889,6 +3906,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         seekArc.setSense(true);
         seekArc.setSenseData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
+        vacationStatusTV.setVisibility(View.GONE);
+        vacationText.setVisibility(View.GONE);
+        vacationEditButton.setVisibility(View.GONE);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         arcView.setPadding(48, 64, 0, 0);

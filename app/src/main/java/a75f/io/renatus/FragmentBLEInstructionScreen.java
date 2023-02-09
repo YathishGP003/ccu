@@ -390,18 +390,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 pairinginstruct.setVisibility(View.GONE);
                 pairinginstructDaikin.setVisibility(View.VISIBLE);
             } else {
-                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_sn);
-            }
-
-        }
-        else if (mNodeType == NodeType.HELIO_NODE)
-        {
-            title.setText(getText(R.string.title_pairhn));
-            if(CCUUiUtil.isDaikinEnvironment(getContext())) {
-                pairinginstruct.setVisibility(View.GONE);
-                pairinginstructDaikin.setVisibility(View.VISIBLE);
-            } else {
-                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_hn);
+                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
             }
 
         }

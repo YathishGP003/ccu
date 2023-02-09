@@ -8,11 +8,9 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.StringUtil;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
 public class EmrEquip
@@ -34,9 +32,8 @@ public class EmrEquip
         }
     }
     
-    public void createEntities(String floorRef, String roomRef, NodeType nodeType)
+    public void createEntities(String floorRef, String roomRef)
     {
-        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -54,7 +51,7 @@ public class EmrEquip
                                      .setFloorRef(floorRef)
                                      .setProfile(profileType.name())
                                      .addMarker("equip").addMarker("emr").addMarker("zone")
-                                      .addMarker(isSmartNode ? Tags.SMART_NODE : Tags.HELIO_NODE)
+                                      .addMarker("smartnode")
                                      .setGatewayRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr)).build();
         equipRef = hayStack.addEquip(b);
     
@@ -120,12 +117,7 @@ public class EmrEquip
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "emr", tz, false));
 
-        SmartNode device;
-        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
-            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }else  {
-            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
         device.addPointsToDb();

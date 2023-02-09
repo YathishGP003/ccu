@@ -11,7 +11,6 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -19,9 +18,9 @@ public class EmrProfile extends ZoneProfile
 {
     EmrEquip emrEquip;
     
-    public void addEmrEquip(short addr, String floorRef, String roomRef, NodeType nodeType) {
+    public void addEmrEquip(short addr, String floorRef, String roomRef) {
         emrEquip = new EmrEquip(getProfileType(), addr);
-        emrEquip.createEntities(floorRef, roomRef, nodeType);
+        emrEquip.createEntities(floorRef, roomRef);
         emrEquip.init();
     }
     

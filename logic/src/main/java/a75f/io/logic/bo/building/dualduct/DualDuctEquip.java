@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.dualduct;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -22,9 +24,8 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
-import a75f.io.logic.bo.haystack.device.HelioNode;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.tuners.DualDuctTuners;
@@ -99,7 +100,7 @@ public class DualDuctEquip {
         return equipRef;
     }
     
-    public void createEntities(DualDuctProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
+    public void createEntities(DualDuctProfileConfiguration config, String floorRef, String roomRef) {
         HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get(Tags.ID).toString();
         String siteDis = siteMap.get("dis").toString();
@@ -111,12 +112,12 @@ public class DualDuctEquip {
             ahuRef = systemEquip.get("id").toString();
         }
         
-        createEquip(siteRef, equipDis, roomRef, floorRef, ahuRef, tz, nodeType);
+        createEquip(siteRef, equipDis, roomRef, floorRef, ahuRef, tz);
     
         RxTask.executeAsync(() -> DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef,
                                                                 floorRef, tz));
         
-        createLogicalPoints(siteRef, equipDis, roomRef, floorRef, tz , config, nodeType);
+        createLogicalPoints(siteRef, equipDis, roomRef, floorRef, tz , config);
     
         createUserIntentPoints(siteRef, equipDis, roomRef, floorRef, tz );
         
@@ -139,9 +140,7 @@ public class DualDuctEquip {
                              String roomRef,
                              String floorRef,
                              String ahuRef,
-                             String tz,
-                             NodeType nodeType) {
-        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
+                             String tz) {
         
         Equip.Builder dualDuctEquip = new Equip.Builder()
                                               .setSiteRef(siteRef)
@@ -151,7 +150,7 @@ public class DualDuctEquip {
                                               .setProfile(profileType.name())
                                               .setPriority(ZonePriority.NONE.name())
                                               .addMarker("equip").addMarker("dualDuct").addMarker("zone")
-                                              .addMarker(isSmartNode ? "smartnode" : "helionode").setAhuRef(ahuRef)
+                                              .addMarker("smartnode").setAhuRef(ahuRef)
                                               .setTz(tz)
                                               .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(dualDuctEquip.build());
@@ -159,7 +158,7 @@ public class DualDuctEquip {
     
     
     private void createLogicalPoints(String siteRef, String equipDis, String roomRef, String floorRef, String tz ,
-                                     DualDuctProfileConfiguration config, NodeType nodeType ) {
+                                     DualDuctProfileConfiguration config ) {
         Point currentTemp = new Point.Builder()
                                     .setDisplayName(equipDis+"-currentTemp")
                                     .setEquipRef(equipRef)
@@ -261,12 +260,7 @@ public class DualDuctEquip {
                 siteRef, roomRef, floorRef, nodeAddr, "dualDuct", tz, false));
     
         CCUHsApi.getInstance().writeHisValById(datId, 0.0);
-        SmartNode device;
-        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
-            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }else  {
-            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);

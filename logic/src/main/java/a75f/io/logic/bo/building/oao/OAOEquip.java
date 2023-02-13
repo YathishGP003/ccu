@@ -7,6 +7,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -16,7 +17,6 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.OAOTuners;
 
@@ -47,9 +47,8 @@ public class OAOEquip
     }
     
     
-    public void createEntities(OAOProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)
+    public void createEntities(OAOProfileConfiguration config, String floorRef, String roomRef)
     {
-        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -61,11 +60,7 @@ public class OAOEquip
         {
             ahuRef = systemEquip.get("id").toString();
         }
-        Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis)
-                .setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name())
-                .addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE)
-                .addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz)
-                .setGroup(String.valueOf(nodeAddr));
+        Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
         OAOTuners.updateOaoSystemTuners( hayStack, siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz,
@@ -325,12 +320,7 @@ public class OAOEquip
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "oao", tz, false));
     
-        SmartNode device;
-        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
-            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }else  {
-            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
         device.analog1In.setType("5");//TODO - Hard coding to CO2 sensor type.

@@ -671,8 +671,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             incrementVal = 1;
         }
         int currentValPos = 0;
-        if (minValue < 0) {
-            for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
+        if (minValueDb > maxValueDb) {
+            for (double i = 100 * minValueDb; i >= 100 * maxValueDb; i += 100 * incrementValDb) {
                 valueList.add(String.valueOf(Math.round(i) / 100.0));
             }
             for (String currVal : valueList) {

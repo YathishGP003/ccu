@@ -311,7 +311,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             if (event.getBluetoothGattCharacteristic().getUuid().toString()
                      .equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
             {
-                if (needsLinkKey() || needsLinkKeyHN())
+                if (needsLinkKey())
                 {
                     mBLEProvisionService
                             .writeCharacteristic(GattAttributes.BLE_LINK_KEY, L.getBLELinkKey());
@@ -350,7 +350,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                           .equalsIgnoreCase(GattAttributes.FIRMWARE_SIGNATURE_KEY))
             {
                 byte[] crc = null;
-                if (needsLinkKey() || needsLinkKeyHN())
+                if (needsLinkKey())
                 {
                     crc = ByteArrayUtils
                                   .addBytes(L.getBLELinkKey(), mBLERoomNameBuffer, mBLEAddressBuffer, L.getEncryptionKey(), L.getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
@@ -468,10 +468,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     private boolean needsLinkKey()
     {
         return mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME);
-    }
-    private boolean needsLinkKeyHN()
-    {
-        return mDevice.getName().equalsIgnoreCase(SerialConsts.HELIONODE_NAME);
     }
     
     

@@ -129,7 +129,12 @@ public class AlertManager
 
     public void generateAlert(String title, String msg){
         if (! repoCheck()) return;
-        repo.generateAlert(title,msg);
+        repo.generateAlert(title,msg, "");
+    }
+
+    public void generateAlert(String title, String msg, String equipRef){
+        if (! repoCheck()) return;
+        repo.generateAlert(title,msg, equipRef);
     }
 
     public void generateCMDeadAlert(String title, String msg){

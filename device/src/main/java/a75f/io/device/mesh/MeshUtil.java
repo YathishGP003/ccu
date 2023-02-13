@@ -81,10 +81,7 @@ public class MeshUtil
     
     public static boolean sendStructToCM(Struct struct)
     {
-        Log.i("amardebug","send struct");
         boolean retVal = LSerial.getInstance().sendSerialToCM(struct);
-        Log.i("amardebug","sretVal"+retVal);
-
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.
         if (Globals.getInstance().isSimulation())

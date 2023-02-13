@@ -11,7 +11,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -24,10 +23,9 @@ public class PlcProfile extends ZoneProfile
     PlcEquip plcEquip;
     int outputSignal = 0;
     
-    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef,
-                            String roomRef, String processVariable, String dynamicTargetTag, NodeType nodeType) {
+    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef, String processVariable, String dynamicTargetTag) {
         plcEquip = new PlcEquip(getProfileType(), addr);
-        plcEquip.createEntities(config, floorRef, roomRef, processVariable, dynamicTargetTag, nodeType);
+        plcEquip.createEntities(config, floorRef, roomRef, processVariable, dynamicTargetTag);
         plcEquip.init();
     }
     

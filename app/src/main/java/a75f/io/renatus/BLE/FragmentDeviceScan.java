@@ -72,8 +72,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     if (device != null && device.getName() != null &&
                             (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
                                     device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME) ||
-                                    device.getName().equalsIgnoreCase(SerialConsts.HYPERSTAT_NAME) ||
-                                    device.getName().equalsIgnoreCase(SerialConsts.HELIONODE_NAME))) {
+                                    device.getName().equalsIgnoreCase(SerialConsts.HYPERSTAT_NAME))) {
                         mLeDeviceListAdapter.addDevice(device);
                         mLeDeviceListAdapter.notifyDataSetChanged();
                     }

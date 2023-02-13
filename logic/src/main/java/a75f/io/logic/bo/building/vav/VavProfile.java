@@ -1,10 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State;
-
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,17 +19,25 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.bo.building.truecfm.TrueCfmLoopState;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.truecfm.TrueCfmLoopState.*;
+import static a75f.io.logic.bo.building.system.SystemController.*;
 /**
  *
  * Created by samjithsadasivan on 5/31/18.
@@ -123,9 +126,9 @@ public abstract class VavProfile extends ZoneProfile {
      * @param floorRef
      * @param roomRef
      */
-    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
+    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
         VavEquip deviceMap = new VavEquip(getProfileType(), addr);
-        deviceMap.createHaystackPoints(config, floorRef, roomRef, nodeType);
+        deviceMap.createHaystackPoints(config, floorRef, roomRef );
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);

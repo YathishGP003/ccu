@@ -27,7 +27,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
-import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.util.RxTask;
@@ -53,8 +52,8 @@ public class SingleStageEquip {
         sseProfile = new SingleStageProfile();
         nodeAddr = node;
     }
-    public void createHaystackPoints(SingleStageConfig config, String floorRef, String roomRef, NodeType nodeType) {
-        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
+    public void createHaystackPoints(SingleStageConfig config, String floorRef, String roomRef) {
+
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -75,7 +74,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name())
                 .setPriority(config.getPriority().name())
-                .addMarker("equip").addMarker("sse").addMarker("zone").addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE)
+                .addMarker("equip").addMarker("sse").addMarker("zone").addMarker("smartnode")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
@@ -331,12 +330,7 @@ public class SingleStageEquip {
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "sse", tz));
 
-        SmartNode device;
-        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
-            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }else  {
-            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        }
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);

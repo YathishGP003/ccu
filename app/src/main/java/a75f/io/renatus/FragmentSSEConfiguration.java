@@ -4,6 +4,8 @@ import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,8 +21,7 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
-import androidx.annotation.Nullable;
-
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -46,6 +47,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -338,7 +340,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
 
         mSSEProfile.getProfileConfiguration().put(mSmartNodeAddress, sseConfig);
         if (mProfileConfig == null) {
-            mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef, mNodeType);
+            mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef);
         } else
         {
             mSSEProfile.updateSSEEquip(mSmartNodeAddress, sseConfig,roomRef);

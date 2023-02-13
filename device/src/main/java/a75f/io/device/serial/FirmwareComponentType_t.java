@@ -12,11 +12,7 @@ public enum FirmwareComponentType_t
 	ITM_DEVICE_TYPE(						"ITM", 		"itm_fw/", 	"smartstat"),
 	SMART_STAT_BACK_DEVICE_TYPE(			null, 			null, 		null),
 	HIA_DEVICE_TYPE(						null, 			null, 		null),
-	HYPER_STAT_DEVICE_TYPE("HyperStat","hs_fw/","hyperstat"),
-	//Firm ware has limitation that helionode device type(8) to be same as firmware component type(7)
-	DUMMY_DEVICE_TYPE(null,null,null),
-	HELIO_NODE_DEVICE_TYPE("HelioNode", "hn_fw/", 	"helionode");
-
+	HYPER_STAT_DEVICE_TYPE("HyperStat","hs_fw/","hyperstat");
 
 	private final String updateFileName;
 	private final String updateUrlDirectory;

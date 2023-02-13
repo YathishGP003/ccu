@@ -8,7 +8,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -65,9 +64,9 @@ public class OAOProfile
         this.matThrottle = matThrottle;
     }
 
-    public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
+    public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
-        oaoEquip.createEntities(config, floorRef, roomRef, nodeType);
+        oaoEquip.createEntities(config, floorRef, roomRef);
     }
     
     public void addOaoEquip(short addr) {

@@ -67,6 +67,7 @@ import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTuners;
+import a75f.io.logic.tuners.VrvTuners;
 import kotlin.Pair;
 
 public class MigrationUtil {
@@ -253,6 +254,12 @@ public class MigrationUtil {
             CpuPointsMigration.Companion.doMigrationForProfilePoints();
             PreferenceUtil.setHyperStatCpuTagMigration();
         }
+
+        if(!PreferenceUtil.getAutoAwayAutoForcedPointMigration()){
+            autoAwayAutoForcedMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAutoAwayAutoForcedPointMigration();
+        }
+
 
         if(!PreferenceUtil.getSmartNodeDamperMigration()){
             doMigrateForSmartNodeDamperType(CCUHsApi.getInstance());
@@ -1476,6 +1483,33 @@ public class MigrationUtil {
         });
 
     }
+
+
+    private static void autoAwayAutoForcedMigration(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> vrvEquips = hayStack.readAllEntities("vrv and equip");
+        if (!vrvEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : vrvEquips) {
+                Equip vrvEquip = new Equip.Builder().setHashMap(equip).build();
+                createPointsAutoAwayAutoForcedOccupiedPoints(hayStack,vrvEquip,"Daikin VRV");
+            }
+        }
+    }
+
+    private static void createPointsAutoAwayAutoForcedOccupiedPoints(CCUHsApi hayStack, Equip equip, String profileName) {
+        String nodeAddr = equip.getGroup();
+        String floorRef = equip.getFloorRef();
+        String equipRef = equip.getId();
+        String roomRef = equip.getRoomRef();
+        String siteRef = equip.getSiteRef();
+        String tz = equip.getTz();
+        String displayName = equip.getDisplayName();
+
+        VrvTuners.addVRVTunersAndSensorPoints(hayStack, siteRef, displayName,
+                equipRef, roomRef, floorRef, tz,nodeAddr);
+        VrvTuners.createOccupancyPoints(hayStack, siteRef, displayName,
+                equipRef, roomRef, floorRef, tz,nodeAddr,0.0,0.0);
+    }
+
 
     private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
 

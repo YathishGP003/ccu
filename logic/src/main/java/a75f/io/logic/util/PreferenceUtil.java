@@ -49,6 +49,7 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
+    private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
 
@@ -447,6 +448,13 @@ public class PreferenceUtil {
 
     public static void setFreeInternalDiskStorageMigration() {
         setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
+    }
+    public static boolean getAutoAwayAutoForcedPointMigration() {
+        return getBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION);
+    }
+
+    public static void setAutoAwayAutoForcedPointMigration() {
+        setBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION, true);
     }
 
     public static boolean getFreeInternalDiskStorageMigration() {

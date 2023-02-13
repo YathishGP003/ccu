@@ -371,12 +371,20 @@ public class HyperStatMessageGenerator {
     }
 
     public static double getFanMode(String equipRef){
-        return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                "point and zone and sp and conditioning and mode and equipRef == \""+equipRef+ "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                    "point and zone and sp and conditioning and mode and equipRef == \"" + equipRef + "\"");
+        }catch (NullPointerException e){
+            return 0.0;
+        }
     }
     public static double getConditioningMode(String equipRef){
-        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
                 "point and zone and fan and mode and operation and equipRef == \""+equipRef+ "\"");
+        }catch (NullPointerException e){
+            return 0.0;
+        }
     }
 
 }

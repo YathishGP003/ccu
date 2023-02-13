@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
@@ -29,7 +30,6 @@ public class PreferenceUtil {
     private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
     private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneReMigration";
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
-    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
     private static final String UPDATE_SCHEDULE_REFS = "reUpdateScheduleRef";
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
@@ -49,9 +49,11 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
+    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
-
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
+    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -481,5 +483,19 @@ public class PreferenceUtil {
 
     public static void setSSEFanStageMigration() {
         setBooleanPreference(SSE_FAN_STAGE_MIGRATION, true);
+    }
+    public static boolean getAirflowSampleWaitTImeMigration() {
+        return getBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION);
+    }
+
+    public static void setAirflowSampleWaitTimeMigration() {
+        setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
+    }
+    public static boolean getstaticPressureSpTrimMigration() {
+        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+    }
+
+    public static void setStaticPressureSpTrimMigration() {
+        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
     }
 }

@@ -282,10 +282,38 @@ public class MigrationUtil {
             SSEFanStageMigration(CCUHsApi.getInstance());
             PreferenceUtil.setSSEFanStageMigration();
         }
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
+            staticPressureSpTrimMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setStaticPressureSpTrimMigration();
+        }
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
+            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeMigration();
+        }
+
+        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
+            staticPressureSpTrimMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setStaticPressureSpTrimMigration();
+        }
+
 
         L.saveCCUState();
     }
-
     private static void SSEFanStageMigration(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> sseEquips = ccuHsApi.readAllEntities("equip and sse");
@@ -306,7 +334,6 @@ public class MigrationUtil {
         }
 
     }
-
     private static void createAnalogIn1AssociationPoint(String equipDis, String siteRef, String equipRef, HashMap<Object, Object> actualEquip, String nodeAddr, String tz, SingleStageConfig config) {
         Point analogInAssociation = new Point.Builder()
                 .setDisplayName(equipDis + "-analogIn1Association")
@@ -1484,7 +1511,22 @@ public class MigrationUtil {
 
     }
 
+    private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
 
+        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (vav or dab) and group");
+        equips.forEach(equip -> {
+            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
+            int nodeAddress = Integer.parseInt(actualEquip.getGroup());
+            RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
+            if(rawPoint!=null && rawPoint.getType().equalsIgnoreCase("MAT")){
+                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_OUT_ONE.name(),DamperType.MAT.displayName);
+            }
+            RawPoint rawPoint2 = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_TWO.toString());
+            if(rawPoint2!=null && rawPoint2.getType().equalsIgnoreCase("MAT")){
+                SmartNode.updatePhysicalPointType(nodeAddress, ANALOG_OUT_TWO.name(),DamperType.MAT.displayName);
+            }
+         });
+    }
     private static void autoAwayAutoForcedMigration(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> vrvEquips = hayStack.readAllEntities("vrv and equip");
         if (!vrvEquips.isEmpty()) {
@@ -1509,25 +1551,6 @@ public class MigrationUtil {
         VrvTuners.createOccupancyPoints(hayStack, siteRef, displayName,
                 equipRef, roomRef, floorRef, tz,nodeAddr,0.0,0.0);
     }
-
-
-    private static void doMigrateForSmartNodeDamperType(CCUHsApi haystack){
-
-        ArrayList<HashMap<Object, Object>> equips = haystack.readAllEntities("equip and (vav or dab) and group");
-        equips.forEach(equip -> {
-            Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
-            int nodeAddress = Integer.parseInt(actualEquip.getGroup());
-            RawPoint rawPoint = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_ONE.toString());
-            if(rawPoint!=null && rawPoint.getType().equalsIgnoreCase("MAT")){
-                    SmartNode.updatePhysicalPointType(nodeAddress,Port.ANALOG_OUT_ONE.name(),DamperType.MAT.displayName);
-            }
-            RawPoint rawPoint2 = SmartNode.getPhysicalPoint(nodeAddress, ANALOG_OUT_TWO.toString());
-            if(rawPoint2!=null && rawPoint2.getType().equalsIgnoreCase("MAT")){
-                SmartNode.updatePhysicalPointType(nodeAddress, ANALOG_OUT_TWO.name(),DamperType.MAT.displayName);
-            }
-         });
-    }
-
     private static void createFreeInternalDiskStorageDiagPointMigration(CCUHsApi instance) {
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         if(siteMap.size()>0){
@@ -1553,4 +1576,31 @@ public class MigrationUtil {
             }
         }
     }
+
+    private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
+        String updatedMaxVal = "-0.5";
+        String updatedMinVal = "-0.01";
+        String updatedIncrementalVal = "-0.01";
+        for (HashMap<Object,Object> staticPressureSPTrim : staticPressureSPTrimPoint) {
+            Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
+            CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+        }
+
+    }
+
+    private static void airflowSampleWaitTimeMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> airflowSampleWaitTimePoint = ccuHsApi.readAllEntities("point and tuner and airflow and sample and wait and time and not standalone");
+        String updatedMaxVal = "150";
+        String updatedMinVal = "0";
+        String updatedUnit = "m";
+        for (HashMap<Object,Object> airflowSampleWait : airflowSampleWaitTimePoint) {
+            Point updatedAirflowSampleWaitTimePoint = new Point.Builder().setHashMap(airflowSampleWait).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setUnit(updatedUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedAirflowSampleWaitTimePoint, updatedAirflowSampleWaitTimePoint.getId());
+        }
+
+    }
+
 }

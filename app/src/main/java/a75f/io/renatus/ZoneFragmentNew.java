@@ -1038,7 +1038,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1703,7 +1703,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }

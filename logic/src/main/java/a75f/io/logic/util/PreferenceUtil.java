@@ -52,6 +52,8 @@ public class PreferenceUtil {
     private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
+    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
 
     public static void setContext(Context c) {
         context= c;

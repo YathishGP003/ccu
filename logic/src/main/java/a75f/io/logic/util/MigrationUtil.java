@@ -314,6 +314,67 @@ public class MigrationUtil {
 
         L.saveCCUState();
     }
+    private static void SSEFanStageMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> sseEquips = ccuHsApi.readAllEntities("equip and sse");
+        for (HashMap<Object, Object> equip : sseEquips) {
+            String equipRef = equip.get("id").toString();
+            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
+                    "temp and sse and equipRef == \"" + equipRef + "\"");
+            String nodeAddr = currentTemp.get("group").toString();
+            HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String siteDis = (String) siteMap.get("dis");
+            String tz = siteMap.get("tz").toString();
+            String equipDis = siteDis + "-TI-" + nodeAddr;
+            SingleStageConfig config = new SingleStageConfig();
+            createAnalogInEnablePoint(equipDis, siteRef, equipRef, equip, nodeAddr, tz, config, currentTemp);
+            createAnalogIn1AssociationPoint(equipDis, siteRef, equipRef, equip, nodeAddr, tz, config);
+            CCUHsApi.getInstance().syncEntityTree();
+        }
+
+    }
+    private static void createAnalogIn1AssociationPoint(String equipDis, String siteRef, String equipRef, HashMap<Object, Object> actualEquip, String nodeAddr, String tz, SingleStageConfig config) {
+        Point analogInAssociation = new Point.Builder()
+                .setDisplayName(equipDis + "-analogIn1Association")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setRoomRef(actualEquip.get("roomRef").toString())
+                .setFloorRef(actualEquip.get("floorRef").toString())
+                .addMarker("config").addMarker("analog1").addMarker("input").addMarker("writable")
+                .addMarker("standalone").addMarker("zone").addMarker("sse").addMarker("association")
+                .setEnums(InputActuatorType.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+
+        String analogInAssociationId = CCUHsApi.getInstance().addPoint(analogInAssociation);
+        CCUHsApi.getInstance().writeDefaultValById(analogInAssociationId, 0.0);
+
+    }
+
+    private static void createAnalogInEnablePoint(String equipDis, String siteRef, String equipRef, HashMap<Object, Object> actualEquip, String nodeAddr, String tz, SingleStageConfig config, HashMap<Object, Object> currentTemp) {
+        Point analogIn = new Point.Builder()
+                .setDisplayName(equipDis + "-analogIn1Enabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .setRoomRef(actualEquip.get("roomRef").toString())
+                .setFloorRef(actualEquip.get("floorRef").toString())
+                .addMarker("config").addMarker("writable").addMarker("zone").addMarker("input")
+                .addMarker("analog1").addMarker("enabled").addMarker("sse").addMarker("standalone")
+                .setEnums("false,true")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+
+        String analogIn1Id = CCUHsApi.getInstance().addPoint(analogIn);
+        CCUHsApi.getInstance().writeDefaultValById(analogIn1Id, (config.analogIn1 ? 1.0 : 0));
+        SmartNode.setPointEnabled(Integer.parseInt(nodeAddr),Port.ANALOG_IN_ONE.name(), false);
+        SmartNode.updatePhysicalPointType(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), String.valueOf(8));
+        SmartNode.updatePhysicalPointRef(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), analogIn1Id);
+
+
+    }
 
     private static void doAirTagMigration(CCUHsApi ccuHsApi) {
 
@@ -1466,7 +1527,30 @@ public class MigrationUtil {
             }
          });
     }
+    private static void autoAwayAutoForcedMigration(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> vrvEquips = hayStack.readAllEntities("vrv and equip");
+        if (!vrvEquips.isEmpty()) {
+            for (HashMap<Object, Object> equip : vrvEquips) {
+                Equip vrvEquip = new Equip.Builder().setHashMap(equip).build();
+                createPointsAutoAwayAutoForcedOccupiedPoints(hayStack,vrvEquip,"Daikin VRV");
+            }
+        }
+    }
 
+    private static void createPointsAutoAwayAutoForcedOccupiedPoints(CCUHsApi hayStack, Equip equip, String profileName) {
+        String nodeAddr = equip.getGroup();
+        String floorRef = equip.getFloorRef();
+        String equipRef = equip.getId();
+        String roomRef = equip.getRoomRef();
+        String siteRef = equip.getSiteRef();
+        String tz = equip.getTz();
+        String displayName = equip.getDisplayName();
+
+        VrvTuners.addVRVTunersAndSensorPoints(hayStack, siteRef, displayName,
+                equipRef, roomRef, floorRef, tz,nodeAddr);
+        VrvTuners.createOccupancyPoints(hayStack, siteRef, displayName,
+                equipRef, roomRef, floorRef, tz,nodeAddr,0.0,0.0);
+    }
     private static void createFreeInternalDiskStorageDiagPointMigration(CCUHsApi instance) {
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         if(siteMap.size()>0){

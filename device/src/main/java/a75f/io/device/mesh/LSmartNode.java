@@ -274,7 +274,7 @@ public class LSmartNode
                         if (p.getPort().equals(ANALOG_OUT_TWO)) {
                             double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+node+"\"");
                             if (damperType == DamperType.MAT.ordinal()) {
-                                double damperPos = hayStack.readHisValByQuery("normalized and damper and secondary and cmd and equipRef == \""+node+"\"");
+                                double damperPos = hayStack.readHisValByQuery("normalized and damper and secondary and cmd and group == \""+node+"\"");
                                 controls_t.damperPosition.set((short)damperPos);
                             }
                         }

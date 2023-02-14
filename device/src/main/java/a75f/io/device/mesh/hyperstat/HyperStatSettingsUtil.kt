@@ -79,12 +79,13 @@ class HyperStatSettingsUtil {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                 }
+                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
+                settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                    settings3.fcuTuners = getHpuTunerDetails(equipRef)
+                }
                 ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                     settings3.fcuTuners = getFcuTunerDetails(equipRef)
-                }
-                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
-                    settings3.genertiTuners = getGenericTunerDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_SENSE.name -> {
                     /** Do nothing */
@@ -347,6 +348,18 @@ class HyperStatSettingsUtil {
             fcuTuners.waterValueSamplingDuringNoOperationOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.waterValueSamplingDuringNoOperationOffTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
             return fcuTuners.build()
+        }
+
+        /**
+         * Function to read all the fan coil unit specific tuners which are required for Hyperstat to run on standalone mode
+         * @param equipRef
+         * @return HyperStatTunersGeneric_t
+         */
+        private fun getHpuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
+            val hpuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
+            hpuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
+            hpuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
+            return hpuTuners.build()
         }
 
         var  ccuControlMessageTimer :Long = 0

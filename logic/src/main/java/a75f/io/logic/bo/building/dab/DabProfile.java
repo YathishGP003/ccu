@@ -167,6 +167,7 @@ public class DabProfile extends ZoneProfile
 
         } else {
             damperOpController.reset();
+            heatingLoop.reset();
             CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
         }
 
@@ -292,6 +293,7 @@ public class DabProfile extends ZoneProfile
                     Double.valueOf((int) heatingLoopOp));
         } else {
             CcuLog.i(L.TAG_CCU_ZONE, "handleReheat disabled. System Fan not active");
+            heatingLoop.reset();
             CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"", 0.0);
         }
     }

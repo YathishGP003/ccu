@@ -2,12 +2,15 @@ package a75f.io.logic.migration.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil.Companion.updateMarkers
+import android.nfc.Tag
 
 /**
  * Created by Manjunath K on 07-10-2022.
@@ -965,14 +968,24 @@ class CpuPointsMigration {
         }
 
         private fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
-            return CCUHsApi.getInstance()
-                .readEntity("zone and $query and equipRef == \"$equipRef\"")
+            val pointMap: HashMap<Any, Any> =  CCUHsApi.getInstance()
+                                    .readEntity("zone and $query and equipRef == \"$equipRef\"")
+            //There have been issues with group field of CPU profile points getting corrupted with Timezone values.
+            //Trying to address it as part of migration.
+            try {
+                if (pointMap[Tags.GROUP] == Tags.TZ || pointMap[Tags.GROUP] is String) {
+                    val equip : HashMap<Any, Any> = CCUHsApi.getInstance().readMapById(pointMap[Tags.EQUIPREF].toString())
+                    pointMap[Tags.GROUP] = equip[Tags.GROUP].toString().toInt()
+                }
+            } catch (e : Exception) {
+                CcuLog.e(L.TAG_CCU_HSCPU, "Failed to fix the group field. The corruption may be beyond a correction")
+            }
+            return pointMap;
         }
 
         private fun readDefaultValue(query: String, equipRef: String): Int {
             return CCUHsApi.getInstance()
                 .readDefaultVal("zone and $query and equipRef == \"$equipRef\"").toInt()
         }
-
     }
 }

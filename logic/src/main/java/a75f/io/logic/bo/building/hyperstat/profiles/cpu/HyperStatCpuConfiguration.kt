@@ -22,9 +22,9 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var relay5State = RelayState(false, CpuRelayAssociation.HEATING_STAGE_2)
    var relay6State = RelayState(false, CpuRelayAssociation.FAN_HIGH_SPEED)
 
-   var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,30.0,60.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,30.0,60.0,100.0)
-   var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,30.0,60.0,100.0)
+   var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
+   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
 
    var isEnableAirFlowTempSensor = false
    var isEnableDoorWindowSensor = false

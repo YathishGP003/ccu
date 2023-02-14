@@ -105,6 +105,7 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                             dabEquip.group.toInt(),
                             Port.RELAY_ONE.name,
                             reheatLoop["id"].toString())
+                        resetAO2ToSecondaryDamper(hayStack, equipRef, dabEquip.group.toInt())
                     }
                     ReheatType.TwoStage.ordinal -> {
                         DeviceUtil.updatePhysicalPointRef(
@@ -115,12 +116,11 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                             dabEquip.group.toInt(),
                             Port.RELAY_TWO.name,
                             reheatLoop["id"].toString())
+                        resetAO2ToSecondaryDamper(hayStack, equipRef, dabEquip.group.toInt())
                     }
                 }
             }
         } else {
-            val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"");
-            DeviceUtil.updatePhysicalPointRef(dabEquip.group.toInt(), Port.ANALOG_OUT_TWO.name, damperPosPoint["id"].toString())
             if (reheatDamper.isNotEmpty()) {
                 hayStack.deleteEntityTree(reheatDamper["id"].toString())
             }
@@ -129,5 +129,9 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
             }
         }
     }
+}
 
+fun resetAO2ToSecondaryDamper(hayStack: CCUHsApi, equipRef: String, nodeAddr : Int ) {
+    val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"");
+    DeviceUtil.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.name, damperPosPoint["id"].toString())
 }

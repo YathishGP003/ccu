@@ -201,7 +201,6 @@ public class HyperStatMessageGenerator {
         return HyperStat.HyperStatOperatingMode_e.HYPERSTAT_OPERATING_MODE_OFF;
     }
 
-
     private static void setHyperStatPort(HyperStat.HyperStatControlsMessage_t.Builder controls,
                                          Port port, double val) {
         if (port == RELAY_ONE) {

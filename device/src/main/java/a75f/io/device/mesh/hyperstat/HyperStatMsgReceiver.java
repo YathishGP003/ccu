@@ -97,6 +97,7 @@ public class HyperStatMsgReceiver {
                     HyperStatIduStatusMessage_t.parseFrom(messageArray);
                 HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
             }
+
         } catch (InvalidProtocolBufferException e) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
         }

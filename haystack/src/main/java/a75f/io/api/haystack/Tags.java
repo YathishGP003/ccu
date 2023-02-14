@@ -156,4 +156,5 @@ public class Tags
     public static final String VOC = "voc";
     public static final String PM2P5 = "pm2p5";
 
+    public static final String TZ = "tz";
 }

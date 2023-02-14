@@ -447,7 +447,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverCoolingRelayLogicalPoint(equipRef)).build()
@@ -468,7 +468,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverHeatingRelayLogicalPoint(equipRef)).build()

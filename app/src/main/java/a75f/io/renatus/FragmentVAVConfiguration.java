@@ -446,7 +446,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMReheating = view.findViewById(R.id.numMinCFMReheating);
         numMinCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMReheating.setMinValue(0);
-        numMinCFMReheating.setMaxValue(50);
+        numMinCFMReheating.setMaxValue(100);
         numMinCFMReheating.setValue(10);
         numMinCFMReheating.setWrapSelectorWheel(false);
         numMinCFMReheating.setDisplayedValues(numberValues);
@@ -454,7 +454,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMaxCFMReheating = view.findViewById(R.id.numMaxCFMReheating);
         numMaxCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMReheating.setMinValue(0);
-        numMaxCFMReheating.setMaxValue(150);
+        numMaxCFMReheating.setMaxValue(300);
         numMaxCFMReheating.setValue(TrueCFMConstants.DEFAULT_VALUE);
         numMaxCFMReheating.setWrapSelectorWheel(false);
         numMaxCFMReheating.setDisplayedValues(numberValues);

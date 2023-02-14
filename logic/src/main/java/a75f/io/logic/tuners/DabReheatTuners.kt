@@ -38,7 +38,7 @@ fun createRelayActivationHysteresisTuner(hayStack : CCUHsApi, siteRef : String, 
                                 tz : String, defaultTag : String, roomRef : String?) {
 
     val relayActivationHysteresis = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheatDelayActivationHysteresis")
+        .setDisplayName("$equipDis-DAB-reheatRelayActivationHysteresis")
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
@@ -71,7 +71,7 @@ fun createTemperatureProportionalRangeTuner(hayStack : CCUHsApi, siteRef : Strin
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
-        .addMarker("reheat").addMarker("temp").addMarker("proportional").addMarker("spread")
+        .addMarker("reheat").addMarker("temp").addMarker("pspread")
         .addMarker("sp")
         .setMinVal("0").setMaxVal("100").setIncrementVal("1")
         .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -99,7 +99,7 @@ fun createTemperatureIntegralTimeTuner(hayStack : CCUHsApi, siteRef : String, eq
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
-        .addMarker("reheat").addMarker("temp").addMarker("integral").addMarker("time")
+        .addMarker("reheat").addMarker("temp").addMarker("itimeout")
         .addMarker("sp")
         .setMinVal("0").setMaxVal("100").setIncrementVal("1")
         .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -122,16 +122,17 @@ fun createTemperatureIntegralTimeTuner(hayStack : CCUHsApi, siteRef : String, eq
 fun createKFactorTuner(hayStack : CCUHsApi, siteRef : String, equipRef : String, equipDis : String,
                                        tz : String, defaultTag : String, type :String, roomRef : String?) {
 
+    val typeName = if (type == "igain")  "Integral" else "Proportional";
     val temperatureIntegralTime = Point.Builder()
-        .setDisplayName("$equipDis-DAB-reheat${type.capitalize()}KFactor")
+        .setDisplayName("$equipDis-DAB-reheat${typeName}KFactor")
         .setSiteRef(siteRef)
         .setEquipRef(equipRef).setHisInterpolate("cov")
         .addMarker("tuner").addMarker("writable").addMarker("his").addMarker(defaultTag)
-        .addMarker("reheat").addMarker("kFactor").addMarker(type)
+        .addMarker("reheat").addMarker(type)
         .addMarker("sp")
-        .setMinVal("0").setMaxVal("10").setIncrementVal(".5")
+        .setMinVal("0.1").setMaxVal("1").setIncrementVal("0.1")
         .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-        .setTz(tz).setUnit(Units.MINUTES)
+        .setTz(tz)
     roomRef?.let { temperatureIntegralTime.setRoomRef(it) }
     val temperatureIntegralTimeId = hayStack.addPoint(temperatureIntegralTime.build())
     hayStack.writePointForCcuUser(
@@ -148,7 +149,7 @@ fun createKFactorTuner(hayStack : CCUHsApi, siteRef : String, equipRef : String,
 }
 
 fun createDefaultReheatTuners(hayStack: CCUHsApi, buildingTunerEquip : Equip) {
-    if (hayStack.readEntity("default and reheat and temp and offset").isNotEmpty()) {
+    if (hayStack.readEntity("default and reheat and temp and offset and not vav").isNotEmpty()) {
         return
     }
     createReheatTempOffsetTuner(hayStack, buildingTunerEquip.siteRef, buildingTunerEquip.id, buildingTunerEquip.displayName,
@@ -160,9 +161,9 @@ fun createDefaultReheatTuners(hayStack: CCUHsApi, buildingTunerEquip : Equip) {
     createTemperatureIntegralTimeTuner(hayStack, buildingTunerEquip.siteRef, buildingTunerEquip.id, buildingTunerEquip.displayName,
         buildingTunerEquip.tz, Tags.DEFAULT, null)
     createKFactorTuner(hayStack, buildingTunerEquip.siteRef, buildingTunerEquip.id, buildingTunerEquip.displayName,
-        buildingTunerEquip.tz, Tags.DEFAULT, "integral", null)
+        buildingTunerEquip.tz, Tags.DEFAULT, "igain", null)
     createKFactorTuner(hayStack, buildingTunerEquip.siteRef, buildingTunerEquip.id, buildingTunerEquip.displayName,
-        buildingTunerEquip.tz, Tags.DEFAULT, "proportional" ,null)
+        buildingTunerEquip.tz, Tags.DEFAULT, "pgain" ,null)
 }
 
 fun createEquipReheatTuners(hayStack: CCUHsApi, equip : Equip) {
@@ -175,7 +176,7 @@ fun createEquipReheatTuners(hayStack: CCUHsApi, equip : Equip) {
     createTemperatureIntegralTimeTuner(hayStack, equip.siteRef, equip.id, equip.displayName,
         equip.tz, Tags.DAB, equip.roomRef)
     createKFactorTuner(hayStack, equip.siteRef, equip.id, equip.displayName,
-        equip.tz, Tags.DAB, "integral", equip.roomRef)
+        equip.tz, Tags.DAB, "igain", equip.roomRef)
     createKFactorTuner(hayStack, equip.siteRef, equip.id, equip.displayName,
-        equip.tz, Tags.DAB, "proportional" ,equip.roomRef)
+        equip.tz, Tags.DAB, "pgain" ,equip.roomRef)
 }

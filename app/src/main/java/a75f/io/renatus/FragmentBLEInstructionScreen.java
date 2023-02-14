@@ -346,32 +346,19 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
+                || mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU
+                || mProfileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT){
             if (L.isSimulation()) {
                 showDialogFragment(
-                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
-                                ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
+                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
                         HyperStatFragment.ID);
-            }
-            else {
-                Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT);
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU) {
-            if (L.isSimulation()) {
-                showDialogFragment(
-                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType,
-                                ProfileType.HYPERSTAT_TWO_PIPE_FCU),
-                        HyperStatFragment.ID);
-            }
-            else {
-                Log.d("FragBleInstrScrn","Hyperstat CPU profile. device scan");
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_TWO_PIPE_FCU);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
-        }
+
     }
     
     

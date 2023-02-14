@@ -1,23 +1,21 @@
 package a75f.io.renatus.hyperstat
 
 import a75f.io.api.haystack.HSUtil
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment
+import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.FragmentBLEInstructionScreen
 import a75f.io.renatus.HyperStatSensePairScreen
 import a75f.io.renatus.R
+import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.Toast
-import a75f.io.renatus.BuildConfig
-import a75f.io.renatus.util.CCUUiUtil
 import androidx.core.view.isVisible
 
 
@@ -86,6 +84,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
       cpuCell.setOnClickListener { showCPUConfigFragment() }
+      hpuCell.setOnClickListener { showHPUConfigFragment() }
       twoPipeCell.setOnClickListener { showPipe2ConfigFragment() }
       senseCell.setOnClickListener{ showSenseconfigFragment() }
       vrvCell.setOnClickListener{ showVrvConfigFragment() }
@@ -102,7 +101,17 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
          ), FragmentBLEInstructionScreen.ID
       )
    }
-
+   private fun showHPUConfigFragment() {
+      showDialogFragment(
+         FragmentBLEInstructionScreen.getInstance(
+            mNodeAddress,
+            mRoomName,
+            mFloorName,
+            ProfileType.HYPERSTAT_HEAT_PUMP_UNIT,
+            NodeType.HYPER_STAT
+         ), FragmentBLEInstructionScreen.ID
+      )
+   }
    private fun showPipe2ConfigFragment() {
       showDialogFragment(
          FragmentBLEInstructionScreen.getInstance(

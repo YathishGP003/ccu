@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.actions
 
+import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
@@ -41,4 +42,10 @@ interface AnalogOutActions {
                                   basicSettings: BasicSettings,
                                   loopOutput: Int,
                                   analogOutStages: HashMap<String, Int>)
+    fun doAnalogCompressorSpeed(port: Port,
+                                conditioningMode: StandaloneConditioningMode,
+                                analogOutStages: HashMap<String, Int>,
+                                compressorLoopOutput: Int,
+                                zoneMode: ZoneState
+    )
 }

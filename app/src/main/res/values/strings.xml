@@ -143,6 +143,7 @@
     <string name="aux_heating_stage_1">  Aux Heating stage1 </string>
     <string name="aux_heating_stage_2">  Aux Heating stage2 </string>
     <string name="water_valve">  Water Valve </string>
+    <string name="compressor_speed">  Compressor Speed </string>
 
     <string-array name="hyperstat_stage_selector">
         <item>  @string/cooling_stage_1 </item>
@@ -173,6 +174,30 @@
         <item>  @string/dehumidifier </item>
     </string-array>
 
+    <string-array name="hyperstat_hpu_stage_selector">
+        <item>  @string/compressor_stage1 </item>
+        <item>  @string/compressor_stage2 </item>
+        <item>  @string/compressor_stage3 </item>
+        <item>  @string/aux_heating_stage_1 </item>
+        <item>  @string/aux_heating_stage_2 </item>
+        <item>  @string/fan_low_speed </item>
+        <item>  @string/fan_medium_speed </item>
+        <item>  @string/fan_high_speed </item>
+        <item>  @string/fan_enabled </item>
+        <item>  @string/occupied_enabled </item>
+        <item>  @string/humidifier </item>
+        <item>  @string/dehumidifier </item>
+        <item>  @string/change_over_cooling </item>
+        <item>  @string/change_over_heating </item>
+    </string-array>
+
+    <string name="compressor_stage1">Compressor Stage1</string>
+    <string name="compressor_stage2">Compressor Stage2</string>
+    <string name="compressor_stage3">Compressor Stage3</string>
+    <string name="change_over_cooling">Change Over O Cooling </string>
+    <string name="change_over_heating">Change Over B Heating </string>
+    <string name="dev_relay">DCV_RELAY</string>
+
     <string name="cooling"> Cooling </string>
     <string name="fan_speed"> Fan Speed </string>
     <string name="heating"> Heating </string>
@@ -189,6 +214,12 @@
 
     <string-array name="hyperstat_pipe2_analog_out_selector">
         <item>  @string/water_valve_modulation </item>
+        <item>  @string/fan_speed </item>
+        <item>  @string/dcv_damper </item>
+    </string-array>
+
+    <string-array name="hyperstat_hpu_analog_out_selector">
+        <item>  @string/compressor_speed </item>
         <item>  @string/fan_speed </item>
         <item>  @string/dcv_damper </item>
     </string-array>
@@ -214,6 +245,10 @@
         <item>  Current TX (0-50Amps) </item>
         <item>  Key Card Sensor </item>
         <item>  Door/Window Sensor (AI2) </item>
+    </string-array>
+    <string-array name="hyperstat_thermister_2_options">
+        <item>  External 10k Room Temp Sensor </item>
+        <item>  Door/Window Sensor</item>
     </string-array>
 
     <!--    Placeholder -->
@@ -505,6 +540,7 @@
     <string name="analog3">Analog-out3</string>
     <string name="door_window_sensor">Door/Window Sensor (Th2)</string>
     <string name="supply_water_sensor">Supply Water Sensor</string>
+    <string name="thermistor_2">Thermistor 2</string>
     <string name="analogin_1">Analog-in1</string>
     <string name="analogin_2">Analog-in2</string>
 
@@ -857,6 +893,11 @@
     <string-array name="sse_relay2_mode">
         <item>  Not enabled </item>
         <item>  Fan </item>
+    </string-array>
+    <string-array name="sse_analog_in_1">
+        <item>  Current TX (0-10 Amps) </item>
+        <item>   Current TX (0-20 Amps) </item>
+        <item> Current TX (0-50 Amps) </item>
     </string-array>
 
 
@@ -1257,6 +1298,7 @@
     <string name="max_val_for_kfactor">3.0</string>
     <string name="step_for_kactor_values">.01</string>
     <string name="default_val_for_kfactor">100</string>
+    <string name="analog_in1">Analog-in1</string>
 
     <string name="label_usereheat">Use Reheat</string>
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>

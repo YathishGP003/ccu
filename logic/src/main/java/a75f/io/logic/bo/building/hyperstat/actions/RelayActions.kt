@@ -90,4 +90,22 @@ interface RelayActions {
         relayActivationHysteresis: Int,
         relayStages: HashMap<String, Int>
     )
+    fun doCompressorStage1( port: Port,
+                            compressorLoopOutput: Int,
+                         relayActivationHysteresis: Int,
+                         relayStages: HashMap<String, Int>,
+                            zoneMode: ZoneState)
+    fun doCompressorStage2(
+                            port: Port,
+                            compressorLoopOutput: Int,
+                            relayActivationHysteresis: Int,
+                            divider: Int,
+                            relayStages: HashMap<String, Int>,
+                            zoneMode: ZoneState)
+
+    fun doCompressorStage3( port: Port,
+                            compressorLoopOutput: Int,
+                         relayActivationHysteresis: Int,
+                         relayStages: HashMap<String, Int>,
+                            zoneMode: ZoneState)
 }

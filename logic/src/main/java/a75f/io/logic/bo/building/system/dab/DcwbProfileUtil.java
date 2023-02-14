@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -213,10 +214,8 @@ public class DcwbProfileUtil {
     
     
     private static void deleteConfigPoint(String query, CCUHsApi hayStack) {
-        HashMap point = hayStack.read("system and config and "+query);
-        if (!point.isEmpty()) {
-            hayStack.deleteWritablePoint(point.get("id").toString());
-        }
+        ArrayList<HashMap<Object, Object>> configPoints = hayStack.readAllEntities("system and config and "+query);
+        configPoints.forEach( point -> hayStack.deleteWritablePoint(point.get("id").toString()));
     }
     
     private static void deleteLoopPoint(String query, CCUHsApi hayStack) {

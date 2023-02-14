@@ -320,38 +320,6 @@ class HyperStatSettingsUtil {
         }
 
         /**
-         * Function to read all the fan coil unit specific tuners which are required for Hyperstat to run on standalone mode
-         * @param equipRef
-         * @return HyperStatTunersGeneric_t
-         */
-        private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
-            val fcuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
-            fcuTuners.twoPipeCoolingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.twoPipeHeatingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.waterValueSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.watreValueSamplingWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOffTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
-            return fcuTuners.build()
-        }
-
-        /**
-         * Function to read all the fan coil unit specific tuners which are required for Hyperstat to run on standalone mode
-         * @param equipRef
-         * @return HyperStatTunersGeneric_t
-         */
-        private fun getHpuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
-            val hpuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
-            hpuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
-            hpuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
-            return hpuTuners.build()
-        }
-
-
-
-        /**
          * Function which reads a default value for the point from haystack
          * @param hsApi
          * @param equipRef

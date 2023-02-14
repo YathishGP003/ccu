@@ -684,12 +684,10 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                     return
                 }
-                if(occupancyStatus != Occupancy.UNOCCUPIED) {
-                    runFanHigh(tuner, basicSettings, relayStages)
-                    runFanMedium(tuner, basicSettings, relayStages, configuration)
-                    runFanLow(tuner, basicSettings, relayStages, configuration)
-                    runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
-                }
+                runFanHigh(tuner, basicSettings, relayStages)
+                runFanMedium(tuner, basicSettings, relayStages, configuration)
+                runFanLow(tuner, basicSettings, relayStages, configuration)
+                runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
             }
         }
     }

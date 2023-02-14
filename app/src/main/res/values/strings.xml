@@ -192,8 +192,8 @@
     <string name="compressor_stage1">Compressor Stage1</string>
     <string name="compressor_stage2">Compressor Stage2</string>
     <string name="compressor_stage3">Compressor Stage3</string>
-    <string name="change_over_cooling">Change Over O Cooling </string>
-    <string name="change_over_heating">Change Over B Heating </string>
+    <string name="change_over_cooling">O - Energize in Cooling </string>
+    <string name="change_over_heating">B - Energize in Heating </string>
     <string name="dev_relay">DCV_RELAY</string>
 
     <string name="cooling"> Cooling </string>

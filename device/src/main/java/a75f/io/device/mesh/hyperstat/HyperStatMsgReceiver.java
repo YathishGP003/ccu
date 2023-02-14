@@ -97,12 +97,6 @@ public class HyperStatMsgReceiver {
                     HyperStatIduStatusMessage_t.parseFrom(messageArray);
                 HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
             }
-    
-         /*   if(currentTempInterface != null) {
-                Log.i("DEV_DEBUG", "102: ");
-                currentTempInterface.refreshScreen(null);
-            }*/
-            
         } catch (InvalidProtocolBufferException e) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
         }
@@ -247,7 +241,7 @@ public class HyperStatMsgReceiver {
      */
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
 
-        hayStack.writeHisValById(rawPoint.getId(), val);
+        hayStack.writeHisValById(rawPoint.getId(), (val/100));
         int index = (int)Double.parseDouble(rawPoint.getType());
 
         if(index == SensorType.DOOR_WINDOW_SENSOR.ordinal()){ // it is DOOR_WINDOW_SENSOR

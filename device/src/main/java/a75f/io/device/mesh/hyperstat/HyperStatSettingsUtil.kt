@@ -78,7 +78,12 @@ class HyperStatSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
-                }ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
+                }
+                ProfileType.HYPERSTAT_TWO_PIPE_FCU.name -> {
+                    settings3.genertiTuners = getGenericTunerDetails(equipRef)
+                    settings3.fcuTuners = getFcuTunerDetails(equipRef)
+                }
+                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_SENSE.name -> {
@@ -326,6 +331,23 @@ class HyperStatSettingsUtil {
             )
         }
 
+        /**
+         * Function to read all the fan coil unit specific tuners which are required for Hyperstat to run on standalone mode
+         * @param equipRef
+         * @return HyperStatTunersGeneric_t
+         */
+        private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
+            val fcuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
+            fcuTuners.twoPipeCoolingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.twoPipeHeatingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.watreValueSamplingWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingDuringNoOperationOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValueSamplingDuringNoOperationOffTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
+            return fcuTuners.build()
+        }
 
         var  ccuControlMessageTimer :Long = 0
             get() {

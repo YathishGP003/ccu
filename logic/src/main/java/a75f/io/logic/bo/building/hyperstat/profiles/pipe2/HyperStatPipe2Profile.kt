@@ -334,33 +334,25 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         hsTuners.humidityHysteresis =
             TunerUtil.getHysteresisPoint("humidity", equip.equipRef!!).toInt()
 
-        hsTuners.heatingThreshold = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and heating and threshold and equipRef == \"${equip.equipRef}\"")
+        hsTuners.heatingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equip.equipRef}\"")
 
-        hsTuners.coolingThreshold = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and cooling and threshold and equipRef == \"${equip.equipRef}\"")
+        hsTuners.coolingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equip.equipRef}\"")
 
-        hsTuners.auxHeating1Activate = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equip.equipRef}\"")
+        hsTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equip.equipRef}\"")
 
-        hsTuners.auxHeating2Activate = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equip.equipRef}\"")
+        hsTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equip.equipRef}\"")
 
-        hsTuners.waterValveSamplingOnTime = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equip.equipRef}\"")
-            .toInt()
+        hsTuners.waterValveSamplingOnTime = TunerUtil.readTunerValByQuery(
+            "tuner and samplingrate and water and on and time and not loop and equipRef == \"${equip.equipRef}\"").toInt()
 
-        hsTuners.waterValveSamplingWaitTime = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equip.equipRef}\"")
-            .toInt()
+        hsTuners.waterValveSamplingWaitTime = TunerUtil.readTunerValByQuery(
+            "tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equip.equipRef}\"").toInt()
 
-        hsTuners.waterValveSamplingDuringLoopDeadbandOnTime = CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equip.equipRef}\"")
-            .toInt()
+        hsTuners.waterValveSamplingDuringLoopDeadbandOnTime = TunerUtil.readTunerValByQuery(
+            "tuner and samplingrate and loop and on and time and equipRef == \"${equip.equipRef}\"").toInt()
 
-        hsTuners.waterValveSamplingDuringLoopDeadbandWaitTime =  CCUHsApi.getInstance()
-            .readHisValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equip.equipRef}\"")
-            .toInt()
+        hsTuners.waterValveSamplingDuringLoopDeadbandWaitTime =  TunerUtil.readTunerValByQuery(
+            "tuner and samplingrate and loop and wait and time and equipRef == \"${equip.equipRef}\"").toInt()
 
         return hsTuners
     }
@@ -657,7 +649,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         relayStages: HashMap<String, Int>,
     ) {
         if(!HyperStatAssociationUtil.isAnyRelayAssociatedToWaterValve(config)
-            || !HyperStatAssociationUtil.isAnyPipe2AnalogAssociatedToWaterValve(config))
+            && !HyperStatAssociationUtil.isAnyPipe2AnalogAssociatedToWaterValve(config))
         {
             Log.i(L.TAG_CCU_HSPIPE2, "No mapping for water value")
             return

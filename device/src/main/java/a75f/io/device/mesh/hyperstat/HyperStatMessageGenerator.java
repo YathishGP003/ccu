@@ -275,21 +275,11 @@ public class HyperStatMessageGenerator {
         return curOccupancyMode == UNOCCUPIED || curOccupancyMode == AUTOAWAY;
     }
         private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
-            try{
-                return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
-            }catch (Exception e){
-                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
-            }
-            return 0;
+            return hayStack.readDefaultVal("humidifier and control and group == \"" + address + "\"").intValue();
         }
 
         private static int getHumidityMaxSp(int address, CCUHsApi hayStack) {
-            try {
-                return hayStack.readDefaultVal("config and humidity and max and group == \"" + address + "\"").intValue();
-            }catch (Exception e){
-                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
-            }
-            return 0;
+            return hayStack.readDefaultVal("dehumidifier and control and group == \"" + address + "\"").intValue();
         }
 
     private static double getStandaloneCoolingDeadband(String equipRef) {

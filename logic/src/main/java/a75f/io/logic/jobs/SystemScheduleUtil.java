@@ -2,6 +2,7 @@ package a75f.io.logic.jobs;
 
 import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
+import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
 import android.util.Log;
 
@@ -76,10 +77,10 @@ public class SystemScheduleUtil {
 
                 Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
                 DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
-                        .withHourOfDay(day.getEthh())
-                        .withMinuteOfHour(day.getEtmm())
+                        .withHourOfDay(getEndHour(day.getEthh()))
+                        .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
                         .withDayOfWeek(day.getDay() + 1)
-                        .withSecondOfMinute(0);
+                        .withSecondOfMinute(getEndSec(day.getEthh()));
 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.USER_APP_WRITE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                         - System.currentTimeMillis(), "ms"));
@@ -93,10 +94,10 @@ public class SystemScheduleUtil {
                 Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
                 
                 DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
-                                              .withHourOfDay(day.getEthh())
-                                              .withMinuteOfHour(day.getEtmm())
+                                              .withHourOfDay(getEndHour(day.getEthh()))
+                                              .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
                                               .withDayOfWeek(day.getDay() + 1)
-                                              .withSecondOfMinute(0);
+                                              .withSecondOfMinute(getEndSec(day.getEthh()));
                 
                 CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                                                                                                                                                         - System.currentTimeMillis(), "ms"));
@@ -200,7 +201,7 @@ public class SystemScheduleUtil {
                                               .withHourOfDay(getEndHour(day.getEthh()))
                                               .withMinuteOfHour(getEndMinute(day.getEthh(), day.getEtmm()))
                                               .withDayOfWeek(day.getDay() + 1)
-                                              .withSecondOfMinute(0);
+                                              .withSecondOfMinute(getEndSec(day.getEthh()));
                 
                 if((coolpoint != null) && (coolval != 0)) {
                     CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(coolval), HNum.make(overrideExpiry.getMillis()

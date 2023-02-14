@@ -97,13 +97,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
+        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
     }
 
     public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigration", isMigrated);
+        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
         editor.apply();
     }
 

@@ -168,7 +168,7 @@ public class RawPoint extends Entity
         private String tz;
         private String roomRef;
         private String floorRef;
-        private String kind;
+        private Kind kind;
         private String shortDis;
         private String minVal;
         private String maxVal;
@@ -186,7 +186,7 @@ public class RawPoint extends Entity
         private boolean enabled;
         private String  id;
 
-        public Builder setKind(String kind)
+        public Builder setKind(Kind kind)
         {
             this.kind = kind;
             return this;
@@ -310,7 +310,7 @@ public class RawPoint extends Entity
             p.siteRef = this.siteRef;
             p.roomRef = this.roomRef;
             p.floorRef = this.floorRef;
-            p.kind = this.kind;
+            p.kind = this.kind != null ? this.kind.getValue() : Kind.NUMBER.getValue();
             p.id = this.id;
             p.enabled = this.enabled;
             p.shortDis = this.shortDis;
@@ -379,7 +379,15 @@ public class RawPoint extends Entity
                 }
                 else if (pair.getKey().equals("kind"))
                 {
-                    this.kind = pair.getValue().toString();
+                    String value = pair.getValue().toString();
+
+                    // support old values if needed for migration.
+                    if (value.equalsIgnoreCase("string")) {
+                        this.kind = Kind.STRING;
+                    }
+                    else {
+                        this.kind = Kind.parse(value);
+                    }
                 }
                 else if (pair.getKey().equals("portEnabled"))
                 {

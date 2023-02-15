@@ -245,7 +245,7 @@ public class ScheduleUtil {
     
     public static boolean isAHUServedEquip(HashMap<Object, Object> equip) {
         return (equip.containsKey("vav") || equip.containsKey("dab") || equip.containsKey("dualDuct") ||
-                equip.containsKey("ti") || equip.containsKey("bpos") );
+                equip.containsKey("ti") || equip.containsKey("otn") );
     }
     
     public static Schedule getActiveSystemVacation() {
@@ -354,7 +354,7 @@ public class ScheduleUtil {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
                    || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")
-                   || q.getMarkers().contains("bpos") || q.getMarkers().contains("sse")) {
+                   || q.getMarkers().contains("otn") || q.getMarkers().contains("sse")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

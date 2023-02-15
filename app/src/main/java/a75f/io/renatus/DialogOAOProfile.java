@@ -1,12 +1,15 @@
 
 package a75f.io.renatus;
 
-import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
-
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,18 +21,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import androidx.annotation.Nullable;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -38,6 +39,8 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
 
 
 /**
@@ -294,7 +297,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.outsideDamperMinOpen = Double.parseDouble(oaDamperMinOpen.getSelectedItem().toString());
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());
         if (mProfileConfig == null) {
-            mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef, mNodeType );
+            mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef );
             if (L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
                 L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true);
             }

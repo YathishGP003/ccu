@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static Context context;
@@ -49,8 +50,11 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
-
+    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
+    private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
+    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -94,13 +98,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
+        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
     }
 
     public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigration", isMigrated);
+        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
         editor.apply();
     }
 
@@ -448,6 +452,13 @@ public class PreferenceUtil {
     public static void setFreeInternalDiskStorageMigration() {
         setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
     }
+    public static boolean getAutoAwayAutoForcedPointMigration() {
+        return getBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION);
+    }
+
+    public static void setAutoAwayAutoForcedPointMigration() {
+        setBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION, true);
+    }
 
     public static boolean getFreeInternalDiskStorageMigration() {
         return getBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION);
@@ -466,6 +477,27 @@ public class PreferenceUtil {
 
     public static void setSmartNodeDamperMigration() {
         setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
+    }
+    public static boolean getSSEFanStageMigration() {
+        return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
+    }
+
+    public static void setSSEFanStageMigration() {
+        setBooleanPreference(SSE_FAN_STAGE_MIGRATION, true);
+    }
+    public static boolean getAirflowSampleWaitTImeMigration() {
+        return getBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION);
+    }
+
+    public static void setAirflowSampleWaitTimeMigration() {
+        setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
+    }
+    public static boolean getstaticPressureSpTrimMigration() {
+        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+    }
+
+    public static void setStaticPressureSpTrimMigration() {
+        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
     }
 
     public static boolean getstandaloneCoolingAirflowTempLowerOffsetMigration() {

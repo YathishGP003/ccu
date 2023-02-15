@@ -21,7 +21,6 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -152,14 +151,14 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         if(supplyWaterTempTh2 > heatingThreshold){
                             twoPipeFCUHeatOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
                         }else if(supplyWaterTempTh2 < coolingThreshold){
-                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
+                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed, opMode);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied, opMode,roomTemp);
                         }
                         break;
                     case COOL_ONLY:
                         if((supplyWaterTempTh2 < coolingThreshold) && (roomTemp > 0)){
-                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
+                            twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed, opMode);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied,opMode,roomTemp);
                         }
@@ -303,6 +302,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
     private void fanOperationalModes(String equipId, StandaloneLogicalFanSpeeds fanSpeed, short addr, boolean occupied, StandaloneOperationalMode opMode, double roomTemp){
 
+        double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
@@ -427,8 +427,24 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
         if(isAuxHeatingEnabled){
-            if(getCmdSignal("aux and heating",addr) > 0)
-                setCmdSignal("aux and heating",0, addr);
+            if (opMode.equals(StandaloneOperationalMode.COOL_ONLY) || opMode.equals(StandaloneOperationalMode.OFF)) {
+                if (getCmdSignal("aux and heating", addr) > 0)
+                    setCmdSignal("aux and heating", 0, addr);
+            } else {
+                if(isAuxHeatingEnabled){
+                    if(roomTemp <= setTempHeating){
+                        relayStates.put("HeatingStage1",1);
+                        setCmdSignal("aux and heating",1.0,addr);
+                    }else if(roomTemp >= (setTempHeating + hysteresis)){
+                        if(getCmdSignal("aux and heating",addr) > 0)
+                            setCmdSignal("aux and heating",0,addr);
+
+                    } else {
+                        if(getCmdSignal("aux and heating",addr) > 0)
+                            relayStates.put("HeatingStage1",1);
+                    }
+                }
+            }
         }
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStates ,ZoneTempState.NONE);
         twoPfcuDeviceMap.get(addr).setStatus(DEADBAND.ordinal());
@@ -445,7 +461,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         twoPfcuDeviceMap.get(node).setStatus(DEADBAND.ordinal());
     }
 
-    private void twoPipeFCUCoolOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
+    private void twoPipeFCUCoolOnlyMode(String equipId, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed, StandaloneOperationalMode opMode){
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
@@ -589,16 +605,23 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
         if(isAuxHeatingEnabled){
-            if(roomTemp <= setTempHeating){
-                relayStates.put("HeatingStage1",1);
-                setCmdSignal("aux and heating",1.0,addr);
-            }else if(roomTemp >= (setTempHeating + hysteresis)){
-                if(getCmdSignal("aux and heating",addr) > 0)
-                    setCmdSignal("aux and heating",0,addr);
-
+            if (opMode.equals(StandaloneOperationalMode.COOL_ONLY) || opMode.equals(StandaloneOperationalMode.OFF)) {
+                if (getCmdSignal("aux and heating", addr) > 0)
+                    setCmdSignal("aux and heating", 0, addr);
             } else {
-                if(getCmdSignal("aux and heating",addr) > 0)
-                    relayStates.put("HeatingStage1",1);
+                if(isAuxHeatingEnabled){
+                    if(roomTemp <= setTempHeating){
+                        relayStates.put("HeatingStage1",1);
+                        setCmdSignal("aux and heating",1.0,addr);
+                    }else if(roomTemp >= (setTempHeating + hysteresis)){
+                        if(getCmdSignal("aux and heating",addr) > 0)
+                            setCmdSignal("aux and heating",0,addr);
+
+                    } else {
+                        if(getCmdSignal("aux and heating",addr) > 0)
+                            relayStates.put("HeatingStage1",1);
+                    }
+                }
             }
         }
         Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
@@ -767,8 +790,17 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
         if(isAuxHeatingEnabled){
-            if(getCmdSignal("aux and heating",addr) > 0)
-                setCmdSignal("aux and heating",0,addr);
+            if(roomTemp <= setTempHeating){
+                relayStates.put("HeatingStage1",1);
+                setCmdSignal("aux and heating",1.0,addr);
+            }else if(roomTemp >= (setTempHeating + hysteresis)){
+                if(getCmdSignal("aux and heating",addr) > 0)
+                    setCmdSignal("aux and heating",0,addr);
+
+            } else {
+                if(getCmdSignal("aux and heating",addr) > 0)
+                    relayStates.put("HeatingStage1",1);
+            }
         }
 
         Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","

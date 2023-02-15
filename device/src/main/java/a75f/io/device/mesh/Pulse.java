@@ -75,7 +75,7 @@ public class Pulse
 	private static boolean mDataReceived = false;
 	private static HashMap mDeviceLowSignalCount = new HashMap();
 	private static HashMap mDeviceLowSignalAlert = new HashMap();
-	private static HashMap<Short, Long> mDeviceUpdate = new HashMap();
+	public static HashMap<Short, Long> mDeviceUpdate = new HashMap();
 
 	public static void setCMDeadTimerIncrement(boolean isReboot){
 		if(isReboot)mTimeSinceCMDead = 0;
@@ -910,7 +910,6 @@ public class Pulse
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
 			String str = "addr:"+address+ " Node status: "+cause;
-			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
@@ -1284,8 +1283,8 @@ public class Pulse
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
 
-				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
-						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
+				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
+						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getEquipRef());
 				 mDeviceUpdate.remove(address);
 				 break;
 			 } else {

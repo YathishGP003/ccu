@@ -32,7 +32,6 @@ public class RemoteCommandUpdateHandler
     public static final String RESTART_MODULE = "restart_module";
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     public static final String OTA_UPDATE_CM = "ota_update_CM";
-    public static final String OTA_UPDATE_HN = "ota_update_helioNode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     /**
      * Maintain Queue request for all the OTA request and process one by one
@@ -72,7 +71,6 @@ public class RemoteCommandUpdateHandler
                             case OTA_UPDATE_SD:
                             case OTA_UPDATE_HS:
                             case OTA_UPDATE_CM:
-                            case OTA_UPDATE_HN:
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
@@ -100,7 +98,6 @@ public class RemoteCommandUpdateHandler
                         case OTA_UPDATE_SD:
                         case OTA_UPDATE_ITM:
                         case OTA_UPDATE_HS:
-                        case OTA_UPDATE_HN:
                             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

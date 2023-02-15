@@ -1,10 +1,5 @@
 package a75f.io.logic.bo.building.dualduct;
 
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-
 import android.util.Log;
 
 import java.util.HashMap;
@@ -22,7 +17,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -36,6 +30,11 @@ import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 public class DualDuctProfile extends ZoneProfile {
     public static final int ANALOG_SCALE = 10;
     
@@ -44,9 +43,9 @@ public class DualDuctProfile extends ZoneProfile {
     GenericPIController coolingDamperController;
     
     
-    public void addDualDuctEquip(short addr, DualDuctProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
+    public void addDualDuctEquip(short addr, DualDuctProfileConfiguration config, String floorRef, String roomRef) {
         dualDuctEquip = new DualDuctEquip(getProfileType(), addr);
-        dualDuctEquip.createEntities(config, floorRef, roomRef, nodeType);
+        dualDuctEquip.createEntities(config, floorRef, roomRef);
         dualDuctEquip.init();
     }
     

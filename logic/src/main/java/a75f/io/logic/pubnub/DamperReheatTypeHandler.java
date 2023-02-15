@@ -32,9 +32,13 @@ public class DamperReheatTypeHandler {
                 SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
                                                   DamperType.values()[typeVal].displayName);
             } else if (configPoint.getMarkers().contains(Tags.SECONDARY)) {
-                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
-                                                  DamperType.values()[typeVal].displayName);
-                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), typeVal != DamperType.MAT.ordinal());
+                double reheatType = hayStack.readDefaultVal("reheat and type and group == \""+configPoint.getGroup()+"\"");
+                if (reheatType == 0 && (reheatType - 1) > ReheatType.Pulse.ordinal()  ) {
+                    //When reheat is mapped to AO2 , we cant use it.
+                    SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
+                            DamperType.values()[typeVal].displayName);
+                    SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+                }
             }
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.DAB)) {
             updateReheatType(typeVal, 40, configPoint.getEquipRef(), hayStack);
@@ -54,6 +58,13 @@ public class DamperReheatTypeHandler {
                 if ((typeVal - 1) == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                }
+
+                double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+configPoint.getGroup()+"\"");
+                if (damperType == DamperType.MAT.ordinal()) {
+                    SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+                    SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
+                                                                    DamperType.MAT.displayName);
                 }
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {

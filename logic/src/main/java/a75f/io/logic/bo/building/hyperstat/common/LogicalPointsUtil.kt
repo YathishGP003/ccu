@@ -447,7 +447,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverCoolingRelayLogicalPoint(equipRef)).build()
@@ -468,7 +468,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverHeatingRelayLogicalPoint(equipRef)).build()
@@ -823,7 +823,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "sensor", "zone", "his", "logical", transformerTag
+                    "current", "sensor", "zone", "his", "logical", "cur", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")

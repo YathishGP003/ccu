@@ -23,9 +23,9 @@ class HyperStatPipe2Configuration: BaseProfileConfiguration() {
     var relay5State = Pipe2RelayState(false, Pipe2RelayAssociation.AUX_HEATING_STAGE2)
     var relay6State = Pipe2RelayState(false, Pipe2RelayAssociation.WATER_VALVE)
 
-    var analogOut1State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.WATER_VALVE, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,30.0,60.0,100.0)
+    var analogOut1State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.WATER_VALVE, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
     var isEnableAirFlowTempSensor = false
     var isSupplyWaterSensor = true

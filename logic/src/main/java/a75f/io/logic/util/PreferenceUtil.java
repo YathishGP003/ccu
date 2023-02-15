@@ -51,6 +51,9 @@ public class PreferenceUtil {
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
     private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
+
+    private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
+
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
@@ -497,5 +500,13 @@ public class PreferenceUtil {
 
     public static void setStaticPressureSpTrimMigration() {
         setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
+    public static boolean getNewOccupancyMode() {
+        return getBooleanPreference(BUILDING_BREACH_MIGRATION);
+    }
+
+    public static void setNewOccupancyMode() {
+         setBooleanPreference(BUILDING_BREACH_MIGRATION,true);
     }
 }

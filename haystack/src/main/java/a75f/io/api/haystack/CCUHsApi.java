@@ -320,7 +320,7 @@ public class CCUHsApi
                               .addMarker("occupancy").addMarker("state")
                               .addMarker("zone").addMarker("his")
                               .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
-                                        "emergencyconditioning, keycardautoaway, windowopen")
+                                        "emergencyconditioning,keycardautoaway,windowopen,noconditioning")
                               .setTz(getTimeZone())
                               .build();
         CCUHsApi.getInstance().addPoint(occupancy);

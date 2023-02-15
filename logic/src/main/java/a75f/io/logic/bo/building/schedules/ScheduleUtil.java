@@ -34,6 +34,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
@@ -463,5 +464,22 @@ public class ScheduleUtil {
     public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
         return hayStack.readHisValByQuery("point and occupancy and state and " +
                             "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
+    }
+
+
+    public static boolean isSystemProfile(CCUHsApi hayStack,String equipId){
+        HashMap<Object, Object> equip = hayStack.readMapById(equipId);
+        if(equip.containsKey("vav") || equip.containsKey("dab"))
+            return true;
+        return false;
+    }
+
+    public static boolean areAllZonesBuildingLimitsBreached(Map<String, OccupancyData> equipOccupancy ){
+        for (OccupancyData occupancyData : equipOccupancy.values()) {
+            if (occupancyData.occupancy != NO_CONDITIONING) {
+                return false;
+            }
+        }
+        return true;
     }
 }

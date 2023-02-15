@@ -1,6 +1,6 @@
 package a75f.io.logic.bo.building.schedules.occupancy;
 
-import java.util.Date;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -21,18 +21,39 @@ public class EmergencyConditioning implements OccupancyTrigger{
     }
     
     public boolean hasTriggered() {
-    
+
+        double zonePriority = CCUHsApi.getInstance().
+                readPointPriorityValByQuery("zone and priority and not dynamic and " +
+                        "not spread and not multiplier and equipRef == \"" + equipRef + "\"");
+
+        HashMap<Object, Object> systemEquip = CCUHsApi.getInstance()
+                .readEntity("system and equip");
+
+        HashMap<Object, Object> scheduleStatusPoint = CCUHsApi.getInstance()
+                .readEntity("point and scheduleStatus and equipRef == \""+systemEquip.get("id").toString()+ "\"");
+
+        String hisZoneStatus = CCUHsApi.getInstance().readDefaultStrValById(scheduleStatusPoint.get("id").toString());
         double currentTemp = hayStack.readHisValByQuery("current and temp and sensor and equipRef == \""+equipRef+"\"");
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimitMax =  BuildingTunerCache.getInstance().getBuildingLimitMax();
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
-        CcuLog.i(L.TAG_CCU_SCHEDULER,
+        String conditioningMode = CCUHsApi.getInstance().
+                readDefaultStrVal("status and zone and message and equipRef == \"" + equipRef + "\"");
+
+        String systemStatus = CCUHsApi.getInstance().
+                readDefaultStrVal("status and system");
+
+        if(zonePriority == 0){
+            return (currentTemp < buildingLimitMin && currentTemp > buildingLimitMin - tempDeadLeeway &&
+                    ((conditioningMode.contains("Warming") || conditioningMode.contains("HEATING"))  && systemStatus.contains("Heating"))||
+                    currentTemp > buildingLimitMax && currentTemp < buildingLimitMax + tempDeadLeeway &&
+                            (conditioningMode.contains("Cooling") && systemStatus.contains("Cooling")));
+        }
+
+         CcuLog.i(L.TAG_CCU_SCHEDULER,
                  "EmergencyConditioning - "+currentTemp+" "+buildingLimitMin+"-"+buildingLimitMax+"("+tempDeadLeeway+
                  ")");
-        if ((currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway))
-           || (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway))) {
-            return true;
-        }
-        return false;
+        return currentTemp < buildingLimitMin && currentTemp > buildingLimitMin - tempDeadLeeway ||
+                currentTemp > buildingLimitMax && currentTemp < buildingLimitMax + tempDeadLeeway ;
     }
 }

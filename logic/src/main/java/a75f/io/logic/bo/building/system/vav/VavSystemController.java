@@ -239,8 +239,8 @@ public class VavSystemController extends SystemController
     
     private boolean isEmergencyCoolingRequired() {
         return systemState !=  HEATING &&
-               buildingLimitMaxBreached("vav") &&
-               conditioningMode != SystemMode.OFF;
+                buildingLimitMaxBreached("vav") &&
+                conditioningMode != SystemMode.OFF;
     }
     
     private boolean isEmergencyHeatingRequired() {

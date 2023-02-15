@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.system;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -41,7 +42,9 @@ public abstract class SystemController
         {
             Equip q = new Equip.Builder().setHashMap(h).build();
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and current and equipRef == \""+q.getId()+"\"");
-            if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway)) {
+            double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
+                    ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
+            if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway) && zonePriority!= 0) {
                 return true;
             }
         }
@@ -59,7 +62,9 @@ public abstract class SystemController
         {
             Equip q = new Equip.Builder().setHashMap(h).build();
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and current and equipRef == \""+q.getId()+"\"");
-            if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway)) {
+            double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
+                    ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
+            if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway) && zonePriority!=0) {
                 return true;
             }
         }

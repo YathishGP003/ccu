@@ -278,27 +278,15 @@ public class MigrationUtil {
         }
 
 
+        if(!PreferenceUtil.getNewOccupancyMode()) {
+            addBuildingLimitsBreachedOccupancy(CCUHsApi.getInstance());
+            PreferenceUtil.setNewOccupancyMode();
+        }
+
+
         if(!PreferenceUtil.getSSEFanStageMigration()){
             SSEFanStageMigration(CCUHsApi.getInstance());
             PreferenceUtil.setSSEFanStageMigration();
-        }
-        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
-            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setAirflowSampleWaitTimeMigration();
-        }
-
-        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
-            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setAirflowSampleWaitTimeMigration();
-        }
-
-        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
-            staticPressureSpTrimMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setStaticPressureSpTrimMigration();
-        }
-        if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
-            airflowSampleWaitTimeMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setAirflowSampleWaitTimeMigration();
         }
 
         if (!PreferenceUtil.getAirflowSampleWaitTImeMigration()) {
@@ -1603,4 +1591,14 @@ public class MigrationUtil {
 
     }
 
+
+    private static void addBuildingLimitsBreachedOccupancy(CCUHsApi hayStack){
+        ArrayList<HashMap<Object, Object>> occModePoints = hayStack.readAllEntities("occupancy and mode");
+        occModePoints.forEach( occMode -> {
+            Point occModePoint = new Point.Builder().setHashMap(occMode).build();
+            occModePoint.setEnums(Occupancy.getEnumStringDefinition());
+            hayStack.updatePoint(occModePoint, occModePoint.getId());
+        });
+        hayStack.scheduleSync();
+    }
 }

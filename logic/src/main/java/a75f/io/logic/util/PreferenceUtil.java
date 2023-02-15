@@ -9,8 +9,9 @@ import android.util.Log;
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
+    private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static Context context;
-    private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
+    private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
@@ -497,5 +498,13 @@ public class PreferenceUtil {
 
     public static void setStaticPressureSpTrimMigration() {
         setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
+    public static boolean getStandaloneHeatingOffsetMigration() {
+        return getBooleanPreference(STANDALONE_HEATING_OFFSET);
+    }
+
+    public static void setStandaloneHeatingOffsetMigration() {
+        setBooleanPreference(STANDALONE_HEATING_OFFSET, true);
     }
 }

@@ -311,9 +311,26 @@ public class MigrationUtil {
             PreferenceUtil.setStaticPressureSpTrimMigration();
         }
 
+        if (!PreferenceUtil.getStandaloneHeatingOffsetMigration()) {
+            standaloneHeatingOffsetMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setStandaloneHeatingOffsetMigration();
+        }
+
 
         L.saveCCUState();
     }
+
+    private static void standaloneHeatingOffsetMigration(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> standaloneHEatingOffsetPoints = ccuHsApi.readAllEntities("standalone and heating and offset and stage1");
+        for (HashMap<Object, Object> standaloneHeatingOffset : standaloneHEatingOffsetPoints) {
+            String updatedMaxValue = "150";
+            String updatedMinValue = "0";
+
+            Point updatedStandaloneHeatingOffsetPoint = new Point.Builder().setHashMap(standaloneHeatingOffset).setMaxVal(updatedMaxValue).setMinVal(updatedMinValue).build();
+            CCUHsApi.getInstance().updatePoint(updatedStandaloneHeatingOffsetPoint, updatedStandaloneHeatingOffsetPoint.getId());
+        }
+    }
+
     private static void SSEFanStageMigration(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> sseEquips = ccuHsApi.readAllEntities("equip and sse");

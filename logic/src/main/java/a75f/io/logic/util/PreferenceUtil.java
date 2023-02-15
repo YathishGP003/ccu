@@ -10,6 +10,7 @@ public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
+    private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -506,5 +507,13 @@ public class PreferenceUtil {
 
     public static void setstandaloneCoolingAirflowTempLowerOffsetMigration() {
         setBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET, true);
+    }
+
+    public static boolean getStandaloneAirflowSampleWaitMigration() {
+        return getBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
+    }
+
+    public static void setAirflowSampleWaitTimeUnitMigration() {
+        setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
     }
 }

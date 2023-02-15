@@ -63,7 +63,7 @@ public class StandAloneTuners {
                                             .setEquipRef(equipRef).setHisInterpolate("cov")
                                             .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("base").addMarker("writable").addMarker("his")
                                             .addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
-                                            .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                                            .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER).setUnit("m")
                                             .setTz(tz)
                                             .build();
         String saAirflowSampleWaitTimeId = hayStack.addPoint(saAirflowSampleWaitTime);

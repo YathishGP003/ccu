@@ -126,7 +126,7 @@
                                 android:text="@string/relay1" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay1Spinner"
@@ -157,7 +157,7 @@
                                 android:text="@string/relay2" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay2Spinner"
@@ -187,7 +187,7 @@
                                 android:text="@string/relay3" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay3Spinner"
@@ -218,7 +218,7 @@
                                 android:text="@string/relay4" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay4Spinner"
@@ -250,7 +250,7 @@
                                 android:text="@string/relay5" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay5Spinner"
@@ -281,7 +281,7 @@
                                 android:text="@string/relay6" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/relay6Spinner"
@@ -313,7 +313,7 @@
                                 android:text="@string/analog1" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/analog1Spinner"
@@ -347,7 +347,7 @@
                                 android:text="@string/analog2" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/analog2Spinner"
@@ -382,7 +382,7 @@
                                 android:text="@string/analog3" />
                         </LinearLayout>
 
-                        <LinearLayout style="@style/TableBasicItemWrapper">
+                        <LinearLayout style="@style/RelayTableBasicItemWrapper">
 
                             <Spinner
                                 android:id="@+id/analog3Spinner"
@@ -435,6 +435,7 @@
                                 android:id="@+id/th2Label"
                                 style="@style/ToggleLabel"
                                 android:text="@string/door_window_sensor" />
+
                         </LinearLayout>
                     </TableRow>
 

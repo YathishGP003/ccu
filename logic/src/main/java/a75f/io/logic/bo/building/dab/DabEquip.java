@@ -92,10 +92,10 @@ public class DabEquip
         {
             equipRef = equipMap.get("id").toString();
             damperController = new GenericPIController();
-            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and equipRef == \"" + equipRef + "\""));
-            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and equipRef == \"" + equipRef + "\""));
-            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and equipRef == \"" + equipRef + "\""));
-            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and equipRef == \"" + equipRef + "\""));
+            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and not reheat and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and not reheat and equipRef == \"" + equipRef + "\""));
     
             co2Target = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and target and equipRef == \""+equipRef+"\"");
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and threshold and equipRef == \""+equipRef+"\"");
@@ -108,14 +108,14 @@ public class DabEquip
             vocLoop.setVOCTarget(vocTarget);
             vocLoop.setVOCThreshold(vocThreshold);
 
-            heatingLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("reheat and " +
-                    "proportional and spread and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("reheat and " +
-                    "integral and time and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("reheat and " +
-                    "proportional and kFactor and equipRef == \"" + equipRef + "\""));
-            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("reheat and " +
-                    "integral and kFactor and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "pspread and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "itimeout and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "pgain and equipRef == \"" + equipRef + "\""));
+            heatingLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dab and reheat and " +
+                                                        "igain and equipRef == \"" + equipRef + "\""));
         }
     
     }

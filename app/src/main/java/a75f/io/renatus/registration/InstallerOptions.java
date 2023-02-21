@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -431,6 +432,8 @@ public class InstallerOptions extends Fragment {
                 if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
                     TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
                 }
+                toggleCelsius.setEnabled(false);
+                new Handler().postDelayed(() -> toggleCelsius.setEnabled(true),2000);
             }
         });
 

@@ -26,6 +26,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
@@ -512,12 +513,18 @@ public class Globals {
                             cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuProfile);
                             break;
+                        case HYPERSTAT_HEAT_PUMP_UNIT:
+                            HyperStatHpuProfile hpuProfile = new HyperStatHpuProfile();
+                            hpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hpuProfile);
+                            break;
 
                         case HYPERSTAT_TWO_PIPE_FCU:
                             HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
                             pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
+
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
                             hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));

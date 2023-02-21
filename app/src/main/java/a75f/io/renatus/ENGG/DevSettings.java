@@ -46,6 +46,8 @@ import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.messaging.MessagingClient;
@@ -116,6 +118,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.btnRestart) Button btnRestart;
 
     public @BindView(R.id.resetPassword) Button resetPassword;
+
+    public @BindView(R.id.resetAppBtn) Button resetAppBtn;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
 
@@ -338,6 +342,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     .setCancelable(false)
                     .create();
             dialog.show();
+        });
+
+        resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
+            Log.d("CCU"," ResetAppState ");
+            L.ccu().systemProfile.reset();
+            for (ZoneProfile p : L.ccu().zoneProfiles) {
+                p.reset();
+            }
+            L.ccu().zoneProfiles.clear();
+            Globals.getInstance().loadEquipProfiles();
         });
 
     }

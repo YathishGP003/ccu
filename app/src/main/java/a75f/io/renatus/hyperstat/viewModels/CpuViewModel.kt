@@ -91,6 +91,7 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application)  
         doorWindowSensorSwitchChanged(checked)
     }
 
+
     private fun doorWindowSensorSwitchChanged(checked: Boolean) {
         viewState.onNext(
             currentState.copy(

@@ -709,7 +709,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
                             profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
-                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())
+                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
+                            profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())
                     ) {
                         tempModule = true;
                     }
@@ -1037,7 +1038,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1389,10 +1390,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
-
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(p);
+                                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                            }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
                                 HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
@@ -1699,7 +1703,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1833,7 +1837,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                Log.i("DEV_DEBUG", "1867: ");
+
                 HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
@@ -1844,11 +1848,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                                 updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
                                                 p.getGroup());
             }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(updatedEquip);
+                Log.i("PointsValue", "Hpu Points:" + cpuEquipPoints);
+                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+            }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
-                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
-
             }
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");
@@ -1896,11 +1904,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double targetValue = (double) plcPoints.get("Target Value");
                     double inputValue = (double) plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                        nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
+                        nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
+                        nonTempControl.setPiInputUnitText("\u00B0C");
+                    } else {
+                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    }
+
                     if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                    } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")){
+                        nonTempControl.setPiOutputUnitText("\u00B0C");
                     } else {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                     }
@@ -1922,6 +1939,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
@@ -1972,6 +1992,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             String equipId = p.getId();
             HashMap zoneEquips = zoneMap.get(0);
             if ((zoneEquips.get("profile").toString()).contains("PLC")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(1);
                 nonTempControl.setImage(R.drawable.ic_zone_piloop);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
@@ -1985,16 +2008,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
             }
             if ((zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(0);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
@@ -2167,16 +2199,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            if( isCelsiusTunerAvailableStatus()) {
+                            if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
+                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                             } else {
                                 nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                                 nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             }
-                            nonTempControl.setPiOutputText(String.valueOf(targetValue));
+
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                                nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                             }
@@ -3424,7 +3460,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             } else {
                 labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                    textViewTargetAir.setText(fahrenheitToCelsius(Double.parseDouble(plcPoints.get("Target Value").toString())) + " " + "\u00B0C");
+                } else {
+                    textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                }
                 viewPointRow1.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);
@@ -3846,7 +3886,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
         linearLayoutstatusPoints.setVisibility(View.GONE);
         linearLayoutschedulePoints.setVisibility(View.GONE);
-
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
         gridItemObj.setGridItem("Sense");
@@ -3864,6 +3906,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         seekArc.setSense(true);
         seekArc.setSenseData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
+        vacationStatusTV.setVisibility(View.GONE);
+        vacationText.setVisibility(View.GONE);
+        vacationEditButton.setVisibility(View.GONE);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         arcView.setPadding(48, 64, 0, 0);

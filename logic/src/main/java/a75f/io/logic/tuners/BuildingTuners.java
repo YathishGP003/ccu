@@ -126,7 +126,8 @@ public class BuildingTuners
         TimerTuners.addDefaultTimerTuners(hayStack, siteRef, equipRef, equipDis, tz);
         OTNTuners.addDefaultOTNTuners(hayStack, siteRef, equipRef, equipDis, tz);
         HyperstatCpuTuners.Companion.addHyperstatDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        OAOTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
+        Equip buildingTunerEquip = new Equip.Builder().setHashMap(hayStack.readEntity("equip and tuner")).build();
+        DabReheatTunersKt.createDefaultReheatTuners(hayStack, buildingTunerEquip);
         HyperStat2PipeTuners.Companion.addPipe2BuildingTuner(hayStack, siteRef, equipRef, equipDis, tz);
     }
 }

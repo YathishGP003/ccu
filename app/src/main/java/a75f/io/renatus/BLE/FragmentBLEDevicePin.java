@@ -448,7 +448,11 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 mNodeType,ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
                                 HyperStatFragment.ID);
                         break;
-
+                    case HYPERSTAT_HEAT_PUMP_UNIT:
+                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
+                                        mNodeType,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
+                                HyperStatFragment.ID);
+                        break;
                     case HYPERSTAT_TWO_PIPE_FCU:
                         showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
                                         mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU),

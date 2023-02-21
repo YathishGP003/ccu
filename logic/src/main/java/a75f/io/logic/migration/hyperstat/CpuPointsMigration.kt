@@ -2,12 +2,15 @@ package a75f.io.logic.migration.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil.Companion.updateMarkers
+import android.nfc.Tag
 
 /**
  * Created by Manjunath K on 07-10-2022.
@@ -119,7 +122,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxCooling", "writable"),
+                    arrayOf("dxCooling"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -138,7 +141,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxHeating", "writable"),
+                    arrayOf("dxHeating"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -157,7 +160,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "low"),
+                    arrayOf("speed", "low"),
                     arrayOf(relay, "enum", "stage1"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -177,7 +180,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "medium"),
+                    arrayOf("speed", "medium"),
                     arrayOf(relay, "enum", "stage2"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -196,7 +199,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "high"),
+                    arrayOf("speed", "high"),
                     arrayOf(relay, "enum", "stage3"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -215,7 +218,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled"),
+                    arrayOf("enabled"),
                     arrayOf(relay, "enum", "enable"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -234,7 +237,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled","occupied"),
+                    arrayOf( "enabled","occupied"),
                     arrayOf(relay, "enum", "enable","occupancy"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -253,7 +256,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable"),
+                    arrayOf(),
                     arrayOf(relay, "enum", "fan"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -382,7 +385,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf(),
-                    arrayOf("$analog", "cmd", "in"), "$equipDis-currentDrawn_10"
+                    arrayOf(analog, "cmd", "in"), "$equipDis-currentDrawn_10"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -397,7 +400,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer20"),
-                    arrayOf("$analog", "cmd", "in", "transformer"), "$equipDis-currentDrawn_20"
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_20"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -412,7 +415,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer50"),
-                    arrayOf("$analog", "cmd", "in", "transformer"), "$equipDis-currentDrawn_50"
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_50"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -820,19 +823,19 @@ class CpuPointsMigration {
             if (coolingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     coolingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-coolingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-coolingLoopOutput"
                 )
             }
             if (heatingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     heatingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-heatingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-heatingLoopOutput"
                 )
             }
             if (fanLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     fanLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-fanLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-fanLoopOutput"
                 )
             }
         }
@@ -965,14 +968,24 @@ class CpuPointsMigration {
         }
 
         private fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
-            return CCUHsApi.getInstance()
-                .readEntity("zone and $query and equipRef == \"$equipRef\"")
+            val pointMap: HashMap<Any, Any> =  CCUHsApi.getInstance()
+                                    .readEntity("zone and $query and equipRef == \"$equipRef\"")
+            //There have been issues with group field of CPU profile points getting corrupted with Timezone values.
+            //Trying to address it as part of migration.
+            try {
+                if (pointMap[Tags.GROUP] == Tags.TZ || pointMap[Tags.GROUP] is String) {
+                    val equip : HashMap<Any, Any> = CCUHsApi.getInstance().readMapById(pointMap[Tags.EQUIPREF].toString())
+                    pointMap[Tags.GROUP] = equip[Tags.GROUP].toString().toInt()
+                }
+            } catch (e : Exception) {
+                CcuLog.e(L.TAG_CCU_HSCPU, "Failed to fix the group field. The corruption may be beyond a correction")
+            }
+            return pointMap;
         }
 
         private fun readDefaultValue(query: String, equipRef: String): Int {
             return CCUHsApi.getInstance()
                 .readDefaultVal("zone and $query and equipRef == \"$equipRef\"").toInt()
         }
-
     }
 }

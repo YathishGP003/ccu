@@ -12,4 +12,15 @@ public class SingleStageConfig extends BaseProfileConfiguration {
     public boolean enableAutoForceOccupied;
 
     public double temperaturOffset;
+    public boolean analogIn1;
+
+    public InputActuatorType getAnalogInAssociation() {
+        return analogInAssociation;
+    }
+
+    public void setAnalogInAssociation(InputActuatorType analogInAssociation) {
+        this.analogInAssociation = analogInAssociation;
+    }
+
+    public InputActuatorType analogInAssociation;
 }

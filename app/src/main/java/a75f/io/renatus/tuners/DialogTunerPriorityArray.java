@@ -34,7 +34,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -49,7 +48,6 @@ import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConve
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
-import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -279,23 +277,43 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         if (dataArray.size() == 0)
             System.exit(1);
-        if (target <= Double.parseDouble(dataArray.get(0)))
-            return Double.parseDouble(dataArray.get(0));
-        if (target >= Double.parseDouble(dataArray.get(dataArray.size() - 1)))
-            return Double.parseDouble(dataArray.get(dataArray.size() - 1));
+        if (Double.parseDouble(dataArray.get(0)) > Double.parseDouble(dataArray.get(dataArray.size()-1))) {
+            if (target >= Double.parseDouble(dataArray.get(0)))
+                return Double.parseDouble(dataArray.get(0));
+            if (target <= Double.parseDouble(dataArray.get(dataArray.size() - 1)))
+                return Double.parseDouble(dataArray.get(dataArray.size() - 1));
+        } else {
+            if (target <= Double.parseDouble(dataArray.get(0)))
+                return Double.parseDouble(dataArray.get(0));
+            if (target >= Double.parseDouble(dataArray.get(dataArray.size() - 1)))
+                return Double.parseDouble(dataArray.get(dataArray.size() - 1));
+        }
 
         int start = 0;
         int end = dataArray.size()-1;
         int mid = 0;
 
-        while (end - start != 1) {
-            mid = (start + end) / 2;
-            if (target == Double.parseDouble(dataArray.get(mid)))
-                return Double.parseDouble(dataArray.get(mid));
-            if (target < Double.parseDouble(dataArray.get(mid)))
-                end = mid;
-            if (target > Double.parseDouble(dataArray.get(mid)))
-                start = mid;
+        if (Double.parseDouble(dataArray.get(0)) > Double.parseDouble(dataArray.get(dataArray.size()-1))) {
+            while (end - start != 1) {
+                mid = (start + end) / 2;
+                if (target == Double.parseDouble(dataArray.get(mid)))
+                    return Double.parseDouble(dataArray.get(mid));
+                if (target > Double.parseDouble(dataArray.get(mid)))
+                    end = mid;
+                if (target < Double.parseDouble(dataArray.get(mid)))
+                    start = mid;
+            }
+        } else {
+
+            while (end - start != 1) {
+                mid = (start + end) / 2;
+                if (target == Double.parseDouble(dataArray.get(mid)))
+                    return Double.parseDouble(dataArray.get(mid));
+                if (target < Double.parseDouble(dataArray.get(mid)))
+                    end = mid;
+                if (target > Double.parseDouble(dataArray.get(mid)))
+                    start = mid;
+            }
         }
         return (Double.parseDouble(target - Double.parseDouble(dataArray.get(start)) <= Math.abs(target - Double.parseDouble(dataArray.get(end))) ? dataArray.get(start)
                 : dataArray.get(end)));
@@ -308,19 +326,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         loadValueList(valueList);
 
         tunerName = tunerItemSelected.get("dis").toString();
-        if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
-            if (isCelsiusTunerAvailableStatus()) {
-                if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                    if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                        defaultVal = (convertingRelativeValueFtoC(defaultVal));
-                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
-                        defaultVal = roundToHalf(convertingDeadBandValueFtoC(defaultVal));
-                    } else {
-                        defaultVal = fahrenheitToCelsiusTuner(defaultVal);
-                    }
-                }
-                defaultVal = getClosestNumberOfTarget(valueList,defaultVal);
-            }
+        if (isCelsiusConversionRequired()) {
+            defaultVal = getClosestNumberOfTarget(valueList,convertToCelsius(defaultVal));
         }
          String tunerName = tunerItemSelected.get("dis").toString();
         if (tunerItemSelected.containsKey("unit")) {
@@ -413,32 +420,15 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         ArrayList<String> valueList = new ArrayList<>();
+        loadValueList(valueList);
         if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
                     tunerVal = valMap.get("val").toString();
-                    if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit") ) {
-                        if (isCelsiusTunerAvailableStatus()) {
-                            if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                                if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                                    tunerVal = String.valueOf(convertingRelativeValueFtoC(Double.parseDouble(tunerVal)));
-                                } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
-                                    tunerVal = String.valueOf(convertingDeadBandValueFtoC(Double.parseDouble(tunerVal)));
-                                } else {
-                                    tunerVal = String.valueOf(fahrenheitToCelsiusTuner(Double.parseDouble(tunerVal)));
-                                }
-                                loadValueList(valueList);
-                                tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
-                            }
-                            if (level.equals("17")){
-                                loadValueList(valueList);
-                                tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, roundToHalf(Double.parseDouble(tunerVal))));
-                            }
-                        }
-                        loadValueList(valueList);
-                        tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, Double.parseDouble(tunerVal)));
-                    }
+                if (isCelsiusConversionRequired()) {
+                    tunerVal = String.valueOf(getClosestNumberOfTarget(valueList, convertToCelsius(Double.parseDouble(tunerVal))));
+                }
                     return tunerVal;
                 }
             }
@@ -518,24 +508,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-                if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
-                    if (isCelsiusTunerAvailableStatus()) {
-                        if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                            if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                                maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
-                                minValueDb = (convertingRelativeValueFtoC(minValueDb));
-                                currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
-                            } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
-                                minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
-                                maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
-                                currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
-                            } else {
-                                minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
-                                maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
-                                currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
-                            }
-                        }
-                    }
+                if (isCelsiusConversionRequired()) {
+                    maxValueDb = convertToCelsius(maxValueDb);
+                    minValueDb = convertToCelsius(minValueDb);
+                    currentValueDb = convertToCelsius(currentValueDb);
                 }
 
                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
@@ -546,8 +522,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     incrementVal = 1;
                 }
                 int currentValPos = 0;
-                if (minValue < 0) {
-                    for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
+                if (minValueDb > maxValueDb) {
+                    for (double i = 100 * minValueDb; i >= 100 * maxValueDb; i += 100 * incrementValDb) {
                         valueList.add(String.valueOf(Math.round(i) / 100.0));
                     }
                     for (String currVal : valueList) {
@@ -643,24 +619,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
         double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-        if (tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit")) {
-            if (isCelsiusTunerAvailableStatus()) {
-                if (tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C")) {
-                    if (doesPointNeedRelativeConversion(tunerItemSelected)) {
-                        maxValueDb = (convertingRelativeValueFtoC(maxValueDb));
-                        minValueDb = (convertingRelativeValueFtoC(minValueDb));
-                        currentValueDb = (convertingRelativeValueFtoC(currentValueDb));
-                    } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)) {
-                        minValueDb = Math.round(convertingDeadBandValueFtoC(minValueDb));
-                        maxValueDb = roundToHalf(convertingDeadBandValueFtoC(maxValueDb));
-                        currentValueDb = (convertingDeadBandValueFtoC(currentValueDb));
-                    } else {
-                        minValueDb = (fahrenheitToCelsiusTuner(minValueDb));
-                        maxValueDb = (fahrenheitToCelsiusTuner(maxValueDb));
-                        currentValueDb = (fahrenheitToCelsiusTuner(currentValueDb));
-                    }
-                }
-            }
+        if (isCelsiusConversionRequired()) {
+            maxValueDb = convertToCelsius(maxValueDb);
+            minValueDb = convertToCelsius(minValueDb);
+            currentValueDb = convertToCelsius(currentValueDb);
         }
 
         Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
@@ -671,8 +633,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             incrementVal = 1;
         }
         int currentValPos = 0;
-        if (minValue < 0) {
-            for (double i = 100 * minValueDb; i <= 100 * maxValueDb; i += 100 * incrementValDb) {
+        if (minValueDb > maxValueDb) {
+            for (double i = 100 * minValueDb; i >= 100 * maxValueDb; i += 100 * incrementValDb) {
                 valueList.add(String.valueOf(Math.round(i) / 100.0));
             }
             for (String currVal : valueList) {
@@ -706,4 +668,26 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             revertMap = item;
         }
     }
+
+    public boolean isTunerTemperatureRelated() {
+        return tunerItemSelected.get("unit").toString().equals("\u00B0F") || tunerItemSelected.get("unit").toString().equals("\u00B0C");
+    }
+    public boolean doesTunerContainUnit() {
+        return tunerItemSelected.containsKey("unit") && !tunerItemSelected.containsKey("displayUnit");
+    }
+    public boolean isCelsiusConversionRequired() {
+        return doesTunerContainUnit() && isCelsiusTunerAvailableStatus() && isTunerTemperatureRelated();
+    }
+
+    private double convertToCelsius(double value) {
+        if (doesPointNeedRelativeConversion(tunerItemSelected)) {
+            value = (convertingRelativeValueFtoC(value));
+        } else if (doesPointNeedRelativeDeadBandConversion(tunerItemSelected)){
+            value = roundToHalf(convertingDeadBandValueFtoC(value));
+        } else {
+            value = fahrenheitToCelsiusTuner(value);
+        }
+        return value;
+    }
+
 }

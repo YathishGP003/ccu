@@ -57,6 +57,7 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
+    private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
 
     public static void setContext(Context c) {
         context= c;
@@ -509,4 +510,12 @@ public class PreferenceUtil {
     public static void setNewOccupancyMode() {
          setBooleanPreference(BUILDING_BREACH_MIGRATION,true);
     }
+
+    public static boolean getCorruptedNamedScheduleRemoval() {
+        return getBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE);
+     }
+     public static void setCorruptedNamedScheduleRemoval() {
+         setBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE, true);
+     }
+
 }

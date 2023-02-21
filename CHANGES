@@ -1,3 +1,9 @@
+ - Merged PR 6598: Reverting the minor version to 634 to regenerate 1.635.0 apk
+ - Merged PR 6596: Remove corrupted named schedules
+ - Rmove corrupted named schedules
+ - Merged PR 6588: Loading schedule issue
+ - Merged PR 6541: Aux stage 1  and stage 2 tuners fix
+ - Version bump to 1.635.0
  - Merged PR 6519: Tag correction- BPOS to OTN
  - Merged PR 6352: 16578 - Emergency Conditioning Mode Message Disconnect from Priority None
  - Merged PR 4332: Firmware version point to hold string value
@@ -283,7 +289,6 @@
  - Version bump to 1.636.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
- - Version bump to 1.635.0
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
  - Remove vacation check for triggering AutoForcedOccupied
  - WIP

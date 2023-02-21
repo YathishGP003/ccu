@@ -58,6 +58,8 @@ public class PreferenceUtil {
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
+    private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -518,4 +520,11 @@ public class PreferenceUtil {
          setBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE, true);
      }
 
+    public static boolean getTiProfileMigration() {
+        return getBooleanPreference(TI_PROFILE_MIGRATION);
+    }
+
+    public static void setTiProfileMigration() {
+        setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
 }

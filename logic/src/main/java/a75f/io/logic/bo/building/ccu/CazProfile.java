@@ -37,8 +37,8 @@ public class CazProfile extends ZoneProfile {
         cazEquip.init();
     }
 
-    public void updateCcuAsZone(CazProfileConfig config) {
-        cazEquip.updateCcuAsZoneConfig(config);
+    public void updateCcuAsZone(CazProfileConfig config, String floorRef, String zoneRef) {
+        cazEquip.updateCcuAsZoneConfig(config, floorRef, zoneRef);
     }
     @Override
     public ProfileType getProfileType() {

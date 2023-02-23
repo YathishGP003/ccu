@@ -1,6 +1,9 @@
 package a75f.io.messaging.handler;
 
+import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.JsonObject;
 
@@ -12,8 +15,10 @@ import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
@@ -26,15 +31,16 @@ import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.messaging.database.MessageDbUtilKt;
 
-public class UpdatePointHandler
+public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
     private static ZoneDataInterface zoneDataInterface = null;
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
-    public static void handleMessage(final JsonObject msgObject) {
+    public void handleMessage(final JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -287,5 +293,18 @@ public class UpdatePointHandler
         }
 
         return false;
+    }
+
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Collections.singletonList(CMD);
+    }
+
+    @Override
+    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        handleMessage(jsonObject);
+        String messageId = jsonObject.get("messageId").getAsString();
+        MessageDbUtilKt.updateMessageHandled(messageId);
     }
 }

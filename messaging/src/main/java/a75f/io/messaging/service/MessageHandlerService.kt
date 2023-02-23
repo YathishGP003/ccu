@@ -29,6 +29,8 @@ class MessageHandlerService private constructor(context: Context){
     private val messagingDbHelper = MessageDatabaseHelper(MessageDatabaseBuilder.getInstance(appContext))
 
     private var alertMessageHandler: AlertMessageHandler? = null
+
+    private val messageHandlers = mutableListOf<MessageHandler>()
     private fun alertMessageHandler(): AlertMessageHandler? {
         if (alertMessageHandler == null) {
             alertMessageHandler = AlertMessageHandler.instanceOf()
@@ -46,6 +48,10 @@ class MessageHandlerService private constructor(context: Context){
             }
             return instance!!
         }
+    }
+
+    fun registerMessageHandler(handler : MessageHandler) {
+        messageHandlers.add(handler)
     }
 
     fun handleMessages() {
@@ -66,42 +72,18 @@ class MessageHandlerService private constructor(context: Context){
 
     private fun messageToJson(message : Message) : JsonObject {
         val gson: Gson = GsonBuilder().create()
-        val messageType = object : TypeToken<a75f.io.messaging.database.Message>() {}.type
+        val messageType = object : TypeToken<Message>() {}.type
         return gson.toJsonTree(message, messageType).asJsonObject
     }
 
     private fun doHandleMessage(msg: JsonObject, context: Context) {
         CcuLog.i(L.TAG_CCU_MESSAGING, " handleMessage $msg")
-        when (val cmd = if (msg["command"] != null) msg["command"].asString else "") {
-            UpdateEntityHandler.CMD -> UpdateEntityHandler.updateEntity(msg)
-            UpdatePointHandler.CMD -> UpdatePointHandler.handleMessage(msg)
-            SiteSyncHandler.CMD -> SiteSyncHandler.handleMessage(msg, context)
-            UpdateScheduleHandler.CMD, UpdateScheduleHandler.ADD_SCHEDULE -> UpdateScheduleHandler.handleMessage(
-                msg
-            )
-            UpdateScheduleHandler.DELETE_SCHEDULE -> CCUHsApi.getInstance()
-                .removeEntity(msg["id"].asString)
-            RemoveEntityHandler.CMD -> RemoveEntityHandler.handleMessage(msg)
-            RemoteCommandUpdateHandler.CMD -> RemoteCommandUpdateHandler.handleMessage(msg, context)
-            CREATE_CUSTOM_ALERT_DEF_CMD,
-            UPDATE_CUSTOM_ALERT_DEF_CMD -> alertMessageHandler()?.handleCustomAlertDefMessage(
-                msg
-            )
-            REMOVE_ALERT_CMD, REMOVE_ALERTS_CMD -> alertMessageHandler()?.handleAlertRemoveMessage(
-                cmd,
-                msg
-            )
-            CREATE_PREDEFINED_ALERT_DEF_CMD,
-            UPDATE_PREDEFINED_ALERT_DEF_CMD,
-            DELETE_PREDEFINED_ALERT_DEF_CMD -> alertMessageHandler()?.handlePredefinedAlertDefMessage(
-                msg
-            )
-            DELETE_CUSTOM_ALERT_DEF_CMD,
-            DELETE_SITE_DEFS_CMD -> alertMessageHandler()?.handleAlertDefRemoveMessage(
-                cmd,
-                msg
-            )
-            else -> CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : $cmd")
+        val cmd = if (msg["command"] != null) msg["command"].asString else ""
+        if (cmd.isNotEmpty()) {
+            messageHandlers.find { it.command.contains(cmd) }?.handleMessage(msg, context)
+                    ?: CcuLog.d(L.TAG_CCU_MESSAGING, "UnSupported Message Command : $cmd")
+        } else {
+            CcuLog.d(L.TAG_CCU_MESSAGING, "Empty Message cmd : $msg")
         }
     }
 }

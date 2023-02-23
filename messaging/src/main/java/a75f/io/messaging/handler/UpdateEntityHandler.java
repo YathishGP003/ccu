@@ -1,5 +1,9 @@
 package a75f.io.messaging.handler;
 
+import android.content.Context;
+
+import androidx.annotation.NonNull;
+
 import com.google.gson.JsonObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -8,8 +12,13 @@ import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Zone;
@@ -17,8 +26,10 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.messaging.database.Message;
+import a75f.io.messaging.database.MessageDbUtilKt;
 
-public class UpdateEntityHandler {
+public class UpdateEntityHandler implements MessageHandler{
     public static final String CMD = "updateEntity";
     public static void updateEntity(JsonObject msgObject){
         String uid = msgObject.get("ids").getAsJsonArray().get(0).toString().replaceAll("\"", "");
@@ -70,5 +81,18 @@ public class UpdateEntityHandler {
                 CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
             }
         }
+    }
+
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Collections.singletonList(CMD);
+    }
+
+    @Override
+    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        updateEntity(jsonObject);
+        String messageId = jsonObject.get("messageId").getAsString();
+        MessageDbUtilKt.updateMessageHandled(messageId);
     }
 }

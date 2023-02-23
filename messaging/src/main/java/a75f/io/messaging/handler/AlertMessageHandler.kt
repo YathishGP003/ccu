@@ -7,6 +7,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.cloud.RenatusServicesEnvironment
+import android.content.Context
+import androidx.annotation.NonNull
 import com.google.common.annotations.VisibleForTesting
 import com.google.gson.JsonObject
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -139,6 +141,45 @@ class AlertMessageHandler(
       for (id in ids) {
          alertManager.deleteAlertDefinition(id)
          CcuLog.d(L.TAG_CCU_PUBNUB, " Deleted Alert Definition: $id")
+      }
+   }
+
+   class PredefinedAlertHandler : MessageHandler {
+      override val command = listOf(CREATE_PREDEFINED_ALERT_DEF_CMD,
+                                    UPDATE_PREDEFINED_ALERT_DEF_CMD,
+                                    DELETE_PREDEFINED_ALERT_DEF_CMD)
+
+      override fun handleMessage(jsonObject: JsonObject, context : Context) {
+         instanceOf().handlePredefinedAlertDefMessage(jsonObject)
+      }
+   }
+   class CustomAlertDefHandler : MessageHandler {
+      override val command = listOf(CREATE_CUSTOM_ALERT_DEF_CMD,
+                                 UPDATE_CUSTOM_ALERT_DEF_CMD)
+
+      override fun handleMessage(jsonObject: JsonObject, context : Context) {
+         instanceOf().handleCustomAlertDefMessage(jsonObject)
+      }
+   }
+
+   class AlertDefRemoveHandler : MessageHandler {
+      override val command = listOf(DELETE_CUSTOM_ALERT_DEF_CMD,
+         DELETE_SITE_DEFS_CMD)
+
+      override fun handleMessage(jsonObject: JsonObject, context : Context) {
+         if (jsonObject["command"] != null) {
+            instanceOf().handleAlertDefRemoveMessage(jsonObject["command"].asString, jsonObject)
+         }
+      }
+   }
+
+   class AlertRemoveHandler : MessageHandler {
+      override val command = listOf(REMOVE_ALERT_CMD, REMOVE_ALERTS_CMD)
+
+      override fun handleMessage(jsonObject: JsonObject, context : Context) {
+         if (jsonObject["command"] != null) {
+            instanceOf().handleAlertRemoveMessage(jsonObject["command"].asString, jsonObject)
+         }
       }
    }
 }

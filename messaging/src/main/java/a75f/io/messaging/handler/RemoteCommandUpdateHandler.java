@@ -3,14 +3,19 @@ package a75f.io.messaging.handler;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.JsonObject;
+
+import java.util.Collections;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 
-public class RemoteCommandUpdateHandler
+public class RemoteCommandUpdateHandler implements MessageHandler
 {
     public static final String CMD = "remoteCommand";
     public static final String CMD_TYPE = "remoteCmdType";
@@ -31,7 +36,8 @@ public class RemoteCommandUpdateHandler
      * Maintain Queue request for all the OTA request and process one by one
      */
 
-    public static void handleMessage(JsonObject msgObject, Context context) {
+    @Override
+    public void handleMessage(JsonObject msgObject, Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("level").getAsString();
@@ -117,5 +123,11 @@ public class RemoteCommandUpdateHandler
 
     public static void setRemoteCommandInterface(RemoteCommandHandleInterface in){
         remoteCommandInterface = in;
+    }
+
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Collections.singletonList(CMD);
     }
 }

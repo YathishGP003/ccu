@@ -1,6 +1,9 @@
 package a75f.io.messaging.handler;
 
+import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.JsonObject;
 
@@ -16,6 +19,8 @@ import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,8 +35,9 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
+import a75f.io.messaging.database.MessageDbUtilKt;
 
-public class UpdateScheduleHandler
+public class UpdateScheduleHandler implements MessageHandler
 {
     public static final String CMD = "updateSchedule";
     public static final String ADD_SCHEDULE = "addSchedule";
@@ -39,7 +45,7 @@ public class UpdateScheduleHandler
     private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
     
-    public static void handleMessage(JsonObject msgObject)
+    public void handleMessage(JsonObject msgObject)
     {
         String uid = msgObject.get("id").getAsString();
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
@@ -257,4 +263,23 @@ public class UpdateScheduleHandler
         intrinsicScheduleListener = listener;
     }
 
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Arrays.asList(CMD,ADD_SCHEDULE, DELETE_SCHEDULE);
+    }
+
+    @Override
+    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        if (jsonObject.get("command").equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
+            CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
+            String messageId = jsonObject.get("messageId").getAsString();
+            MessageDbUtilKt.updateMessageHandled(messageId);
+            return;
+        }
+        handleMessage(jsonObject);
+        String messageId = jsonObject.get("messageId").getAsString();
+        MessageDbUtilKt.updateMessageHandled(messageId);
+
+    }
 }

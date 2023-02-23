@@ -2,21 +2,29 @@ package a75f.io.messaging.handler;
 
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.annotation.NonNull;
+
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.client.HClient;
+
+import java.util.Collections;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.util.RxTask;
+import a75f.io.messaging.database.MessageDbUtilKt;
 
-public class SiteSyncHandler
+public class SiteSyncHandler implements MessageHandler
 {
     public static final String CMD = "sync";
-    
-    public static void handleMessage(JsonObject msgObject, Context context) {
+
+    @Override
+    public void handleMessage(JsonObject msgObject, Context context) {
         
         String siteGuid = msgObject.get("siteId") != null ? msgObject.get("siteId").getAsString(): "";
         
@@ -40,11 +48,18 @@ public class SiteSyncHandler
                 context.sendBroadcast(locationUpdateIntent);
             }
         }
-    
+        String messageId = msgObject.get("messageId").getAsString();
+        MessageDbUtilKt.updateMessageHandled(messageId);
     }
 
     private static void updateSiteOrganisationwithNamedSchedules(CCUHsApi hsApi, String organization) {
         HClient hClient = new HClient(hsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         hsApi.importNamedScheduleWithOrg(hClient, organization);
+    }
+
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Collections.singletonList(CMD);
     }
 }

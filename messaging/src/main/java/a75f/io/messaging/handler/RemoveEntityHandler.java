@@ -1,23 +1,29 @@
 package a75f.io.messaging.handler;
 
+import android.content.Context;
+
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.messaging.database.MessageDbUtilKt;
 
-public class RemoveEntityHandler
+public class RemoveEntityHandler implements MessageHandler
 {
     public static final String CMD = "removeEntity";
     
-    public static void handleMessage(JsonObject msgObject)
+    public void handleMessage(JsonObject msgObject)
     {
         try {
             //TODO - Revisit
@@ -47,5 +53,18 @@ public class RemoveEntityHandler
         } catch (Exception e) {
             CcuLog.d(L.TAG_CCU_PUBNUB, " Failed to parse removeEntity Json " + msgObject);
         }
+    }
+
+    @NonNull
+    @Override
+    public List<String> getCommand() {
+        return Collections.singletonList(CMD);
+    }
+
+    @Override
+    public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
+        handleMessage(jsonObject);
+        String messageId = jsonObject.get("messageId").getAsString();
+        MessageDbUtilKt.updateMessageHandled(messageId);
     }
 }

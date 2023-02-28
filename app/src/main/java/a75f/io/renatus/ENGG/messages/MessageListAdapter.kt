@@ -2,8 +2,7 @@ package a75f.io.renatus.ENGG.messages
 
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.hyperstat.profiles.util.TRUE
-import a75f.io.messaging.database.Message
+import a75f.io.data.message.Message
 import a75f.io.renatus.R
 import android.annotation.SuppressLint
 import android.graphics.Color

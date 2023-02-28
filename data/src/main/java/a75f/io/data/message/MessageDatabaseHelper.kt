@@ -1,11 +1,11 @@
-package a75f.io.messaging.database
-
+package a75f.io.data.message
+import a75f.io.data.RenatusDatabase
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 
-class MessageDatabaseHelper(private val messagesDb: MessageDatabase) : DatabaseHelper {
+class MessageDatabaseHelper(private val messagesDb: RenatusDatabase) : DatabaseHelper {
     override suspend fun insert(message: Message) = messagesDb.messageDao().insert(message)
     override suspend fun update(message: Message) = messagesDb.messageDao().update(message)
     override suspend fun delete(message: Message) = messagesDb.messageDao().delete(message)

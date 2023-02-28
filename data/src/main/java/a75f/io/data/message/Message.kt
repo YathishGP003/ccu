@@ -1,4 +1,4 @@
-package a75f.io.messaging.database
+package a75f.io.data.message
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

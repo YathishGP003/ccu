@@ -15,9 +15,9 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.util.RxTask;
-import a75f.io.messaging.database.MessageDbUtilKt;
 
 public class SiteSyncHandler implements MessageHandler
 {
@@ -49,7 +49,7 @@ public class SiteSyncHandler implements MessageHandler
             }
         }
         String messageId = msgObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId);
+        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 
     private static void updateSiteOrganisationwithNamedSchedules(CCUHsApi hsApi, String organization) {

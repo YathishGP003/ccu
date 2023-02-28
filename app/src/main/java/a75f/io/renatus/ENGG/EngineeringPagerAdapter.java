@@ -75,7 +75,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 4:
 				return "OTA Update";
 			case 5:
-				return "Field Test";
+				return "Messages";
 		}
 		return null;
 	}

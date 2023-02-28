@@ -228,6 +228,7 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
 
     implementation project(':messaging')
+    implementation project(':data')
 
     implementation 'com.google.dagger:hilt-android:2.44.2'
     kapt 'com.google.dagger:hilt-android-compiler:2.44.2'

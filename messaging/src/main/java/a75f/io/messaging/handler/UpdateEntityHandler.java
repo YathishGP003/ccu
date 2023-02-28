@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.google.gson.JsonObject;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
@@ -13,7 +14,6 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,11 +23,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.messaging.database.Message;
-import a75f.io.messaging.database.MessageDbUtilKt;
 
 public class UpdateEntityHandler implements MessageHandler{
     public static final String CMD = "updateEntity";
@@ -93,6 +91,6 @@ public class UpdateEntityHandler implements MessageHandler{
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         updateEntity(jsonObject);
         String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId);
+        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 }

@@ -1,5 +1,6 @@
-package a75f.io.messaging.database
+package a75f.io.data.message
 
+import a75f.io.data.message.Message
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 

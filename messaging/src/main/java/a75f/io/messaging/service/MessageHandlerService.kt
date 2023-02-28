@@ -1,11 +1,10 @@
 package a75f.io.messaging.service
 
-import a75f.io.api.haystack.CCUHsApi
+import a75f.io.data.RenatusDatabaseBuilder
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.messaging.database.Message
-import a75f.io.messaging.database.MessageDatabaseBuilder
-import a75f.io.messaging.database.MessageDatabaseHelper
+import a75f.io.data.message.Message
+import a75f.io.data.message.MessageDatabaseHelper
 import a75f.io.messaging.handler.*
 import android.content.Context
 import android.os.Handler
@@ -26,7 +25,9 @@ class MessageHandlerService private constructor(context: Context){
                                         .looper.let { Handler(it) }
                                         .asCoroutineDispatcher()
     private val messagingScope = CoroutineScope(dispatcher + SupervisorJob())
-    private val messagingDbHelper = MessageDatabaseHelper(MessageDatabaseBuilder.getInstance(appContext))
+    private val messagingDbHelper = MessageDatabaseHelper(
+        RenatusDatabaseBuilder.getInstance(appContext)
+    )
 
     private var alertMessageHandler: AlertMessageHandler? = null
 

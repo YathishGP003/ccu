@@ -1,13 +1,12 @@
-package a75f.io.messaging.database
-
+package a75f.io.data
 import android.content.Context
 import androidx.room.Room
 
-object MessageDatabaseBuilder {
-    private var INSTANCE: MessageDatabase? = null
-    @JvmStatic fun getInstance(context: Context): MessageDatabase {
+object RenatusDatabaseBuilder {
+    private var INSTANCE: RenatusDatabase? = null
+    @JvmStatic fun getInstance(context: Context): RenatusDatabase {
         if (INSTANCE == null) {
-            synchronized(MessageDatabase::class) {
+            synchronized(RenatusDatabase::class) {
                 INSTANCE = buildRoomDB(context)
             }
         }
@@ -16,8 +15,8 @@ object MessageDatabaseBuilder {
     private fun buildRoomDB(context: Context) =
         Room.databaseBuilder(
             context.applicationContext,
-            MessageDatabase::class.java,
-            "messageDb"
+            RenatusDatabase::class.java,
+            "renatusDb"
         ).fallbackToDestructiveMigration()
          .build()
 }

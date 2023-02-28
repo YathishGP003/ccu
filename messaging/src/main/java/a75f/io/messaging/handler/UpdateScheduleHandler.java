@@ -20,7 +20,6 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,12 +29,12 @@ import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
-import a75f.io.messaging.database.MessageDbUtilKt;
 
 public class UpdateScheduleHandler implements MessageHandler
 {
@@ -274,12 +273,12 @@ public class UpdateScheduleHandler implements MessageHandler
         if (jsonObject.get("command").equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
             String messageId = jsonObject.get("messageId").getAsString();
-            MessageDbUtilKt.updateMessageHandled(messageId);
+            MessageDbUtilKt.updateMessageHandled(messageId, context);
             return;
         }
         handleMessage(jsonObject);
         String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId);
+        MessageDbUtilKt.updateMessageHandled(messageId, context);
 
     }
 }

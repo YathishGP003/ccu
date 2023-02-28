@@ -8,11 +8,11 @@ import com.here.oksse.ServerSentEvent;
 import java.util.Collections;
 import java.util.HashSet;
 
+import a75f.io.data.message.Message;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.messaging.database.Message;
-import a75f.io.messaging.database.MessageDbUtilKt;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.messaging.service.AcknowledgeRequest;
 import a75f.io.messaging.service.MessageHandlerService;
@@ -74,7 +74,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
                     messageContents.getAsJsonObject().get("who").getAsString(),
                     messageContents.getAsJsonObject().get("level").getAsInt(), false, 0, "");
 
-            MessageDbUtilKt.insert(msg);
+            MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
             MessageHandlerService.Companion.getInstance(Globals.getInstance().getApplicationContext())
                                 .handleMessage(msg);
             //MessageHandler.Companion.enqueueMessageWork(Globals.getInstance().getApplicationContext(), 0);

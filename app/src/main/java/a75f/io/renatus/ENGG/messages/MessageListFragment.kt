@@ -1,9 +1,9 @@
 package a75f.io.renatus.ENGG.messages
 
-import a75f.io.messaging.database.Message
+import a75f.io.logic.L
 import a75f.io.renatus.R
-import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +30,10 @@ class MessageListFragment : Fragment(){
 
         viewModel.getMessageList().observe(viewLifecycleOwner, Observer {
             messageListAdapter.addItems(it)
-            messageListView.smoothScrollToPosition(messageListAdapter.itemCount - 1)
+            Log.i(L.TAG_CCU_MESSAGING, " Display messages size "+it.size)
+            if (it.isNotEmpty()) {
+                messageListView.smoothScrollToPosition(messageListAdapter.itemCount - 1)
+            }
         })
     }
 }

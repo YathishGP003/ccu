@@ -282,8 +282,6 @@ public class LSmartNode
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
-                    if (!Globals.getInstance().isTemporaryOverrideMode())
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
@@ -297,14 +295,18 @@ public class LSmartNode
 
                     //Mapping not required during override.
                     if (Globals.getInstance().isTemporaryOverrideMode()) {
-                        //mappedVal = (short)logicalVal;
                         double physicalVal = hayStack.readHisValById(p.getId());
                         mappedVal = (short) physicalVal;
+                    } else {
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
 
+                }  else {
+                    //Disabled output port should reset its val
+                    hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
             controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));

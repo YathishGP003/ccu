@@ -35,6 +35,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -506,8 +507,12 @@ public class DabEquip
                 device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
                 device.relay1.setPointRef(reheatPosId);
                 device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
-                device.relay1.setPointRef(reheatPosId);
+                device.relay2.setPointRef(reheatPosId);
             }
+            if (config.damper2Type != DamperType.MAT.ordinal()) {
+                device.analog2Out.setPointRef(normalizedDamper2PosId);
+            }
+
         } else {
             device.analog2Out.setPointRef(normalizedDamper2PosId);
         }

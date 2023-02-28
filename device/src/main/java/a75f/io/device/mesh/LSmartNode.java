@@ -524,8 +524,6 @@ public class LSmartNode
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
-                    if (!Globals.getInstance().isTemporaryOverrideMode())
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
@@ -535,11 +533,18 @@ public class LSmartNode
                         controlsMessage.controls.damperPosition.set(mappedVal);
                         mappedVal = 0;
                     }
+
+                    if (!Globals.getInstance().isTemporaryOverrideMode())
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+
                     Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p.getPort());
                     if(smartNodePort != null)
                         smartNodePort.set(mappedVal);
 
+                } else {
+                    //Disabled output port should reset its val
+                    hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
             controlsMessage.controls.setTemperature.set((short) (getDesiredTemp(Short.parseShort(node)) * 2));

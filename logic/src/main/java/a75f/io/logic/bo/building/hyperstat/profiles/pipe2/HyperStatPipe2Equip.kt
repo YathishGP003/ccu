@@ -119,8 +119,6 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
 
         // Syncing the Points
         haystack.syncEntityTree()
-
-        return
     }
 
 
@@ -159,7 +157,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
                 hyperStatConfig.zonePm2p5Threshold,hyperStatConfig.zonePm2p5Target
             )
 
-        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints()
+        val loopOutputPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createLoopOutputPoints(false)
 
         val relayConfigPoints: MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createIsRelayEnabledConfigPoints(
             ConfigState(hyperStatConfig.relay1State.enabled, hyperStatConfig.relay1State.association.ordinal),
@@ -399,8 +397,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao1MinVal = 2.0
         var ao1MaxVal = 10.0
 
-        var ao1fanLow = 30.0
-        var ao1fanMedium = 60.0
+        var ao1fanLow = 70.0
+        var ao1fanMedium = 80.0
         var ao1fanHigh = 100.0
 
         if (ao1 == 1) {
@@ -430,8 +428,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao2MinVal = 2.0
         var ao2MaxVal = 10.0
 
-        var ao2fanLow = 30.0
-        var ao2fanMedium = 60.0
+        var ao2fanLow = 70.0
+        var ao2fanMedium = 80.0
         var ao2fanHigh = 100.0
 
         if (ao2 == 1) {
@@ -461,8 +459,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao3MinVal = 2.0
         var ao3MaxVal = 10.0
 
-        var ao3fanLow = 30.0
-        var ao3fanMedium = 60.0
+        var ao3fanLow = 70.0
+        var ao3fanMedium = 80.0
         var ao3fanHigh = 100.0
 
         if (ao3 == 1) {
@@ -567,10 +565,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         return analogOutputPoints
     }
 
-    private fun putPointToMap(pointData: HashMap<Any, Any>, outputPointMap: HashMap<Int, String>, mapping: Int){
-        if (pointData.isNotEmpty() && pointData.containsKey(Tags.ID))
-            outputPointMap[mapping] = pointData[Tags.ID].toString()
-    }
+
 
 
     // Update configuration
@@ -713,16 +708,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
            if (HyperStatAssociationUtil.isPipe2RelayAssociatedToFan(relayState)){
                updateFanMode(newConfiguration)
            }
-
- }
-
-
-    // Function to check the changes in the point and do the update with new value
-    private fun updatePointValueChangeRequired(pointId: String, newValue: Double){
-        val presentValue = haystack.readDefaultValById(pointId)
-        if(presentValue != newValue)
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId,newValue)
     }
+
 
     // Function which updates the Analog Out new configurations
     private fun updateAnalogOutDetails(
@@ -916,34 +903,6 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
             updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
         Log.i(L.TAG_CCU_HSPIPE2, "updateAnalogInConfig: Done")
-    }
-
-    // Function which updates the Analog In new configurations
-    private fun updateAnalogInDetails(
-        analogInState: AnalogInState,
-        analogInTag: String,
-        physicalPort: Port
-    ) {
-        val analogInId = hsHaystackUtil.readPointID("config and $analogInTag and input and enabled") as String
-        val analogInAssociatedId = hsHaystackUtil.readPointID("config and $analogInTag and input and association") as String
-        hyperStatPointsUtil.addDefaultValueForPoint(analogInId, if (analogInState.enabled) 1.0 else 0.0)
-        hyperStatPointsUtil.addDefaultValueForPoint(analogInAssociatedId, analogInState.association.ordinal.toDouble())
-
-        DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogInState.enabled)
-        if (analogInState.enabled) {
-            val pointData: Point = hyperStatPointsUtil.analogInConfiguration(
-                analogInState = analogInState,
-                analogTag = analogInTag
-            )
-            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
-
-            DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
-            val pointType = HyperStatAssociationUtil.getSensorNameByType(analogInState.association)
-            DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, pointType)
-        }
-
     }
 
     fun getCurrentTemp(): Double {

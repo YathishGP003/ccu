@@ -11,7 +11,8 @@ public enum UnoccupiedTrigger {
     AutoForcedOccupied(Occupancy.AUTOFORCEOCCUPIED),
     EmergencyConditioning(Occupancy.EMERGENCY_CONDITIONING),
     Vacation(Occupancy.VACATION),
-    Unoccupied(Occupancy.UNOCCUPIED);
+    Unoccupied(Occupancy.UNOCCUPIED),
+    NoConditioning(Occupancy.NO_CONDITIONING);
     
     private final Occupancy mappedOccupancy;
     private UnoccupiedTrigger(Occupancy occupancy) {

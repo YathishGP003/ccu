@@ -7,6 +7,7 @@
 
 
     <TextView
+        android:id="@+id/textView13"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -21,12 +22,58 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <TextView
+        android:id="@+id/textAutoAway"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="58dp"
+        android:layout_marginBottom="30dp"
+        android:text="@string/autoaway"
+        android:textAppearance="@style/text_appearance"
+        app:layout_constraintBottom_toTopOf="@+id/textTempOffset"
+        app:layout_constraintEnd_toStartOf="@+id/toggleAutoAway"
+        app:layout_constraintTop_toBottomOf="@+id/textView13"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ToggleButton
+        android:id="@+id/toggleAFO"
+        android:layout_width="46.12dp"
+        android:layout_height="27.42dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/toggle_selector"
+        android:checked="false"
+        android:textOff=""
+        android:textOn=""
+        app:layout_constraintBottom_toTopOf="@+id/textTempOffset"
+        app:layout_constraintEnd_toStartOf="@+id/textAutoAway"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/textAutoForceOccupied"
+        app:layout_constraintTop_toBottomOf="@+id/textView13"
+        app:layout_constraintVertical_bias="0.977" />
+
+    <TextView
+        android:id="@+id/textAutoForceOccupied"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="116dp"
+        android:text="@string/autoforceoccupied"
+        android:textAppearance="@style/text_appearance"
+        app:layout_constraintBottom_toTopOf="@+id/textTempOffset"
+        app:layout_constraintEnd_toStartOf="@+id/textView13"
+        app:layout_constraintHorizontal_bias="0.713"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.382" />
+
     <TextView
         android:id="@+id/textTempOffset"
         android:layout_width="137dp"
         android:layout_height="24dp"
-        android:layout_marginStart="400dp"
-        android:layout_marginTop="136dp"
+        android:layout_marginStart="404dp"
+        android:layout_marginTop="192dp"
         android:alpha="0.6"
         android:fontFamily="@font/lato_regular"
         android:text="@string/title_offset"
@@ -35,30 +82,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ToggleButton
+        android:id="@+id/toggleAutoAway"
+        android:layout_width="46.12dp"
+        android:layout_height="27.42dp"
+        android:background="@drawable/toggle_selector"
+        android:checked="false"
+        android:textOff=""
+        android:textOn=""
+        app:layout_constraintBottom_toBottomOf="@+id/textAutoAway"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.228"
+        app:layout_constraintStart_toEndOf="@+id/textView13" />
+
     <NumberPicker
         android:id="@+id/temperatureOffset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="448dp"
-        android:layout_marginTop="172dp"
+        android:layout_marginTop="260dp"
         android:textColor="#202020"
         android:textSize="30sp"
         android:theme="?DefaultNumberPickerTheme"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="392dp"
         android:fontFamily="@font/lato_regular"
         android:text="@string/vrv_label_humidity_min"
         android:textAppearance="@style/text_appearance"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/humidityMinSp"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Spinner
         android:id="@+id/humidityMinSp"
@@ -67,22 +125,25 @@
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
         android:layout_marginStart="284dp"
-        android:layout_marginTop="384dp"
         android:fontFamily="@font/lato_regular"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView9"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/spinner_dropdown_item" />
 
     <TextView
+        android:id="@+id/textView9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="504dp"
-        android:layout_marginTop="392dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="43dp"
         android:fontFamily="@font/lato_regular"
         android:text="@string/vrv_label_humidity_max"
         android:textAppearance="@style/text_appearance"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/humidityMaxSp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/humidityMinSp"
+        app:layout_constraintTop_toBottomOf="@+id/temperatureOffset" />
 
     <Spinner
         android:id="@+id/humidityMaxSp"
@@ -90,11 +151,10 @@
         android:layout_width="120dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="732dp"
-        android:layout_marginTop="384dp"
+        android:layout_marginStart="43dp"
         android:fontFamily="@font/lato_regular"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView9"
+        app:layout_constraintStart_toEndOf="@+id/textView9"
         tools:listitem="@layout/spinner_dropdown_item" />
 
     <TextView

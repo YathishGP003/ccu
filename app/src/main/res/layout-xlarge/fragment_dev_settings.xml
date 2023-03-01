@@ -6,6 +6,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +37,7 @@
             <a75f.io.renatus.ENGG.LocalConnectionView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -46,40 +47,33 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Clear History data"
                     android:textSize="20sp"
-                    android:text="Clear History data"/>
+                    android:textStyle="bold" />
 
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/deleteHis"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Clear"
-                    android:id="@+id/deleteHis"/>
-
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                    android:layout_margin="10dp"
+                    android:text="Clear" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Reset App State"
                     android:textSize="20sp"
-                    android:text="Pull Building Tuners"/>
-
+                    android:textStyle="bold" />
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/resetAppBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pull"
-                    android:id="@+id/pullDataBtn"/>
+                    android:layout_margin="10dp"
+                    android:text="Reset" />
 
             </LinearLayout>
 
@@ -91,18 +85,18 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Pull Building Tuners"
                     android:textSize="20sp"
-                    android:text="Push Local data"/>
+                    android:textStyle="bold" />
 
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/pullDataBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Re-Sync"
-                    android:id="@+id/forceSyncBtn"/>
+                    android:layout_margin="10dp"
+                    android:text="Pull" />
 
             </LinearLayout>
 
@@ -114,35 +108,58 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Push Local data"
                     android:textSize="20sp"
-                    android:text="Capture Logs to SD Card"/>
+                    android:textStyle="bold" />
 
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/forceSyncBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Save"
-                    android:id="@+id/logCaptureBtn"/>
+                    android:layout_margin="10dp"
+                    android:text="Re-Sync" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Capture Logs to SD Card"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/logCaptureBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Save" />
 
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Upload CCU logs to cloud"
                     android:textSize="20sp"
-                    android:text="Upload CCU logs to cloud"/>
+                    android:textStyle="bold" />
 
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/logUploadBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Upload"
-                    android:id="@+id/logUploadBtn"/>
+                    android:layout_margin="10dp"
+                    android:text="Upload" />
 
             </LinearLayout>
 
@@ -177,17 +194,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Enable Test Mode"
                     android:textSize="20sp"
-                    android:text="Enable Test Mode"/>
+                    android:textStyle="bold" />
 
 
                 <ToggleButton
-                    android:layout_margin="10dp"
+                    android:id="@+id/testModBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/testModBtn"/>
+                    android:layout_margin="10dp" />
 
                 <LinearLayout
                     android:id="@+id/testModLayout"
@@ -198,32 +215,32 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_margin="10dp"
+                        android:text="Outside Air Temp (F)"
                         android:textSize="20sp"
-                        android:text="Outside Air Temp (F)"/>
+                        android:textStyle="bold" />
 
 
                     <Spinner
-                        android:layout_margin="10dp"
+                        android:id="@+id/outsideTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/outsideTemp"/>
+                        android:layout_margin="10dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_margin="10dp"
+                        android:text="Outside Air Humidity (%)"
                         android:textSize="20sp"
-                        android:text="Outside Air Humidity (%)"/>
+                        android:textStyle="bold" />
 
 
                     <Spinner
-                        android:layout_margin="10dp"
+                        android:id="@+id/outsideHumidity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/outsideHumidity"/>
+                        android:layout_margin="10dp" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -236,17 +253,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Use BTU Meter Proxy"
                     android:textSize="20sp"
-                    android:text="Use BTU Meter Proxy"/>
+                    android:textStyle="bold" />
 
 
                 <ToggleButton
-                    android:layout_margin="10dp"
+                    android:id="@+id/btuProxyBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btuProxyBtn"/>
+                    android:layout_margin="10dp" />
 
                 <LinearLayout
                     android:id="@+id/btuProxyLayout"
@@ -257,44 +274,44 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_margin="10dp"
+                        android:text="Inlet Water Temp (F)"
                         android:textSize="20sp"
-                        android:text="Inlet Water Temp (F)"/>
+                        android:textStyle="bold" />
 
 
                     <Spinner
+                        android:id="@+id/inletWaterTemp"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/inletWaterTemp"/>
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_margin="10dp"
+                        android:text="Outlet Water Temp (F)"
                         android:textSize="20sp"
-                        android:text="Outlet Water Temp (F)"/>
+                        android:textStyle="bold" />
 
 
                     <Spinner
+                        android:id="@+id/outletWaterTemp"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/outletWaterTemp"/>
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_margin="10dp"
+                        android:text="CW Max FLow rate"
                         android:textSize="20sp"
-                        android:text="CW Max FLow rate"/>
+                        android:textStyle="bold" />
 
 
                     <Spinner
+                        android:id="@+id/cwFlowRate"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/cwFlowRate"/>
+                        android:layout_height="wrap_content" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -308,10 +325,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="CM Serial Connection"
                     android:textSize="20sp"
-                    android:text="CM Serial Connection"/>
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/imageCMSerial"
@@ -319,8 +336,8 @@
                     android:layout_height="24dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="54dp"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginRight="54dp"
                     android:src="@android:drawable/checkbox_off_background" />
 
                 <Space
@@ -331,10 +348,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Modbus Serial Connection"
                     android:textSize="20sp"
-                    android:text="Modbus Serial Connection"/>
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/imageMBSerial"
@@ -342,18 +359,19 @@
                     android:layout_height="24dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="54dp"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginRight="54dp"
                     android:src="@android:drawable/checkbox_off_background" />
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/reconnectSerial"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reconnect Serial"
-                    android:id="@+id/reconnectSerial"/>
+                    android:layout_margin="10dp"
+                    android:text="Reconnect Serial" />
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -362,33 +380,32 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Enable Daikin Theme"
                     android:textSize="20sp"
-                    android:text="Enable Daikin Theme"/>
+                    android:textStyle="bold" />
 
 
                 <CheckBox
-                    android:gravity="center"
-                    android:layout_gravity="center"
                     android:id="@+id/daikin_theme_config"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center" />
 
                 <Button
                     android:id="@+id/btnRestart"
-                    android:layout_marginLeft="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/lato_regular"
-                    android:text="@string/txt_restart"
-                    android:textColor="?orange_75f"
-                    android:textSize="19.5sp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="20dp"
                     android:background="@null"
                     android:button="@null"
+                    android:fontFamily="@font/lato_regular"
                     android:gravity="center"
-                    android:layout_gravity="center"
-                    />
+                    android:text="@string/txt_restart"
+                    android:textColor="?orange_75f"
+                    android:textSize="19.5sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -400,27 +417,27 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_margin="10dp"
+                    android:text="Reset passwords"
                     android:textSize="20sp"
-                    android:text="Reset passwords"/>
+                    android:textStyle="bold" />
 
 
                 <Button
-                    android:layout_margin="10dp"
+                    android:id="@+id/resetPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reset"
-                    android:id="@+id/resetPassword"/>
+                    android:layout_margin="10dp"
+                    android:text="Reset" />
             </LinearLayout>
             <!--Remove after we're satisfied with Crashlytics working -->
             <Button
                 android:id="@+id/crashButton"
-                android:visibility="gone"
-                android:layout_margin="@dimen/margin_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Crash App" />
+                android:layout_margin="@dimen/margin_20"
+                android:text="Crash App"
+                android:visibility="gone" />
 
         </LinearLayout>
     </ScrollView>

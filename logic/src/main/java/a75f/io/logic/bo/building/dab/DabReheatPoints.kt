@@ -15,7 +15,6 @@ fun createReheatType(equip : Equip, defaultVal : Double, hayStack : CCUHsApi) {
         .setSiteRef(equip.siteRef)
         .setRoomRef(equip.roomRef)
         .setFloorRef(equip.floorRef)
-        .setHisInterpolate("cov")
         .addMarker("config").addMarker("dab").addMarker("writable")
         .addMarker("zone").addMarker("reheat").addMarker("type").addMarker("sp")
         .setEnums("NotInstalled,ZeroToTenV,TwoToTenV,TenToTwoV,TenToZeroV,Pulse,OneStage,TwoStage")
@@ -34,7 +33,6 @@ fun createReheatMinDamper(equip : Equip, defaultVal : Double, hayStack: CCUHsApi
         .setSiteRef(equip.siteRef)
         .setRoomRef(equip.roomRef)
         .setFloorRef(equip.floorRef)
-        .setHisInterpolate("cov")
         .addMarker("config").addMarker("dab").addMarker("writable")
         .addMarker("zone").addMarker("reheat").addMarker("min").addMarker("damper").addMarker("sp")
         .setMinVal("0").setMaxVal("100").setIncrementVal("1")
@@ -48,14 +46,14 @@ fun createReheatMinDamper(equip : Equip, defaultVal : Double, hayStack: CCUHsApi
 
 fun createReheatPosPoint(equip : Equip, defaultVal : Double, hayStack: CCUHsApi) : String {
     val reheatPos = Point.Builder()
-        .setDisplayName(equip.displayName + "-reheatPos")
+        .setDisplayName(equip.displayName + "-reheatCmd")
         .setEquipRef(equip.id)
         .setSiteRef(equip.siteRef)
         .setRoomRef(equip.roomRef)
         .setFloorRef(equip.floorRef)
         .setHisInterpolate("cov")
-        .addMarker("dab").addMarker("his").addMarker("zone")
-        .addMarker("cmd").addMarker("reheat").addMarker("pos")
+        .addMarker("dab").addMarker("his").addMarker("zone").addMarker("writable")
+        .addMarker("cmd").addMarker("reheat")
         .setUnit("%")
         .setGroup(equip.group)
         .setTz(equip.tz)
@@ -70,7 +68,7 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
     val currentReheatType = hayStack.readDefaultVal("reheat and type and equipRef == \"$equipRef\"")
     if (reheatType != currentReheatType) {
         val reheatDamper = hayStack.readEntity("reheat and min and damper and equipRef ==\"$equipRef\"")
-        val reheatLoop = hayStack.readEntity("reheat and pos and equipRef ==\"$equipRef\"")
+        val reheatLoop = hayStack.readEntity("reheat and cmd and equipRef ==\"$equipRef\"")
         val dabEquip = Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build()
         if (reheatType > 0) {
             if (reheatDamper.isEmpty()) {
@@ -107,6 +105,7 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                             dabEquip.group.toInt(),
                             Port.RELAY_ONE.name,
                             reheatLoop["id"].toString())
+                        resetAO2ToSecondaryDamper(hayStack, equipRef, dabEquip.group.toInt())
                     }
                     ReheatType.TwoStage.ordinal -> {
                         DeviceUtil.updatePhysicalPointRef(
@@ -117,12 +116,11 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                             dabEquip.group.toInt(),
                             Port.RELAY_TWO.name,
                             reheatLoop["id"].toString())
+                        resetAO2ToSecondaryDamper(hayStack, equipRef, dabEquip.group.toInt())
                     }
                 }
             }
         } else {
-            val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"");
-            DeviceUtil.updatePhysicalPointRef(dabEquip.group.toInt(), Port.ANALOG_OUT_TWO.name, damperPosPoint["id"].toString())
             if (reheatDamper.isNotEmpty()) {
                 hayStack.deleteEntityTree(reheatDamper["id"].toString())
             }
@@ -131,5 +129,9 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
             }
         }
     }
+}
 
+fun resetAO2ToSecondaryDamper(hayStack: CCUHsApi, equipRef: String, nodeAddr : Int ) {
+    val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"");
+    DeviceUtil.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.name, damperPosPoint["id"].toString())
 }

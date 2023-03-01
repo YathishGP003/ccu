@@ -118,7 +118,6 @@ class HyperStatReconfigureUtil {
             portType: Port
         ) {
             if (equip.markers.contains(CPU)) {
-
                 CpuReconfiguration.updateConfiguration(
                     updatedConfigValue, equip, portType,
                 )
@@ -126,6 +125,11 @@ class HyperStatReconfigureUtil {
 
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.updateConfiguration(
+                    updatedConfigValue, equip, portType,
+                )
+            }
+            if (equip.markers.contains(HPU)) {
+                HpuReconfiguration.updateConfiguration(
                     updatedConfigValue, equip, portType,
                 )
             }
@@ -145,6 +149,11 @@ class HyperStatReconfigureUtil {
             }
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.configAssociationPoint(
+                    portType, updatedConfigValue, equip
+                )
+            }
+            if (equip.markers.contains(HPU)) {
+                HpuReconfiguration.configAssociationPoint(
                     portType, updatedConfigValue, equip
                 )
             }

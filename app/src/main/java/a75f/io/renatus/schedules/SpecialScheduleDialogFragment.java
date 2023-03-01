@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
@@ -251,6 +252,11 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "Please provide Special Schedule Name.",
                     Toast.LENGTH_SHORT).show();
            return;
+        }
+        if(!Pattern.matches("[ /^(?:[A-Za-z0-9\\s]|)+[A-Za-z0-9\\s\\-\\_]*/ ]+",scheduleName)){
+            Toast.makeText(SpecialScheduleDialogFragment.this.getContext(), "SpecialSchedule name contains special characters.Please Re-edit.",
+                    Toast.LENGTH_SHORT).show();
+            return;
         }
 
         int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;

@@ -27,6 +27,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.device.serial.SerialConsts;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -74,7 +75,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                                     device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME) ||
                                     device.getName().equalsIgnoreCase(SerialConsts.HYPERSTAT_NAME))) {
                         mLeDeviceListAdapter.addDevice(device);
-                        mLeDeviceListAdapter.notifyDataSetChanged();
+
                     }
                 });
             }
@@ -157,6 +158,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                       mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
                       mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
                           final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                          Log.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
                           finish(device);
                           scanLeDevice(false);
                       });
@@ -199,11 +201,13 @@ public class FragmentDeviceScan extends BaseDialogFragment
             new Handler(Looper.getMainLooper()).postDelayed(() -> mBluetoothLeScanner.stopScan(mScanCallback),SCAN_PERIOD);
 
             mBluetoothLeScanner.startScan(mScanCallback);
+            Log.d(L.TAG_CCU_BLE,"Scan Started");
         }
         else
         {
             mScanning = false;
             mBluetoothLeScanner.stopScan(mScanCallback);
+            Log.d(L.TAG_CCU_BLE,"Scan Stopped");
         }
     }
     
@@ -277,7 +281,9 @@ public class FragmentDeviceScan extends BaseDialogFragment
         {
             if (!mLeDevices.contains(device))
             {
+                Log.d(L.TAG_CCU_BLE,"New Device added to the list "+device);
                 mLeDevices.add(device);
+                mLeDeviceListAdapter.notifyDataSetChanged();
             }
         }
         

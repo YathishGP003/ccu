@@ -276,11 +276,11 @@ public abstract class SystemProfile
             }
         }
         Point airflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
-                .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz).build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
-        HashMap airflowSampleWaitTimePoint = hayStack.read("point and tuner and default and airflow and sample and wait and time");
+        HashMap airflowSampleWaitTimePoint = hayStack.read("point and tuner and default and airflow and sample and wait and time and not standalone");
         ArrayList<HashMap> airflowSampleWaitTimeArr = hayStack.readPoint(airflowSampleWaitTimePoint.get("id").toString());
         for (HashMap valMap : airflowSampleWaitTimeArr)
         {

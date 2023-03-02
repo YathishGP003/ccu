@@ -70,6 +70,11 @@ public class FragmentDeviceScan extends BaseDialogFragment
             if(getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     BluetoothDevice device = result.getDevice();
+                    if(device != null && device.getName() != null && !(isDeviceMatching(device.getName()))){
+                        setListViewEmptyView();
+                        return;
+                    }
+
                     if (device != null && device.getName() != null &&
                             (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
                                     device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME) ||
@@ -81,6 +86,33 @@ public class FragmentDeviceScan extends BaseDialogFragment
             }
         }
     };
+
+    private boolean isDeviceMatching(String deviceName) {
+        switch (deviceName){
+            case SerialConsts.SMART_NODE_NAME :
+                if(mNodeType == NodeType.SMART_NODE){
+                    return true;
+                }
+                break;
+            case SerialConsts.HYPERSTAT_NAME :
+                if(mNodeType == NodeType.HYPER_STAT){
+                    return true;
+                }
+                break;
+            case SerialConsts.SMART_STAT_NAME :
+                if(mNodeType == NodeType.SMART_STAT){
+                    return true;
+                }
+                break;
+            case SerialConsts.HELIONODE_NAME :
+                if(mNodeType == NodeType.HELIO_NODE){
+                    return true;
+                }
+                break;
+       }
+        return false;
+    }
+
     private NodeType mNodeType;
     
     
@@ -133,7 +165,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
         return retVal;
     }
     
-    
+
     @Override
     public void onResume()
     {
@@ -227,7 +259,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
             scanLeDevice(false);
         }
     }
-    
+
     
     @Override
     public void onCreate(Bundle savedInstanceState)

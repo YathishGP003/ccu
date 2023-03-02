@@ -61,6 +61,10 @@ public class PreferenceUtil {
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
 
+    private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+
+
+
 
     public static void setContext(Context c) {
         context= c;
@@ -535,5 +539,12 @@ public class PreferenceUtil {
 
     public static void setStandaloneHeatingOffsetMigration() {
         setBooleanPreference(STANDALONE_HEATING_OFFSET, true);
+    }
+    public static boolean getMinorTagMigration() {
+        return getBooleanPreference(TAG_MINOR_MIGRATION);
+    }
+
+    public static void setMinorTagMigration() {
+        setBooleanPreference(TAG_MINOR_MIGRATION,true);
     }
 }

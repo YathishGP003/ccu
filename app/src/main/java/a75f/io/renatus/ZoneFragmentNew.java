@@ -3523,7 +3523,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
-        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {
@@ -3535,6 +3534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            UpdatePointHandler.setZoneDataInterface(this);
         }
     }
 

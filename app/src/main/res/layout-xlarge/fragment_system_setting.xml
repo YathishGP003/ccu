@@ -246,6 +246,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lastUpdated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
@@ -381,6 +382,7 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/scheduleType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30dp"
@@ -389,7 +391,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="30dp"
-                            android:text="@string/txt_schedule"
+                            android:text="@string/txt_intrinsic_schedule"
                             android:textAppearance="@style/label_black" />
 
                         <TextView
@@ -397,7 +399,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:text="@string/txt_intrinsic_schedule"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            android:visibility="gone"/>
 
                     </LinearLayout>
 

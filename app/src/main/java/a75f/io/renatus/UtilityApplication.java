@@ -213,7 +213,7 @@ public abstract class UtilityApplication extends Application {
         Globals.getInstance().setApplicationContext(this);
 
         // we now have haystack
-        //RaygunClient.setUser(userNameForCrashReportsFromHaystack());
+        RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
         //Modbus EquipmendManager
         EquipsManager.getInstance(this).setApplicationContext(this);

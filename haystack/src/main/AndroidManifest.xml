@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="a75f.io.api.haystack"/>
+          package="a75f.io.api.haystack">
+
+    <uses-permission android:name="android.permission.SET_TIME_ZONE" />
+</manifest>

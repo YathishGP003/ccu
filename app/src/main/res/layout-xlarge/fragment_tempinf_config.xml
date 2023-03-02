@@ -39,12 +39,12 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_below="@+id/layoutHeader"
                 android:layout_marginTop="46dp"
-                android:layout_marginBottom="100dp"
-                android:orientation="vertical"
                 android:paddingLeft="200dp"
-                android:paddingRight="200dp">
+                android:paddingRight="200dp"
+                android:layout_marginBottom="100dp">
 
 
                 <RelativeLayout
@@ -74,15 +74,15 @@
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="72dp">
+                    android:layout_marginTop="72dp"
+                    android:layout_gravity="center_horizontal">
                     <TextView
                         android:id="@+id/textTempOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:gravity="center_vertical|center_horizontal"
                         android:text="@string/label_tempoffsetnp"
+                        android:gravity="center_vertical|center_horizontal"
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
@@ -99,82 +99,51 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:id="@+id/textmainsensor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:paddingEnd="110dp"
-                        android:text="@string/mainsensor"
-                        android:textAppearance="@style/title_normal"
-                        tools:ignore="RtlSymmetry" />
-
-                    <ToggleButton
-                        android:id="@+id/togglemainsensor"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="true"
-                        android:textOff=""
-                        android:textOn="" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="20dp">
+                    android:layout_marginTop="20dp">
                     <TextView
-                        android:id="@+id/textth1"
+                        android:id="@+id/textRoomTemSensor"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:paddingEnd="200dp"
-                        android:text="@string/thermistor1"
+                        android:text="@string/room_temperature"
                         android:textAppearance="@style/title_normal"
                         tools:ignore="RtlSymmetry" />
-
-                    <ToggleButton
-                        android:id="@+id/toggleth1"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="20dp">
-                    <TextView
-                        android:id="@+id/textth2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:paddingEnd="200dp"
-                        android:text="@string/thermistor2"
-                        android:textAppearance="@style/title_normal"
-                        tools:ignore="RtlSymmetry" />
-
-                    <ToggleButton
-                        android:id="@+id/toggleth2"
-                        android:layout_width="47dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
 
                     <Spinner
-                        android:id="@+id/supplyTemp"
+                        android:id="@+id/roomTempSpinner"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:layout_width="270dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentStart="true"
+                        android:textAppearance="@style/title_normal"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+                    <TextView
+                        android:id="@+id/textSupplyAirTemp"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="20dp" />
+                        android:layout_height="60dp"
+                        android:paddingEnd="160dp"
+                        android:text="@string/supply_air_temperature"
+                        android:textAppearance="@style/title_normal"
+                        tools:ignore="RtlSymmetry" />
+
+                    <Spinner
+                        android:id="@+id/supplyAirTempSpinner"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:layout_width="270dp"
+                        android:layout_height="50dp"
+                        android:layout_alignParentStart="true"
+                        android:textSize="40sp"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+
                 </LinearLayout>
             </LinearLayout>
 

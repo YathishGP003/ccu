@@ -7,10 +7,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class PreferenceUtil {
+    private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
+    private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
-    private static final String SUPPLY_AIR_TEMP_MIGRATION = "supplyAirTempMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
     private static final String TIMER_COUNTER_MIGRATION="stageUpTimerCounterTimerMigration";
@@ -27,14 +28,14 @@ public class PreferenceUtil {
     private static final String VOC_PM2P5_MIGRATION = "VovPm2p5Migration";
     private static final String DIAG_POINTS_MIGRATION = "diagPointsMigration";
     private static final String SCHEDULE_REFACTOR_MIGRATION = "scheduleRefactorMigration";
-    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneMigration";
+    private static final String SCHEDULE_REF_FOR_ZONE_MIGRATION = "scheduleRefsForZoneReMigration";
     private static final String VOC_PM2P5_MIGRATION_V1 = "VovPm2p5Migration_V1";
 
-    private static final String UPDATE_SCHEDULE_REFS = "updateScheduleRef";
+    private static final String UPDATE_SCHEDULE_REFS = "reUpdateScheduleRef";
     private static final String SITE_NAME_MIGRATION = "siteNameMigration";
     private static final String STAGE_UP_TIMER_FOR_DAB = "stageUpTimerForDab";
     private static final String TI_UPDATE = "updateTIThermister";
-    private static final String UPDATE_SCHEDULE_TYPE = "updateSchedulesTypes";
+    private static final String UPDATE_SCHEDULE_TYPE = "reUpdateSchedulesTypes";
 
 
     private static final String AUTOAWAY_AUTOFORCEOCCUPUED_POINTS_MIGRATION = "RerunOccupancyPointsMigration";
@@ -46,8 +47,19 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
+    private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
+    private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
+    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
+    private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
+
+    private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
+    private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
+    private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
+    private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -91,13 +103,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
+        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
     }
 
     public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigration", isMigrated);
+        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
         editor.apply();
     }
 
@@ -433,20 +445,86 @@ public class PreferenceUtil {
     public static void setVavDiscargeTunerMigration() {
         setBooleanPreference(VAV_DISCHARGE_TUNER_MIGRATION, true);
     }
-    public static boolean getSupplyAirTempMigration() {
-        return getBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION);
-    }
 
-    public static void setSupplyAirTempMigration() {
-        setBooleanPreference(SUPPLY_AIR_TEMP_MIGRATION, true);
-    }
     public static boolean getHyperStatCpuTagMigration() {
         return getBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION);
     }
 
     public static void setHyperStatCpuTagMigration() {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
-
     }
 
+    public static void setFreeInternalDiskStorageMigration() {
+        setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
+    }
+    public static boolean getAutoAwayAutoForcedPointMigration() {
+        return getBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION);
+    }
+
+    public static void setAutoAwayAutoForcedPointMigration() {
+        setBooleanPreference(VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION, true);
+    }
+
+    public static boolean getFreeInternalDiskStorageMigration() {
+        return getBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION);
+    }
+
+    public static boolean getHyperStatCpuAirTagMigration() {
+        return false;
+    }
+
+    public static void setHyperStatCpuAirTagMigration() {
+        setBooleanPreference(HYPERSTAT_AIR_TAG_MIGRATION, true);
+    }
+    public static boolean getSmartNodeDamperMigration() {
+        return getBooleanPreference(SMART_NODE_DAMPER_MIGRATION);
+    }
+
+    public static void setSmartNodeDamperMigration() {
+        setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
+    }
+    public static boolean getSSEFanStageMigration() {
+        return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
+    }
+
+    public static void setSSEFanStageMigration() {
+        setBooleanPreference(SSE_FAN_STAGE_MIGRATION, true);
+    }
+    public static boolean getAirflowSampleWaitTImeMigration() {
+        return getBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION);
+    }
+
+    public static void setAirflowSampleWaitTimeMigration() {
+        setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
+    }
+    public static boolean getstaticPressureSpTrimMigration() {
+        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+    }
+
+    public static void setStaticPressureSpTrimMigration() {
+        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
+    public static boolean getNewOccupancyMode() {
+        return getBooleanPreference(BUILDING_BREACH_MIGRATION);
+    }
+
+    public static void setNewOccupancyMode() {
+         setBooleanPreference(BUILDING_BREACH_MIGRATION,true);
+    }
+
+    public static boolean getCorruptedNamedScheduleRemoval() {
+        return getBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE);
+     }
+     public static void setCorruptedNamedScheduleRemoval() {
+         setBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE, true);
+     }
+
+    public static boolean getTiProfileMigration() {
+        return getBooleanPreference(TI_PROFILE_MIGRATION);
+    }
+
+    public static void setTiProfileMigration() {
+        setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
 }

@@ -6,5 +6,7 @@ data class VrvProfileConfiguration(
     val temperatureOffset : Double,
     val minHumiditySp : Double,
     val maxHumiditySp : Double,
-    val masterControllerMode : Double
+    val masterControllerMode : Double,
+    val isAutoAwayEnabled : Boolean,
+    val isAutoForcedOccupiedEnabled: Boolean
 ) : BaseProfileConfiguration()

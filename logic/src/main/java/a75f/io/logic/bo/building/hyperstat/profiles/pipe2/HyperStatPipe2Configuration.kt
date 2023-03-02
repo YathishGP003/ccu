@@ -23,9 +23,9 @@ class HyperStatPipe2Configuration: BaseProfileConfiguration() {
     var relay5State = Pipe2RelayState(false, Pipe2RelayAssociation.AUX_HEATING_STAGE2)
     var relay6State = Pipe2RelayState(false, Pipe2RelayAssociation.WATER_VALVE)
 
-    var analogOut1State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.WATER_VALVE, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,30.0,60.0,100.0)
-    var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,30.0,60.0,100.0)
+    var analogOut1State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.WATER_VALVE, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+    var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
     var isEnableAirFlowTempSensor = false
     var isSupplyWaterSensor = true
@@ -70,13 +70,6 @@ data class Pipe2AnalogOutState(
     val perAtFanHigh: Double,
 )
 
-/*
-// Analog in configuration are commom so no need for all the profiles
-data class AnalogInState(
-    val enabled: Boolean,
-    val association: AnalogInAssociation
-)*/
-
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
 // Do not change order without a migration.
 enum class Pipe2RelayAssociation {
@@ -90,7 +83,6 @@ enum class Pipe2RelayAssociation {
     OCCUPIED_ENABLED,
     HUMIDIFIER,
     DEHUMIDIFIER
-
 }
 
 // Order is important -- see comment above.

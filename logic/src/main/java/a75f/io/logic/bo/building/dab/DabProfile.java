@@ -167,7 +167,8 @@ public class DabProfile extends ZoneProfile
 
         } else {
             damperOpController.reset();
-            CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"", 0.0);
+            heatingLoop.reset();
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
         }
 
         updateZoneState(roomTemp, setTempCooling, setTempHeating);
@@ -231,7 +232,7 @@ public class DabProfile extends ZoneProfile
             dabEquip.setDamperPos(damperPos, "secondary");
             dabEquip.setNormalizedDamperPos(damperPos, "primary");
             dabEquip.setNormalizedDamperPos(damperPos, "secondary");
-            CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"", 0.0);
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
@@ -287,7 +288,19 @@ public class DabProfile extends ZoneProfile
                                             dabEquip.getId()+"\"");
         double heatingLoopOp = Math.max(0, heatingLoop.getLoopOutput(desiredTempHeating - reheatOffset, currentTemp));
         CcuLog.i(L.TAG_CCU_ZONE, "handleReheat : reheatOffset "+reheatOffset+" heatingLoopOp "+heatingLoopOp);
-        CCUHsApi.getInstance().writeHisValByQuery("reheat and pos and equipRef == \""+dabEquip.getId()+"\"",
-                                                Double.valueOf((int)heatingLoopOp));
+        if (isSystemFanOn()) {
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"",
+                    Double.valueOf((int) heatingLoopOp));
+        } else {
+            CcuLog.i(L.TAG_CCU_ZONE, "handleReheat disabled. System Fan not active");
+            heatingLoop.reset();
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"", 0.0);
+        }
+    }
+
+    private boolean isSystemFanOn() {
+        //This is short cut and not a way to do this. But currently required only for Dab profile.
+        String systemStatusMessage = L.ccu().systemProfile.getStatusMessage();
+        return systemStatusMessage.contains("Fan");
     }
 }

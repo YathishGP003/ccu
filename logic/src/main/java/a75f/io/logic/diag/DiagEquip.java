@@ -10,9 +10,12 @@ import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Environment;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -42,7 +45,7 @@ public class DiagEquip
         HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip already created");
-            return null;
+            return diagEquip.get("id").toString();
         }
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
@@ -138,7 +141,7 @@ public class DiagEquip
                                            .setDisplayName(equipDis+"-availableMemory")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef).setHisInterpolate("linear")
-                                           .addMarker("diag").addMarker("available").addMarker("memory").addMarker("his")
+                                           .addMarker("diag").addMarker("available").addMarker("memory").addMarker("his").addMarker("cur")
                                            .setUnit("MB")
                                            .setTz(tz)
                                            .build();
@@ -148,7 +151,7 @@ public class DiagEquip
                                         .setDisplayName(equipDis+"-totalMemory")
                                         .setEquipRef(equipRef)
                                         .setSiteRef(siteRef).setHisInterpolate("linear")
-                                        .addMarker("diag").addMarker("total").addMarker("memory").addMarker("his")
+                                        .addMarker("diag").addMarker("total").addMarker("memory").addMarker("his").addMarker("cur")
                                         .setUnit("MB")
                                         .setTz(tz)
                                         .build();
@@ -158,7 +161,7 @@ public class DiagEquip
                                     .setDisplayName(equipDis+"-isLowMemory")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef).setHisInterpolate("linear")
-                                    .addMarker("diag").addMarker("low").addMarker("memory").addMarker("his")
+                                    .addMarker("diag").addMarker("low").addMarker("memory").addMarker("his").addMarker("cur")
                                     .setTz(tz)
                                     .build();
         hsApi.addPoint(isLowMemory);
@@ -200,6 +203,16 @@ public class DiagEquip
                 .setKind(Kind.STRING)
                 .build();
         hsApi.addPoint(appVersion);
+        Point internalDiskStorage = new Point.Builder()
+                .setDisplayName(equipDis+"-availableInternalDiskStorage")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("linear")
+                .addMarker("diag").addMarker("available").addMarker("internal").addMarker("disk").addMarker("storage").addMarker("his").addMarker("cur")
+                .setUnit("MB")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(internalDiskStorage);
+
     }
     
     
@@ -269,9 +282,22 @@ public class DiagEquip
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        updateFreeInternalStoragePoint();
+
     }
-    
+
     public void setDiagHisVal(String tag, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and diag and "+tag, val);
+    }
+
+    public void updateFreeInternalStoragePoint(){
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long availableBlocks = stat.getAvailableBlocksLong();
+        long freeInternalMemorySize = (((availableBlocks * blockSize)/1024)/1024);  // it returns size in MB
+        Log.d("DiagEquip","freeInternalStorage "+freeInternalMemorySize);
+        setDiagHisVal("internal and disk",freeInternalMemorySize);
     }
 }

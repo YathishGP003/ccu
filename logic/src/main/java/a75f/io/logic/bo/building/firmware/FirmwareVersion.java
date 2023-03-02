@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.firmware;
 
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.RawPoint;
 
 public class FirmwareVersion {
@@ -17,6 +18,7 @@ public class FirmwareVersion {
                 .addMarker("firmware")
                 .addMarker("version")
                 .setTz(tz)
+                .setKind(Kind.STRING)
                 .build();
 
     }
@@ -30,6 +32,7 @@ public class FirmwareVersion {
                 .addMarker("firmware")
                 .addMarker("version")
                 .setTz(tz)
+                .setKind(Kind.STRING)
                 .build();
 
     }

@@ -194,8 +194,8 @@
     <string name="compressor_stage1">Compressor Stage1</string>
     <string name="compressor_stage2">Compressor Stage2</string>
     <string name="compressor_stage3">Compressor Stage3</string>
-    <string name="change_over_cooling">Change Over O Cooling </string>
-    <string name="change_over_heating">Change Over B Heating </string>
+    <string name="change_over_cooling">O - Energize in Cooling </string>
+    <string name="change_over_heating">B - Energize in Heating </string>
     <string name="dev_relay">DCV_RELAY</string>
 
     <string name="cooling"> Cooling </string>
@@ -820,7 +820,7 @@
     <string name="label_maintempoffset">MAIN SENSOR\nTEMP OFFSET</string>
 
     <!--TEMPERATURE INFLUENCING Screen-->
-    <string name="label_tempoffsetnp">TEMP OFFSET</string>
+    <string name="label_tempoffsetnp">ROOM TEMP OFFSET</string>
 
     <!--SYSTEM DEVICES AND OAO Screen-->
     <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>
@@ -1299,6 +1299,9 @@
     <string name="step_for_kactor_values">.01</string>
     <string name="default_val_for_kfactor">100</string>
     <string name="analog_in1">Analog-in1</string>
+    <string name="room_temperature_offset">Room Temperature offset</string>
+    <string name="room_temperature">Room Temperature</string>
+    <string name="supply_air_temperature">Supply Air temperature</string>
 
     <string name="label_usereheat">Use Reheat</string>
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>

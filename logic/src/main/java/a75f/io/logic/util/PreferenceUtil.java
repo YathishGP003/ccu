@@ -9,8 +9,9 @@ import android.util.Log;
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
+    private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static Context context;
-    private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
+    private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
@@ -51,8 +52,18 @@ public class PreferenceUtil {
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
     private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
+
+    private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
+
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
+    private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
+    private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+
+    private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+
+
 
 
     public static void setContext(Context c) {
@@ -97,13 +108,13 @@ public class PreferenceUtil {
 
     public static boolean isFirmwareVersionPointMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("firmwareVersionPointMigration",false);
+        return sharedPreferences.getBoolean("firmwareVersionPointMigrationWithStringKind",false);
     }
 
     public static void setFirmwareVersionPointMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("firmwareVersionPointMigration", isMigrated);
+        editor.putBoolean("firmwareVersionPointMigrationWithStringKind", isMigrated);
         editor.apply();
     }
 
@@ -497,5 +508,43 @@ public class PreferenceUtil {
 
     public static void setStaticPressureSpTrimMigration() {
         setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
+    public static boolean getNewOccupancyMode() {
+        return getBooleanPreference(BUILDING_BREACH_MIGRATION);
+    }
+
+    public static void setNewOccupancyMode() {
+         setBooleanPreference(BUILDING_BREACH_MIGRATION,true);
+    }
+
+    public static boolean getCorruptedNamedScheduleRemoval() {
+        return getBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE);
+     }
+     public static void setCorruptedNamedScheduleRemoval() {
+         setBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE, true);
+     }
+
+    public static boolean getTiProfileMigration() {
+        return getBooleanPreference(TI_PROFILE_MIGRATION);
+    }
+
+    public static void setTiProfileMigration() {
+        setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
+
+    public static boolean getStandaloneHeatingOffsetMigration() {
+        return getBooleanPreference(STANDALONE_HEATING_OFFSET);
+    }
+
+    public static void setStandaloneHeatingOffsetMigration() {
+        setBooleanPreference(STANDALONE_HEATING_OFFSET, true);
+    }
+    public static boolean getMinorTagMigration() {
+        return getBooleanPreference(TAG_MINOR_MIGRATION);
+    }
+
+    public static void setMinorTagMigration() {
+        setBooleanPreference(TAG_MINOR_MIGRATION,true);
     }
 }

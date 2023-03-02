@@ -313,7 +313,7 @@ public class InstallerOptions extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.d("CCU", "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
-                if (i > 0) {
+                if (i >= 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){

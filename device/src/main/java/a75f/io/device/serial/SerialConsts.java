@@ -12,4 +12,5 @@ public class SerialConsts
 	public static final String SMART_STAT_NAME = "75F-SMART-STAT";
 	public static final String SMART_NODE_NAME = "75F-SN";
 	public static final String HYPERSTAT_NAME = "75F-HYPERSTAT";
+	public static final String HELIONODE_NAME = "75F-HELIONODE";
 }

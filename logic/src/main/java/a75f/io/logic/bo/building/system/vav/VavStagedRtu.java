@@ -820,6 +820,10 @@ public class VavStagedRtu extends VavSystemProfile
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {

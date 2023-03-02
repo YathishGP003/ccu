@@ -234,6 +234,8 @@ public class LSmartNode
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName());
+                        //Disabled output port should reset its val
+                        hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                         continue;
                     }
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
@@ -288,7 +290,7 @@ public class LSmartNode
                     }
 
                     //TODo -MAT is currently configured on analog2 , what if reheat is also configured.
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal >= 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
@@ -515,6 +517,7 @@ public class LSmartNode
                     HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));
+                        hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                         continue;
                     }
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());

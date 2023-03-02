@@ -7,6 +7,8 @@
     <string name="title_ble">BLE</string>
     <string name="main_content">Main Content</string>
     <string name="ble_content">BLE</string>
+    <string name="edit_icon">&#xf044;</string>
+    <string name="delete_icon">&#xf1f8;</string>
 
 
     <string name="unknown_device">unknown device</string>
@@ -967,6 +969,7 @@
     <string name="txt_compensate_humidity">Compensate for Humidity</string>
     <string name="txt_demand_response_mode">Demand Response Mode</string>
     <string name="txt_ccu">CCU</string>
+    <string name="txt_oao">OAO</string>
     <string name="txt_system_profile">System Profile</string>
     <string name="txt_occupancy_status">Occupancy Status:</string>
     <string name="txt_equipment_status">Equipment Status:</string>

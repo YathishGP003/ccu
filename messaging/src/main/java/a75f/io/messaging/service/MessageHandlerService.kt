@@ -29,16 +29,7 @@ class MessageHandlerService private constructor(context: Context){
         RenatusDatabaseBuilder.getInstance(appContext)
     )
 
-    private var alertMessageHandler: AlertMessageHandler? = null
-
     private val messageHandlers = mutableListOf<MessageHandler>()
-    private fun alertMessageHandler(): AlertMessageHandler? {
-        if (alertMessageHandler == null) {
-            alertMessageHandler = AlertMessageHandler.instanceOf()
-        }
-        return alertMessageHandler
-    }
-
     companion object {
         private var instance : MessageHandlerService? = null
 

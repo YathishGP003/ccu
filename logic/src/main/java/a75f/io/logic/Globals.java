@@ -19,7 +19,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
@@ -236,6 +235,7 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
+        updateCCUAhuRef();
         setRecoveryMode();
     }
 
@@ -658,5 +658,24 @@ public class Globals {
 
     public boolean getBuildingProcessStatus() {
         return mProcessJob.getStatus();
+    }
+
+    /**
+     * Below method ensures systemEquip Id is mapped to ahuRef
+     */
+    private void updateCCUAhuRef(){
+        HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
+        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
+
+        if(systemProfile.isEmpty()){
+            return;
+        }
+
+        String ahuRef = ccuDevice.get("ahuRef").toString();
+        String systemProf = systemProfile.get("id").toString();
+
+        if(!(systemProf.equals(ahuRef))) {
+            CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+        }
     }
 }

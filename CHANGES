@@ -1,6 +1,52 @@
+ - Merged PR 6598: Reverting the minor version to 634 to regenerate 1.635.0 apk
+ - Merged PR 6596: Remove corrupted named schedules
+ - Rmove corrupted named schedules
+ - Merged PR 6588: Loading schedule issue
+ - Merged PR 6541: Aux stage 1  and stage 2 tuners fix
+ - Version bump to 1.635.0
+ - Merged PR 6519: Tag correction- BPOS to OTN
+ - Merged PR 6352: 16578 - Emergency Conditioning Mode Message Disconnect from Priority None
+ - Merged PR 4332: Firmware version point to hold string value
+ - Merged PR 6516: Resolved master merge conflicts
+ - Merged PR 6441: Bug 17489: CCU [Hyperstat HPU]: DCV damper gets closed during Pre-conditioning
+ - Merged PR 6496: HPU Hotfix to master
+ - Merged PR 6509: 2pipe water valve issue
+ - Merged PR 5966: With end time as 24:00 schedule,manually updated desired temperature fix
+ - Merged PR 6429: Conditioning mode operations defined
+ - Merged PR 6428: Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Defaul...
+ - merge master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/modify_tuner_15159
+ - Merged PR 6153: Added below tuners for HS-VRV profile:
+ - Merged PR 5781: User Story 12486: SSE Fan Stage Not Enabling On Occupancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - Merged PR 6290: Bug 16984: Device dead alerts not working for Hyperstat zones
+ - Merged PR 5851: Bug 15703: CCU Crash when clicked on staticPressureSPTrim tuner
+ - Merged PR 6385: operating mode in hyperstat control message
+ - Merged PR 6394: uncommented setting username for raygun
+ - Merged PR 4507: Hide lastUpdated and scheduleType before registration in system screen
+ - Merged PR 6382: 15207 CCU: Named Schedule Discrepancy, zone not following correct scheduleType
+ - Merged PR 6463: Revert 'Provided different pairing option to HelioNode'
+ - Merged PR 5984: Hidden vacation view for few non temp and sense profiles
+ - Conditioning mode operations defined
+ - Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Default and increment for...
+ - Zone status fan status update
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - Bug 16984: Device dead alerts not working for Hyperstat zones
+ - tag update
+ - tag update
+ - Merged PR 5961: Bug 13147: CCU | Celsius Support | Time discrepancy in Zone status
+ - Merged PR 5951: Bug 13241: CCU | Celsius Support | Discrepancy when Toggle is enabled during...
+ - Merged PR 5825: widget temperature changed
+ - Merged PR 5684: minCFMReheating max value updated
+ - update
+ - Version bump to 1.634.0
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 5100: Provided different pairing option to HelioNode
  - Version bump to 1.633.0
  - Merged PR 6182: HPU Profile
+ - Migration issue resolved
+ - Merge remote-tracking branch 'origin/US/bharath/12486_SSE_fan_stage_enabling_in_occupancy' into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 5617: Error handling while parsing accessToken from caretaker
  - Merge
  - Merged PR 5771: Reporting available internal disk storage every 1 min - added diag point - availableInternalDiskStorage
@@ -9,9 +55,18 @@
  - Merged PR 4958: Bug 13915: CCU | Discrepancy observed while editing zone schedule PR created
  - Merged PR 5899: Fix for remove entity parse error
  - Merged PR 6176: Bug 16118: CCU : HyperStat - CO2 and VOC sensors not mapped to haystack points
+ - Migration code
  - Merged PR 6107: 16557  Checking occupied condition while resetting fan mode
  - Bug 16118: CCU : HyperStat - CO2 and VOC sensors not mapped to haystack points
+ - Merge branch 'US/bharath/12486_SSE_fan_stage_enabling_in_occupancy' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - added "cur" tag
+ - Migration code added
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 6112: Bug fixes
+ - POint delete when analogIn1 is disabled
+ - transformer point deleted when analogIn is disabled
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 6067: Removed TI Changes
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into remove_ti_profile_changes
  - Merged PR 6139: Updated version code
@@ -20,6 +75,8 @@
  - Merged PR 5638: Th values updated to appropriate decimal place
  - Removed TI Changes
  - Merged PR 6019: Fixed Reconfiguration UI issue
+ - Fan stage analogType added
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 6011: Resolved merge conflits
  - Merged PR 6009: Hotfix 1.631 and 1.632 to Master
  - 14800 - Schedule add/deletion random crash
@@ -29,8 +86,11 @@
  - 13539 - Increase hight of curTemp seekark widget
  - Merged PR 5846: Soft handled crash during updateScheduleRefForZones migration
  - Merged PR 5812: After replace, before preference file getting over ridden by shared preferenc...
+ - variable name changed
+ - Bug 13147: CCU | Celsius Support | Time discrepancy in Zone status
  - Merged PR 5612: Integration bug fixes
  - Merged PR 5815: 15037 - Weather API Migration
+ - Bug 13241: CCU | Celsius Support | Discrepancy when Toggle is enabled during Multiple CCU
  - changed getErrRespString to getRespString
  - Fix decimal placement in weather widget humidity value
  - focussable changed to title
@@ -38,15 +98,26 @@
  - Prevent NPE in site update
  - Merged PR 5886: Schedule Out of Sync - Building and Zone
  - Remove decimal offset for humidity readings
+ - used enum instead of strings
  - Merged PR 5765: Skip device update rebased
  - Merged PR 5766: Dcwb algorithm update
  - Fix enthalpy calculation
+ - Bug 15703: CCU Crash when clicked on staticPressureSPTrim tuner
+ - Bug 15703: CCU Crash when clicked on staticPressureSPTrim tuner
  - Added new rain weather icon
  - Adjusted enthalpy calculation inputs to normalized percentages
+ - widget temperature changed
+ - changes in his write
  - Remove TODOs
  - Complete weather API swap
  - swapped weather data source. Removed location update
+ - Ui change
+ - sync issue resolved
+ - Zone temp dead
+ - User Story 12486: SSE Fan Stage Not Enabling On Occupancy
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 5671: Retry mechanism for replace CCU on SocketTimeoutException
+ - User Story 12486: SSE Fan Stage Not Enabling On Occupancy
  - Update pi fallback logic
  - Added logs
  - Use inverted PI loop output as base value for linear mode output
@@ -54,6 +125,7 @@
  - Merged PR 5654: 15020 - Handling Site Manager spaces on floor deletion from CCU
  - Merged PR 5627: User Story 14409: CCU: Multi tag support for EquipType field in modbus equip's json definition
  - trimmed spaces
+ - minCFMReheating max value updated
  - Merged PR 5509: Increased the connection time out to 50 seconds, by default it is 10 seconds
  - modbus to display first equipType
  - Modbus to display "displayName"
@@ -217,8 +289,6 @@
  - Version bump to 1.636.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
- - Version bump to 1.635.0
- - Version bump to 1.634.0
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
  - Remove vacation check for triggering AutoForcedOccupied
  - WIP

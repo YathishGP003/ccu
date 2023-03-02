@@ -419,6 +419,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         if (co2Value > 0 && co2Value > zoneCO2Threshold
             && !isDoorOpen && (currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
                     currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
+                    currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
                     currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal)
         ) {
             var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
@@ -429,7 +430,6 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             logIt("$port = OutDCVDamper  analogSignal  $damperOperationPercent")
 
         } else if (co2Value < zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
-            currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
             currentOperatingMode == Occupancy.VACATION.ordinal ||
             currentOperatingMode == Occupancy.UNOCCUPIED.ordinal || isDoorOpen
         ) {
@@ -465,7 +465,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     fun updateLogicalPointIdValue(pointId: String?, value: Double) {
         if(pointId != null) {
-            hsHaystackUtil.writeDefaultWithHisValue(pointId, value)
+            hsHaystackUtil.writeHisValueByID(pointId, value)
         }else{
             logIt("updateLogicalPointIdValue: But point id is null !!")
         }

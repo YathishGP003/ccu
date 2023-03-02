@@ -421,7 +421,7 @@ class LogicalPointsUtil {
                     "logical", "standalone", "zone")
 
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-heatingStage1")
+                    .setDisplayName("$equipDis-compressorStage3")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")

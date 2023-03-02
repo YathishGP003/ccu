@@ -51,6 +51,7 @@ public class L
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
     public static final String TAG_OTN = "CCU_OTN";
+    public static final String TAG_CCU_BLE = "CCU_BLE";
 
     public static Context app()
     {

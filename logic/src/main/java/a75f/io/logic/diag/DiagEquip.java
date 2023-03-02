@@ -45,7 +45,7 @@ public class DiagEquip
         HashMap<Object,Object> diagEquip = CCUHsApi.getInstance().readEntity("equip and diag");
         if (diagEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip already created");
-            return null;
+            return diagEquip.get("id").toString();
         }
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();

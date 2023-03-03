@@ -1,18 +1,20 @@
 package a75f.io.logic.bo.building.system;
 
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+
+import org.projecthaystack.UnknownRecException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Created by samjithsadasivan on 3/20/19.
@@ -20,7 +22,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 public abstract class SystemController
 {
-    public enum State {OFF, COOLING, HEATING};
+    public enum State {OFF, COOLING, HEATING}
     public enum EffectiveSatConditioning {SAT_OFF, SAT_COOLING, SAT_HEATING}
     public State systemState = OFF;
     
@@ -87,5 +89,29 @@ public abstract class SystemController
     
     public void reset() {
     
+    }
+
+    public boolean isZoneDead(String equipRef) {
+
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef == \""+equipRef+"\"");
+        if(!point.isEmpty()){
+            HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+            if (hisItem == null) {
+                CcuLog.e(L.TAG_CCU_SYSTEM, "Equip dead! "+equipRef+" , Heartbeat does not exist");
+                return true;
+            }
+            if ((System.currentTimeMillis() - hisItem.getDateInMillis()) > 15 * 60 * 1000) {
+                CcuLog.e(L.TAG_CCU_SYSTEM, "Equip dead! "+equipRef+" , Heartbeat "+hisItem.getDate().toString());
+                return true;
+            }
+        }
+
+        try {
+            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""
+                    + equipRef + "\"").equals("Zone Temp Dead");
+        } catch (UnknownRecException e) {
+            //Handle non-temp equips
+            return false;
+        }
     }
 }

@@ -967,7 +967,7 @@ class CpuPointsMigration {
             }
         }
 
-        private fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
+        public fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
             val pointMap: HashMap<Any, Any> =  CCUHsApi.getInstance()
                                     .readEntity("zone and $query and equipRef == \"$equipRef\"")
             //There have been issues with group field of CPU profile points getting corrupted with Timezone values.

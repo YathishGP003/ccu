@@ -1,6 +1,11 @@
 package a75f.io.renatus.schedules;
 
+import static a75f.io.renatus.UtilityApplication.context;
+
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.joda.time.DateTime;
@@ -20,6 +26,8 @@ import java.util.List;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.FontManager;
 
 public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialScheduleAdapter.ViewHolder>{
 
@@ -84,17 +92,22 @@ public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialSchedule
         private TextView specialScheduleName;
         private TextView startDate;
         private TextView endDate;
-        private ImageButton specialScheduleEdit;
-        private ImageButton specialScheduleDelete;
+        private TextView specialScheduleEdit;
+        private TextView specialScheduleDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
+
+            Typeface iconFont = FontManager.getTypeface(context.getApplicationContext(), FontManager.FONTAWESOME);
+
             specialScheduleName = itemView.findViewById(R.id.specialScheduleTitle);
             startDate = itemView.findViewById(R.id.specialScheduleStartDate);
             endDate = itemView.findViewById(R.id.specialScheduleEndDate);
             specialScheduleEdit = itemView.findViewById(R.id.specialScheduleEditButton);
             specialScheduleEdit.setOnClickListener(this);
+            specialScheduleEdit.setTypeface(iconFont);
             specialScheduleDelete = itemView.findViewById(R.id.specialScheduleDeleteButton);
+            specialScheduleDelete.setTypeface(iconFont);
             specialScheduleDelete.setOnClickListener(this);
         }
 

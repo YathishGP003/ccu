@@ -9,8 +9,11 @@ import android.util.Log;
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
+    private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
+    private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
+    private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
     private static Context context;
-    private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
+    private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
@@ -56,6 +59,13 @@ public class PreferenceUtil {
 
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
+
+    private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
+    private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+
+    private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+
+
 
 
     public static void setContext(Context c) {
@@ -508,5 +518,51 @@ public class PreferenceUtil {
 
     public static void setNewOccupancyMode() {
          setBooleanPreference(BUILDING_BREACH_MIGRATION,true);
+    }
+
+    public static boolean getCorruptedNamedScheduleRemoval() {
+        return getBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE);
+     }
+     public static void setCorruptedNamedScheduleRemoval() {
+         setBooleanPreference(REMOVE_CORRUPTED_NAMED_SCHEDULE, true);
+     }
+
+    public static boolean getTiProfileMigration() {
+        return getBooleanPreference(TI_PROFILE_MIGRATION);
+    }
+
+    public static void setTiProfileMigration() {
+        setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
+
+    public static boolean getStandaloneHeatingOffsetMigration() {
+        return getBooleanPreference(STANDALONE_HEATING_OFFSET);
+    }
+
+    public static void setStandaloneHeatingOffsetMigration() {
+        setBooleanPreference(STANDALONE_HEATING_OFFSET, true);
+    }
+    public static boolean getMinorTagMigration() {
+        return getBooleanPreference(TAG_MINOR_MIGRATION);
+    }
+
+    public static void setMinorTagMigration() {
+        setBooleanPreference(TAG_MINOR_MIGRATION,true);
+    }
+
+    public static boolean getstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        return getBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET);
+    }
+
+    public static void setstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        setBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET, true);
+    }
+
+    public static boolean getStandaloneAirflowSampleWaitMigration() {
+        return getBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
+    }
+
+    public static void setAirflowSampleWaitTimeUnitMigration() {
+        setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
     }
 }

@@ -32,11 +32,9 @@ public class NoConditioning implements OccupancyTrigger{
 
 
         String profile = profileObj.toString();
-        if (profile.contains("VAV") || profile.contains("DAB") || profile.contains("HYPERSTAT") ||
-                profile.contains("SMARTSTAT")) {
-            double zonePriority = hayStack.
-                    readPointPriorityValByQuery("zone and priority and not dynamic and " +
-                            "not spread and not multiplier and equipRef == \"" + equipRef + "\"");
+        if (profile.contains("VAV") || profile.contains("DAB")) {
+            Double zonePriority = hayStack.readPointPriorityValByQuery("zone and priority and not dynamic and " +
+                    "not spread and not multiplier and equipRef == \"" + equipRef + "\"");
             String conditioningMode = hayStack.
                     readDefaultStrVal("status and zone and message and equipRef == \"" + equipRef + "\"");
             isZoneAndSystemOnDifferentDirection(conditioningMode);

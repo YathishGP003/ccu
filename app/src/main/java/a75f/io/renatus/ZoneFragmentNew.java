@@ -6,6 +6,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -1878,6 +1879,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if (p.getProfile().startsWith("EMR")) {
                 LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                 LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                vc_schedule.setVisibility(View.GONE);
                 ll_status.setVisibility(View.GONE);
                 ll_schedule.setVisibility(View.GONE);
                 HashMap emPoints = ZoneViewData.getEMEquipPoints(p.getId());
@@ -2172,6 +2175,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap emPoints = ZoneViewData.getEMEquipPoints(nonTempEquip.getId());
@@ -2192,6 +2197,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         if (nonTempEquip.getProfile().startsWith("PLC")) {
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap plcPoints = ZoneViewData.getPiEquipPoints(nonTempEquip.getId());
@@ -2222,6 +2229,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
 
@@ -2458,7 +2467,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
-            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString());
+            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString() + " cfm" );
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {

@@ -200,7 +200,6 @@ class AlertsRepository(
 
       // evaluate and raise alert conditions from alert defs
       alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs)
-      fixNewStateAlerts(alertDefOccurrences)
 
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
@@ -245,15 +244,6 @@ class AlertsRepository(
    // also used by AlertDefs dev settings fragment
    fun getCurrentOccurrences() = alertDefOccurrences
 
-
-
-   private fun fixNewStateAlerts(alertDefList: List<AlertDefOccurrence> ){
-      alertDefList.forEach {
-         if(!it.testPositive && !it.alertDef.alert.isFixed){
-            fixAlert(it.alertDef.alert)
-         }
-      }
-   }
 
    /////   private   /////
 

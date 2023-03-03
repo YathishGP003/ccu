@@ -1,10 +1,12 @@
 package a75f.io.messaging.service
 
+import a75f.io.data.message.DatabaseHelper
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import android.content.Context
 import androidx.work.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 /**
  * Schedules a repeating handler job and processes all the unhandled messages.
@@ -13,13 +15,19 @@ class MessageHandlerWork(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
     private var appContext : Context = context
+    @Inject
+    lateinit var messageDbHelper: DatabaseHelper
+
+    @Inject
+    lateinit var messageHandlerService: MessageHandlerService
 
     override suspend fun doWork(): Result {
         CcuLog.i(L.TAG_CCU_MESSAGING,"MessageHandlerWork")
         return try {
-            MessageHandlerService.getInstance(appContext).handleMessages()
+            messageHandlerService.handleMessages()
             Result.success()
         } catch (e: java.lang.Exception) {
+            e.printStackTrace()
             Result.failure()
         }
     }

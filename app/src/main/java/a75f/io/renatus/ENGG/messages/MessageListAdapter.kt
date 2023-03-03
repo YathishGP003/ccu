@@ -11,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MessageListAdapter(messages : List<Message>) : RecyclerView.Adapter<MessageViewHolder>() {
     private var messageList = messages
@@ -43,8 +45,8 @@ class MessageViewHolder(view : View) : RecyclerView.ViewHolder (view) {
 
     @SuppressLint("ResourceAsColor")
     fun bind(message: Message) {
-        messageId.text = message.messageId
-        cmd.text = message.command
+        val format = SimpleDateFormat("mm:ss")
+        messageId.text = message.messageId+": "+format.format(Date(message.timeToken))
         point.text = message.id+"    "+message.value
         status.text = if (message.handlingStatus?.toString().toBoolean()) {
             "HANDLED"

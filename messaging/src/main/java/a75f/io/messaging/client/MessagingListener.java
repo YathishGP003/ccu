@@ -2,22 +2,30 @@ package a75f.io.messaging.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.here.oksse.ServerSentEvent;
 
 import java.util.Collections;
 import java.util.HashSet;
 
+import javax.inject.Inject;
+
+import a75f.io.data.RenatusDatabaseBuilder;
+import a75f.io.data.message.DatabaseHelper;
 import a75f.io.data.message.Message;
+import a75f.io.data.message.MessageDatabaseHelper;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.messaging.di.MessagingEntryPoint;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.messaging.service.AcknowledgeRequest;
 import a75f.io.messaging.service.MessageHandlerService;
 import a75f.io.messaging.service.MessagingService;
 import a75f.io.messaging.service.ServiceGenerator;
+import dagger.hilt.android.EntryPointAccessors;
 import io.reactivex.rxjava3.core.Single;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,6 +37,9 @@ public class MessagingListener implements ServerSentEvent.Listener {
     private final String bearerToken;
 
     private MessagingService messagingService;
+
+    @Inject DatabaseHelper messagingDbHelper;
+    @Inject MessageHandlerService messageHandlerService;
     public MessagingListener(String siteId, String ccuId, String messagingUrl, String bearerToken) {
         super();
 
@@ -44,6 +55,14 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
         if (messagingService == null) {
             messagingService = new ServiceGenerator().createService(messagingUrl, bearerToken);
+        }
+
+        MessagingEntryPoint messagingDIEntryPoint =
+                EntryPointAccessors.fromApplication(Globals.getInstance().getApplicationContext(), MessagingEntryPoint.class);
+
+        if(messagingDIEntryPoint != null) {
+            messagingDbHelper = messagingDIEntryPoint.getDbHelper();
+            messageHandlerService = messagingDIEntryPoint.getMessagingHandlerService();
         }
     }
 
@@ -72,13 +91,21 @@ public class MessagingListener implements ServerSentEvent.Listener {
                     messageContents.getAsJsonObject().get("id").getAsString(),
                     messageContents.getAsJsonObject().get("val").getAsString(),
                     messageContents.getAsJsonObject().get("who").getAsString(),
-                    messageContents.getAsJsonObject().get("level").getAsInt(), false, 0, "");
+                    messageContents.getAsJsonObject().get("level").getAsInt(),
+                    timetoken, false, 0, "");
 
             MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
-            MessageHandlerService.Companion.getInstance(Globals.getInstance().getApplicationContext())
-                                .handleMessage(msg);
+            /*MessageHandlerService.Companion.getInstance(Globals.getInstance().getApplicationContext(), messagingDbHelper)
+                                .handleMessage(msg);*/
+            if (messageHandlerService != null) {
+                messageHandlerService.handleMessage(msg);
+            } else {
+                CcuLog.e(L.TAG_CCU_MESSAGING, "MessageHandlerService not initialized");
+            }
+
             //MessageHandler.Companion.enqueueMessageWork(Globals.getInstance().getApplicationContext(), 0);
         } catch (Exception e) {
+            e.printStackTrace();
             CcuLog.e(L.TAG_CCU_MESSAGING, "UnsupportedMessage ", e);
         }
 

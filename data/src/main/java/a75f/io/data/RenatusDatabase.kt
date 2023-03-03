@@ -5,7 +5,7 @@ import a75f.io.data.message.MessageDao
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-@Database(entities = [Message::class], version = 1)
+@Database(entities = [Message::class], version = 2)
 abstract class RenatusDatabase : RoomDatabase(){
     abstract fun messageDao(): MessageDao
 }

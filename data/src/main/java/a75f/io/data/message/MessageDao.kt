@@ -6,10 +6,10 @@ import androidx.room.*
 @Dao
 interface MessageDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(message: Message)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(messages: List<Message>)
 
     @Delete

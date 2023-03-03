@@ -3,9 +3,11 @@ import a75f.io.data.RenatusDatabase
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class MessageDatabaseHelper(private val messagesDb: RenatusDatabase) : DatabaseHelper {
+@Singleton
+class MessageDatabaseHelper @Inject constructor (private val messagesDb: RenatusDatabase) : DatabaseHelper {
     override suspend fun insert(message: Message) = messagesDb.messageDao().insert(message)
     override suspend fun update(message: Message) = messagesDb.messageDao().update(message)
     override suspend fun delete(message: Message) = messagesDb.messageDao().delete(message)

@@ -78,6 +78,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.bacnet.BACnetScheduler;
@@ -116,6 +118,9 @@ public abstract class UtilityApplication extends Application {
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
     private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
+
+    @Inject
+    MessageHandlerSubscriber messageHandlerSubscriber;
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
@@ -902,7 +907,7 @@ public abstract class UtilityApplication extends Application {
         }
         scheduleMessagingAckJob();
         MessageHandlerWork.Companion.schedulePeriodicMessageWork(context);
-        MessageHandlerSubscriber.Companion.subscribeAllHandlers(context);
+        messageHandlerSubscriber.subscribeAllHandlers();
     }
 
     private void scheduleMessagingAckJob() {

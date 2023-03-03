@@ -11,6 +11,7 @@ data class Message(
     @ColumnInfo(name = "value") val value: String?,
     @ColumnInfo(name = "who") val who: String?,
     @ColumnInfo(name = "level") val level: Int?,
+    @ColumnInfo(name = "tomeToken") val timeToken: Long,
     @ColumnInfo(name = "handlingStatus") var handlingStatus: Boolean?,
     @ColumnInfo(name = "retryCount") var retryCount : Int,
     @ColumnInfo(name = "error") var error: String?

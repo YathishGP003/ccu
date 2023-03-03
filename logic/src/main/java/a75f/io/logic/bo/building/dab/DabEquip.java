@@ -752,7 +752,7 @@ public class DabEquip
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
         }
     }
-    
+
     public DabProfileConfiguration getProfileConfiguration() {
         DabProfileConfiguration config = new DabProfileConfiguration();
         config.minDamperCooling = ((int)getDamperLimit("cooling","min"));
@@ -853,6 +853,8 @@ public class DabEquip
         }else if(!curTrueCfmEnabled && config.enableCFMControl){
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
         }
+
+        hayStack.scheduleSync();
 
         if(config.enableAutoAwayControl != getProfileConfiguration().enableAutoAwayControl
              || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){

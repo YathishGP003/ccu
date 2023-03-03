@@ -41,13 +41,18 @@ public class UpdatePointHandler
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
 
+
         if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
         }
         
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
+            HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
+            if (buildingTunerPoint.containsKey("displayUnit")) {
+                zoneDataInterface.refreshScreen("");
+            }
             return;
         }
 

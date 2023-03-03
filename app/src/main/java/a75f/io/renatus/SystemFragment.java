@@ -245,6 +245,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
 		
 	}
+
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}

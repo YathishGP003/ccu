@@ -349,10 +349,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
+                gridlayout.invalidate();
             });
         }
     }
-    
+
+
     HashMap<String, View> zoneStatus = new HashMap<>();
     
     public void refreshHeartBeatStatus(String id) {
@@ -3532,6 +3534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
+        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {

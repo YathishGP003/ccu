@@ -102,6 +102,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -3542,6 +3543,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            UpdatePointHandler.setZoneDataInterface(this);
         }
     }
 
@@ -3555,6 +3557,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        UpdatePointHandler.setZoneDataInterface(null);
     }
 
     @Override

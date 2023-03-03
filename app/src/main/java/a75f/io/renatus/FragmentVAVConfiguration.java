@@ -60,7 +60,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
 /**
@@ -70,9 +70,9 @@ import butterknife.ButterKnife;
 public class FragmentVAVConfiguration extends BaseDialogFragment implements AdapterView.OnItemSelectedListener, CheckBox.OnCheckedChangeListener
 {
     public static final String ID = FragmentVAVConfiguration.class.getSimpleName();
-    
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     static final int TEMP_OFFSET_LIMIT = 100;
-    static final int STEP = 10;
+    static final int STEP = 5;
     
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -424,13 +424,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setWrapSelectorWheel(false);
 
         numMaxCFMCooling = view.findViewById(R.id.numMaxCFMCooling);
-        String[] numberValues = new String[TrueCFMConstants.MAX_VAL - TrueCFMConstants.MIN_VAL + 1];
+        String[] numberValues = new String[(TrueCFMConstants.MAX_VAL - TrueCFMConstants.MIN_VAL + 1)*2];
         for (int i = 0; i < numberValues.length; i++) {
             numberValues[i] = String.valueOf(i * STEP);
         }
         numMaxCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMCooling.setMinValue(0);
-        numMaxCFMCooling.setMaxValue(150);
+        numMaxCFMCooling.setMaxValue(1000);
         numMaxCFMCooling.setValue(TrueCFMConstants.DEFAULT_VALUE);
         numMaxCFMCooling.setDisplayedValues(numberValues);
         numMaxCFMCooling.setWrapSelectorWheel(false);
@@ -438,7 +438,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMCooling = view.findViewById(R.id.numMinCFMCooling);
         numMinCFMCooling.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMCooling.setMinValue(0);
-        numMinCFMCooling.setMaxValue(50);
+        numMinCFMCooling.setMaxValue(100);
         numMinCFMCooling.setValue(10);
         numMinCFMCooling.setWrapSelectorWheel(false);
         numMinCFMCooling.setDisplayedValues(numberValues);
@@ -446,7 +446,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMinCFMReheating = view.findViewById(R.id.numMinCFMReheating);
         numMinCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMinCFMReheating.setMinValue(0);
-        numMinCFMReheating.setMaxValue(50);
+        numMinCFMReheating.setMaxValue(100);
         numMinCFMReheating.setValue(10);
         numMinCFMReheating.setWrapSelectorWheel(false);
         numMinCFMReheating.setDisplayedValues(numberValues);
@@ -454,7 +454,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         numMaxCFMReheating = view.findViewById(R.id.numMaxCFMReheating);
         numMaxCFMReheating.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         numMaxCFMReheating.setMinValue(0);
-        numMaxCFMReheating.setMaxValue(150);
+        numMaxCFMReheating.setMaxValue(300);
         numMaxCFMReheating.setValue(TrueCFMConstants.DEFAULT_VALUE);
         numMaxCFMReheating.setWrapSelectorWheel(false);
         numMaxCFMReheating.setDisplayedValues(numberValues);
@@ -527,37 +527,27 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<String, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupVavZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().syncEntityTree();
-                        CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        RxjavaUtil.executeBackground(() -> LSerial.getInstance()
-                                   .sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef));
-                        
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            
+
+                setButton.setEnabled(false);
+                compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                        ()->{
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
+                        },
+                        ()->{
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupVavZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().syncEntityTree();
+                            CCUHsApi.getInstance().setCcuReady();
+                            LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                        },
+                        ()->{
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+
+                ));
             }
         });
     }

@@ -127,7 +127,7 @@ public abstract class VavSystemProfile extends SystemProfile
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");
@@ -204,7 +204,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                             .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                             .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
-                                            .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                            .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                             .setUnit("m")
                                             .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                             .setTz(tz)
@@ -244,7 +244,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                               .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                               .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                               .addMarker("sp").addMarker("system")
-                                              .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                              .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                               .setUnit("m")
                                               .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                               .setTz(tz)
@@ -337,7 +337,7 @@ public abstract class VavSystemProfile extends SystemProfile
     }
     
     /**
-     * Check whether system is operation without only TI/BPOS zones.
+     * Check whether system is operation without only TI/OTN zones.
      * @param hayStack
      * @return
      */
@@ -350,7 +350,7 @@ public abstract class VavSystemProfile extends SystemProfile
         ArrayList<HashMap<Object, Object>> tiEquips = CCUHsApi
                                                           .getInstance()
                                                           .readAllEntities("(equip and zone and ti) or" +
-                                                                           "(equip and zone and bpos)"
+                                                                           "(equip and zone and otn)"
                                                           );
         if (!tiEquips.isEmpty()) {
             return true;

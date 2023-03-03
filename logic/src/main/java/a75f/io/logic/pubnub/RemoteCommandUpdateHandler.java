@@ -28,6 +28,7 @@ public class RemoteCommandUpdateHandler
     public static final String RESTART_TABLET = "restart_tablet";
     public static final String RESET_CM = "reset_cm";
     public static final String SAVE_CCU_LOGS = "save_ccu_logs";
+    public static final String RESET_PASSWORD = "reset_password";
     public static final String RESTART_MODULE = "restart_module";
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     public static final String OTA_UPDATE_CM = "ota_update_CM";
@@ -79,6 +80,10 @@ public class RemoteCommandUpdateHandler
                                 break;
                             case SAVE_CCU_LOGS:
                                 CcuLog.d("RemoteCommand", "PUBNUB handle save logs");
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                break;
+                            case RESET_PASSWORD:
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;

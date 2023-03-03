@@ -103,7 +103,7 @@ public class Tags
     public static final String HUMIDIFICATION = "humidification";
     public static final String HYPERSTAT = "hyperstat";
     public static final String SENSE = "sense";
-    public static final String BPOS = "bpos";
+    public static final String OTN = "otn";
     public static final String PLC = "pid";
     
     public static final String MULTI_ZONE = "multiZone";
@@ -137,4 +137,24 @@ public class Tags
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
     public static final String SPECIAL = "special";
+    public static final String AUTO = "auto";
+    public static final String AWAY = "away";
+    public static final String SETBACK = "setback";
+
+
+    public static final String TEMP = "temp";
+    public static final String CMD = "cmd";
+    public static final String DISCHARGE = "discharge";
+    public static final String AIR = "air";
+    public static final String LOGICAL = "logical";
+    public static final String SENSOR = "sensor";
+    public static final String DOOR = "door";
+    public static final String WINDOW = "window";
+    public static final String OPERATING = "operating";
+    public static final String OFFSET = "offset";
+    public static final String HUMIDITY = "humidity";
+    public static final String VOC = "voc";
+    public static final String PM2P5 = "pm2p5";
+
+    public static final String TZ = "tz";
 }

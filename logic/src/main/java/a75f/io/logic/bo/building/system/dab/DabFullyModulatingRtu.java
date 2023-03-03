@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
@@ -150,9 +151,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
-        if(status.toString().isEmpty())
-            status.append("System OFF");
-        return status.toString();
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn()) : status.toString() + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn());
     }
     
     public void addSystemEquip() {
@@ -985,7 +984,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                    systemEquip.getId(), systemEquip.getTz());
         }
         
-        setConfigVal("dcwb and enabled",1);
+        setConfigVal("dcwb and enabled and not analog4 and not maximized and not adaptive",1);
         CCUHsApi.getInstance().scheduleSync();
     }
     
@@ -994,7 +993,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Deletes all the necessary config/loop/output points for DCWB.
      */
     public void disableDcwb(CCUHsApi hayStack) {
-        setConfigVal("dcwb and enabled",0);
+        setConfigVal("dcwb and enabled and not analog4 and not maximized and not adaptive",0);
         setDcwbConfigEnabled(Tags.ANALOG1, 0);
         setDcwbConfigEnabled(Tags.ANALOG4, 0);
         deleteConfigPoints(hayStack);
@@ -1031,6 +1030,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public boolean isDcwbEnabled() {
-        return CCUHsApi.getInstance().readDefaultVal("system and dcwb and enabled") > 0;
+        return CCUHsApi.getInstance().readDefaultVal("system and dcwb and enabled and not analog4 and not maximized and not adaptive") > 0;
     }
 }

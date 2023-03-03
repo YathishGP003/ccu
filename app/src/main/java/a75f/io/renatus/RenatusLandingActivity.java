@@ -78,6 +78,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_PASSWORD;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
@@ -215,11 +216,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             });
             setViewPager();
             ScheduleManager.getInstance().updateSchedules();
-            HashMap site = CCUHsApi.getInstance().read("site");
-            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-            String siteCountry = site.get("geoCountry").toString();
-            String siteZipCode = site.get("geoPostalCode").toString();
-            CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
+
+            WeatherDataDownloadService.getWeatherData();
+
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -286,7 +285,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void launchZoneFragment() {
-
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)
@@ -294,13 +292,18 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
         FragmentManager fm = getSupportFragmentManager();
-        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
-            fm.popBackStackImmediate(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            if(fragment.getClass().toString().contains("CreateNewSite")){
-               getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        try {
+
+            for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                if (fragment.getClass().toString().contains("CreateNewSite")) {
+                    getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                }
+            }
+        }catch (IllegalStateException e){
+            e.printStackTrace();
         }
     }
 
@@ -613,6 +616,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     UploadLogs.instanceOf().saveCcuLogs();
                 }
             }.start();
+        } else if (!commands.isEmpty() && commands.equals(RESET_PASSWORD)) {
+            CCUUtils.resetPasswords(RenatusApp.getAppContext());
         } else if (!commands.isEmpty() && commands.equals(RESET_CM)) {
             AlertManager.getInstance().generateAlert(AlertsConstantsKt.CM_RESET, "CM Reset request sent for  - " + CCUHsApi.getInstance().getCcuName());
             CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
@@ -672,7 +677,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                 if(d.getMarkers().contains("smartstat")) {
                                     sendSmartStatResetMsg(d.getAddr());
                                 }else if(d.getMarkers().contains("smartnode") ||
-                                        d.getMarkers().contains("bpos")){
+                                        d.getMarkers().contains("otn")){
                                     sendSmarNodeResetMsg(d.getAddr());
                                 }else if (d.getMarkers().contains("hyperstat")) {
                                     HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -686,7 +691,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         if(d.getMarkers().contains("smartstat")) {
                             sendSmartStatResetMsg(d.getAddr());
                         }else if(d.getMarkers().contains("smartnode")  ||
-                                d.getMarkers().contains("bpos")) {
+                                d.getMarkers().contains("otn")) {
                            sendSmarNodeResetMsg(d.getAddr());
                         }else if (d.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -698,7 +703,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     if(equip.getMarkers().contains("smartstat")) {
                         sendSmartStatResetMsg(equip.getGroup());
                     }else if(equip.getMarkers().contains("smartnode") ||
-                            equip.getMarkers().contains("bpos")){
+                            equip.getMarkers().contains("otn")){
                         sendSmarNodeResetMsg(equip.getGroup());
                     }
                     else if (equip.getMarkers().contains("hyperstat")) {

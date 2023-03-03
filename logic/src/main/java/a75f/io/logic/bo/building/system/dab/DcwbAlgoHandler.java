@@ -8,6 +8,8 @@ import a75f.io.algos.dcwb.AdaptiveDeltaTInput;
 import a75f.io.algos.dcwb.MaximizedDeltaTControl;
 import a75f.io.algos.dcwb.MaximizedDeltaTInput;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
@@ -49,7 +51,7 @@ class DcwbAlgoHandler {
      * received via pubnub wont be picked till next app-restart.
      */
     private void initializeTuners() {
-     
+        dcwbControlLoop.useNegativeProportionalError(false);
         dcwbControlLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef));
         dcwbControlLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef));
         dcwbControlLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dcwb and pspread", systemEquipRef));
@@ -66,7 +68,8 @@ class DcwbAlgoHandler {
      * Runs the appropriate DCWB algorithm and update system chilledWaterValveLoopOutput.
      */
     public void runLoopAlgorithm() {
-    
+
+        CcuLog.i(L.TAG_CCU_SYSTEM, "DCWB runLoopAlgorithm");
         initializeTuners();
         DcwbBtuMeterDao btuDao = DcwbBtuMeterDao.getInstance();
         
@@ -79,10 +82,11 @@ class DcwbAlgoHandler {
             chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     
             //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
-            if (adaptiveDelta) {
+            if (adaptiveDelta && !AdaptiveDeltaTControlAlgo.Companion.getLinearModeLoop()) {
                 chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
             }
         } else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "DCWB disabled. Flow rate is higher than threshold "+btuDao.getCWMaxFlowRate(hayStack));
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
     }

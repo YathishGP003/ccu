@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.SystemProfileUtil;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
@@ -285,7 +286,7 @@ public class DabStagedRtu extends DabSystemProfile
         }
     
         //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
-        //even if the loopOp is 0 ( Both fan stage1 and stage2 are turned on here
+        //even if the loopOp is 0 ( Both fan stage1 and stage2 are turned on here)
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fan1Status = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fan1Status;
@@ -536,7 +537,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.append((stageStatus[COOLING_4.ordinal()] > 0) ? ",4" : "");
             status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
         }
-        
+
         if (isHeatingActive()) {
             status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
@@ -554,7 +555,7 @@ public class DabStagedRtu extends DabSystemProfile
                 status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
             }
         }
-        return status.toString().equals("")? "System OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" + SystemProfileUtil.isDeHumidifierOn()+SystemProfileUtil.isHumidifierOn() : status.toString()+SystemProfileUtil.isDeHumidifierOn()+(SystemProfileUtil.isHumidifierOn());
     }
     
     public void updateStagesSelected() {
@@ -747,6 +748,10 @@ public class DabStagedRtu extends DabSystemProfile
     public double getConfigAssociation(String config) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+config);
+            return 0;
+        }
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {

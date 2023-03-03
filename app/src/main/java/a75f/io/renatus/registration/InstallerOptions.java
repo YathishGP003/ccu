@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -71,6 +72,9 @@ import a75f.io.renatus.views.TempLimit.TempLimitView;
 import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
@@ -309,7 +313,7 @@ public class InstallerOptions extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.d("CCU", "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
-                if (i > 0) {
+                if (i >= 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
@@ -424,9 +428,12 @@ public class InstallerOptions extends Fragment {
                     Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
                 }
                 getTempValues();
+                initializeTempLockoutUI(CCUHsApi.getInstance());
                 if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
                     TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
                 }
+                toggleCelsius.setEnabled(false);
+                new Handler().postDelayed(() -> toggleCelsius.setEnabled(true),2000);
             }
         });
 
@@ -555,29 +562,48 @@ public class InstallerOptions extends Fragment {
             hideTempLockoutUI();
             return;
         }
-        
-        ArrayAdapter<Double> coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
+
+        ArrayAdapter<Double> coolingLockoutAdapter;
+        if (isCelsiusTunerAvailableStatus()){
+            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(0)),Math.round(fahrenheitToCelsius(70)),1, getActivity());
+        } else {
+            coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
+        }
         spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
         spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(ccu().systemProfile.getCoolingLockoutVal()),
                                                                                                         false);
     
         spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+                if (isCelsiusTunerAvailableStatus()) {
+                    setCoolingLockoutVal(hayStack, Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()))));
+                } else {
+                    setCoolingLockoutVal(hayStack, Double.parseDouble(spinnerCoolingLockoutTemp.getSelectedItem().toString()));
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {
                 //Not handled
             }
         });
-        
-        ArrayAdapter<Double> heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+
+        ArrayAdapter<Double> heatingLockoutAdapter;
+        if (isCelsiusTunerAvailableStatus()){
+            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(50)),Math.round(fahrenheitToCelsius(100)),1, getActivity());
+        } else {
+            heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
+        }
         spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
         spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(ccu().systemProfile.getHeatingLockoutVal())
                                                                                                         , false);
         spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setHeatingLockoutVal(hayStack,
-                                     Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
+                if (isCelsiusTunerAvailableStatus()) {
+                    setHeatingLockoutVal(hayStack,
+                            Math.round(celsiusToFahrenheit(Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()))));
+                } else {
+                    setHeatingLockoutVal(hayStack,
+                            Double.parseDouble(spinnerHeatingLockoutTemp.getSelectedItem().toString()));
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {
                 //Not handled

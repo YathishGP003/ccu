@@ -11,7 +11,9 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuEquip
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
@@ -22,35 +24,16 @@ import org.projecthaystack.HRef
  * Created by Manjunath K on 06-08-2021.
  */
 class HSHaystackUtil(
-    private val profileName: String,
-    private val equipRef: String,
+    val equipRef: String,
     private val haystack: CCUHsApi
 
 ) {
     companion object {
 
-        fun getBasicSettings(node: Int): BasicSettings {
-            try {
-                val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
-                return if (equip.equipRef != null) {
-                    BasicSettings(
-                        StandaloneConditioningMode.values()[equip.hsHaystackUtil!!.getCurrentConditioningMode().toInt()],
-                        StandaloneFanStage.values()[equip.hsHaystackUtil!!.getCurrentFanMode().toInt()]
-                    )
-                } else {
-                    BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
-                }
-            }catch (e:Exception){
-                e.printStackTrace()
-                Log.i(L.TAG_CCU_HSCPU, "Exception getBasicSettings: ${e.localizedMessage} for $node ")
-            }
-            return BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
-        }
-
         fun getPossibleConditioningModeSettings(node: Int): PossibleConditioningMode {
             var status = PossibleConditioningMode.OFF
             try {
-                val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
+                val equip = HyperStatCpuEquip.getHyperStatEquipRef(node.toShort())
                 // Add conditioning status
                 val config = equip.getConfiguration()
                 if ((isAnyRelayEnabledAssociatedToCooling(config) || isAnyAnalogOutEnabledAssociatedToCooling(config))
@@ -101,7 +84,7 @@ class HSHaystackUtil(
 
         fun getPossibleFanModeSettings(node: Int): PossibleFanMode {
             try {
-                val equip = HyperStatCpuEquip.getHyperstatEquipRef(node.toShort())
+                val equip = HyperStatCpuEquip.getHyperStatEquipRef(node.toShort())
                 val fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration())
                 if (fanLevel == 6) return PossibleFanMode.LOW
                 if (fanLevel == 7) return PossibleFanMode.MED
@@ -117,7 +100,7 @@ class HSHaystackUtil(
         }
 
         fun getActualFanMode(nodeAddress: String, position: Int): Int{
-            val equip = HyperStatCpuEquip.getHyperstatEquipRef(nodeAddress.toShort())
+            val equip = HyperStatCpuEquip.getHyperStatEquipRef(nodeAddress.toShort())
             return HyperStatAssociationUtil.getSelectedFanModeByLevel(
                 fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration()),
                 selectedFan = position
@@ -125,14 +108,81 @@ class HSHaystackUtil(
 
         }
 
+        fun getPipe2ActualFanMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatPipe2Equip.getHyperStatEquipRef(nodeAddress.toShort()).getConfiguration()
+            return HyperStatAssociationUtil.getSelectedFanModeByLevel(
+                fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(equip),
+                selectedFan = position
+            ).ordinal
+
+        }
+
+        fun getHpuActualFanMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatHpuEquip.getHyperStatEquipRef(nodeAddress.toShort()).getConfiguration()
+            return HyperStatAssociationUtil.getSelectedFanModeByLevel(
+                fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip),
+                selectedFan = position
+            ).ordinal
+
+        }
+
+
         fun getFanSelectionMode(nodeAddress: String, position: Int): Int{
-            val equip = HyperStatCpuEquip.getHyperstatEquipRef(nodeAddress.toShort())
+            val equip = HyperStatCpuEquip.getHyperStatEquipRef(nodeAddress.toShort())
             return HyperStatAssociationUtil.getSelectedFanMode(
                 fanLevel = HyperStatAssociationUtil.getSelectedFanLevel(equip.getConfiguration()),
                 selectedFan = position
             )
         }
+
+        fun getPipe2FanSelectionMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatPipe2Equip.getHyperStatEquipRef(nodeAddress.toShort())
+            return HyperStatAssociationUtil.getSelectedFanMode(
+                fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(equip.getConfiguration()),
+                selectedFan = position
+            )
+        }
+        fun getHpuFanSelectionMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatHpuEquip.getHyperStatEquipRef(nodeAddress.toShort())
+            return HyperStatAssociationUtil.getSelectedFanMode(
+                fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip.getConfiguration()),
+                selectedFan = position
+            )
+        }
+        fun getPipePossibleFanModeSettings(node: Int): PossibleFanMode {
+            try {
+                val equip = HyperStatPipe2Equip.getHyperStatEquipRef(node.toShort())
+                val fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(equip.getConfiguration())
+                if (fanLevel == 6) return PossibleFanMode.LOW
+                if (fanLevel == 7) return PossibleFanMode.MED
+                if (fanLevel == 8) return PossibleFanMode.HIGH
+                if (fanLevel == 13) return PossibleFanMode.LOW_MED
+                if (fanLevel == 14) return PossibleFanMode.LOW_HIGH
+                if (fanLevel == 15) return PossibleFanMode.MED_HIGH
+                if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
+            }catch (e:Exception){
+                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+            }
+            return PossibleFanMode.OFF
+        }
+        fun getHpuPossibleFanModeSettings(node: Int): PossibleFanMode {
+            try {
+                val equip = HyperStatHpuEquip.getHyperStatEquipRef(node.toShort())
+                val fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip.getConfiguration())
+                if (fanLevel == 6) return PossibleFanMode.LOW
+                if (fanLevel == 7) return PossibleFanMode.MED
+                if (fanLevel == 8) return PossibleFanMode.HIGH
+                if (fanLevel == 13) return PossibleFanMode.LOW_MED
+                if (fanLevel == 14) return PossibleFanMode.LOW_HIGH
+                if (fanLevel == 15) return PossibleFanMode.MED_HIGH
+                if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
+            }catch (e:Exception){
+                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+            }
+            return PossibleFanMode.OFF
+        }
     }
+
 
     fun getEquipLiveStatus(): String? {
         val equipStatusPointId = readPointID("status and message")
@@ -142,21 +192,21 @@ class HSHaystackUtil(
         return null
     }
 
-    fun readConfigStatus(equipRef: String, markers: String): Double {
+    fun readConfigStatus(markers: String): Double {
         return haystack.readDefaultVal(
-            "point and hyperstat and $profileName and config and $markers and enabled and equipRef == \"$equipRef\""
+            "point and config and $markers and enabled and equipRef == \"$equipRef\""
         )
     }
 
-    fun readConfigAssociation(equipRef: String, markers: String): Double {
+    fun readConfigAssociation(markers: String): Double {
         return haystack.readDefaultVal(
-            "point and hyperstat and $profileName and config and $markers and association and equipRef == \"$equipRef\""
+            "point and config and $markers and association and equipRef == \"$equipRef\""
         )
     }
 
     fun readPointID(markers: String): String? {
         val pointMap: HashMap<*, *> = haystack.read(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\""
+            "point and $markers and equipRef == \"$equipRef\""
         )
         return pointMap["id"] as String?
     }
@@ -164,38 +214,38 @@ class HSHaystackUtil(
 
     fun readConfigPointValue(markers: String): Double {
         return haystack.readDefaultVal(
-            "point and hyperstat and $profileName and config and $markers and equipRef == \"$equipRef\""
+            "point and config and $markers and equipRef == \"$equipRef\""
         )
     }
 
     fun readPointValue(markers: String): Double {
         return haystack.readDefaultVal(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\""
+            "point and $markers and equipRef == \"$equipRef\""
         )
     }
 
     fun readPointPriorityVal(markers: String): Double {
         return haystack.readPointPriorityValByQuery(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\""
+            "point and $markers and equipRef == \"$equipRef\""
         )
     }
 
     fun readHisVal(markers: String): Double {
         return haystack.readHisValByQuery(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\""
+            "point and $markers and equipRef == \"$equipRef\""
         )
     }
 
     fun writeDefaultVal(markers: String, value: Double) {
         haystack.writeDefaultVal(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\"",
+            "point and $markers and equipRef == \"$equipRef\"",
             value
         )
     }
 
     fun writeDefaultVal(markers: String, value: String) {
         haystack.writeDefaultVal(
-            "point and hyperstat and $profileName and $markers and equipRef == \"$equipRef\"",
+            "point and $markers and equipRef == \"$equipRef\"",
             value
         )
     }
@@ -208,7 +258,7 @@ class HSHaystackUtil(
         haystack.writeDefaultValById(id, value)
     }
 
-    private fun writeDefaultWithHisValue(id: String, value: Double) {
+    fun writeDefaultWithHisValue(id: String, value: Double) {
         writeHisValueByID(id, value)
         writeDefaultValueByID(id, value)
     }
@@ -220,15 +270,8 @@ class HSHaystackUtil(
 
     fun getCurrentTemp(): Double {
         return haystack.readHisValByQuery(
-            "point and air and temp and sensor and current and equipRef == \"$equipRef\""
+            "point and air and current and temp and sensor and equipRef == \"$equipRef\""
         )
-    }
-
-    fun setCurrentTemp(roomTemp: Double) {
-        haystack.writeHisValByQuery(
-            "point and air and temp and sensor and current and equipRef == \"$equipRef\"", roomTemp
-        )
-
     }
 
     private fun readPointIdWithAll(markers: String): String {
@@ -308,7 +351,7 @@ class HSHaystackUtil(
     }
 
     fun getCurrentConditioningMode(): Double {
-        return readPointPriorityVal("zone and temp and mode and conditioning")
+        return readPointPriorityVal("zone and sp and conditioning and mode")
     }
 
     fun getCurrentFanMode(): Double {
@@ -339,32 +382,32 @@ class HSHaystackUtil(
 
     fun getAnalogFanSpeedMultiplier(): Double {
         return TunerUtil.readTunerValByQuery(
-            "hyperstat and analog and fan and speed and multiplier and equipRef == \"$equipRef\"")
+            "analog and fan and speed and multiplier and equipRef == \"$equipRef\"")
     }
 
     fun getHumidity(): Double {
         return haystack.readHisValByQuery(
-            "point and air and humidity and sensor and current and equipRef == \"$equipRef\""
+            "point and air and humidity and sensor and equipRef == \"$equipRef\""
         )
 
     }
 
     fun readCo2Value(): Double {
         return haystack.readHisValByQuery(
-            "point and co2 and  sensor and hyperstat and equipRef == \"$equipRef\""
+            "point and co2 and sensor and equipRef == \"$equipRef\""
         )
     }
 
     fun setHumidity(humidity: Double) {
         haystack.writeHisValByQuery(
-            "point and air and humidity and sensor and current and equipRef == \"$equipRef\"", humidity
+            "point and air and humidity and sensor and equipRef == \"$equipRef\"", humidity
         )
 
     }
 
     fun setProfilePoint(markers: String, value: Double) {
         haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and his and $markers and equipRef == \"$equipRef\"",
+            "point and  his and $markers and equipRef == \"$equipRef\"",
             value
         )
     }
@@ -381,44 +424,19 @@ class HSHaystackUtil(
         )
     }
 
-    fun getOccupancySensorPointValue(): Double {
+    private fun getOccupancySensorPointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and hyperstat and $profileName and occupancy and sensor and his and equipRef == \"$equipRef\""
+            "point and occupancy and sensor and his and equipRef == \"$equipRef\""
         )
     }
 
     fun getOccupancyModePointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and hyperstat and $profileName and occupancy " +
+            "point and occupancy " +
                     "and mode and his and equipRef == \"$equipRef\""
         )
     }
 
-    fun setOccupancyMode(status: Double) {
-        haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and occupancy " +
-                    "and mode and his and equipRef == \"$equipRef\"", status
-        )
-    }
-
-
-    fun getHeatingDeadbandPoint(): HashMap<*, *>? {
-        return haystack.read(
-            "point and air and temp and desired and heating and sp and equipRef == \"$equipRef\""
-        )
-    }
-
-    fun getCoolingDeadbandPoint(): HashMap<*, *>? {
-        return haystack.read(
-            "point and air and temp and desired and cooling and sp and equipRef == \"$equipRef\""
-        )
-    }
-
-    fun getAvgDesiredTempPoint(): HashMap<*, *>? {
-        return haystack.read(
-            "point and air and temp and desired and average and sp and equipRef == \"$equipRef\""
-        )
-    }
 
     fun updateOccupancyDetection() {
         val detectionPointId = readPointID("occupancy and detection and his")
@@ -426,85 +444,133 @@ class HSHaystackUtil(
             haystack.writeHisValueByIdWithoutCOV(detectionPointId, 1.0)
     }
 
-    fun readDetectionPointDetails(): HashMap<*, *> {
-        return haystack.read(
-            "point and hyperstat and $profileName" +
-                    " and occupancy and detection and his and equipRef == \"$equipRef\""
-        )
-    }
-
     fun getSensorPointValue(markers: String): Double {
         return haystack.readHisValByQuery(
-            "point and hyperstat and $profileName and $markers and his and equipRef == \"$equipRef\""
+            "point and $markers and his and equipRef == \"$equipRef\""
         )
     }
 
-    fun updateAllLoopOutput(coolingLoop: Int, heatingLoop: Int, fanLoop: Int) {
+    fun updateAllLoopOutput(coolingLoop: Int, heatingLoop: Int, fanLoop: Int, isHpuProfile: Boolean, compressorLoop: Int) {
         haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and his and cooling and loop and output and modulating " +
+            "point and  his and cooling and loop and output and modulating " +
                     "and equipRef  == \"$equipRef\"", coolingLoop.toDouble()
         )
         haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and his and heating and loop and output and modulating " +
+            "point and  his and heating and loop and output and modulating " +
                     "and equipRef  == \"$equipRef\"", heatingLoop.toDouble()
         )
         haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and his and fan and loop and output and modulating " +
+            "point and his and fan and loop and output and modulating " +
                     "and equipRef  == \"$equipRef\"", fanLoop.toDouble()
         )
+
+        if(isHpuProfile){
+            haystack.writeHisValByQuery(
+                "point and his and compressor and loop and output and modulating " +
+                        "and equipRef  == \"$equipRef\"", compressorLoop.toDouble()
+            )
+        }
     }
 
-    fun setSensorOccupancyPoint(value: Double) {
-        haystack.writeHisValByQuery(
-            "point and hyperstat and $profileName and occupancy and sensor and his and equipRef == \"$equipRef\"",
-            value
+
+    fun reWriteOccupancy() {
+        val ocupancyDetection = CCUHsApi.getInstance().read(
+            "point and cpu and occupancy and detection and his and equipRef  ==" +
+                    " \"" + equipRef + "\"")
+        if (ocupancyDetection.size> 0) {
+            val pointValue = CCUHsApi.getInstance().readHisValById(ocupancyDetection["id"].toString())
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetection["id"].toString(), pointValue)
+        }
+    }
+
+    fun getTempOffValue(): Double{
+        return (haystack.readDefaultVal("point and temp and offset and equipRef == \"$equipRef\"")/ 10)
+    }
+    fun isAutoForceOccupyEnabled(): Boolean{
+        return (readConfigStatus("auto and forced and control and occupied or occupancy").toInt() == 1)
+    }
+    fun isAutoAwayEnabled(): Boolean{
+        return (readConfigStatus("auto and away").toInt() == 1)
+    }
+
+    fun isAirFlowSensorTh1Enabled(): Boolean{
+        return (readConfigStatus("air and discharge and temp").toInt() == 1)
+    }
+    fun isDoorWindowSensorTh2Enabled(): Boolean{
+        return (readConfigStatus("window and not sensing").toInt() == 1)
+    }
+
+    fun isSupplyWaterSensorTh2Enabled(): Boolean{
+        // return (readConfigStatus("supply and water and temp and sensor and th2").toInt() == 1)
+        // For 2Pipe Supply sensor will be always on
+        return  true
+    }
+    fun getCo2DamperOpeningConfigValue(): Double{
+        return haystack.readDefaultVal(
+            "point and co2 and opening and rate and equipRef == \"$equipRef\"")
+    }
+    fun getCo2DamperThresholdConfigValue(): Double{
+        return  haystack.readDefaultVal(
+            "point and co2 and threshold and equipRef == \"$equipRef\""
         )
-        updateOccupancyDetection()
+    }
+    fun getCo2TargetConfigValue(): Double{
+        return  haystack.readDefaultVal(
+            "point and co2 and target and equipRef == \"$equipRef\""
+        )
+    }
+    fun getVocThresholdConfigValue(): Double{
+        return  haystack.readDefaultVal(
+            "point and voc and threshold and equipRef == \"$equipRef\""
+        )
+    }
+    fun getVocTargetConfigValue(): Double{
+        return  haystack.readDefaultVal(
+            "point and voc and target and equipRef == \"$equipRef\""
+        )
+    }
+    fun getPm2p5ThresholdConfigValue(): Double{
+        return haystack.readDefaultVal(
+            "point and pm2p5 and threshold and equipRef == \"$equipRef\""
+        )
+    }
+    fun getPm2p5TargetConfigValue(): Double{
+        return  haystack.readDefaultVal(
+            "point and pm2p5 and target and equipRef == \"$equipRef\""
+        )
     }
 
-    fun reWriteOccupancy(equipReff: String){
-        val ocupancyDetectionHscpu = CCUHsApi.getInstance().read(
-            "point and hyperstat and cpu and occupancy and detection and his and equipRef  ==" +
-                    " \"" + equipReff + "\"");
-        if (ocupancyDetectionHscpu.size> 0) {
-
-             val pointValue = CCUHsApi.getInstance().readHisValById(ocupancyDetectionHscpu["id"].toString());
-            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(ocupancyDetectionHscpu["id"].toString(), pointValue);
-        }
+    fun updateKeycardValues(keycardEnabled: Double, keycardSensor: Double){
+        haystack.writeDefaultVal("keycard and sensing and enabled and equipRef == \"$equipRef\"",keycardEnabled)
+        haystack.writeHisValByQuery("keycard and sensor and input and equipRef == \"$equipRef\"",keycardSensor)
     }
 
-     fun getDesiredTempCoolingPriorityValue(equipRef: String): Double {
-        try {
-            return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                "desired and temp and cooling and equipRef == \"$equipRef\""
-            )
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
-        return 0.0
+    fun updateDoorWindowValues(doorWindowEnabled: Double, doorWindowSensor: Double){
+        haystack.writeDefaultVal("window and sensing and enabled and equipRef == \"$equipRef\"",doorWindowEnabled)
+        haystack.writeHisValByQuery("window and sensor and input and equipRef == \"$equipRef\"",doorWindowSensor)
     }
 
-     fun getDesiredTempHeatingPriorityValue(equipRef: String): Double {
-        try {
-            return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                "desired and temp and heating and equipRef == \"$equipRef\""
-            )
-
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
-        return 0.0
+    fun getDisplayHumidity(): Double{
+        return  haystack.readDefaultVal(
+            "point and humidity and enabled and equipRef == \"$equipRef\""
+        )
     }
 
-     fun getAverageDesiredTempPriorityValue(equipRef: String): Double {
-        try {
-            return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                ("point and desired and average and temp and equipRef == \"$equipRef\"")
-            )
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
-        return 0.0
+    fun getDisplayCo2(): Double{
+        return  haystack.readDefaultVal(
+            "point and co2 and enabled and equipRef == \"$equipRef\""
+        )
     }
 
+    fun getDisplayVoc(): Double{
+        return  haystack.readDefaultVal(
+            "point and voc and enabled and equipRef == \"$equipRef\""
+        )
+    }
+
+    fun getDisplayP2p5(): Double{
+        return  haystack.readDefaultVal(
+            "point and pm2p5 and enabled and equipRef == \"$equipRef\""
+        )
+    }
 }

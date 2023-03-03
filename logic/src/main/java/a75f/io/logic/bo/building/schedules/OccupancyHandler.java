@@ -1,10 +1,15 @@
 package a75f.io.logic.bo.building.schedules;
 
+import java.util.Map;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.NoConditioning;
 import a75f.io.logic.bo.building.schedules.occupancy.EmergencyConditioning;
 import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.KeyCard;
@@ -32,6 +37,7 @@ public class OccupancyHandler implements Occupiable {
     OccupancyTrigger autoForcedOccupied;
     OccupancyTrigger preconditioning;
     OccupancyTrigger vacation;
+    OccupancyTrigger noconditioning;
     OccupancyUtil    occupancyUtil;
     
     public OccupancyHandler(CCUHsApi hayStack, String equipRef, OccupancyUtil occupancyUtil) {
@@ -47,6 +53,7 @@ public class OccupancyHandler implements Occupiable {
         autoForcedOccupied = new AutoForcedOccupied(occupancyUtil);
         preconditioning = new Preconditioning(hayStack, equipRef);
         vacation = new Vacation(hayStack, equipRef);
+        noconditioning = new NoConditioning(hayStack,equipRef);
     }
     
     public Schedule getSchedule() {
@@ -67,6 +74,9 @@ public class OccupancyHandler implements Occupiable {
         }
         if (emergencyConditioning.hasTriggered()) {
             return OccupiedTrigger.EmergencyConditioning;
+        }
+        if(noconditioning.hasTriggered()){
+            return OccupiedTrigger.NoConditioning;
         }
         
         return OccupiedTrigger.Occupied;
@@ -93,9 +103,30 @@ public class OccupancyHandler implements Occupiable {
         if (emergencyConditioning.hasTriggered()) {
             return UnoccupiedTrigger.EmergencyConditioning;
         }
+        if (noconditioning.hasTriggered()) {
+            return UnoccupiedTrigger.NoConditioning;
+        }
         if (vacation.hasTriggered()) {
             return UnoccupiedTrigger.Vacation;
         }
         return UnoccupiedTrigger.Unoccupied;
+    }
+
+    /**
+     * Do clean up while transitioning from Unoccupied -> occupied
+     */
+    public void prepareOccupied() {
+
+    }
+
+    /**
+     * Do clean up while transitioning from occupied -> unoccupied
+     */
+    public void prepareUnoccupied() {
+        Map<Object, Object> forcedOccupiedLevel = ScheduleUtil.getForcedOccupiedLevel(equipRef);
+        if (forcedOccupiedLevel != null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Clear forced occupied "+forcedOccupiedLevel);
+            ScheduleUtil.clearTempOverrideAtLevel(equipRef, HayStackConstants.FORCE_OVERRIDE_LEVEL);
+        }
     }
 }

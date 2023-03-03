@@ -140,6 +140,13 @@ class BuildingTunerFallback {
         tagsValMap.put("trueCfm,itimeout,airflow",TunerConstants.AIR_FLOW_CFM_INTEGRAL_TIME);
         tagsValMap.put("trueCfm,airflow,pgain",TunerConstants.AIR_FLOW_CFM_PROPORTIONAL_K_FACTOR);
 
+        tagsValMap.put("reheat,temp,offset",TunerConstants.DAB_REHEAT_OFFSET_DEFAULT_VAL);
+        tagsValMap.put("reheat,relay,hysteresis",TunerConstants.DAB_RELAY_HYSTERESIS_DEFAULT_VAL);
+        tagsValMap.put("reheat,proportional,spread",TunerConstants.DEFAULT_PROPORTIONAL_SPREAD);
+        tagsValMap.put("reheat,integral,time",TunerConstants.DEFAULT_INTEGRAL_TIMEOUT);
+        tagsValMap.put("reheat,proportional,kFactor",TunerConstants.DEFAULT_PROPORTIONAL_GAIN);
+        tagsValMap.put("reheat,integral,kFactor",TunerConstants.DEFAULT_PROPORTIONAL_GAIN);
+
         return tagsValMap;
     }
     

@@ -34,6 +34,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
@@ -172,9 +173,9 @@ public class ScheduleUtil {
         return false;
     }
     
-    public static boolean isAnyZoneOccupied(Map<String, OccupancyData> equipOccupancy) {
+    public static boolean isAnyZoneOccupiedOrAutoAway(Map<String, OccupancyData> equipOccupancy) {
         for (OccupancyData occupancyData : equipOccupancy.values()) {
-            if (occupancyData.occupancy == OCCUPIED) {
+            if (occupancyData.occupancy == OCCUPIED || occupancyData.occupancy == AUTOAWAY) {
                 return true;
             }
         }
@@ -192,7 +193,7 @@ public class ScheduleUtil {
             }
             Occupied occ = (Occupied) occEntry.getValue();
             //CcuLog.i(TAG_CCU_SCHEDULER, " Occupied for "+roomRef+" "+occ.toString());
-            if (occ.isOccupied() && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)) {
+            if (occ.isOccupied()/* && !isZoneAutoAway(roomRef, CCUHsApi.getInstance(), equipOccupancy)*/) {
                 Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
                 if (currOccupied == null || occDay.getEthh() > currOccupied.getCurrentlyOccupiedSchedule().getEthh()
                     || (occDay.getEthh() == currOccupied.getCurrentlyOccupiedSchedule().getEthh() &&
@@ -244,7 +245,7 @@ public class ScheduleUtil {
     
     public static boolean isAHUServedEquip(HashMap<Object, Object> equip) {
         return (equip.containsKey("vav") || equip.containsKey("dab") || equip.containsKey("dualDuct") ||
-                equip.containsKey("ti") || equip.containsKey("bpos") );
+                equip.containsKey("ti") || equip.containsKey("otn") );
     }
     
     public static Schedule getActiveSystemVacation() {
@@ -335,15 +336,14 @@ public class ScheduleUtil {
                                                                            "temp and equipRef == \"" + equipId + "\"");
         HashMap<Object, Object> heatDT = CCUHsApi.getInstance().read("point and desired and heating and " +
                                                                      "temp and equipRef == \"" + equipId + "\"");
-        //HashMap averageDT =CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
+        HashMap averageDT =CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
         
         CCUHsApi.getInstance().clearPointArrayLevel(coolDT.get("id").toString(), level, false);
         CCUHsApi.getInstance().clearPointArrayLevel(heatDT.get("id").toString(), level, false);
         
-        /*if (!averageDT.isEmpty()) {
-            CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        if (!averageDT.isEmpty()) {
+            CCUHsApi.getInstance().clearPointArrayLevel(averageDT.get("id").toString(), level, false);
         }
-        systemOccupancy = UNOCCUPIED; */
     }
     public static long getSystemTemporaryHoldExpiry() {
         long thExpiry = 0;
@@ -354,7 +354,7 @@ public class ScheduleUtil {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
                 if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
                    || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")
-                   || q.getMarkers().contains("bpos") || q.getMarkers().contains("sse")) {
+                   || q.getMarkers().contains("otn") || q.getMarkers().contains("sse")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }
@@ -448,12 +448,38 @@ public class ScheduleUtil {
     }
     
     public static void resetOccupancyDetection(CCUHsApi hayStack, String equipRef) {
+        setOccupancyDetection(hayStack, equipRef, false);
+    }
+
+    public static void setOccupancyDetection(CCUHsApi hayStack, String equipRef, boolean occupancy) {
         HashMap<Object, Object> occupancyDetection = hayStack.readEntity(
-            "occupancy and detection and equipRef  == \"" + equipRef + "\"");
+                "occupancy and detection and equipRef  == \"" + equipRef + "\"");
         if (!occupancyDetection.isEmpty()) {
-            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), 0.0);
+            hayStack.writeHisValueByIdWithoutCOV(occupancyDetection.get("id").toString(), occupancy ? 1.0 : 0);
         } else {
             CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupancy detection does not exist for "+equipRef);
         }
+    }
+
+    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
+        return hayStack.readHisValByQuery("point and occupancy and state and " +
+                            "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
+    }
+
+
+    public static boolean isSystemProfile(CCUHsApi hayStack,String equipId){
+        HashMap<Object, Object> equip = hayStack.readMapById(equipId);
+        if(equip.containsKey("vav") || equip.containsKey("dab"))
+            return true;
+        return false;
+    }
+
+    public static boolean areAllZonesBuildingLimitsBreached(Map<String, OccupancyData> equipOccupancy ){
+        for (OccupancyData occupancyData : equipOccupancy.values()) {
+            if (occupancyData.occupancy != NO_CONDITIONING) {
+                return false;
+            }
+        }
+        return true;
     }
 }

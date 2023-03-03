@@ -30,6 +30,7 @@ private const val CARETAKER_EXT = ":3100/api/v1/"
 private const val HAYSTACK_EXT = ":8085/v1/"
 private const val FILESTORAGE_EXT = ":8081"
 private const val MESSAGING_EXT = ":8082"
+private const val WEATHER_EXT = ":3001/api/v1"
 
 private const val PREF_LOCAL_BASE_IP_VALUE = "pref_local_base_ip_value"
 private const val PREF_LOCAL_BASE_IP_ALL_VALUES = "pref_local_base_ip_all_values"
@@ -73,7 +74,8 @@ class RenatusServicesEnvironment(
             BuildConfig.HAYSTACK_API_BASE,
             BuildConfig.ALERTS_API_BASE,
             BuildConfig.FILE_STORAGE_API_BASE,
-            BuildConfig.MESSAGING_API_BASE
+            BuildConfig.MESSAGING_API_BASE,
+            BuildConfig.WEATHER_API_BASE
          )
       }
 
@@ -85,7 +87,9 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + HAYSTACK_EXT,
             HTTP + baseIp + ALERTS_EXT,
             HTTP + baseIp + FILESTORAGE_EXT,
-            HTTP + baseIp + MESSAGING_EXT
+            HTTP + baseIp + MESSAGING_EXT,
+                 HTTP + baseIp + WEATHER_EXT,
+
          )
       }
 
@@ -143,7 +147,8 @@ data class RenatusServicesUrls(
    val haystackUrl: String,
    val alertsUrl: String,
    val remoteStorageUrl: String,
-   val messagingUrl: String
+   val messagingUrl: String,
+   val weatherUrl: String
 ) {
    // useful for local environment
    val base: String

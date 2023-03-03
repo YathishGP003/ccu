@@ -1,6 +1,6 @@
 package a75f.io.renatus.registration;
 
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -70,7 +71,6 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private String enteredPassCode;
     private View toastFail;
     private View toastCcuRestoreSuccess;
-    private static final String TAG= "CCU_REPLACE";
 
     public ReplaceCCU() {
         // Required empty public constructor
@@ -149,7 +149,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             @Override
             public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                Toast toast = new Toast(getApplicationContext());
+                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 if (response.getString("valid") == "true") {
                     getAllCCUs(response.getJSONObject("siteCode").getString("siteId"), response.getJSONArray("devices"));
@@ -286,7 +286,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                     initRestoreCCUProcess(ccu);
                                 } catch(NullHGridException nullHGridException){
                                     success.set(false);
-                                    Log.i(TAG, nullHGridException.getMessage());
+                                    Log.i(TAG_CCU_REPLACE, nullHGridException.getMessage());
                                     nullHGridException.printStackTrace();
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
@@ -299,6 +299,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                             replaceCCUErrorDailog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialogInterface, i) -> {
                                                 deleteRenatusData();
                                             });
+                                            Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
                                             replaceCCUErrorDailog.setIcon(R.drawable.ic_alert);
                                             replaceCCUErrorDailog.show();
                                         }
@@ -310,22 +311,24 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                                 displayToastMessageOnRestoreSuccess(ccu);
                                 loadRenatusLandingIntent();
                                 updatePreference();
+                                Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
                             }
 
                         }
                     );
             }
             @Override
-            public void onErrorResponse(JSONObject response) throws JSONException {
+            public void onErrorResponse(JSONObject response) {
                 ProgressDialogUtils.hideProgressDialog();
-                Toast toast = new Toast(getApplicationContext());
+                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
                 toast.setView(toastFail);
                 TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
-                textView.setText(ccu.getName()+"  replace is failed. Please try again");
+                textView.setText(ccu.getName()+"  replace is failed as Bearer token cannot be generated. Please try again");
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
                 deleteRenatusData();
+                Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");
@@ -334,23 +337,32 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
 
     private void deleteRenatusData(){
        try{
-            String packageName = getApplicationContext().getPackageName();
+            String packageName = Globals.getInstance().getApplicationContext().getPackageName();
             Runtime runtime = Runtime.getRuntime();
             runtime.exec("pm clear "+packageName);
         }
         catch (IOException exception){
-            Log.i(TAG, exception.getMessage());
+            Log.i(TAG_CCU_REPLACE, exception.getMessage());
             exception.printStackTrace();
         }
     }
 
+    private void updateModbusConfigValues(Map<String, Integer> modbusConfigs){
+        Prefs prefs = new Prefs(getContext());
+        for (Map.Entry<String,Integer> mapElement : modbusConfigs.entrySet()) {
+            prefs.setInt( mapElement.getKey(), mapElement.getValue());
+        }
+    }
+
     private void initRestoreCCUProcess(CCU ccu) {
-        new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@", ""),
-                ccu.getCcuId().replaceFirst("@", ""));
-        new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
+        Log.i(TAG_CCU_REPLACE, "Replace CCU Started");
+        Map<String, Integer> modbusConfigs = new FileBackupManager().getConfigFiles(ccu.getSiteCode().replaceFirst("@"
+                , ""), ccu.getCcuId().replaceFirst("@", ""));
+                new FileBackupManager().getModbusSideLoadedJsonsFiles(ccu.getSiteCode().replaceFirst("@", ""),
                 ccu.getCcuId().replaceFirst("@", ""));
         RestoreCCU restoreCCU = new RestoreCCU();
         restoreCCU.getCCUEquip(ccu.getCcuId());
+        updateModbusConfigValues(modbusConfigs);
         final int[] deviceCount = {restoreCCU.equipCountsInCCU(ccu.getCcuId(), ccu.getSiteCode())};
         restoreCCU.syncExistingSite(ccu.getSiteCode());
         restoreCCU.getSettingPointsByCCUId(ccu.getCcuId());
@@ -379,7 +391,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){
-        Toast toast = new Toast(getApplicationContext());
+        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
         toast.setGravity(Gravity.BOTTOM, 50, 50);
         toast.setView(toastCcuRestoreSuccess);
         TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);

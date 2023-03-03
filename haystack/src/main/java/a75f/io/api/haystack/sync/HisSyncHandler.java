@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.util.Log;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
@@ -93,7 +95,7 @@ public class HisSyncHandler
     
         //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
         syncHistorizedEquipPoints(syncAllData);
-    
+
         syncHistorizedZonePoints(syncAllData);
     }
     
@@ -153,7 +155,7 @@ public class HisSyncHandler
             }
         }
     }
-    
+
     /**
      * This is a short cut to get all the occupancy points on rooms to get synced.
      * This must be revisited.
@@ -162,10 +164,10 @@ public class HisSyncHandler
     private void syncHistorizedZonePoints(boolean timeForQuarterHourSync) {
         List<HashMap> allZones = ccuHsApi.readAll("room");
         List<HashMap> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
-        
+
         for (HashMap zone : zonesToSync) {
             String roomId = zone.get("id").toString();
-            
+
             List<HashMap> allPointsForZone =
                 ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
@@ -271,30 +273,35 @@ public class HisSyncHandler
     
     private void doHisWrite(List<HDict> hDictList, String syncType, String deviceOrEquipGuid,
                                List<HisItem> hisItemList) {
-        
-        HDict[] hDicts = hDictListToArray(hDictList);
-        
-        HDict hisWriteMetadata = new HDictBuilder()
-                                     .add("id", HRef.make(StringUtils.stripStart(deviceOrEquipGuid,"@")))
-                                     .add(syncType)
-                                     .toDict();
-        
-        EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
-        CcuLog.e(TAG, "response "+response.getRespCode()+" : "+response.getErrRespString());
-        if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
-            try {
-                ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
-            } catch (IllegalArgumentException e) {
-                /* There is a corner case where this HisItem might have been removed from Objectbox since the
-                 * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
-                 * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
-                 * monitor how frequently this is happening or there is more to it than what we see now.
-                 */
-                CcuLog.e(TAG, "Failed to update HisItem !", e);
+        if (CCUHsApi.getInstance().getAuthorised()) {
+
+            HDict[] hDicts = hDictListToArray(hDictList);
+
+            HDict hisWriteMetadata = new HDictBuilder()
+                    .add("id", HRef.make(StringUtils.stripStart(deviceOrEquipGuid, "@")))
+                    .add(syncType)
+                    .toDict();
+
+            EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
+            if (response.getRespCode() == 401) {
+                CCUHsApi.getInstance().setAuthorised(false);
             }
-        } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
-            CcuLog.e(TAG, "His write failed! , Trying to handle the error");
-            EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+            CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
+            if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
+                try {
+                    ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
+                } catch (IllegalArgumentException e) {
+                    /* There is a corner case where this HisItem might have been removed from Objectbox since the
+                     * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
+                     * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
+                     * monitor how frequently this is happening or there is more to it than what we see now.
+                     */
+                    CcuLog.e(TAG, "Failed to update HisItem !", e);
+                }
+            } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                CcuLog.e(TAG, "His write failed! , Trying to handle the error");
+                EntitySyncErrorHandler.handle400HttpError(ccuHsApi, response.getErrRespString());
+            }
         }
     }
     

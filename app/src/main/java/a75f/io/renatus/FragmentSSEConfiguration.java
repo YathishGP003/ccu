@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -30,13 +32,16 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Input;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
+import a75f.io.logic.bo.building.sse.SingleStageEquip;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -74,6 +79,9 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
     ToggleButton autoForceOccupied;
     Button setButton;
     NumberPicker temperatureOffset;
+    ToggleButton analogIn1;
+    @BindView(R.id.sseAnalogActuator)
+    Spinner sseAnalogIn1Spinner;
     public FragmentSSEConfiguration()
     {
     }
@@ -169,6 +177,9 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         autoAway = (ToggleButton) view.findViewById(R.id.sse_autoAway);
         autoForceOccupied = (ToggleButton) view.findViewById(R.id.sse_autoforceoccupied);
 
+        analogIn1 = (ToggleButton) view.findViewById(R.id.sse_analogin1);
+
+        CCUUiUtil.setSpinnerDropDownColor(sseAnalogIn1Spinner,getContext());
         CCUUiUtil.setSpinnerDropDownColor(sseRelay1Actuator,getContext());
         CCUUiUtil.setSpinnerDropDownColor(sseRelay2Actuator,getContext());
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -197,6 +208,12 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
 
+        ArrayAdapter<InputActuatorType> sseAnalogActuatorAdapter = new ArrayAdapter<InputActuatorType>(getActivity(),
+                R.layout.spinner_dropdown_item,InputActuatorType.values());
+        sseAnalogIn1Spinner.setAdapter(sseAnalogActuatorAdapter);
+
+        analogIn1.setOnCheckedChangeListener((compoundButton, checked) -> handleAnalog1InChange(checked));
+
         sseRelay2Actuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -224,6 +241,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             sseRelay2Actuator.setSelection(mProfileConfig.enableRelay2,false);
             autoAway.setChecked(mProfileConfig.enableAutoAway);
             autoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
+            analogIn1.setChecked(mProfileConfig.analogIn1);
+            sseAnalogIn1Spinner.setSelection(mProfileConfig.analogInAssociation.ordinal());
             if(mProfileConfig.getOutputs().size() > 0) {
                 for(Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -273,6 +292,10 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         });
     }
 
+    private void handleAnalog1InChange(boolean checked) {
+        sseAnalogIn1Spinner.setEnabled(checked);
+    }
+
     private void setupSSEZoneProfile() {
 
         SingleStageConfig sseConfig = new SingleStageConfig();
@@ -284,11 +307,21 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         sseConfig.enableAutoAway = autoAway.isChecked();
         sseConfig.enableAutoForceOccupied = autoForceOccupied.isChecked();
+        sseConfig.analogIn1 = analogIn1.isChecked();
+        if (analogIn1.isChecked()) sseConfig.setAnalogInAssociation(InputActuatorType.values()[sseAnalogIn1Spinner.getSelectedItemPosition()]);
+        else sseConfig.setAnalogInAssociation(InputActuatorType.values()[0]);
         if(switchCoolHeatR1.isChecked()) sseConfig.enableRelay1 = sseRelay1Actuator.getSelectedItemPosition()+1;
         else sseConfig.enableRelay1 = 0;
         if(switchFanR2.isChecked()) sseConfig.enableRelay2 = sseRelay2Actuator.getSelectedItemPosition();
         else sseConfig.enableRelay2 = 0;
 
+        if (analogIn1.isChecked()) {
+            Input analogIn = new Input();
+            analogIn.setAddress(mSmartNodeAddress);
+            analogIn.setPort(Port.ANALOG_IN_ONE);
+            analogIn.mInputActuatorType = InputActuatorType.values()[sseAnalogIn1Spinner.getSelectedItemPosition()];
+            sseConfig.getInputs().add(analogIn);
+        }
 
         if(switchCoolHeatR1.isChecked()) {
             Output relay1Op = new Output();

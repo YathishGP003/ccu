@@ -2,9 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
-
-
-import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +14,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
@@ -28,8 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.hyperstat.cpu.HyperStatProfileSelectionFragment;
-import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -180,9 +178,9 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         showDialogFragment(FragmentModbusType.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentModbusType.MID);
     }
 
-    @OnClick(R.id.rlbpos) void onBPOSClick(){
+    @OnClick(R.id.rlOTN) void onOTNClick(){
 
-        showDialogFragment(FragmentBPOSTypeSelection.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentBPOSTypeSelection.ID);
+        showDialogFragment(FragmentOTNTypeSelection.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired), FragmentOTNTypeSelection.ID);
     }
 
     @OnClick(R.id.first_button) void onFirstButtonClick() {

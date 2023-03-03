@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -119,7 +120,7 @@ public abstract class DabSystemProfile extends SystemProfile
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
         
         Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
-                .setUnit("%").setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
+                .setUnit("%").setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and dab and relay and deactivation and hysteresis");
         ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
@@ -168,6 +169,7 @@ public abstract class DabSystemProfile extends SystemProfile
         addModeChangeHysteresisChangeOverTuner(equipRef);
         addStageUpTimerCounterTuner(equipRef);
         addStageDownTimerCounterTuner(equipRef);
+        addEffectiveSatConditioningPoint(equipRef, CCUHsApi.getInstance());
     }
     
     private void addModeChangeHysteresisChangeOverTuner(String equipRef) {
@@ -231,7 +233,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                                  .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                                  .addMarker("sp").addMarker("system")
-                                                 .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                                 .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                                  .setUnit("m")
                                                  .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                  .setTz(tz)
@@ -271,7 +273,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                             .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
-                                            .setMinVal("0").setMaxVal("30").setIncrementVal("1")
+                                            .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                                             .setUnit("m")
                                             .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                             .setTz(tz)
@@ -366,5 +368,23 @@ public abstract class DabSystemProfile extends SystemProfile
     @Override
     public void reset() {
         getSystemController().reset();
+    }
+
+    private void addEffectiveSatConditioningPoint(String equipRef, CCUHsApi hayStack) {
+        if (hayStack.readEntity("system and effective and sat and conditioning").isEmpty()) {
+            Site site = hayStack.getSite();
+            Point effectiveSatConditioning = new Point.Builder()
+                    .setDisplayName(HSUtil.getDis(equipRef) + "-effectiveSatConditioning")
+                    .setSiteRef(site.getId())
+                    .setEquipRef(equipRef)
+                    .setHisInterpolate("cov")
+                    .addMarker("system").addMarker("dab").addMarker("his")
+                    .addMarker("effective").addMarker("sat").addMarker("conditioning").addMarker("sp")
+                    .setEnums("not_available,cooling,heating")
+                    .setTz(site.getTz())
+                    .build();
+            String effectiveSatConditioningId = hayStack.addPoint(effectiveSatConditioning);
+            hayStack.writeHisValById(effectiveSatConditioningId, 0.0);
+        }
     }
 }

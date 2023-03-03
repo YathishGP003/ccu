@@ -123,7 +123,7 @@ public class VavSystemController extends SystemController
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and vav) or " +
                                                                             "(equip and zone and ti) or " +
-                                                                   "(equip and zone and bpos)"
+                                                                   "(equip and zone and otn)"
         );
 
         updateSystemTempHumidity(allEquips);
@@ -239,8 +239,8 @@ public class VavSystemController extends SystemController
     
     private boolean isEmergencyCoolingRequired() {
         return systemState !=  HEATING &&
-               buildingLimitMaxBreached("vav") &&
-               conditioningMode != SystemMode.OFF;
+                buildingLimitMaxBreached("vav") &&
+                conditioningMode != SystemMode.OFF;
     }
     
     private boolean isEmergencyHeatingRequired() {
@@ -254,9 +254,9 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
+            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
-            if (isZoneDead(equip)) {
+            if (isZoneDead(equip.getId())) {
                 zoneDeadCount++;
             } else if (hasTemp(equip)) {
                 double zoneCurTemp = getEquipCurrentTemp(equip.getId());
@@ -543,17 +543,6 @@ public class VavSystemController extends SystemController
         );
         return ZonePriority.values()[(int) priorityVal];
     }
-    
-    public boolean isZoneDead(Equip q) {
-        try
-        {
-            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""
-                                                            + q.getId() + "\"").equals("Zone Temp Dead");
-        } catch (Exception e) {
-            //Handle non-temp equips
-            return false;
-        }
-    }
     public boolean isCMTempDead(double cmTemp) {
 
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
@@ -678,12 +667,12 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips)
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos")) {
+            if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                     "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("bpos");
-                if (!isZoneDead(equip) && (tempVal > 0)) {
+                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
+                if (!isZoneDead(equip.getId()) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
                 }
@@ -747,7 +736,7 @@ public class VavSystemController extends SystemController
     
             double damperPos = damperPosMap.get(normalizedDamper.get("id").toString());
             double normalizedDamperPos;
-            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
+            if (isZoneDead(equip.get("id").toString())) {
                 normalizedDamperPos = damperPos;
             } else {
                 normalizedDamperPos = (damperPos + damperPos * targetPercent / 100);
@@ -765,7 +754,7 @@ public class VavSystemController extends SystemController
     public double getMaxDamperPos(ArrayList<HashMap<Object, Object>> vavEquips) {
         double maxDamperPos = 0;
         for (HashMap<Object, Object> equip : vavEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
+            if (isZoneDead(equip.get("id").toString())) {
                 continue;
             }
             HashMap<Object, Object> damper = CCUHsApi.getInstance().readEntity("point and damper and base and cmd and " +
@@ -871,7 +860,7 @@ public class VavSystemController extends SystemController
             );
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             
-            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
+            if (isZoneDead(equip.get("id").toString())) {
                 adjustedDamperOpeningMap.put(damperPos.get("id").toString() , damperPosVal);
             } else {
                 double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;

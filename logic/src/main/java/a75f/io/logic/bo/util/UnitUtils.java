@@ -124,7 +124,8 @@ public class UnitUtils {
         }
         if (myDoubles.size() > 0) {
             try {
-                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + myDoubles.get(3).intValue());
+                DecimalFormat timeFormatter = new DecimalFormat("00");
+                return ((s.substring(0, s.lastIndexOf("F")) + " ") + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0)))) + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return temp;
@@ -172,10 +173,14 @@ public class UnitUtils {
 
 
     public static boolean doesPointNeedRelativeConversion(HashMap<Object,Object> tunerItem) {
-        return   tunerItem.containsKey("spread") || tunerItem.containsKey("abnormal") ||
+             return   tunerItem.containsKey("spread") || tunerItem.containsKey("abnormal") ||
                 (tunerItem.containsKey("chilled") || tunerItem.containsKey("pspread")) ||
                 tunerItem.containsKey("leeway") || tunerItem.containsKey("setback") ||
-                tunerItem.containsKey("differential")|| tunerItem.containsKey("sat") ;
+                     tunerItem.containsKey("differential")|| tunerItem.containsKey("sat")
+                     || (tunerItem.containsKey("reheat") && tunerItem.containsKey("offset"))
+                     || (tunerItem.containsKey("aux") && tunerItem.containsKey("heating") && tunerItem.containsKey("stage1"))
+                     || (tunerItem.containsKey("aux") && tunerItem.containsKey("heating") && tunerItem.containsKey("stage2"));
+
     }
 
     public static boolean doesPointNeedRelativeDeadBandConversion(HashMap<Object,Object> tunerItem) {

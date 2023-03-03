@@ -160,6 +160,12 @@ public class RegisterGatherCCUDetails extends Activity {
                 return;
             }
             if (!CCUUiUtil.isInvalidName(ccuName)) {
+                mCreateNewCCU.setClickable(false);
+                ArrayList<HashMap<Object, Object> >ccus = CCUHsApi.getInstance().readAllEntities("device and ccu");
+                for(HashMap<Object, Object> ccu :ccus){
+                    CCUHsApi.getInstance().deleteEntityLocally(ccu.get("id").toString());
+                }
+                L.saveCCUState();
                 L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                 L.ccu().systemProfile = new DefaultSystem();
@@ -303,12 +309,6 @@ public class RegisterGatherCCUDetails extends Activity {
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }
-
-                L.saveCCUState();
-                CCUHsApi.getInstance().log();
-                CCUHsApi.getInstance().syncEntityTree();
-
-
                 return null;
             }
 
@@ -343,7 +343,9 @@ public class RegisterGatherCCUDetails extends Activity {
                         .setPositiveButton(
                                 "Yes",
                                 (dialog, which) -> {
-
+                                    L.saveCCUState();
+                                    CCUHsApi.getInstance().log();
+                                    CCUHsApi.getInstance().syncEntityTree();
                                     // When the user click yes button
                                     // then app will close
                                     Intent i = new Intent(RegisterGatherCCUDetails.this,
@@ -354,7 +356,10 @@ public class RegisterGatherCCUDetails extends Activity {
                                     finish();
                                 });
 
-                 builder.setNegativeButton("No",(dialog,which)->{ });
+                 builder.setNegativeButton("No",(dialog,which)->{
+                     mCreateNewCCU.setClickable(true);
+                     dialog.dismiss();
+                 });
                 // Create the Alert dialog
                 AlertDialog alertDialog = builder.create();
 

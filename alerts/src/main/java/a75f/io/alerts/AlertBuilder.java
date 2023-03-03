@@ -35,7 +35,7 @@ public class AlertBuilder
         alert.siteName = haystack.getSiteName();
         alert.ccuIdNoAt = haystack.getCcuRef().toVal();
         alert.ccuName = haystack.getCcuName();
-        if (equipRef != null) {
+        if (equipRef != null && !equipRef.isEmpty()) {
             alert.equipId = equipRef.replaceFirst("@","");
 
             Equip equip = HSUtil.getEquipInfo(equipRef);

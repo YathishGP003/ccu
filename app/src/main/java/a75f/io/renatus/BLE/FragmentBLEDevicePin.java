@@ -56,7 +56,7 @@ import a75f.io.renatus.HyperStatSenseFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -444,9 +444,19 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatSenseFragment.ID);
                         break;
                     case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                        showDialogFragment(HyperStatCpuFragment.newInstance(mPairingAddress,mName,mFloorName,
+                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
                                 mNodeType,ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT),
-                                HyperStatCpuFragment.ID);
+                                HyperStatFragment.ID);
+                        break;
+                    case HYPERSTAT_HEAT_PUMP_UNIT:
+                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
+                                        mNodeType,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
+                                HyperStatFragment.ID);
+                        break;
+                    case HYPERSTAT_TWO_PIPE_FCU:
+                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
+                                        mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU),
+                                HyperStatFragment.ID);
                         break;
                 }
                 

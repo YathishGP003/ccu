@@ -3,9 +3,10 @@ package a75f.io.api.haystack;
 import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
-
+import org.apache.commons.lang3.StringUtils;
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
@@ -34,6 +35,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 
 /***
@@ -126,6 +128,9 @@ public class Schedule extends Entity
             int endHour = getInt(range.get(Tags.ETHH).toString());
             int endMin = getInt(range.get(Tags.ETMM).toString());
 
+            endMin = getInt(range.get(Tags.ETHH).toString()) == 24 ? 59 : endMin;
+            endHour = TimeUtil.getEndHour(endHour);
+
             DateTime beginDateTime = SS_DATE_TIME_FORMATTER.parseDateTime(beginDate)
                     .withHourOfDay(beginHour)
                     .withMinuteOfHour(beginMin);
@@ -208,8 +213,7 @@ public class Schedule extends Entity
         return specialSchedule;
     }
 
-    public static Schedule getScheduleForZone(String zoneId, boolean vacation)
-    {
+    public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
@@ -220,12 +224,10 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        if (ref != null && !ref.equals("")) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
             
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
@@ -475,23 +477,24 @@ public class Schedule extends Entity
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals(""))
-        {
+        Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
+                "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
+        //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
+        if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
-            {
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
                 schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, true);
-                CcuLog.d("Schedule", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
+                CcuLog.d("CCU_SCHEDULER", "Zone Schedule with special schedule: for "+build.getDisplayName()+" : "
                         + schedule.toString());
                 return schedule;
             }
         }
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule"+scheduleType);
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0) {
             Schedule schedule = retVal.get(0);
             schedule = mergeSpecialScheduleWithZoneSchedule(combinedSpecialSchedules, schedule, false);
-            CcuLog.d("Schedule", "Building Schedule with special schedule:  "+schedule);
+            CcuLog.d("CCU_SCHEDULER", "Building Schedule with special schedule:  "+schedule);
             return schedule;
         }
         return null;
@@ -894,7 +897,11 @@ public class Schedule extends Entity
     
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(mDis).append(" ");
+
+        b.append(mDis).append("-");
+        if (mId != null) {
+            b.append(mId).append(" ");
+        }
         if (isVacation()) {
             b.append(mStartDate.toString()+"-"+mEndDate.toString());
         }else

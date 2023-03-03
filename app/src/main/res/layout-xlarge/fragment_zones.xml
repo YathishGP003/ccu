@@ -52,7 +52,7 @@
                 android:layout_height="77dp"
                 android:layout_marginLeft="110dp"
                 android:layout_marginTop="110dp"
-                android:src="@drawable/snow" />
+                android:src="@drawable/weather_icon_13d" />
 
             <TextView
                 android:id="@+id/temperature"

@@ -201,7 +201,7 @@ public class ControlMote
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setUnit("Ohm")
+                .setUnit("Kilo Ohm")
                 .setTz(tz)
                 .build();
 
@@ -218,7 +218,7 @@ public class ControlMote
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("sensor").addMarker("his")
-                .setUnit("Ohm")
+                .setUnit("Kilo Ohm")
                 .setTz(tz)
                 .build();
     }

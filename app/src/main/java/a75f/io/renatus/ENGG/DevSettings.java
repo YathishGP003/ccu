@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,26 +22,45 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRef;
+import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.filesystem.FileSystemTools;
+import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
+import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.util.CCUUiUtil;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
+import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 /**
   * Created by samjithsadasivan on 12/18/18.
@@ -55,9 +76,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.logCaptureBtn)
     Button logCaptureBtn;
+
+    @BindView(R.id.logUploadBtn)
+    Button logUploadBtn;
     
-    @BindView(R.id.resetAppBtn)
-    Button resetAppBtn;
+    @BindView(R.id.pullDataBtn)
+    Button pullDataBtn;
     
     @BindView(R.id.deleteHis)
     Button deleteHis;
@@ -93,6 +117,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.crashButton) Button crashButton;
     public @BindView(R.id.btnRestart) Button btnRestart;
 
+    public @BindView(R.id.resetPassword) Button resetPassword;
+
+    public @BindView(R.id.resetAppBtn) Button resetAppBtn;
+
+    private final CompositeDisposable disposable = new CompositeDisposable();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -116,83 +146,92 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         biskitModeBtn.setChecked(Globals.getInstance().isSimulation());
         
         
-        logCaptureBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-    
-                alert.setTitle("Log File Name ");
-                FileSystemTools fileSystemTools = new FileSystemTools(getContext().getApplicationContext());
-                String date = fileSystemTools.timeStamp();
-                
-                //alert.setMessage(date);
-    
-                // Set an EditText view to get user input
-                final EditText input = new EditText(getActivity());
-                input.setText("Renatus_Logs_"+date);
-                input.setTextSize(20);
-                alert.setView(input);
-    
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
-                                }
-                                catch (IOException | SecurityException ex) {
-                                    ex.printStackTrace();
-                                    getActivity().runOnUiThread(() -> showErrorDialog(
-                                            "Unable to save log file: " + ex.getMessage()));
-                                }
+        logCaptureBtn.setOnClickListener(view13 -> {
+            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+            alert.setTitle("Log File Name ");
+            FileSystemTools fileSystemTools = new FileSystemTools(getContext().getApplicationContext());
+            String date = fileSystemTools.timeStamp();
+
+            //alert.setMessage(date);
+
+            // Set an EditText view to get user input
+            final EditText input = new EditText(getActivity());
+            input.setText("Renatus_Logs_"+date);
+            input.setTextSize(20);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
                             }
-                        }.start();
-                    }
-                });
-    
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Canceled.
-                    }
-                });
-    
-                alert.show();
-            }
-        });
-    
-        resetAppBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d("CCU"," ResetAppState ");
-                L.ccu().systemProfile.reset();
-                for (ZoneProfile p : L.ccu().zoneProfiles) {
-                    p.reset();
+                            catch (IOException | SecurityException ex) {
+                                ex.printStackTrace();
+                                getActivity().runOnUiThread(() -> showErrorDialog(
+                                        "Unable to save log file: " + ex.getMessage()));
+                            }
+                        }
+                    }.start();
                 }
-                L.ccu().zoneProfiles.clear();
-                Globals.getInstance().loadEquipProfiles();
-            }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
+        });
+
+        logUploadBtn.setOnClickListener( v -> {
+            new Thread() {
+                @Override
+                public void run() {
+                    UploadLogs.instanceOf().saveCcuLogs();
+                }
+            }.start();
+        });
+
+        pullDataBtn.setOnClickListener(view14 -> {
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),
+                    () -> {
+                        Site site = CCUHsApi.getInstance().getSite();
+                        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                        CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
+                        CCUHsApi.getInstance().importBuildingTuners();
+
+                        ArrayList<HashMap<Object, Object>> writablePoints = CCUHsApi.getInstance()
+                                .readAllEntities("point and tuner and default");
+                        ArrayList<HDict> hDicts = new ArrayList<>();
+                        for (HashMap<Object, Object> m : writablePoints) {
+                            HDict pid = new HDictBuilder().add("id", HRef.copy(m.get("id").toString())).toDict();
+                            hDicts.add(pid);
+                        }
+                        CCUHsApi.getInstance().importPointArrays(hDicts, null);
+                    },
+                    () -> {
+                        ProgressDialogUtils.hideProgressDialog();
+                    }
+            ));
         });
         
-        deleteHis.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d("CCU"," deleteHis data ");
-                new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
+        deleteHis.setOnClickListener(view15 -> {
+            Log.d("CCU"," deleteHis data ");
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
+                    () -> {
                         CCUHsApi.getInstance().deleteHistory();
+                    },
+                    () -> {
+                        ProgressDialogUtils.hideProgressDialog();
                     }
-                }.start();
-            }
+            ));
         });
     
         forceSyncBtn.setOnClickListener(new View.OnClickListener()
@@ -281,7 +320,43 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
         });
 
+        resetPassword.setOnClickListener(view12 -> {
+            final EditText taskEditText = new EditText(getActivity());
+            KeyListener keyListener = DigitsKeyListener.getInstance("0123456789");
+            taskEditText.setKeyListener(keyListener);
+
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                    .setTitle("Enter passcode")
+                    .setMessage("Enter default 75F password to reset application security passwords.")
+                    .setView(taskEditText)
+                    .setPositiveButton("Done", (dialog1, which) -> {
+                        if (taskEditText.getText().toString().trim().equals("7575")) {
+                            dialog1.dismiss();
+                            CCUUtils.resetPasswords(RenatusApp.getAppContext());
+                            Toast.makeText(getActivity(), "Password reset succeeded", Toast.LENGTH_SHORT).show();
+                        } else {
+                            taskEditText.getText().clear();
+                            Toast.makeText(getActivity(), "Incorrect passcode , Try Again!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+        });
+
+        resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
+            Log.d("CCU"," ResetAppState ");
+            L.ccu().systemProfile.reset();
+            for (ZoneProfile p : L.ccu().zoneProfiles) {
+                p.reset();
+            }
+            L.ccu().zoneProfiles.clear();
+            Globals.getInstance().loadEquipProfiles();
+        });
+
     }
+
+
     
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
@@ -363,6 +438,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         cwFlowRate.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                                     .getInt("cw_FlowRate", 0)));
     
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
     }
 
 }

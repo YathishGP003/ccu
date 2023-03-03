@@ -29,7 +29,7 @@ public class StandaloneConfigHandler {
 
         if (configPoint.getMarkers().contains(Tags.HIS)) {
             CCUHsApi.getInstance().writeHisValById(configPoint.getId(),
-                                        HSUtil.getPriorityVal(configPoint.getId()));
+                    HSUtil.getPriorityVal(configPoint.getId()));
         }
         
     }

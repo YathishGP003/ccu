@@ -168,7 +168,7 @@ class AlertsRepository(
     *
     * I.e. This will only send one alert for any message, until restart.  (existing logic).  Used for interal alerts.
     */
-   fun generateAlert(title: String, msg: String) {
+   fun generateAlert(title: String, msg: String, equipRef: String) {
       val alertDef = alertDefsMap[title]
 
       if (alertDef == null) {
@@ -180,7 +180,7 @@ class AlertsRepository(
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
          alertDef.alert.setmNotificationMsg(msg)
-         addAlert(AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack))
+         addAlert(AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null))
       }
    }
 
@@ -188,7 +188,7 @@ class AlertsRepository(
       if (dataStore.getActiveCMDeadAlerts().isNotEmpty()) {
          return
       }
-      generateAlert(title, msg ?: "")
+      generateAlert(title, msg ?: ""," ")
    }
 
 
@@ -200,7 +200,6 @@ class AlertsRepository(
 
       // evaluate and raise alert conditions from alert defs
       alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs)
-      fixNewStateAlerts(alertDefOccurrences)
 
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
@@ -245,15 +244,6 @@ class AlertsRepository(
    // also used by AlertDefs dev settings fragment
    fun getCurrentOccurrences() = alertDefOccurrences
 
-
-
-   private fun fixNewStateAlerts(alertDefList: List<AlertDefOccurrence> ){
-      alertDefList.forEach {
-         if(!it.testPositive && !it.alertDef.alert.isFixed){
-            fixAlert(it.alertDef.alert)
-         }
-      }
-   }
 
    /////   private   /////
 
@@ -308,7 +298,9 @@ class AlertsRepository(
       CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
 
       if (unsyncedAlerts.isNotEmpty()) {
-         alertSyncHandler.sync(unsyncedAlerts, dataStore)
+         if (CCUHsApi.getInstance().getAuthorised()) {
+            alertSyncHandler.sync(unsyncedAlerts, dataStore)
+         }
       }
    }
 

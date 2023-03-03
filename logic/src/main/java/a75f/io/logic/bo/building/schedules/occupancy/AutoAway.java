@@ -7,7 +7,9 @@ import java.util.Date;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 
 public class AutoAway implements OccupancyTrigger {
     private OccupancyUtil occupancyUtil;
@@ -32,13 +34,23 @@ public class AutoAway implements OccupancyTrigger {
         }
         
         Date lastOccupancy = occupancyUtil.getLastOccupancyDetectionTime();
+        Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
         //TODO-Schedules - check how this is handled now.
         if (lastOccupancy == null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Occupancy detection not active");
+            //It safe to initialize occupancy Detection when we are already occupied. Needed when a profile is
+            //created during occupancy and there is no history of detection.
+            if (occupancyMode == Occupancy.OCCUPIED) {
+                ScheduleUtil.setOccupancyDetection(CCUHsApi.getInstance(), occupancyUtil.getEquipRef(), true);
+            }
             return false;
         }
-    
-        Occupancy occupancyMode = occupancyUtil.getCurrentOccupiedMode();
-        if (occupancyMode == Occupancy.AUTOFORCEOCCUPIED || occupancyMode == Occupancy.UNOCCUPIED) {
+
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "Current occupancyMode : "+occupancyMode);
+        if (occupancyMode == Occupancy.FORCEDOCCUPIED ||
+                occupancyMode == Occupancy.AUTOFORCEOCCUPIED ||
+                occupancyMode == Occupancy.UNOCCUPIED ||
+                occupancyMode == Occupancy.VACATION) {
             return false;
         }
         

@@ -66,7 +66,7 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.hyperstat.cpu.HyperStatCpuFragment;
+import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
@@ -864,13 +864,14 @@ public class FloorPlanFragment extends Fragment {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
 
             if (floorToRename != null) {
-                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR,null);
-            }else {
-                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR,null);
+                isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
+            } else {
+                isConnectedToServer(FloorHandledCondition.ADD_NEW_FLOOR, null);
             }
         }
         return false;
     }
+
 
     private void addRenamedFloor(){
         if (floorToRename != null) {
@@ -1022,7 +1023,6 @@ public class FloorPlanFragment extends Fragment {
             Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.", Toast.LENGTH_LONG).show();
             return;
         }
-
         isConnectedToServer(FloorHandledCondition.ALLOW_RENAMING_FLOOR, floor);
     }
 
@@ -1078,7 +1078,6 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
         };
-
         new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
     }
 
@@ -1272,7 +1271,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isCCUPaired = false;
         boolean isPaired = false;
         boolean isSensePaired = false;
-        boolean isBPOSPaired = false;
+        boolean isOTNPaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1289,13 +1288,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("SENSE")) {
                     isSensePaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("BPOS")) {
-                    isBPOSPaired = true;
+                if (zoneEquips.get(i).getProfile().contains("OTN")) {
+                    isOTNPaired = true;
                 }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isBPOSPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isOTNPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1332,8 +1331,8 @@ public class FloorPlanFragment extends Fragment {
             if (isSensePaired) {
                 Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
-            if (isBPOSPaired) {
-                Toast.makeText(getActivity(), "BPOS is already paired in this zone", Toast.LENGTH_LONG).show();
+            if (isOTNPaired) {
+                Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1465,9 +1464,9 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
-                case BPOS:
-                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()),FragmentBPOSTempInfConfiguration.ID);
+                case OTN:
+                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
@@ -1475,9 +1474,11 @@ public class FloorPlanFragment extends Fragment {
                     break;
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatCpuFragment.newInstance(Short.parseShort(nodeAddress)
+                case HYPERSTAT_TWO_PIPE_FCU:
+                case HYPERSTAT_HEAT_PUMP_UNIT:
+                    showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatSenseFragment.ID);
+                            HyperStatFragment.ID);
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

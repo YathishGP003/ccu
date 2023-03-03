@@ -61,4 +61,9 @@ public class AlertGenerateHandler {
                     break;
             }
     }
+
+    public static void handleDeviceMessage(String cmd, String msg, String equipRef) {
+        AlertManager.getInstance().generateAlert(DEVICE_DEAD, msg, equipRef);
+    }
+
 }

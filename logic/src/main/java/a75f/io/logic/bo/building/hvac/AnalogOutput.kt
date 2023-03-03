@@ -8,5 +8,6 @@ enum class AnalogOutput {
     COOLING,
     FAN_SPEED,
     HEATING,
-    DCV_DAMPER
+    DCV_DAMPER,
+    WATER_VALVE
 }

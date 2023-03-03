@@ -177,7 +177,7 @@ public abstract class SystemProfile
             //All the zone equips served by AHU/RTU will have an ahuRef.
             if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
                 || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
-                || q.getMarkers().contains("vrv") || q.getMarkers().contains("bpos")) {
+                || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
                        q.getMarkers().contains("modbus") || q.getMarkers().contains("sense") || q.getMarkers().contains("hyperstat")) {
@@ -276,11 +276,11 @@ public abstract class SystemProfile
             }
         }
         Point airflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
-                .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz).build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
-        HashMap airflowSampleWaitTimePoint = hayStack.read("point and tuner and default and airflow and sample and wait and time");
+        HashMap airflowSampleWaitTimePoint = hayStack.read("point and tuner and default and airflow and sample and wait and time and not standalone");
         ArrayList<HashMap> airflowSampleWaitTimeArr = hayStack.readPoint(airflowSampleWaitTimePoint.get("id").toString());
         for (HashMap valMap : airflowSampleWaitTimeArr)
         {

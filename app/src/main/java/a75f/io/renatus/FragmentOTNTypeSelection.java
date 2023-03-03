@@ -1,0 +1,117 @@
+package a75f.io.renatus;
+
+import android.app.Dialog;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Optional;
+
+/*
+ * created by spoorthidev on 3-August-2021
+ */
+
+public class FragmentOTNTypeSelection extends BaseDialogFragment {
+
+    public static final String ID = FragmentOTNTypeSelection.class.getSimpleName();
+
+    @BindView(R.id.rl_otntempinf)
+    View tempinfo;
+    Zone mZone;
+    short mNodeAddress;
+    String mRoomName;
+    String mFloorName;
+    Boolean misPaired;
+
+
+    @Override
+    public String getIdString() {
+        return ID;
+    }
+
+
+    public static FragmentOTNTypeSelection newInstance(short meshAddress, String roomName,
+                                                       String floorName, boolean isPaired) {
+        FragmentOTNTypeSelection f = new FragmentOTNTypeSelection();
+        Bundle bundle = new Bundle();
+        bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
+        bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
+        bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
+        bundle.putBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED, isPaired);
+        f.setArguments(bundle);
+        return f;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.otn_typeselection, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
+        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
+        ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @OnClick(R.id.rl_otntempinf)
+    public void Onclicktempinf() {
+        if (checkForSingleModule()){
+            return;
+        }
+        showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
+                mFloorName, ProfileType.OTN),
+                FragmentOTNTempInfConfiguration.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.imageGoback)
+    void onGoBackButtonClick() {
+        removeDialogFragment(ID);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+    }
+
+
+    private boolean checkForSingleModule(){
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+        for (Equip equip: zoneEquips) {
+            if (!equip.getProfile().contains("OTN")) {
+                Toast.makeText(getActivity(), "Unpair all Modules and try", Toast.LENGTH_LONG).show();
+                closeAllBaseDialogFragments();
+                return true;
+            }
+        }
+        return false;
+    }
+}

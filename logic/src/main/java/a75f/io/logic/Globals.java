@@ -25,13 +25,15 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.bpos.BPOSProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
+import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.hyperstat.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -120,7 +122,8 @@ public class Globals {
     private int tempOverCount = 0;
 
     private long ccuUpdateTriggerTimeToken;
-    
+
+    private boolean recoveryMode = false;
     private Globals() {
     }
 
@@ -230,7 +233,10 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
+        updateCCUAhuRef();
+        setRecoveryMode();
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -343,7 +349,6 @@ public class Globals {
                 Watchdog.getInstance().start();
 
                 CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(300);
-                CCUHsApi.getInstance().trimObjectBoxHisStore();
 
             }
         }.start();
@@ -508,15 +513,27 @@ public class Globals {
                             cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuProfile);
                             break;
+                        case HYPERSTAT_HEAT_PUMP_UNIT:
+                            HyperStatHpuProfile hpuProfile = new HyperStatHpuProfile();
+                            hpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hpuProfile);
+                            break;
+
+                        case HYPERSTAT_TWO_PIPE_FCU:
+                            HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
+                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(pipe2Profile);
+                            break;
+
                         case HYPERSTAT_SENSE:
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
                             hssense.addHyperStatSenseEquip(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(hssense);
                             break;
-                        case BPOS:
-                            BPOSProfile bpos = new BPOSProfile();
-                            bpos.addBPOSEquip(Short.parseShort(eq.getGroup()));
-                            L.ccu().zoneProfiles.add(bpos);
+                        case OTN:
+                            OTNProfile otnProfile = new OTNProfile();
+                            otnProfile.addOTNEquip(Short.parseShort(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(otnProfile);
                             break;
                         case HYPERSTAT_VRV:
                             VrvProfile vrv = new VrvProfile();
@@ -630,5 +647,35 @@ public class Globals {
         if(heatDTMin >= heatDTMax ||  heatDTMindf >= heatDTMaxdf) return false;
         else return true;
     }
-    
+
+    public void setRecoveryMode() {
+        recoveryMode = SystemProperties.getInt("renatus_recovery",0) > 0;
+    }
+
+    public boolean isRecoveryMode() {
+        return recoveryMode;
+   }
+
+    public boolean getBuildingProcessStatus() {
+        return mProcessJob.getStatus();
+    }
+
+    /**
+     * Below method ensures systemEquip Id is mapped to ahuRef
+     */
+    private void updateCCUAhuRef(){
+        HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
+        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
+
+        if(systemProfile.isEmpty()){
+            return;
+        }
+
+        String ahuRef = ccuDevice.get("ahuRef").toString();
+        String systemProf = systemProfile.get("id").toString();
+
+        if(!(systemProf.equals(ahuRef))) {
+            CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+        }
+    }
 }

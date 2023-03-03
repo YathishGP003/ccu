@@ -17,6 +17,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.SystemProperties;
+import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
@@ -80,7 +82,13 @@ public class SplashActivity extends AppCompatActivity {
                                 startActivity(i);
                                 finish();
                             } else if(prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
-                                Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
+                                int recovery = SystemProperties.getInt("renatus_recovery",0);
+                                Intent i;
+                                if (recovery == 1) {
+                                    i = new Intent(SplashActivity.this, RenatusEngineeringActivity.class);
+                                } else {
+                                    i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
+                                }
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
                                 finish();

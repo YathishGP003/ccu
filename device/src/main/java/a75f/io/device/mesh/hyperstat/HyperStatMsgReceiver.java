@@ -8,6 +8,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -31,20 +32,24 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip;
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.jobs.HyperStatScheduler;
+import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.pubnub.ZoneDataInterface;
-
-import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
 public class HyperStatMsgReceiver {
     
@@ -92,11 +97,7 @@ public class HyperStatMsgReceiver {
                     HyperStatIduStatusMessage_t.parseFrom(messageArray);
                 HyperStatIduMessageHandler.handleIduStatusMessage(p1p2Status, address, hayStack);
             }
-    
-            if(currentTempInterface != null) {
-                currentTempInterface.refreshScreen(null);
-            }
-            
+
         } catch (InvalidProtocolBufferException e) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
         }
@@ -108,6 +109,9 @@ public class HyperStatMsgReceiver {
             CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
         }
         HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
+
+        Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
+
         DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
                     .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
         
@@ -125,14 +129,29 @@ public class HyperStatMsgReceiver {
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
         writeDesiredTemp(message, hsEquip, hayStack);
-        updateConditioningMode(hsEquip.getId(),message.getConditioningModeValue(),nodeAddress);
-        updateFanMode(hsEquip.getId(),message.getFanSpeed().ordinal(),nodeAddress);
+        updateFanConditioningMode(hsEquip.getId(),message.getFanSpeed().ordinal(),message.getConditioningModeValue(),hsEquip,nodeAddress);
+        ZoneProfile profile = L.getProfile((short) nodeAddress);
+        runProfileAlgo(profile,(short) nodeAddress);
 
         /** send the updated control  message*/
         HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
         sendAcknowledge(nodeAddress);
     }
-    
+
+    private static void runProfileAlgo(ZoneProfile profile, short nodeAddress){
+
+        if (profile instanceof HyperStatCpuProfile) {
+            HyperStatCpuProfile hyperStatCpuProfile = (HyperStatCpuProfile) profile;
+            hyperStatCpuProfile.processHyperStatCPUProfile((HyperStatCpuEquip) Objects.requireNonNull(hyperStatCpuProfile.getHyperStatEquip(nodeAddress)));
+        }
+        if(profile instanceof HyperStatPipe2Profile){
+            HyperStatPipe2Profile hyperStatPipe2Profile = (HyperStatPipe2Profile) profile;
+            hyperStatPipe2Profile.processHyperStatPipeProfile((HyperStatPipe2Equip) Objects.requireNonNull(hyperStatPipe2Profile.getHyperStatEquip(nodeAddress)));
+
+        }
+    }
+
+
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,
                                                      CCUHsApi hayStack) {
@@ -223,7 +242,7 @@ public class HyperStatMsgReceiver {
      */
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
 
-        hayStack.writeHisValById(rawPoint.getId(), val);
+        hayStack.writeHisValById(rawPoint.getId(), (val/100));
         int index = (int)Double.parseDouble(rawPoint.getType());
 
         if(index == SensorType.DOOR_WINDOW_SENSOR.ordinal()){ // it is DOOR_WINDOW_SENSOR
@@ -338,49 +357,54 @@ public class HyperStatMsgReceiver {
     
     private static void writeDesiredTemp(HyperStatLocalControlsOverrideMessage_t message, Equip hsEquip,
                                          CCUHsApi hayStack) {
-        HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
+
         double coolingDesiredTemp = (double)message.getSetTempCooling()/2;
         double heatingDesiredTemp = (double)message.getSetTempHeating()/2;
-        double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
-        
-        if (!coolingDtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: "+hsEquip.getDisplayName());
+
+
+        double currentCoolingDesiredTemp = HyperStatMessageGenerator.getDesiredTempCooling(hsEquip.getId());
+        double currentHeatingDesiredTemp = HyperStatMessageGenerator.getDesiredTempHeating(hsEquip.getId());
+
+        if(currentHeatingDesiredTemp != heatingDesiredTemp || currentCoolingDesiredTemp != coolingDesiredTemp) {
+            double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
+
+            HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!coolingDtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+
+            HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!heatingDtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+            HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
+                    + hsEquip.getId() + "\"");
+            if (!dtPoint.isEmpty()) {
+                CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double) message.getSetTempCooling());
+            } else {
+                CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: " + hsEquip.getDisplayName());
+            }
+
+            SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                    new Point.Builder().setHashMap(heatingDtPoint).build(),
+                    new Point.Builder().setHashMap(dtPoint).build(),
+                    coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
         }
-    
-    
-        HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
-        if (!heatingDtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: "+hsEquip.getDisplayName());
-        }
-    
-        HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
-                                               +hsEquip.getId()+ "\"");
-        if (!dtPoint.isEmpty()) {
-            CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double)message.getSetTempCooling());
-        } else {
-            CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: "+hsEquip.getDisplayName());
-        }
-    
-        SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
-                                                         new Point.Builder().setHashMap(heatingDtPoint).build(),
-                                                         new Point.Builder().setHashMap(dtPoint).build(),
-                                                         coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
-    
     }
 
     public static void setCurrentTempInterface(ZoneDataInterface in) {
         currentTempInterface = in; }
 
 
-    public static void updateConditioningMode(String equipId, double mode, int nodeAddress){
-        PossibleConditioningMode possibleMode =
-                HSHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
+    public static void updateConditioningMode(String equipId, int mode, PossibleConditioningMode possibleMode){
         int conditioningMode;
         if (mode == HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO.ordinal()){
             if (possibleMode != PossibleConditioningMode.BOTH) {
@@ -403,20 +427,42 @@ public class HyperStatMsgReceiver {
             }
             conditioningMode = StandaloneConditioningMode.OFF.ordinal();
         }
-        HyperStatScheduler.Companion.updateHyperstatUIPoints(equipId,
-                "temp and conditioning and mode and cpu", conditioningMode);
+        HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints(equipId,
+                "zone and sp and conditioning and mode", conditioningMode);
     }
 
-    public static void updateFanMode(String equipId, int mode, int nodeAddress){
-        PossibleFanMode possibleMode =
-                HSHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
+    public static void updateFanMode(String equipId, int mode, PossibleFanMode possibleMode){
         int fanMode = getLogicalFanMode(possibleMode,mode);
         if(fanMode!= -1) {
-            HyperStatScheduler.Companion.updateHyperstatUIPoints(
-                    equipId, "fan and operation and mode and cpu", fanMode);
+            HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints(
+                    equipId, "zone and sp and fan and operation and mode", fanMode);
         }
 
     }
+
+
+    public static void updateFanConditioningMode(String equipId, int fanMode,int conditioningMode, Equip equip, int nodeAddress){
+        PossibleConditioningMode possibleConditioningMode = PossibleConditioningMode.OFF;
+        PossibleFanMode possibleFanMode = PossibleFanMode.OFF;
+
+        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())){
+            possibleConditioningMode = HSHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
+            possibleFanMode = HSHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
+        }
+        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())){
+            possibleConditioningMode = PossibleConditioningMode.BOTH;
+            possibleFanMode = HSHaystackUtil.Companion.getPipePossibleFanModeSettings(nodeAddress);
+        }
+        if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())){
+            possibleConditioningMode = PossibleConditioningMode.BOTH;
+            possibleFanMode = HSHaystackUtil.Companion.getHpuPossibleFanModeSettings(nodeAddress);
+        }
+
+
+        updateFanMode(equipId,fanMode,possibleFanMode);
+        updateConditioningMode(equipId,conditioningMode,possibleConditioningMode);
+    }
+
 
     private static void sendAcknowledge(int address){
         Log.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement");

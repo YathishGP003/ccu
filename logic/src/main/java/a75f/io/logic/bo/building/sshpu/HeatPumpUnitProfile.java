@@ -103,8 +103,6 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
-                CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
-                        "equipRef == \"" + hpuEquip.getId() + "\"", 0.0);
                 continue;
 
             }
@@ -140,11 +138,6 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", fanModeSaved);
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
-            }
-            if(occuStatus != null){
-                hpuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            }else {
-                hpuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 

@@ -328,7 +328,7 @@ public class DabTuners {
                                                        .addMarker("stageUp")
                                                        .addMarker("timer").addMarker("counter").addMarker("sp")
                                                        .setMinVal("0")
-                                                       .setMaxVal("30")
+                                                       .setMaxVal("60")
                                                        .setIncrementVal("1")
                                                        .setUnit("m")
                                                        .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -349,7 +349,7 @@ public class DabTuners {
                                                          .addMarker("stageDown")
                                                          .addMarker("timer").addMarker("counter").addMarker("sp")
                                                          .setMinVal("0")
-                                                         .setMaxVal("30")
+                                                         .setMaxVal("60")
                                                          .setIncrementVal("1")
                                                          .setUnit("m")
                                                          .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -588,7 +588,6 @@ public class DabTuners {
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hisItems.add(HSUtil.getHisItemForWritable(zoneVOCThresholdId));
 
-
         Point autoAwaySetback   = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"autoAwaySetback")
                 .setSiteRef(siteRef)
@@ -605,7 +604,7 @@ public class DabTuners {
         BuildingTunerUtil.updateTunerLevels(autoAwaySetbackId, roomRef, hayStack);
         hayStack.writePointForCcuUser(autoAwaySetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwaySetbackId, HSUtil.getPriorityVal(autoAwaySetbackId));
-    
+
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
 

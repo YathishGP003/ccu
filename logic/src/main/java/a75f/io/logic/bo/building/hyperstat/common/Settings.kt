@@ -8,7 +8,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
  * Created on 7/7/21.
  */
 
-const val PROFILE ="Hyperstat CPU"
 
 enum class HSZoneStatus {
    STATUS,
@@ -26,8 +25,8 @@ enum class HSZoneStatus {
  * Basic settings a user in the space might set.  These might be included (moved to) UserIntents
  */
 data class BasicSettings(
-   val conditioningMode: StandaloneConditioningMode,
-   val fanMode: StandaloneFanStage,
+    val conditioningMode: StandaloneConditioningMode,
+    var fanMode: StandaloneFanStage,
 )
 
 /**
@@ -60,6 +59,15 @@ data class HyperStatProfileTuners(
    var autoAwayZoneTimer: Int = 30,
    var autoAwayZoneSetbackTemp: Int = 2, // (°F)
 
+   // 2pipe additional tuners
+   var heatingThreshold: Double = 85.0, // (°F)
+   var coolingThreshold: Double = 65.0, // (°F)
+   var auxHeating1Activate: Double = 3.0,      // (F)
+   var auxHeating2Activate: Double = 4.0,      // (F)
+   var waterValveSamplingOnTime : Int = 2,   // min
+   var waterValveSamplingWaitTime : Int =  3, // 58,   // min
+   var waterValveSamplingDuringLoopDeadbandOnTime : Int = 2,   // min
+   var waterValveSamplingDuringLoopDeadbandWaitTime : Int = 5,   // min
 )
 
 // Used as key to hold point id
@@ -84,3 +92,25 @@ enum class AnalogOutChanges{
    NOCHANGE,ENABLED,MAPPING,MIN,MAX,LOW,MED,HIGH
 }
 
+
+data class PointBasicInfo(
+   val siteRef: String,
+   val gatewayRef: String,
+   val timeZone: String,
+   val siteDis: String
+)
+
+data class ConfigState(
+   val enabled: Boolean,
+   val association: Int
+)
+
+data class AnalogConfigState(
+   val enabled: Boolean,
+   val association: Int,
+   val voltageAtMin: Double,   // create position to value mapping here.
+   val voltageAtMax: Double,    // create position to value mapping here.
+   val perAtFanLow: Double,
+   val perAtFanMedium: Double,
+   val perAtFanHigh: Double
+)

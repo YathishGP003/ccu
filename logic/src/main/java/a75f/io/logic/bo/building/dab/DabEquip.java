@@ -35,6 +35,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -45,6 +46,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -836,6 +838,14 @@ public class DabEquip
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    if (config.damper2Type < DamperType.MAT.ordinal() &&
+                                    (config.reheatType == 0 || config.reheatType > ReheatType.OneStage.ordinal())) {
+                        HashMap<Object, Object> normalizedSecDamper = hayStack
+                                .readEntity("normalized and secondary and damper and cmd and equipRef ==\""+equipRef+"\"");
+                        if (!normalizedSecDamper.isEmpty()) {
+                            DeviceUtil.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.name(), normalizedSecDamper.get("id").toString());
+                        }
+                    }
                     break;
                 case RELAY_ONE:
                 case RELAY_TWO:

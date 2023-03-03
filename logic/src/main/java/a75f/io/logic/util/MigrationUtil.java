@@ -317,6 +317,16 @@ public class MigrationUtil {
             PreferenceUtil.setTiProfileMigration();
         }
 
+        if(!PreferenceUtil.getstandaloneCoolingAirflowTempLowerOffsetMigration()){
+            createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setstandaloneCoolingAirflowTempLowerOffsetMigration();
+        }
+
+        if(!PreferenceUtil.getStandaloneAirflowSampleWaitMigration()){
+            createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
+        }
+
         L.saveCCUState();
     }
 
@@ -1796,4 +1806,30 @@ public class MigrationUtil {
         }
     }
 
+
+    private static void createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> standaloneAirflowTempLowerOffsetPoints = ccuHsApi.
+                readAllEntities("point and airflow and standalone and cooling and lower and not stage2");
+        String updatedUnit = "\u00B0F";
+        for (HashMap<Object, Object> standaloneAirflowTempLowerOffsetPoint : standaloneAirflowTempLowerOffsetPoints) {
+            Point updatedPoint = new Point.Builder().setHashMap(standaloneAirflowTempLowerOffsetPoint).setUnit(updatedUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+
+    }
+
+    private static void createStandaloneAirflowSampleWaitMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> standaloneAirflowSampleWaitPoints = ccuHsApi.
+                readAllEntities("standalone and airflow and default and sample");
+        for (HashMap<Object, Object> standaloneAirflowSampleWaitTime : standaloneAirflowSampleWaitPoints) {
+            String updateUnit = "m";
+            Point updatedStandaloneAirflowSampleWaitTimePoint = new Point.Builder().
+                    setHashMap(standaloneAirflowSampleWaitTime).setUnit(updateUnit).build();
+
+            CCUHsApi.getInstance().updatePoint(updatedStandaloneAirflowSampleWaitTimePoint,
+                    updatedStandaloneAirflowSampleWaitTimePoint.getId());
+        }
+    }
 }

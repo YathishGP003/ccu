@@ -288,7 +288,6 @@ public class Globals {
                         multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
             }
-            TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
 
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());

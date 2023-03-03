@@ -7,6 +7,8 @@
     <string name="title_ble">BLE</string>
     <string name="main_content">Main Content</string>
     <string name="ble_content">BLE</string>
+    <string name="edit_icon">&#xf044;</string>
+    <string name="delete_icon">&#xf1f8;</string>
 
 
     <string name="unknown_device">unknown device</string>
@@ -818,7 +820,7 @@
     <string name="label_maintempoffset">MAIN SENSOR\nTEMP OFFSET</string>
 
     <!--TEMPERATURE INFLUENCING Screen-->
-    <string name="label_tempoffsetnp">TEMP OFFSET</string>
+    <string name="label_tempoffsetnp">ROOM TEMP OFFSET</string>
 
     <!--SYSTEM DEVICES AND OAO Screen-->
     <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>
@@ -967,6 +969,7 @@
     <string name="txt_compensate_humidity">Compensate for Humidity</string>
     <string name="txt_demand_response_mode">Demand Response Mode</string>
     <string name="txt_ccu">CCU</string>
+    <string name="txt_oao">OAO</string>
     <string name="txt_system_profile">System Profile</string>
     <string name="txt_occupancy_status">Occupancy Status:</string>
     <string name="txt_equipment_status">Equipment Status:</string>
@@ -1296,6 +1299,9 @@
     <string name="step_for_kactor_values">.01</string>
     <string name="default_val_for_kfactor">100</string>
     <string name="analog_in1">Analog-in1</string>
+    <string name="room_temperature_offset">Room Temperature offset</string>
+    <string name="room_temperature">Room Temperature</string>
+    <string name="supply_air_temperature">Supply Air temperature</string>
 
     <string name="label_usereheat">Use Reheat</string>
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>

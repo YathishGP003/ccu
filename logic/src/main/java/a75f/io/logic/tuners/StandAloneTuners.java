@@ -102,7 +102,7 @@ public class StandAloneTuners {
                                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                .addMarker("stage1").addMarker("heating").addMarker("sp").addMarker("lower").addMarker("offset")
-                                               .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                                               .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                                                .setTz(tz)
                                                .build();
         String saStage1HeatingLowerOffsetId = hayStack.addPoint(saStage1HeatingLowerOffset);
@@ -115,7 +115,7 @@ public class StandAloneTuners {
                                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                .addMarker("stage1").addMarker("heating").addMarker("sp").addMarker("upper").addMarker("offset")
-                                               .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                                               .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                                                .setTz(tz)
                                                .build();
         String saStage1HeatingUpperOffsetId = hayStack.addPoint(saStage1HeatingUpperOffset);

@@ -8,7 +8,8 @@ public enum OccupiedTrigger {
     KeyCardInput(Occupancy.KEYCARD_AUTOAWAY),
     Autoaway(Occupancy.AUTOAWAY),
     EmergencyConditioning(Occupancy.EMERGENCY_CONDITIONING),
-    Occupied (Occupancy.OCCUPIED);
+    Occupied (Occupancy.OCCUPIED),
+    NoConditioning(Occupancy.NO_CONDITIONING);
     
     private final Occupancy mappedOccupancy;
     private OccupiedTrigger(Occupancy occupancy) {

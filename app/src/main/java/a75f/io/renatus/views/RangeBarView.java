@@ -127,7 +127,7 @@ public class RangeBarView extends LinearLayout {
         coolLL = getTuner(coolLLMap.get("id").toString());
         coolUL = getTuner(coolULMap.get("id").toString());
 
-        rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
+        rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb, false);
 
         double diffValue = (coolLL - heatLL);
         if (diffValue <= (hdb + cdb)){
@@ -162,7 +162,7 @@ public class RangeBarView extends LinearLayout {
         coolValue = getTuner(coolDT.get("id").toString());
         heatValue = getTuner(heatDT.get("id").toString());
 
-        rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
+        rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb, true);
 
         double diffValue = (coolLL - heatLL);
         if (diffValue <= (hdb + cdb)){

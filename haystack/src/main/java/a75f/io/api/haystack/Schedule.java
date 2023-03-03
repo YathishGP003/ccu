@@ -502,24 +502,37 @@ public class Schedule extends Entity
 
     private static Schedule mergeSpecialScheduleWithZoneSchedule(Set<Schedule.Days> combinedSpecialSchedules,
                                                                  Schedule zoneSchedule, boolean isZone){
+        if(combinedSpecialSchedules.isEmpty()){
+            Log.i("CCU_SCHEDULER","schedule with out special schedule "+zoneSchedule);
+            return zoneSchedule;
+        }
         Set<Schedule.Days> zoneScheduleDays = new TreeSet<>(sortSchedules());
         zoneScheduleDays.addAll(zoneSchedule.getDays());
         /*
-        The below loop is to handle overnight schedule
+        The below loop is to handle overnight schedule and ONS stands for overnight schedule
          */
-        for(Schedule.Days days : zoneScheduleDays){
-            if(days.getEthh() < days.getSthh() || (days.getEthh() == days.getSthh() && days.getEtmm() < days.getStmm())){
+        List<Days> nextDayONSList = new ArrayList<>();
+        for (Schedule.Days days : zoneScheduleDays) {
+            if (days.getEthh() < days.getSthh() || (days.getEthh() == days.getSthh()
+                    && days.getEtmm() < days.getStmm())) {
+                Days nextDayONS = new Days();
+                nextDayONS.setDay((days.getDay()+1) % 7);
+                nextDayONS.setSthh(0);
+                nextDayONS.setStmm(0);
+                nextDayONS.setEthh(days.getEthh());
+                nextDayONS.setEtmm(days.getEtmm());
+                nextDayONS.setHeatingVal(days.getHeatingVal());
+                nextDayONS.setCoolingVal(days.getCoolingVal());
+                nextDayONSList.add(nextDayONS);
                 days.setEthh(23);
                 days.setEtmm(59);
             }
+            nextDayONSList.add(days);
         }
-
-        if(!combinedSpecialSchedules.isEmpty()){
-            List<Schedule.Days> intrinsicScheduleDays = new ArrayList<>();
-            intrinsicScheduleDays.addAll(schedulesWithPriority(combinedSpecialSchedules, zoneScheduleDays));
-            zoneSchedule = createScheduleForSpecialSchedule(intrinsicScheduleDays, isZone);
-        }
-        return zoneSchedule;
+        zoneScheduleDays.addAll(nextDayONSList);
+        List<Schedule.Days> intrinsicScheduleDays = new ArrayList<>();
+        intrinsicScheduleDays.addAll(schedulesWithPriority(combinedSpecialSchedules, zoneScheduleDays));
+        return createScheduleForSpecialSchedule(intrinsicScheduleDays, isZone);
     }
     public static Zone getZoneforEquipId(String equipId)
     {

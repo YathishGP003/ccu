@@ -60,6 +60,8 @@ public class PreferenceUtil {
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
 
+    private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -526,5 +528,13 @@ public class PreferenceUtil {
 
     public static void setTiProfileMigration() {
         setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
+
+    public static boolean getDabReheatStage2Migration() {
+        return getBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION);
+    }
+
+    public static void setDabReheatStage2Migration() {
+        setBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION, true);
     }
 }

@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,8 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -56,8 +60,6 @@ import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-
-import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -548,7 +550,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
         mDabProfile.getProfileConfiguration().put(mSmartNodeAddress, dabConfig);
         if (mProfileConfig == null) {
-            mDabProfile.addDabEquip(mSmartNodeAddress, dabConfig, floorRef, zoneRef );
+            mDabProfile.addDabEquip(mSmartNodeAddress, dabConfig, floorRef, zoneRef, mNodeType );
         } else {
             mDabProfile.updateDabEquip(dabConfig);
         }

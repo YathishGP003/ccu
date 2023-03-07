@@ -8,6 +8,9 @@ import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
 
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -47,6 +50,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
+import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -77,7 +81,7 @@ public class DabEquip
     double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
 
     private ControlLoop heatingLoop;
-    
+
     public DabEquip(ProfileType type, int node)
     {
         profileType = type;
@@ -122,8 +126,9 @@ public class DabEquip
     
     }
 
-    public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef)
+    public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)
     {
+        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -134,7 +139,7 @@ public class DabEquip
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
-    
+
         Equip.Builder b = new Equip.Builder()
                                   .setSiteRef(siteRef)
                                   .setDisplayName(equipDis)
@@ -143,7 +148,7 @@ public class DabEquip
                                   .setProfile(profileType.name())
                                   .setPriority(config.getPriority().name())
                                   .addMarker("equip").addMarker("dab").addMarker("zone")
-                                  .addMarker("smartnode").setAhuRef(ahuRef)
+                                  .addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE).setAhuRef(ahuRef)
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
@@ -458,7 +463,14 @@ public class DabEquip
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+
+        SmartNode device;
+        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
+            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }else  {
+            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }
+
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);

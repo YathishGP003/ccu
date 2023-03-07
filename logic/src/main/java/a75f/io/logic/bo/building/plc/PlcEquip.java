@@ -11,11 +11,13 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
+import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
@@ -66,7 +68,9 @@ public class PlcEquip {
         return plc;
     }
 
-    public void createEntities(PlcProfileConfiguration config, String floorRef, String roomRef, String processVar, String dynamicTargetTag) {
+    public void createEntities(PlcProfileConfiguration config, String floorRef, String roomRef,
+                               String processVar, String dynamicTargetTag, NodeType nodeType) {
+        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -85,7 +89,7 @@ public class PlcEquip {
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name())
                 .addMarker("equip").addMarker("pid").addMarker("zone")
-                .setGatewayRef(ahuRef).addMarker("smartnode")
+                .setGatewayRef(ahuRef).addMarker(isSmartNode ? Tags.SMART_NODE: Tags.HELIO_NODE)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr)).build();
 
@@ -277,7 +281,12 @@ public class PlcEquip {
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "pid", tz, false));
         
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        SmartNode device;
+        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
+            device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }else  {
+            device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        }
 
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);

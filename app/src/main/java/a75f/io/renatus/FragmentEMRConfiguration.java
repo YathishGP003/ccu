@@ -4,8 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +11,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
@@ -166,7 +166,7 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
     public void setupEmrProfile() {
         
         mEmrProfile = new EmrProfile();
-        mEmrProfile.addEmrEquip(mSmartNodeAddress,floorRef, zoneRef);
+        mEmrProfile.addEmrEquip(mSmartNodeAddress,floorRef, zoneRef, mNodeType);
         L.ccu().zoneProfiles.add(mEmrProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Emr Config: Profiles - "+L.ccu().zoneProfiles.size());
     }

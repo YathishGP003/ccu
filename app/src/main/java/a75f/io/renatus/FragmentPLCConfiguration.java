@@ -2,13 +2,8 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-
-import a75f.io.api.haystack.CCUHsApi;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,19 +21,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.sensors.NativeSensor;
-import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
+import a75f.io.logic.bo.building.sensors.NativeSensor;
+import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -661,7 +659,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         }
 
         if (mProfileConfig == null) {
-            mPlcProfile.addPlcEquip(mSmartNodeAddress, p, floorRef, zoneRef, processVariableTag, dynamicTargetTag);
+            mPlcProfile.addPlcEquip(mSmartNodeAddress, p, floorRef, zoneRef, processVariableTag, dynamicTargetTag, mNodeType);
         } else {
             mPlcProfile.updatePlcEquip(p,floorRef, zoneRef, processVariableTag, dynamicTargetTag);
         }

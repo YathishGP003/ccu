@@ -48,7 +48,7 @@ public class SmartNode
     public SmartNode(int address, String site, String floor, String room, String equipRef) {
         Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
-                .addMarker("network").addMarker("node").addMarker("smartnode").addMarker("his")
+                .addMarker("network").addMarker("node").addMarker(Tags.SMART_NODE).addMarker("his")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
@@ -79,8 +79,11 @@ public class SmartNode
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         tz = siteMap.get("tz").toString();
     }
-    
-    private void createPoints() {
+
+    public SmartNode() {
+    }
+
+     void createPoints() {
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
                                 .setShortDis("Analog1-In Physical Sensor")

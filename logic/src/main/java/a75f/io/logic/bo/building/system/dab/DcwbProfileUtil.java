@@ -219,10 +219,8 @@ public class DcwbProfileUtil {
     }
     
     private static void deleteLoopPoint(String query, CCUHsApi hayStack) {
-        HashMap point = hayStack.read("system and "+query);
-        if (!point.isEmpty()) {
-            hayStack.deleteWritablePoint(point.get("id").toString());
-        }
+        ArrayList<HashMap<Object, Object>> loopPoints = hayStack.readAllEntities("system and "+query);
+        loopPoints.forEach(point -> hayStack.deleteEntityTree(point.get("id").toString()));
     }
     
 }

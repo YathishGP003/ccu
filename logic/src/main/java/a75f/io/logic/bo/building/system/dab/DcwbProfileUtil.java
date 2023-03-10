@@ -7,6 +7,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 public class DcwbProfileUtil {
     
@@ -215,12 +217,18 @@ public class DcwbProfileUtil {
     
     private static void deleteConfigPoint(String query, CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> configPoints = hayStack.readAllEntities("system and config and "+query);
-        configPoints.forEach( point -> hayStack.deleteWritablePoint(point.get("id").toString()));
+        configPoints.forEach( point -> {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "deleteConfigPoint "+point);
+            hayStack.deleteWritablePoint(point.get("id").toString());
+        });
     }
     
     private static void deleteLoopPoint(String query, CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> loopPoints = hayStack.readAllEntities("system and "+query);
-        loopPoints.forEach(point -> hayStack.deleteEntityTree(point.get("id").toString()));
+        loopPoints.forEach(point -> {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "deleteLoopPoint "+point);
+            hayStack.deleteEntityTree(point.get("id").toString());
+        });
     }
     
 }

@@ -586,7 +586,7 @@ class VrvEquip(hsApi : CCUHsApi,
             getConfigNumVal("max and humidity and sp"),
             getConfigNumVal("masterController and mode and sp"),
             (getConfigNumVal("auto and away") > 0),
-            (getConfigNumVal("auto and forced and occupancy") > 0)
+            (getConfigNumVal("auto and forced and occupied") > 0)
         )
     }
 
@@ -599,9 +599,9 @@ class VrvEquip(hsApi : CCUHsApi,
         val isAutoAwayEnabled  = if(config.isAutoAwayEnabled) 1.0 else 0.0
         setConfigNumVal("auto and away",isAutoAwayEnabled);
         val isAutoForcedOccupiedEnabled  = if(config.isAutoForcedOccupiedEnabled) 1.0 else 0.0
-        setConfigNumVal("auto and forced and occupancy",isAutoForcedOccupiedEnabled);
+        setConfigNumVal("auto and forced and occupied",isAutoForcedOccupiedEnabled);
         setHisVal("auto and away",isAutoAwayEnabled);
-        setHisVal("auto and forced and occupancy",isAutoForcedOccupiedEnabled);
+        setHisVal("auto and forced and occupied",isAutoForcedOccupiedEnabled);
 
     }
 

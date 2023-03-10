@@ -274,7 +274,7 @@ public class HSUtil
         HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
         return equip.containsKey(Tags.HYPERSTAT) &&
                 ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
-                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU));
+                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU) || equip.containsKey(Tags.VRV));
     }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {

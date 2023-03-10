@@ -56,7 +56,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 CCUHsApi.getInstance().readHisValByQuery("point and idu and connectionStatus " +
                         "and group == \"$nodeAddr\"").toInt(),
                 (getConfigNumVal("vrv and auto and away and enabled and standalone", nodeAddr) > 0),
-                (getConfigNumVal(" vrv and auto and forced and occupancy and standalone", nodeAddr) > 0)
+                (getConfigNumVal(" vrv and auto and forced and occupied and standalone", nodeAddr) > 0)
                 )
         } ?: run {
             return VrvViewState(

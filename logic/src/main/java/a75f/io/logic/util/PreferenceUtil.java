@@ -65,8 +65,7 @@ public class PreferenceUtil {
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
 
-
-
+    private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
     public static void setContext(Context c) {
         context= c;
@@ -564,5 +563,13 @@ public class PreferenceUtil {
 
     public static void setAirflowSampleWaitTimeUnitMigration() {
         setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
+    }
+
+    public static boolean getAutoForcedTagNameCorrectionMigration() {
+        return getBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION);
+    }
+
+    public static void setAutoForcedTagNameCorrectionMigration() {
+        setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
     }
 }

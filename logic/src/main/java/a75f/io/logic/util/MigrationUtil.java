@@ -327,6 +327,11 @@ public class MigrationUtil {
             PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
         }
 
+        if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){
+            changeOccupancyToOccupiedForAutoForcedEnabledPoint(CCUHsApi.getInstance());
+            PreferenceUtil.setAutoForcedTagNameCorrectionMigration();
+        }
+
         L.saveCCUState();
     }
 
@@ -1830,6 +1835,27 @@ public class MigrationUtil {
 
             CCUHsApi.getInstance().updatePoint(updatedStandaloneAirflowSampleWaitTimePoint,
                     updatedStandaloneAirflowSampleWaitTimePoint.getId());
+        }
+    }
+
+    private static void changeOccupancyToOccupiedForAutoForcedEnabledPoint(CCUHsApi instance) {
+
+        ArrayList<HashMap<Object, Object>> vrvEquips = CCUHsApi.getInstance().readAllEntities("vrv and equip and zone");
+        for(HashMap<Object, Object> equip : vrvEquips){
+
+            HashMap<Object, Object> pointHM= CCUHsApi.getInstance().readEntity("vrv and auto and forced and occupancy and equipRef== \"" + equip.get("id") + "\"");
+            if(pointHM.size() > 0){
+                Point tempPoint = new Point.Builder().setHashMap(pointHM).removeMarker("occupancy").addMarker("occupied").build();
+                tempPoint.setDisplayName(equip.get("dis")+"-autoForceOccupiedEnabled");
+                instance.updatePoint(tempPoint,tempPoint.getId());
+            }
+
+           HashMap<Object, Object> pointHM1 = CCUHsApi.getInstance().readEntity("vrv and auto and away and enabled and equipRef== \"" + equip.get("id") + "\"");
+           if(pointHM1.size() > 0){
+               Point tempPoint = new Point.Builder().setHashMap(pointHM1).build();
+               tempPoint.setDisplayName(equip.get("dis")+"-autoawayEnabled");
+               instance.updatePoint(tempPoint,tempPoint.getId());
+           }
         }
     }
 }

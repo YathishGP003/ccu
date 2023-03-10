@@ -47,11 +47,19 @@ public class IntrinsicScheduleCreator {
     private Set<Schedule.Days> calculateIntrinsicScheduleWithSpecialSchedules(int dayNumber){
         Set<Schedule.Days> zonesDayScheduleSet = new TreeSet<>(sortSchedules());
         List<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
+        boolean isConsidered = false;
+
         for(HashMap<Object, Object> room : rooms){
+            if(!isZoneConsideredForIntrinsicSchedule(room)){
+                continue;
+            }
+            isConsidered = true;
             zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(
                     room.get(Tags.ID).toString(), dayNumber));
         }
-        zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(null, dayNumber));
+        if(isConsidered) {
+            zonesDayScheduleSet.addAll(SpecialSchedule.getSpecialScheduleForRunningWeekForZone(null, dayNumber));
+        }
         return zonesDayScheduleSet;
     }
 

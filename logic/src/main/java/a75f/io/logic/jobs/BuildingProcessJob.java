@@ -4,7 +4,6 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.IllegalInstantException;
-
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -56,7 +55,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         L.pingCloudServer();
         
-        if (!CCUHsApi.getInstance().isCCUConfigured()) {
+        if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-BuildingProcessJob ");
             return;
         }
@@ -115,23 +114,35 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
     private void runZoneProfilesAlgorithm() {
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
-            profile.updateZonePoints();
+            try {
+                profile.updateZonePoints();
+            } catch (Exception e){
+                CcuLog.e(L.TAG_CCU_JOB, "runZoneProfilesAlgorithm Failed ! ", e);
+            }
         }
     }
     
     private void runOAOAlgorithm() {
-        if (L.ccu().oaoProfile != null) {
-            L.ccu().oaoProfile.doOAO();
-        } else {
-            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
-                                                      (double) EpidemicState.OFF.ordinal());
+        try{
+            if (L.ccu().oaoProfile != null) {
+                L.ccu().oaoProfile.doOAO();
+            } else {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state",
+                                                          (double) EpidemicState.OFF.ordinal());
+            }
+        } catch (Exception e){
+            CcuLog.e(L.TAG_CCU_JOB, "runOAOAlgorithm Failed ! ", e);
         }
     }
     
     private void runSystemControlAlgorithm() {
-        if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
-            L.ccu().systemProfile.doSystemControl();
-        }
+       try {
+            if (!Globals.getInstance().isTestMode() && !Globals.getInstance().isTemporaryOverrideMode()) {
+                L.ccu().systemProfile.doSystemControl();
+            }
+       } catch (Exception e) {
+           CcuLog.e(L.TAG_CCU_JOB, "runSystemControlAlgorithm Failed ! ", e);
+       }
     }
     
     private void handleSync() {

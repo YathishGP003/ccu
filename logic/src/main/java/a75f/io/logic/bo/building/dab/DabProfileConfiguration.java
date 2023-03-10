@@ -32,4 +32,7 @@ public class DabProfileConfiguration extends BaseProfileConfiguration
     public int minCFMForIAQ;
     public boolean enableCFMControl;
     public double kFactor;
+
+    public int reheatType;
+    public int minReheatDamperPos;
 }

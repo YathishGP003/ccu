@@ -984,7 +984,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                    systemEquip.getId(), systemEquip.getTz());
         }
         
-        setConfigVal("dcwb and enabled",1);
+        setConfigVal("dcwb and enabled and not analog4 and not maximized and not adaptive",1);
         CCUHsApi.getInstance().scheduleSync();
     }
     
@@ -993,7 +993,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Deletes all the necessary config/loop/output points for DCWB.
      */
     public void disableDcwb(CCUHsApi hayStack) {
-        setConfigVal("dcwb and enabled",0);
+        setConfigVal("dcwb and enabled and not analog4 and not maximized and not adaptive",0);
         setDcwbConfigEnabled(Tags.ANALOG1, 0);
         setDcwbConfigEnabled(Tags.ANALOG4, 0);
         deleteConfigPoints(hayStack);
@@ -1030,6 +1030,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public boolean isDcwbEnabled() {
-        return CCUHsApi.getInstance().readDefaultVal("system and dcwb and enabled") > 0;
+        return CCUHsApi.getInstance().readDefaultVal("system and dcwb and enabled and not analog4 and not maximized and not adaptive") > 0;
     }
 }

@@ -134,7 +134,7 @@ public abstract class ZoneProfile
     
     public void updateOccupancy(CCUHsApi hayStack) {
         CcuLog.i(TAG_CCU_SCHEDULER, "UpdateOccupancy for Profile: "+getEquip().getDisplayName());
-        if (equipScheduleHandler == null) {
+        if (equipScheduleHandler == null || equipOccupancyHandler == null) {
             Equip currentEquip = getEquip();
             if (currentEquip == null) {
                 CcuLog.e(L.TAG_CCU_SCHEDULER, "updateOccupancy failed: No equip for ZoneProfile");

@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -42,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -318,7 +320,7 @@ public class CCUHsApi
                               .addMarker("occupancy").addMarker("state")
                               .addMarker("zone").addMarker("his")
                               .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
-                                        "emergencyconditioning, keycardautoaway, windowopen")
+                                        "emergencyconditioning,keycardautoaway,windowopen,noconditioning")
                               .setTz(getTimeZone())
                               .build();
         CCUHsApi.getInstance().addPoint(occupancy);
@@ -353,12 +355,9 @@ public class CCUHsApi
     private void updateLocationDataForWeatherUpdate(Site updatedSite) {
 
         SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
+        spPrefsEditor.putString("address", updatedSite.getGeoAddress());
+        spPrefsEditor.putString("city", updatedSite.getGeoCity());
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
-
-        //Reset lat & lng so that WeatherService regenerates it using updated address.
-        spPrefsEditor.putFloat("lat", 0);
-        spPrefsEditor.putFloat("lng", 0);
 
         spPrefsEditor.commit();
     }
@@ -1009,6 +1008,7 @@ public class CCUHsApi
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
         tagsDb.tagsMap.remove(id.replace("@", ""));
+        removeId(id);
     }
 
     public void removeId(String id) {
@@ -2438,7 +2438,7 @@ public class CCUHsApi
                         while (hZincReaderIterator.hasNext()) {
                             HRow row = (HRow) hZincReaderIterator.next();
                             tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                            CcuLog.i("CCU_HS", "Schedule Imported "+row);
+                            CcuLog.i("CCU_HS", "Schedule Imported " + row);
                         }
                     }
                     return true;
@@ -2525,5 +2525,49 @@ public class CCUHsApi
         return IS_AUTHORISED;
     }
 
+    public void updateTimeZoneInBackground(String tz) {
+        CCUHsApi.getInstance().updateTimeZone(tz);
+        String[] tzIds = TimeZone.getAvailableIDs();
+        for (String timeZone : tzIds) {
+            if (timeZone.contains(tz)) {
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.setTimeZone(timeZone);
+                break;
+            }
+        }
+        CCUHsApi.getInstance().syncEntityTree();
+    }
+
+    public Schedule getRemoteSchedule(String pointUid){
+        String response = CCUHsApi.getInstance().fetchRemoteEntity(pointUid);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote schedule : " + response);
+            return null;
+        }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
+        HRow r = (HRow) it.next();
+        HDict scheduleDict = new HDictBuilder().add(r).toDict();
+        return new Schedule.Builder().setHDict(scheduleDict).build();
+    }
+
+    public HDict readRemotePoint(String query){
+        String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
+            return null;
+        }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
+        HRow r = (HRow) it.next();
+        return new HDictBuilder().add(r).toDict();
+    }
+
+    public String fetchRemoteEntityByQuery(String query) {
+        HDictBuilder b = new HDictBuilder().add("filter", query);
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+    }
 
 }

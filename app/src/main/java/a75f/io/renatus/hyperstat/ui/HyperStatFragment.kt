@@ -4,6 +4,7 @@ import a75f.io.device.HyperStat
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -51,7 +52,7 @@ class HyperStatFragment : BaseDialogFragment() {
     private val profileType: ProfileType
         get() = ProfileType.values()[requireArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
 
-    lateinit var profileName: TextView
+    private lateinit var profileName: TextView
     lateinit var th2Label: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
@@ -140,6 +141,11 @@ class HyperStatFragment : BaseDialogFragment() {
             ProfileType.HYPERSTAT_TWO_PIPE_FCU->{
                 val pipe2ViewModel: Pipe2ViewModel by viewModels()
                 viewModel = pipe2ViewModel
+                viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)
+
+            }ProfileType.HYPERSTAT_HEAT_PUMP_UNIT->{
+                val hpuViewModel: HpuViewModel by viewModels()
+                viewModel = hpuViewModel
                 viewModel.initData(meshAddress, roomName, floorName, nodeType, profileType)
 
             }
@@ -358,6 +364,8 @@ class HyperStatFragment : BaseDialogFragment() {
         zonePMTarget.setSelection(zonePMTarget.adapter.count -1)
 
 
+        zoneCO2Threshold.setSelection(zoneCO2Threshold.adapter.count -1)
+        zoneCO2Target.setSelection(zoneCO2Target.adapter.count -1)
         analogOutUIs.forEach {
             val minMaxAdapter = getAdapterValue(analogVoltageAtSpinnerValues())
             it.vAtMinDamperSelector.adapter = minMaxAdapter
@@ -423,7 +431,6 @@ class HyperStatFragment : BaseDialogFragment() {
         th2Switch.setOnCheckedChangeListener { _, isChecked ->
             viewModel.th2SwitchChanged(isChecked)
         }
-
         analogInUIs.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogInSwitchChanged(index, isChecked)
@@ -460,25 +467,31 @@ class HyperStatFragment : BaseDialogFragment() {
 
         // On Click save the CPU configuration
         setButton.setOnClickListener {
-            setButton.isEnabled = false
-            configurationDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
-                {
-                    ProgressDialogUtils.showProgressDialog(activity, "Saving HyperStat Configuration")
-                }, {
-                    CCUHsApi.getInstance().resetCcuReady()
-                    viewModel.setConfigSelected()
-                    CCUHsApi.getInstance().setCcuReady()
-                    LSerial.getInstance().sendHyperStatSeedMessage(
-                        this.meshAddress, roomName, floorName
-                    )
-                }, {
-                    ProgressDialogUtils.hideProgressDialog()
-                    closeAllBaseDialogFragments()
-                    activity?.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                }
+            if (!viewModel.validateProfileConfig()) {
+                Toast.makeText(context, viewModel.getValidationMessage() , Toast.LENGTH_LONG).show()
+            } else {
+                setButton.isEnabled = false
+                configurationDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    {
+                        ProgressDialogUtils.showProgressDialog(
+                            activity,
+                            "Saving HyperStat Configuration"
+                        )
+                    }, {
+                        CCUHsApi.getInstance().resetCcuReady()
+                        viewModel.setConfigSelected()
+                        CCUHsApi.getInstance().setCcuReady()
+                        LSerial.getInstance().sendHyperStatSeedMessage(
+                            this.meshAddress, roomName, floorName
+                        )
+                    }, {
+                        ProgressDialogUtils.hideProgressDialog()
+                        closeAllBaseDialogFragments()
+                        activity?.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    }
 
-            ))
-
+                ))
+            }
         }
     }
 
@@ -717,11 +730,12 @@ class HyperStatFragment : BaseDialogFragment() {
         profileName.text = viewModel.getProfileName()
         th2Label.text = viewModel.getTh2SensorLabel()
 
-        val adapterRelayMapping = getAdapter(viewModel.getRelayMapping())
+        val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
         val adapterAnalogOutMapping = getAdapter(viewModel.getAnalogOutMapping())
-
+        var relayPos = 0
         relayUIs.forEach {
-                relayWidgets -> relayWidgets.selector.adapter = adapterRelayMapping
+                it.selector.adapter = adapterRelayMapping
+                it.selector.tag = relayPos++
         }
         analogOutUIs.forEach {
                 analogOutWidgets -> analogOutWidgets.selector.adapter = adapterAnalogOutMapping

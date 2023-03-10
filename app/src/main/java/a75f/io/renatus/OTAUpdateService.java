@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.mesh.MeshUtil;
@@ -124,8 +125,10 @@ public class OTAUpdateService extends IntentService {
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
+
             MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
             byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
+            Log.i("OTA_Update_Service","event type from serial"+eventType);
             switch(eventType) {
                 case CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK:
                     handleOtaUpdateAck(eventBytes);
@@ -185,6 +188,7 @@ public class OTAUpdateService extends IntentService {
         CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
+        Log.i(TAG,"msg.lwMeshAddress.get()  "+msg.lwMeshAddress.get()+"   "+mCurrentLwMeshAddress);
         if(msg.lwMeshAddress.get() == mCurrentLwMeshAddress) {
             Log.d(TAG, "[UPDATE] CM has acknowledged update");
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_CM_ACK));
@@ -270,6 +274,10 @@ public class OTAUpdateService extends IntentService {
             mFirmwareDeviceType = FirmwareComponentType_t.SMART_NODE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
+        else if(firmwareVersion.startsWith("HelioNode_")) {
+            mFirmwareDeviceType = FirmwareComponentType_t.HELIO_NODE_DEVICE_TYPE;
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+        }
         else if(firmwareVersion.startsWith("ITM_")) {
             mFirmwareDeviceType = FirmwareComponentType_t.ITM_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
@@ -294,7 +302,7 @@ public class OTAUpdateService extends IntentService {
      * @param versionMinor The minor version of the new firmware
      * @param deviceType   The type of device being updated
      */
-    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
+    private void   startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
         Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
         if (mUpdateInProgress) {
@@ -320,6 +328,16 @@ public class OTAUpdateService extends IntentService {
             case "system":
                 //update everything
                 HashMap<Object, Object> deviceList= CCUHsApi.getInstance().readEntity("device and cm");
+                HashMap equipment =  CCUHsApi.getInstance().readEntity("equip and oao");
+
+                if(!equipment.isEmpty()){
+                    Device OAOdevice = HSUtil.getDevice(Short.parseShort(equipment.get(Tags.GROUP).toString()));
+                    if(OAOdevice.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                        Log.d(TAG, "[VALIDATION] Adding OAO device " + OAOdevice.getAddr() + " to update");
+                        mLwMeshAddresses.add(Integer.parseInt(OAOdevice.getAddr()));
+                    }
+                }
+
 
                 if(deviceList.containsKey( deviceType.getHsMarkerName())){
                         mLwMeshAddresses.add(99+ L.ccu().getSmartNodeAddressBand());

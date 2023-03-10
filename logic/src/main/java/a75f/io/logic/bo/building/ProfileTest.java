@@ -2,10 +2,10 @@ package a75f.io.logic.bo.building;
 
 //import junit.framework.Assert;
 
-import a75f.io.logic.bo.building.definitions.InputActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
+import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 
 /**
@@ -36,7 +36,7 @@ public class ProfileTest
 		ip1.setAddress(testSN);
 		ip1.mName = "Room1";
 		ip1.mInput = a75f.io.logic.bo.building.definitions.Input.Analog1In;
-		ip1.mInputActuatorType = InputActuatorType.ZeroTo10ACurrentTransformer;
+		ip1.mInputActuatorType = InputActuatorType.ZERO_TO_10A_CURRENT_TRANSFORMER;
 		lightProfileConfiguration.getInputs().add(ip1);
 
 

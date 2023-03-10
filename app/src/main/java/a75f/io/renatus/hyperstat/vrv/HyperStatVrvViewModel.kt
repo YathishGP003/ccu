@@ -1,7 +1,7 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logger.CcuLog
+import a75f.io.device.mesh.LSmartNode.getConfigNumVal
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.logic.bo.building.vrv.VrvProfile
@@ -54,7 +54,10 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 CCUHsApi.getInstance().readHisValByQuery("point and coolHeatRight " +
                         "and group == \"$nodeAddr\"").toInt(),
                 CCUHsApi.getInstance().readHisValByQuery("point and idu and connectionStatus " +
-                        "and group == \"$nodeAddr\"").toInt())
+                        "and group == \"$nodeAddr\"").toInt(),
+                (getConfigNumVal("vrv and auto and away and enabled and standalone", nodeAddr) > 0),
+                (getConfigNumVal(" vrv and auto and forced and occupied and standalone", nodeAddr) > 0)
+                )
         } ?: run {
             return VrvViewState(
                 tempOffsetPosition = tempOffsetIndexFromValue(0f),
@@ -62,7 +65,9 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 humidityMaxPosition = 100,
                 masterControllerMode = 0,
                 coolHeatRight = 0,
-                0,
+                iduConnectionStatus = 0,
+                isAutoAwayEnabled = false,
+                isAutoForcedOccupiedEnabled = false
             )
         }
     }
@@ -73,7 +78,9 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                             currentState.tempOffsetPosition.toDouble() - 100,
                             currentState.humidityMinPosition.toDouble(),
                             currentState.humidityMaxPosition.toDouble(),
-                            currentState.masterControllerMode.toDouble()))
+                            currentState.masterControllerMode.toDouble(),
+                            currentState.isAutoAwayEnabled,
+                            currentState.isAutoForcedOccupiedEnabled))
         }?: run {
             vrvProfile = VrvProfile()
             vrvProfile!!.createVrvEquip(
@@ -82,7 +89,9 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                     currentState.tempOffsetPosition.toDouble() - 100,
                     currentState.humidityMinPosition.toDouble(),
                     currentState.humidityMaxPosition.toDouble(),
-                    currentState.masterControllerMode.toDouble()
+                    currentState.masterControllerMode.toDouble(),
+                    currentState.isAutoAwayEnabled,
+                    currentState.isAutoForcedOccupiedEnabled
                 ),
                 roomRef,
                 floorRef
@@ -117,6 +126,18 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     fun masterControllerModeSelected(newVal: Int) {
         viewState.onNext(currentState.copy(
             masterControllerMode = newVal)
+        )
+    }
+
+    fun setAutoAwayToggle(newValue: Boolean) {
+        viewState.onNext(currentState.copy(
+            isAutoAwayEnabled = newValue)
+        )
+    }
+
+    fun setAutoForcedOccupiedToggle(newValue: Boolean) {
+        viewState.onNext(currentState.copy(
+            isAutoForcedOccupiedEnabled = newValue)
         )
     }
 
@@ -178,7 +199,9 @@ data class VrvViewState(
     val humidityMaxPosition: Int,
     val masterControllerMode : Int,
     val coolHeatRight : Int,
-    val iduConnectionStatus :Int
+    val iduConnectionStatus :Int,
+    val isAutoAwayEnabled : Boolean,
+    val isAutoForcedOccupiedEnabled: Boolean
 )
 
 data class OneTimeUiActions(

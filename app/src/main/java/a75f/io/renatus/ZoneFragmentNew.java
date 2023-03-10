@@ -102,6 +102,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -115,7 +116,6 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
-import a75f.io.renatus.util.LocationDetails;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
@@ -125,7 +125,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, LocationDetails {
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
@@ -284,7 +284,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
-                WeatherDataDownloadService.getWeatherData(ZoneFragmentNew.this);
+                WeatherDataDownloadService.getWeatherData();
                 if (weatherUpdateHandler != null)
                     weatherUpdateHandler.post(weatherUpdate);
             }
@@ -349,10 +349,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
+                gridlayout.invalidate();
             });
         }
     }
-    
+
+
     HashMap<String, View> zoneStatus = new HashMap<>();
     
     public void refreshHeartBeatStatus(String id) {
@@ -539,8 +541,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
-            double weatherHumidity = WeatherDataDownloadService.getHumidity();
-            weatherHumidity = weatherHumidity * 100;
+            double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
             weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
             note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
@@ -562,9 +563,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             }
 
             weather_condition.setText(WeatherDataDownloadService.getSummary());
-            String weather_icon_string = WeatherDataDownloadService.getIcon().toString().replaceAll("-", "");
+            String weatherIconId = WeatherDataDownloadService.getIcon();
             Context context = weather_icon.getContext();
-            int id = context.getResources().getIdentifier(weather_icon_string, "drawable", context.getPackageName());
+            int id = context.getResources().getIdentifier("weather_icon_" + weatherIconId, "drawable", context.getPackageName());
             weather_icon.setImageResource(id);
         }
     }
@@ -712,7 +713,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             profileType.contains(ProfileType.HYPERSTAT_VRV.name()) ||
                             profileType.contains(profileOTN)||
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
-                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())
+                            profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
+                            profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())
                     ) {
                         tempModule = true;
                     }
@@ -1040,7 +1042,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1115,7 +1117,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         zoneStatus.put(zoneTitle, textViewModule);
 
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
 
         double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
@@ -1225,7 +1227,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             ScaleControlToNormal(270,210,nonTempControl);
@@ -1256,7 +1258,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
@@ -1278,7 +1280,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -1296,7 +1298,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
@@ -1392,10 +1394,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
-
+                            if (p.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(p);
+                                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                            }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
                                 HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(p);
                                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
@@ -1702,7 +1707,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                         HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
                         Zone z = HSUtil.getZone(zoneId, Objects.requireNonNull(room.get("floorRef")).toString());
-                        if (z != null && z.getScheduleRef() == null) {
+                        if (z != null) {
                             z.setScheduleRef(schedule.get("id").toString());
                             CCUHsApi.getInstance().updateZone(z, zoneId);
                         }
@@ -1836,7 +1841,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 loadOTNPointsUI(otnPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                Log.i("DEV_DEBUG", "1867: ");
+
                 HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
@@ -1847,11 +1852,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                                 updatedEquip.getId(), CCUHsApi.getInstance(), getActivity(),
                                                 p.getGroup());
             }
+            if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(updatedEquip);
+                Log.i("PointsValue", "Hpu Points:" + cpuEquipPoints);
+                HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+            }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
-                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatPipe2EquipPoints(updatedEquip);
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
                 HyperStatZoneViewKt.loadHyperStatPipe2Profile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
-
             }
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");
@@ -1872,6 +1881,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             if (p.getProfile().startsWith("EMR")) {
                 LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                 LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                vc_schedule.setVisibility(View.GONE);
                 ll_status.setVisibility(View.GONE);
                 ll_schedule.setVisibility(View.GONE);
                 HashMap emPoints = ZoneViewData.getEMEquipPoints(p.getId());
@@ -1899,11 +1910,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double targetValue = (double) plcPoints.get("Target Value");
                     double inputValue = (double) plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                        nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
+                        nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
+                        nonTempControl.setPiInputUnitText("\u00B0C");
+                    } else {
+                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    }
+
                     if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                    } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")){
+                        nonTempControl.setPiOutputUnitText("\u00B0C");
                     } else {
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                     }
@@ -1925,6 +1945,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
@@ -1975,6 +1998,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             String equipId = p.getId();
             HashMap zoneEquips = zoneMap.get(0);
             if ((zoneEquips.get("profile").toString()).contains("PLC")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(1);
                 nonTempControl.setImage(R.drawable.ic_zone_piloop);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
@@ -1988,16 +2014,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
             }
             if ((zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(0);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
             }
             if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+                vacationStatusTV.setVisibility(View.GONE);
+                vacationText.setVisibility(View.GONE);
+                vacationEditButton.setVisibility(View.GONE);
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
@@ -2055,7 +2090,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
 
                                         }
                                         isExpanded = false;
@@ -2142,6 +2177,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap emPoints = ZoneViewData.getEMEquipPoints(nonTempEquip.getId());
@@ -2162,6 +2199,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         if (nonTempEquip.getProfile().startsWith("PLC")) {
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap plcPoints = ZoneViewData.getPiEquipPoints(nonTempEquip.getId());
@@ -2170,16 +2209,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
-                            if( isCelsiusTunerAvailableStatus()) {
+                            if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
+                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                             } else {
                                 nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                                 nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             }
-                            nonTempControl.setPiOutputText(String.valueOf(targetValue));
+
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                            } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                                nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                             }
@@ -2188,6 +2231,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
 
@@ -2284,7 +2329,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }
@@ -2382,6 +2427,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
@@ -2396,12 +2442,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Discharge Airflow : ");
+        textViewLabel2.setText("Supply Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
-            textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+            textViewValue2.setText(dabPoints.get("Supply Airflow").toString());
         }
         if (!Boolean.TRUE.equals(dabPoints.get(AIRFLOW_SENSOR)))  viewDischarge.setVisibility(View.GONE);
 
@@ -2409,14 +2455,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
+
+        View viewReheat = null;
+        if (CCUHsApi.getInstance().readDefaultVal("reheat and type and group == \""+nodeAddress+"\"") > 0) {
+            viewReheat = inflater.inflate(R.layout.zone_item_type3, null);
+            TextView reheatText = viewReheat.findViewById(R.id.text_label);
+            TextView reheatVal = viewReheat.findViewById(R.id.text_value);
+            reheatText.setText("      Reheat Coil : ");
+            reheatVal.setText(dabPoints.get("Reheat Coil").toString());
+            linearLayoutZonePoints.addView(viewReheat);
+        }
+
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
-            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString());
+            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString() + " cfm" );
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {
-            viewPointRow1.setPadding(0, 0, 0, 40);
+            if (viewReheat != null) {
+                viewReheat.setPadding(0, 0, 0, 40);
+            } else {
+                viewPointRow1.setPadding(0, 0, 0, 40);
+            }
         }
     }
 
@@ -3411,7 +3472,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
 
             } else {
                 labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString().replace("Native-", "") + " : ");
-                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").equals("\u00B0F")) {
+                    textViewTargetAir.setText(fahrenheitToCelsius(Double.parseDouble(plcPoints.get("Target Value").toString())) + " " + "\u00B0C");
+                } else {
+                    textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                }
                 viewPointRow1.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);
@@ -3469,6 +3534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
+        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {
@@ -3480,6 +3546,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            UpdatePointHandler.setZoneDataInterface(this);
         }
     }
 
@@ -3493,6 +3560,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        UpdatePointHandler.setZoneDataInterface(null);
     }
 
     @Override
@@ -3517,11 +3585,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(null);
             HyperStatMsgReceiver.setCurrentTempInterface(null);
         }
-    }
-
-    @Override
-    public void onDataReceived() {
-        UpdateWeatherData();
     }
 
     class FloorComparator implements Comparator<Floor> {
@@ -3838,7 +3901,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
         linearLayoutstatusPoints.setVisibility(View.GONE);
         linearLayoutschedulePoints.setVisibility(View.GONE);
-
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+        TextView vacationText = zoneDetails.findViewById(R.id.vacationText);
+        ImageView vacationEditButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
         gridItemObj.setGridItem("Sense");
@@ -3850,12 +3915,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
         zoneDetails.setTag(gridItemObj);
-        seekArc.scaletoNormal(250, 210);
+        seekArc.scaletoNormal(260, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         seekArc.setSense(true);
         seekArc.setSenseData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
+        vacationStatusTV.setVisibility(View.GONE);
+        vacationText.setVisibility(View.GONE);
+        vacationEditButton.setVisibility(View.GONE);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         arcView.setPadding(48, 64, 0, 0);
@@ -3920,10 +3988,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            seekArcExpanded.scaletoNormal(260, 210);
                                         } else {
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            ScaleControlToNormal(260, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
@@ -3952,7 +4020,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
                             //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                            seekArc.scaletoNormalBig(250, 210);
+                            seekArc.scaletoNormalBig(260, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             status_view.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -3975,7 +4043,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
+                        seekArc.scaletoNormal(260, 210);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
@@ -3993,7 +4061,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface, Loca
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
                     //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                    seekArc.scaletoNormalBig(250, 210);
+                    seekArc.scaletoNormalBig(260, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();

@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Occupied
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.ZoneProfile
@@ -19,6 +18,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import android.util.Log
 
 
@@ -30,7 +30,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     lateinit var hsHaystackUtil: HSHaystackUtil
     var logicalPointsList: HashMap<Any, String> = HashMap()
-    open var occuStatus: Occupied = Occupied()
+    open var occupancyStatus: Occupancy = Occupancy.OCCUPIED
     private val haystack = CCUHsApi.getInstance()
 
 
@@ -53,7 +53,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.COOLING_1.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = CoolingStage1:  $relayState")
+            logIt("$port = CoolingStage1:  $relayState")
         }
     }
 
@@ -74,7 +74,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.COOLING_2.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = CoolingStage2:  $relayState")
+            logIt( "$port = CoolingStage2:  $relayState")
         }
     }
 
@@ -94,7 +94,81 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.COOLING_3.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = CoolingStage3:  $relayState")
+            logIt("$port = CoolingStage3:  $relayState")
+        }
+    }
+
+
+    override fun doCompressorStage1(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > relayActivationHysteresis)
+            relayState = 1.0
+        if (compressorLoopOutput == 0)
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_1.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_1.displayName] = 1
+            }
+            logIt("$port = COMPRESSOR_STAGE1:  $relayState")
+        }
+    }
+
+    override fun doCompressorStage2(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        divider: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > (divider + (relayActivationHysteresis / 2)))
+            relayState = 1.0
+        if (compressorLoopOutput <= (divider - (relayActivationHysteresis / 2)))
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_2.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_2.displayName] = 1
+            }
+            logIt( "$port = COMPRESSOR_STAGE2:  $relayState")
+        }
+    }
+
+    override fun doCompressorStage3(
+        port: Port,
+        compressorLoopOutput: Int,
+        relayActivationHysteresis: Int,
+        relayStages: HashMap<String, Int>,
+        zoneMode: ZoneState
+    ) {
+        var relayState = -1.0
+        if (compressorLoopOutput > (66 + (relayActivationHysteresis / 2)))
+            relayState = 1.0
+        if (compressorLoopOutput <= (66 - (relayActivationHysteresis / 2)))
+            relayState = 0.0
+        if (relayState != -1.0) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, relayState)
+            if (relayState == 1.0) {
+                if(zoneMode == ZoneState.COOLING)
+                    relayStages[Stage.COOLING_3.displayName] = 1
+                if(zoneMode == ZoneState.HEATING)
+                    relayStages[Stage.HEATING_3.displayName] = 1
+            }
+            logIt("$port = COMPRESSOR_STAGE3:  $relayState")
         }
     }
 
@@ -117,7 +191,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.HEATING_1.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = HeatingStage1: $relayState")
+            logIt("$port = HeatingStage1: $relayState")
         }
 
     }
@@ -139,7 +213,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.HEATING_2.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = HeatingStage2:  $relayState")
+            logIt("$port = HeatingStage2:  $relayState")
         }
     }
 
@@ -159,7 +233,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             if (relayState == 1.0) {
                 relayStages[Stage.HEATING_3.displayName] = 1
             }
-            Log.i(L.TAG_CCU_HSCPU, "$port = HeatingStage3  $relayState")
+            logIt("$port = HeatingStage3  $relayState")
         }
     }
 
@@ -167,9 +241,9 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         // Then Relay will be turned On when the zone is in occupied mode Or
         // any conditioning is happening during an unoccupied schedule
 
-        if (occuStatus.isOccupied || fanLoopOutput > 0) {
+        if (occupancyStatus == Occupancy.OCCUPIED || fanLoopOutput > 0) {
             updateLogicalPointIdValue(logicalPointsList[whichPort]!!, 1.0)
-        } else if (!occuStatus.isOccupied || (currentState == ZoneState.COOLING && currentState == ZoneState.HEATING)) {
+        } else if (occupancyStatus != Occupancy.OCCUPIED || (currentState == ZoneState.COOLING || currentState == ZoneState.HEATING)) {
             updateLogicalPointIdValue(logicalPointsList[whichPort]!!, 0.0)
         }
     }
@@ -178,12 +252,9 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         // Relay will be turned on when module is in occupied state
         updateLogicalPointIdValue(
             logicalPointsList[relayPort]!!,
-            if (occuStatus.isOccupied) 1.0 else 0.0
+            if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0
         )
-        Log.i(
-            L.TAG_CCU_HSCPU,
-            "$relayPort = DeHumidifier  ${if (occuStatus.isOccupied) 1.0 else 0.0}"
-        )
+        logIt("$relayPort = DeHumidifier  ${if (occupancyStatus == Occupancy.OCCUPIED) 1.0 else 0.0}")
 
     }
 
@@ -199,16 +270,15 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
         val currentHumidity = hsHaystackUtil.getHumidity()
         val currentPortStatus = haystack.readHisValById(logicalPointsList[relayPort]!!)
-        Log.i(
-            L.TAG_CCU_HSCPU,
+        logIt(
             "doHumidifierOperation: currentHumidity : $currentHumidity \n" +
                     "currentPortStatus : $currentPortStatus \n" +
                     "targetMinInsideHumidity : $targetMinInsideHumidity \n" +
                     "Hysteresis : $humidityHysteresis \n"
-        )
+         )
 
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occuStatus.isOccupied) {
+        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
             if (currentHumidity < targetMinInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -218,7 +288,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         } else relayStatus = 0.0
 
         updateLogicalPointIdValue(logicalPointsList[relayPort]!!, relayStatus)
-        Log.i(L.TAG_CCU_HSCPU, "$relayPort = Humidifier  $relayStatus")
+        logIt( "$relayPort = Humidifier  $relayStatus")
     }
 
     override fun doDeHumidifierOperation(
@@ -233,15 +303,14 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
         val currentHumidity = hsHaystackUtil.getHumidity()
         val currentPortStatus = haystack.readHisValById(logicalPointsList[relayPort]!!)
-        Log.i(
-            L.TAG_CCU_HSCPU,
+        logIt(
             "doDeHumidifierOperation currentHumidity : $currentHumidity \n" +
                     "| currentPortStatus : $currentPortStatus \n" +
                     "|targetMaxInsideHumidity : $targetMaxInsideHumidity \n" +
                     "| Hysteresis : $humidityHysteresis \n"
         )
         var relayStatus = 0.0
-        if (currentHumidity > 0 && occuStatus.isOccupied) {
+        if (currentHumidity > 0 && occupancyStatus == Occupancy.OCCUPIED) {
             if (currentHumidity > targetMaxInsideHumidity) {
                 relayStatus = 1.0
             } else if (currentPortStatus > 0) {
@@ -251,7 +320,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         } else relayStatus = 0.0
 
         updateLogicalPointIdValue(logicalPointsList[relayPort]!!, relayStatus)
-        Log.i(L.TAG_CCU_HSCPU, "$relayPort = DeHumidifier  $relayStatus")
+        logIt("$relayPort = DeHumidifier  $relayStatus")
     }
 
 
@@ -350,6 +419,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         if (co2Value > 0 && co2Value > zoneCO2Threshold
             && !isDoorOpen && (currentOperatingMode == Occupancy.OCCUPIED.ordinal ||
                     currentOperatingMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
+                    currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
                     currentOperatingMode == Occupancy.FORCEDOCCUPIED.ordinal)
         ) {
             var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
@@ -357,17 +427,34 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             updateLogicalPointIdValue(logicalPointsList[port]!!, damperOperationPercent)
             if (damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] =
                 damperOperationPercent.toInt()
-            Log.i(L.TAG_CCU_HSCPU, "$port = OutDCVDamper  analogSignal  $damperOperationPercent")
+            logIt("$port = OutDCVDamper  analogSignal  $damperOperationPercent")
 
         } else if (co2Value < zoneCO2Threshold || currentOperatingMode == Occupancy.AUTOAWAY.ordinal ||
-            currentOperatingMode == Occupancy.PRECONDITIONING.ordinal ||
             currentOperatingMode == Occupancy.VACATION.ordinal ||
             currentOperatingMode == Occupancy.UNOCCUPIED.ordinal || isDoorOpen
         ) {
             updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
         }
     }
-
+    override fun doAnalogCompressorSpeed(
+        port: Port,
+        conditioningMode: StandaloneConditioningMode,
+        analogOutStages: HashMap<String, Int>,
+        compressorLoopOutput: Int,
+        zoneMode: ZoneState
+    ) {
+        if (conditioningMode !=  StandaloneConditioningMode.OFF) {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, compressorLoopOutput.toDouble())
+            if (compressorLoopOutput > 0){
+                if(zoneMode == ZoneState.COOLING)
+                    analogOutStages[AnalogOutput.COOLING.name] = compressorLoopOutput
+                if(zoneMode == ZoneState.HEATING)
+                    analogOutStages[AnalogOutput.HEATING.name] = compressorLoopOutput
+            }
+        } else {
+            updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+        }
+    }
     override fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double) {
         hsHaystackUtil.updateDoorWindowValues(doorWindowEnabled,doorWindowSensor)
     }
@@ -378,9 +465,9 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
     fun updateLogicalPointIdValue(pointId: String?, value: Double) {
         if(pointId != null) {
-            hsHaystackUtil.writeDefaultWithHisValue(pointId, value)
+            hsHaystackUtil.writeHisValueByID(pointId, value)
         }else{
-            Log.i(L.TAG_CCU_HSPIPE2, "updateLogicalPointIdValue: But point id is null !!")
+            logIt("updateLogicalPointIdValue: But point id is null !!")
         }
     }
 
@@ -391,7 +478,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         if(pointId != null) {
             updateLogicalPointIdValue(pointId, 0.0)
         }else{
-            Log.i(L.TAG_CCU_HSPIPE2, "resetLogicalPoint: But point id is null !!")
+            logIt("resetLogicalPoint: But point id is null !!")
         }
     }
 
@@ -406,5 +493,66 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
     }
 
+    fun fallBackFanMode(
+        equip: HyperStatEquip, equipRef: String, fanModeSaved: Int,
+        actualFanMode: Int, basicSettings: BasicSettings
+    ): StandaloneFanStage {
+
+        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
+        logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
+        if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
+            logIt("Resetting the Fan status back to  AUTO: ")
+            HyperStatUserIntentHandler.updateHyperStatUIPoints(
+                equipRef = equipRef,
+                command = "zone and sp and fan and operation and mode",
+                value = StandaloneFanStage.AUTO.ordinal.toDouble()
+            )
+            return StandaloneFanStage.AUTO
+        }
+
+        if ((occupancyStatus == Occupancy.OCCUPIED|| Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING )
+            && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
+            logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
+            HyperStatUserIntentHandler.updateHyperStatUIPoints(
+                equipRef = equipRef,
+                command = "zone and sp and fan and operation and mode",
+                value = actualFanMode.toDouble()
+            )
+            return StandaloneFanStage.values()[actualFanMode]
+        }
+        return  StandaloneFanStage.values()[equip.hsHaystackUtil.getCurrentFanMode().toInt()]
+    }
+
+    private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
+        return (occupancyStatus != Occupancy.OCCUPIED
+            && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
+            && basicSettings.fanMode != StandaloneFanStage.OFF
+            && basicSettings.fanMode != StandaloneFanStage.AUTO
+            && basicSettings.fanMode != StandaloneFanStage.LOW_ALL_TIME
+            && basicSettings.fanMode != StandaloneFanStage.MEDIUM_ALL_TIME
+            && basicSettings.fanMode != StandaloneFanStage.HIGH_ALL_TIME
+        )
+    }
+
+    fun setOperatingMode(currentTemp: Double,averageDesiredTemp: Double,basicSettings: BasicSettings,equip: HyperStatEquip){
+        var zoneOperatingMode = ZoneState.DEADBAND.ordinal
+        if(currentTemp < averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.COOL_ONLY) {
+            zoneOperatingMode = ZoneState.HEATING.ordinal
+        }
+        else if(currentTemp >= averageDesiredTemp && basicSettings.conditioningMode != StandaloneConditioningMode.HEAT_ONLY) {
+            zoneOperatingMode = ZoneState.COOLING.ordinal
+        }
+        logIt("averageDesiredTemp $averageDesiredTemp" + "zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}")
+        equip.hsHaystackUtil.setProfilePoint("operating and mode", zoneOperatingMode.toDouble())
+    }
+
+    private fun logIt(msg: String){
+        Log.i(L.TAG_CCU_HSHST, msg)
+    }
+
+    // To run specific fan speed while running aux heating
+    enum class FanSpeed {
+        OFF,LOW,MEDIUM,HIGH
+    }
 
 }

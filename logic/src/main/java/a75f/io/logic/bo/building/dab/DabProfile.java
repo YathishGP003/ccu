@@ -1,5 +1,10 @@
 package a75f.io.logic.bo.building.dab;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import android.util.Log;
 
 import java.util.HashMap;
@@ -7,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import a75.io.algos.CO2Loop;
+import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,6 +23,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -26,13 +33,9 @@ import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -54,10 +57,10 @@ public class DabProfile extends ZoneProfile
     ZoneState prevState = DEADBAND;
     
     private static final int LOOP_OP_MIDPOINT = 50;
-    
-    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef) {
+    private ControlLoop heatingLoop;
+    public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
         dabEquip = new DabEquip(getProfileType(), addr);
-        dabEquip.createEntities(config, floorRef, roomRef);
+        dabEquip.createEntities(config, floorRef, roomRef, nodeType);
         dabEquip.init();
     }
     
@@ -68,6 +71,7 @@ public class DabProfile extends ZoneProfile
     
     public void updateDabEquip(DabProfileConfiguration config) {
         dabEquip.update(config);
+        dabEquip.init();
     }
     
     @Override
@@ -132,86 +136,81 @@ public class DabProfile extends ZoneProfile
         
         co2 = dabEquip.getCO2();
         voc = dabEquip.getVOC();
-        
-        Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
-    
+
+        heatingLoop = dabEquip.getHeatingLoop();
+
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if (roomTemp > setTempCooling
-            && conditioning == SystemController.State.COOLING
-            && systemMode != SystemMode.OFF) {
-            
-            //Zone is in Cooling
-            handleCoolingChangeOver(damperOpController);
-            damperOpController.updateControlVariable(roomTemp, setTempCooling);
-        } else if (roomTemp < setTempHeating
-                 && conditioning == SystemController.State.HEATING
-                 && systemMode != SystemMode.OFF) {
-            
-            //Zone is in heating
-            handleHeatingChangeOver(damperOpController);
-            damperOpController.updateControlVariable(setTempHeating, roomTemp);
-        } else {
-            if (state != DEADBAND) {
-                state = DEADBAND;
-            }
-            if (prevState == COOLING && conditioning == SystemController.State.COOLING) {
-                damperOpController.updateControlVariable(roomTemp, setTempCooling);
-            } else if (prevState == HEATING && conditioning == SystemController.State.HEATING) {
-                damperOpController.updateControlVariable(setTempHeating, roomTemp);
+
+        int satConditioning = CCUHsApi.getInstance().readHisValByQuery("system and sat and conditioning").intValue();
+        if (systemMode != SystemMode.OFF) {
+            if (satConditioning > 0) {
+                //Effective SAT conditioning is available. Run the PI loop based on that.
+                if (satConditioning == SystemController.EffectiveSatConditioning.SAT_COOLING.ordinal()) {
+                    damperOpController.updateControlVariable(roomTemp, setTempCooling);
+                } else {
+                    damperOpController.updateControlVariable(setTempHeating, roomTemp);
+                }
             } else {
-                prevState = DEADBAND;
-                damperOpController.reset();
+                //Fall back to System-conditioning based PI loop.
+                if (conditioning == SystemController.State.COOLING) {
+                    damperOpController.updateControlVariable(roomTemp, setTempCooling);
+                } else {
+                    damperOpController.updateControlVariable(setTempHeating, roomTemp);
+                }
             }
+
+            if (CCUHsApi.getInstance().readDefaultVal("reheat and type and equipRef == \""+dabEquip.getId()+"\"").intValue() > 0) {
+                handleReheat(setTempHeating, roomTemp);
+                heatingLoop.dump();
+            }
+
+        } else {
+            damperOpController.reset();
+            heatingLoop.reset();
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
         }
+
+        updateZoneState(roomTemp, setTempCooling, setTempHeating);
+
+        Log.d(L.TAG_CCU_ZONE, "DAB-"+dabEquip.nodeAddr+" : roomTemp " + roomTemp
+                + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating
+                + " satConditioning "+satConditioning);
         damperOpController.dump();
-        setDamperLimits(damper);
-    
-        updateDamperIAQCompensation();
-        
+
         //Loop Output varies from 0-100% such that, it is 50% at 0 error, 0% at maxNegative error, 100% at maxPositive
         //error
-        double midPointBalancedLoopOp = 0;
-        if (prevState != DEADBAND) {
-            midPointBalancedLoopOp = LOOP_OP_MIDPOINT +
-                         damperOpController.getControlVariable() * LOOP_OP_MIDPOINT / damperOpController.getMaxAllowedError();
-        }
-        
+        double midPointBalancedLoopOp = LOOP_OP_MIDPOINT +
+                damperOpController.getControlVariable() * LOOP_OP_MIDPOINT / damperOpController.getMaxAllowedError();
+
+        setDamperLimits(damper, conditioning);
+        updateDamperIAQCompensation();
+
         damper.currentPosition =
             (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * midPointBalancedLoopOp / 100);
-        
-        double hisDamperPos = CCUHsApi.getInstance().readHisValByQuery("point and damper and base and cmd and primary"+
-                                                                    " and group == \""+dabEquip.nodeAddr+"\"");
-        if(damper.currentPosition != hisDamperPos) {
-            dabEquip.setDamperPos(damper.currentPosition, "primary");
-            dabEquip.setDamperPos(damper.currentPosition, "secondary");
-        }
+
+        dabEquip.setDamperPos(damper.currentPosition, "primary");
+        dabEquip.setDamperPos(damper.currentPosition, "secondary");
         
         dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                     : state == COOLING ? buildingLimitMaxBreached() : false));
-        CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState()
+        CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + conditioning
                                  + " ZoneState : " + getState()
                                  + " ,CV: " + damperOpController.getControlVariable()
                                  +" , midPointBalancedLoopOp "+midPointBalancedLoopOp
                                  + " ,damper:" + damper.currentPosition);
     }
-    
-    private void handleCoolingChangeOver(GenericPIController damperOpController) {
-        if (state != COOLING) {
+
+    private void updateZoneState(double roomTemp, double setTempCooling, double setTempHeating) {
+        if (roomTemp > setTempCooling) {
             state = COOLING;
-            prevState = COOLING;
-            damperOpController.reset();
-        }
-    }
-    
-    private void handleHeatingChangeOver(GenericPIController damperOpController) {
-        if (state != HEATING) {
+        } else if (roomTemp < setTempHeating) {
             state = HEATING;
-            prevState = HEATING;
-            damperOpController.reset();
+        } else {
+            state = DEADBAND;
         }
+
     }
-    
     
     private void updateZoneDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
@@ -233,6 +232,7 @@ public class DabProfile extends ZoneProfile
             dabEquip.setDamperPos(damperPos, "secondary");
             dabEquip.setNormalizedDamperPos(damperPos, "primary");
             dabEquip.setNormalizedDamperPos(damperPos, "secondary");
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \""+dabEquip.getId()+"\"", 0.0);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
         }
     }
@@ -265,9 +265,9 @@ public class DabProfile extends ZoneProfile
         }
     }
     
-    protected void setDamperLimits(Damper d) {
-        d.minPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
-        d.maxPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
+    protected void setDamperLimits(Damper d, SystemController.State conditioning) {
+        d.minPosition = (int)dabEquip.getDamperLimit(conditioning == SystemController.State.HEATING ? "heating":"cooling", "min");
+        d.maxPosition = (int)dabEquip.getDamperLimit(conditioning == SystemController.State.HEATING ? "heating":"cooling", "max");
         d.iaqCompensatedMinPos = d.minPosition;
     }
     
@@ -281,5 +281,26 @@ public class DabProfile extends ZoneProfile
         dabEquip.setDamperPos(damperMin, "primary");
         dabEquip.setDamperPos(damperMin, "secondary");
         dabEquip.setCurrentTemp(0);
+    }
+
+    private void handleReheat(double desiredTempHeating, double currentTemp) {
+        double reheatOffset = TunerUtil.readTunerValByQuery("tuner and reheat and offset and equipRef == \"" +
+                                            dabEquip.getId()+"\"");
+        double heatingLoopOp = Math.max(0, heatingLoop.getLoopOutput(desiredTempHeating - reheatOffset, currentTemp));
+        CcuLog.i(L.TAG_CCU_ZONE, "handleReheat : reheatOffset "+reheatOffset+" heatingLoopOp "+heatingLoopOp);
+        if (isSystemFanOn()) {
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"",
+                    Double.valueOf((int) heatingLoopOp));
+        } else {
+            CcuLog.i(L.TAG_CCU_ZONE, "handleReheat disabled. System Fan not active");
+            heatingLoop.reset();
+            CCUHsApi.getInstance().writeHisValByQuery("reheat and cmd and equipRef == \"" + dabEquip.getId() + "\"", 0.0);
+        }
+    }
+
+    private boolean isSystemFanOn() {
+        //This is short cut and not a way to do this. But currently required only for Dab profile.
+        String systemStatusMessage = L.ccu().systemProfile.getStatusMessage();
+        return systemStatusMessage.contains("Fan");
     }
 }

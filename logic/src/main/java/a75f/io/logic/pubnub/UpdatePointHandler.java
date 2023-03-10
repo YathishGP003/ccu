@@ -41,13 +41,18 @@ public class UpdatePointHandler
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
 
+
         if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
         }
         
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
+            HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
+            if (buildingTunerPoint.containsKey("displayUnit")) {
+                zoneDataInterface.refreshScreen("");
+            }
             return;
         }
 
@@ -92,7 +97,10 @@ public class UpdatePointHandler
             return;
         }
 
-        if (HSUtil.isHyperStatConfig(pointUid, CCUHsApi.getInstance())) {
+        if (HSUtil.isHyperStatConfig(pointUid, CCUHsApi.getInstance())
+                && !localPoint.getMarkers().contains(Tags.DESIRED)
+                && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
+                && !localPoint.getMarkers().contains(Tags.TUNER)) {
             HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
@@ -144,8 +152,8 @@ public class UpdatePointHandler
             logPointArray(localPoint);
         
             try {
-                updatePoints(localPoint);
                 Thread.sleep(10);
+                updatePoints(localPoint);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

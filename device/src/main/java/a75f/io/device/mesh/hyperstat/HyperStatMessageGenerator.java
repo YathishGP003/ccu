@@ -124,15 +124,18 @@ public class HyperStatMessageGenerator {
                 StandaloneConditioningMode.values()[(int)getFanMode(equipRef)],
                 StandaloneFanStage.values()[(int)getConditioningMode(equipRef)]
         );
+        controls.setFanSpeed(getDeviceFanMode(settings));
+        controls.setConditioningMode(getConditioningMode(settings,address));
+        controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
+        controls.setOperatingMode(getOperatingMode(equipRef));
+
         Log.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
                  "\n ConditioningMode"+getConditioningMode(settings,address).name()+
-                 "\n occupancyMode :"+isInUnOccupiedMode(equipRef));
-        controls.setFanSpeed(getDeviceFanMode(settings));
-        controls.setConditioningMode(getConditioningMode(settings,address));
-        controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
+                 "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
+                "\n operatingMode :"+controls.getOperatingMode());
 
         if (!device.isEmpty()) {
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
@@ -166,7 +169,7 @@ public class HyperStatMessageGenerator {
         return controls;
     }
     
-    private static double getDesiredTempCooling(String equipRef) {
+    public static double getDesiredTempCooling(String equipRef) {
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
                     "cooling and equipRef == \"" + equipRef + "\"");
@@ -176,7 +179,7 @@ public class HyperStatMessageGenerator {
         return 0;
     }
     
-    private static double getDesiredTempHeating(String equipRef) {
+    public static double getDesiredTempHeating(String equipRef) {
         try {
             return CCUHsApi.getInstance().readPointPriorityValByQuery("desired and temp and " +
                     "heating and equipRef == \"" + equipRef +
@@ -186,7 +189,17 @@ public class HyperStatMessageGenerator {
         }
         return 0;
     }
-    
+
+    private static HyperStat.HyperStatOperatingMode_e getOperatingMode(String equipRef){
+            double operatingMode = CCUHsApi.getInstance().readHisValByQuery("operating and mode and equipRef == \"" + equipRef + "\"");
+            if (operatingMode == 1) {
+                return HyperStat.HyperStatOperatingMode_e.HYPERSTAT_OPERATING_MODE_COOLING;
+            }
+            if (operatingMode == 2) {
+                return HyperStat.HyperStatOperatingMode_e.HYPERSTAT_OPERATING_MODE_HEATING;
+            }
+        return HyperStat.HyperStatOperatingMode_e.HYPERSTAT_OPERATING_MODE_OFF;
+    }
 
     private static void setHyperStatPort(HyperStat.HyperStatControlsMessage_t.Builder controls,
                                          Port port, double val) {
@@ -261,21 +274,11 @@ public class HyperStatMessageGenerator {
         return curOccupancyMode == UNOCCUPIED || curOccupancyMode == AUTOAWAY;
     }
         private static int getHumidityMinSp(int address, CCUHsApi hayStack) {
-            try{
-                return hayStack.readDefaultVal("config and humidity and min and group == \"" + address + "\"").intValue();
-            }catch (Exception e){
-                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
-            }
-            return 0;
+            return hayStack.readDefaultVal("humidifier and control and group == \"" + address + "\"").intValue();
         }
 
         private static int getHumidityMaxSp(int address, CCUHsApi hayStack) {
-            try {
-                return hayStack.readDefaultVal("config and humidity and max and group == \"" + address + "\"").intValue();
-            }catch (Exception e){
-                Log.i(L.TAG_CCU_DEVICE, " "+e.getMessage()+ " address : "+address);
-            }
-            return 0;
+            return hayStack.readDefaultVal("dehumidifier and control and group == \"" + address + "\"").intValue();
         }
 
     private static double getStandaloneCoolingDeadband(String equipRef) {
@@ -357,12 +360,20 @@ public class HyperStatMessageGenerator {
     }
 
     public static double getFanMode(String equipRef){
-        return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                "point and zone and sp and conditioning and mode and equipRef == \""+equipRef+ "\"");
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
+                    "point and zone and sp and conditioning and mode and equipRef == \"" + equipRef + "\"");
+        }catch (NullPointerException e){
+            return 0.0;
+        }
     }
     public static double getConditioningMode(String equipRef){
-        return CCUHsApi.getInstance().readPointPriorityValByQuery(
+        try {
+            return CCUHsApi.getInstance().readPointPriorityValByQuery(
                 "point and zone and fan and mode and operation and equipRef == \""+equipRef+ "\"");
+        }catch (NullPointerException e){
+            return 0.0;
+        }
     }
 
 }

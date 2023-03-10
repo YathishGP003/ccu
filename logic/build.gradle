@@ -62,6 +62,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"\"'
         }
         dev {
             minifyEnabled false
@@ -73,6 +74,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-dev\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-dev.azurewebsites.net/api/v1/\"'
         }
         qa {
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-295bc836-36eb-11ea-bbf4-c6d8f98a95a1\"'
@@ -83,6 +85,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-qa\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-qa.azurewebsites.net/api/v1/\"'
             minifyEnabled false
         }
         staging {
@@ -94,6 +97,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-staging.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-staging.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global-staging\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-staging.azurewebsites.net/api/v1/\"'
             minifyEnabled false
         }
         prod {
@@ -106,6 +110,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service.azurewebsites.net/api/v1/\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
@@ -119,6 +124,7 @@ android {
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-daikin-service.azurewebsites.net/\"'
             buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-daikin-service.azurewebsites.net/\"'
             buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-daikin-service.azurewebsites.net/api/v1/\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }

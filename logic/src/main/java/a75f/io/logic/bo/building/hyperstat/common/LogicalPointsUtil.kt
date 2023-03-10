@@ -7,6 +7,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Configuration
 import java.util.HashMap
 
@@ -38,7 +39,7 @@ class LogicalPointsUtil {
             val existingPoint = readFanLowRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","writable","zone","his","fan", "low", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "low", "speed"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanlowspeed")
@@ -58,7 +59,7 @@ class LogicalPointsUtil {
             val existingPoint = readFanMediumRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","writable","zone","his","fan", "medium", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "medium", "speed"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanMediumSpeed")
@@ -78,7 +79,7 @@ class LogicalPointsUtil {
             val existingPoint = readFanHighRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","logical","runtime","writable","zone","his","fan", "high", "speed"
+                    "cmd","logical","runtime","zone","his","fan", "high", "speed"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanHighSpeed")
@@ -99,7 +100,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "cmd", "logical","runtime", "his", "writable", "zone", "fan", "enabled"
+                    "cmd", "logical","runtime", "his", "zone", "fan", "enabled"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-fanEnabled")
@@ -119,7 +120,7 @@ class LogicalPointsUtil {
             val existingPoint = readOccupiedEnabledRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "writable", "zone", "occupied", "enabled"
+                    "cmd", "logical", "runtime", "his", "zone", "occupied", "enabled"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-occupiedEnabled")
@@ -139,7 +140,7 @@ class LogicalPointsUtil {
             val existingPoint = readHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "writable", "zone", "humidifier"
+                    "cmd", "logical", "runtime", "his", "zone", "humidifier"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-humidifierEnableCmd")
@@ -159,7 +160,7 @@ class LogicalPointsUtil {
             val existingPoint = readDeHumidifierRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "logical", "runtime", "his", "writable", "zone", "dehumidifier"
+                    "cmd", "logical", "runtime", "his", "zone", "dehumidifier"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-dehumidifierEnableCmd")
@@ -181,7 +182,7 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage1RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage1", "dxCooling", "zone", "logical", "runtime","writable","his"
+                    "cmd", "cooling", "stage1", "dxCooling", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage1")
@@ -201,7 +202,7 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage2RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage2", "dxCooling", "zone", "logical", "runtime","writable","his"
+                    "cmd", "cooling", "stage2", "dxCooling", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage2")
@@ -221,7 +222,7 @@ class LogicalPointsUtil {
             val existingPoint = readCoolingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "cooling", "stage3", "dxCooling", "zone", "logical", "runtime","writable","his"
+                    "cmd", "cooling", "stage3", "dxCooling", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-coolingStage3")
@@ -243,7 +244,7 @@ class LogicalPointsUtil {
 
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage1", "electHeating", "zone", "logical", "runtime","writable","his"
+                    "cmd", "heating", "stage1", "electHeating", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage1")
@@ -265,7 +266,7 @@ class LogicalPointsUtil {
 
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage2", "electHeating", "zone", "logical", "runtime","writable","his"
+                    "cmd", "heating", "stage2", "electHeating", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage2")
@@ -285,7 +286,7 @@ class LogicalPointsUtil {
             val existingPoint = readHeatingStage3RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "heating", "stage3", "electHeating", "zone", "logical", "runtime","writable","his"
+                    "cmd", "heating", "stage3", "electHeating", "zone", "logical", "runtime","his"
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-heatingStage3")
@@ -307,7 +308,7 @@ class LogicalPointsUtil {
             val existingPoint = readHeatingAux1RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "zone", "logical", "cmd", "runtime", "his", "writable",
+                    "zone", "logical", "cmd", "runtime", "his",
                     "heating", "aux", "stage1", "electheating"
                 )
                 val point = Point.Builder()
@@ -327,7 +328,7 @@ class LogicalPointsUtil {
             val existingPoint = readHeatingAux2RelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "zone", "logical", "cmd", "runtime", "his", "writable", "relay",
+                    "zone", "logical", "cmd", "runtime", "his", "relay",
                     "heating", "aux", "stage2", "electheating"
                 )
                 val point = Point.Builder()
@@ -347,7 +348,7 @@ class LogicalPointsUtil {
             val existingPoint = readWaterValveRelayLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "zone", "logical", "cmd", "runtime", "his", "writable", "relay",
+                    "zone", "logical", "cmd", "runtime", "his", "relay",
                     "heating", "cooling", "water", "valve"
                 )
                 val point = Point.Builder()
@@ -361,6 +362,117 @@ class LogicalPointsUtil {
             return  Point.Builder().setHashMap(readWaterValveRelayLogicalPoint(equipRef)).build()
         }
 
+
+        // HPU logical point creation
+
+        fun createCompressorStage1Point(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String,
+        ): Point{
+            val existingPoint = readCompressorStage1RelayLogicalPoint(equipRef)
+
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "compressor", "stage1", "runtime", "hpu", "cur", "his",
+                    "logical", "standalone", "zone")
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-compressorStage1")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                markers.forEach { point.addMarker(it) }
+
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readCompressorStage1RelayLogicalPoint(equipRef)).build()
+        }
+        fun createCompressorStage2Point(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String,
+        ): Point{
+            val existingPoint = readCompressorStage2RelayLogicalPoint(equipRef)
+
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "compressor", "stage2", "runtime", "hpu", "cur", "his",
+                    "logical", "standalone", "zone")
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-compressorStage2")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                markers.forEach { point.addMarker(it) }
+
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readCompressorStage2RelayLogicalPoint(equipRef)).build()
+        }
+        fun createCompressorStage3Point(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String,
+        ): Point{
+            val existingPoint = readCompressorStage3RelayLogicalPoint(equipRef)
+
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "compressor", "stage3", "runtime", "hpu", "cur", "his",
+                    "logical", "standalone", "zone")
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-compressorStage3")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                markers.forEach { point.addMarker(it) }
+
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readCompressorStage3RelayLogicalPoint(equipRef)).build()
+        }
+
+        fun createChangeOverCoolingPoint(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String,
+        ): Point {
+            val existingPoint = readChangeOverCoolingRelayLogicalPoint(equipRef)
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "changeover", "cooling", "runtime", "hpu", "cur", "his",
+                    "logical", "standalone", "zone")
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-changeOverCooling")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                markers.forEach { point.addMarker(it) }
+                point.setEnums("off,on")
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readChangeOverCoolingRelayLogicalPoint(equipRef)).build()
+        }
+
+        fun createChangeOverHeatingPoint(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String,
+        ): Point {
+            val existingPoint = readChangeOverHeatingRelayLogicalPoint(equipRef)
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "changeover", "heating", "runtime", "hpu", "cur", "his",
+                    "logical", "standalone", "zone")
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-changeOverHeating")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                markers.forEach { point.addMarker(it) }
+                point.setEnums("off,on")
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readChangeOverHeatingRelayLogicalPoint(equipRef)).build()
+        }
 
         /** Reading logical points **/
 
@@ -435,6 +547,31 @@ class LogicalPointsUtil {
                 "logical and water and valve and relay and equipRef == \"$equipRef\"")
         }
 
+        // Hpu specific points reading
+
+        fun readChangeOverCoolingRelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and cooling and changeover and equipRef == \"$equipRef\"")
+        }
+
+        fun readChangeOverHeatingRelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and heating and changeover and equipRef == \"$equipRef\"")
+        }
+
+        fun readCompressorStage1RelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and compressor and stage1 and equipRef == \"$equipRef\"")
+        }
+        fun readCompressorStage2RelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and compressor and stage2 and equipRef == \"$equipRef\"")
+        }
+        fun readCompressorStage3RelayLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and compressor and stage3 and equipRef == \"$equipRef\"")
+        }
+
         /**====== Analog Logical points=======**/
 
          fun createAnalogOutPointForHeating(
@@ -444,7 +581,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogHeatingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime", "writable",
+                    "cmd","zone","logical","analog", "output",
                     "modulating", "elecHeating","heating","his"
                 )
 
@@ -461,11 +598,11 @@ class LogicalPointsUtil {
          fun createAnalogOutPointForCooling(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String
-        ): Point {
+         ): Point {
             val existingPoint = readAnalogCoolingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime", "writable",
+                    "cmd","zone","logical","analog", "output",
                     "modulating", "dxCooling","cooling","his"
                 )
                 val point = Point.Builder()
@@ -487,7 +624,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime", "writable",
+                    "cmd","zone","logical","analog", "output",
                     "fan", "speed","run","his"
                 )
                 val point = Point.Builder()
@@ -508,7 +645,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutDcvLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime", "writable",
+                    "cmd","zone","logical","analog", "output",
                     "damper", "dcv","actuator","his"
                 )
                 val point = Point.Builder()
@@ -528,7 +665,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutWaterValveLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "zone", "logical", "analog", "output", "runtime", "writable",
+                    "cmd", "zone", "logical", "analog", "output",
                     "water", "valve","heating","cooling","his"
                 )
 
@@ -541,6 +678,28 @@ class LogicalPointsUtil {
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readAnalogOutWaterValveLogicalPoint(equipRef)).build()
+        }
+
+        fun createAnalogOutCompressorSpeedValve(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String
+        ): Point {
+            val existingPoint = readAnalogOutCompressorSpeedLogicalPoint(equipRef)
+            if(existingPoint.isEmpty()) {
+                val markers = arrayOf(
+                    "cmd", "zone", "logical", "analog", "output",
+                    "compressor", "speed","his"
+                )
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-compressorSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov").setUnit("%")
+                markers.forEach { point.addMarker(it) }
+                addPointToHaystack(point.build())
+            }
+            return  Point.Builder().setHashMap(readAnalogOutCompressorSpeedLogicalPoint(equipRef)).build()
         }
 
 
@@ -567,6 +726,10 @@ class LogicalPointsUtil {
                 "analog and logical and output and dcv and damper and equipRef == \"$equipRef\"")
         }
 
+        fun readAnalogOutCompressorSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "analog and logical and output and compressor and speed and equipRef == \"$equipRef\"")
+        }
 
         /***   Thermistor logical points***/
 
@@ -589,16 +752,15 @@ class LogicalPointsUtil {
 
         fun createPointForDoorWindowSensor(
             equipDis: String, siteRef: String, equipRef: String,
-            roomRef: String, floorRef: String, tz: String, windowType: Int
+            roomRef: String, floorRef: String, tz: String, windowSensorType: WindowSensorType
         ): Point {
             var window = "window"
-            var doorWindowName= "doorWindowSensor"
+            var doorWindowName = "doorWindowSensor"
 
-              if(windowType == 2){
+            if(windowSensorType == WindowSensorType.WINDOW_SENSOR_2){
                   window = "window2"
                   doorWindowName = "doorWindowSensor_2"
-              }
-              else if(windowType == 3) {
+              } else if(windowSensorType == WindowSensorType.WINDOW_SENSOR_3) {
                   window = "window3"
                   doorWindowName = "doorWindowSensor_3"
               }
@@ -644,16 +806,16 @@ class LogicalPointsUtil {
          fun createPointForCurrentTx(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
-            min: String, max: String, inc: String, unit: String, tranferType: Int
+            min: String, max: String, inc: String, unit: String, tranferType: TransformerSensorType
         ): Point {
 
             var transformerTag = "transformer"
             var name = "currentDrawn_10"
-            if(tranferType == 20) {
+            if(tranferType == TransformerSensorType.TRANSFORMER_20) {
                 transformerTag = "transformer20"
                 name = "currentDrawn_20"
             }
-            if(tranferType == 50) {
+            if(tranferType == TransformerSensorType.TRANSFORMER_50) {
                 transformerTag = "transformer50"
                 name = "currentDrawn_50"
             }
@@ -661,7 +823,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "sensor", "zone", "his", "logical", transformerTag
+                    "current", "sensor", "zone", "his", "logical", "cur", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")
@@ -701,20 +863,21 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "current and logical and sensor and $transferTag and equipRef == \"$equipRef\"")
         }
-        fun readDoorWindowSensor(equipRef: String, windowType: Int): HashMap<Any, Any> {
+
+        fun readDoorWindowSensor(equipRef: String, windowType: WindowSensorType): HashMap<Any, Any> {
             var window = "window"
-            if(windowType == 2){
+            if(windowType == WindowSensorType.WINDOW_SENSOR_2){
                 window = "window2"
-            } else if(windowType == 3) {
+            } else if(windowType == WindowSensorType.WINDOW_SENSOR_3) {
                 window = "window3"
             }
             return CCUHsApi.getInstance().readEntity(
                 "logical and sensor and contact and door and $window and equipRef == \"$equipRef\"")
         }
 
-        private fun readKeycardSensor(equipRef: String, keycardType: Int): HashMap<Any, Any> {
+        private fun readKeycardSensor(equipRef: String, keycardType: KeyCardSensorType): HashMap<Any, Any> {
             var keycardMarker ="keycard"
-            if(keycardType == 2 ){
+            if(keycardType == KeyCardSensorType.KEYCARD2 ){
                 keycardMarker = "keycard2"
             }
             return CCUHsApi.getInstance().readEntity(
@@ -774,7 +937,6 @@ class LogicalPointsUtil {
             removePipe2AnalogLogicalPoints(config, equipRef)
             removeAnalogInLogicalPoints(equipRef,config,ProfileType.HYPERSTAT_TWO_PIPE_FCU)
         }
-
         private fun removePipe2RelayLogicalPoints(config: HyperStatPipe2Configuration, equipRef: String){
             if(!HyperStatAssociationUtil.isAnyRelayAssociatedToAuxHeatingStage1(config))
                 removePoint(readHeatingAux1RelayLogicalPoint(equipRef))
@@ -806,6 +968,65 @@ class LogicalPointsUtil {
                 removePoint(readAnalogOutDcvLogicalPoint(equipRef))
         }
 
+        fun cleanHpuLogicalPoints(config: HyperStatHpuConfiguration, equipRef: String){
+            removeHpuRelayLogicalPoints(config, equipRef)
+            removeHpuAnalogLogicalPoints(config, equipRef)
+            removeAnalogInLogicalPoints(equipRef,config,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT)
+        }
+        private fun removeHpuRelayLogicalPoints(config: HyperStatHpuConfiguration, equipRef: String){
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToCompressorStage1(config))
+                removePoint(readCompressorStage1RelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToCompressorStage2(config))
+                removePoint(readCompressorStage2RelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToCompressorStage3(config))
+                removePoint(readCompressorStage3RelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToAuxHeatingStage1(config))
+                removePoint(readHeatingAux1RelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToAuxHeatingStage2(config))
+                removePoint(readHeatingAux2RelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToFanLow(config))
+                removePoint(readFanLowRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToFanMedium(config))
+                removePoint(readFanMediumRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToFanHigh(config))
+                removePoint(readFanHighRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToFanEnabled(config))
+                removePoint(readFanEnabledRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToOccupiedEnabled(config))
+                removePoint(readOccupiedEnabledRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayEnabledAssociatedToHumidifier(config))
+                removePoint(readHumidifierRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayEnabledAssociatedToDeHumidifier(config))
+                removePoint(readDeHumidifierRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayEnabledAssociatedToDeHumidifier(config))
+                removePoint(readDeHumidifierRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayEnabledAssociatedToChangeOverCooling(config))
+                removePoint(readChangeOverCoolingRelayLogicalPoint(equipRef))
+
+            if(!HyperStatAssociationUtil.isAnyHpuRelayEnabledAssociatedToChangeOverHeating(config))
+                removePoint(readChangeOverHeatingRelayLogicalPoint(equipRef))
+        }
+        private fun removeHpuAnalogLogicalPoints(config: HyperStatHpuConfiguration, equipRef: String){
+            if(!HyperStatAssociationUtil.isAnyHpuAnalogAssociatedToCompressorSpeed(config))
+                removePoint(readAnalogOutCompressorSpeedLogicalPoint(equipRef))
+            if(!HyperStatAssociationUtil.isAnyHpuAnalogAssociatedToFanSpeed(config))
+                removePoint(readAnalogOutFanSpeedLogicalPoint(equipRef))
+            if(!HyperStatAssociationUtil.isAnyHpuAnalogAssociatedToDCV(config))
+                removePoint(readAnalogOutDcvLogicalPoint(equipRef))
+        }
 
         private fun removeAnalogInLogicalPoints(
             equipRef: String, baseConfig: BaseProfileConfiguration, profileType: ProfileType
@@ -823,6 +1044,10 @@ class LogicalPointsUtil {
                     analogIn1State =  (baseConfig as HyperStatPipe2Configuration).analogIn1State
                     analogIn2State =  baseConfig.analogIn2State
                 }
+                ProfileType.HYPERSTAT_HEAT_PUMP_UNIT ->{
+                    analogIn1State =  (baseConfig as HyperStatHpuConfiguration).analogIn1State
+                    analogIn2State =  baseConfig.analogIn2State
+                }
                 else -> {}
             }
             if(!HyperStatAssociationUtil.isAnyAnalogInMappedCT10(analogIn1State,analogIn2State))
@@ -832,14 +1057,15 @@ class LogicalPointsUtil {
             if(!HyperStatAssociationUtil.isAnyAnalogInMappedCT50(analogIn1State,analogIn2State))
                 removePoint(readCurrentTransferSensor(equipRef,"transformer50"))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn1State, AnalogInAssociation.KEY_CARD_SENSOR))
-                removePoint(readKeycardSensor(equipRef,1))
+                removePoint(readKeycardSensor(equipRef,KeyCardSensorType.KEYCARD))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn2State, AnalogInAssociation.KEY_CARD_SENSOR))
-                removePoint(readKeycardSensor(equipRef,2))
+                removePoint(readKeycardSensor(equipRef,KeyCardSensorType.KEYCARD2))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn1State, AnalogInAssociation.DOOR_WINDOW_SENSOR))
-                removePoint(readDoorWindowSensor(equipRef,2))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR_2))
             if(!HyperStatAssociationUtil.isAnalogInMappedTo(analogIn2State, AnalogInAssociation.DOOR_WINDOW_SENSOR))
-                removePoint(readDoorWindowSensor(equipRef,3))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR_3))
         }
+
         private fun removePoint(point: HashMap<Any, Any>){
             if(point.isNotEmpty()){
                 CCUHsApi.getInstance().deleteEntityTree(Point.Builder().setHashMap(point).build().id)
@@ -847,4 +1073,14 @@ class LogicalPointsUtil {
         }
     }
 
+
+    enum class WindowSensorType {
+        WINDOW_SENSOR,WINDOW_SENSOR_2,WINDOW_SENSOR_3,
+    }
+    enum class TransformerSensorType {
+        TRANSFORMER,TRANSFORMER_20,TRANSFORMER_50
+    }
+    enum class KeyCardSensorType {
+        KEYCARD, KEYCARD2
+    }
 }

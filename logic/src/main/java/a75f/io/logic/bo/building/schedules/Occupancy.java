@@ -16,10 +16,11 @@ public enum Occupancy
     EMERGENCY_CONDITIONING,
     KEYCARD_AUTOAWAY,
     WINDOW_OPEN,
+    NO_CONDITIONING,
     NONE;
-    
+
     public static String getEnumStringDefinition() {
         return "unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing,autoforcedoccupied,autoaway," +
-        "emergencyconditioning, keycardautoaway, windowopen";
+                "emergencyconditioning,keycardautoaway,windowopen,noconditioning";
     }
 }

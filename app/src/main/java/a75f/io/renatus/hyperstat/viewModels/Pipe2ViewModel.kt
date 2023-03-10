@@ -87,15 +87,8 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
     }
 
     override fun th2SwitchChanged(checked: Boolean) {
-
-     // For 2 pipe profile we should not allow user to operate the toggle
-    /*
-    viewState.onNext(
-            currentState.copy(
-                th2Enabled = checked
-            )
-        )
-    */
+    // For 2 pipe profile we should not allow user to operate the toggle
+    // viewState.onNext(currentState.copy(th2Enabled = checked ))
     }
 
     override fun getTh2SensorLabel(): String {

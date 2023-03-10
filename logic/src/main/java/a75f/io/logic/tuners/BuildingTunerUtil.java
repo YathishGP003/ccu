@@ -19,7 +19,7 @@ import static a75f.io.logic.tuners.TunerConstants.TUNER_BUILDING_VAL_LEVEL;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_SYSTEM_VAL_LEVEL;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_ZONE_VAL_LEVEL;
 
-class BuildingTunerUtil {
+public class BuildingTunerUtil {
     
     public static void updateTunerLevels(String tunerPointId, String zoneRef, CCUHsApi hayStack) {
     

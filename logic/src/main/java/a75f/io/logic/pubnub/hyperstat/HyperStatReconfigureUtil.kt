@@ -84,7 +84,7 @@ class HyperStatReconfigureUtil {
             configType: String
         ) {
         // It is not to any profile specific it works for all the profiles (HS CPU,HPU,PIPE2,PIPE4)
-            if (point.markers.contains("out")) {
+            if (point.markers.contains("output")) {
                 val analogOutTag = when (configType) {
                     ANALOG1_OUT -> "analog1"
                     ANALOG2_OUT -> "analog2"
@@ -118,7 +118,6 @@ class HyperStatReconfigureUtil {
             portType: Port
         ) {
             if (equip.markers.contains(CPU)) {
-
                 CpuReconfiguration.updateConfiguration(
                     updatedConfigValue, equip, portType,
                 )
@@ -126,6 +125,11 @@ class HyperStatReconfigureUtil {
 
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.updateConfiguration(
+                    updatedConfigValue, equip, portType,
+                )
+            }
+            if (equip.markers.contains(HPU)) {
+                HpuReconfiguration.updateConfiguration(
                     updatedConfigValue, equip, portType,
                 )
             }
@@ -145,6 +149,11 @@ class HyperStatReconfigureUtil {
             }
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.configAssociationPoint(
+                    portType, updatedConfigValue, equip
+                )
+            }
+            if (equip.markers.contains(HPU)) {
+                HpuReconfiguration.configAssociationPoint(
                     portType, updatedConfigValue, equip
                 )
             }

@@ -137,6 +137,9 @@ public class Tags
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
     public static final String SPECIAL = "special";
+    public static final String AUTO = "auto";
+    public static final String AWAY = "away";
+    public static final String SETBACK = "setback";
 
 
     public static final String TEMP = "temp";
@@ -147,5 +150,13 @@ public class Tags
     public static final String SENSOR = "sensor";
     public static final String DOOR = "door";
     public static final String WINDOW = "window";
+    public static final String OPERATING = "operating";
+    public static final String OFFSET = "offset";
+    public static final String HUMIDITY = "humidity";
+    public static final String VOC = "voc";
+    public static final String PM2P5 = "pm2p5";
 
+    public static final String TZ = "tz";
+    public static final String HELIO_NODE = "helionode";
+    public static final String SMART_NODE = "smartnode";
 }

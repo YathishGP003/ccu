@@ -39,6 +39,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.ccu.CazEquip;
+import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
@@ -59,6 +61,7 @@ import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.api.haystack.CCUHsApi.TAG;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
@@ -75,7 +78,7 @@ public class Pulse
 	private static boolean mDataReceived = false;
 	private static HashMap mDeviceLowSignalCount = new HashMap();
 	private static HashMap mDeviceLowSignalAlert = new HashMap();
-	private static HashMap<Short, Long> mDeviceUpdate = new HashMap();
+	public static HashMap<Short, Long> mDeviceUpdate = new HashMap();
 
 	public static void setCMDeadTimerIncrement(boolean isReboot){
 		if(isReboot)mTimeSinceCMDead = 0;
@@ -314,6 +317,9 @@ public class Pulse
 					updateOTNOccupancyStatus(sp, val, device);
 					break;
 				case ILLUMINANCE:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val * 10) );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val*10));
+					break;
 				case CO2:
 				case CO:
 				case NO:
@@ -536,7 +542,9 @@ public class Pulse
 			double th1TempVal = 0.0;
 			boolean isTh2Enabled = false;
 			boolean isTh1Enabled = false;
-			boolean isTI = false;
+			boolean isTh1RoomTempInTI = false;
+			boolean isTh2RoomTempInTI = false;
+			double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 			for (HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
@@ -560,10 +568,15 @@ public class Pulse
 						break;
 					case SENSOR_RT:
 						val = cmRegularUpdateMessage_t.roomTemperature.get();
-						double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 						curTempVal = getCMRoomTempConversion(val,tempOffset);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
 						logicalCurTempPoint = logPoint.get("id").toString();
+						if (phyPoint.get("portEnabled").toString().equals("true") && device.containsKey("ti")) {
+							String roomTempSensorId = getRoomTempSensorId(deviceInfo);
+							if (roomTempSensorId != null) {
+								hayStack.writeHisValById(roomTempSensorId, curTempVal);
+							}
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset+","+val);
 						break;
 					case TH2_IN:
@@ -571,14 +584,21 @@ public class Pulse
 						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th2 " + phyPoint.get("id").toString() );
 						if (isTh2Enabled) {
-							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
+							double offSet = tempOffset;
+							boolean isPortMappedToSAT = CazEquipUtil.isPortMappedToSupplyAirTemprature(phyPoint.get(
+									"pointRef").toString());
+							if(isPortMappedToSAT){
+								offSet = 0.0;
+							}
+							th2TempVal =
+									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
-							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+							double curTh2TempVal =
+									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
-							if(logPoint.keySet().contains(Tags.TI)){
+							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh2TempVal;
-								isTI = true;
+								isTh2RoomTempInTI = true;
 							}
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(oldTh2TempVal != curTh2TempVal)
@@ -609,13 +629,19 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th1 " + phyPoint.get("id").toString() );
 
 						if(isTh1Enabled){
-							double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-							curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
+							double offSet = tempOffset;
+							boolean isPortMappedToSAT = CazEquipUtil.isPortMappedToSupplyAirTemprature(phyPoint.get(
+									"pointRef").toString());
+							if(isPortMappedToSAT){
+								offSet = 0.0;
+							}
+							double curTh1TempVal =
+									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							th1TempVal = curTh1TempVal;
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							if(logPoint.keySet().contains(Tags.TI)){
+							if(logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT){
 								curTempVal=curTh1TempVal;
-								isTI = true;
+								isTh1RoomTempInTI = true;
 							}
 							if(oldTh1TempVal != curTh1TempVal)
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curTh1TempVal);
@@ -636,14 +662,14 @@ public class Pulse
 				}
 			}
 
-			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTI) {
+			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTh1RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
 				if (currentTempInterface != null) {
 					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			}//Write Current temp point based on th2 enabled or not,
-			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() ) {
+			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isTh2RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if (currentTempInterface != null) {
 					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
@@ -680,7 +706,19 @@ public class Pulse
 		//Done as per requirement from support team and not used in system operation.
 		updateCMPhysicalPoints(cmRegularUpdateMessage_t);
 	}
-	
+
+	private static String getRoomTempSensorId(Device deviceInfo) {
+
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		String roomTempId = null;
+		HashMap<Object, Object> roomTempSensorPoint = hayStack.readEntity(
+				"point and space and not type and temp and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
+		if (!roomTempSensorPoint.isEmpty()) {
+			roomTempId = roomTempSensorPoint.get("id").toString();
+		}
+		return roomTempId;
+	}
+
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
 		
 		CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -912,7 +950,6 @@ public class Pulse
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
 			String str = "addr:"+address+ " Node status: "+cause;
-			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
@@ -1286,8 +1323,8 @@ public class Pulse
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
 
-				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
-						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
+				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
+						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getEquipRef());
 				 mDeviceUpdate.remove(address);
 				 break;
 			 } else {

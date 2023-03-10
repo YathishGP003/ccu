@@ -2,12 +2,15 @@ package a75f.io.logic.migration.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil.Companion.updateMarkers
+import android.nfc.Tag
 
 /**
  * Created by Manjunath K on 07-10-2022.
@@ -37,14 +40,14 @@ class CpuPointsMigration {
 
                 // Logical Points migration
                 migrateAllRelaysPoint(equip[Tags.ID].toString())
-                migrateThermistorSensorPoint(equip[Tags.ID].toString())
-                migrateAnalogInSensorPoints(equip[Tags.ID].toString())
+                migrateThermistorSensorPoint(equip[Tags.ID].toString(),equip[Tags.DIS].toString())
+                migrateAnalogInSensorPoints(equip[Tags.ID].toString(),equip[Tags.DIS].toString())
                 migrateAnalogOutputPoint(equip[Tags.ID].toString())
 
-
+                migrateSensingInputPoints(equip[Tags.ID].toString())
                 migrateRelayPoints(equip[Tags.ID].toString())
                 migrateAnalogOutPoints(equip[Tags.ID].toString())
-                migrateThermistorPoints(equip[Tags.ID].toString())
+                migrateThermistorPoints(equip[Tags.ID].toString(),equip[Tags.DIS].toString())
                 migrateAnalogInPoints(equip[Tags.ID].toString())
 
                 migratedRelays.clear()
@@ -119,7 +122,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxCooling", "writable"),
+                    arrayOf("dxCooling"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -138,7 +141,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("dxHeating", "writable"),
+                    arrayOf("dxHeating"),
                     arrayOf(relay, "enum"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -157,7 +160,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "low"),
+                    arrayOf("speed", "low"),
                     arrayOf(relay, "enum", "stage1"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -177,7 +180,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "medium"),
+                    arrayOf("speed", "medium"),
                     arrayOf(relay, "enum", "stage2"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -196,7 +199,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("speed", "writable", "high"),
+                    arrayOf("speed", "high"),
                     arrayOf(relay, "enum", "stage3"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -215,7 +218,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled"),
+                    arrayOf("enabled"),
                     arrayOf(relay, "enum", "enable"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -234,7 +237,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable", "enabled","occupied"),
+                    arrayOf( "enabled","occupied"),
                     arrayOf(relay, "enum", "enable","occupancy"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -253,7 +256,7 @@ class CpuPointsMigration {
             if (logicalPoint.isNotEmpty()) {
                 updateMarkers(
                     logicalPoint,
-                    arrayOf("writable"),
+                    arrayOf(),
                     arrayOf(relay, "enum", "fan"), null
                 )
                 migratedRelays.add(port.ordinal)
@@ -267,13 +270,13 @@ class CpuPointsMigration {
             }
         }
 
-        private fun migrateThermistorSensorPoint(equipRef: String) {
+        private fun migrateThermistorSensorPoint(equipRef: String,equipDis: String) {
             val th1LogicalPoint = readPoint("th1 and logical", equipRef)
             if (th1LogicalPoint.isNotEmpty()) {
                 updateMarkers(
                     th1LogicalPoint,
                     arrayOf(),
-                    arrayOf("th1", "airflow", "in", "writable", "zone"), null
+                    arrayOf("th1", "airflow", "in", "writable", "zone"), "$equipDis-airflowTempSensor"
                 )
             }
             val th2LogicalPoint = readPoint("th2 and logical", equipRef)
@@ -281,59 +284,64 @@ class CpuPointsMigration {
                 updateMarkers(
                     th2LogicalPoint,
                     arrayOf("door", "contact"),
-                    arrayOf("th2", "cmd", "in", "writable", "zone"), null
+                    arrayOf("th2", "cmd", "in", "writable", "zone"), "$equipDis-doorWindowSensor"
                 )
             }
         }
 
-        private fun migrateAnalogInSensorPoints(equipRef: String) {
-            updateAnalogInSensorPoint(equipRef, "analog1", 1)
+        private fun migrateAnalogInSensorPoints(equipRef: String,equipDis: String) {
+            updateAnalogInSensorPoint(equipRef, "analog1", 1,equipDis)
             if (!isAnalogInputMigrated) {
-                updateAnalogInSensorPoint(equipRef, "analog2", 2)
+                updateAnalogInSensorPoint(equipRef, "analog2", 2,equipDis)
             }
         }
 
-        private fun updateAnalogInSensorPoint(equipRef: String, analog: String, type: Int) {
+        private fun updateAnalogInSensorPoint(equipRef: String, analog: String, type: Int,equipDis: String) {
             val configAnalogIn = readDefaultValue("config and enabled and $analog and in", equipRef)
             if (configAnalogIn == 1) {
                 when (readDefaultValue("config and association and $analog and in", equipRef)) {
                     AnalogInAssociation.KEY_CARD_SENSOR.ordinal -> analogInKeyCardMigration(
                         type,
-                        equipRef
+                        equipRef,
+                        equipDis
                     )
                     AnalogInAssociation.DOOR_WINDOW_SENSOR.ordinal -> analogWindowSensorMigration(
                         type,
-                        equipRef
+                        equipRef,
+                        equipDis
                     )
                     AnalogInAssociation.CURRENT_TX_0_10.ordinal -> migrateCurrentTransfer(
                         type,
                         equipRef,
                         analog,
-                        10
+                        10,
+                        equipDis
                     )
                     AnalogInAssociation.CURRENT_TX_0_20.ordinal -> migrateCurrentTransfer(
                         type,
                         equipRef,
                         analog,
-                        20
+                        20,
+                        equipDis
                     )
                     AnalogInAssociation.CURRENT_TX_0_50.ordinal -> migrateCurrentTransfer(
                         type,
                         equipRef,
                         analog,
-                        50
+                        50,
+                        equipDis
                     )
                 }
             }
         }
 
-        private fun analogInKeyCardMigration(analogType: Int, equipRef: String) {
+        private fun analogInKeyCardMigration(analogType: Int, equipRef: String,equipDis: String) {
             if (analogType == 1) {
                 val logicalPoint = readPoint("analog1 and in and logical", equipRef)
                 updateMarkers(
                     logicalPoint,
                     arrayOf(),
-                    arrayOf("analog1", "cmd", "in", "enum", "zone"), null
+                    arrayOf("analog1", "cmd", "in", "enum", "zone"), "$equipDis-keyCardSensor"
                 )
                 return
             }
@@ -342,19 +350,19 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("keycard2"),
-                    arrayOf("analog2", "cmd", "in", "enum", "zone", "keycard"), null
+                    arrayOf("analog2", "cmd", "in", "enum", "zone", "keycard"), "$equipDis-keyCardSensor_2"
                 )
                 return
             }
         }
 
-        private fun analogWindowSensorMigration(analogType: Int, equipRef: String) {
+        private fun analogWindowSensorMigration(analogType: Int, equipRef: String,equipDis: String) {
             if (analogType == 1) {
                 val logicalPoint = readPoint("analog1 and in and logical", equipRef)
                 updateMarkers(
                     logicalPoint,
                     arrayOf("door", "contact", "window2"),
-                    arrayOf("analog1", "cmd", "in", "writable", "zone", "window"), null
+                    arrayOf("analog1", "cmd", "in", "writable", "zone", "window"), "$equipDis-doorWindowSensor_2"
                 )
                 return
             }
@@ -363,21 +371,21 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("door", "contact", "window3"),
-                    arrayOf("analog1", "cmd", "in", "writable", "zone", "window"), null
+                    arrayOf("analog2", "cmd", "in", "writable", "zone", "window"), "$equipDis-doorWindowSensor_3"
                 )
                 return
             }
         }
 
         private fun migrateCurrentTransfer(
-            analogType: Int, equipRef: String, analog: String, currentTx: Int
+            analogType: Int, equipRef: String, analog: String, currentTx: Int,equipDis: String
         ) {
             val logicalPoint = readPoint("$analog and in and logical", equipRef)
             if (currentTx == 10) {
                 updateMarkers(
                     logicalPoint,
                     arrayOf(),
-                    arrayOf("analog1", "cmd", "in"), null
+                    arrayOf(analog, "cmd", "in"), "$equipDis-currentDrawn_10"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -392,7 +400,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer20"),
-                    arrayOf("analog1", "cmd", "in", "transformer"), null
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_20"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -407,7 +415,7 @@ class CpuPointsMigration {
                 updateMarkers(
                     logicalPoint,
                     arrayOf("transformer50"),
-                    arrayOf("analog1", "cmd", "in", "transformer"), null
+                    arrayOf(analog, "cmd", "in", "transformer"), "$equipDis-currentDrawn_50"
                 )
                 if (analogType == 1 && !isAnalogInputMigrated) {
                     migrateAnalog2(
@@ -437,8 +445,7 @@ class CpuPointsMigration {
                     )
                     val ai2LogicalPoint = readPoint("analog2 and in and logical", equipRef)
                     if (ai2LogicalPoint.isNotEmpty()) {
-                        CCUHsApi.getInstance()
-                            .deleteEntity(ai2LogicalPoint[Tags.ID].toString())
+                        CCUHsApi.getInstance().deleteEntity(ai2LogicalPoint[Tags.ID].toString())
                     }
                     isAnalogInputMigrated = true
                 }
@@ -816,20 +823,41 @@ class CpuPointsMigration {
             if (coolingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     coolingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-coolingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-coolingLoopOutput"
                 )
             }
             if (heatingLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     heatingLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-heatingLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-heatingLoopOutput"
                 )
             }
             if (fanLoopOutput.isNotEmpty()) {
                 updateMarkers(
                     fanLoopOutput,
-                    arrayOf("runtime", "writable"), arrayOf("out"), "$equipName-fanLoopOutput"
+                    arrayOf("runtime"), arrayOf("out"), "$equipName-fanLoopOutput"
                 )
+            }
+        }
+
+
+        private fun migrateSensingInputPoints(equipRef: String) {
+            val keycardEnabled = readPoint("enabled and sensing and keycard", equipRef)
+            val windowEnabled = readPoint("enabled and sensing and window", equipRef)
+            val windowInput = readPoint("input and sensor and keycard", equipRef)
+            val keycardInput = readPoint("input and sensor and window", equipRef)
+
+            if (keycardEnabled.isNotEmpty()) {
+                updateMarkers(keycardEnabled, arrayOf(), arrayOf(),null)
+            }
+            if (windowEnabled.isNotEmpty()) {
+                updateMarkers(windowEnabled, arrayOf(), arrayOf(),null)
+            }
+            if (windowInput.isNotEmpty()) {
+                updateMarkers(windowInput, arrayOf(), arrayOf(),null)
+            }
+            if (keycardInput.isNotEmpty()) {
+                updateMarkers(keycardInput, arrayOf(), arrayOf(),null)
             }
         }
 
@@ -884,7 +912,7 @@ class CpuPointsMigration {
             }
         }
 
-        private fun migrateThermistorPoints(equipRef: String) {
+        private fun migrateThermistorPoints(equipRef: String,equipName: String) {
             val th1 = readPoint("config and th1 and enabled", equipRef)
             val th2 = readPoint("config and th2 and enabled", equipRef)
 
@@ -892,13 +920,14 @@ class CpuPointsMigration {
                 updateMarkers(
                     th1,
                     arrayOf("air", "cmd"),
-                    arrayOf("airflow", "sensor", "th1"), null
+                    arrayOf("airflow", "sensor", "th1"), "$equipName-enableAirflowTempSensor"
                 )
             }
             if (th2.isNotEmpty()) {
                 updateMarkers(
                     th2,
-                    arrayOf("his", "cmd"), arrayOf("sensor", "th1"), null
+                    arrayOf("his", "cmd"),
+                    arrayOf("sensor", "th2"), "$equipName-enableDoorWindowSensor"
                 )
             }
 
@@ -938,15 +967,25 @@ class CpuPointsMigration {
             }
         }
 
-        private fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
-            return CCUHsApi.getInstance()
-                .readEntity("zone and $query and equipRef == \"$equipRef\"")
+        public fun readPoint(query: String, equipRef: String): HashMap<Any, Any> {
+            val pointMap: HashMap<Any, Any> =  CCUHsApi.getInstance()
+                                    .readEntity("zone and $query and equipRef == \"$equipRef\"")
+            //There have been issues with group field of CPU profile points getting corrupted with Timezone values.
+            //Trying to address it as part of migration.
+            try {
+                if (pointMap[Tags.GROUP] == Tags.TZ || pointMap[Tags.GROUP] is String) {
+                    val equip : HashMap<Any, Any> = CCUHsApi.getInstance().readMapById(pointMap[Tags.EQUIPREF].toString())
+                    pointMap[Tags.GROUP] = equip[Tags.GROUP].toString().toInt()
+                }
+            } catch (e : Exception) {
+                CcuLog.e(L.TAG_CCU_HSCPU, "Failed to fix the group field. The corruption may be beyond a correction")
+            }
+            return pointMap;
         }
 
         private fun readDefaultValue(query: String, equipRef: String): Int {
             return CCUHsApi.getInstance()
                 .readDefaultVal("zone and $query and equipRef == \"$equipRef\"").toInt()
         }
-
     }
 }

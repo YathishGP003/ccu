@@ -1,5 +1,10 @@
 package a75f.io.logic.bo.building.sse;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +20,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.SSEStage;
@@ -24,11 +30,6 @@ import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-
 /**
  * Created by Anilkumar on 8/19/2019.
  */
@@ -37,9 +38,9 @@ public class SingleStageProfile extends ZoneProfile
 {
     SingleStageEquip sseEquip;
 
-    public void addSSEEquip(short addr, SingleStageConfig config, String floorRef, String roomRef) {
+    public void addSSEEquip(short addr, SingleStageConfig config, String floorRef, String roomRef, NodeType nodeType) {
         sseEquip = new SingleStageEquip(getProfileType(), addr);
-        sseEquip.createHaystackPoints(config, floorRef, roomRef);
+        sseEquip.createHaystackPoints(config, floorRef, roomRef, nodeType);
     }
 
     public void addSSEEquip(short addr) {
@@ -109,6 +110,7 @@ public class SingleStageProfile extends ZoneProfile
                 CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
                         "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
             }
+            sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
             return;
         }
 
@@ -180,12 +182,7 @@ public class SingleStageProfile extends ZoneProfile
                 }
             } else {
                 // neither heating, cooling, nor zone dead
-                if ((relay2config > 0) && occupied) {
-                    stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
-                    setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
-                } else
-                    setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
-                
+               stageStatus = controlFanStage();
                 //Fan is already handled. Just update heating/cooling.
                 resetConditioning((short) sseEquip.nodeAddr);
                 state = DEADBAND;
@@ -237,5 +234,20 @@ public class SingleStageProfile extends ZoneProfile
             sseEquip.setCurrentTemp(0);
 
         }
+    }
+    private String controlFanStage() {
+
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + sseEquip.nodeAddr + "\"")).build();
+        String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
+        double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
+        String stageStatus = "";
+
+        if ((relay2config > 0) && occupied) {
+            stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
+            setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
+        } else
+            setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
+        return stageStatus;
     }
 }

@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="60dp"
-                android:src="@drawable/snow" />
+                android:src="@drawable/weather_icon_13d" />
 
             <TextView
                 android:id="@+id/temperature"

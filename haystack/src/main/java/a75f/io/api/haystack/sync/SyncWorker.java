@@ -1,7 +1,12 @@
 package a75f.io.api.haystack.sync;
 
+import static a75f.io.api.haystack.sync.HttpUtil.HTTP_RESPONSE_UNAUTHORIZED;
+
 import android.content.Context;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,18 +20,12 @@ import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.xml.transform.Result;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
-import androidx.annotation.NonNull;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
 
 public class SyncWorker extends Worker {
     
@@ -73,10 +72,10 @@ public class SyncWorker extends Worker {
                 return Result.retry();
             }
 
-                if (!syncDeletedEntities()) {
-                    CcuLog.e(TAG, "Deleted entity sync failed");
-                    return Result.retry();
-                }
+            if (!syncDeletedEntities()) {
+                CcuLog.e(TAG, "Deleted entity sync failed");
+                return Result.retry();
+            }
 
             if (!syncUnSyncedEntities()) {
                 CcuLog.e(TAG, "Unsynced entity sync failed");
@@ -151,36 +150,35 @@ public class SyncWorker extends Worker {
         if (!syncStatusService.hasDeletedData()) {
             return true;
         }
-            List<String> deletedItems = syncStatusService.getDeletedData();
-            synchronized (deletedItems) {
-                List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
-                List<String> deletedSyncedItems = new ArrayList<>();
+        List<String> deletedItems = syncStatusService.getDeletedData();
+        synchronized (deletedItems) {
+            List<List<String>> pointListBatches = ListUtils.partition(deletedItems, DELETE_ENTITY_BATCH_SIZE);
+            List<String> deletedSyncedItems = new ArrayList<>();
 
-                pointListBatches.forEach(entityList -> {
-                    ArrayList<HDict> entities = new ArrayList<>();
-                    for (String deletedId : entityList) {
-                        HDictBuilder b = new HDictBuilder();
-                        b.add("id", HRef.make(deletedId.replace("@", "")));
-                        entities.add(b.toDict());
-                    }
-                    HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            pointListBatches.forEach(entityList -> {
+                ArrayList<HDict> entities = new ArrayList<>();
+                for (String deletedId : entityList) {
+                    HDictBuilder b = new HDictBuilder();
+                    b.add("id", HRef.make(deletedId.replace("@", "")));
+                    entities.add(b.toDict());
+                }
+                HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
 
-                    String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
-                            HZincWriter.gridToString(gridData));
-                    CcuLog.d(TAG, "RemoveEntity Response : " + response);
-                    if (Integer.parseInt(response) == 401) {
-                        CCUHsApi.getInstance().setAuthorised(false);
-                        return;
-                    }
-                    if (response == null) {
-                        return;
-                    }
-                    deletedSyncedItems.addAll(entityList);
-                });
+                EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
+                        HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
+                if (response.getRespCode() == HTTP_RESPONSE_UNAUTHORIZED) {
+                    CCUHsApi.getInstance().setAuthorised(false);
+                    return;
+                }
+                if (response == null || response.getRespString() == null) {
+                    return;
+                }
+                deletedSyncedItems.addAll(entityList);
+            });
 
-                updateDeleteStatus(deletedSyncedItems);
-            }
-            return true;
+            updateDeleteStatus(deletedSyncedItems);
+        }
+        return true;
 
     }
     

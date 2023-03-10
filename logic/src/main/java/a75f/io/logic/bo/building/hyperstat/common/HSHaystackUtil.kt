@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Compa
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.tuners.TunerUtil
@@ -28,25 +29,6 @@ class HSHaystackUtil(
 
 ) {
     companion object {
-
-        fun getBasicSettings(node: Int): BasicSettings {
-            try {
-                val equip = HyperStatCpuEquip.getHyperStatEquipRef(node.toShort())
-                return if (equip.equipRef != null) {
-                    BasicSettings(
-                        StandaloneConditioningMode.values()[equip.hsHaystackUtil.getCurrentConditioningMode()
-                            .toInt()],
-                        StandaloneFanStage.values()[equip.hsHaystackUtil.getCurrentFanMode().toInt()]
-                    )
-                } else {
-                    BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
-                }
-            }catch (e:Exception){
-                e.printStackTrace()
-                Log.i(L.TAG_CCU_HSCPU, "Exception getBasicSettings: ${e.localizedMessage} for $node ")
-            }
-            return BasicSettings(StandaloneConditioningMode.OFF, StandaloneFanStage.OFF)
-        }
 
         fun getPossibleConditioningModeSettings(node: Int): PossibleConditioningMode {
             var status = PossibleConditioningMode.OFF
@@ -135,6 +117,16 @@ class HSHaystackUtil(
 
         }
 
+        fun getHpuActualFanMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatHpuEquip.getHyperStatEquipRef(nodeAddress.toShort()).getConfiguration()
+            return HyperStatAssociationUtil.getSelectedFanModeByLevel(
+                fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip),
+                selectedFan = position
+            ).ordinal
+
+        }
+
+
         fun getFanSelectionMode(nodeAddress: String, position: Int): Int{
             val equip = HyperStatCpuEquip.getHyperStatEquipRef(nodeAddress.toShort())
             return HyperStatAssociationUtil.getSelectedFanMode(
@@ -150,11 +142,33 @@ class HSHaystackUtil(
                 selectedFan = position
             )
         }
-
+        fun getHpuFanSelectionMode(nodeAddress: String, position: Int): Int{
+            val equip = HyperStatHpuEquip.getHyperStatEquipRef(nodeAddress.toShort())
+            return HyperStatAssociationUtil.getSelectedFanMode(
+                fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip.getConfiguration()),
+                selectedFan = position
+            )
+        }
         fun getPipePossibleFanModeSettings(node: Int): PossibleFanMode {
             try {
                 val equip = HyperStatPipe2Equip.getHyperStatEquipRef(node.toShort())
                 val fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(equip.getConfiguration())
+                if (fanLevel == 6) return PossibleFanMode.LOW
+                if (fanLevel == 7) return PossibleFanMode.MED
+                if (fanLevel == 8) return PossibleFanMode.HIGH
+                if (fanLevel == 13) return PossibleFanMode.LOW_MED
+                if (fanLevel == 14) return PossibleFanMode.LOW_HIGH
+                if (fanLevel == 15) return PossibleFanMode.MED_HIGH
+                if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
+            }catch (e:Exception){
+                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+            }
+            return PossibleFanMode.OFF
+        }
+        fun getHpuPossibleFanModeSettings(node: Int): PossibleFanMode {
+            try {
+                val equip = HyperStatHpuEquip.getHyperStatEquipRef(node.toShort())
+                val fanLevel = HyperStatAssociationUtil.getHpuSelectedFanLevel(equip.getConfiguration())
                 if (fanLevel == 6) return PossibleFanMode.LOW
                 if (fanLevel == 7) return PossibleFanMode.MED
                 if (fanLevel == 8) return PossibleFanMode.HIGH
@@ -412,13 +426,13 @@ class HSHaystackUtil(
 
     private fun getOccupancySensorPointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and  occupancy and sensor and his and equipRef == \"$equipRef\""
+            "point and occupancy and sensor and his and equipRef == \"$equipRef\""
         )
     }
 
     fun getOccupancyModePointValue(): Double {
         return haystack.readHisValByQuery(
-            "point and  occupancy " +
+            "point and occupancy " +
                     "and mode and his and equipRef == \"$equipRef\""
         )
     }
@@ -436,7 +450,7 @@ class HSHaystackUtil(
         )
     }
 
-    fun updateAllLoopOutput(coolingLoop: Int, heatingLoop: Int, fanLoop: Int) {
+    fun updateAllLoopOutput(coolingLoop: Int, heatingLoop: Int, fanLoop: Int, isHpuProfile: Boolean, compressorLoop: Int) {
         haystack.writeHisValByQuery(
             "point and  his and cooling and loop and output and modulating " +
                     "and equipRef  == \"$equipRef\"", coolingLoop.toDouble()
@@ -446,9 +460,16 @@ class HSHaystackUtil(
                     "and equipRef  == \"$equipRef\"", heatingLoop.toDouble()
         )
         haystack.writeHisValByQuery(
-            "point and  his and fan and loop and output and modulating " +
+            "point and his and fan and loop and output and modulating " +
                     "and equipRef  == \"$equipRef\"", fanLoop.toDouble()
         )
+
+        if(isHpuProfile){
+            haystack.writeHisValByQuery(
+                "point and his and compressor and loop and output and modulating " +
+                        "and equipRef  == \"$equipRef\"", compressorLoop.toDouble()
+            )
+        }
     }
 
 
@@ -476,7 +497,7 @@ class HSHaystackUtil(
         return (readConfigStatus("air and discharge and temp").toInt() == 1)
     }
     fun isDoorWindowSensorTh2Enabled(): Boolean{
-        return (readConfigStatus("window").toInt() == 1)
+        return (readConfigStatus("window and not sensing").toInt() == 1)
     }
 
     fun isSupplyWaterSensorTh2Enabled(): Boolean{

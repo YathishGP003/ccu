@@ -5,13 +5,14 @@ package a75f.io.logic.bo.building.schedules;
  */
 public enum UnoccupiedTrigger {
     DoorWindowInput(Occupancy.WINDOW_OPEN),
-    KeyCardInput(Occupancy.KEYCARD_AUTOAWAY),
+    KeyCardInput(Occupancy.AUTOFORCEOCCUPIED),
     Preconditioning(Occupancy.PRECONDITIONING),
     ForcedOccupied(Occupancy.FORCEDOCCUPIED),
     AutoForcedOccupied(Occupancy.AUTOFORCEOCCUPIED),
     EmergencyConditioning(Occupancy.EMERGENCY_CONDITIONING),
     Vacation(Occupancy.VACATION),
-    Unoccupied(Occupancy.UNOCCUPIED);
+    Unoccupied(Occupancy.UNOCCUPIED),
+    NoConditioning(Occupancy.NO_CONDITIONING);
     
     private final Occupancy mappedOccupancy;
     private UnoccupiedTrigger(Occupancy occupancy) {

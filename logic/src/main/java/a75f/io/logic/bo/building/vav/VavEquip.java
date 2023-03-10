@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.vav;
 
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY;
+
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -42,15 +46,15 @@ import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.tuners.BuildingTunerUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTuners;
 import a75f.io.logic.util.RxTask;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -194,7 +198,9 @@ public class VavEquip
         cfmController.reset();
     }
     
-    public void createHaystackPoints(VavProfileConfiguration config, String floor, String room) {
+    public void createHaystackPoints(VavProfileConfiguration config, String floor, String room, NodeType nodeType) {
+        boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
+
     
         //Create Logical points
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -219,7 +225,7 @@ public class VavEquip
                           .setProfile(profileType.name())
                           .setPriority(config.getPriority().name())
                           .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("singleDuct")
-                          .addMarker("pressureDependent").addMarker("smartnode")
+                          .addMarker("pressureDependent").addMarker(isSmartNode ? "smartnode":"helionode")
                           .addMarker(isElectric ? "elecReheat" : "hotWaterReheat")
                           .setAhuRef(ahuRef)
                           .setTz(tz)
@@ -650,7 +656,13 @@ public class VavEquip
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
 
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
+        SmartNode device;
+        if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
+             device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
+        }else  {
+             device = new HelioNode(nodeAddr, siteRef, floor, room, equipRef);
+        }
+
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(eatID);
@@ -769,23 +781,11 @@ public class VavEquip
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
 
-        HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
-                                                                          .read("tuner and default and fan and " +
-                                                                                "control and time and delay");
-        ArrayList<HashMap> fanControlOnFixedTimeDelayPointArr =
-            CCUHsApi.getInstance().readPoint(fanControlOnFixedTimeDelayPoint.get("id").toString());
-        for (HashMap valMap : fanControlOnFixedTimeDelayPointArr) {
-            if (valMap.get("val") != null) {
-                CCUHsApi.getInstance().pointWrite(HRef.copy(fanControlOnFixedTimeDelayId),
-                             (int) Double.parseDouble(valMap.get("level").toString()),
-                                                       valMap.get("who").toString(),
-                                                       HNum.make(Double.parseDouble(valMap.get("val").toString())),
-                                                       HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(fanControlOnFixedTimeDelayId, roomRef, hayStack);
+        hayStack.writePointForCcuUser(fanControlOnFixedTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                 DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+        hayStack.writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
 
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, 1.0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }
 
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {

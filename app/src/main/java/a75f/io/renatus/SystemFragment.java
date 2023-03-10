@@ -150,6 +150,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	//TODO uncomment for acctuall prod releasee, commenting it out for Automation test
 	//SystemNumberPicker systemModePicker;
 	NumberPicker systemModePicker;
+	LinearLayout lastUpdated;
+	LinearLayout scheduleType;
 	
 	TextView occupancyStatus;
 	TextView equipmentStatus;
@@ -243,6 +245,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
 		
 	}
+
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
@@ -649,6 +652,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		mainLayout = view.findViewById(R.id.main_layout);
+		lastUpdated = view.findViewById(R.id.lastUpdated);
+		scheduleType = view.findViewById(R.id.scheduleType);
+		if(prefs.getBoolean("REGISTRATION")){
+			lastUpdated.setVisibility(View.VISIBLE);
+			scheduleType.setVisibility(View.VISIBLE);
+			constraintScheduler.setVisibility(View.VISIBLE);
+		}else {
+			lastUpdated.setVisibility(View.GONE);
+			scheduleType.setVisibility(View.GONE);
+			constraintScheduler.setVisibility(View.GONE);
+		}
 
 		if (L.ccu().systemProfile != null) {
 			coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();

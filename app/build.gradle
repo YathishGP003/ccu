@@ -72,7 +72,6 @@ android {
         local {
             minifyEnabled false
             signingConfig signingConfigs.debug
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
             versionNameSuffix "_" + 'local' + "_" + versionSuffix
             debuggable true
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
@@ -80,7 +79,6 @@ android {
         dev {
             minifyEnabled false
             signingConfig signingConfigs.debug
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
             versionNameSuffix "_" + 'dev' + "_" + versionSuffix
             debuggable true
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
@@ -90,14 +88,12 @@ android {
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE\"'
             versionNameSuffix "_" + 'prod' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         qa {
             minifyEnabled false
             signingConfig signingConfigs.debug
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU\"'
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
             debuggable true
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
@@ -105,7 +101,6 @@ android {
         staging {
             minifyEnabled false
             signingConfig signingConfigs.debug
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY\"'
             versionNameSuffix "_" + 'staging' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
@@ -114,7 +109,6 @@ android {
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
             versionNameSuffix "_" + 'daikin_prod' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_daikin",appicon:"@drawable/daikin",roundicon:"@drawable/daikin"]
         }
@@ -227,7 +221,7 @@ def getVersionCodeTimestamp() {
     Since 2022, the date format cannot be converted to int as it exceeds the int limit.
     With the below fix, version code can be used for many years as we are changing only the last four digits
      */
-    def code = 2112240001 +  LocalDate.now().getYear() + LocalDate.now().getDayOfYear()
+    def code = 2112240001 +  (1000 * LocalDate.now().getYear()) + LocalDate.now().getDayOfYear()
     return code
 }
 

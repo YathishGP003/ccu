@@ -158,7 +158,7 @@ public class AlertsFragment extends Fragment
 		try {
 			for (int i = 0; i < strings.length; i++) {
 				if (strings[i].contains("\u00B0")) {
-					DecimalFormat tempValueFormatter = new DecimalFormat("##.00");
+					DecimalFormat tempValueFormatter = new DecimalFormat("##.0");
 					strings[i] = "\u00B0C";
 					if (currentTemp) {
 						strings[i - 1] = tempValueFormatter.format(((Double.parseDouble(strings[i-1]) - 32) * 5 / 9));

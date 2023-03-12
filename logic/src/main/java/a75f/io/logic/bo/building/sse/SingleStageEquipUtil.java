@@ -1,12 +1,7 @@
 package a75f.io.logic.bo.building.sse;
 
-import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
-
-import android.util.Log;
-
-import org.apache.commons.logging.LogFactory;
-
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -242,46 +237,107 @@ public class SingleStageEquipUtil {
         return point;
     }
 
-    public static void updateAnalogIn1Config(int configVal, Point configPoint, boolean analogIn1Enabled) {
+    public static void updateAnalogIn1Config(InputActuatorType analogInAssociation, Point configPoint, boolean analogIn1Enabled) {
 
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
         double curConfig = getConfigNumVal("input and association", nodeAddr);
         double curAnalogInEnabled = getConfigNumVal("analog1 and input and enabled", nodeAddr);
-        int configAnalogIn1Enabled;
-        if (analogIn1Enabled) {
-            configAnalogIn1Enabled = 1;
-        } else {
-            configAnalogIn1Enabled = 0;
-        }
-        HashMap configAnalogInPoint = null;
 
-        if (configVal == curConfig && curAnalogInEnabled == configAnalogIn1Enabled) {
-            CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 - No Action required : configVal "+configVal);
+        //if the selected point is same as the existing, return without doing anything
+        if(isCurrentSettingsSameAsNewSettings(curConfig, analogIn1Enabled, analogInAssociation, curAnalogInEnabled)) {
+            CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 - No Action required : configVal "+analogInAssociation);
             return;
         }
-        if (curConfig == 0) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer and sensor and equipRef== \""
-                    + configPoint.getEquipRef() + "\"");
-        } else if (curConfig == 1) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer20 and sensor and equipRef== \""
-                    + configPoint.getEquipRef() + "\"");
-        } else if (curConfig == 2) {
-            configAnalogInPoint = CCUHsApi.getInstance().read("point and logical and transformer50 and sensor and equipRef== \""
-                    + configPoint.getEquipRef() + "\"");
-        }
-        CcuLog.d(L.TAG_CCU_ZONE, "SSE updateAnalogIn1 : " + configAnalogInPoint);
 
-        if (!configAnalogInPoint.isEmpty()) {
-            CCUHsApi.getInstance().deleteEntity(configAnalogInPoint.get("id").toString());
+        deleteExistingPoint(curConfig, configPoint.getEquipRef());
+        createNewPoint(Integer.parseInt(nodeAddr), analogIn1Enabled, equip, analogInAssociation);
+        mapLogicalPointWithConfigPoint(equip.getId(), analogInAssociation, Integer.parseInt(nodeAddr));
+        CCUHsApi.getInstance().scheduleSync();
+    }
+
+    private static void mapLogicalPointWithConfigPoint(String equipId, InputActuatorType analogInAssociation, int nodeAddr) {
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> analogInPoint;
+
+        if (analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
+            analogInPoint = hayStack.readEntity("point and transformer50 and sensor and " +
+                    "equipRef == \""+equipId+"\"");
+        } else if (analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
+            analogInPoint = hayStack.readEntity("point and transformer20 and sensor and " +
+                    "equipRef == \""+equipId+"\"");
+        } else {
+            analogInPoint = hayStack.readEntity("point and transformer and sensor and " +
+                    "equipRef == \""+equipId+"\"");
         }
+
+        if (!analogInPoint.isEmpty()) {
+            updateMarker(analogInPoint);
+            SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), Objects.requireNonNull(analogInPoint.get("id")).toString());
+        }
+
+    }
+
+    private static void createNewPoint(int nodeAddr, boolean analogIn1Enabled, Equip equip, InputActuatorType analogInAssociation) {
+
+        SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), analogIn1Enabled);
 
         if (analogIn1Enabled) {
-            String analogAssociationId = String.valueOf(createAnalogInLogicalPoints(equip.getDisplayName(), equip.getSiteRef(), equip.getId(), equip.getRoomRef(), equip.getFloorRef(), equip.getTz(), Integer.parseInt(nodeAddr), configVal));
-            SmartNode.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), configVal > 0);
+
+            String analogAssociationId = String.valueOf(createAnalogInLogicalPoints(equip.getDisplayName(),
+                    equip.getSiteRef(), equip.getId(), equip.getRoomRef(), equip.getFloorRef(), equip.getTz(),
+                    nodeAddr, analogInAssociation.ordinal()));
+
             SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.ANALOG_IN_ONE.name(), analogAssociationId);
+
+            if (analogInAssociation == InputActuatorType.ZERO_TO_50A_CURRENT_TRANSFORMER) {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "10");
+            } else if (analogInAssociation == InputActuatorType.ZERO_TO_20A_CURRENT_TRANSFORMER) {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "9");
+            } else {
+                SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "8");
+            }
+
             CCUHsApi.getInstance().scheduleSync();
         }
+
+    }
+
+    private static boolean isCurrentSettingsSameAsNewSettings(double curConfig, boolean analogIn1Enabled, InputActuatorType analogInAssociation, double curAnalogInEnabled) {
+
+        int configAnalogIn1Enabled = analogIn1Enabled ? 1 :0;
+
+        return analogInAssociation.ordinal() == curConfig && curAnalogInEnabled == configAnalogIn1Enabled;
+
+    }
+
+    private static void deleteExistingPoint(double curConfig, String equipRef) {
+
+        HashMap<Object, Object> configAnalogInPoint = null;
+
+        String[] queryStrings = {
+                "point and logical and transformer and sensor and equipRef== \"" + equipRef + "\"",
+                "point and logical and transformer20 and sensor and equipRef== \"" + equipRef + "\"",
+                "point and logical and transformer50 and sensor and equipRef== \"" + equipRef + "\""
+        };
+
+        if (curConfig >= 0 && curConfig < queryStrings.length) {
+            configAnalogInPoint = CCUHsApi.getInstance().readEntity(queryStrings[(int) curConfig]);
+        }
+
+        if (!Objects.requireNonNull(configAnalogInPoint).isEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(Objects.requireNonNull(configAnalogInPoint.get("id")).toString());
+        }
+    }
+
+    private static void updateMarker(HashMap<Object, Object> point) {
+
+        if (!point.containsKey("standalone") || !point.containsKey("sse")) {
+            Point point1 = new Point.Builder().setHashMap(point).addMarker("standalone").addMarker("sse").build();
+            CCUHsApi.getInstance().updatePoint(point1, Objects.requireNonNull(point.get("id")).toString());
+        }
+
     }
 }

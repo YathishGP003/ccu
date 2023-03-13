@@ -461,9 +461,9 @@ public class ScheduleUtil {
         }
     }
 
-    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
+    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef, Occupancy occupancyType) {
         return hayStack.readHisValByQuery("point and occupancy and state and " +
-                            "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
+                            "roomRef == \""+roomRef+"\"").intValue() == occupancyType.ordinal();
     }
 
 
@@ -481,15 +481,5 @@ public class ScheduleUtil {
             }
         }
         return true;
-    }
-
-    public static boolean isZoneAutoForceOccupied(CCUHsApi hayStack, String roomRef) {
-        return hayStack.readHisValByQuery("point and occupancy and state and " +
-                "roomRef == \""+roomRef+"\"").intValue() == AUTOFORCEOCCUPIED.ordinal();
-    }
-
-    public static boolean isZoneForceOccupied(CCUHsApi hayStack, String roomRef) {
-        return hayStack.readHisValByQuery("point and occupancy and state and " +
-                "roomRef == \""+roomRef+"\"").intValue() == FORCEDOCCUPIED.ordinal();
     }
 }

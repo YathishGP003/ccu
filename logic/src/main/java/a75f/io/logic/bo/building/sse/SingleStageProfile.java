@@ -125,9 +125,9 @@ public class SingleStageProfile extends ZoneProfile
             double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
             String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
-            boolean autoForceOccupied = ScheduleUtil.isZoneAutoForceOccupied(CCUHsApi.getInstance(), zoneId);
-            boolean forceOccupied = ScheduleUtil.isZoneForceOccupied(CCUHsApi.getInstance(), zoneId);
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
+            boolean autoForceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOFORCEOCCUPIED);
+            boolean forceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.FORCEDOCCUPIED);
             String stageStatus = "";
             Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
             if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
@@ -242,7 +242,7 @@ public class SingleStageProfile extends ZoneProfile
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + sseEquip.nodeAddr + "\"")).build();
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
-        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
         String stageStatus = "";
 
         if ((relay2config > 0) && occupied) {

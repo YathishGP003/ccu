@@ -12,6 +12,7 @@ class MessageDatabaseHelper @Inject constructor (private val messagesDb: Renatus
     override suspend fun update(message: Message) = messagesDb.messageDao().update(message)
     override suspend fun delete(message: Message) = messagesDb.messageDao().delete(message)
     override fun getAllMessages(): LiveData<List<Message>> = messagesDb.messageDao().getAllMessages()
+    override fun getAllMessagesList(): List<Message> = messagesDb.messageDao().getAllMessagesList()
     override suspend fun insertAll(messages: List<Message>) = messagesDb.messageDao().insertAll(messages)
     override suspend fun deleteAll(messages: List<Message>) = messagesDb.messageDao().deleteAll(messages)
     override suspend fun updateAll(message: List<Message>) = messagesDb.messageDao().updateAll(message)

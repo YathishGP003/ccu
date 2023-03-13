@@ -30,32 +30,36 @@ import a75f.io.logic.L;
 public class UpdateEntityHandler implements MessageHandler{
     public static final String CMD = "updateEntity";
     public static void updateEntity(JsonObject msgObject){
-        String uid = msgObject.get("ids").getAsJsonArray().get(0).toString().replaceAll("\"", "");
-        HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
-        if(entity.get("room") != null){
-            updateNamedSchedule(entity,uid);
-        }
-        else if (entity.get("floor") != null) {
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
-            HDict[] dictArr  = {b.toDict()};
-            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
-                    HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-            if (response != null) {
-                HZincReader hZincReader = new HZincReader(response);
-                Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                while (hZincReaderIterator.hasNext()) {
-                    HRow row = (HRow) hZincReaderIterator.next();
-                    Floor floor = new Floor.Builder()
-                            .setDisplayName(row.get("dis").toString())
-                            .setSiteRef(row.get("siteRef").toString())
-                            .build();
-                    floor.setId(row.get("id").toString());
-                    floor.setOrientation(Double.parseDouble(row.get("orientation").toString()));
-                    floor.setFloorNum(Double.parseDouble(row.get("floorNum").toString()));
-                    CCUHsApi.getInstance().updateFloorLocally(floor, floor.getId());
+        msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
+            CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
+            String uid = msgJson.toString().replaceAll("\"", "");
+            HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
+            if(entity.get("room") != null){
+                updateNamedSchedule(entity,uid);
+            }
+            else if (entity.get("floor") != null) {
+                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
+                HDict[] dictArr  = {b.toDict()};
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                        HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                if (response != null) {
+                    HZincReader hZincReader = new HZincReader(response);
+                    Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                    while (hZincReaderIterator.hasNext()) {
+                        HRow row = (HRow) hZincReaderIterator.next();
+                        Floor floor = new Floor.Builder()
+                                .setDisplayName(row.get("dis").toString())
+                                .setSiteRef(row.get("siteRef").toString())
+                                .build();
+                        floor.setId(row.get("id").toString());
+                        floor.setOrientation(Double.parseDouble(row.get("orientation").toString()));
+                        floor.setFloorNum(Double.parseDouble(row.get("floorNum").toString()));
+                        CCUHsApi.getInstance().updateFloorLocally(floor, floor.getId());
+                    }
                 }
             }
-        }
+        });
+
     }
 
     private static void updateNamedSchedule(HashMap<Object,Object> entity,String uid) {

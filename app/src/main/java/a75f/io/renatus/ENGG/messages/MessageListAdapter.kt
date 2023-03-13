@@ -45,14 +45,16 @@ class MessageViewHolder(view : View) : RecyclerView.ViewHolder (view) {
 
     @SuppressLint("ResourceAsColor")
     fun bind(message: Message) {
-        val format = SimpleDateFormat("mm:ss")
-        messageId.text = message.messageId+": "+format.format(Date(message.timeToken))
-        point.text = message.id+"    "+message.value
-        status.text = if (message.handlingStatus?.toString().toBoolean()) {
-            "HANDLED"
-        } else {
-            "NOT HANDLED"
+        val format = SimpleDateFormat("MM/dd - hh:mm:ss")
+        messageId.text = message.messageId+": (${format.format(Date(message.timeToken))})"
+        cmd.text = message.command
+        point.text = when {
+            message.id != null -> if (message.value != null) message.id+", val: "+message.value else message.id
+            message.ids != null -> message.ids!![0]+" ...+${message.ids!!.size-1}"
+            else -> ""
         }
+        status.text = if (message.handlingStatus?.toString().toBoolean()) "HANDLED" else "NOT HANDLED"
+
         message.handlingStatus?.let {
             CcuLog.i(L.TAG_CCU_MESSAGING," Message status ${message.handlingStatus}")
             when(it) {

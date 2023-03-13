@@ -9,6 +9,7 @@ interface DatabaseHelper {
     suspend fun update(message: Message)
     suspend fun delete(message: Message)
     fun getAllMessages(): LiveData<List<Message>>
+    fun getAllMessagesList(): List<Message>
     suspend fun insertAll(message: List<Message>)
     suspend fun updateAll(message: List<Message>)
     suspend fun deleteAll(message: List<Message>)

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
@@ -40,7 +41,13 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public void handleMessage(JsonObject msgObject, Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
-            String cmdLevel = msgObject.get("level").getAsString();
+            //Update command is processed asynchronously. The message will be updated once handling is complete.
+            //OTA commands would also tracked separately.
+            if (cmdType != UPDATE_CCU) {
+                String messageId = msgObject.get("messageId").getAsString();
+                MessageDbUtilKt.updateMessageHandled(messageId, context);
+            }
+            String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
@@ -73,7 +80,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             case OTA_UPDATE_CM:
                             case OTA_UPDATE_HN:
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
-                                otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
+                                otaUpdateIntent.putExtra("id", msgObject.get("remoteCmdLevel").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
                                 otaUpdateIntent.putExtra("cmdLevel", cmdLevel);
 

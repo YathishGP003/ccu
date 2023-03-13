@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/messageId"
-        android:layout_width="300sp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:ellipsize="end"
@@ -22,9 +22,9 @@
 
     <TextView
         android:id="@+id/messageCmd"
-        android:layout_width="100sp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8sp"
+        android:layout_marginStart="18sp"
         android:singleLine="true"
         android:ellipsize="end"
         tools:text="Command"
@@ -33,24 +33,41 @@
         app:layout_constraintTop_toTopOf="@+id/messageId"
         app:layout_constraintBottom_toBottomOf="@+id/messageId"
         />
+    <TextView
+        android:id="@+id/handlingStatus"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        tools:text="handlingStatus"
+        android:layout_marginStart="18sp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/messageCmd"
+        app:layout_constraintTop_toTopOf="@+id/messageId"
+        app:layout_constraintBottom_toBottomOf="@+id/messageId"
+        />
 
     <TextView
         android:id="@+id/pointId"
-        android:layout_width="380sp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="18sp"
         tools:text="PointId"
         android:ellipsize="end"
         android:singleLine="true"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/handlingStatus"
         app:layout_constraintTop_toTopOf="@+id/messageId"
         app:layout_constraintBottom_toBottomOf="@+id/messageId"
         />
 
+
+
     <!--   The placement of this view is a bit hack, using its margins against the parents to position it
            correctly between the other columns.  Overall this view won't scale well.  Redo using %'s for column widths. -->
-    <TextView
+    <!--<TextView
         android:id="@+id/handlingStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,6 +83,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/messageId"
         app:layout_constraintBottom_toBottomOf="@+id/messageId"
-        android:focusable="true" />
+        android:focusable="true" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

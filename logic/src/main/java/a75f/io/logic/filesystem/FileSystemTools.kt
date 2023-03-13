@@ -2,6 +2,9 @@ package a75f.io.logic.filesystem
 
 import a75f.io.alerts.AlertManager
 import a75f.io.api.haystack.Alert
+import a75f.io.data.RenatusDatabaseBuilder
+import a75f.io.data.message.MessageDatabaseHelper
+import a75f.io.logic.Globals
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
@@ -94,6 +97,25 @@ class FileSystemTools(private val appContext: Context) {
          // preferred pattern in Kotlin, so we're going to leave this as is for now.
          mapOf()
       }
+   }
+
+   fun writeMessages(fileName: String): File {
+
+      val log = StringBuilder("\n\n *** Message Status ***\n")
+
+      val messageDatabaseHelper = MessageDatabaseHelper(RenatusDatabaseBuilder
+                                    .getInstance(Globals.getInstance().applicationContext))
+
+      val messageList = messageDatabaseHelper.getAllMessagesList()
+      if (messageList.size < 1000) {
+         messageList.forEach {
+            message -> log.append("$message \n")
+         }
+      } else {
+         log.append(" There has been ${messageList.size} messages. Which is unusually high for 24 hour period.")
+      }
+
+      return writeStringToFileInLogsDir(log.toString(), fileName)
    }
 
    private fun writeStringToFileInLogsDir(str: String, fileName: String): File {

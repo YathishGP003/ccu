@@ -1,7 +1,6 @@
 package a75f.io.data.message
 import a75f.io.data.RenatusDatabaseBuilder
 import android.content.Context
-import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,12 +11,17 @@ private val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 private var messageDbHelper : MessageDatabaseHelper? = null
 fun insert(message: Message, context: Context) {
-    Log.i("CCU_MESSAGING", " Insert $message")
     appScope.launch {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        messageDbHelper?.insert(message)
+        Log.i("CCU_MESSAGING", " DbUtil:Insert $message")
+        try {
+            messageDbHelper?.insert(message)
+        } catch (e : Exception) {
+            e.printStackTrace()
+            Log.i("CCU_MESSAGING", " Insert Failed $e")
+        }
     }
 }
 fun update(message: Message, context : Context) {
@@ -25,11 +29,16 @@ fun update(message: Message, context : Context) {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
+        Log.i("CCU_MESSAGING", " DbUtil:Update $message")
         messageDbHelper?.update(message)
     }
 }
-fun delete(message: Message) {
+fun deleteMessage(message: Message, context : Context) {
     appScope.launch {
+        Log.i("CCU_MESSAGING", " DbUtil:Delete $message")
+        if (messageDbHelper == null) {
+            messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
+        }
         messageDbHelper?.delete(message)
     }
 }
@@ -48,6 +57,7 @@ fun updateMessageHandled(messageId : String, context: Context) {
         val message = messageDbHelper?.getMessageById(messageId)
         message?.let {
             it.handlingStatus = true
+            Log.i("CCU_MESSAGING","updateMessageHandled $message")
             messageDbHelper?.update(it)
         }
     }

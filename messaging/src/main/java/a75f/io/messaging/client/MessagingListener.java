@@ -16,10 +16,12 @@ import a75f.io.data.message.DatabaseHelper;
 import a75f.io.data.message.Message;
 import a75f.io.data.message.MessageDatabaseHelper;
 import a75f.io.data.message.MessageDbUtilKt;
+import a75f.io.data.message.MessageUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.messaging.di.MessagingEntryPoint;
+import a75f.io.messaging.exceptions.InvalidMessageFormat;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.messaging.service.AcknowledgeRequest;
 import a75f.io.messaging.service.MessageHandlerService;
@@ -71,7 +73,6 @@ public class MessagingListener implements ServerSentEvent.Listener {
         CcuLog.d(L.TAG_CCU_MESSAGING, message);
 
         JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
-        Long timetoken = payload.get("timetoken").getAsLong();
         JsonElement messageContents = payload.getAsJsonObject().get("message");
 
         // Special case for "Restart CCU" and "Restart Tablet" remote commands:
@@ -82,35 +83,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
         } else {
             acknowledgeAsync(payload);
         }
-
-        // Send to message handler
-        //PbMessageHandler.getInstance().handlePubnubMessage(messageContents, timetoken, Globals.getInstance().getApplicationContext());
-        try {
-            Message msg = new Message(payload.get("messageId").getAsString(),
-                    messageContents.getAsJsonObject().get("command").getAsString(),
-                    messageContents.getAsJsonObject().get("id").getAsString(),
-                    messageContents.getAsJsonObject().get("val").getAsString(),
-                    messageContents.getAsJsonObject().get("who").getAsString(),
-                    messageContents.getAsJsonObject().get("level").getAsInt(),
-                    timetoken, false, 0, "");
-
-            MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
-            /*MessageHandlerService.Companion.getInstance(Globals.getInstance().getApplicationContext(), messagingDbHelper)
-                                .handleMessage(msg);*/
-            if (messageHandlerService != null) {
-                messageHandlerService.handleMessage(msg);
-            } else {
-                CcuLog.e(L.TAG_CCU_MESSAGING, "MessageHandlerService not initialized");
-            }
-
-            //MessageHandler.Companion.enqueueMessageWork(Globals.getInstance().getApplicationContext(), 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            CcuLog.e(L.TAG_CCU_MESSAGING, "UnsupportedMessage ", e);
-        }
-
-
-
+        handleMessage(payload);
     }
 
     @Override
@@ -183,5 +156,27 @@ public class MessagingListener implements ServerSentEvent.Listener {
      */
     private void acknowledgeAsync(JsonObject payload) {
         MessagingClient.getInstance().queueMessageIdToAck(payload);
+    }
+
+    private void handleMessage(JsonObject payload) {
+        if (messageHandlerService == null) {
+            CcuLog.e(L.TAG_CCU_MESSAGING, "MessageHandlerService not initialized: Cant process messages");
+            return;
+        }
+        Message msg;
+        try {
+            msg = MessageUtilKt.jsonToMessage(payload);
+        } catch (InvalidMessageFormat e) {
+            CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to Parse message ", e);
+            e.printStackTrace();
+            return;
+        }
+
+        if (messageHandlerService.isCommandSupported(msg.getCommand())) {
+            MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
+            messageHandlerService.handleMessage(msg);
+        } else {
+            CcuLog.e(L.TAG_CCU_MESSAGING, "Unsupported command ignored "+msg.getCommand());
+        }
     }
 }

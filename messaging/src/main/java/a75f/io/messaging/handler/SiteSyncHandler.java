@@ -26,8 +26,8 @@ public class SiteSyncHandler implements MessageHandler
     @Override
     public void handleMessage(JsonObject msgObject, Context context) {
         
-        String siteGuid = msgObject.get("siteId") != null ? msgObject.get("siteId").getAsString(): "";
-        
+        //String siteGuid = msgObject.get("siteId") != null ? msgObject.get("siteId").getAsString(): "";
+        String siteGuid = msgObject.get("id") != null ? msgObject.get("id").getAsString(): "";
         if (!siteGuid.isEmpty()) {
             
             CCUHsApi hayStack = CCUHsApi.getInstance();

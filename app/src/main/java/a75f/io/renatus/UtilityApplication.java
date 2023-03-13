@@ -93,7 +93,8 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.handler.MessageHandlerSubscriber;
-import a75f.io.messaging.service.MessageHandlerWork;
+import a75f.io.messaging.service.MessageCleanUpWork;
+import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.schedules.FileBackupService;
@@ -906,7 +907,8 @@ public abstract class UtilityApplication extends Application {
             }
         }
         scheduleMessagingAckJob();
-        MessageHandlerWork.Companion.schedulePeriodicMessageWork(context);
+        MessageRetryHandlerWork.Companion.schedulePeriodicMessageWork(context);
+        MessageCleanUpWork.Companion.scheduleMessageCleanUpWork(context);
         messageHandlerSubscriber.subscribeAllHandlers();
     }
 

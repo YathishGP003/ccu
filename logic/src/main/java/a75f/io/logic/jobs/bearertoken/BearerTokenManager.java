@@ -57,11 +57,13 @@ public class BearerTokenManager{
                     hayStack.setJwt(token.getAccessToken());
                     refreshServices(token);
                 }
+                hayStack.updateJwtValidity();
             }
             
             @Override
             public void onFailure(Call<BearerToken> call, Throwable throwable) {
                 System.out.println(throwable);
+                hayStack.updateJwtValidity();
             }
         });
     }

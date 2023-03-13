@@ -66,8 +66,6 @@ public class MessagingAckJob {
                                     response -> {
                                         if (response.isSuccessful()) {
                                             CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
-                                        } else if (response.code() == 401) {
-                                            CCUHsApi.getInstance().setAuthorised(false);
                                         } else {
                                             CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
                                         }

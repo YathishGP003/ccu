@@ -166,10 +166,6 @@ public class SyncWorker extends Worker {
 
                 EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
-                if (response.getRespCode() == HTTP_RESPONSE_UNAUTHORIZED) {
-                    CCUHsApi.getInstance().setAuthorised(false);
-                    return;
-                }
                 if (response == null || response.getRespString() == null) {
                     return;
                 }

@@ -142,7 +142,7 @@ public class SingleStageProfile extends ZoneProfile
                     }
                 } else if (roomTemp <= setTempCooling - hysteresis) {
                     setCmdSignal("cooling and stage1", 0, (short) sseEquip.nodeAddr);
-                    if ((relay2config > 0) && isOccupied(occupied,forceOccupied,autoForceOccupied)) {
+                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
                         stageStatus = "Fan ON";
                         setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                     } else
@@ -168,7 +168,7 @@ public class SingleStageProfile extends ZoneProfile
                     }
                 } else if (roomTemp >= (setTempHeating + hysteresis)) {
                     setCmdSignal("heating and stage1", 0, (short) sseEquip.nodeAddr);
-                    if ((relay2config > 0) && isOccupied(occupied,forceOccupied,autoForceOccupied)) {
+                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
                         stageStatus = "Fan ON";
                         setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                     } else

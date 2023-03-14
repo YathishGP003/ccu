@@ -147,38 +147,25 @@ public class AlertsFragment extends Fragment
 
 	String formatMessageToCelsius(String alertMessage) {
 
-		boolean limit = false;
-		boolean currentTemp = true;
 		StringBuilder sb = new StringBuilder();
-		if (alertMessage.contains("limit")){
-			limit = true;
-		}
 		String[] strings = null;
 		strings = alertMessage.split(" ");
 		try {
 			for (int i = 0; i < strings.length; i++) {
+				//"\u00B0" is the unicode for °
 				if (strings[i].contains("\u00B0")) {
-					DecimalFormat tempValueFormatter = new DecimalFormat("##.0");
 					strings[i] = "\u00B0C";
-					if (currentTemp) {
-						strings[i - 1] = tempValueFormatter.format(((Double.parseDouble(strings[i-1]) - 32) * 5 / 9));
-						currentTemp = false;
-						continue;
-					}
-					if (limit) {
-						strings[i - 1] = tempValueFormatter.format(Math.round(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1]))));
-					} else {
-						strings[i - 1] = tempValueFormatter.format(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
-					}
+					strings[i - 1] = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
+
 				}
 			}
-
 			for (String string : strings) {
 				sb.append(string);
 				sb.append(" ");
 			}
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
+			CcuLog.e("CCU_ALERTS", "Failed to format units in alert message", e);
 			return alertMessage;
 		}
 		return sb.toString();

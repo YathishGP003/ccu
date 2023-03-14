@@ -54,8 +54,10 @@ import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
+import a75f.io.api.haystack.util.JwtValidationException;
 import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
@@ -2575,20 +2577,19 @@ public class CCUHsApi
      */
     public void updateJwtValidity() {
         String tokenString = getJwt();
-        if (tokenString != null && !tokenString.isEmpty()) {
+        if (StringUtils.isNotEmpty(tokenString)) {
             try {
                 JwtValidator jwt = new JwtValidator(tokenString);
-                isAuthorized = jwt.isExpired();
-
-            } catch (Exception e) {
+                isAuthorized = jwt.isValid();
+            } catch (JwtValidationException e) {
                 e.printStackTrace();
+                CcuLog.e(TAG, "Failed to validate Jwt", e);
                 isAuthorized = true; //Failure to decode token will be considered as "authorized" to
                 //reduce business risk.
             }
-
         } else {
             isAuthorized = false;
-            CcuLog.i(TAG, "updateJwtValidity : Token does not exist");
+            CcuLog.e(TAG, "updateJwtValidity : Token does not exist");
         }
         CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
     }

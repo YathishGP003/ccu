@@ -191,6 +191,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
 
+    private final DecimalFormat PRECIPITATION_DECIMAL_FORMAT = new DecimalFormat("#.##");
+    private final DecimalFormat HUMIDITY_DECIMAL_FORMAT = new DecimalFormat("#.#");
+
     TextView zoneLoadTextView = null;
     public ZoneFragmentNew() {
     }
@@ -539,11 +542,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
                 minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
             }
-            DecimalFormat df = new DecimalFormat("#.##");
-            double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
+
+            double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
             double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
-            weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
-            note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
+
+            double formattedPrecipitation = Double.parseDouble(PRECIPITATION_DECIMAL_FORMAT.format(weatherPrecipitation));
+            double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
+
+            note.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
+
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");

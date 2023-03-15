@@ -2219,7 +2219,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
-                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                             } else {
                                 nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                                 nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
@@ -2227,8 +2226,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
 
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
+                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
                             } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                                 nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());

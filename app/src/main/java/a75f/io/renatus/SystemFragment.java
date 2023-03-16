@@ -704,6 +704,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode"))
 						{
 							SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
+							if (L.ccu().systemProfile != null) {
+								L.ccu().systemProfile.reset();
+							}
 						}
 					}
 				}, 100);

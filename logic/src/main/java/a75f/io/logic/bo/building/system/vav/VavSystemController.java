@@ -950,11 +950,13 @@ public class VavSystemController extends SystemController
     
     @Override
     public void reset(){
+        CcuLog.i(L.TAG_CCU_SYSTEM, "Reset system loop");
         weightedAverageCoolingOnlyLoadMAQueue.clear();
         weightedAverageHeatingOnlyLoadMAQueue.clear();
         piController.reset();
         heatingSignal = 0;
         coolingSignal = 0;
+        systemState = OFF;
     }
     
     public void resetLoop() {

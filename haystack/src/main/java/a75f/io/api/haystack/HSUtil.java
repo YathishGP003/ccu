@@ -395,6 +395,20 @@ public class HSUtil
                 || pointEntity.containsKey("th2")
                 || pointEntity.containsKey("main")));
     }
+
+    /**
+     * Currently on conditioning mode change is being considered for loop reset.
+     * We will have
+     * @param pointUid
+     * @param instance
+     * @return
+     */
+    public static boolean isPointUpdateNeedsSystemProfileReset(String pointUid, CCUHsApi instance) {
+        HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
+        return ((pointEntity.containsKey(Tags.CONDITIONING)
+                && pointEntity.containsKey(Tags.MODE)));
+    }
+
     /**
      * Checks a given point is a limit tuner.
      * @param id

@@ -637,7 +637,7 @@ public class FloorPlanFragment extends Fragment {
         rl_oao.setVisibility(View.VISIBLE);
         rl_modbus_energy_meter.setVisibility(View.VISIBLE);
         rl_modbus_btu_meter.setVisibility(View.VISIBLE);
-
+        addZonelt.setVisibility(View.GONE); // we are not showing 'add zone+' here.
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {

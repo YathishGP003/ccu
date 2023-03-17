@@ -338,7 +338,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             textTunerDefaultValue.setText("" + defaultVal);
         }
 
-        textTunerGroupTitle.setText(tunerGroupSelected.getName());
+        String tunerGroup = tunerItemSelected.get("tunerGroup") != null ? tunerItemSelected.get("tunerGroup").toString() :
+                                                tunerGroupSelected.getName();
+        textTunerGroupTitle.setText(tunerGroup);
+
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);

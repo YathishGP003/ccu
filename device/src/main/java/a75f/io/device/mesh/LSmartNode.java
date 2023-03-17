@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -22,6 +24,7 @@ import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
+import a75f.io.device.serial.DamperActuator_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
@@ -29,12 +32,11 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
@@ -136,7 +138,7 @@ public class LSmartNode
         fillSmartNodeSettings(settingsMessage.settings,zone,address,equipRef, profile);
         return settingsMessage;
     }
-    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile){
+    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile) {
 
         try
         {
@@ -169,6 +171,7 @@ public class LSmartNode
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
+                setupDamperType(address, settings);
                 break;
             case "lcm":
                 settings.profileBitmap.lightingControl.set((short)1);
@@ -188,7 +191,7 @@ public class LSmartNode
         
         settings.forwardMotorBacklash.set((short)5);
         settings.reverseMotorBacklash.set((short)5);
-        
+
         String equipId = SystemTemperatureUtil.getEquip(address).getId();
         try {
             settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
@@ -216,6 +219,64 @@ public class LSmartNode
             settings.enableOccupationDetection.set((short)0);
         }
     }
+
+
+    public static void setupDamperType(short address, SmartNodeSettings_t settings){
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        Equip equip = new Equip.Builder().setHashMap(hsApi.readEntity("equip and group == \"" + address + "\"")).build();
+        if (equip.getMarkers().contains("dab")) {
+            int damperConfig = hsApi.readDefaultVal("point and config and dab and damper and primary and type and group == \""+address+"\"").intValue();
+            int damper2Config = hsApi.readDefaultVal("point and config and dab and damper and secondary and type and group == \""+address+"\"").intValue();
+            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
+            setupDamperActuator(settings, damperConfig, damper2Config, reheatConfig, "dab");
+        } else if (equip.getMarkers().contains("vav")) {
+            int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
+            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
+            setupDamperActuator(settings, damperConfig, 0, reheatConfig, "vav");
+        }
+    }
+
+    /**
+     * Function which setup the damper actuator type for smart node setting message if profile type is Dab
+     * @param settings
+     * @param damperConfig
+     * @param damper2Config
+     * @param reheatConfig
+     */
+    public static void setupDamperActuator(
+            SmartNodeSettings_t settings,
+            int damperConfig,int damper2Config,int reheatConfig, String profileType
+    ){
+
+        Map<DamperType, DamperActuator_t> damperTypeMap = new HashMap<>();
+        damperTypeMap.put(DamperType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
+        damperTypeMap.put(DamperType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
+        damperTypeMap.put(DamperType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
+        damperTypeMap.put(DamperType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
+        damperTypeMap.put(DamperType.MAT, DamperActuator_t.DAMPER_ACTUATOR_MAT);
+
+        Map<ReheatType, DamperActuator_t> reheatTypeMap = new HashMap<>();
+        reheatTypeMap.put(ReheatType.ZeroToTenV, DamperActuator_t.DAMPER_ACTUATOR_0_10V);
+        reheatTypeMap.put(ReheatType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
+        reheatTypeMap.put(ReheatType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
+        reheatTypeMap.put(ReheatType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
+        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_PULSED);
+        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_Staged);
+        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_Staged);
+
+        settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
+
+        if (profileType.equals("vav")){
+            settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
+        } else {
+            if (reheatConfig > 0) {
+                settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
+            } else {
+                settings.returnAirDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damper2Config])));
+            }
+        }
+    }
+
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
 

@@ -23,6 +23,8 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -108,6 +110,9 @@ public class ScheduleManager {
             occupiedHashMap.remove(equip.getRoomRef());
             CcuLog.i(TAG_CCU_SCHEDULER, " Equip not occupied "+equip.getDisplayName());
             return;
+        }else if(occ.getCoolingVal() == null || occ.getHeatingVal() == null){
+            CcuLog.i(TAG_CCU_SCHEDULER, " occ.getCoolingVal(): "+occ.getCoolingVal()+" occ.getHeatingVal(): "+occ.getHeatingVal());
+            return;
         }
         
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupiedSchedule: NextOcc "+occ.getNextOccupiedSchedule()+" "+
@@ -163,8 +168,9 @@ public class ScheduleManager {
             }
         }
 
-        updateOccupancy(CCUHsApi.getInstance());
-        updateDesiredTemp();
+        Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
+        updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
+        updateDesiredTemp(zoneProfiles);
 
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
@@ -175,7 +181,8 @@ public class ScheduleManager {
         ScheduleUtil.deleteExpiredSpecialSchedules();
 
         //TODO - refactor. This can only be done after updating desired temp.
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+        for (ZoneProfile profile : zoneProfiles) {
+
             if (profile instanceof ModbusProfile) {
                 continue;
             }
@@ -238,9 +245,9 @@ public class ScheduleManager {
         updateSystemOccupancy(CCUHsApi.getInstance());
     }
     
-    public void updateOccupancy(CCUHsApi hayStack) {
+    public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+        for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile) {
                 continue;
             }
@@ -321,8 +328,9 @@ public class ScheduleManager {
     
     
     
-    public void updateDesiredTemp() {
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+    public void updateDesiredTemp(Set<ZoneProfile> zoneProfiles) {
+
+        for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
                 continue;
             }

@@ -701,7 +701,8 @@
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
 
     <!--SMART NODE Module Screen-->
-    <string name="title_smartnodemodule">SMART NODE | HELIO NODE | SELECT MODULE TYPE</string>
+    <string name="title_smartnodemodule">SMART NODE | SELECT MODULE TYPE</string>
+    <string name="title_helionodemodule">HELIO NODE | SELECT MODULE TYPE</string>
     <string name="title_vav">VAV with Reheat</string>
     <string name="desc_vav">Control a VAV box for airflow and reheat valves/electric coils</string>
     <string name="title_dab">Dynamic Airflow Balancing</string>
@@ -855,7 +856,8 @@
     <string name="lable_epidemic_settings_text">Epidemic Mode Settings</string>
 
     <!--PAIRING INSTRUCTION Screen-->
-    <string name="title_pairsn">SMART NODE | HELIO NODE | PAIRING STEPS </string>
+    <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
+    <string name="title_pairhn">HELIO NODE | PAIRING STEPS </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 

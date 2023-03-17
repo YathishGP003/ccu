@@ -384,9 +384,9 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         restoreCCU.getZoneEquipsOfCCU(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getOAOEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
+        L.saveCCUState();
         int address = Integer.parseInt(pointMaps.get("val").toString());
         L.ccu().setSmartNodeAddressBand((short)address);
-        L.saveCCUState();
 
     }
 

@@ -5,13 +5,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Point;
-import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
-import a75f.io.renatus.util.RxjavaUtil;
-import androidx.annotation.Nullable;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,11 +22,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Point;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -49,6 +46,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.truecfm.TrueCFMConstants;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
@@ -58,6 +56,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -688,7 +687,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "
                 +vavConfig.enableAutoForceoccupied+"----------"+vavConfig.enableAutoAwayControl);
         if (mProfileConfig == null) {
-            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
+            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef, mNodeType);
         } else
         {
             mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);

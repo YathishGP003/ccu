@@ -1,8 +1,11 @@
 package a75f.io.logic.pubnub;
 
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.resetAO2ToSecondaryDamper;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
 
 import com.google.gson.JsonObject;
+
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
@@ -14,6 +17,7 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
 public class DamperReheatTypeHandler {
@@ -33,11 +37,22 @@ public class DamperReheatTypeHandler {
                                                   DamperType.values()[typeVal].displayName);
             } else if (configPoint.getMarkers().contains(Tags.SECONDARY)) {
                 double reheatType = hayStack.readDefaultVal("reheat and type and group == \""+configPoint.getGroup()+"\"");
-                if (reheatType == 0 && (reheatType - 1) > ReheatType.Pulse.ordinal()  ) {
+                if (reheatType == 0 || (reheatType - 1) > ReheatType.Pulse.ordinal()  ) {
                     //When reheat is mapped to AO2 , we cant use it.
                     SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
                             DamperType.values()[typeVal].displayName);
                     SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+
+                    if (typeVal < DamperType.MAT.ordinal()) {
+                        HashMap<Object, Object> normalizedSecDamper = hayStack
+                                .readEntity("normalized and secondary and damper and cmd and equipRef ==\""+configPoint.getEquipRef()+"\"");
+                        CcuLog.i("CCU_ZONE", normalizedSecDamper.toString());
+                        if (!normalizedSecDamper.isEmpty()) {
+                            DeviceUtil.updatePhysicalPointRef(Integer.parseInt(configPoint.getGroup()),
+                                    Port.ANALOG_OUT_TWO.name(), normalizedSecDamper.get("id").toString());
+
+                        }
+                    }
                 }
             }
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.DAB)) {

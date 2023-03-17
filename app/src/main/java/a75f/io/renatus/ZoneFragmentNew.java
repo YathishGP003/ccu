@@ -191,6 +191,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
 
+    private final DecimalFormat PRECIPITATION_DECIMAL_FORMAT = new DecimalFormat("#.##");
+    private final DecimalFormat HUMIDITY_DECIMAL_FORMAT = new DecimalFormat("#.#");
+
     TextView zoneLoadTextView = null;
     public ZoneFragmentNew() {
     }
@@ -349,10 +352,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
+                gridlayout.invalidate();
             });
         }
     }
-    
+
+
     HashMap<String, View> zoneStatus = new HashMap<>();
     
     public void refreshHeartBeatStatus(String id) {
@@ -537,11 +542,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
                 minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
             }
-            DecimalFormat df = new DecimalFormat("#.##");
-            double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
+
+            double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
             double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
-            weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
-            note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
+
+            double formattedPrecipitation = Double.parseDouble(PRECIPITATION_DECIMAL_FORMAT.format(weatherPrecipitation));
+            double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
+
+            note.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
+
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
@@ -2210,7 +2219,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if( isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")) {
                                 nonTempControl.setPiInputText(String.format("%.2f", fahrenheitToCelsius(inputValue)));
                                 nonTempControl.setPiInputUnitText(" \u00B0C");
-                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                             } else {
                                 nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                                 nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
@@ -2218,8 +2226,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
 
                             if ((boolean) plcPoints.get("Dynamic Setpoint")) {
+                                nonTempControl.setPiOutputText(String.valueOf(targetValue));
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
                             } else if (isCelsiusTunerAvailableStatus() && plcPoints.get("Unit").toString().equals("\u00B0F")){
+                                nonTempControl.setPiOutputText(String.valueOf(fahrenheitToCelsius(targetValue)));
                                 nonTempControl.setPiOutputUnitText("\u00B0C");
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -3532,6 +3542,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
+        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {

@@ -234,6 +234,8 @@ public class LSmartNode
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName());
+                        //Disabled output port should reset its val
+                        hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                         continue;
                     }
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
@@ -282,29 +284,31 @@ public class LSmartNode
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
-                    if (!Globals.getInstance().isTemporaryOverrideMode())
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
                     }
 
                     //TODo -MAT is currently configured on analog2 , what if reheat is also configured.
-                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal >= 0) {
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
 
                     //Mapping not required during override.
                     if (Globals.getInstance().isTemporaryOverrideMode()) {
-                        //mappedVal = (short)logicalVal;
                         double physicalVal = hayStack.readHisValById(p.getId());
                         mappedVal = (short) physicalVal;
+                    } else {
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
 
+                }  else {
+                    //Disabled output port should reset its val
+                    hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
             controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));
@@ -513,6 +517,7 @@ public class LSmartNode
                     HashMap<Object,Object> logicalOpPoint = hayStack.readEntity("point and id == " + p.getPointRef());
                     if (logicalOpPoint.isEmpty()) {
                         CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));
+                        hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                         continue;
                     }
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
@@ -524,8 +529,6 @@ public class LSmartNode
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
-                    if (!Globals.getInstance().isTemporaryOverrideMode())
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                         mappedVal |= 0x80;
@@ -535,11 +538,18 @@ public class LSmartNode
                         controlsMessage.controls.damperPosition.set(mappedVal);
                         mappedVal = 0;
                     }
+
+                    if (!Globals.getInstance().isTemporaryOverrideMode())
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+
                     Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p.getPort());
                     if(smartNodePort != null)
                         smartNodePort.set(mappedVal);
 
+                } else {
+                    //Disabled output port should reset its val
+                    hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
             controlsMessage.controls.setTemperature.set((short) (getDesiredTemp(Short.parseShort(node)) * 2));

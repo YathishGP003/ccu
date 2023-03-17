@@ -548,11 +548,7 @@ public class CCUUtils {
         }
         return value;
     }
-
-	public static String getEnvGoogleMapKeys() {
-			return BuildConfig.GOOGLE_MAPS_KEY;
-	}
-
+	
 	public static void resetPasswords(Context context) {
 		Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
 		final String DEFAULT_RESET_PASSWORD = "7575";

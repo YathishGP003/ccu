@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -17,6 +19,7 @@ import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,8 +35,6 @@ import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
-import com.tooltip.Tooltip;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,8 +59,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -70,7 +69,6 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
@@ -78,7 +76,6 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.pubnub.IntrinsicScheduleListener;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -94,21 +91,6 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.OaoArc;
-import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -300,9 +282,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
+	try {
 		NotificationHandler.setCloudConnectivityListener(this);
 		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
-
 		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
 
 		//Week Days
@@ -374,6 +356,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
 		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
 
+		}catch (InflateException inflateException){
+			Log.d(L.TAG_CCU_UI," Problem when inflating the layout fragment_system_setting "+inflateException.getMessage());
+			inflateException.printStackTrace();
+		}
 		return rootView;
 	}
 

@@ -55,12 +55,12 @@ public class SystemProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile_selector, container, false);
-        ButterKnife.bind(this, rootView);
         return rootView;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        ButterKnife.bind(this, view);
         isFreshRegister = getActivity() instanceof FreshRegistration;
 
         if (!isFreshRegister) {

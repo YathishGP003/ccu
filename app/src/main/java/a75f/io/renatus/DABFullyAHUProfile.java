@@ -132,7 +132,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_dab_fully_ahu, container, false);
-        ButterKnife.bind(this, rootView);
+
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -143,6 +143,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
 
+        ButterKnife.bind(this, view);
         prefs = new Prefs(getContext().getApplicationContext());
         if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
             systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;

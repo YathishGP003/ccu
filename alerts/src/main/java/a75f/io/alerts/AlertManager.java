@@ -260,4 +260,32 @@ public class AlertManager
             fixAlert(a);
         }
     }
+
+    /**Fixing Safe mode explicity
+     * as this value is set and restarted immediately
+     */
+    public void fixSafeMode(){
+        if (! repoCheck()) return;
+
+        for (Alert a: repo.getActiveSafeModeAlert()){
+            fixAlert(a);
+        }
+    }
+
+    public void generateCrashAlert(String title, String msg){
+        if (! repoCheck()) return;
+        repo.generateCrashAlertWithMessage(title,msg);
+    }
+
+
+    /**Fixing CrashAlert explicity
+     * if there is a upcoming crashalert
+     */
+    public void fixPreviousCrashAlert(){
+        if (! repoCheck()) return;
+
+        for (Alert a: repo.getActiveCrashAlert()){
+            fixAlert(a);
+        }
+    }
 }

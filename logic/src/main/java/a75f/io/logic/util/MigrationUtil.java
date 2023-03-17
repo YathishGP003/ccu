@@ -278,6 +278,13 @@ public class MigrationUtil {
         }
 
 
+        if(!PreferenceUtil.getSafeModeMigration()){
+            addSafeModeDiagPoint(CCUHsApi.getInstance());
+            PreferenceUtil.setSafeModeMigration();
+        }
+
+
+
         if(!PreferenceUtil.getSSEFanStageMigration()){
             SSEFanStageMigration(CCUHsApi.getInstance());
             PreferenceUtil.setSSEFanStageMigration();
@@ -1889,6 +1896,19 @@ public class MigrationUtil {
                tempPoint.setDisplayName(equip.get("dis")+"-autoawayEnabled");
                instance.updatePoint(tempPoint,tempPoint.getId());
            }
+        }
+    }
+
+
+    private static void addSafeModeDiagPoint(CCUHsApi hsApi){
+        Map<Object,Object> diagEquip = hsApi.readEntity("equip and diag");
+        if (!diagEquip.isEmpty()) {
+            String equipRef = diagEquip.get("id").toString();
+            String equipDis = "DiagEquip";
+            String siteRef = diagEquip.get("siteRef").toString();
+            String tz = diagEquip.get("tz").toString();
+            hsApi.addPoint(DiagEquip.getDiagSafeModePoint(equipRef, equipDis, siteRef, tz));
+
         }
     }
 }

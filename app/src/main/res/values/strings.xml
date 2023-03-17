@@ -1309,4 +1309,8 @@
     <string name="label_analog2_min_reheat">Analog2-Out at\nMin Reheat</string>
     <string name="label_analog2_max_reheat">Analog2-Out at\nMax Reheat</string>
     <string name="label_min_reheat_damper_pos">Min Reheat \nDamper Pos</string>
+    
+    <!-- Safe mode -->
+    <string name="in_safe_mode">CCU is in Safe Mode</string>
+    <string name="exit_safe_mode">EXIT SAFE MODE</string>
 </resources>

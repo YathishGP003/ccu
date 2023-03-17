@@ -57,6 +57,8 @@ public class PreferenceUtil {
 
     private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
 
+    private static final String SAFE_MODE_DIAG = "safeModeDiag";
+
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
@@ -573,6 +575,14 @@ public class PreferenceUtil {
 
     public static void setAirflowSampleWaitTimeUnitMigration() {
         setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
+    }
+
+    public static boolean getSafeModeMigration() {
+        return getBooleanPreference(SAFE_MODE_DIAG);
+    }
+
+    public static void setSafeModeMigration() {
+        setBooleanPreference(SAFE_MODE_DIAG,true);
     }
 
     public static boolean getAutoForcedTagNameCorrectionMigration() {

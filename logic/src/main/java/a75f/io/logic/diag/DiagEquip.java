@@ -75,7 +75,9 @@ public class DiagEquip
         HashMap<Object,Object> siteMap = hsApi.readEntity(Tags.SITE);
         String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
         String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
-        
+
+        hsApi.addPoint(getDiagSafeModePoint(equipRef,equipDis,siteRef,tz));
+
         Point batteryLevel = new Point.Builder()
                                            .setDisplayName(equipDis+"-batteryLevel")
                                            .setEquipRef(equipRef)
@@ -207,12 +209,12 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-availableInternalDiskStorage")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("linear")
-                .addMarker("diag").addMarker("available").addMarker("internal").addMarker("disk").addMarker("storage").addMarker("his").addMarker("cur")
+                .addMarker("diag").addMarker("available").addMarker("internal").addMarker("disk")
+                .addMarker("storage").addMarker("his").addMarker("cur")
                 .setUnit("MB")
                 .setTz(tz)
                 .build();
         hsApi.addPoint(internalDiskStorage);
-
     }
     
     
@@ -283,6 +285,7 @@ public class DiagEquip
             e.printStackTrace();
         }
 
+        setDiagHisVal("safe and mode and status", Globals.getInstance().isSafeMode()? 1 : 0);
         updateFreeInternalStoragePoint();
 
     }
@@ -299,5 +302,17 @@ public class DiagEquip
         long freeInternalMemorySize = (((availableBlocks * blockSize)/1024)/1024);  // it returns size in MB
         Log.d("DiagEquip","freeInternalStorage "+freeInternalMemorySize);
         setDiagHisVal("internal and disk",freeInternalMemorySize);
+    }
+
+    public static Point getDiagSafeModePoint(String equipRef, String equipDis, String siteRef, String tz){
+        return  new Point.Builder()
+                .setDisplayName(equipDis+"-safeModeStatus")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("cov")
+                .addMarker("diag").addMarker("safe").addMarker("mode").addMarker("his")
+                .addMarker("cur").addMarker("sp").addMarker("status")
+                .setKind(Kind.NUMBER)
+                .setTz(tz)
+                .build();
     }
 }

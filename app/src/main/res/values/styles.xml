@@ -703,4 +703,17 @@
         <item name="android:layout_gravity">end|top</item>
         <item name="android:dropDownWidth">match_parent</item>
     </style>
+
+
+    <style name="safe_mode_header" parent="@android:style/TextAppearance">
+        <item name="android:textSize">33sp</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+    </style>
+
+    <style name="safe_mode_cts" parent="@android:style/TextAppearance">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/renatus_75F_accent</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+    </style>
 </resources>

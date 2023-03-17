@@ -15,7 +15,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
@@ -209,8 +208,9 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
             fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).coerceAtMost(100.0).toInt())
         }
-        else if (heatingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+        else if (heatingLoopOutput > 0 && ((basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY && supplyWaterTempTh2 > coolingThreshold )
+                    || (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO && supplyWaterTempTh2 > coolingThreshold))
+        ) {
             fanLoopOutput = (heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).coerceAtMost(100.0).toInt()
         }
     }
@@ -338,14 +338,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
         // any specific user intent run the fan operations
         if(basicSettings.fanMode != StandaloneFanStage.OFF && basicSettings.fanMode != StandaloneFanStage.AUTO) {
-            doFanOperation(
-                tuner,
-                basicSettings,
-                relayStages,
-                configuration,
-                userIntents,
-                analogOutStages
-            )
+            doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
         }
 
         if ((currentTemp > 0) && (basicSettings.fanMode != StandaloneFanStage.OFF)) {
@@ -363,9 +356,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     doHeatOnly(tuner, basicSettings, relayStages, configuration,userIntents,analogOutStages,equip)
                 }
                 StandaloneConditioningMode.OFF -> {
-                    doFanOperation(
-                        tuner, basicSettings, relayStages, configuration,userIntents, analogOutStages
-                    )
+                    doFanOperation(tuner, basicSettings, relayStages, configuration,userIntents, analogOutStages, equip)
                 }
             }
         } else {
@@ -414,11 +405,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                                 resetFan(relayStages,analogOutStages,basicSettings)
                                 return
                             }
-
-                            doFanOperation(
-                                tuner, basicSettings, relayStages,
-                                configuration, userIntents, analogOutStages
-                            )
+                            doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                         }
                         if(heatingLoopOutput > 0 || fanLoopOutput == 0){
                             resetFan(relayStages,analogOutStages,basicSettings)
@@ -426,11 +413,24 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     }
                 } else {
                     // If Fan has specific user intent
-                    doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages)
+                    doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                 }
-            } else {
+            }
+            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
+                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
+                resetFan(relayStages,analogOutStages,basicSettings)
+                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
+            }
+            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
+                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
+                resetFan(relayStages,analogOutStages,basicSettings)
+                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
+            }
+            else {
                 // if we don't have aux configuration
-                doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages)
+                doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
             }
         } else {
             resetFan(relayStages,analogOutStages,basicSettings)
@@ -472,21 +472,31 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
                     } else {
                         if(heatingLoopOutput > 0) {
-                            doFanOperation(
-                                tuner, basicSettings, relayStages,
-                                configuration, userIntents, analogOutStages
-                            )
+                            doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                         } else {
                             resetFan(relayStages,analogOutStages,basicSettings)
                         }
                     }
                 } else {
                     // If Fan has specific user intent
-                    doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages)
+                    doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                 }
-            } else {
+            }
+            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
+                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
+                resetFan(relayStages,analogOutStages,basicSettings)
+                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
+            }
+            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
+                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
+                resetFan(relayStages,analogOutStages,basicSettings)
+                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
+            }
+            else {
                 // If we have don't have any aux configuration
-                doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages)
+                doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
             }
         } else {
             resetFan(relayStages,analogOutStages,basicSettings)
@@ -655,7 +665,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         relayStages: HashMap<String, Int>,
         configuration: HyperStatPipe2Configuration,
         userIntents: UserIntents,
-        analogOutStages: HashMap<String, Int>
+        analogOutStages: HashMap<String, Int>,
+        equip: HyperStatPipe2Equip
     ) {
       logIt(" Fan operation is running")
         if( basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
@@ -675,19 +686,54 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 && currentTemp > userIntents.zoneCoolingTargetTemperature) {
                 resetFan(relayStages,analogOutStages,basicSettings)
             } else {
-                if(basicSettings.fanMode == StandaloneFanStage.LOW_ALL_TIME
-                    ||basicSettings.fanMode == StandaloneFanStage.MEDIUM_ALL_TIME
-                    ||basicSettings.fanMode == StandaloneFanStage.HIGH_ALL_TIME ){
+                if ( basicSettings.fanMode != StandaloneFanStage.AUTO && basicSettings.fanMode != StandaloneFanStage.OFF ) {
                     runFanHigh(tuner, basicSettings, relayStages)
                     runFanMedium(tuner, basicSettings, relayStages, configuration)
                     runFanLow(tuner, basicSettings, relayStages, configuration)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                     return
                 }
-                runFanHigh(tuner, basicSettings, relayStages)
-                runFanMedium(tuner, basicSettings, relayStages, configuration)
-                runFanLow(tuner, basicSettings, relayStages, configuration)
-                runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
+                if (equip.waterSamplingStartTime == 0L && (relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal) &&
+                            getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!) == 1.0)) {
+
+                    runFanHigh(tuner, basicSettings, relayStages)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration)
+                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
+                }
+                else if(equip.waterSamplingStartTime == 0L &&  analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal) &&
+                    getCurrentLogicalPointStatus(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!) > 1.0){
+                    runFanHigh(tuner, basicSettings, relayStages)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration)
+                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
+                }
+                else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
+                    && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0){
+                    runFanHigh(tuner, basicSettings, relayStages)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration)
+                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runAnalogFanSpeed(
+                        configuration,
+                        userIntents,
+                        analogOutStages,
+                        basicSettings
+                    )
+                }
+                else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
+                    && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
+                    runFanHigh(tuner, basicSettings, relayStages)
+                    runFanMedium(tuner, basicSettings, relayStages, configuration)
+                    runFanLow(tuner, basicSettings, relayStages, configuration)
+                    runAnalogFanSpeed(
+                        configuration,
+                        userIntents,
+                        analogOutStages,
+                        basicSettings
+                    )
+                } else {
+                    resetFan(relayStages,analogOutStages,basicSettings)
+                }
             }
         }
     }
@@ -1068,23 +1114,22 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
-
     private fun runSpecificAnalogFanSpeed(config: HyperStatPipe2Configuration, fanSpeed: FanSpeed, analogOutStages: HashMap<String, Int>) {
-
-        var doWeHaveAnalog = false
-        if(config.analogOut1State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut1State)) {
-            updateLogicalPointIdValue(logicalPointsList[Port.ANALOG_OUT_ONE]!!, getPercent(config.analogOut1State,fanSpeed))
-            doWeHaveAnalog = true
+        var analogOutputsUpdated = 0
+        val analogOutputStates = listOf(
+            Pair(Port.ANALOG_OUT_ONE, config.analogOut1State),
+            Pair(Port.ANALOG_OUT_TWO, config.analogOut2State),
+            Pair(Port.ANALOG_OUT_THREE, config.analogOut3State)
+        )
+        if (analogOutputStates.any { it.second.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(it.second) }) {
+            for ((port, analogOutState) in analogOutputStates) {
+                if (analogOutState.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(analogOutState)) {
+                    updateLogicalPointIdValue(logicalPointsList[port]!!, getPercent(analogOutState, fanSpeed))
+                    analogOutputsUpdated++
+                }
+            }
         }
-        if(config.analogOut2State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut2State)) {
-            updateLogicalPointIdValue(logicalPointsList[Port.ANALOG_OUT_TWO]!!, getPercent(config.analogOut2State,fanSpeed))
-            doWeHaveAnalog = true
-        }
-        if(config.analogOut3State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut3State)) {
-            updateLogicalPointIdValue(logicalPointsList[Port.ANALOG_OUT_THREE]!!, getPercent(config.analogOut3State,fanSpeed))
-            doWeHaveAnalog = true
-        }
-        if(doWeHaveAnalog && fanSpeed != FanSpeed.OFF) {
+        if (analogOutputsUpdated > 0 && fanSpeed != FanSpeed.OFF) {
             analogOutStages[AnalogOutput.FAN_SPEED.name] = 1
         }
     }
@@ -1098,36 +1143,30 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
-    private fun waterValveLoop(userIntents: UserIntents): Int{
+    private fun waterValveLoop(userIntents: UserIntents): Int {
+        val supplyWaterTempTh2AboveHeating = supplyWaterTempTh2 > heatingThreshold
+        val supplyWaterTempTh2BelowCooling = supplyWaterTempTh2 < coolingThreshold
 
-        if(supplyWaterTempTh2 > heatingThreshold){
-            if(currentTemp < userIntents.zoneHeatingTargetTemperature){
-                // Zone expecting heat
-                return heatingLoopOutput
-            }else  if(currentTemp > userIntents.zoneCoolingTargetTemperature){
-                // Zone expecting cool
-                return 0
-            }else{
-                if (heatingLoopOutput > 0 )
-                    return heatingLoopOutput
-                return 0
-            }
+        val zoneExpectingHeat = currentTemp < userIntents.zoneHeatingTargetTemperature
+        val zoneExpectingCool = currentTemp > userIntents.zoneCoolingTargetTemperature
 
-        } else if( supplyWaterTempTh2 < coolingThreshold){
-            if(currentTemp < userIntents.zoneHeatingTargetTemperature){
-                // Zone expecting heat
-                return 0
-            }else  if(currentTemp > userIntents.zoneCoolingTargetTemperature){
-                // Zone expecting cool
-                return coolingLoopOutput
-            } else {
-                 if (coolingLoopOutput > 0 )
-                     return coolingLoopOutput
-                return 0
+        if (supplyWaterTempTh2AboveHeating && zoneExpectingHeat) {
+            // Supply heating
+            return heatingLoopOutput
+        } else if (supplyWaterTempTh2BelowCooling && zoneExpectingCool) {
+            // Supply cooling
+            return coolingLoopOutput
+        } else {
+            // No supply
+            if (supplyWaterTempTh2AboveHeating) {
+                return if (heatingLoopOutput > 0) heatingLoopOutput else 0
+            } else if (supplyWaterTempTh2BelowCooling) {
+                return if (coolingLoopOutput > 0) coolingLoopOutput else 0
             }
         }
         return 0
     }
+
 
 
     private fun isDoorOpenState(
@@ -1221,8 +1260,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             analogOutStages.clear()
             relayStages.clear()
         }
-
-
     }
 
     private fun resetLoopOutputValues() {
@@ -1231,8 +1268,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         heatingLoopOutput = 0
         fanLoopOutput = 0
     }
-
-
 
     private fun getSupplyWaterTemp(equipRef: String): Double {
         return CCUHsApi.getInstance()
@@ -1268,9 +1303,24 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
     }
 
+    override fun isZoneDead(): Boolean {
+        val buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max")
+        val buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min")
+        val tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway")
+        for (node in pipe2DeviceMap.keys) {
+            if (pipe2DeviceMap[node]!!.getCurrentTemp() > buildingLimitMax + tempDeadLeeway
+                || pipe2DeviceMap[node]!!.getCurrentTemp() < buildingLimitMin - tempDeadLeeway
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
     private fun milliToMin(milliseconds: Long): Long {
         return (milliseconds / (1000 * 60) % 60)
     }
+
     /**
      * Function just to print logs
      */

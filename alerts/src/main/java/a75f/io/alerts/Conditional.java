@@ -371,7 +371,7 @@ public class Conditional
                                                 sb.append("\n   Found point assoc w/ this equip").append(pointRef.substring(0,6)).append(" -- reading last two his vals from today");
 
                     //List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-1800000,HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT))), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT)))));
-                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(pointRef,"today");
+                    List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(pointRef, 0, 2);
                     ///List<HisItem> hisItems= CCUHsApi.getInstance().hisReadRemote(CCUHsApi.getInstance().getGUID(point.get("id").toString()),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis() - 3600000, HTimeZone.make(point.get("tz").toString())), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(point.get("tz").toString()))));
 
                     if (hisItems.size() < 2) {
@@ -380,8 +380,8 @@ public class Conditional
                         continue;
                     }
                     
-                    HisItem reading1 = hisItems.get(hisItems.size() - 2);
-                    HisItem reading2 = hisItems.get(hisItems.size() - 1);
+                    HisItem reading1 = hisItems.get(hisItems.size() - 1);
+                    HisItem reading2 = hisItems.get(hisItems.size() - 2);
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \"" + equipRef + "\""));
                                                     sb.append("\nval (RHS): ").append(val).append("  -- recalculated for this zone");

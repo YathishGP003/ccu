@@ -9,8 +9,11 @@ import android.util.Log;
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
+    private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
+    private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
+    private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
     private static Context context;
-    private static String PRESSURE_UNIT_MIGRATION="pressureUnitMigration";
+    private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
     private static final String TRUE_CFM_VAV_MIGRATION="trueCfmVavMigration";
     private static final String AIRFLOW_UNIT_MIGRATION="airflowUnitMigration";
@@ -62,6 +65,9 @@ public class PreferenceUtil {
 
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
+    private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+
+    private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
     public static void setContext(Context c) {
         context= c;
@@ -536,5 +542,44 @@ public class PreferenceUtil {
 
     public static void setDabReheatStage2Migration() {
         setBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION, true);
+    }
+
+    public static boolean getStandaloneHeatingOffsetMigration() {
+        return getBooleanPreference(STANDALONE_HEATING_OFFSET);
+    }
+
+    public static void setStandaloneHeatingOffsetMigration() {
+        setBooleanPreference(STANDALONE_HEATING_OFFSET, true);
+    }
+    public static boolean getMinorTagMigration() {
+        return getBooleanPreference(TAG_MINOR_MIGRATION);
+    }
+
+    public static void setMinorTagMigration() {
+        setBooleanPreference(TAG_MINOR_MIGRATION,true);
+    }
+
+    public static boolean getstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        return getBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET);
+    }
+
+    public static void setstandaloneCoolingAirflowTempLowerOffsetMigration() {
+        setBooleanPreference(STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET, true);
+    }
+
+    public static boolean getStandaloneAirflowSampleWaitMigration() {
+        return getBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
+    }
+
+    public static void setAirflowSampleWaitTimeUnitMigration() {
+        setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
+    }
+
+    public static boolean getAutoForcedTagNameCorrectionMigration() {
+        return getBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION);
+    }
+
+    public static void setAutoForcedTagNameCorrectionMigration() {
+        setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
     }
 }

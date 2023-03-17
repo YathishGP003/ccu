@@ -2,9 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
@@ -29,10 +29,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
-
-
-
-import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -52,6 +48,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     String mRoomName;
     String mFloorName;
     boolean isPaired;
+    String nodeType;
     
     @BindView(R.id.default_text_view)
     TextView    defaultTextView;
@@ -212,6 +209,9 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @BindView(R.id.textParallelDesc)
     TextView textParallelDesc;
 
+    @BindView(R.id.textTitleFragment)
+    TextView     textTitleFragment;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
@@ -224,6 +224,13 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         defaultTextView.setText(HSUtil.getDis(mRoomName));
+        isPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
+        nodeType = getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE);
+        if(nodeType.equals(String.valueOf(NodeType.HELIO_NODE))){
+            textTitleFragment.setText(R.string.title_helionodemodule);
+        }else {
+            textTitleFragment.setText(R.string.title_smartnodemodule);
+        }
     }
 
     @Optional
@@ -273,7 +280,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                                                                     mRoomName,
                                                                     mFloorName,
                                                                     ProfileType.DAB,
-                                                                    NodeType.SMART_NODE),
+                NodeType.valueOf(nodeType)),
                            FragmentBLEInstructionScreen.ID
         );
     }
@@ -287,7 +294,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                                                                     mRoomName,
                                                                     mFloorName,
                                                                     ProfileType.DUAL_DUCT,
-                                                                    NodeType.SMART_NODE),
+                NodeType.valueOf(nodeType)),
                            FragmentBLEInstructionScreen.ID
         );
     }
@@ -296,7 +303,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_sse)
     void onSSEOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
     @Optional
     @OnClick(R.id.rl_light)
@@ -310,7 +317,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_tempmonitor)
     void onTempMonitorOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.TEMP_MONITOR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.TEMP_MONITOR, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
     @Optional
@@ -325,7 +332,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     void onPiControlOnClick()
     {
         if(!isPaired) {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
         }else{
             Toast.makeText(getActivity(), "Pi Loop cannot be paired with existing any module in this zone", Toast.LENGTH_LONG).show();
         }
@@ -336,7 +343,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     void onEnergyMeterOnClick()
     {
         if(!isPaired) {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
         }else{
             Toast.makeText(getActivity(), "Energy meter cannot be paired with existing any module in this zone", Toast.LENGTH_LONG).show();
         }
@@ -354,7 +361,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavNoFan)
     void onVAVNoFanOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.valueOf(nodeType)), FragmentBLEInstructionScreen.ID);
     }
 
 
@@ -366,7 +373,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                                                                     mRoomName,
                                                                     mFloorName,
                                                                     ProfileType.VAV_SERIES_FAN,
-                                                                    NodeType.SMART_NODE),
+                NodeType.valueOf(nodeType)),
                            FragmentBLEInstructionScreen.ID
         );
     }
@@ -379,7 +386,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                                                                     mRoomName,
                                                                     mFloorName,
                                                                     ProfileType.VAV_PARALLEL_FAN,
-                                                                    NodeType.SMART_NODE),
+                NodeType.valueOf(nodeType)),
                            FragmentBLEInstructionScreen.ID
         );
     }
@@ -566,7 +573,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         }
     }
     
-    public static DialogSmartNodeProfiling newInstance(short meshAddress, String roomName, String floorName,boolean isPaired)
+    public static DialogSmartNodeProfiling newInstance(short meshAddress, String roomName, String floorName,boolean isPaired, NodeType nodeType)
     {
         DialogSmartNodeProfiling f = new DialogSmartNodeProfiling();
         Bundle bundle = new Bundle();
@@ -574,6 +581,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
         bundle.putBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED, isPaired);
+        bundle.putString(FragmentCommonBundleArgs.NODE_TYPE, String.valueOf(nodeType));
         f.setArguments(bundle);
         return f;
     }

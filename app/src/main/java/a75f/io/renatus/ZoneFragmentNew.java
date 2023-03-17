@@ -6,6 +6,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -101,6 +102,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -188,6 +190,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     int noTempSensor = 0;
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
+
+    private final DecimalFormat PRECIPITATION_DECIMAL_FORMAT = new DecimalFormat("#.##");
+    private final DecimalFormat HUMIDITY_DECIMAL_FORMAT = new DecimalFormat("#.#");
 
     TextView zoneLoadTextView = null;
     public ZoneFragmentNew() {
@@ -347,10 +352,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         CcuLog.e(L.TAG_CCU_UI, "Failed to refresh UI ", e);
                     }
                 }
+                gridlayout.invalidate();
             });
         }
     }
-    
+
+
     HashMap<String, View> zoneStatus = new HashMap<>();
     
     public void refreshHeartBeatStatus(String id) {
@@ -535,11 +542,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
                 minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
             }
-            DecimalFormat df = new DecimalFormat("#.##");
-            double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
+
+            double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
             double weatherHumidity = WeatherDataDownloadService.getHumidity() * 100;
-            weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
-            note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
+
+            double formattedPrecipitation = Double.parseDouble(PRECIPITATION_DECIMAL_FORMAT.format(weatherPrecipitation));
+            double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
+
+            note.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
+
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
@@ -1877,6 +1888,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if (p.getProfile().startsWith("EMR")) {
                 LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                 LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                vc_schedule.setVisibility(View.GONE);
                 ll_status.setVisibility(View.GONE);
                 ll_schedule.setVisibility(View.GONE);
                 HashMap emPoints = ZoneViewData.getEMEquipPoints(p.getId());
@@ -2171,6 +2184,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap emPoints = ZoneViewData.getEMEquipPoints(nonTempEquip.getId());
@@ -2191,6 +2206,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         if (nonTempEquip.getProfile().startsWith("PLC")) {
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
                             HashMap plcPoints = ZoneViewData.getPiEquipPoints(nonTempEquip.getId());
@@ -2221,6 +2238,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                             LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            LinearLayout vc_schedule = zoneDetails.findViewById(R.id.vc_schedule);
+                            vc_schedule.setVisibility(View.GONE);
                             ll_status.setVisibility(View.GONE);
                             ll_schedule.setVisibility(View.GONE);
 
@@ -2457,7 +2476,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), updatedEquip.getId())) {
             View viewAirflowCFM = inflater.inflate(R.layout.zone_item_airflow_cfm, null);
             TextView airFlowCFMValue = viewAirflowCFM.findViewById(R.id.text_airflow_cfm_value);
-            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString());
+            airFlowCFMValue.setText(dabPoints.get("Airflow CFM").toString() + " cfm" );
             linearLayoutZonePoints.addView(viewAirflowCFM);
             viewAirflowCFM.setPadding(0, 0, 0, 40);
         }else {
@@ -3522,6 +3541,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
+        UpdatePointHandler.setZoneDataInterface(this);
     }
 
     private void setListeners() {
@@ -3533,6 +3553,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             StandaloneScheduler.setZoneDataInterface(this);
             HyperStatMsgReceiver.setCurrentTempInterface(this);
             HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
+            UpdatePointHandler.setZoneDataInterface(this);
         }
     }
 
@@ -3546,6 +3567,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         StandaloneScheduler.setZoneDataInterface(null);
         HyperStatUserIntentHandler.Companion.setZoneDataInterface(this);
         HyperStatMsgReceiver.setCurrentTempInterface(null);
+        UpdatePointHandler.setZoneDataInterface(null);
     }
 
     @Override

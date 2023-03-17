@@ -7,6 +7,8 @@
     <string name="title_ble">BLE</string>
     <string name="main_content">Main Content</string>
     <string name="ble_content">BLE</string>
+    <string name="edit_icon">&#xf044;</string>
+    <string name="delete_icon">&#xf1f8;</string>
 
 
     <string name="unknown_device">unknown device</string>
@@ -699,7 +701,8 @@
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
 
     <!--SMART NODE Module Screen-->
-    <string name="title_smartnodemodule">SMART NODE | HELIO NODE | SELECT MODULE TYPE</string>
+    <string name="title_smartnodemodule">SMART NODE | SELECT MODULE TYPE</string>
+    <string name="title_helionodemodule">HELIO NODE | SELECT MODULE TYPE</string>
     <string name="title_vav">VAV with Reheat</string>
     <string name="desc_vav">Control a VAV box for airflow and reheat valves/electric coils</string>
     <string name="title_dab">Dynamic Airflow Balancing</string>
@@ -853,7 +856,8 @@
     <string name="lable_epidemic_settings_text">Epidemic Mode Settings</string>
 
     <!--PAIRING INSTRUCTION Screen-->
-    <string name="title_pairsn">SMART NODE | HELIO NODE | PAIRING STEPS </string>
+    <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
+    <string name="title_pairhn">HELIO NODE | PAIRING STEPS </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
@@ -967,6 +971,7 @@
     <string name="txt_compensate_humidity">Compensate for Humidity</string>
     <string name="txt_demand_response_mode">Demand Response Mode</string>
     <string name="txt_ccu">CCU</string>
+    <string name="txt_oao">OAO</string>
     <string name="txt_system_profile">System Profile</string>
     <string name="txt_occupancy_status">Occupancy Status:</string>
     <string name="txt_equipment_status">Equipment Status:</string>

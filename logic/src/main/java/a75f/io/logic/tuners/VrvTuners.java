@@ -241,13 +241,13 @@ public class VrvTuners {
                                              String equipref, String roomRef, String floorRef, String tz,
                                              String nodeAddr, double autoForcedOccupiedEnabled, double autoAwayEnabled) {
         Point autoForcedOccupiedPoint = new Point.Builder()
-                .setDisplayName(displayName +"-autoForceOccupied")
+                .setDisplayName(displayName +"-autoForceOccupiedEnabled")
                 .setEquipRef(equipref)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("writable").addMarker("zone")
-                .addMarker("auto").addMarker("occupancy").addMarker("enabled")
+                .addMarker("auto").addMarker("occupied").addMarker("enabled")
                 .addMarker("control").addMarker("forced").addMarker("his")
                 .addMarker("cmd").setHisInterpolate("cov").setEnums("off,on").addMarker(Tags.STANDALONE)
                 .addMarker("vrv")
@@ -259,7 +259,7 @@ public class VrvTuners {
         hayStack.writeHisValById(autoForcedOccupiedPointId,autoForcedOccupiedEnabled);
 
         Point autoAwayPoint = new Point.Builder()
-                .setDisplayName(displayName + "-autoAway")
+                .setDisplayName(displayName + "-autoawayEnabled")
                 .setEquipRef(equipref)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)

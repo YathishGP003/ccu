@@ -209,7 +209,7 @@ public class OTNEquip {
             //    (double) config.gettempOffset());
 
         Point autoforceoccupied = new Point.Builder()
-                .setDisplayName(equipDis + "-enableautoforceoccupied")
+                .setDisplayName(equipDis + "-autoForceOccupiedEnabled")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -228,13 +228,13 @@ public class OTNEquip {
                 config.getautoforceOccupied() ? 1.0 : 0.0);
 
         Point autoaway = new Point.Builder()
-                .setDisplayName(equipDis + "-enableautoaway")
+                .setDisplayName(equipDis + "-autoawayEnabled")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
-                .addMarker("forced").addMarker("away").addMarker("auto").setHisInterpolate("cov")
+                .addMarker("away").addMarker("auto").setHisInterpolate("cov")
                 .addMarker("his").addMarker("enabled")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("off,on")

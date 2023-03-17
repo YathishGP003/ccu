@@ -63,6 +63,8 @@ public class PreferenceUtil {
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
 
+    private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
+
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
@@ -532,6 +534,14 @@ public class PreferenceUtil {
 
     public static void setTiProfileMigration() {
         setBooleanPreference(TI_PROFILE_MIGRATION, true);
+    }
+
+    public static boolean getDabReheatStage2Migration() {
+        return getBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION);
+    }
+
+    public static void setDabReheatStage2Migration() {
+        setBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION, true);
     }
 
     public static boolean getStandaloneHeatingOffsetMigration() {

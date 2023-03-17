@@ -39,6 +39,7 @@ import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
@@ -49,6 +50,7 @@ import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
@@ -315,6 +317,12 @@ public class MigrationUtil {
         if(!PreferenceUtil.getTiProfileMigration()){
             doTiProfileMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTiProfileMigration();
+        }
+
+
+        if(!PreferenceUtil.getDabReheatStage2Migration()) {
+            doDabReheatStage2Migration(CCUHsApi.getInstance());
+            PreferenceUtil.setDabReheatStage2Migration();
         }
 
         if(!PreferenceUtil.getstandaloneCoolingAirflowTempLowerOffsetMigration()){
@@ -1766,6 +1774,31 @@ public class MigrationUtil {
         otnAutoAwayForcedOccupyPointTagMigration(ccuHsApi);
     }
 
+    private static void doDabReheatStage2Migration(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab and zone");
+
+        dabEquips.forEach( dabEquip -> {
+            Equip equip = new Equip.Builder().setHashMap(dabEquip).build();
+            int reheatType = hayStack.readDefaultVal("reheat and type and equipRef == \""+equip.getId()+"\"").intValue();
+            HashMap<Object, Object> reheatCmd = hayStack.readEntity("reheat and cmd and equipRef ==\""+equip.getId()+"\"");
+
+            if ((reheatType - 1) == ReheatType.TwoStage.ordinal() && !reheatCmd.isEmpty()) {
+                DeviceUtil.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.RELAY_TWO.toString(),
+                                                                reheatCmd.get("id").toString());
+            }
+
+            double damperType = hayStack.readDefaultVal("secondary and damper and type and " +
+                    "equipRef == \""+equip.getId()+"\"");
+            HashMap<Object, Object> damperPos = hayStack.readEntity("normalized and damper and " +
+                    "secondary and cmd and equipRef == \""+equip.getId()+"\"");
+            if (damperType != DamperType.MAT.ordinal() && !damperPos.isEmpty()) {
+                DeviceUtil.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), ANALOG_OUT_TWO.toString(),
+                        damperPos.get("id").toString());
+            }
+
+        });
+
+    }
     private static void otnAutoAwayForcedOccupyPointTagMigration(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equipList = ccuHsApi.readAllEntities("otn and equip");
         String[] markerToAdd = {};

@@ -520,8 +520,12 @@ public class DabEquip
                 device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
                 device.relay1.setPointRef(reheatPosId);
                 device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
-                device.relay1.setPointRef(reheatPosId);
+                device.relay2.setPointRef(reheatPosId);
             }
+            if (config.damper2Type != DamperType.MAT.ordinal()) {
+                device.analog2Out.setPointRef(normalizedDamper2PosId);
+            }
+
         } else {
             device.analog2Out.setPointRef(normalizedDamper2PosId);
         }

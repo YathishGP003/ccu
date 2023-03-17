@@ -67,6 +67,7 @@ public class RangeBar extends View {
     double hdb = 2.0;
 
     private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
+    boolean isZoneSchedule;
 
     public RangeBar(Context context) {
         super(context);
@@ -117,10 +118,17 @@ public class RangeBar extends View {
             mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
 
+        //different overlap constant has to be calculated for Zone schedule and Building Schedule
+        double textOverLapConstant = 0.0;
+        if (isZoneSchedule) {
+            textOverLapConstant = 2.5;
+        }
+
         //force push the text if overlap
         int dbWidth = 0;
-        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] <= (float) (cdb + hdb + 2.5)){
-            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 5;
+        Log.d("TAG", "drawSliderIcon: coolband " + cdb);
+        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + textOverLapConstant)){
+            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 20;
         }
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
@@ -212,7 +220,7 @@ public class RangeBar extends View {
 
     // init temps
     public void setData(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
-                        float upperCoolingTemp, float cdb, float hdb) {
+                        float upperCoolingTemp, float cdb, float hdb, boolean isZoneSchedule) {
         temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = lowerHeatingTemp;
         temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()] = upperHeatingTemp;
         temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = lowerCoolingTemp;
@@ -224,6 +232,7 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
+        this.isZoneSchedule = isZoneSchedule;
         Log.d("RangeControl"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
                              +" lowerCoolingTemp "+lowerCoolingTemp+" upperCoolingTemp "+upperCoolingTemp+" cdb "+cdb+" hdb "+hdb);
               mDataSet = true;
@@ -248,7 +257,7 @@ public class RangeBar extends View {
                 getBitmapFromVectorDrawable(getContext(), R.drawable.ic_heat_thumb);
 
 
-        setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, (float) cdb, (float) hdb);
+        setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, (float) cdb, (float) hdb, false);
 
 
         mLinePaint = new Paint();

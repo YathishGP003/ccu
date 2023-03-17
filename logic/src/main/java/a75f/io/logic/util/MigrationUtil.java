@@ -317,6 +317,21 @@ public class MigrationUtil {
             PreferenceUtil.setTiProfileMigration();
         }
 
+        if(!PreferenceUtil.getstandaloneCoolingAirflowTempLowerOffsetMigration()){
+            createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setstandaloneCoolingAirflowTempLowerOffsetMigration();
+        }
+
+        if(!PreferenceUtil.getStandaloneAirflowSampleWaitMigration()){
+            createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
+        }
+
+        if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){
+            changeOccupancyToOccupiedForAutoForcedEnabledPoint(CCUHsApi.getInstance());
+            PreferenceUtil.setAutoForcedTagNameCorrectionMigration();
+        }
+
         L.saveCCUState();
     }
 
@@ -1796,4 +1811,51 @@ public class MigrationUtil {
         }
     }
 
+
+    private static void createStandaloneCoolingAirflowTempLowerOffsetMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> standaloneAirflowTempLowerOffsetPoints = ccuHsApi.
+                readAllEntities("point and airflow and standalone and cooling and lower and not stage2");
+        String updatedUnit = "\u00B0F";
+        for (HashMap<Object, Object> standaloneAirflowTempLowerOffsetPoint : standaloneAirflowTempLowerOffsetPoints) {
+            Point updatedPoint = new Point.Builder().setHashMap(standaloneAirflowTempLowerOffsetPoint).setUnit(updatedUnit).build();
+            CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+        }
+
+    }
+
+    private static void createStandaloneAirflowSampleWaitMigration(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> standaloneAirflowSampleWaitPoints = ccuHsApi.
+                readAllEntities("standalone and airflow and default and sample");
+        for (HashMap<Object, Object> standaloneAirflowSampleWaitTime : standaloneAirflowSampleWaitPoints) {
+            String updateUnit = "m";
+            Point updatedStandaloneAirflowSampleWaitTimePoint = new Point.Builder().
+                    setHashMap(standaloneAirflowSampleWaitTime).setUnit(updateUnit).build();
+
+            CCUHsApi.getInstance().updatePoint(updatedStandaloneAirflowSampleWaitTimePoint,
+                    updatedStandaloneAirflowSampleWaitTimePoint.getId());
+        }
+    }
+
+    private static void changeOccupancyToOccupiedForAutoForcedEnabledPoint(CCUHsApi instance) {
+
+        ArrayList<HashMap<Object, Object>> vrvEquips = CCUHsApi.getInstance().readAllEntities("vrv and equip and zone");
+        for(HashMap<Object, Object> equip : vrvEquips){
+
+            HashMap<Object, Object> pointHM= CCUHsApi.getInstance().readEntity("vrv and auto and forced and occupancy and equipRef== \"" + equip.get("id") + "\"");
+            if(pointHM.size() > 0){
+                Point tempPoint = new Point.Builder().setHashMap(pointHM).removeMarker("occupancy").addMarker("occupied").build();
+                tempPoint.setDisplayName(equip.get("dis")+"-autoForceOccupiedEnabled");
+                instance.updatePoint(tempPoint,tempPoint.getId());
+            }
+
+           HashMap<Object, Object> pointHM1 = CCUHsApi.getInstance().readEntity("vrv and auto and away and enabled and equipRef== \"" + equip.get("id") + "\"");
+           if(pointHM1.size() > 0){
+               Point tempPoint = new Point.Builder().setHashMap(pointHM1).build();
+               tempPoint.setDisplayName(equip.get("dis")+"-autoawayEnabled");
+               instance.updatePoint(tempPoint,tempPoint.getId());
+           }
+        }
+    }
 }

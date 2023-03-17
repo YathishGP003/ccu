@@ -1,3 +1,45 @@
+ - Merged PR 6227: US - 16066
+ - Merged PR 6523: Dab reheat AO2 reset
+ - Reset AO2 out when logical map does not exist
+ - Merged PR 6715: Google API key removal for VAPT
+ - Merged PR 5422: CFM toggle discrepancy issue is resolved.
+ - Merged PR 5972: Bug 13444: CCU : Celsius conversions across multiple CCU's should happen dyna...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13444_multiple_ccu_sync
+ - Merged PR 6733: Discrepancy in temp lockout cooling/heating dropdowns
+ - Merged PR 6051: Bug 15029: CCU-User intent changes from portal not getting reflected in CCU(a...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharaty/15029/SS_CPU_update
+ - Merged PR 6320: Bug 16977: INT Portal: Discrepancy seen with unit assigned for few tuner i.e...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/16977/standalonecoolingairflow_tuner_ui
+ - Merged PR 6726: Resolved Overnight schedule issue
+ - Merged PR 6448: Bug 10170: Alerts: Constant current Temp alert Notification message shows the...
+ - Merged PR 6228: Bug 16781: CCU: Multiple UI/UX issues seen on Zone screen for different devic...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 16781/bug/multiple_ui_issues
+ - Merged PR 6667: Runtime Tag correction
+ - Merged PR 5787: Now Alerts will not trigger when just site is registered.
+ - Merged PR 6457: Bug 14841: CCU : Helio Node : Discrepancy with illuminance logical value
+ - Merged PR 6530: Bug 15142: CCU | Discrepancy in tuner "standaloneStage1HeatingOffset" value r...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/15142_bharath_discrepency_in_tuner_standaloneheating
+ - Merged PR 6624: Handled fan mode update on Reconfiguration
+ - Merged PR 6529: Bug 15316: Unable to Change Pairing Address After Deleting All Equips
+ - Merged PR 6553: System data not loading on heatmap
+ - moved the method to setListeners.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharaty/15029/SS_CPU_update
+ - Sync across multple CCU with the use of invalidate method for the grid layout
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13444_multiple_ccu_sync
+ - Merged PR 6567: bug-17023- Duplicate CCU shell issue while adding CCU to existing site
+ - Merged PR 6727: Compressor stage 3 name fix
+ - Merged PR 6184: While pairing device added nodeType check.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/13444_multiple_ccu_sync
+ - Merged PR 6601: calling notifyDataSetChanged() only when we are adding new device to the list.
+ - Google API key removal for VAPT
+ - Reset AO2 when not in temp override
+ - Reset output on disabled port
+ - Merged PR 6492: Exclude deadzones without heartbeat from algo
+ - Merged PR 6611: Resolve OTA crash
+ - Merged PR 6593: 16084 CCU: Special schedule accepting special characters
+ - Merged PR 6022: User Story 15987: CCU TI Profile UI Refinement
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/15987_ccu_ti_profile_refinement
+ - Version bump to 1.636.0
  - Merged PR 6598: Reverting the minor version to 634 to regenerate 1.635.0 apk
  - Merged PR 6596: Remove corrupted named schedules
  - Rmove corrupted named schedules
@@ -6,10 +48,16 @@
  - Version bump to 1.635.0
  - Merged PR 6519: Tag correction- BPOS to OTN
  - Merged PR 6352: 16578 - Emergency Conditioning Mode Message Disconnect from Priority None
+ - unit added to standaloneairflowsamplewaittime
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/16977/standalonecoolingairflow_tuner_ui
+ - Bug 15142: CCU | Discrepancy in tuner "standaloneStage1HeatingOffset" value range/default value
+ - Bug 15316: Unable to Change Pairing Address After Deleting All Equips
  - Merged PR 4332: Firmware version point to hold string value
  - Merged PR 6516: Resolved master merge conflicts
  - Merged PR 6441: Bug 17489: CCU [Hyperstat HPU]: DCV damper gets closed during Pre-conditioning
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 16781/bug/multiple_ui_issues
  - Merged PR 6496: HPU Hotfix to master
+ - Vacation schedule not needed for energy meter and modbus devices
  - Merged PR 6509: 2pipe water valve issue
  - Merged PR 5966: With end time as 24:00 schedule,manually updated desired temperature fix
  - Merged PR 6429: Conditioning mode operations defined
@@ -27,8 +75,13 @@
  - Merged PR 6382: 15207 CCU: Named Schedule Discrepancy, zone not following correct scheduleType
  - Merged PR 6463: Revert 'Provided different pairing option to HelioNode'
  - Merged PR 5984: Hidden vacation view for few non temp and sense profiles
+ - Bug 14841: CCU : Helio Node : Discrepancy with illuminance logical value
+ - Bug 10170: Alerts: Constant current Temp alert Notification message shows the current temp value same as offset val set in Definition .
+ - VACATION Action bar added
  - Conditioning mode operations defined
  - Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Default and increment for...
+ - Exclude deadzones without heartbeat from algo
+ - Bug 16977: INT Portal: Discrepancy seen with unit assigned for few tuner i.e "standaloneCoolingAirflowTempLowerOffset" and BuildingTuner-standaloneAirflowSampleWaitTime
  - Zone status fan status update
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Bug 16984: Device dead alerts not working for Hyperstat zones
@@ -44,11 +97,14 @@
  - Merged PR 5100: Provided different pairing option to HelioNode
  - Version bump to 1.633.0
  - Merged PR 6182: HPU Profile
+ - roomTemp point update
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/15987_ccu_ti_profile_refinement
  - Migration issue resolved
  - Merge remote-tracking branch 'origin/US/bharath/12486_SSE_fan_stage_enabling_in_occupancy' into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
  - Merged PR 5617: Error handling while parsing accessToken from caretaker
  - Merge
+ - Bug 16781: CCU: Multiple UI/UX issues seen on Zone screen for different device types
  - Merged PR 5771: Reporting available internal disk storage every 1 min - added diag point - availableInternalDiskStorage
  - Merged PR 5762: Updating Timezone to all  equips and points when timezone changed from portal.
  - Merged PR 5828: Damper type 'MAT' migrated to 'Smart Damper' for smartnode VAV and DAB profile.
@@ -56,6 +112,9 @@
  - Merged PR 5899: Fix for remove entity parse error
  - Merged PR 6176: Bug 16118: CCU : HyperStat - CO2 and VOC sensors not mapped to haystack points
  - Migration code
+ - Code refractorization
+ - Code refractorization and point deletion
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/15987_ccu_ti_profile_refinement
  - Merged PR 6107: 16557  Checking occupied condition while resetting fan mode
  - Bug 16118: CCU : HyperStat - CO2 and VOC sensors not mapped to haystack points
  - Merge branch 'US/bharath/12486_SSE_fan_stage_enabling_in_occupancy' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
@@ -63,6 +122,8 @@
  - added "cur" tag
  - Migration code added
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - updated loadGrid() method name to reloadScreen()
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13444_multiple_ccu_sync
  - Merged PR 6112: Bug fixes
  - POint delete when analogIn1 is disabled
  - transformer point deleted when analogIn is disabled
@@ -70,13 +131,21 @@
  - Merged PR 6067: Removed TI Changes
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into remove_ti_profile_changes
  - Merged PR 6139: Updated version code
+ - fixed issue to consider room temperature for current temp point
+ - addressed the observations
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into us/bharath/15987_ccu_ti_profile_refinement
  - Merged PR 6014: fixed schedule upgrade migration issues
  - Merged PR 6018: 11793_OTA support for OAO
  - Merged PR 5638: Th values updated to appropriate decimal place
  - Removed TI Changes
  - Merged PR 6019: Fixed Reconfiguration UI issue
+ - Bug 15029: CCU-User intent changes from portal not getting reflected in CCU(auto update is not working)
  - Fan stage analogType added
+ - tag "space" used instead of "room"
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/15987_ccu_ti_profile_refinement
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into US/bharath/12486_SSE_fan_stage_enabling_in_occupancy
+ - implementing loadGrid specifically for displayUnit tuner point update
+ - User Story 15987: CCU TI Profile UI Refinement
  - Merged PR 6011: Resolved merge conflits
  - Merged PR 6009: Hotfix 1.631 and 1.632 to Master
  - 14800 - Schedule add/deletion random crash
@@ -86,6 +155,7 @@
  - 13539 - Increase hight of curTemp seekark widget
  - Merged PR 5846: Soft handled crash during updateScheduleRefForZones migration
  - Merged PR 5812: After replace, before preference file getting over ridden by shared preferenc...
+ - Bug 13444: CCU : Celsius conversions across multiple CCU's should happen dynamically
  - variable name changed
  - Bug 13147: CCU | Celsius Support | Time discrepancy in Zone status
  - Merged PR 5612: Integration bug fixes
@@ -286,7 +356,6 @@
  - Version bump to 1.639.0
  - Version bump to 1.638.0
  - Version bump to 1.637.0
- - Version bump to 1.636.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

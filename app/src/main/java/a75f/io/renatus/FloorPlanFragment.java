@@ -445,7 +445,11 @@ public class FloorPlanFragment extends Fragment {
         for (Floor f : floorList) {
             ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
             for (Zone zone : zoneList) {
-                siteRoomList.add(zone.getDisplayName());
+                if(zone.getDisplayName() != null) {
+                    siteRoomList.add(zone.getDisplayName());
+                }else {
+                    Log.d(L.TAG_CCU_UI, "Zone name is null. Floor: " + f + ", Zone: "+zone.getHDict());
+                }
             }
         }
     }
@@ -633,7 +637,7 @@ public class FloorPlanFragment extends Fragment {
         rl_oao.setVisibility(View.VISIBLE);
         rl_modbus_energy_meter.setVisibility(View.VISIBLE);
         rl_modbus_btu_meter.setVisibility(View.VISIBLE);
-
+        addZonelt.setVisibility(View.GONE); // we are not showing 'add zone+' here.
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {
@@ -1128,10 +1132,9 @@ public class FloorPlanFragment extends Fragment {
     public boolean handleRoomChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             int maxZoneNameLength = 24;
-
             if (roomToRename != null) {
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString().trim())) {
+                   if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }

@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ReheatType
 import a75f.io.logic.bo.haystack.device.DeviceUtil
@@ -118,6 +119,12 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
                             reheatLoop["id"].toString())
                         resetAO2ToSecondaryDamper(hayStack, equipRef, dabEquip.group.toInt())
                     }
+                    else -> {
+                        DeviceUtil.updatePhysicalPointRef(
+                            dabEquip.group.toInt(),
+                            Port.ANALOG_OUT_TWO.name,
+                            reheatLoop["id"].toString())
+                    }
                 }
             }
         } else {
@@ -132,6 +139,6 @@ fun updateReheatType(reheatType : Double, minDamper : Double, equipRef : String,
 }
 
 fun resetAO2ToSecondaryDamper(hayStack: CCUHsApi, equipRef: String, nodeAddr : Int ) {
-    val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"");
+    val damperPosPoint = hayStack.readEntity("normalized and damper and cmd and secondary and equipRef == \"$equipRef\"")
     DeviceUtil.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.name, damperPosPoint["id"].toString())
 }

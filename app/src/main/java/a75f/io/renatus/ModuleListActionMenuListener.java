@@ -62,11 +62,14 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			switch (item.getItemId()) {
 				case R.id.deleteSelection:
 					if (true) { //TODO check prefconfigured profiels
-
+						int floorSelectedIndex = floorPlanActivity.mFloorListAdapter.getSelectedPostion();
 						deleteSelectedFSV();
 						EquipsManager.getInstance().deleteModules(seletedModules);
 						seletedModules.clear();
 						floorPlanActivity.refreshScreen();
+						if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
+							floorPlanActivity.systemDeviceOnClick();
+						}
 						mode.finish(); // Action picked, so close the CAB
 
 					} else {

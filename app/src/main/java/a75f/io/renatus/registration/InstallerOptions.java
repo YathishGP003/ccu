@@ -564,14 +564,15 @@ public class InstallerOptions extends Fragment {
         }
 
         ArrayAdapter<Double> coolingLockoutAdapter;
+        double coolingVal = ccu().systemProfile.getCoolingLockoutVal();
         if (isCelsiusTunerAvailableStatus()){
             coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(0)),Math.round(fahrenheitToCelsius(70)),1, getActivity());
+            coolingVal =  Math.round(fahrenheitToCelsius(coolingVal));
         } else {
             coolingLockoutAdapter = CCUUiUtil.getArrayAdapter(0,70,1, getActivity());
         }
         spinnerCoolingLockoutTemp.setAdapter(coolingLockoutAdapter);
-        spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(ccu().systemProfile.getCoolingLockoutVal()),
-                                                                                                        false);
+        spinnerCoolingLockoutTemp.setSelection(coolingLockoutAdapter.getPosition(coolingVal),false);
     
         spinnerCoolingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -587,14 +588,15 @@ public class InstallerOptions extends Fragment {
         });
 
         ArrayAdapter<Double> heatingLockoutAdapter;
+        double heatingVal = ccu().systemProfile.getHeatingLockoutVal();
         if (isCelsiusTunerAvailableStatus()){
             heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(Math.round(fahrenheitToCelsius(50)),Math.round(fahrenheitToCelsius(100)),1, getActivity());
+            heatingVal =  Math.round(fahrenheitToCelsius(heatingVal));
         } else {
             heatingLockoutAdapter = CCUUiUtil.getArrayAdapter(50,100,1, getActivity());
         }
         spinnerHeatingLockoutTemp.setAdapter(heatingLockoutAdapter);
-        spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(ccu().systemProfile.getHeatingLockoutVal())
-                                                                                                        , false);
+        spinnerHeatingLockoutTemp.setSelection(heatingLockoutAdapter.getPosition(heatingVal), false);
         spinnerHeatingLockoutTemp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (isCelsiusTunerAvailableStatus()) {

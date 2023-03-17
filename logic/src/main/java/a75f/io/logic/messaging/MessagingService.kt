@@ -15,6 +15,7 @@ import org.joda.time.DateTime
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.SocketTimeoutException
 
 interface MessagingService {
     @PUT("/messages/{channel}/acknowledge")

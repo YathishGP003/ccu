@@ -252,6 +252,10 @@ public class CCUHsApi
         return tagsDb.addPointWithId(p, id);
     }
 
+    public String addRemotePoint(SettingPoint p, String id) {
+        return tagsDb.addPointWithId(p, id);
+    }
+
     public String addPoint(RawPoint p) {
         String rawPointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(rawPointId);
@@ -2536,6 +2540,38 @@ public class CCUHsApi
             }
         }
         CCUHsApi.getInstance().syncEntityTree();
+    }
+
+    public Schedule getRemoteSchedule(String pointUid){
+        String response = CCUHsApi.getInstance().fetchRemoteEntity(pointUid);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote schedule : " + response);
+            return null;
+        }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
+        HRow r = (HRow) it.next();
+        HDict scheduleDict = new HDictBuilder().add(r).toDict();
+        return new Schedule.Builder().setHDict(scheduleDict).build();
+    }
+
+    public HDict readRemotePoint(String query){
+        String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
+            return null;
+        }
+        HGrid sGrid = new HZincReader(response).readGrid();
+        Iterator it = sGrid.iterator();
+        HRow r = (HRow) it.next();
+        return new HDictBuilder().add(r).toDict();
+    }
+
+    public String fetchRemoteEntityByQuery(String query) {
+        HDictBuilder b = new HDictBuilder().add("filter", query);
+        HDict[] dictArr = {b.toDict()};
+        return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
 
 }

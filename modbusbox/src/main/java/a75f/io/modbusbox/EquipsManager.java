@@ -97,5 +97,8 @@ public class EquipsManager
     public EquipmentDevice fetchProfileByVendorAndModel(String vendor, String model){
         return processor.getEquipByVendorAndModel(vendor, model);
     }
+    public List<String> getAllModbusNamesByEquipType(String equipType){
+        return processor.getEquipNamesByProfile(equipType);
+    }
 }
 

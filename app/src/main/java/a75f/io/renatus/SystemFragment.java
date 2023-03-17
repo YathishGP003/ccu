@@ -35,6 +35,7 @@ import android.widget.ToggleButton;
 
 import com.tooltip.Tooltip;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -69,6 +70,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
@@ -211,11 +213,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	Schedule schedule;
 
+	private Context mContext;
+
 	public SystemFragment()
 	{
 	}
-	
-	
+
+	@Override
+	public void onAttach(@NonNull Context context) {
+		super.onAttach(context);
+		this.mContext = context;
+	}
+
 	public static SystemFragment newInstance()
 	{
 		return new SystemFragment();
@@ -245,6 +254,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
 		
 	}
+
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
@@ -364,29 +374,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
 		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
 
-		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
-		//After they are measured d the schedule.
-		ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
-		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-			@Override
-			public void onGlobalLayout() {
-				constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-				View viewHourOne = viewTimeLines.get(1);
-				View viewHourTwo = viewTimeLines.get(2);
-
-				mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-				mPixelsBetweenADay = constraintScheduler.getHeight() / 7f;
-
-				//Leave 20% for padding.
-				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-
-				loadIntrinsicSchedule();
-				drawCurrentTime();
-
-			}
-		});
-
 		return rootView;
 	}
 
@@ -408,8 +395,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		int hh = now.getHourOfDay();
 		int mm = now.getMinuteOfHour();
 
-
-		AppCompatImageView imageView = new AppCompatImageView(getActivity());
+		if (mContext == null) {
+			Log.d(L.TAG_CCU_UI," SystemFragment is not attached with an activity");
+			return;
+		}
+		AppCompatImageView imageView = new AppCompatImageView(mContext);
 
 		imageView.setImageResource(R.drawable.ic_time_marker_svg);
 		imageView.setId(View.generateViewId());
@@ -641,6 +631,30 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
+
+		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
+		//After they are measured d the schedule.
+		ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+				View viewHourOne = viewTimeLines.get(1);
+				View viewHourTwo = viewTimeLines.get(2);
+
+				mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+				mPixelsBetweenADay = constraintScheduler.getHeight() / 7f;
+
+				//Leave 20% for padding.
+				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
+
+				loadIntrinsicSchedule();
+				drawCurrentTime();
+
+			}
+		});
+
 
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);

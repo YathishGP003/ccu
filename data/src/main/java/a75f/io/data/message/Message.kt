@@ -20,6 +20,8 @@ data class Message(@PrimaryKey val messageId: String,
     var remoteCmdType: String? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_REMOTE_CMD_LEVEL)
     var remoteCmdLevel: String? = null,
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_VERSION)
+    var version: String? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_TIME_TOKEN)
     var timeToken: Long = 0,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_HANDLING_STATUS)

@@ -1,4 +1,6 @@
-package a75f.io.messaging.handler
+package a75f.io.messaging
+
+import a75f.io.messaging.handler.*
 
 class MessageHandlerFactory {
     enum class Command{

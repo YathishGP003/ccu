@@ -35,6 +35,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
+import a75f.io.messaging.MessageHandler;
 
 public class UpdateScheduleHandler implements MessageHandler
 {
@@ -272,13 +273,8 @@ public class UpdateScheduleHandler implements MessageHandler
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         if (jsonObject.get("command").equals(DELETE_SCHEDULE) && jsonObject.get("id") != null) {
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
-            String messageId = jsonObject.get("messageId").getAsString();
-            MessageDbUtilKt.updateMessageHandled(messageId, context);
             return;
         }
         handleMessage(jsonObject);
-        String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId, context);
-
     }
 }

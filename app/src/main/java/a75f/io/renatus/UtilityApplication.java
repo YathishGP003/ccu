@@ -92,7 +92,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
-import a75f.io.messaging.handler.MessageHandlerSubscriber;
+import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;

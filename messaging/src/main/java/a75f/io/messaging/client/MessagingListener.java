@@ -2,7 +2,6 @@ package a75f.io.messaging.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.here.oksse.ServerSentEvent;
 
@@ -11,17 +10,15 @@ import java.util.HashSet;
 
 import javax.inject.Inject;
 
-import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.message.DatabaseHelper;
 import a75f.io.data.message.Message;
-import a75f.io.data.message.MessageDatabaseHelper;
 import a75f.io.data.message.MessageDbUtilKt;
-import a75f.io.data.message.MessageUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.messaging.MessageBuilderKt;
 import a75f.io.messaging.di.MessagingEntryPoint;
-import a75f.io.messaging.exceptions.InvalidMessageFormat;
+import a75f.io.messaging.exceptions.InvalidMessageFormatException;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.messaging.service.AcknowledgeRequest;
 import a75f.io.messaging.service.MessageHandlerService;
@@ -165,8 +162,8 @@ public class MessagingListener implements ServerSentEvent.Listener {
         }
         Message msg;
         try {
-            msg = MessageUtilKt.jsonToMessage(payload);
-        } catch (InvalidMessageFormat e) {
+            msg = MessageBuilderKt.jsonToMessage(payload);
+        } catch (InvalidMessageFormatException e) {
             CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to Parse message ", e);
             e.printStackTrace();
             return;

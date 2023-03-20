@@ -43,23 +43,45 @@ fun deleteMessage(message: Message, context : Context) {
     }
 }
 
-fun updateMessage(messageId : String, context: Context) {
+fun updateMessage(message: Message) {
     appScope.launch {
-        val message = messageDbHelper?.getMessageById(messageId)
         if (message != null) {
             messageDbHelper?.update(message)
         }
     }
 }
 
-fun updateMessageHandled(messageId : String, context: Context) {
+fun updateMessageHandled(message: Message, context: Context) {
     appScope.launch {
-        val message = messageDbHelper?.getMessageById(messageId)
-        message?.let {
-            it.handlingStatus = true
-            Log.i("CCU_MESSAGING","updateMessageHandled $message")
-            messageDbHelper?.update(it)
+        if (messageDbHelper == null) {
+            messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
+        message.handlingStatus = true
+        Log.i("CCU_MESSAGING","updateMessageHandled $message")
+        messageDbHelper?.update(message)
+    }
+}
+
+/**
+ * When app version is upgraded,all the upgrade requests pending in the message db
+ * are marked as handled. This avoids ending up in a situation we message db has queued up too many
+ * upgrade/downgrade request and continuously doing it.
+ */
+fun updateAllRemoteCommandsHandled(context: Context, cmdType : String) {
+    appScope.launch {
+        if (messageDbHelper == null) {
+            messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
+        }
+        messageDbHelper?.getAllUnhandledMessage()?.collect {
+            for (message in it) {
+                if (message.remoteCmdType != null && message.remoteCmdType == cmdType) {
+                    message.handlingStatus = true
+                    Log.i("CCU_MESSAGING","updateMessageHandled $message")
+                    messageDbHelper?.update(message)
+                }
+            }
+        }
+
     }
 }
 

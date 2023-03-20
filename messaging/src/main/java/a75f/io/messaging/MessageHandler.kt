@@ -1,4 +1,4 @@
-package a75f.io.messaging.handler
+package a75f.io.messaging
 
 import android.content.Context
 import com.google.gson.JsonObject

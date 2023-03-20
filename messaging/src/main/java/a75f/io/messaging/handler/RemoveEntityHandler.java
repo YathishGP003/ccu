@@ -18,6 +18,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.messaging.MessageHandler;
 
 public class RemoveEntityHandler implements MessageHandler
 {
@@ -64,7 +65,5 @@ public class RemoveEntityHandler implements MessageHandler
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         handleMessage(jsonObject);
-        String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 }

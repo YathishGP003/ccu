@@ -32,6 +32,7 @@ import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.messaging.MessageHandler;
 
 public class UpdatePointHandler implements MessageHandler
 {
@@ -304,7 +305,5 @@ public class UpdatePointHandler implements MessageHandler
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         handleMessage(jsonObject);
-        String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 }

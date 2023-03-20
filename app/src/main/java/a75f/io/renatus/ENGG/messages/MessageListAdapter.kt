@@ -28,6 +28,7 @@ class MessageListAdapter(messages : List<Message>) : RecyclerView.Adapter<Messag
 
     override fun getItemCount() = messageList.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun addItems(messages : List<Message>) {
         messageList = messages
         notifyDataSetChanged()
@@ -43,20 +44,19 @@ class MessageViewHolder(view : View) : RecyclerView.ViewHolder (view) {
     private val status: TextView = view.findViewById(R.id.handlingStatus)
 
 
-    @SuppressLint("ResourceAsColor")
+    @SuppressLint("ResourceAsColor", "SimpleDateFormat", "SetTextI18n")
     fun bind(message: Message) {
         val format = SimpleDateFormat("MM/dd - hh:mm:ss")
         messageId.text = message.messageId+": (${format.format(Date(message.timeToken))})"
         cmd.text = message.command
         point.text = when {
             message.id != null -> if (message.value != null) message.id+", val: "+message.value else message.id
-            message.ids != null -> message.ids!![0]+" ...+${message.ids!!.size-1}"
+            message.ids != null -> if (message.ids!!.size > 1) message.ids!![0]+" ...+${message.ids!!.size-1}" else message.ids!![0]
             else -> ""
         }
-        status.text = if (message.handlingStatus?.toString().toBoolean()) "HANDLED" else "NOT HANDLED"
+        status.text = if (message.handlingStatus.toString().toBoolean()) "HANDLED" else "NOT HANDLED"
 
-        message.handlingStatus?.let {
-            CcuLog.i(L.TAG_CCU_MESSAGING," Message status ${message.handlingStatus}")
+        message.handlingStatus.let {
             when(it) {
                 true -> status.setTextColor(Color.GREEN)
                 false -> status.setTextColor(Color.RED)

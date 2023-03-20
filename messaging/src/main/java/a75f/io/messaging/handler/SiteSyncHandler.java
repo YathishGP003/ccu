@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.util.RxTask;
+import a75f.io.messaging.MessageHandler;
 
 public class SiteSyncHandler implements MessageHandler
 {
@@ -48,8 +49,6 @@ public class SiteSyncHandler implements MessageHandler
                 context.sendBroadcast(locationUpdateIntent);
             }
         }
-        String messageId = msgObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 
     private static void updateSiteOrganisationwithNamedSchedules(CCUHsApi hsApi, String organization) {

@@ -1,10 +1,9 @@
-package a75f.io.renatus.messaging
+package a75f.io.messaging.handler
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.alerts.AlertManager
 import a75f.io.alerts.cloud.AlertsService
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.messaging.handler.*
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.mockk.every

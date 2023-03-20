@@ -15,6 +15,7 @@ import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.messaging.MessageHandler;
 
 public class RemoteCommandUpdateHandler implements MessageHandler
 {
@@ -41,16 +42,10 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public void handleMessage(JsonObject msgObject, Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
-            //Update command is processed asynchronously. The message will be updated once handling is complete.
-            //OTA commands would also tracked separately.
-            if (cmdType != UPDATE_CCU) {
-                String messageId = msgObject.get("messageId").getAsString();
-                MessageDbUtilKt.updateMessageHandled(messageId, context);
-            }
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
-            CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
+            CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
             switch (cmdLevel){
                 case "site":
                 case "system":

@@ -26,8 +26,9 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.messaging.MessageHandler;
 
-public class UpdateEntityHandler implements MessageHandler{
+public class UpdateEntityHandler implements MessageHandler {
     public static final String CMD = "updateEntity";
     public static void updateEntity(JsonObject msgObject){
         msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
@@ -94,7 +95,5 @@ public class UpdateEntityHandler implements MessageHandler{
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         updateEntity(jsonObject);
-        String messageId = jsonObject.get("messageId").getAsString();
-        MessageDbUtilKt.updateMessageHandled(messageId, context);
     }
 }

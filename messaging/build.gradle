@@ -6,6 +6,7 @@ plugins {
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -133,6 +134,8 @@ dependencies {
     testImplementation("com.google.dagger:hilt-android-testing:2.44.2")
     kaptTest("com.google.dagger:hilt-android-compiler:2.44.2")
     testAnnotationProcessor("com.google.dagger:hilt-android-compiler:2.44.2")
+    testImplementation "com.google.truth:truth:1.1"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
     //Instrumentation test
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -149,6 +152,7 @@ dependencies {
             because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
         }
     }
+
 }
 repositories {
     mavenCentral()

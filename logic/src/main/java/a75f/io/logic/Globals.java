@@ -23,6 +23,7 @@ import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.ccu.CazProfile;
@@ -81,6 +82,9 @@ import a75f.io.logic.watchdog.Watchdog;
     This is used to keep track of global static associated with application context.
  */
 public class Globals {
+    private static final String RESTART_CCU = "restart_ccu";
+    private static final String RESTART_TABLET = "restart_tablet";
+
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
         public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
@@ -231,6 +235,9 @@ public class Globals {
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
         setRecoveryMode();
+
+        MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
+        MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){

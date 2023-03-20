@@ -29,7 +29,7 @@ class SSEConfigHandler {
             SingleStageEquipUtil.updateThermistorConfig( val, configPoint);
         } else if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
             InputActuatorType inputActuatorType = InputActuatorType.getEnum(String.valueOf(val));
-            SingleStageEquipUtil.updateAnalogIn1Config(inputActuatorType,configPoint,true);
+            SingleStageEquipUtil.updateAnalogIn1Config(inputActuatorType, configPoint, true);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
         

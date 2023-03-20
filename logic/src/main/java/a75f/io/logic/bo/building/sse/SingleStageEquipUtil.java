@@ -323,7 +323,7 @@ public class SingleStageEquipUtil {
                 "point and logical and transformer50 and sensor and equipRef== \"" + equipRef + "\""
         };
 
-        if (curConfig >= 0 && curConfig < queryStrings.length) {
+        if (curConfig < queryStrings.length) {
             configAnalogInPoint = CCUHsApi.getInstance().readEntity(queryStrings[(int) curConfig]);
         }
 

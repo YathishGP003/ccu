@@ -141,7 +141,12 @@ public class DabSystemController extends SystemController
             reset();
             return;
         }else if(systemState == OFF) {
-            systemState = COOLING;
+            //Initialize System State
+            if (conditioningMode == AUTO || conditioningMode == COOLONLY) {
+                systemState = COOLING;
+            } else if (conditioningMode == HEATONLY) {
+                systemState = HEATING;
+            }
             piController.reset();
         }
 

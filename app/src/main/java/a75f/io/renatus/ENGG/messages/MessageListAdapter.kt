@@ -46,7 +46,7 @@ class MessageViewHolder(view : View) : RecyclerView.ViewHolder (view) {
 
     @SuppressLint("ResourceAsColor", "SimpleDateFormat", "SetTextI18n")
     fun bind(message: Message) {
-        val format = SimpleDateFormat("MM/dd - hh:mm:ss")
+        val format = SimpleDateFormat("MM/dd - HH:mm:ss")
         messageId.text = message.messageId+": (${format.format(Date(message.timeToken))})"
         cmd.text = message.command
         point.text = when {

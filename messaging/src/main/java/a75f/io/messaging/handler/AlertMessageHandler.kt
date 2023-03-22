@@ -4,6 +4,9 @@ package a75f.io.messaging.handler
 
 import a75f.io.alerts.AlertManager
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_MESSAGE_ID
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.cloud.RenatusServicesEnvironment
@@ -29,13 +32,12 @@ const val DELETE_PREDEFINED_ALERT_DEF_CMD = "removePredefinedAlertDefinition"
 const val REMOVE_ALERT_CMD = "removeAlert"
 const val REMOVE_ALERTS_CMD = "removeAlerts"
 
-@VisibleForTesting
 const val KEY_ALERT_DEF_ID = "definitionId"
 
-private const val KEY_ALERT_DEF_IDS = "definitionIds"
-@VisibleForTesting
+const val KEY_ALERT_DEF_IDS = "definitionIds"
+
 const val KEY_ALERT_ID = "alertId"
-private const val KEY_ALERT_IDS = "alertIds"
+const val KEY_ALERT_IDS = "alertIds"
 
 //@Singleton
 class AlertMessageHandler(
@@ -68,7 +70,7 @@ class AlertMessageHandler(
    fun handleCustomAlertDefMessage(msgObject: JsonObject) {
 
       val env = RenatusServicesEnvironment.instance
-      val alertGUID = msgObject[KEY_ALERT_DEF_ID]?.asString
+      val alertGUID = msgObject[MESSAGE_ATTRIBUTE_ID]?.asString
          ?: return CcuLog.e(L.TAG_CCU_PUBNUB, "No $KEY_ALERT_DEF_ID in $CREATE_CUSTOM_ALERT_DEF_CMD message")
 
       val siteId = haystackApi.siteIdRef?.toVal()
@@ -118,8 +120,8 @@ class AlertMessageHandler(
    fun handleAlertRemoveMessage(cmd: String, msgObject: JsonObject) {
       try {
          val ids = when (cmd) {
-            REMOVE_ALERT_CMD -> listOf(msgObject.getAsJsonPrimitive(KEY_ALERT_ID).asString)
-            REMOVE_ALERTS_CMD -> msgObject.getAsJsonArray(KEY_ALERT_IDS).map { it.asString }
+            REMOVE_ALERT_CMD -> listOf(msgObject.getAsJsonPrimitive(MESSAGE_ATTRIBUTE_ID).asString)
+            REMOVE_ALERTS_CMD -> msgObject.getAsJsonArray(MESSAGE_ATTRIBUTE_IDS).map { it.asString }
             else -> throw IllegalStateException("non Remove Alert cmd in AlertRemoveHandler")
          }
          for (id in ids) {
@@ -134,8 +136,8 @@ class AlertMessageHandler(
 
    fun handleAlertDefRemoveMessage(cmd: String, msgObject: JsonObject) {
       val ids = when (cmd) {
-         DELETE_CUSTOM_ALERT_DEF_CMD -> listOf(msgObject.getAsJsonPrimitive(KEY_ALERT_DEF_ID).asString)
-         DELETE_SITE_DEFS_CMD -> msgObject.getAsJsonArray(KEY_ALERT_DEF_IDS).map { it.asString }
+         DELETE_CUSTOM_ALERT_DEF_CMD -> listOf(msgObject.getAsJsonPrimitive(MESSAGE_ATTRIBUTE_ID).asString)
+         DELETE_SITE_DEFS_CMD -> msgObject.getAsJsonArray(MESSAGE_ATTRIBUTE_IDS).map { it.asString }
          else -> throw IllegalStateException("non Remove Alert cmd in AlertRemoveHandler")
       }
       for (id in ids) {

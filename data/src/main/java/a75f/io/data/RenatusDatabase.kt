@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
-@Database(entities = [Message::class], version = 1, exportSchema = false)
+@Database(entities = [Message::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class RenatusDatabase : RoomDatabase(){
     abstract fun messageDao(): MessageDao

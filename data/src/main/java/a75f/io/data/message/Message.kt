@@ -24,6 +24,8 @@ data class Message(@PrimaryKey val messageId: String,
     var version: String? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_TIME_TOKEN)
     var timeToken: Long = 0,
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_HANDLED_TIME)
+    var handledTime: Long = 0,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_HANDLING_STATUS)
     var handlingStatus: Boolean = false,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_RETRY_COUNT)

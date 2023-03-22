@@ -57,6 +57,7 @@ fun updateMessageHandled(message: Message, context: Context) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
         message.handlingStatus = true
+        message.handledTime = System.currentTimeMillis()
         Log.i("CCU_MESSAGING","updateMessageHandled $message")
         messageDbHelper?.update(message)
     }
@@ -76,6 +77,7 @@ fun updateAllRemoteCommandsHandled(context: Context, cmdType : String) {
             for (message in it) {
                 if (message.remoteCmdType != null && message.remoteCmdType == cmdType) {
                     message.handlingStatus = true
+                    message.handledTime = System.currentTimeMillis()
                     Log.i("CCU_MESSAGING","updateMessageHandled $message")
                     messageDbHelper?.update(message)
                 }

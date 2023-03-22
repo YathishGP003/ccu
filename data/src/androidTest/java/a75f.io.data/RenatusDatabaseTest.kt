@@ -1,15 +1,23 @@
 package a75f.io.data
 
+import a75f.io.data.message.Message
 import a75f.io.data.message.MessageDao
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
 class RenatusDatabaseTest {
@@ -30,8 +38,47 @@ class RenatusDatabaseTest {
     }
 
     @Test
-    fun insertMessageTest() {
-        assertEquals(null, messageDao.getAllMessages().value?.size)
+    fun messageDb_insertMessageTest() = runBlocking{
+        val testMessage = Message("testMessageId")
+        messageDao.insert(testMessage)
+        val messages = messageDao.getAllMessagesList()
+        assertThat(messages).contains(testMessage)
+    }
+
+    @Test
+    fun messageDb_updateMessageTest() = runBlocking{
+        val testMessage = Message("testMessageId")
+        messageDao.insert(testMessage)
+        val message = messageDao.getAllMessagesList()[0]
+        assertThat(message).isEqualTo(testMessage)
+        message.command = "testCommand"
+        messageDao.update(message)
+        assertThat(messageDao.getAllMessagesList()[0])
+            .isEqualTo(Message(messageId = "testMessageId",
+                command = "testCommand"))
+
+    }
+
+    @Test
+    fun messageDb_deleteMessageTest() = runBlocking{
+        val testMessage = Message("testMessageId")
+        messageDao.insert(testMessage)
+        val message = messageDao.getAllMessagesList()[0]
+        messageDao.delete(message)
+        assertThat(messageDao.getAllMessagesList())
+            .doesNotContain(testMessage)
+
+    }
+
+    @Test
+    fun messageDb_unhandledMessageTest() = runBlocking{
+        val testMessage = Message("testMessageId")
+        messageDao.insert(testMessage)
+        val messages = messageDao.getAllUnhandledMessage()
+        assertThat(messages).contains(testMessage)
+        testMessage.handlingStatus = true
+        messageDao.update(testMessage)
+        assertThat(messageDao.getAllUnhandledMessage()).isEmpty()
     }
 
 }

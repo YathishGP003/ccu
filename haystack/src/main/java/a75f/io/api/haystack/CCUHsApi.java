@@ -252,6 +252,10 @@ public class CCUHsApi
         return tagsDb.addPointWithId(p, id);
     }
 
+    public String addRemotePoint(SettingPoint p, String id) {
+        return tagsDb.addPointWithId(p, id);
+    }
+
     public String addPoint(RawPoint p) {
         String rawPointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(rawPointId);

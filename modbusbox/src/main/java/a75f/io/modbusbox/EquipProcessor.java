@@ -109,6 +109,17 @@ public class EquipProcessor
         return mbQuery.build().find();
     }
 
+    public List<String> getEquipNamesByProfile(String equipType){
+        addEquipmentDevices();
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.equipType, equipType);
+        List<String> modbusNames = new ArrayList<>();
+        for(EquipmentDevice equipmentDevice : configQuery.build().find()){
+            modbusNames.add(equipmentDevice.getName());
+        }
+        return modbusNames;
+    }
+
     public EquipmentDevice getMbEquip(String equipId){
         QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
         mbQuery.equal(EquipmentDevice_.modbusEquipIdId,equipId);

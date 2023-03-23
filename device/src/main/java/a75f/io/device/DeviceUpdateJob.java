@@ -51,7 +51,8 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         watchdogMonitor = false;
     
         CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
-        if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode()) {
+        if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode() ||
+                Globals.getInstance().isSafeMode()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-DeviceUpdateJob ");
             return;
         }

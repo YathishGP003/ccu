@@ -133,7 +133,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_dabhybridahu, container, false);
-        ButterKnife.bind(this, rootView);
+
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -143,7 +143,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
     @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-
+        ButterKnife.bind(this, view);
         prefs = new Prefs(getContext().getApplicationContext());
     
         if (getUserVisibleHint()) {

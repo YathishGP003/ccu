@@ -116,7 +116,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_vav_staged_vfd, container, false);
-        ButterKnife.bind(this, rootView);
+
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -126,6 +126,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+        ButterKnife.bind(this, view);
         prefs = new Prefs(getContext().getApplicationContext());
         //if(getUserVisibleHint()) {
             Log.i(TAG,"isVisibletoUser:"+getUserVisibleHint());

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -74,10 +75,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.bacnet.BACnetScheduler;
@@ -247,14 +251,36 @@ public abstract class UtilityApplication extends Application {
 
     private void initializeCrashReporting() {
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
-    
+
         RaygunClient.init(this);
         RaygunClient.setVersion(versionName());
         RaygunClient.enableCrashReporting();
-    
+
         if (BuildConfig.BUILD_TYPE.equals("staging") ||
-            BuildConfig.BUILD_TYPE.equals("prod") ) {
+                BuildConfig.BUILD_TYPE.equals("prod") ||
+                BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+                String crashMessage = getCrashMessage();
+                AlertManager.getInstance().fixPreviousCrashAlert();
+                AlertManager.getInstance().generateCrashAlert(
+                        "CCU CRASH",
+                        crashMessage);
+
+
+                SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
+                crashPreference.edit().putString("crash_message", crashMessage).commit();
+
+                List<String> crashTimesWithinLastHour = getCrashTimestampsWithinLastHour();
+
+                //add the new crash to the list
+                crashTimesWithinLastHour.add(String.valueOf(System.currentTimeMillis()));
+                Set<String> timeSet = new HashSet<>(crashTimesWithinLastHour);
+                crashPreference.edit().putStringSet("crash", timeSet).commit();
+
+                if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
+                    CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+                }
+
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
@@ -263,6 +289,39 @@ public abstract class UtilityApplication extends Application {
         }
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");
     
+    }
+
+    private List<String> getCrashTimestampsWithinLastHour() {
+        List<String> timeList = new ArrayList<>();
+        SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
+        if (crashPreference != null) {
+            Set<String> timeSetFromPreference = crashPreference.getStringSet("crash", null);
+            if (timeSetFromPreference != null) {
+                for (String time : timeSetFromPreference) {
+                    long timeLong = Long.parseLong(time);
+                    if ((timeLong < System.currentTimeMillis() &&
+                            timeLong > (System.currentTimeMillis() - 3600000)))
+                        timeList.add(time);
+                }
+            }
+        }
+        return timeList;
+    }
+
+    private String getCrashMessage(){
+        String message;
+        List<String> crashTimeList = getCrashTimestampsWithinLastHour();
+
+        if(crashTimeList.size() == 0)
+            message = "CCU crashed for the first time";
+        else {
+            long lastCrashTime = System.currentTimeMillis() - Long.parseLong(crashTimeList.get(crashTimeList.size()-1));
+            long timeInMins = ((lastCrashTime) / (1000 * 60)) % 60;
+            int count = crashTimeList.size() + 1;
+            message = "CCU crashed "+ count +" times in last " + String.valueOf(timeInMins) + " minutes";
+        }
+
+        return message;
     }
 
     private String versionName() {
@@ -353,7 +412,8 @@ public abstract class UtilityApplication extends Application {
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event) {
-        if (CCUHsApi.getInstance().isCcuReady() && !Globals.getInstance().isRecoveryMode()) {
+        if (CCUHsApi.getInstance().isCcuReady() && !Globals.getInstance().isRecoveryMode() ||
+                !Globals.getInstance().isSafeMode()) {
             LSerial.handleSerialEvent(this, event);
         }
     }

@@ -1211,6 +1211,9 @@ public class SeekArc extends View
                     inCoolingSelectionMode = isCoolingPressed(event.getX(), event.getY());
                     inHeatingSelectionMode = isHeatingPressed(event.getX(), event.getY());
                 }
+                if (inCoolingSelectionMode) {
+                    inHeatingSelectionMode = false;
+                }
 
                 getParent().requestDisallowInterceptTouchEvent(false);
 

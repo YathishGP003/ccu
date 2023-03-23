@@ -968,6 +968,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Creates all the necessary config/loop/output points for DCWB.
      */
     public void enableDcwb(CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_SYSTEM, "enableDcwb");
         //Remove analog1 Command points
         setConfigEnabled(Tags.ANALOG1, 0);
         HashMap equipMap = hayStack.read("equip and system");
@@ -993,6 +994,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Deletes all the necessary config/loop/output points for DCWB.
      */
     public void disableDcwb(CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_SYSTEM, "disableDcwb");
         setConfigVal("dcwb and enabled and not analog4 and not maximized and not adaptive",0);
         setDcwbConfigEnabled(Tags.ANALOG1, 0);
         setDcwbConfigEnabled(Tags.ANALOG4, 0);
@@ -1000,7 +1002,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         deleteLoopOutputPoints(hayStack);
         double loopType = hayStack.readDefaultVal("analog4 and loop and output and type");
         deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, hayStack);
-        CCUHsApi.getInstance().scheduleSync();
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     /**
@@ -1019,7 +1021,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createAnalog4LoopConfigPoints(newLoopType == 0 ? Tags.COOLING : Tags.CO2, systemEquip, hayStack);
         hayStack.writeDefaultVal("analog4 and loop and output and type", newLoopType);
-        CCUHsApi.getInstance().scheduleSync();
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     /**

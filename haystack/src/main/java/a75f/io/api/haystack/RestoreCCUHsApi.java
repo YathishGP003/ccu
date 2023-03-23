@@ -849,7 +849,7 @@ public class RestoreCCUHsApi {
         List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
 
         pointMaps.forEach(pointMap -> {
-            Point pointDetails = new Point.Builder().setHashMap(pointMap).build();
+            SettingPoint pointDetails = new SettingPoint.Builder().setHashMap(pointMap).build();
             String pointId = StringUtils.prependIfMissing(pointDetails.getId(), "@");
             HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
             if (point.isEmpty()) {
@@ -858,12 +858,6 @@ public class RestoreCCUHsApi {
             } else {
                 CcuLog.i(TAG, "Point already imported "+pointDetails.getId());
             }
-
-            Log.i(TAG, "restoreSNBandPointByCCUId: ");
-            SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(pointMaps.get(0));
-            sp.setVal(pointMaps.get(0).get("val").toString());
-            SettingPoint snBand = sp.build();
-            CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
         });
     }
 

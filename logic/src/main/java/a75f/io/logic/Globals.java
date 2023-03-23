@@ -655,6 +655,13 @@ public class Globals {
         return recoveryMode;
    }
 
+   public boolean isSafeMode(){
+       HashMap<Object,Object> safeModeObj = CCUHsApi.getInstance().readEntity("safe and mode");
+       if(!safeModeObj.isEmpty()){
+           return CCUHsApi.getInstance().readHisValById(safeModeObj.get("id").toString()) == 1;
+       }
+       return false;
+   }
     public boolean getBuildingProcessStatus() {
         return mProcessJob.getStatus();
     }

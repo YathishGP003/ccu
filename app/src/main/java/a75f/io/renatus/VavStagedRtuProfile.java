@@ -92,7 +92,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_stagedrtu, container, false);
-        ButterKnife.bind(this, rootView);
+
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -102,7 +102,8 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        prefs = new Prefs(getContext().getApplicationContext());
+            ButterKnife.bind(this, view);
+            prefs = new Prefs(getContext().getApplicationContext());
 
             Log.i(TAG,"isVisibletoUser:"+getUserVisibleHint());
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU) {

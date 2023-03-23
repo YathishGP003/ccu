@@ -86,7 +86,7 @@ public class AlertsFragment extends Fragment
 				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 				if (message.contains("\u00B0")) {
-					if(MasterControlView.getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
 						message = formatMessageToCelsius(message);
 					}
 				}

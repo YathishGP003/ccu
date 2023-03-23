@@ -17,9 +17,11 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.safemode.SafeModeActivity;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
@@ -84,7 +86,10 @@ public class SplashActivity extends AppCompatActivity {
                             } else if(prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
                                 int recovery = SystemProperties.getInt("renatus_recovery",0);
                                 Intent i;
-                                if (recovery == 1) {
+                                if(Globals.getInstance().isSafeMode()){
+                                    i = new Intent(SplashActivity.this, SafeModeActivity.class);
+                                }
+                                else if (recovery == 1) {
                                     i = new Intent(SplashActivity.this, RenatusEngineeringActivity.class);
                                 } else {
                                     i = new Intent(SplashActivity.this, RenatusLandingActivity.class);

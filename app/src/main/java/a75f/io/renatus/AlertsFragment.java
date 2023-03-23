@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
+import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
@@ -86,9 +87,8 @@ public class AlertsFragment extends Fragment
 				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 				if (message.contains("\u00B0")) {
-					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-						message = formatMessageToCelsius(message);
-					}
+					message = formatMessageToCelsius(message);
+
 				}
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
@@ -154,9 +154,13 @@ public class AlertsFragment extends Fragment
 			for (int i = 0; i < strings.length; i++) {
 				//"\u00B0" is the unicode for °
 				if (strings[i].contains("\u00B0")) {
-					strings[i] = "\u00B0C";
-					strings[i - 1] = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
-
+					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+						strings[i] = "\u00B0C";
+						strings[i - 1] = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
+					} else {
+						DecimalFormat df = new DecimalFormat("#.#");
+						strings[i - 1] = String.valueOf(Double.parseDouble(df.format(Double.parseDouble(strings[i - 1]))));
+					}
 				}
 			}
 			for (String string : strings) {

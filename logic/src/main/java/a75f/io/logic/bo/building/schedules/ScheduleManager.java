@@ -3,6 +3,8 @@ package a75f.io.logic.bo.building.schedules;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOFORCEOCCUPIED;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NONE;
+import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.EMERGENCY_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.FORCEDOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
@@ -21,6 +23,8 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -106,6 +110,9 @@ public class ScheduleManager {
             occupiedHashMap.remove(equip.getRoomRef());
             CcuLog.i(TAG_CCU_SCHEDULER, " Equip not occupied "+equip.getDisplayName());
             return;
+        }else if(occ.getCoolingVal() == null || occ.getHeatingVal() == null){
+            CcuLog.i(TAG_CCU_SCHEDULER, " occ.getCoolingVal(): "+occ.getCoolingVal()+" occ.getHeatingVal(): "+occ.getHeatingVal());
+            return;
         }
         
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupiedSchedule: NextOcc "+occ.getNextOccupiedSchedule()+" "+
@@ -161,8 +168,9 @@ public class ScheduleManager {
             }
         }
 
-        updateOccupancy(CCUHsApi.getInstance());
-        updateDesiredTemp();
+        Set<ZoneProfile> zoneProfiles = new HashSet<>(L.ccu().zoneProfiles);
+        updateOccupancy(CCUHsApi.getInstance(), zoneProfiles);
+        updateDesiredTemp(zoneProfiles);
 
         //TODO-Schedules - Optimize equip creation and need for this method.
         for(HashMap hs : equips) {
@@ -173,7 +181,8 @@ public class ScheduleManager {
         ScheduleUtil.deleteExpiredSpecialSchedules();
 
         //TODO - refactor. This can only be done after updating desired temp.
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+        for (ZoneProfile profile : zoneProfiles) {
+
             if (profile instanceof ModbusProfile) {
                 continue;
             }
@@ -236,9 +245,9 @@ public class ScheduleManager {
         updateSystemOccupancy(CCUHsApi.getInstance());
     }
     
-    public void updateOccupancy(CCUHsApi hayStack) {
+    public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+        for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile) {
                 continue;
             }
@@ -319,8 +328,9 @@ public class ScheduleManager {
     
     
     
-    public void updateDesiredTemp() {
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+    public void updateDesiredTemp(Set<ZoneProfile> zoneProfiles) {
+
+        for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile || profile instanceof HyperStatSenseProfile) {
                 continue;
             }
@@ -411,7 +421,17 @@ public class ScheduleManager {
                 ahuServedEquipsOccupancy.put(equipId, equipOccupancy.get(equipId));
             }
         });
-        
+
+        if(ahuServedEquipsOccupancy.size() == 0){
+            systemOccupancy = NONE;
+            return;
+        }
+
+        if (ScheduleUtil.areAllZonesBuildingLimitsBreached(ahuServedEquipsOccupancy)) {
+            systemOccupancy = NO_CONDITIONING;
+            postSystemOccupancy(CCUHsApi.getInstance());
+            return;
+        }
         
         if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)) {
             systemOccupancy = EMERGENCY_CONDITIONING;
@@ -629,6 +649,10 @@ public class ScheduleManager {
         if (curOccupancyMode == Occupancy.PRECONDITIONING) {
             return "In Preconditioning";
         }
+
+        if(curOccupancyMode == NO_CONDITIONING){
+            return "No Conditioning: Building Limits Breached";
+        }
         
         if (curOccupancyMode == EMERGENCY_CONDITIONING) {
             return "In Emergency Conditioning[Building Limits breached]";
@@ -737,9 +761,13 @@ public class ScheduleManager {
         
         if(L.ccu().systemProfile instanceof DefaultSystem)
             return "No Central equipment connected.";
-        if(systemOccupancy == null) {
+        if(systemOccupancy == null || systemOccupancy == NONE) {
             CcuLog.i(TAG_CCU_SCHEDULER, " system occupancy null");
             return "No schedule configured";
+        }
+
+        if(systemOccupancy == NO_CONDITIONING){
+            return "No Conditioning - Building Limits breached";
         }
         
         if (systemOccupancy == EMERGENCY_CONDITIONING) {
@@ -766,10 +794,10 @@ public class ScheduleManager {
         if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
             if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
                 //return "Building Limit Breach | Emergency Heating turned ON";
-                return "In Emergency Conditioning [Building Limits Breached]";
+                return "In Emergency Conditioning";
             } else if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING) {
                // return "Building Limit Breach | Emergency Cooling turned ON";
-                return "In Emergency Conditioning [Building Limits Breached]";
+                return "In Emergency Conditioning";
             }
         }
         

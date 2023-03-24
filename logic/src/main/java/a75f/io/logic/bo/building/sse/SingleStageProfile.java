@@ -110,6 +110,7 @@ public class SingleStageProfile extends ZoneProfile
                 CCUHsApi.getInstance().writeHisValByQuery("occupancy and mode and standalone and " +
                         "group == \"" + sseEquip.nodeAddr + "\"", 0.0);
             }
+            sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
             return;
         }
 
@@ -181,12 +182,7 @@ public class SingleStageProfile extends ZoneProfile
                 }
             } else {
                 // neither heating, cooling, nor zone dead
-                if ((relay2config > 0) && occupied) {
-                    stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
-                    setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
-                } else
-                    setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
-                
+               stageStatus = controlFanStage();
                 //Fan is already handled. Just update heating/cooling.
                 resetConditioning((short) sseEquip.nodeAddr);
                 state = DEADBAND;
@@ -238,5 +234,20 @@ public class SingleStageProfile extends ZoneProfile
             sseEquip.setCurrentTemp(0);
 
         }
+    }
+    private String controlFanStage() {
+
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + sseEquip.nodeAddr + "\"")).build();
+        String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
+        double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
+        String stageStatus = "";
+
+        if ((relay2config > 0) && occupied) {
+            stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
+            setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
+        } else
+            setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
+        return stageStatus;
     }
 }

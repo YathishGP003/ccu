@@ -15,6 +15,7 @@ import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.MessageHandler;
 
 public class RemoteCommandUpdateHandler implements MessageHandler
@@ -33,7 +34,9 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     public static final String OTA_UPDATE_CM = "ota_update_CM";
     public static final String OTA_UPDATE_HN = "ota_update_helioNode";
+    public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
+    private static SafeModeInterface safeModeInterface = null;
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
@@ -58,16 +61,22 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 CcuLog.d("RemoteCommand", "PUBNUB handle Restart CCU=");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case UPDATE_CCU:
                                 CcuLog.d("RemoteCommand", "PUBNUB handle update CCU=" + msgObject.get("version").getAsString());
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
                                 break;
                             case RESET_CM:
                                 CcuLog.d("RemoteCommand", "PUBNUB handle Restart reset cm=");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
@@ -85,11 +94,19 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 CcuLog.d("RemoteCommand", "PUBNUB handle save logs");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case RESET_PASSWORD:
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
+                            case EXIT_SAFE_MODE:
+                                CcuLog.d("RemoteCommand", "RemoteCommand handle exit_safe_mode");
+                                if (safeModeInterface != null)
+                                    safeModeInterface.handleExitSafeMode();
                         }
                     }
                     break;
@@ -112,6 +129,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             CcuLog.d("RemoteCommand","PUBNUB handle zone level:"+cmdType);
                             if(remoteCommandInterface != null)
                                 remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, id);
+                            else if(safeModeInterface != null)
+                                safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, id);
                             break;
                     }
                     break;
@@ -125,6 +144,10 @@ public class RemoteCommandUpdateHandler implements MessageHandler
 
     public static void setRemoteCommandInterface(RemoteCommandHandleInterface in){
         remoteCommandInterface = in;
+    }
+
+    public static void setSafeInterface(SafeModeInterface in){
+        safeModeInterface = in;
     }
 
     @NonNull

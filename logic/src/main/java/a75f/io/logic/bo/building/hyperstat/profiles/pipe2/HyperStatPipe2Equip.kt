@@ -397,8 +397,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao1MinVal = 2.0
         var ao1MaxVal = 10.0
 
-        var ao1fanLow = 30.0
-        var ao1fanMedium = 60.0
+        var ao1fanLow = 70.0
+        var ao1fanMedium = 80.0
         var ao1fanHigh = 100.0
 
         if (ao1 == 1) {
@@ -428,8 +428,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao2MinVal = 2.0
         var ao2MaxVal = 10.0
 
-        var ao2fanLow = 30.0
-        var ao2fanMedium = 60.0
+        var ao2fanLow = 70.0
+        var ao2fanMedium = 80.0
         var ao2fanHigh = 100.0
 
         if (ao2 == 1) {
@@ -459,8 +459,8 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         var ao3MinVal = 2.0
         var ao3MaxVal = 10.0
 
-        var ao3fanLow = 30.0
-        var ao3fanMedium = 60.0
+        var ao3fanLow = 70.0
+        var ao3fanMedium = 80.0
         var ao3fanHigh = 100.0
 
         if (ao3 == 1) {

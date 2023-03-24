@@ -440,8 +440,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao1MinVal = 2.0
         var ao1MaxVal = 10.0
 
-        var ao1fanLow = 30.0
-        var ao1fanMedium = 60.0
+        var ao1fanLow = 70.0
+        var ao1fanMedium = 80.0
         var ao1fanHigh = 100.0
 
         if (ao1 == 1) {
@@ -471,8 +471,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao2MinVal = 2.0
         var ao2MaxVal = 10.0
 
-        var ao2fanLow = 30.0
-        var ao2fanMedium = 60.0
+        var ao2fanLow = 70.0
+        var ao2fanMedium = 80.0
         var ao2fanHigh = 100.0
 
         if (ao2 == 1) {
@@ -502,8 +502,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         var ao3MinVal = 2.0
         var ao3MaxVal = 10.0
 
-        var ao3fanLow = 30.0
-        var ao3fanMedium = 60.0
+        var ao3fanLow = 70.0
+        var ao3fanMedium = 80.0
         var ao3fanHigh = 100.0
 
         if (ao3 == 1) {
@@ -572,32 +572,32 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     ) {
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay1State, existingConfiguration.relay1State)) {
-            updateRelayDetails(newConfiguration.relay1State, "relay1", Port.RELAY_ONE, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay1State, newConfiguration.relay1State, "relay1", Port.RELAY_ONE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay2State, existingConfiguration.relay2State)) {
-            updateRelayDetails(newConfiguration.relay2State, "relay2", Port.RELAY_TWO, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay2State, newConfiguration.relay2State, "relay2", Port.RELAY_TWO, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay3State, existingConfiguration.relay3State)) {
-            updateRelayDetails(newConfiguration.relay3State, "relay3", Port.RELAY_THREE, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay3State, newConfiguration.relay3State, "relay3", Port.RELAY_THREE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay4State, existingConfiguration.relay4State)) {
-            updateRelayDetails(newConfiguration.relay4State, "relay4", Port.RELAY_FOUR, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay4State, newConfiguration.relay4State, "relay4", Port.RELAY_FOUR, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay5State, existingConfiguration.relay5State)) {
-            updateRelayDetails(newConfiguration.relay5State, "relay5", Port.RELAY_FIVE, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay5State, newConfiguration.relay5State, "relay5", Port.RELAY_FIVE, newConfiguration)
         }
 
         if (!HyperStatAssociationUtil.isBothRelayHasSameConfigs
                 (newConfiguration.relay6State, existingConfiguration.relay6State)) {
-            updateRelayDetails(newConfiguration.relay6State, "relay6", Port.RELAY_SIX, newConfiguration)
+            updateRelayDetails(existingConfiguration.relay6State, newConfiguration.relay6State, "relay6", Port.RELAY_SIX, newConfiguration)
         }
     }
 
@@ -611,7 +611,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut1State, existingConfiguration.analogOut1State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn, newConfiguration)
+            updateAnalogOutDetails(existingConfiguration.analogOut1State, newConfiguration.analogOut1State, "analog1", Port.ANALOG_OUT_ONE, changeIn, newConfiguration)
         }
         if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
                 (newConfiguration.analogOut2State, existingConfiguration.analogOut2State)
@@ -619,7 +619,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut2State, existingConfiguration.analogOut2State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn, newConfiguration)
+            updateAnalogOutDetails(existingConfiguration.analogOut2State, newConfiguration.analogOut2State, "analog2", Port.ANALOG_OUT_TWO, changeIn, newConfiguration)
         }
         if (!HyperStatAssociationUtil.isBothAnalogOutHasSameConfigs
                 (newConfiguration.analogOut3State, existingConfiguration.analogOut3State)
@@ -627,7 +627,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             val changeIn = HyperStatAssociationUtil.findChangeInAnalogOutConfig(
                 newConfiguration.analogOut3State, existingConfiguration.analogOut3State
             )
-            updateAnalogOutDetails(newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn, newConfiguration)
+            updateAnalogOutDetails(existingConfiguration.analogOut3State, newConfiguration.analogOut3State, "analog3", Port.ANALOG_OUT_THREE, changeIn, newConfiguration)
         }
     }
 
@@ -651,6 +651,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     // Function which updates the Relay new configurations
     private fun updateRelayDetails(
+        existingRelay:RelayState,
         relayState: RelayState,
         relayTag: String,
         physicalPort: Port,
@@ -680,11 +681,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             DeviceUtil.updatePhysicalPointRef(nodeAddress, physicalPort.name, pointId)
         }
 
-        CcuLog.i(L.TAG_CCU_ZONE, "updateRelayDetails: ${relayState.association.name} ${relayState.enabled}")
-        CcuLog.i(L.TAG_CCU_ZONE, "isRelayAssociatedToAnyOfConditioningModes: "+HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
-       if ( newConfiguration != null && HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)){
-           updateFanMode(newConfiguration)
-       }
+        if(isRelayFanModeUpdateRequired(existingRelay,relayState,newConfiguration)){
+            updateFanMode(newConfiguration!!)
+        }
         if(HyperStatAssociationUtil.isRelayAssociatedToAnyOfConditioningModes(relayState))
             updateConditioningMode()
     }
@@ -692,6 +691,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     // Function which updates the Analog Out new configurations
     private fun updateAnalogOutDetails(
+        existingAnalogOutState: AnalogOutState,
         analogOutState: AnalogOutState,
         analogOutTag: String,
         physicalPort: Port,
@@ -808,15 +808,36 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         }
         CcuLog.i(L.TAG_CCU_ZONE, "changeIn: Analog $changeIn  ${HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)}")
-        if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
-                    && HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState))) {
-            updateFanMode(newConfiguration)
+
+        if(isAnalogFanModeUpdateRequired(existingAnalogOutState,analogOutState,changeIn,newConfiguration)){
+            updateFanMode(newConfiguration!!)
         }
 
         if (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && HyperStatAssociationUtil.isAnalogAssociatedToAnyOfConditioningModes(analogOutState))) {
             updateConditioningMode()
         }
+    }
+
+    private fun isRelayFanModeUpdateRequired(
+        existingRelay:RelayState,
+        relayState: RelayState,
+        newConfiguration: HyperStatCpuConfiguration?,
+    ): Boolean {
+        return (newConfiguration != null &&
+               (HyperStatAssociationUtil.isRelayAssociatedToFan(relayState) ||
+               HyperStatAssociationUtil.isRelayAssociatedToFan(existingRelay)))
+   }
+
+    private fun isAnalogFanModeUpdateRequired(
+        existingAnalogOutState: AnalogOutState,
+        analogOutState: AnalogOutState,
+        changeIn: AnalogOutChanges,
+        newConfiguration: HyperStatCpuConfiguration?
+    ): Boolean {
+        return (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
+                    && (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)
+                    || HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(existingAnalogOutState))))
     }
 
      private fun updateConditioningMode() {
@@ -850,7 +871,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         }
     }
 
-     fun updateFanMode(config: HyperStatCpuConfiguration) {
+     private fun updateFanMode(config: HyperStatCpuConfiguration) {
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
          Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")

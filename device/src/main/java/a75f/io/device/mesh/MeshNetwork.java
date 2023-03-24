@@ -45,12 +45,12 @@ public class MeshNetwork extends DeviceNetwork
     @Override
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
-        
-        /*if (!LSerial.getInstance().isConnected()) {
+
+        if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }*/
+        }
         if(LSerial.getInstance().isNodesSeeding())
             return;
         MeshUtil.sendHeartbeat((short)0);
@@ -162,10 +162,11 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef());
 
-                                    /** Sending the setting2 and setting3 messages */
-                                    CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperStat setting Messages ==="+d.getAddr());
-                                    HyperStatMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
-
+                                    if (!equip.getMarkers().contains("vrv") ) {
+                                        /** Sending the setting2 and setting3 messages */
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "======== NOW SENDING Additional Setting HyperStat setting Messages ===" + d.getAddr());
+                                        HyperStatMessageSender.sendAdditionalSettingMessages(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                    }
                                     if (equip.getMarkers().contains("vrv") ){
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat IDU Controls ===================== "+d.getAddr());
                                         HyperStatMessageSender.sendIduControlMessage(

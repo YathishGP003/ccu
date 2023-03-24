@@ -715,7 +715,7 @@ public class VavTuners {
                                                 .setEquipRef(equipRef).setHisInterpolate("cov")
                                                 .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
                                                 .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
-                                                .setMinVal("0").setMaxVal("100").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                .setMinVal("0").setMaxVal("60").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                                 .setUnit("%")
                                                 .setTz(tz)
                                                 .build();

@@ -36,6 +36,11 @@ class VrvEquip(hsApi : CCUHsApi,
         VrvPoints.createTelecoCheckPoint(vrvEquip, roomRef, floorRef,nodeAddr,hayStack)
         VrvTuners.addEquipVrvTuners(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
                             vrvEquip.id, roomRef, floorRef, vrvEquip.tz)
+        VrvTuners.addVRVTunersAndSensorPoints(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
+            vrvEquip.id, roomRef, floorRef, vrvEquip.tz,nodeAddr.toString())
+        VrvTuners.createOccupancyPoints(hayStack, vrvEquip.siteRef, vrvEquip.displayName,
+            vrvEquip.id, roomRef, floorRef, vrvEquip.tz,nodeAddr.toString()
+            ,(if(config.isAutoForcedOccupiedEnabled) 1.0 else 0.0),(if(config.isAutoAwayEnabled) 1.0 else 0.0))
         hayStack.syncEntityTree()
     }
 
@@ -378,7 +383,6 @@ class VrvEquip(hsApi : CCUHsApi,
             .build()
         val masterControllerModeId = hayStack.addPoint(masterControllerMode)
         hayStack.writeDefaultValById(masterControllerModeId, config.masterControllerMode)
-
     }
 
     private fun createIduStatusPoints(
@@ -580,7 +584,9 @@ class VrvEquip(hsApi : CCUHsApi,
             getConfigNumVal("temperature and offset"),
             getConfigNumVal("min and humidity and sp"),
             getConfigNumVal("max and humidity and sp"),
-            getConfigNumVal("masterController and mode and sp")
+            getConfigNumVal("masterController and mode and sp"),
+            (getConfigNumVal("auto and away") > 0),
+            (getConfigNumVal("auto and forced and occupied") > 0)
         )
     }
 
@@ -589,6 +595,13 @@ class VrvEquip(hsApi : CCUHsApi,
         setConfigNumVal("min and humidity and sp", config.minHumiditySp)
         setConfigNumVal("max and humidity and sp", config.maxHumiditySp)
         setConfigNumVal("masterController and mode and sp", config.masterControllerMode)
+
+        val isAutoAwayEnabled  = if(config.isAutoAwayEnabled) 1.0 else 0.0
+        setConfigNumVal("auto and away",isAutoAwayEnabled);
+        val isAutoForcedOccupiedEnabled  = if(config.isAutoForcedOccupiedEnabled) 1.0 else 0.0
+        setConfigNumVal("auto and forced and occupied",isAutoForcedOccupiedEnabled);
+        setHisVal("auto and away",isAutoAwayEnabled);
+        setHisVal("auto and forced and occupied",isAutoForcedOccupiedEnabled);
 
     }
 
@@ -601,4 +614,10 @@ class VrvEquip(hsApi : CCUHsApi,
         return CCUHsApi.getInstance()
             .readDefaultVal("point and zone and config and vrv and $tags and group == \"$nodeAddr\"")
     }
+
+    fun setHisVal(tags: String, value: Double) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and standalone and vrv and $tags and group == \"$nodeAddr\"", value)
+    }
+
+
 }

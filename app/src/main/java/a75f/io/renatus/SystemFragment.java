@@ -19,6 +19,7 @@ import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -132,6 +134,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	//TODO uncomment for acctuall prod releasee, commenting it out for Automation test
 	//SystemNumberPicker systemModePicker;
 	NumberPicker systemModePicker;
+	LinearLayout lastUpdated;
+	LinearLayout scheduleType;
 	
 	TextView occupancyStatus;
 	TextView equipmentStatus;
@@ -191,11 +195,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	Schedule schedule;
 
+	private Context mContext;
+
 	public SystemFragment()
 	{
 	}
-	
-	
+
+	@Override
+	public void onAttach(@NonNull Context context) {
+		super.onAttach(context);
+		this.mContext = context;
+	}
+
 	public static SystemFragment newInstance()
 	{
 		return new SystemFragment();
@@ -225,6 +236,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
 		
 	}
+
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
@@ -270,9 +282,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
+	try {
 		NotificationHandler.setCloudConnectivityListener(this);
 		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
-
 		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
 
 		//Week Days
@@ -344,29 +356,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
 		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
 
-		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
-		//After they are measured d the schedule.
-		ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
-		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-			@Override
-			public void onGlobalLayout() {
-				constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-				View viewHourOne = viewTimeLines.get(1);
-				View viewHourTwo = viewTimeLines.get(2);
-
-				mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-				mPixelsBetweenADay = constraintScheduler.getHeight() / 7f;
-
-				//Leave 20% for padding.
-				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-
-				loadIntrinsicSchedule();
-				drawCurrentTime();
-
-			}
-		});
-
+		}catch (InflateException inflateException){
+			Log.d(L.TAG_CCU_UI," Problem when inflating the layout fragment_system_setting "+inflateException.getMessage());
+			inflateException.printStackTrace();
+		}
 		return rootView;
 	}
 
@@ -388,8 +381,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		int hh = now.getHourOfDay();
 		int mm = now.getMinuteOfHour();
 
-
-		AppCompatImageView imageView = new AppCompatImageView(getActivity());
+		if (mContext == null) {
+			Log.d(L.TAG_CCU_UI," SystemFragment is not attached with an activity");
+			return;
+		}
+		AppCompatImageView imageView = new AppCompatImageView(mContext);
 
 		imageView.setImageResource(R.drawable.ic_time_marker_svg);
 		imageView.setId(View.generateViewId());
@@ -622,6 +618,30 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	{
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated");
 
+		//Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
+		//After they are measured d the schedule.
+		ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+				View viewHourOne = viewTimeLines.get(1);
+				View viewHourTwo = viewTimeLines.get(2);
+
+				mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+				mPixelsBetweenADay = constraintScheduler.getHeight() / 7f;
+
+				//Leave 20% for padding.
+				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
+
+				loadIntrinsicSchedule();
+				drawCurrentTime();
+
+			}
+		});
+
+
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
 		HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
@@ -631,6 +651,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		mainLayout = view.findViewById(R.id.main_layout);
+		lastUpdated = view.findViewById(R.id.lastUpdated);
+		scheduleType = view.findViewById(R.id.scheduleType);
+		if(prefs.getBoolean("REGISTRATION")){
+			lastUpdated.setVisibility(View.VISIBLE);
+			scheduleType.setVisibility(View.VISIBLE);
+			constraintScheduler.setVisibility(View.VISIBLE);
+		}else {
+			lastUpdated.setVisibility(View.GONE);
+			scheduleType.setVisibility(View.GONE);
+			constraintScheduler.setVisibility(View.GONE);
+		}
 
 		if (L.ccu().systemProfile != null) {
 			coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();

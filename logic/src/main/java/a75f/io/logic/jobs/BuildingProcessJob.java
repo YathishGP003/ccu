@@ -50,7 +50,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         L.pingCloudServer();
         
-        if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode()) {
+        if (!CCUHsApi.getInstance().isCCUConfigured() || Globals.getInstance().isRecoveryMode() ) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not configured ! <-BuildingProcessJob ");
             return;
         }

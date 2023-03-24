@@ -1,5 +1,6 @@
 package a75f.io.messaging.service;
 
+import java.net.SocketTimeoutException;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +54,7 @@ public class MessagingAckJob {
         emptyMessageWatchdogCounter = 0;
         if (CCUHsApi.getInstance().getAuthorised()) {
             channelsToMessageIds.forEach((channel, messageIds) ->
+            {
                     messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
                             .subscribe(
                                     response -> {
@@ -65,7 +67,8 @@ public class MessagingAckJob {
                                         }
                                     },
                                     error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
-                            ));
+                            );
+            });
         }
     }
 }

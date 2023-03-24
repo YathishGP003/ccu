@@ -1,6 +1,5 @@
 package a75f.io.renatus.hyperstat.vrv
 
-import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.vrv.VrvMasterController
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -29,6 +28,9 @@ class HyperStatVrvFragment : BaseDialogFragment() {
     lateinit var masterControllerSp : Spinner
     lateinit var setButton : Button
     lateinit var masterControlUnInitText : TextView
+    lateinit var autoawayToggle : ToggleButton
+    lateinit var autoForcedOccupiedToggle : ToggleButton
+
 
 
     private val disposables = CompositeDisposable()           // All of our Rx subscriptions, for easy management.
@@ -76,6 +78,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
             masterControllerSp = findViewById(R.id.masterControllerSp)
             setButton = findViewById(R.id.setBtn)
             masterControlUnInitText = findViewById(R.id.masterControlUnInitText)
+            autoawayToggle = findViewById(R.id.toggleAutoAway)
+            autoForcedOccupiedToggle = findViewById(R.id.toggleAFO)
         }
 
         setUpSpinners()
@@ -119,6 +123,13 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         humidityMinSp.setOnItemSelected { position -> viewModel.humidityMinSelected(position) }
         humidityMaxSp.setOnItemSelected { position -> viewModel.humidityMaxSelected(position) }
         masterControllerSp.setOnItemSelected { position -> viewModel.masterControllerModeSelected(position) }
+        autoawayToggle.setOnClickListener {
+            viewModel.setAutoAwayToggle(autoawayToggle.isChecked)
+        }
+        autoForcedOccupiedToggle.setOnClickListener {
+            viewModel.setAutoForcedOccupiedToggle(autoForcedOccupiedToggle.isChecked)
+        }
+
         setButton.setOnClickListener {
             disposables.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                 {
@@ -150,6 +161,8 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         if (viewState.iduConnectionStatus == IduConnectionStatus.Connected.ordinal) {
             masterControlUnInitText.visibility = View.GONE
         }
+        autoawayToggle.isChecked = viewState.isAutoAwayEnabled
+        autoForcedOccupiedToggle.isChecked = viewState.isAutoForcedOccupiedEnabled
     }
 
     private fun handleError(error: Throwable) {

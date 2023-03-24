@@ -16,3 +16,4 @@ const val CM_DEAD = "CM DEAD";
 const val DEVICE_DEAD = "DEVICE DEAD";
 const val DEVICE_LOW_SIGNAL = "DEVICE LOW SIGNAL";
 const val CCU_RESTART = "CCU RESTART";
+const val CCU_CRASH = "CCU CRASH";

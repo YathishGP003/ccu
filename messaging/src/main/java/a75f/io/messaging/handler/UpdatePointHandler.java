@@ -46,13 +46,18 @@ public class UpdatePointHandler implements MessageHandler
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
 
+
         if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
         }
         
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
+            HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
+            if (buildingTunerPoint.containsKey("displayUnit")) {
+                zoneDataInterface.refreshScreen("");
+            }
             return;
         }
 
@@ -125,10 +130,12 @@ public class UpdatePointHandler implements MessageHandler
 
         if(HSUtil.isVAVTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateVAVConfigPoint(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
         }
 
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
         }
 
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){

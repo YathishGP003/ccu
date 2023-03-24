@@ -97,7 +97,6 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_dabstagedrtu, container, false);
-        ButterKnife.bind(this, rootView);
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -107,7 +106,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     @SuppressLint("StaticFieldLeak") @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-
+        ButterKnife.bind(this, view);
         prefs = new Prefs(getContext().getApplicationContext());
     
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU) {

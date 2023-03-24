@@ -758,14 +758,14 @@ class HyperStatPointsUtil(
 
         // isEnableAutoForceOccupied Point
         val enableAutoForceOccupancyControlPoint = createHaystackPointWithEnums(
-            "$equipDis-autoForceOccupied",
+            "$equipDis-autoForceOccupiedEnabled",
             enableAutoForceOccupancyControlPointMarkers,
             "off,on"
         )
 
         // isEnableAutoAway Point
         val enableAutoAwayControlPointPoint = createHaystackPointWithEnums(
-            "$equipDis-autoAway",
+            "$equipDis-autoawayEnabled",
             enableAutoAwayControlPointMarkers,
             "off,on"
         )

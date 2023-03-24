@@ -234,6 +234,7 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
+        updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
@@ -289,7 +290,6 @@ public class Globals {
                         multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
             }
-            TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
 
             if(!isHeatingLimitUpdated()){
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
@@ -637,7 +637,33 @@ public class Globals {
         return recoveryMode;
    }
 
+   public boolean isSafeMode(){
+       HashMap<Object,Object> safeModeObj = CCUHsApi.getInstance().readEntity("safe and mode");
+       if(!safeModeObj.isEmpty()){
+           return CCUHsApi.getInstance().readHisValById(safeModeObj.get("id").toString()) == 1;
+       }
+       return false;
+   }
     public boolean getBuildingProcessStatus() {
         return mProcessJob.getStatus();
+    }
+
+    /**
+     * Below method ensures systemEquip Id is mapped to ahuRef
+     */
+    private void updateCCUAhuRef(){
+        HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
+        HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile");
+
+        if(systemProfile.isEmpty()){
+            return;
+        }
+
+        String ahuRef = ccuDevice.get("ahuRef").toString();
+        String systemProf = systemProfile.get("id").toString();
+
+        if(!(systemProf.equals(ahuRef))) {
+            CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+        }
     }
 }

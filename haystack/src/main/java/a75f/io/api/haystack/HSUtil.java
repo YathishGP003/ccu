@@ -9,6 +9,7 @@ import org.projecthaystack.HVal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import a75f.io.logger.CcuLog;
@@ -273,7 +274,7 @@ public class HSUtil
         HashMap equip = hayStack.readMapById(localPoint.getEquipRef());
         return equip.containsKey(Tags.HYPERSTAT) &&
                 ( equip.containsKey(Tags.CPU) ||  equip.containsKey(Tags.PIPE2)
-                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU));
+                || equip.containsKey(Tags.PIPE4) ||  equip.containsKey(Tags.HPU) || equip.containsKey(Tags.VRV));
     }
     
     public static boolean isPIConfig(String id, CCUHsApi hayStack) {
@@ -435,4 +436,16 @@ public class HSUtil
 //                || (tunerPoint.getMarkers().contains("cooling") && tunerPoint.getMarkers().contains("limit"))
 //                || (tunerPoint.getMarkers().contains("heating") && tunerPoint.getMarkers().contains("limit"));
 //    }
+
+    public static void addPointToLocalDB(HDict dict){
+        HashMap<Object, Object> map = new HashMap<>();
+        Iterator it   = dict.iterator();
+        while (it.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            map.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+        Point point = new Point.Builder().setHashMap(map).build();
+        CCUHsApi.getInstance().addPoint(point);
+    }
 }

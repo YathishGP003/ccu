@@ -25,14 +25,17 @@ class MigratePointsUtil {
             markersToRemove: Array<String>,
             displayName: String?
         ) {
+            if (pointMap.isEmpty()) {
+                Log.e(TAG, "updateMarkers: point does not exist $displayName")
+                return
+            }
             var point = Point.Builder().setHashMap(pointMap)
-            Log.i(TAG, "updateMarkers: ${point.build().displayName} : "+point.build().markers)
+            Log.i(TAG, "updateMarkers: $pointMap")
             if(displayName != null)
                 point.setDisplayName(displayName)
             point = addMarker(point, markersToAdd)
             point = removeMarker(point, markersToRemove)
             updatePoint(point.build())
-            Log.i(TAG, "updateMarkers: ${point.build().displayName} : "+point.build().markers)
         }
 
         /** Function to add the marker
@@ -63,6 +66,7 @@ class MigratePointsUtil {
          * @return Point.Builder
          */
         fun updatePoint(updatedPoint: Point) {
+            Log.i(TAG, "updatedPoint: ${updatedPoint.displayName} Markers: ${updatedPoint.markers}")
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.id)
         }
 

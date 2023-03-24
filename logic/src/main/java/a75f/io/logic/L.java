@@ -43,7 +43,7 @@ public class L
     public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
     public static final String TAG_CCU_BACKUP = "CCU_BACKUP";
     public static final String TAG_CCU_REPLACE = "CCU_REPLACE";
-
+    public static final String TAG_CCU_HSHST = "CCU_HST";
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
     public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
     public static final String TAG_CCU_HSHPU = "CCU_HSHPU";
@@ -51,6 +51,7 @@ public class L
     public static final String TAG_CCU_WEATHER = "CCU_WEATHER";
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
     public static final String TAG_OTN = "CCU_OTN";
+    public static final String TAG_CCU_BLE = "CCU_BLE";
 
     public static Context app()
     {

@@ -120,6 +120,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     boolean isFromReg = false;
     DabFullyModulatingRtu systemProfile = null;
     private boolean dcwbEnabled;
+
+    private static final int CONFIG_SAVE_PROGRESS_MILLIS = 5000;
     
     public static DABFullyAHUProfile newInstance()
     {
@@ -132,7 +134,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_dab_fully_ahu, container, false);
-        ButterKnife.bind(this, rootView);
+
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
@@ -143,6 +145,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
 
+        ButterKnife.bind(this, view);
         prefs = new Prefs(getContext().getApplicationContext());
         if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
             systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
@@ -220,6 +223,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     private void configureDcwbEnableButton() {
         
         dcwbEnableToggle.setOnCheckedChangeListener((compoundButton, b) -> {
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DCWB " +
+                    "Configuration");
             if (b) {
                 AlertDialog.Builder btuConfigDialog = new AlertDialog.Builder(getActivity());
                 btuConfigDialog.setTitle(getString(R.string.label_configure_btu));
@@ -242,6 +247,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 systemProfile.disableDcwb(CCUHsApi.getInstance());
                 handleDabDwcbEnabled(false);
             }
+
+            compoundButton.postDelayed((Runnable) () -> ProgressDialogUtils.hideProgressDialog(), CONFIG_SAVE_PROGRESS_MILLIS);
         
         });
     }

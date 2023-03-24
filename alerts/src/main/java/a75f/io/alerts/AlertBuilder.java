@@ -1,6 +1,7 @@
 package a75f.io.alerts;
 
 import java.util.GregorianCalendar;
+import java.util.Objects;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
@@ -35,7 +36,7 @@ public class AlertBuilder
         alert.siteName = haystack.getSiteName();
         alert.ccuIdNoAt = haystack.getCcuRef().toVal();
         alert.ccuName = haystack.getCcuName();
-        if (equipRef != null) {
+        if (equipRef != null && !Objects.equals(equipRef, "")) {
             alert.equipId = equipRef.replaceFirst("@","");
 
             Equip equip = HSUtil.getEquipInfo(equipRef);

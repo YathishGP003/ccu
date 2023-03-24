@@ -9,6 +9,7 @@ import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import android.util.Log
 import java.util.*
 
 class VrvProfile : ZoneProfile() {
@@ -58,6 +59,7 @@ class VrvProfile : ZoneProfile() {
 
     override fun updateZonePoints() {
         CcuLog.i(L.TAG_CCU_ZONE, " updateZonePoints VRV "+vrvEquip.nodeAddr)
+        setOccupancySensorPointValue(equip!!.id)
     }
 
     /**
@@ -72,6 +74,19 @@ class VrvProfile : ZoneProfile() {
             if (occupancyPoint["id"] == occupancyPort.pointRef) {
                 hayStack.deleteEntity(occupancyPort.id)
             }
+        }
+    }
+
+    private fun setOccupancySensorPointValue(equipRef: String) {
+        val haystack = CCUHsApi.getInstance()
+        val occupancySensorValue = haystack.readHisValByQuery(
+            "point and occupancy and sensor and his and equipRef == \"$equipRef\""
+        )
+        if(occupancySensorValue > 0){
+            val pointMap: HashMap<*, *> = haystack.read(
+                "point and occupancy and detection and his and equipRef == \"$equipRef\"")
+            val detectionPointId = pointMap["id"] as String?
+            haystack.writeHisValueByIdWithoutCOV(detectionPointId,1.0)
         }
     }
 }

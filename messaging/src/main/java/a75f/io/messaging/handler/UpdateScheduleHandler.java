@@ -166,7 +166,15 @@ public class UpdateScheduleHandler implements MessageHandler
             if(m.containsKey("scheduleRef")) {
                 ArrayList<Interval> intervalSpills = new ArrayList<>();
                 Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
-                CcuLog.d(L.TAG_CCU_PUBNUB, "Zone " + m + " " + zoneSchedule.toString());
+                if(zoneSchedule == null) {
+                    // Handling Crash here.
+                    zoneSchedule = CCUHsApi.getInstance().getRemoteSchedule(m.get("scheduleRef").toString());
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Fetching the schedule from remote " + zoneSchedule);
+                    if(zoneSchedule == null) {
+                        CcuLog.d(L.TAG_CCU_PUBNUB, "The schedule retrieved from the remote source is also null.");
+                        continue;
+                    }
+                }
                 if (zoneSchedule.getMarkers().contains("disabled")) {
                     continue;
                 }

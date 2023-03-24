@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.vav;
 
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY;
 
 import android.util.Log;
 
@@ -54,9 +55,6 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTuners;
 import a75f.io.logic.util.RxTask;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -785,7 +783,7 @@ public class VavEquip
 
         BuildingTunerUtil.updateTunerLevels(fanControlOnFixedTimeDelayId, roomRef, hayStack);
         hayStack.writePointForCcuUser(fanControlOnFixedTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
-                                                            DEFAULT_FAN_ON_CONTROL_DELAY, 0);
+                 DEFAULT_FAN_ON_CONTROL_DELAY, 0);
         hayStack.writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
 
     }

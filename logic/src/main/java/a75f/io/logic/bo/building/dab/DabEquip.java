@@ -1,8 +1,5 @@
 package a75f.io.logic.bo.building.dab;
 
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
-import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
-
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatMinDamper;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatPosPoint;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
@@ -10,6 +7,9 @@ import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 import static a75f.io.logic.tuners.DabReheatTunersKt.createEquipReheatTuners;
+
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
+import static a75f.io.logic.haystack.TagQueries.IAQ_ENABLED;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -48,6 +49,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
+import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.DabTuners;
@@ -150,7 +152,7 @@ public class DabEquip
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-    
+
         RxTask.executeAsync(() -> DabTuners.addEquipDabTuners( hayStack,
                                                                siteRef,
                                                                equipDis,
@@ -459,7 +461,6 @@ public class DabEquip
                 roomRef,floorRef,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
 
-
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
 
@@ -519,8 +520,12 @@ public class DabEquip
                 device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
                 device.relay1.setPointRef(reheatPosId);
                 device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
-                device.relay1.setPointRef(reheatPosId);
+                device.relay2.setPointRef(reheatPosId);
             }
+            if (config.damper2Type != DamperType.MAT.ordinal()) {
+                device.analog2Out.setPointRef(normalizedDamper2PosId);
+            }
+
         } else {
             device.analog2Out.setPointRef(normalizedDamper2PosId);
         }
@@ -765,7 +770,7 @@ public class DabEquip
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
         }
     }
-    
+
     public DabProfileConfiguration getProfileConfiguration() {
         DabProfileConfiguration config = new DabProfileConfiguration();
         config.minDamperCooling = ((int)getDamperLimit("cooling","min"));
@@ -849,6 +854,14 @@ public class DabEquip
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    if (config.damper2Type < DamperType.MAT.ordinal() &&
+                                    (config.reheatType == 0 || config.reheatType > ReheatType.OneStage.ordinal())) {
+                        HashMap<Object, Object> normalizedSecDamper = hayStack
+                                .readEntity("normalized and secondary and damper and cmd and equipRef ==\""+equipRef+"\"");
+                        if (!normalizedSecDamper.isEmpty()) {
+                            DeviceUtil.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.name(), normalizedSecDamper.get("id").toString());
+                        }
+                    }
                     break;
                 case RELAY_ONE:
                 case RELAY_TWO:
@@ -866,6 +879,8 @@ public class DabEquip
         }else if(!curTrueCfmEnabled && config.enableCFMControl){
             TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equipRef, config);
         }
+
+        hayStack.scheduleSync();
 
         if(config.enableAutoAwayControl != getProfileConfiguration().enableAutoAwayControl
              || config.enableAutoForceOccupied != getProfileConfiguration().enableAutoForceOccupied){

@@ -129,7 +129,12 @@ public class AlertManager
 
     public void generateAlert(String title, String msg){
         if (! repoCheck()) return;
-        repo.generateAlert(title,msg);
+        repo.generateAlert(title,msg, "");
+    }
+
+    public void generateAlert(String title, String msg, String equipRef){
+        if (! repoCheck()) return;
+        repo.generateAlert(title,msg, equipRef);
     }
 
     public void generateCMDeadAlert(String title, String msg){
@@ -252,6 +257,34 @@ public class AlertManager
         if (! repoCheck()) return;
 
         for (Alert a: repo.getActiveCMDeadAlerts()){
+            fixAlert(a);
+        }
+    }
+
+    /**Fixing Safe mode explicity
+     * as this value is set and restarted immediately
+     */
+    public void fixSafeMode(){
+        if (! repoCheck()) return;
+
+        for (Alert a: repo.getActiveSafeModeAlert()){
+            fixAlert(a);
+        }
+    }
+
+    public void generateCrashAlert(String title, String msg){
+        if (! repoCheck()) return;
+        repo.generateCrashAlertWithMessage(title,msg);
+    }
+
+
+    /**Fixing CrashAlert explicity
+     * if there is a upcoming crashalert
+     */
+    public void fixPreviousCrashAlert(){
+        if (! repoCheck()) return;
+
+        for (Alert a: repo.getActiveCrashAlert()){
             fixAlert(a);
         }
     }

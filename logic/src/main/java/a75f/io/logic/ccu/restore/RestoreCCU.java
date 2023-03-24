@@ -272,29 +272,47 @@ public class RestoreCCU {
         return EquipsManager.getInstance().fetchProfileByVendorAndModel(vendor, model);
     }
 
-    private String getModbusName(String equipDispName, String slaveId, String modbusEquipType){
-        /*
-        Name is fetched under the assumption of format in which dis(display name of modbus equip) is stored in
-        siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId
-         */
+    private String getModbusName(String equipDispName, String modbusEquipType){
         String zone = "_ZONE";
         if(modbusEquipType.endsWith(zone)){
             int end = modbusEquipType.lastIndexOf(zone);
             modbusEquipType = modbusEquipType.substring(0,end);
-
         }
-        String siteDis = (String) CCUHsApi.getInstance().read(Tags.SITE).get("dis");
-        return equipDispName.replace(siteDis+"-", "").replace("-"+modbusEquipType, "")
-                .replace("-"+slaveId,"");
+        List<String> modbusNames = EquipsManager.getInstance().getAllModbusNamesByEquipType(modbusEquipType);
+        for(String mbn : modbusNames){
+            if(equipDispName.contains(mbn)){
+                return mbn;
+            }
+        }
+        return null;
+    }
+
+    private String matchEquipProfileToOBjectBox(String equipProfile){
+        String objectBoxProfile = equipProfile;
+        switch(equipProfile){
+            case "UPS30" :
+                objectBoxProfile = "UPS30K";
+                break;
+            case "UPS80" :
+                objectBoxProfile = "UPS80K";
+                break;
+            case "UPS400" :
+                objectBoxProfile = "UPS400K";
+                break;
+            case "UPS150" :
+                objectBoxProfile = "UPS150K";
+                break;
+        }
+        return objectBoxProfile;
     }
 
     private void saveToBox(HRow equipRow){
         ArrayList<HashMap> mbDispPointList = CCUHsApi.getInstance().readAll("point and modbus and displayInUi and " +
                 "shortDis  and equipRef == \""+equipRow.get("id").toString()+ "\"");
-        String profile =  equipRow.get("profile").toString().replace("MODBUS_","");
+        String profile =  matchEquipProfileToOBjectBox(equipRow.get("profile").toString().
+                replace("MODBUS_",""));
         String modbusDisplayName = equipRow.get("dis").toString();
-        String modbusName = getModbusName(modbusDisplayName, equipRow.get("group").toString(),
-                profile);
+        String modbusName = getModbusName(modbusDisplayName, profile);
 
         EquipmentDevice modbusDevice = (profile.equalsIgnoreCase("DEFAULT"))?
         getFromBoxByVendorAndModel(equipRow.get("vendor").toString(), equipRow.get("model").toString()):

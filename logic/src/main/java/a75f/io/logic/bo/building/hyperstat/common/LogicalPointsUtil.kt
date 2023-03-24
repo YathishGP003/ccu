@@ -421,7 +421,7 @@ class LogicalPointsUtil {
                     "logical", "standalone", "zone")
 
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-heatingStage1")
+                    .setDisplayName("$equipDis-compressorStage3")
                     .setSiteRef(siteRef).setEquipRef(equipRef)
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
@@ -447,7 +447,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverCoolingRelayLogicalPoint(equipRef)).build()
@@ -468,7 +468,7 @@ class LogicalPointsUtil {
                     .setRoomRef(roomRef).setFloorRef(floorRef)
                     .setTz(tz).setHisInterpolate("cov")
                 markers.forEach { point.addMarker(it) }
-                point.setEnums("on,off")
+                point.setEnums("off,on")
                 addPointToHaystack(point.build())
             }
             return  Point.Builder().setHashMap(readChangeOverHeatingRelayLogicalPoint(equipRef)).build()
@@ -581,7 +581,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogHeatingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime",
+                    "cmd","zone","logical","analog", "output",
                     "modulating", "elecHeating","heating","his"
                 )
 
@@ -602,7 +602,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogCoolingLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime",
+                    "cmd","zone","logical","analog", "output",
                     "modulating", "dxCooling","cooling","his"
                 )
                 val point = Point.Builder()
@@ -624,7 +624,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime",
+                    "cmd","zone","logical","analog", "output",
                     "fan", "speed","run","his"
                 )
                 val point = Point.Builder()
@@ -645,7 +645,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutDcvLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output", "runtime",
+                    "cmd","zone","logical","analog", "output",
                     "damper", "dcv","actuator","his"
                 )
                 val point = Point.Builder()
@@ -665,7 +665,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutWaterValveLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "zone", "logical", "analog", "output", "runtime",
+                    "cmd", "zone", "logical", "analog", "output",
                     "water", "valve","heating","cooling","his"
                 )
 
@@ -687,7 +687,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutCompressorSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd", "zone", "logical", "analog", "output", "runtime",
+                    "cmd", "zone", "logical", "analog", "output",
                     "compressor", "speed","his"
                 )
 
@@ -823,7 +823,7 @@ class LogicalPointsUtil {
             if(existingPoint.isEmpty()) {
 
                 val markers = arrayOf(
-                    "current", "sensor", "zone", "his", "logical", transformerTag
+                    "current", "sensor", "zone", "his", "logical", "cur", transformerTag
                 )
                 val point = Point.Builder()
                     .setDisplayName("$equipDis-$name")

@@ -10,17 +10,19 @@ import kotlinx.coroutines.launch
 private val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 private var messageDbHelper : MessageDatabaseHelper? = null
+
+private const val CCU_TAG_MESSAGING = "CCU_MESSAGING"
 fun insert(message: Message, context: Context) {
     appScope.launch {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        Log.i("CCU_MESSAGING", " DbUtil:Insert $message")
+        Log.i(CCU_TAG_MESSAGING, " DbUtil:Insert msg :${message.messageId}")
         try {
             messageDbHelper?.insert(message)
         } catch (e : Exception) {
             e.printStackTrace()
-            Log.i("CCU_MESSAGING", " Insert Failed $e")
+            Log.i(CCU_TAG_MESSAGING, " Insert Failed $e")
         }
     }
 }
@@ -29,13 +31,13 @@ fun update(message: Message, context : Context) {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        Log.i("CCU_MESSAGING", " DbUtil:Update $message")
+        Log.i(CCU_TAG_MESSAGING, " DbUtil:Update msg : ${message.messageId}")
         messageDbHelper?.update(message)
     }
 }
 fun deleteMessage(message: Message, context : Context) {
     appScope.launch {
-        Log.i("CCU_MESSAGING", " DbUtil:Delete $message")
+        Log.i(CCU_TAG_MESSAGING, " DbUtil:Delete msg : ${message.messageId}")
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
@@ -56,10 +58,15 @@ fun updateMessageHandled(message: Message, context: Context) {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        message.handlingStatus = true
-        message.handledTime = System.currentTimeMillis()
-        Log.i("CCU_MESSAGING","updateMessageHandled $message")
-        messageDbHelper?.update(message)
+        val msg = messageDbHelper?.getMessageById(message.messageId)
+        if (msg != null) {
+            message.handlingStatus = true
+            message.handledTime = System.currentTimeMillis()
+            Log.i(CCU_TAG_MESSAGING, "updateMessageHandled msg : ${message.messageId}")
+            messageDbHelper?.update(message)
+        } else {
+            Log.i(CCU_TAG_MESSAGING,"updateMessageHandled msg not found ${message.messageId}")
+        }
     }
 }
 
@@ -78,7 +85,7 @@ fun updateAllRemoteCommandsHandled(context: Context, cmdType : String) {
                 if (message.remoteCmdType != null && message.remoteCmdType == cmdType) {
                     message.handlingStatus = true
                     message.handledTime = System.currentTimeMillis()
-                    Log.i("CCU_MESSAGING","updateMessageHandled $message")
+                    Log.i(CCU_TAG_MESSAGING,"updateMessageHandled $message")
                     messageDbHelper?.update(message)
                 }
             }

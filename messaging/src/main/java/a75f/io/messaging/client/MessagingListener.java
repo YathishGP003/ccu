@@ -1,10 +1,13 @@
 package a75f.io.messaging.client;
 
+import android.content.Context;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.here.oksse.ServerSentEvent;
 
+import java.io.File;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +34,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MessagingListener implements ServerSentEvent.Listener {
+
+    private static final long MESSAGING_DB_MAXT_USE_LIMIT = 10000000;//10MB max limit
     private final String siteId;
     private final String ccuId;
     private final String messagingUrl;
@@ -171,10 +176,20 @@ public class MessagingListener implements ServerSentEvent.Listener {
         }
 
         if (messageHandlerService.isCommandSupported(msg.getCommand())) {
-            MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
+            if (isMessageDbSizeWithinMaxLimit()) {
+                MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
+            } else {
+                CcuLog.e(L.TAG_CCU_MESSAGING, "Message DB reached max limit. ");
+            }
             messageHandlerService.handleMessage(msg);
         } else {
             CcuLog.e(L.TAG_CCU_MESSAGING, "Unsupported command ignored "+msg.getCommand());
         }
+    }
+
+    private boolean isMessageDbSizeWithinMaxLimit() {
+        Context context = Globals.getInstance().getApplicationContext();
+        File file = context.getDatabasePath("renatusDb");
+        return file.length() < MESSAGING_DB_MAXT_USE_LIMIT ;
     }
 }

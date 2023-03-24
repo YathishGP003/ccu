@@ -878,7 +878,7 @@ public class Pulse
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
@@ -886,7 +886,7 @@ public class Pulse
 				if(oldCurTempVal != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 					}
 				}

@@ -120,7 +120,7 @@ public class MessagingClient {
 
         String subscribeUrl = String.format("%s/messages/acknowledgeable?channels=%s,%s&subscriberId=%s",
                 messagingUrl,
-                BuildConfig.PUBNUB_GLOBAL_CHANNEL,
+                BuildConfig.MESSAGING_GLOBAL_CHANNEL,
                 siteId,
                 ccuId);
 

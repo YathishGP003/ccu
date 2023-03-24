@@ -48,7 +48,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
-            CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
+            CcuLog.d("RemoteCommand","handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
             switch (cmdLevel){
                 case "site":
                 case "system":
@@ -58,21 +58,21 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             case RESTART_CCU:
                             case RESTART_TABLET:
                             case RESTART_MODULE:
-                                CcuLog.d("RemoteCommand", "PUBNUB handle Restart CCU=");
+                                CcuLog.d("RemoteCommand", " handle Restart CCU=");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case UPDATE_CCU:
-                                CcuLog.d("RemoteCommand", "PUBNUB handle update CCU=" + msgObject.get("version").getAsString());
+                                CcuLog.d("RemoteCommand", " handle update CCU=" + msgObject.get("version").getAsString());
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
                                 break;
                             case RESET_CM:
-                                CcuLog.d("RemoteCommand", "PUBNUB handle Restart reset cm=");
+                                CcuLog.d("RemoteCommand", " handle Restart reset cm=");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 else if(safeModeInterface != null)
@@ -91,7 +91,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 context.sendBroadcast(otaUpdateIntent);
                                 break;
                             case SAVE_CCU_LOGS:
-                                CcuLog.d("RemoteCommand", "PUBNUB handle save logs");
+                                CcuLog.d("RemoteCommand", " handle save logs");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 else if(safeModeInterface != null)
@@ -126,7 +126,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             context.sendBroadcast(otaUpdateIntent);
                             break;
                         case RESTART_MODULE:
-                            CcuLog.d("RemoteCommand","PUBNUB handle zone level:"+cmdType);
+                            CcuLog.d("RemoteCommand"," handle zone level:"+cmdType);
                             if(remoteCommandInterface != null)
                                 remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, id);
                             else if(safeModeInterface != null)

@@ -18,10 +18,12 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -48,6 +51,7 @@ import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -62,6 +66,7 @@ public class AboutFragment extends Fragment {
     private boolean mCCUAppDownloaded = false;
     private boolean mHomeAppDownloaded = false;
     private CountDownTimer otpCountDownTimer;
+    private Spinner backFillTimeSpinner;
     @BindView(R.id.tvSerialNumber)
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
@@ -143,6 +148,8 @@ public class AboutFragment extends Fragment {
             getActivity().registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
         ButterKnife.bind(this, rootView);
+
+        setBackFillTimeSpinner(rootView);
 
         HashMap site = CCUHsApi.getInstance().read("site");
 
@@ -586,4 +593,11 @@ public class AboutFragment extends Fragment {
             }
         });
     }
+
+    private void setBackFillTimeSpinner(View rootView) {
+        backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
+        backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
+        backFillTimeSpinner.setSelection(0);
+    }
+
 }

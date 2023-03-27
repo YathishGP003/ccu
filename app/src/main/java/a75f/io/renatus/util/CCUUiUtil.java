@@ -10,18 +10,26 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -131,4 +139,52 @@ public class CCUUiUtil {
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");
     }
+
+    public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
+        ArrayList<HashMap<Object, Object>> totalNumberOfZones = CCUHsApi.getInstance().readAllEntities("room");
+        int totalZones = totalNumberOfZones.size();
+        String[] strings = {"None","1 Hr","2 Hrs","3 Hrs","6 Hrs","12 Hrs","24 Hrs","48 Hrs","72 Hrs"};
+        ArrayList<String> backFillTimeArray = new ArrayList<String>(Arrays.asList(strings));
+        return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, totalZones);
+    }
+
+    private static ArrayAdapter<String> getDynamicBackFillTimeArrayAdapter(Context context, ArrayList<String> backFillTimeArray, int totalZones) {
+
+        return new ArrayAdapter<String>(context, R.layout.spinner_dropdown_item, backFillTimeArray) {
+            @Override
+            public boolean isEnabled(int position) {
+                return position < getMaxNormalRows();
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                Context mContext = getContext();
+                LayoutInflater vi = LayoutInflater.from(mContext);
+                View v = vi.inflate(R.layout.spinner_dropdown_item, parent, false);
+                View row = super.getDropDownView(position, v, parent);
+                if (position >= getMaxNormalRows()) {
+                    row.setAlpha(0.5F);
+                }
+                return row;
+            }
+
+            private int getMaxNormalRows() {
+                if (totalZones <= 6) {
+                    return 0;
+                } else if (totalZones <= 10) {
+                    return 7;
+                } else if (totalZones <= 20) {
+                    return 6;
+                } else if (totalZones <= 30) {
+                    return 6;
+                } else if (totalZones <= 40) {
+                    return 5;
+                } else {
+                    return 2;
+                }
+            }
+        };
+
+    }
+
 }

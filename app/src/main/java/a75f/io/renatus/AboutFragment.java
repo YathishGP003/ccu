@@ -18,6 +18,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -149,7 +150,7 @@ public class AboutFragment extends Fragment {
         }
         ButterKnife.bind(this, rootView);
 
-        setBackFillTimeSpinner(rootView);
+        setBackFillTimeSpinner(rootView, backFillTimeSpinner);
 
         HashMap site = CCUHsApi.getInstance().read("site");
 
@@ -594,10 +595,27 @@ public class AboutFragment extends Fragment {
         });
     }
 
-    private void setBackFillTimeSpinner(View rootView) {
-        backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
-        backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
-        backFillTimeSpinner.setSelection(0);
+    private void setBackFillTimeSpinner(View rootView, Spinner backFillTimeSpinner) {
+
+        this.backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
+        this.backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
+        this.backFillTimeSpinner.setSelection(0);
+
+        backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                int[] durations = {1, 2, 3, 6, 12, 24, 48, 72};
+                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 5;
+                int backFillDurationSelected = durations[index];
+
+                CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
 }

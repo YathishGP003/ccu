@@ -1160,10 +1160,10 @@ public class CCUTagsDb extends HServer {
     //Delete all the hisItem entries older than 24 hrs.
     public void removeExpiredHisItems(HRef id) {
         HDict entity = readById(id);
-    
+        double backfillduration = CCUHsApi.getInstance().readPointPriorityValByQuery("point and backfill and duration");
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - backfillduration*60*60*1000)
                 .or()
                 .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);

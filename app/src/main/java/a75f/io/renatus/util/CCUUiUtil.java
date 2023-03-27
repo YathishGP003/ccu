@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.renatus.BackFillDuration;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -143,7 +144,7 @@ public class CCUUiUtil {
     public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
         ArrayList<HashMap<Object, Object>> totalNumberOfZones = CCUHsApi.getInstance().readAllEntities("room");
         int totalZones = totalNumberOfZones.size();
-        String[] strings = {"None","1 Hr","2 Hrs","3 Hrs","6 Hrs","12 Hrs","24 Hrs","48 Hrs","72 Hrs"};
+        String[] strings = BackFillDuration.getDisplayNames();
         ArrayList<String> backFillTimeArray = new ArrayList<String>(Arrays.asList(strings));
         return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, totalZones);
     }

@@ -807,6 +807,9 @@ public abstract class SystemProfile
     public void addNewSystemUserIntentPoints(String equipref){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap siteMap = hayStack.read(Tags.SITE);
+        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipref);
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        String floorRef = equip.getFloorRef();
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
@@ -834,6 +837,13 @@ public abstract class SystemProfile
             String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
             CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
+        }
+
+        if(!verifyPointsAvailability("point and backfill and duration",equipref)) {
+            Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").setFloorRef(floorRef).build();
+            String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
+            CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
+            CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
         }
         
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);

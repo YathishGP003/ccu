@@ -133,7 +133,7 @@ public class SyncStatusService {
             }
         }
     }
-    
+
     private void scheduleSyncDataSaveTimer() {
         fileSaveDelayTimer = new Timer();
         fileSaveDelayTimer.schedule(new TimerTask() {
@@ -141,12 +141,15 @@ public class SyncStatusService {
             public void run() {
             CcuLog.i("CCU_PROFILING", "Save sync data");
             putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
-            try {
-                fileSaveDelayTimer.cancel();
-                fileSaveDelayTimer = null;
-            } catch (IllegalStateException e) {
-                CcuLog.i(HayStackConstants.LOG_TAG, "Timer already cancelled",e);
-            }
+                try {
+                    if (fileSaveDelayTimer == null) {
+                        return;
+                    }
+                    fileSaveDelayTimer.cancel();
+                    fileSaveDelayTimer = null;
+                } catch (IllegalStateException e) {
+                    CcuLog.i(HayStackConstants.LOG_TAG, "Timer already cancelled", e);
+                }
             }
         }, 15000);
     }

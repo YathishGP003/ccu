@@ -326,7 +326,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 View viewHourTwo = viewTimeLines.get(2);
 
                 mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                mPixelsBetweenADay = constraintScheduler.getHeight() / 7;
+                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
 
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);

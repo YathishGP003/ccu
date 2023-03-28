@@ -159,4 +159,7 @@ public class Tags
     public static final String TZ = "tz";
     public static final String HELIO_NODE = "helionode";
     public static final String SMART_NODE = "smartnode";
+
+    public static final String MESSAGE = "message";
+    public static final String KIND = "kind";
 }

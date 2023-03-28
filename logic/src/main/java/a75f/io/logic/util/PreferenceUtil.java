@@ -71,6 +71,8 @@ public class PreferenceUtil {
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
+    private static final String KIND_CORRECTION ="Kind_Correction";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -591,5 +593,14 @@ public class PreferenceUtil {
 
     public static void setAutoForcedTagNameCorrectionMigration() {
         setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
+    }
+
+
+    public static boolean getKindCorrectionMigration() {
+        return getBooleanPreference(KIND_CORRECTION);
+    }
+
+    public static void setKindCorrectionMigration() {
+        setBooleanPreference(KIND_CORRECTION, true);
     }
 }

@@ -28,9 +28,7 @@ class MessageCleanUpWork(context: Context, params: WorkerParameters) :
                 MessagingEntryPoint::class.java
             )
 
-            if (messagingDIEntryPoint != null) {
-                msgDbHelper = messagingDIEntryPoint.dbHelper
-            }
+            msgDbHelper = messagingDIEntryPoint.dbHelper
         }
         CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork ")
 

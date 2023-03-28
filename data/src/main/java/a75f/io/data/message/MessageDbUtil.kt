@@ -31,7 +31,7 @@ fun update(message: Message, context : Context) {
         if (messageDbHelper == null) {
             messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        Log.i(CCU_TAG_MESSAGING, " DbUtil:Update msg : ${message.messageId}")
+        Log.i(CCU_TAG_MESSAGING, " DbUtil:Update msg : $message")
         messageDbHelper?.update(message)
     }
 }
@@ -48,6 +48,7 @@ fun deleteMessage(message: Message, context : Context) {
 fun updateMessage(message: Message) {
     appScope.launch {
         if (message != null) {
+            Log.i(CCU_TAG_MESSAGING, "updateMessage msg : ${message.messageId}")
             messageDbHelper?.update(message)
         }
     }

@@ -13,8 +13,7 @@ import javax.inject.Inject
  * Schedules a repeating handler job and processes all the unhandled messages.
  */
 
-const val MESSAGE_RETRY_INTERVAL_MINUTES : Long = 15
-const val MESSAGE_RETRY_INITIAL_MINUTES : Long = 5
+const val MESSAGE_RETRY_INTERVAL_MINUTES : Long = 3
 class MessageRetryHandlerWork(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
@@ -32,26 +31,27 @@ class MessageRetryHandlerWork(context: Context, params: WorkerParameters) :
                 MessagingEntryPoint::class.java
             )
 
-            if (messagingDIEntryPoint != null) {
-                messageHandlerService = messagingDIEntryPoint.messagingHandlerService
-            }
+            messageHandlerService = messagingDIEntryPoint.messagingHandlerService
         }
         CcuLog.i(L.TAG_CCU_MESSAGING,"MessageRetryHandlerWork ")
 
         messageHandlerService.handleMessages()
         //Always return success as this is periodic work.
+        scheduleMessageRetryWork(appContext)
         return Result.success()
     }
 
+
+    /**
+     * Periodic job is not used here since the WorkManager requires minimum interval of 15 minutes.
+     */
     companion object {
-        fun schedulePeriodicMessageWork(context: Context) {
-            val workRequest = PeriodicWorkRequestBuilder<MessageRetryHandlerWork>(MESSAGE_RETRY_INTERVAL_MINUTES, TimeUnit.MINUTES)
-                                            .setInitialDelay(MESSAGE_RETRY_INITIAL_MINUTES, TimeUnit.MINUTES)
-                                            .addTag("MessageHandlingWork")
-                                            .build()
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork("MessageHandlingWork",
-                ExistingPeriodicWorkPolicy.REPLACE, workRequest
-            )
+        fun scheduleMessageRetryWork(context: Context) {
+            val messageRetryWorkRequest = OneTimeWorkRequest.Builder(MessageRetryHandlerWork::class.java)
+                                                .setInitialDelay(MESSAGE_RETRY_INTERVAL_MINUTES, TimeUnit.MINUTES)
+                                                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork("MessageRetryWork",
+                                ExistingWorkPolicy.REPLACE, messageRetryWorkRequest)
         }
     }
 }

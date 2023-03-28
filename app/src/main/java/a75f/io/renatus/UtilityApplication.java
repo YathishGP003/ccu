@@ -967,7 +967,7 @@ public abstract class UtilityApplication extends Application {
             }
         }
         scheduleMessagingAckJob();
-        MessageRetryHandlerWork.Companion.schedulePeriodicMessageWork(context);
+        MessageRetryHandlerWork.Companion.scheduleMessageRetryWork(context);
         MessageCleanUpWork.Companion.scheduleMessageCleanUpWork(context);
         messageHandlerSubscriber.subscribeAllHandlers();
     }

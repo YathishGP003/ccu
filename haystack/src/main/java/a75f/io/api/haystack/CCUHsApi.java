@@ -2526,6 +2526,10 @@ public class CCUHsApi
     }
 
     public boolean getAuthorised(){
+        if (!IS_AUTHORISED) {
+            CcuLog.e("CCU_HTTP_REQUEST", "Not Authenticated with 75F Cloud. Token: " + getJwt());
+        }
+
         return IS_AUTHORISED;
     }
 

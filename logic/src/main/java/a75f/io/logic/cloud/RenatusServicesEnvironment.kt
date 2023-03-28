@@ -137,7 +137,7 @@ class RenatusServicesEnvironment(
    }
 
    private fun setupUrls() {
-      AlertManager.getInstance().setAlertsApiBase(urls.alertsUrl, CCUHsApi.getInstance().jwt)
+      AlertManager.getInstance().setAlertsApiBase(urls.alertsUrl)
       CCUHsApi.getInstance().resetBaseUrls(urls.haystackUrl, urls.caretakerUrl)
    }
 }

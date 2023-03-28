@@ -563,10 +563,8 @@ public class HClient extends HProj
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
-        Log.d("CCU_HCLIENT", "Request to " + uriStr);
         Log.d("CCU_HCLIENT", "Request body: " + req);
 
-        Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
         URL url = new URL(uriStr);
         HttpURLConnection c = openHttpConnection(url, "POST");
         try {
@@ -584,12 +582,14 @@ public class HClient extends HProj
           c.setReadTimeout(30000);
           c.connect();
 
+          CcuLog.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
+
           // post expression
           Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
           cout.write(req);
           cout.close();
 
-          Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
+          CcuLog.d("CCU_HTTP_RESPONSE", "HClient:postString: " + c.getResponseCode() + " - [POST] "+ uriStr);
 
           // read response into string
           StringBuffer s = new StringBuffer(1024);
@@ -764,11 +764,17 @@ public class HClient extends HProj
         c.setConnectTimeout(60000);
         c.setReadTimeout(60000);
         c.connect();
+
+        Log.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
+
         // post expression
         Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
         cout.write(req);
         cout.close();
+
         Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
+        Log.d("CCU_HTTP_RESPONSE", "HClient:postString: " + c.getResponseCode() + " - [POST] "+ uriStr);
+
         // read response into string
         StringBuffer s = new StringBuffer(1024);
         Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));

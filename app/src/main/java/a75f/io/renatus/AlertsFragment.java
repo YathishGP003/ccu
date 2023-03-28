@@ -192,10 +192,6 @@ public class AlertsFragment extends Fragment
 	}
 	private void setAlertList() {
 		alertList.clear();
-		AlertManager alertManager = AlertManager.getInstance();
-		if (!alertManager.hasService()) {
-			alertManager.rebuildServiceNewToken(CCUHsApi.getInstance().getJwt());
-		}
 		AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
 			if(alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
 		});

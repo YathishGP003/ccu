@@ -71,20 +71,9 @@ public class AlertProcessJob
         try
         {
             AlertManager alertManager = AlertManager.getInstance();
-            // We may need to initialize alerts service here (via AlertManager) if this is the first
-            // alerts sync after registration.
-            if (!alertManager.hasService()) {
-                String token = CCUHsApi.getInstance().getJwt();
-                if (token.isEmpty()) {
-                    CcuLog.w(TAG, "AlertProcessJob:  Site exists but token is empty");
-                    return;
-                }
-                alertManager.rebuildServiceNewToken(token);
-            }
-
+            alertManager.fetchPredefinedAlertsIfEmpty();
             alertManager.processAlerts();
-
-        }catch (Exception e) {
+        } catch (Exception e) {
             CcuLog.w(TAG, "AlertProcessJob Exception: " + e.getMessage(), e);
             e.printStackTrace();
         }

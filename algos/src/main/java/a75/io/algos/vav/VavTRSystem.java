@@ -177,8 +177,11 @@ public class VavTRSystem extends TRSystem
     private double getSatTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
-        if((cdb == null) && (cdb.size() == 0))
-            cdb = hayStack.read("point and tuner and default and tr and sat and "+trParam);
+        if((cdb == null)) {
+            cdb = hayStack.read("point and tuner and default and tr and sat and " + trParam);
+        }else if(cdb.size() == 0){
+            cdb = hayStack.read("point and tuner and default and tr and sat and " + trParam);
+        }
         if(cdb != null && cdb.size() > 0) {
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());

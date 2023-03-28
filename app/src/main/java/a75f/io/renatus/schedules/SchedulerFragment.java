@@ -347,7 +347,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
-            schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            ArrayList<Schedule> buildingScheduleList = CCUHsApi.getInstance().getSystemSchedule(false);
+            if(buildingScheduleList.size() > 0) {
+                schedule = buildingScheduleList.get(0);
+            }
             Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         

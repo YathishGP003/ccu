@@ -154,19 +154,22 @@ public class OTAUpdateService extends IntentService {
         }
 
         Cursor c = downloadManager.query(new DownloadManager.Query().setFilterById(id));
-        c.moveToFirst();
 
-        int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
-        if(status != DownloadManager.STATUS_SUCCESSFUL) {
-            int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
-            c.close();
+        if(c.moveToFirst()) {
+            int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
 
-            Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
 
-            //TODO retry a couple of times, depending on error
-            resetUpdateVariables();
-            completeUpdate();
-            return;
+            if (status != DownloadManager.STATUS_SUCCESSFUL) {
+                int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
+                c.close();
+
+                Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
+
+                //TODO retry a couple of times, depending on error
+                resetUpdateVariables();
+                completeUpdate();
+                return;
+            }
         }
 
         c.close();
@@ -209,7 +212,11 @@ public class OTAUpdateService extends IntentService {
     private void handleNodeReboot(byte[] eventBytes) {
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
-        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
+        if(msg.smartNodeDeviceType == null){
+            Log.d(TAG, " SmartNode device type is null" );
+            return;
+        }
+       if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
                 (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 

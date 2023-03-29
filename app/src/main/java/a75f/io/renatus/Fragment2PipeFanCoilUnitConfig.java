@@ -275,7 +275,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         twoPfcuConfig.setNodeAddress(mSmartNodeAddress);
         twoPfcuConfig.enableOccupancyControl = switchOccSensor.isChecked();
         twoPfcuConfig.setPriority(ZonePriority.NONE);
-        twoPfcuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        twoPfcuConfig.temperatureOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         twoPfcuConfig.enableThermistor1 = switchThermistor1.isChecked();
         twoPfcuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
 

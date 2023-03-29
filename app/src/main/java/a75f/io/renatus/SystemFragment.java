@@ -807,7 +807,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				sbComfortValue.setContentDescription(String.valueOf(seekBar.getProgress()));
-				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - seekBar.getProgress());
+				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - (double) seekBar.getProgress());
 			}
 		});
 		

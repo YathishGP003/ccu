@@ -2269,7 +2269,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
                                 String equipType = equipTypes.get(0);
-                                equipType.trim();
+                                equipType = equipType.trim();
                                 tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
@@ -2704,19 +2704,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2939,19 +2939,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -3641,7 +3641,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void hideWeather() {
-        TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
+        TranslateAnimation animate = new TranslateAnimation(0, (float) -weather_data.getWidth() + 5, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);

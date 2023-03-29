@@ -59,11 +59,13 @@ public class BearerTokenManager{
                     // Refresh the connection to Messaging API using the updated bearer token
                     MessagingClient.getInstance().resetMessagingConnection();
                 }
+                hayStack.updateJwtValidity();
             }
             
             @Override
             public void onFailure(Call<BearerToken> call, Throwable throwable) {
                 System.out.println(throwable);
+                hayStack.updateJwtValidity();
             }
         });
     }

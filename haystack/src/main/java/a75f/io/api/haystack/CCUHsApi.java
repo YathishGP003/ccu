@@ -1,10 +1,11 @@
 package a75f.io.api.haystack;
 
+import static android.widget.Toast.LENGTH_LONG;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -46,7 +47,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncResponse;
@@ -54,16 +54,16 @@ import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
-import a75f.io.api.haystack.sync.SyncWorker;
+import a75f.io.api.haystack.util.JwtValidationException;
+import a75f.io.api.haystack.util.JwtValidator;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.api.haystack.util.StringUtil;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-
-import static android.widget.Toast.LENGTH_LONG;
 
 
 public class CCUHsApi
@@ -72,7 +72,6 @@ public class CCUHsApi
     public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
-    public static boolean IS_AUTHORISED = true;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
 
@@ -96,6 +95,8 @@ public class CCUHsApi
     
     private volatile boolean isCcuReady = false;
     private long appAliveMinutes = 0;
+
+    public Boolean isAuthorized = false;
     
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -124,6 +125,7 @@ public class CCUHsApi
         syncManager = new SyncManager(context);
 
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
+        updateJwtValidity();
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -192,6 +194,7 @@ public class CCUHsApi
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", jwtToken);
         editor.commit();
+        updateJwtValidity();
     }
 
 
@@ -2521,16 +2524,9 @@ public class CCUHsApi
         }
         return true;
     }
-    public void setAuthorised(boolean isAuthorised) {
-        IS_AUTHORISED = isAuthorised;
-    }
 
     public boolean getAuthorised(){
-        if (!IS_AUTHORISED) {
-            CcuLog.e("CCU_HTTP_REQUEST", "Not Authenticated with 75F Cloud. Token: " + getJwt());
-        }
-
-        return IS_AUTHORISED;
+        return isAuthorized;
     }
 
     public void updateTimeZoneInBackground(String tz) {
@@ -2576,6 +2572,30 @@ public class CCUHsApi
         HDict[] dictArr = {b.toDict()};
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+    }
+
+    /**
+     * Currently updates validity only in terms of expiry.
+     * This should be called after every token refresh to update the cached variable isAuthorized.
+     * @return
+     */
+    public void updateJwtValidity() {
+        String tokenString = getJwt();
+        if (StringUtils.isNotEmpty(tokenString)) {
+            try {
+                JwtValidator jwt = new JwtValidator(tokenString);
+                isAuthorized = jwt.isValid();
+            } catch (JwtValidationException e) {
+                e.printStackTrace();
+                CcuLog.e(TAG, "Failed to validate Jwt", e);
+                isAuthorized = true; //Failure to decode token will be considered as "authorized" to
+                //reduce business risk.
+            }
+        } else {
+            isAuthorized = false;
+            CcuLog.e(TAG, "updateJwtValidity : Token does not exist");
+        }
+        CcuLog.i(TAG, "updateJwtValidity : "+isAuthorized);
     }
 
 }

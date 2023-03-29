@@ -1,5 +1,7 @@
 package a75f.io.logic.pubnub;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -8,6 +10,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Input;
+import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageEquipUtil;
 
 class SSEConfigHandler {
@@ -23,6 +27,9 @@ class SSEConfigHandler {
         } else if (configPoint.getMarkers().contains(Tags.TH1)
                     || configPoint.getMarkers().contains(Tags.TH2)) {
             SingleStageEquipUtil.updateThermistorConfig( val, configPoint);
+        } else if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
+            InputActuatorType inputActuatorType = InputActuatorType.getEnum(String.valueOf(val));
+            SingleStageEquipUtil.updateAnalogIn1Config(inputActuatorType, configPoint, true);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
         

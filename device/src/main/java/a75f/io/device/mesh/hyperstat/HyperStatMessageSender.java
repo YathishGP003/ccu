@@ -182,7 +182,16 @@ public class HyperStatMessageSender {
         
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
-    
+
+    public static void sendIduSeedSetting(String zone, int address, String equipRef, boolean checkDuplicate){
+        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatIduMessageHandler.getIduSeedMessage(zone, address, equipRef);
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
+            CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
+        }
+
+        writeSeedMessage(seedMessage, address, checkDuplicate);
+    }
     private static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
         Log.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
         HyperStatSettingsUtil.Companion.setCcuControlMessageTimer(System.currentTimeMillis());

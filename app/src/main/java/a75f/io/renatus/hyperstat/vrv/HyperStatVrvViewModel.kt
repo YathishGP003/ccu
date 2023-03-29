@@ -1,6 +1,7 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode.getConfigNumVal
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.vrv.VrvMasterController
@@ -97,6 +98,9 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
                 floorRef
             )
             L.ccu().zoneProfiles.add(vrvProfile)
+            LSerial.getInstance().sendHyperStatSeedMessage(
+                nodeAddr, roomRef, floorRef,true
+            )
         }
     }
 
@@ -157,7 +161,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     ): Array<String?> {
 
         val range = max - min
-        val count =   (range / inc).toInt() + 1;
+        val count =   (range / inc).toInt() + 1
         val offsetFromZeroCount = (min / inc).toInt()
 
         val nums = arrayOfNulls<String>(count)

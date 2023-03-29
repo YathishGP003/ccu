@@ -68,7 +68,7 @@ class AlertsRepository(
    }
 
    fun fetchAlertsDefinitions() {
-      if (! haystack.siteSynced()) {
+      if (!haystack.siteSynced() || !haystack.authorised) {
          return
       }
       val siteId = haystack.siteIdRef.toVal()
@@ -107,6 +107,10 @@ class AlertsRepository(
    fun getActiveDeviceDeadAlerts() = dataStore.getActiveDeviceDeadAlerts()
 
    fun getUnsyncedAlerts() = dataStore.getUnSyncedAlerts()
+
+   fun getActiveSafeModeAlert() = dataStore.getActiveSafeModeAlert()
+
+   fun getActiveCrashAlert() = dataStore.getActiveCrashAlert()
 
    /**
     * @return Looks like this returns all alerts with severity not equal to an INTERNAL status
@@ -188,7 +192,7 @@ class AlertsRepository(
       if (dataStore.getActiveCMDeadAlerts().isNotEmpty()) {
          return
       }
-      generateAlert(title, msg ?: ""," ")
+      generateAlert(title, msg ?: "","")
    }
 
 
@@ -326,5 +330,9 @@ class AlertsRepository(
 
    fun close() {
       fetchDisposable?.dispose()
+   }
+
+   fun generateCrashAlertWithMessage(title: String, msg: String?) {
+      generateAlert(title, msg ?: "","")
    }
 }

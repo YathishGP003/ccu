@@ -187,6 +187,10 @@ public class SyncWorker extends Worker {
         ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
         for (String id : syncedIds) {
             syncStatusService.setEntitySynced(id);
+            //Covers a corner case where are item gets removed from local database while waiting for response from addEntity
+            if (CCUHsApi.getInstance().readMapById(id).isEmpty()) {
+                syncStatusService.addDeletedEntity(id, false);
+            }
         }
         syncStatusService.saveSyncStatus();
         

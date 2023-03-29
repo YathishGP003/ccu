@@ -38,7 +38,7 @@ class AlertsDataStore @JvmOverloads constructor(
 
    // All internal alert types that are triggered by events that have no resolution conditions
    // Alert occurrences created for these types will be auto-fixed after 1 hour
-   private var eventAlertDefs = arrayOf(CCU_RESTART, CM_RESET, DEVICE_REBOOT, DEVICE_RESTART)
+   private var eventAlertDefs = arrayOf(CCU_RESTART, CM_RESET, DEVICE_REBOOT, DEVICE_RESTART,CCU_CRASH)
 
 
    fun clearAlert(alert: Alert) {
@@ -184,7 +184,8 @@ class AlertsDataStore @JvmOverloads constructor(
    fun addAlertIfUnique(alert: Alert) {
       for (a in getActiveAlerts()) {
          // We do not allow adding alerts if there is already an active alert of the same type (title) and same equip (same test/requirement as on server)
-         if (a.mTitle == alert.mTitle && a.equipId == alert.equipId) {
+         // CCU Crash alert can be added if there is an existing crash alert.
+         if (a.mTitle == alert.mTitle && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH") {
             return
          }
       }
@@ -193,5 +194,22 @@ class AlertsDataStore @JvmOverloads constructor(
 
    fun updateAlert(alert: Alert) {
       alertBox.put(alert)
+   }
+
+   fun getActiveSafeModeAlert(): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle, "CCU IN SAFE MODE")
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+
+   fun getActiveCrashAlert(): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle, "CCU CRASH")
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
    }
 }

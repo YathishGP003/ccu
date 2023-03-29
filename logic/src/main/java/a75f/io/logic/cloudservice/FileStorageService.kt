@@ -1,6 +1,7 @@
 package a75f.io.logic.cloudservice
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.cloud.RenatusServicesEnvironment
 import okhttp3.Interceptor
 import okhttp3.MultipartBody
@@ -43,12 +44,10 @@ interface FileStorageService {
  * but more generally we might use this for all our networking.  Then, this could
  * be recreated right from RenatusServicesEnvironment.
  */
-class ServiceGenerator(
-   ccuHsApi: CCUHsApi
-) {
+class ServiceGenerator {
 
    private val retrofit: Retrofit =
-      createRetrofit(ccuHsApi.jwt)
+      createRetrofit()
 
 
    fun provideFileStorageService(): FileStorageService =
@@ -58,7 +57,7 @@ class ServiceGenerator(
    /**
     * This client has generous timeout periods set to help large log file uploads.
     */
-   private fun createRetrofit(token: String): Retrofit {
+   private fun createRetrofit(): Retrofit {
       val okhttpLogging = HttpLoggingInterceptor().apply {
          level = HttpLoggingInterceptor.Level.HEADERS
       }
@@ -69,13 +68,31 @@ class ServiceGenerator(
       val okHttpClient = OkHttpClient.Builder().apply {
          addInterceptor(
             Interceptor { chain ->
+               val bearerToken = CCUHsApi.getInstance().jwt
+
                val builder = chain.request().newBuilder()
-               builder.header("Authorization", "Bearer $token")
+               builder.header("Authorization", "Bearer $bearerToken")
                builder.header("Accept-Encoding", "gzip, deflate, br")
+
+               CcuLog.d("CCU_HTTP_REQUEST", "FileBackupService: [" + chain.request().method + "] " + chain.request().url + " - Token: " + bearerToken);
+
                return@Interceptor chain.proceed(builder.build())
             }
          )
          addInterceptor(okhttpLogging)
+         addInterceptor(
+               Interceptor { chain ->
+                   val request = chain.request()
+                   val response = chain.proceed(request)
+
+                   CcuLog.d("CCU_HTTP_RESPONSE", "FileBackupService: ${response.code} - [${request.method}] ${request.url}")
+
+                   if (response.code == 401) {
+                       CCUHsApi.getInstance().authorised = false
+                   }
+                   response
+               }
+         )
          connectTimeout(60, TimeUnit.SECONDS)
          readTimeout(60, TimeUnit.SECONDS)
          writeTimeout(60, TimeUnit.SECONDS)

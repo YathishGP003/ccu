@@ -445,7 +445,11 @@ public class FloorPlanFragment extends Fragment {
         for (Floor f : floorList) {
             ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
             for (Zone zone : zoneList) {
-                siteRoomList.add(zone.getDisplayName());
+                if(zone.getDisplayName() != null) {
+                    siteRoomList.add(zone.getDisplayName());
+                }else {
+                    Log.d(L.TAG_CCU_UI, "Zone name is null. Floor: " + f + ", Zone: "+zone.getHDict());
+                }
             }
         }
     }
@@ -633,7 +637,7 @@ public class FloorPlanFragment extends Fragment {
         rl_oao.setVisibility(View.VISIBLE);
         rl_modbus_energy_meter.setVisibility(View.VISIBLE);
         rl_modbus_btu_meter.setVisibility(View.VISIBLE);
-
+        addZonelt.setVisibility(View.GONE); // we are not showing 'add zone+' here.
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {
@@ -875,6 +879,7 @@ public class FloorPlanFragment extends Fragment {
 
     private void addRenamedFloor(){
         if (floorToRename != null) {
+            int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
             floorList.remove(floorToRename);
             siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName().trim()));
             Floor hsFloor = new Floor.Builder()
@@ -951,11 +956,15 @@ public class FloorPlanFragment extends Fragment {
             L.saveCCUState();
             CCUHsApi.getInstance().syncEntityTree();
             siteFloorList.add(hsFloor);
+            if(this.floorList.size() == 0 || floorSelectedIndex == -1){
+                this.systemDeviceOnClick();
+            }
         }
     }
 
     private void addNewFloor(){
         if (addFloorEdit.getText().toString().length() > 0) {
+            int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
             ArrayList<String> flrMarkers = new ArrayList<>();
             flrMarkers.add("writable");
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -1006,6 +1015,9 @@ public class FloorPlanFragment extends Fragment {
             Toast.makeText(getActivity().getApplicationContext(),
                     "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
             siteFloorList.add(hsFloor);
+            if(this.floorList.size() == 0 || floorSelectedIndex == -1){
+                this.systemDeviceOnClick();
+            }
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
         }
@@ -1128,10 +1140,9 @@ public class FloorPlanFragment extends Fragment {
     public boolean handleRoomChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             int maxZoneNameLength = 24;
-
             if (roomToRename != null) {
                 for (String z : siteRoomList) {
-                    if (z.equals(addRoomEdit.getText().toString().trim())) {
+                   if (z.equals(addRoomEdit.getText().toString().trim())) {
                         Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
                         return true;
                     }

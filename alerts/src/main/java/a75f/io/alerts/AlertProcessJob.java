@@ -3,7 +3,10 @@ package a75f.io.alerts;
 import android.content.Context;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 
@@ -33,10 +36,26 @@ public class AlertProcessJob
     public void doJob()
     {
         CcuLog.d(TAG, "AlertProcessJob -> ");
+
+
+        double isSafeMode = CCUHsApi.getInstance().readHisValByQuery("point and safe and mode and diag and his");
+        boolean isSafeModeAlertActive = false;
+
+        if(isSafeMode == 1){
+            List<Alert> allAlertList = AlertManager.getInstance().getActiveAlerts();
+            isSafeModeAlertActive = allAlertList.stream().anyMatch(alert -> Objects.equals(alert.mTitle, "CCU IN SAFE MODE"));
+        }
         
         if (!CCUHsApi.getInstance().isCcuReady()) {
-            CcuLog.d(TAG, "CCU not ready! <-AlertProcessJob ");
-            return;
+            if(isSafeMode == 1) {
+                if (isSafeModeAlertActive){
+                    CcuLog.d(TAG, "CCU not ready! <-AlertProcessJob ");
+                    return;
+                }
+            }else {
+                CcuLog.d(TAG, "CCU not ready! <-AlertProcessJob ");
+                return;
+            }
         }
         HashMap site = CCUHsApi.getInstance().read("site");
     
@@ -52,20 +71,9 @@ public class AlertProcessJob
         try
         {
             AlertManager alertManager = AlertManager.getInstance();
-            // We may need to initialize alerts service here (via AlertManager) if this is the first
-            // alerts sync after registration.
-            if (!alertManager.hasService()) {
-                String token = CCUHsApi.getInstance().getJwt();
-                if (token.isEmpty()) {
-                    CcuLog.w(TAG, "AlertProcessJob:  Site exists but token is empty");
-                    return;
-                }
-                alertManager.rebuildServiceNewToken(token);
-            }
-
+            alertManager.fetchPredefinedAlertsIfEmpty();
             alertManager.processAlerts();
-
-        }catch (Exception e) {
+        } catch (Exception e) {
             CcuLog.w(TAG, "AlertProcessJob Exception: " + e.getMessage(), e);
             e.printStackTrace();
         }

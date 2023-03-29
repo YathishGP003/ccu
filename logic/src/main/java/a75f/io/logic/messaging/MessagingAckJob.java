@@ -7,18 +7,15 @@ import java.util.Set;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.util.ConnectionUtil;
 
 public class MessagingAckJob {
     private final String ccuId;
     private final MessagingService messagingService;
 
-    private int emptyMessageWatchdogCounter;
-
-    public MessagingAckJob(String ccuId, String messagingUrl, String bearerToken) {
+    public MessagingAckJob(String ccuId, String messagingUrl) {
         this.ccuId = ccuId;
 
-        this.messagingService = new ServiceGenerator().createService(messagingUrl, bearerToken);
+        this.messagingService = new ServiceGenerator().createService(messagingUrl);
     }
 
     public Runnable getJobRunnable()
@@ -48,16 +45,10 @@ public class MessagingAckJob {
 
         Map<String, Set<String>> channelsToMessageIds = MessagingClient.getInstance().pollMessageIdsToAck();
         if (channelsToMessageIds.isEmpty()) {
-            emptyMessageWatchdogCounter++;
-            int EMPTY_MESSAGE_WATCHDOG_TIMEOUT_MINUTES = 60;
-            if (emptyMessageWatchdogCounter > EMPTY_MESSAGE_WATCHDOG_TIMEOUT_MINUTES) {
-                CcuLog.d(L.TAG_CCU_MESSAGING, "Message Job : Empty Message Watch dog bite , reset connection");
-                MessagingClient.getInstance().resetMessagingConnection();
-                emptyMessageWatchdogCounter = 0;
-            }
+            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job exited. No messages to ACK.");
             return;
         }
-        emptyMessageWatchdogCounter = 0;
+
         if (CCUHsApi.getInstance().getAuthorised()) {
             channelsToMessageIds.forEach((channel, messageIds) ->
             {

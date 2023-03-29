@@ -30,7 +30,7 @@ class UploadLogs(
          val haystackApi = CCUHsApi.getInstance()
 
          val fileSystemTools = FileSystemTools(appContext)
-         val fileStorageService = ServiceGenerator(haystackApi).provideFileStorageService()
+         val fileStorageService = ServiceGenerator().provideFileStorageService()
          val fileStorageManager = RemoteFileStorageManager(fileStorageService)
 
          return UploadLogs(fileSystemTools, fileStorageManager, haystackApi)

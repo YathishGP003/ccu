@@ -13,9 +13,13 @@ import android.graphics.Typeface;
 import androidx.core.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.lang.reflect.InvocationTargetException;
+
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.BitmapUtil;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -88,22 +92,21 @@ public class OaoArc extends View {
     private Paint heartBeatSignal;
     public OaoArc(Context context) {
         super(context);
-        init(context, null);
+        callInit(context, null);
     }
 
     public OaoArc(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        callInit(context, attrs);
     }
 
     public OaoArc(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context, attrs);
+        callInit(context, attrs);
     }
 
-    private void init(Context context, AttributeSet attrs) {
-
-        Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
+    private void init(Context context, AttributeSet attrs) throws InvocationTargetException {
+        Typeface latoLightFont = Typeface.create("sans-serif-light", Typeface.NORMAL);
         final Resources res = getResources();
         float density = context.getResources().getDisplayMetrics().density;
 
@@ -237,7 +240,6 @@ public class OaoArc extends View {
     }
 
     private void drawInitText(Canvas canvas) {
-
         float yPos = getHeight();  // baseline
 
         canvas.drawText("0 PPM", 0, yPos - 70, mTextPaint);
@@ -246,7 +248,6 @@ public class OaoArc extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         final int height = getDefaultSize(getSuggestedMinimumHeight(),
                 heightMeasureSpec);
         final int width = getDefaultSize(getSuggestedMinimumWidth(),
@@ -290,7 +291,6 @@ public class OaoArc extends View {
     }
 
     private void updateProgress(int progress, boolean fromUser) {
-
         if (progress == INVALID_PROGRESS_VALUE) {
             return;
         }
@@ -374,5 +374,16 @@ public class OaoArc extends View {
             heartBeatSignal.setColor(Color.parseColor("#999999"));
         }
 
+    }
+
+    private void callInit(Context context, AttributeSet attrs){
+        try{
+            init(context, attrs);
+        }catch (InvocationTargetException e){
+            // It will throw the exception when invoke the method that wraps around with InvocationTargetException
+            // Here we are using e.getCause - which returns the cause of this exception.
+            Log.d(L.TAG_CCU_UI,"Problem in init method: "+e.getCause());
+            e.printStackTrace();
+        }
     }
 }

@@ -125,7 +125,9 @@ public class SingleStageProfile extends ZoneProfile
             double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
             String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
+            boolean autoForceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOFORCEOCCUPIED);
+            boolean forceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.FORCEDOCCUPIED);
             String stageStatus = "";
             Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
             if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
@@ -140,7 +142,7 @@ public class SingleStageProfile extends ZoneProfile
                     }
                 } else if (roomTemp <= setTempCooling - hysteresis) {
                     setCmdSignal("cooling and stage1", 0, (short) sseEquip.nodeAddr);
-                    if ((relay2config > 0) && occupied) {
+                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
                         stageStatus = "Fan ON";
                         setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                     } else
@@ -166,7 +168,7 @@ public class SingleStageProfile extends ZoneProfile
                     }
                 } else if (roomTemp >= (setTempHeating + hysteresis)) {
                     setCmdSignal("heating and stage1", 0, (short) sseEquip.nodeAddr);
-                    if ((relay2config > 0) && occupied) {
+                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
                         stageStatus = "Fan ON";
                         setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                     } else
@@ -240,7 +242,7 @@ public class SingleStageProfile extends ZoneProfile
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + sseEquip.nodeAddr + "\"")).build();
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
-        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId);
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
         String stageStatus = "";
 
         if ((relay2config > 0) && occupied) {
@@ -250,4 +252,9 @@ public class SingleStageProfile extends ZoneProfile
             setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
         return stageStatus;
     }
+
+    private boolean isOccupied(boolean occupied, boolean forceOccupied, boolean autoForceOccupied) {
+        return occupied || autoForceOccupied || forceOccupied;
+    }
+
 }

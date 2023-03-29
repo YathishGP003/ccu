@@ -57,15 +57,21 @@ public class PreferenceUtil {
 
     private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
 
+    private static final String SAFE_MODE_DIAG = "safeModeDiag";
+
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
 
+    private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
+
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
+
+    private static final String KIND_CORRECTION ="Kind_Correction";
 
     public static void setContext(Context c) {
         context= c;
@@ -534,6 +540,14 @@ public class PreferenceUtil {
         setBooleanPreference(TI_PROFILE_MIGRATION, true);
     }
 
+    public static boolean getDabReheatStage2Migration() {
+        return getBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION);
+    }
+
+    public static void setDabReheatStage2Migration() {
+        setBooleanPreference(DAB_REHEAT_STAGE2_FIX_MIGRATION, true);
+    }
+
     public static boolean getStandaloneHeatingOffsetMigration() {
         return getBooleanPreference(STANDALONE_HEATING_OFFSET);
     }
@@ -565,11 +579,28 @@ public class PreferenceUtil {
         setBooleanPreference(STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, true);
     }
 
+    public static boolean getSafeModeMigration() {
+        return getBooleanPreference(SAFE_MODE_DIAG);
+    }
+
+    public static void setSafeModeMigration() {
+        setBooleanPreference(SAFE_MODE_DIAG,true);
+    }
+
     public static boolean getAutoForcedTagNameCorrectionMigration() {
         return getBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION);
     }
 
     public static void setAutoForcedTagNameCorrectionMigration() {
         setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
+    }
+
+
+    public static boolean getKindCorrectionMigration() {
+        return getBooleanPreference(KIND_CORRECTION);
+    }
+
+    public static void setKindCorrectionMigration() {
+        setBooleanPreference(KIND_CORRECTION, true);
     }
 }

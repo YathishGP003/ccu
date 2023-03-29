@@ -41,7 +41,7 @@ public class AlertSyncHandler
 
         // We are not doing anything with these rx disposables, but we could...
         AlertsService alertService = AlertManager.getInstance().getAlertsService();
-        if (! CCUHsApi.getInstance().siteSynced()) {
+        if (!CCUHsApi.getInstance().siteSynced() || !CCUHsApi.getInstance().getAuthorised()) {
             return;
         }
         String siteId = CCUHsApi.getInstance().getSiteIdRef().val;

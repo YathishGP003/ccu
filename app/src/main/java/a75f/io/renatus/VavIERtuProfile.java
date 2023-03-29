@@ -101,17 +101,18 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_rtuie, container, false);
-        ButterKnife.bind(this, rootView);
-        if(getArguments() != null) {
-            isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
-        }
-        btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
+
         return rootView;
     }
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+        ButterKnife.bind(this, view);
+        if(getArguments() != null) {
+            isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+        }
+        btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         prefs = new Prefs(getContext().getApplicationContext());
         if ((L.ccu().systemProfile instanceof VavIERtu))
         {

@@ -1,3 +1,32 @@
+ - Merged PR 6480: 16044 - Safe mode screen
+ - Merged PR 6933: Fix tuner group name display
+ - Merged PR 6714: Relay2 reheat config mapping
+ - Merged PR 6821: Sync issue race condition
+ - Merge master
+ - Merged PR 6895: Called scheduleSync() to schedule sync in 30sec
+ - Merged PR 6580: US - 16064
+ - Merged PR 6896: 18179 17552 Run Fan stages only when we have conditioning
+ - Merged PR 5120: Bug 14037: CCU : Zone desired temperatures are showing the just expired special schedule temperature once the zone enters setback
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath_14037_Zone_desired_temp
+ - Merged PR 6778: 17385 Damper actuator type fix
+ - Merged PR 6590: Bug 14110: CCU | UI |Desired Temperature TEXT is Superimposed when deadband i...
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 14110/bug_bharath_ui_superimpose_desired_temp
+ - Merged PR 6834: 18200 - resolved UI - zone merge issue
+ - Merged PR 6584: - 16073
+ - Introduced a progress dialog when DCWB config changes
+ - Merged PR 6761: 17034 - Fix to restore modbus modules
+ - Merged PR 6912: output text does not consider the unit of the input value.
+ - Merged PR 6812: 18104 - Issues with restoring setting points resolved
+ - Merged PR 6691: 17817 - Humidity Number Format Issue
+ - output text does not consider the unit of the input value.
+ - Added logs and remove scheduleSync
+ - Merged PR 6819: - Auto forced tag name correction: `occupancy` to 'occupied'
+ - Merged PR 6495: Bug 13402: CCU | 'Intrinsic Schedule' tiles discrepancy seen on CCU's system...
+ - Sync issue race condition
+ - Merged PR 6811: Version Bump to 1.638.0
+ - Merged PR 6461: Separate option to pair helionode
+ - Migration support for Stage2- dab reheat
+ - Version bump to 1.637.0
  - Merged PR 6227: US - 16066
  - Merged PR 6523: Dab reheat AO2 reset
  - Reset AO2 out when logical map does not exist
@@ -5,6 +34,8 @@
  - Merged PR 5422: CFM toggle discrepancy issue is resolved.
  - Merged PR 5972: Bug 13444: CCU : Celsius conversions across multiple CCU's should happen dyna...
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13444_multiple_ccu_sync
+ - different overlap constant has been considered for Zone schedule and Building Schedule
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 14110/bug_bharath_ui_superimpose_desired_temp
  - Merged PR 6733: Discrepancy in temp lockout cooling/heating dropdowns
  - Merged PR 6051: Bug 15029: CCU-User intent changes from portal not getting reflected in CCU(a...
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharaty/15029/SS_CPU_update
@@ -12,6 +43,8 @@
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/16977/standalonecoolingairflow_tuner_ui
  - Merged PR 6726: Resolved Overnight schedule issue
  - Merged PR 6448: Bug 10170: Alerts: Constant current Temp alert Notification message shows the...
+ - Zone not showing upcoming desired temp instead showing expired desired temp issue resolved for emergency conditioning
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath_14037_Zone_desired_temp
  - Merged PR 6228: Bug 16781: CCU: Multiple UI/UX issues seen on Zone screen for different devic...
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 16781/bug/multiple_ui_issues
  - Merged PR 6667: Runtime Tag correction
@@ -22,6 +55,7 @@
  - Merged PR 6624: Handled fan mode update on Reconfiguration
  - Merged PR 6529: Bug 15316: Unable to Change Pairing Address After Deleting All Equips
  - Merged PR 6553: System data not loading on heatmap
+ - when the dead is lesser than 2, the selection rects are going to overlap because of which both isCoolingPressed and isHeatingPressed is going to be selected and hence there will be overlap of text, this is one way to make sure only one of the two is selected at given point.
  - moved the method to setListeners.
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharaty/15029/SS_CPU_update
  - Sync across multple CCU with the use of invalidate method for the grid layout
@@ -32,6 +66,7 @@
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/bharath/13444_multiple_ccu_sync
  - Merged PR 6601: calling notifyDataSetChanged() only when we are adding new device to the list.
  - Google API key removal for VAPT
+ - Relay2 reheat config mapping
  - Reset AO2 when not in temp override
  - Reset output on disabled port
  - Merged PR 6492: Exclude deadzones without heartbeat from algo
@@ -44,6 +79,7 @@
  - Merged PR 6596: Remove corrupted named schedules
  - Rmove corrupted named schedules
  - Merged PR 6588: Loading schedule issue
+ - Bug 14110: CCU | UI |Desired Temperature TEXT is Superimposed when deadband is minimum.
  - Merged PR 6541: Aux stage 1  and stage 2 tuners fix
  - Version bump to 1.635.0
  - Merged PR 6519: Tag correction- BPOS to OTN
@@ -60,6 +96,7 @@
  - Vacation schedule not needed for energy meter and modbus devices
  - Merged PR 6509: 2pipe water valve issue
  - Merged PR 5966: With end time as 24:00 schedule,manually updated desired temperature fix
+ - Fix tuner group name display
  - Merged PR 6429: Conditioning mode operations defined
  - Merged PR 6428: Pull Request 5852: User Story 15159: Modify Tuner Parameters - Min/Max/Defaul...
  - merge master
@@ -70,6 +107,7 @@
  - Merged PR 6290: Bug 16984: Device dead alerts not working for Hyperstat zones
  - Merged PR 5851: Bug 15703: CCU Crash when clicked on staticPressureSPTrim tuner
  - Merged PR 6385: operating mode in hyperstat control message
+ - Bug 13402: CCU | 'Intrinsic Schedule' tiles discrepancy seen on CCU's system Page
  - Merged PR 6394: uncommented setting username for raygun
  - Merged PR 4507: Hide lastUpdated and scheduleType before registration in system screen
  - Merged PR 6382: 15207 CCU: Named Schedule Discrepancy, zone not following correct scheduleType
@@ -355,10 +393,10 @@
  - Version bump to 1.640.0
  - Version bump to 1.639.0
  - Version bump to 1.638.0
- - Version bump to 1.637.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Bug 14037: CCU : Zone desired temperatures are showing the just expired special schedule temperature once the zone enters setback
  - Remove vacation check for triggering AutoForcedOccupied
  - WIP
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu

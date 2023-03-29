@@ -45,11 +45,6 @@ public class CloudConnectionManager {
                         okhttp3.Response response = chain.proceed(request);
 
                         CcuLog.d("CCU_HTTP_RESPONSE", "CloudConnectionManager: " + response.code() + " - [" + request.method() + "] " + request.url());
-
-                        if (response.code() == 401) {
-                            CCUHsApi.getInstance().setAuthorised(false);
-                        }
-
                         return response;
                  })
                 .connectTimeout(50, TimeUnit.SECONDS)

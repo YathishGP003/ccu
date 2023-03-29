@@ -36,11 +36,6 @@ class CaretakerServiceGenerator {
                                           Response response = chain.proceed(request);
 
                                           CcuLog.d("CCU_HTTP_RESPONSE", "CaretakerService: " + response.code() + " - [" + request.method() + "] " + request.url());
-
-                                          if (response.code() == 401) {
-                                              CCUHsApi.getInstance().setAuthorised(false);
-                                          }
-
                                           return response;
                                       })
                                       .build();

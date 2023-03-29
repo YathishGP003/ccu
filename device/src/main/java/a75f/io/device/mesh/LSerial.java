@@ -442,15 +442,19 @@ public class LSerial
         }
     }
     
-    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef) {
+    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef, boolean isVRV) {
         if (isConnected()) {
             isNodeSeeding = true;
             CcuLog.d(L.TAG_CCU_DEVICE,
                      "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
             Device d = HSUtil.getDevice(addr);
             Zone zone = HSUtil.getZone(roomRef, floorRef);
-            HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                   d.getEquipRef(), false);
+            if (isVRV){
+                HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                        d.getEquipRef(), false);
+            } else {
+                HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false);
+            }
             LSerial.getInstance().setNodeSeeding(false);
         }
     }

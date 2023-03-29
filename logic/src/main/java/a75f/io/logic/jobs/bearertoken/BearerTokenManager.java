@@ -7,11 +7,11 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
-import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.messaging.MessagingClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,7 +32,6 @@ public class BearerTokenManager{
     }
     
     public void scheduleJob() {
-        
         Context appContext = Globals.getInstance().getApplicationContext();
         AlarmManager alarmMgr = (AlarmManager)appContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(appContext, BearerTokenManagerService.class);
@@ -43,8 +42,9 @@ public class BearerTokenManager{
     }
     
     public void fetchToken(CCUHsApi hayStack) {
+        String bearerToken = hayStack.getJwt();
         
-        CaretakerService service = CaretakerServiceGenerator.createService(CaretakerService.class, hayStack.getJwt());
+        CaretakerService service = CaretakerServiceGenerator.createService(CaretakerService.class, bearerToken);
         Call<BearerToken> callAsync = service.getAccessToken(hayStack.getCcuId());
         
         callAsync.enqueue(new Callback<BearerToken>() {
@@ -55,18 +55,18 @@ public class BearerTokenManager{
                     BearerToken token = response.body();
                     CcuLog.d(L.TAG_CCU_JOB, "BearerTokenManagerService: Set new token " + token.getAccessToken());
                     hayStack.setJwt(token.getAccessToken());
-                    refreshServices(token);
+
+                    // Refresh the connection to Messaging API using the updated bearer token
+                    MessagingClient.getInstance().resetMessagingConnection();
                 }
+                hayStack.updateJwtValidity();
             }
             
             @Override
             public void onFailure(Call<BearerToken> call, Throwable throwable) {
                 System.out.println(throwable);
+                hayStack.updateJwtValidity();
             }
         });
-    }
-
-    private void refreshServices(BearerToken token) {
-        AlertManager.getInstance().rebuildServiceNewToken(token.getAccessToken());
     }
 }

@@ -482,7 +482,7 @@ class HyperStatFragment : BaseDialogFragment() {
                         viewModel.setConfigSelected()
                         CCUHsApi.getInstance().setCcuReady()
                         LSerial.getInstance().sendHyperStatSeedMessage(
-                            this.meshAddress, roomName, floorName
+                            this.meshAddress, roomName, floorName, false
                         )
                     }, {
                         ProgressDialogUtils.hideProgressDialog()

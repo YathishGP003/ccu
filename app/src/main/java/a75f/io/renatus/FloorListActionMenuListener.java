@@ -115,9 +115,13 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribe(
 					() -> {
+						int floorSelectedIndex = floorPlanActivity.mFloorListAdapter.getSelectedPostion();
 						selectedFloor.clear();
 						floorPlanActivity.refreshScreen();
 						floorPlanActivity.hideWait();
+						if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
+							floorPlanActivity.systemDeviceOnClick();
+						}
 					},
 					error -> {
 						Toast.makeText(floorPlanActivity.requireContext(),

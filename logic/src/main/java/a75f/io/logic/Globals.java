@@ -225,9 +225,8 @@ public class Globals {
         PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
 
-        // Start AlertManager whether or not token is empty
-        String token = CCUHsApi.getInstance().getJwt();
-        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl(), token);
+        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl())
+                .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band
         String addrBand = getSmartNodeBand();

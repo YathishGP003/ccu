@@ -68,7 +68,7 @@ class AlertsRepository(
    }
 
    fun fetchAlertsDefinitions() {
-      if (! haystack.siteSynced()) {
+      if (!haystack.siteSynced() || !haystack.authorised) {
          return
       }
       val siteId = haystack.siteIdRef.toVal()

@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
+import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
@@ -86,9 +87,8 @@ public class AlertsFragment extends Fragment
 				useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 				if (message.contains("\u00B0")) {
-					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
-						message = formatMessageToCelsius(message);
-					}
+					message = formatMessageToCelsius(message);
+
 				}
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				builder.setMessage(a.getmTitle() + "\n\n" + message + "\n"
@@ -145,24 +145,34 @@ public class AlertsFragment extends Fragment
 		
 	}
 
-	String formatMessageToCelsius(String alertMessage){
-		String reverse = StringUtils.reverse(alertMessage);
-		String[] temp = StringUtils.substringsBetween(reverse,"\u00B0 "," ");
-		for (String s : temp) {
-			try {
-				DecimalFormat f = new DecimalFormat("##.00");
-				String celsiusVal = String.valueOf(f.format(fahrenheitToCelsiusTwoDecimal(Float.valueOf(StringUtils.reverse(s)))));
-				Pattern fahrenheitVal = Pattern.compile(StringUtils.reverse(s));
-				Matcher tempVal = fahrenheitVal.matcher(alertMessage);
-				alertMessage = tempVal.replaceAll(celsiusVal);
-			} catch (Exception e) {
-				e.printStackTrace();
+	String formatMessageToCelsius(String alertMessage) {
+
+		StringBuilder sb = new StringBuilder();
+		String[] strings = null;
+		strings = alertMessage.split(" ");
+		try {
+			for (int i = 0; i < strings.length; i++) {
+				//"\u00B0" is the unicode for °
+				if (strings[i].contains("\u00B0")) {
+					if(useCelsius.containsKey("id") && MasterControlView.getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+						strings[i] = "\u00B0C";
+						strings[i - 1] = String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(strings[i - 1])));
+					} else {
+						DecimalFormat df = new DecimalFormat("#.#");
+						strings[i - 1] = String.valueOf(Double.parseDouble(df.format(Double.parseDouble(strings[i - 1]))));
+					}
+				}
 			}
+			for (String string : strings) {
+				sb.append(string);
+				sb.append(" ");
+			}
+		}catch (NumberFormatException e) {
+			e.printStackTrace();
+			CcuLog.e("CCU_ALERTS", "Failed to format units in alert message", e);
+			return alertMessage;
 		}
-		Pattern fahrenheitUnit = Pattern.compile("\u00B0F");
-		Matcher tempUnit = fahrenheitUnit.matcher(alertMessage);
-		alertMessage = tempUnit.replaceAll("\u00B0C");
-		return alertMessage;
+		return sb.toString();
 	}
 	
 	String getFormattedDate(long millis) {
@@ -192,10 +202,6 @@ public class AlertsFragment extends Fragment
 	}
 	private void setAlertList() {
 		alertList.clear();
-		AlertManager alertManager = AlertManager.getInstance();
-		if (!alertManager.hasService()) {
-			alertManager.rebuildServiceNewToken(CCUHsApi.getInstance().getJwt());
-		}
 		AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
 			if(alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
 		});

@@ -150,15 +150,15 @@ public class MeshNetwork extends DeviceNetwork
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
                                                               "SEEDS ===================== "+d.getAddr());
-                                    HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                                           d.getEquipRef(), false);
-                                    if (equip.getMarkers().contains("vrv") ){
-                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU " +
-                                                                   "Controls ===================== "+d.getAddr());
-                                        HyperStatMessageSender.sendIduSeedControlMessage(
-                                            Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
+                                    if (equip.getMarkers().contains("vrv")) {
+                                        CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU Controls ===================== "+d.getAddr());
+                                        HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false);
+                                        HyperStatMessageSender.sendIduSeedControlMessage(Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
+                                    } else {
+                                        HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                                                d.getEquipRef(), false);
                                     }
-                                } else{
+                                } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== "+d.getAddr());
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef());
 

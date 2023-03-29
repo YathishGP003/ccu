@@ -39,27 +39,27 @@ public class MessagingListener implements ServerSentEvent.Listener {
     private final String siteId;
     private final String ccuId;
     private final String messagingUrl;
-    private final String bearerToken;
 
     private MessagingService messagingService;
 
     @Inject DatabaseHelper messagingDbHelper;
     @Inject MessageHandlerService messageHandlerService;
-    public MessagingListener(String siteId, String ccuId, String messagingUrl, String bearerToken) {
+    public MessagingListener(String siteId, String ccuId, String messagingUrl) {
         super();
-
+        CcuLog.i(L.TAG_CCU_MESSAGING, "Constructed SSE Listener");
         this.siteId = siteId;
         this.ccuId = ccuId;
         this.messagingUrl = messagingUrl;
-        this.bearerToken = bearerToken;
     }
 
     @Override
     public void onOpen(ServerSentEvent sse, Response response) {
         CcuLog.i(L.TAG_CCU_MESSAGING, "SSE Connection Opened");
 
+        CcuLog.d("CCU_HTTP_RESPONSE", "MessagingClient: " + response.code() + " - [" + response.request().method() + "] " + response.request().url());
+
         if (messagingService == null) {
-            messagingService = new ServiceGenerator().createService(messagingUrl, bearerToken);
+            messagingService = new ServiceGenerator().createService(messagingUrl);
         }
 
         MessagingEntryPoint messagingDIEntryPoint =
@@ -107,7 +107,8 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public boolean onRetryError(ServerSentEvent sse, Throwable throwable, Response response) {
-        CcuLog.w(L.TAG_CCU_MESSAGING, "SSE connection error. Attempting to reconnect", throwable);
+        int responseCode = response != null ? response.code() : 0;
+        CcuLog.w(L.TAG_CCU_MESSAGING, "SSE connection error: [" + responseCode + "]. Attempting to reconnect", throwable);
         //We will simply request to retry here, assuming the error ie recoverable.
         return true;
     }

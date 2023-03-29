@@ -88,6 +88,7 @@ public class SplashActivity extends AppCompatActivity {
                                 Intent i;
                                 if(Globals.getInstance().isSafeMode()){
                                     i = new Intent(SplashActivity.this, SafeModeActivity.class);
+                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 }
                                 else if (recovery == 1) {
                                     i = new Intent(SplashActivity.this, RenatusEngineeringActivity.class);

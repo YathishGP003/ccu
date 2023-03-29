@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -383,11 +384,24 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         restoreCCU.getModbusSystemEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getZoneEquipsOfCCU(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
         restoreCCU.getOAOEquip(ccu.getCcuId(), ccu.getSiteCode(), deviceCount[0], equipResponseCallback);
-        HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
         L.saveCCUState();
-        int address = Integer.parseInt(pointMaps.get("val").toString());
-        L.ccu().setSmartNodeAddressBand((short)address);
-
+        HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
+        int pairingAddress = 1000;
+        if(!pointMaps.containsKey("val")){
+            ArrayList<HashMap<Object, Object>> devices = CCUHsApi.getInstance().readAllEntities("device and addr");
+            for(HashMap device : devices){
+                int devicePairingAddress  = Integer.parseInt(device.get("addr").toString());
+                if(devicePairingAddress > pairingAddress){
+                    pairingAddress = devicePairingAddress;
+                    break;
+                }
+            }
+            pairingAddress = (pairingAddress/100) * 100;
+        }
+        else {
+            pairingAddress = Integer.parseInt(pointMaps.get("val").toString());
+        }
+        L.ccu().setSmartNodeAddressBand((short) pairingAddress);
     }
 
     private void displayToastMessageOnRestoreSuccess(CCU ccu){

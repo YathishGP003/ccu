@@ -46,27 +46,11 @@ public class AlertManager
     /**
      * Call this when apiBase changes.  Token should not be null, so please include current token.
      */
-    public void setAlertsApiBase(String alertsApiBase, String token) {
+    public void setAlertsApiBase(String alertsApiBase) {
         this.baseUrl = alertsApiBase;
 
-        if (token != null & !token.isEmpty()) {
-            this.alertsService = ServiceGenerator.getInstance().createService(alertsApiBase, token);
-            String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
-            AlertProcessor processor = new AlertProcessor(appContext, ccuId, CCUHsApi.getInstance());
-            repo = new AlertsRepository(
-                    new AlertsDataStore(appContext),
-                    processor,
-                    alertsService,
-                    new AlertSyncHandler(alertsService),
-                    CCUHsApi.getInstance()
-            );
-        }
-    }
-
-    public void rebuildServiceNewToken(String token) {
-        this.alertsService = ServiceGenerator.getInstance().createService(baseUrl,token);
-        String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
-        AlertProcessor processor = new AlertProcessor(appContext, ccuId, CCUHsApi.getInstance());
+        this.alertsService = ServiceGenerator.getInstance().createService(alertsApiBase);
+        AlertProcessor processor = new AlertProcessor(appContext);
         repo = new AlertsRepository(
                 new AlertsDataStore(appContext),
                 processor,
@@ -86,19 +70,18 @@ public class AlertManager
      *
      * @param appContext     application context (android)
      * @param alertsApiBase  the base of the URL for alerts service, e.g. "http://192.168.0.122:8087"
-     * @param token         bearer token for authentication
      */
-    private AlertManager(Context appContext, String alertsApiBase, String token) {
+    private AlertManager(Context appContext, String alertsApiBase) {
         this.appContext = appContext;
-        setAlertsApiBase(alertsApiBase, token);
+        setAlertsApiBase(alertsApiBase);
     }
 
-    public static AlertManager getInstance(Context c, String alertsApiBase, String token) {
+    public static AlertManager getInstance(Context c, String alertsApiBase) {
         if (mInstance == null) {
-            mInstance = new AlertManager(c, alertsApiBase, token);
+            mInstance = new AlertManager(c, alertsApiBase);
         }
         if (!mInstance.hasService()) {
-            mInstance.setAlertsApiBase(alertsApiBase, token);
+            mInstance.setAlertsApiBase(alertsApiBase);
         }
         return mInstance;
     }

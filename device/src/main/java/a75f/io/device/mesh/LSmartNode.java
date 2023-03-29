@@ -227,7 +227,7 @@ public class LSmartNode
         if (equip.getMarkers().contains("dab")) {
             int damperConfig = hsApi.readDefaultVal("point and config and dab and damper and primary and type and group == \""+address+"\"").intValue();
             int damper2Config = hsApi.readDefaultVal("point and config and dab and damper and secondary and type and group == \""+address+"\"").intValue();
-            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
+            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue() - 1;
             setupDamperActuator(settings, damperConfig, damper2Config, reheatConfig, "dab");
         } else if (equip.getMarkers().contains("vav")) {
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();

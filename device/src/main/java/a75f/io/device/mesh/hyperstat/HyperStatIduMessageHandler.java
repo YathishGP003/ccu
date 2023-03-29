@@ -1,11 +1,16 @@
 package a75f.io.device.mesh.hyperstat;
 
+import static a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator.getSettingsMessage;
+
 import android.util.Log;
+
+import com.google.protobuf.ByteString;
 
 import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatIduControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatIduStatusMessage_t;
 import a75f.io.device.mesh.DLog;
@@ -38,11 +43,11 @@ class HyperStatIduMessageHandler {
         }
         
         //Temporary solution till response is implemented
-        /*if (msgCache.isControlsPendingResponse(nodeAddress)) {
+        if (msgCache.isControlsPendingResponse(nodeAddress)) {
             CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for " +
                                        ""+nodeAddress+" timer "+msgCache.getControlsPendingTimer(nodeAddress));
             return;
-        }*/
+        }
         
         setOperationMode(iduStatus.getOperationMode(), nodeAddress, hayStack);
         setFanSpeed(iduStatus.getFanSpeed(), nodeAddress, hayStack);
@@ -222,7 +227,21 @@ class HyperStatIduMessageHandler {
                                    .setMasterController(getMasterController(address, hayStack))
                                    .build();
     }
-    
+
+    public static HyperStat.HyperStatCcuDatabaseSeedMessage_t getIduSeedMessage(String zone, int address, String equipRef) {
+        HyperStat.HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
+        HyperStat.HyperStatIduControlsMessage_t hyperStatControlsMessage_t = HyperStatIduMessageHandler.getIduControlMessage(address, CCUHsApi.getInstance());
+
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatControlsMessage_t.toString());
+
+        HyperStat.HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStat.HyperStatCcuDatabaseSeedMessage_t.newBuilder()
+                .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
+                .setSerializedSettingsData(hyperStatSettingsMessage_t.toByteString())
+                .setSerializedControlsData(hyperStatControlsMessage_t.toByteString())
+                .build();
+        return seedMessage;
+    }
     
     private static int getOperationMode(int address, CCUHsApi hayStack) {
         return hayStack.readPointPriorityValByQuery("userIntent and operation and mode and group == \""+address+

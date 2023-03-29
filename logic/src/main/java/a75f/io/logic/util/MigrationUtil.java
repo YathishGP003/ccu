@@ -25,6 +25,7 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -347,7 +348,42 @@ public class MigrationUtil {
             PreferenceUtil.setAutoForcedTagNameCorrectionMigration();
         }
 
+
+        if (!PreferenceUtil.getKindCorrectionMigration()) {
+            updateKind(CCUHsApi.getInstance());
+            PreferenceUtil.setKindCorrectionMigration();
+        }
+
         L.saveCCUState();
+    }
+
+    private static void updateKind(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");
+
+
+        for (HashMap<Object, Object> hyperstatEquip :
+                hyperstatEquips) {
+            String equipRef = hyperstatEquip.get(Tags.ID).toString();
+            ArrayList<HashMap<Object, Object>> statusMessages = ccuHsApi.readAllEntities("(status or scheduleStatus) and message and equipRef == \"" + equipRef + "\"");
+            for (HashMap<Object, Object> statusMessage : statusMessages) {
+                if ((Kind.NUMBER.getValue()).equals(statusMessage.get(Tags.KIND).toString())) {
+                    Point updatedPoint = new Point.Builder().setHashMap(statusMessage).setKind(Kind.STRING).build();
+                    ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
+                }
+            }
+
+
+            ArrayList<HashMap<Object, Object>> scheduleTypes = ccuHsApi.readAllEntities("scheduleType and message and equipRef == \"" + equipRef + "\"");
+            for (HashMap<Object, Object> scheduleType : scheduleTypes) {
+                Point updatedPoint = new Point.Builder().setHashMap(scheduleType).removeMarker(Tags.MESSAGE).build();
+                ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
+
+            }
+
+
+        }
+
+        ccuHsApi.scheduleSync();
     }
 
     private static void standaloneHeatingOffsetMigration(CCUHsApi ccuHsApi) {

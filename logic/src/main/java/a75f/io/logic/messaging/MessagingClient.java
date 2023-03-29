@@ -15,8 +15,10 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import okhttp3.Request;
@@ -47,14 +49,12 @@ public class MessagingClient {
 
         if (!useMessagingApi) {
             this.closeMessagingConnection();
-            //PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteId);
         } else {
             String ccuId = CCUHsApi.getInstance().getCcuId();
 
             if (ccuId != null) {
-                String bearerToken = CCUHsApi.getInstance().getJwt();
                 PbSubscriptionHandler.getInstance().close();
-                this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
+                this.openMessagingConnection(siteId.substring(1), ccuId.substring(1));
                 Globals.getInstance().scheduleMessagingAckJob();
             }
         }
@@ -98,25 +98,30 @@ public class MessagingClient {
     /**
      * Resets Messaging connection without restarting the MessagingAck thread.
      * Could be called when Messaging client runs into error.
+     *
+     * Connection will not be opened before complete registration, or if
+     * the CCU loses authentication (i.e. expired bearer token)
      */
     public void resetMessagingConnection() {
         this.closeMessagingConnection();
         String siteId = CCUHsApi.getInstance().getSiteIdRef().toString();
         String ccuId = CCUHsApi.getInstance().getCcuId();
-        String bearerToken = CCUHsApi.getInstance().getJwt();
 
-        if (ccuId != null) {
-            this.openMessagingConnection(bearerToken, siteId.substring(1), ccuId.substring(1));
+        if (ccuId != null && CCUHsApi.getInstance().getAuthorised()) {
+            this.openMessagingConnection(siteId.substring(1), ccuId.substring(1));
         }
 
     }
 
-    private void openMessagingConnection(String bearerToken, String siteId, String ccuId) {
+    private void openMessagingConnection(String siteId, String ccuId) {
+        CcuLog.i(L.TAG_CCU_MESSAGING, "Opening Messaging Connection");
+
         if (sse != null) {
             return;
         }
 
         String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+        String bearerToken = CCUHsApi.getInstance().getJwt();
 
         String subscribeUrl = String.format("%s/messages/acknowledgeable?channels=%s,%s&subscriberId=%s",
                 messagingUrl,
@@ -129,12 +134,16 @@ public class MessagingClient {
                 .header("Authorization", "Bearer " + bearerToken)
                 .build();
 
+        CcuLog.d("CCU_HTTP_REQUEST", "MessagingClient: [GET] " + subscribeUrl + " - Token: " + bearerToken);
+
         okSse = new OkSse();
-        sse = okSse.newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl, bearerToken));
+        sse = okSse.newServerSentEvent(request, new MessagingListener(siteId, ccuId, messagingUrl));
         sse.setTimeout(1, TimeUnit.MINUTES);
     }
 
     private void closeMessagingConnection() {
+        CcuLog.i(L.TAG_CCU_MESSAGING, "Closing Messaging Connection");
+
         if (sse != null) {
             sse.close();
             sse = null;

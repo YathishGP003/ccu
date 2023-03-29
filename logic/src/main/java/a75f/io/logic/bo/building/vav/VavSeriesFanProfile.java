@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -81,7 +82,7 @@ public class VavSeriesFanProfile extends VavProfile
                 valve.currentPosition = 0;
             }
             
-            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), vavEquip.getRoomRef());
+            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), vavEquip.getRoomRef(), Occupancy.OCCUPIED);
             CcuLog.i(L.TAG_CCU_ZONE, " Zone occupied "+occupied);
             updateIaqCompensatedMinDamperPos(occupied, node);
     

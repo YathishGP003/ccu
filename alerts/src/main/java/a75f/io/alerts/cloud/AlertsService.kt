@@ -2,6 +2,7 @@ package a75f.io.alerts.cloud
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.constants.HttpConstants
 import a75f.io.logger.CcuLog
 import com.google.gson.*
@@ -143,13 +144,10 @@ class ServiceGenerator {
       }
    }
 
-   fun createService(baseUrl: String, token: String): AlertsService {
-      CcuLog.d("CCU_ALERTS", "AlertsService: createService $baseUrl, $token")
+   fun createService(baseUrl: String): AlertsService {
+      CcuLog.d("CCU_ALERTS", "AlertsService: createService $baseUrl")
 
-      return createRetrofit(
-         baseUrl,
-         HttpHeaders(contentType = "application/json", token = token)
-      )
+      return createRetrofit(baseUrl)
          .create(AlertsService::class.java)
    }
 
@@ -158,7 +156,7 @@ class ServiceGenerator {
     *
     * Supply the baseUrl and encoding, and optionally the bearer token or Api-key.
     */
-   fun createRetrofit(baseUrl: String, headers: HttpHeaders): Retrofit {
+   fun createRetrofit(baseUrl: String): Retrofit {
       val okhttpLogging = HttpLoggingInterceptor().apply {
          level = HttpLoggingInterceptor.Level.BODY
       }
@@ -167,14 +165,26 @@ class ServiceGenerator {
          addInterceptor(okhttpLogging)
          addInterceptor(
             Interceptor { chain ->
+               val bearerToken = CCUHsApi.getInstance().jwt
+
+               CcuLog.d("CCU_HTTP_REQUEST", "AlertsService: [${chain.request().method}] ${chain.request().url} - Token: $bearerToken")
+
                val builder = chain.request().newBuilder()
                        .header(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
-               headers.token?.let { builder.header("Authorization", "Bearer $it") }
-               headers.apiKey?.let { builder.header("api-key", it) }
-               headers.encoding?.let { builder.header("Accept-Encoding", it) }
-               headers.contentType?.let { builder.header("Content-Type", it) }
+                       .header("Authorization", "Bearer $bearerToken")
+                       .header("Content-Type", "application/json")
+
                return@Interceptor chain.proceed(builder.build())
             }
+         )
+         addInterceptor(
+                 Interceptor { chain ->
+                    val request = chain.request()
+                    val response = chain.proceed(request)
+
+                    CcuLog.d("CCU_HTTP_RESPONSE", "AlertsService: ${response.code} - [${request.method}] ${request.url}")
+                    response
+                 }
          )
       }.build()
 

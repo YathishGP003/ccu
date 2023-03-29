@@ -95,11 +95,7 @@ public class PointWriteWorker extends Worker {
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
                 if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {
                     return true;
-                }else if (response.getRespCode() == 401) {
-                    CCUHsApi.getInstance().setAuthorised(false);
-                    return true;
-                }
-                else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
                     EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
                 }
                 return response != null;

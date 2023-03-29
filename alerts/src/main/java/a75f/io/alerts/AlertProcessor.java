@@ -27,15 +27,12 @@ public class AlertProcessor
 {
     // Parses a String into a list of AlertDefinitions
     AlertParser parser;
-    private final String ccuId;
-    private final CCUHsApi haystack;      // used only for luid/guid lookup
 
     private final SharedPreferences defaultSharedPrefs;
 
-    AlertProcessor(Context c, String ccuId, CCUHsApi haystack) {
+    AlertProcessor(Context c) {
         this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
-        this.ccuId = ccuId;
-        this.haystack = haystack;
+
         // great candidate for DI when we have it:
         CcuLog.d("CCU_ALERTS", "AlertProcessor Init");
 
@@ -48,6 +45,11 @@ public class AlertProcessor
      */
     public List<AlertDefOccurrence> evaluateAlertDefinitions(List<AlertDefinition> alertDefs) {
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
+
+        // Exit without processing alert defs if registration is not yet complete
+        if (CCUHsApi.getInstance().getCcuRef() == null) {
+            return occurrences;
+        }
 
         for (AlertDefinition def : alertDefs) {
             boolean doProcess = inspectAlertDef(def, occurrences);
@@ -140,6 +142,8 @@ public class AlertProcessor
                     null,
                     null));
         } else  {
+            String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
+
             equipToResult.entrySet().forEach(e -> {
                 String equipRef = e.getKey();
                 String pointRef = equipToPoint.get(equipRef);
@@ -192,6 +196,7 @@ public class AlertProcessor
      * Then the alert def will not be processed.
      */
     private boolean inspectAlertDef(AlertDefinition def, List<AlertDefOccurrence> occurrences) {
+        String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
 
         List<String> uniqueGrpOperations = def.conditionals.stream()
                 .filter(conditional -> conditional.operator == null || conditional.operator.isEmpty()) // Skip the "comparision" conditionals

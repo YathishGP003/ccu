@@ -20,9 +20,10 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import okhttp3.Request;
 
-public class MessagingClient {
+public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshListener {
     private static MessagingClient instance = null;
 
     private ServerSentEvent sse = null;
@@ -31,6 +32,9 @@ public class MessagingClient {
 
     private OkSse okSse = null;
 
+    private MessagingClient() {
+        BearerTokenManager.getInstance().setOnBearerTokenRefreshListener(this);
+    }
     public static MessagingClient getInstance() {
         if (instance == null) {
             synchronized(MessagingClient.class) {
@@ -150,6 +154,12 @@ public class MessagingClient {
 
     public OkSse getOkSse() {
         return okSse;
+    }
+
+    @Override
+    public void onTokenRefresh() {
+        CcuLog.i(L.TAG_CCU_MESSAGING, "BearerToken refreshed. Reset messaging connection.");
+        resetMessagingConnection();
     }
 
     private class MessageToAck implements Comparable<MessageToAck> {

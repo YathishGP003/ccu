@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.messaging.MessagingClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,6 +21,8 @@ import retrofit2.Response;
 public class BearerTokenManager{
     
     private static BearerTokenManager instance = null;
+
+    private List<OnBearerTokenRefreshListener> tokenRefreshListeners = new ArrayList<>();
     
     private BearerTokenManager() {}
     
@@ -56,8 +60,8 @@ public class BearerTokenManager{
                     CcuLog.d(L.TAG_CCU_JOB, "BearerTokenManagerService: Set new token " + token.getAccessToken());
                     hayStack.setJwt(token.getAccessToken());
 
-                    // Refresh the connection to Messaging API using the updated bearer token
-                    MessagingClient.getInstance().resetMessagingConnection();
+                    tokenRefreshListeners.forEach( listener -> listener.onTokenRefresh());
+
                 }
                 hayStack.updateJwtValidity();
             }
@@ -68,5 +72,13 @@ public class BearerTokenManager{
                 hayStack.updateJwtValidity();
             }
         });
+    }
+
+    public interface OnBearerTokenRefreshListener {
+        void onTokenRefresh();
+    }
+
+    public void setOnBearerTokenRefreshListener(OnBearerTokenRefreshListener listener) {
+        tokenRefreshListeners.add(listener);
     }
 }

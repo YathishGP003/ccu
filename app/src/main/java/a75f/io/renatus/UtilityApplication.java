@@ -979,7 +979,7 @@ public abstract class UtilityApplication extends Application {
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
             String bearerToken = CCUHsApi.getInstance().getJwt();
 
-            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
             Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }

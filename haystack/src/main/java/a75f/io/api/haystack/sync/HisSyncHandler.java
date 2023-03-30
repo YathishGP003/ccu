@@ -369,7 +369,6 @@ public class HisSyncHandler
                     super.run();
                     purgeStatus = true;
                     CcuLog.d(TAG, "doPurge ->");
-                    Log.d("Bharath", "Bharath debug log data purge started ");
                     try {
                         ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
                         for (HashMap<Object, Object> point : allHisPoints) {

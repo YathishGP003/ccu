@@ -354,7 +354,30 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
+        if (!PreferenceUtil.getBackFillDurationMigration()) {
+            backFillDurationMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setBackFillDurationMigration();
+        }
+
         L.saveCCUState();
+    }
+
+    private static void backFillDurationMigration(CCUHsApi ccuHsApi) {
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<Object, Object> siteMap = hayStack.readEntity(Tags.SITE);
+        HashMap<Object, Object> equipMap = hayStack.readEntity("equip and system");
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        String equipRef = equip.getId();
+        String floorRef = equip.getFloorRef();
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+
+        Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").setFloorRef(floorRef).build();
+        String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
+        CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
+        CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
     }
 
     private static void updateKind(CCUHsApi ccuHsApi) {

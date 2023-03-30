@@ -12,6 +12,7 @@ public class PreferenceUtil {
     private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
+    private static final String BACK_FILL_DURATION = "backFillDuartion";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -602,5 +603,13 @@ public class PreferenceUtil {
 
     public static void setKindCorrectionMigration() {
         setBooleanPreference(KIND_CORRECTION, true);
+    }
+
+    public static boolean getBackFillDurationMigration() {
+        return getBooleanPreference(BACK_FILL_DURATION);
+    }
+
+    public static void setBackFillDurationMigration() {
+        setBooleanPreference(BACK_FILL_DURATION, true);
     }
 }

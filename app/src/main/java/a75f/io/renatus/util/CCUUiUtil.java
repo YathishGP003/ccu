@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -146,6 +147,7 @@ public class CCUUiUtil {
         int totalZones = totalNumberOfZones.size();
         String[] strings = BackFillDuration.getDisplayNames();
         ArrayList<String> backFillTimeArray = new ArrayList<String>(Arrays.asList(strings));
+        Log.d("Bharath", "Bharath debug logs back fill time array " + backFillTimeArray);
         return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, totalZones);
     }
 
@@ -171,11 +173,11 @@ public class CCUUiUtil {
 
             private int getMaxNormalRows() {
                 if (totalZones <= 6) {
-                    return 0;
+                    return 10;
                 } else if (totalZones <= 10) {
-                    return 7;
+                    return 8;
                 } else if (totalZones <= 20) {
-                    return 6;
+                    return 7;
                 } else if (totalZones <= 30) {
                     return 6;
                 } else if (totalZones <= 40) {

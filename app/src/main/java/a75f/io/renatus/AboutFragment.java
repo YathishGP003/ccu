@@ -150,7 +150,7 @@ public class AboutFragment extends Fragment {
         }
         ButterKnife.bind(this, rootView);
 
-        setBackFillTimeSpinner(rootView, backFillTimeSpinner);
+        setBackFillTimeSpinner(rootView);
 
         HashMap site = CCUHsApi.getInstance().read("site");
 
@@ -595,17 +595,17 @@ public class AboutFragment extends Fragment {
         });
     }
 
-    private void setBackFillTimeSpinner(View rootView, Spinner backFillTimeSpinner) {
+    private void setBackFillTimeSpinner(View rootView) {
 
         this.backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
         this.backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
         this.backFillTimeSpinner.setSelection(0);
 
-        backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int[] durations = {1, 2, 3, 6, 12, 24, 48, 72};
-                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 5;
+                int[] durations = {1, 2, 3, 6, 12, 18, 24, 48, 72};
+                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 6;
                 int backFillDurationSelected = durations[index];
 
                 CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));

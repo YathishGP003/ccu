@@ -5,9 +5,10 @@ public enum BackFillDuration {
     NONE("None"),
     ONE_HOUR("1 Hr"),
     TWO_HOURS("2 Hrs"),
-    THREE_HOURS("3 Hr"),
+    THREE_HOURS("3 Hrs"),
     SIX_HOURS("6 Hrs"),
-    TWELVE_HOURS("12 Hr"),
+    TWELVE_HOURS("12 Hrs"),
+    EIGHTEEN_HOURS("18 Hrs"),
     TWENTY_FOUR_HOURS("24 Hrs"),
     FORTY_EIGHT_HOURS("48 Hrs"),
     SEVENTY_TWO_HOURS("72 Hrs");

@@ -363,7 +363,7 @@ public class HisSyncHandler
             return;
         }
         DateTime now = new DateTime();
-        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0 ? true : false;
+        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0;
         
         if (forcedPurge || timeForPurge) {
             Thread purgeThread = new Thread() {
@@ -371,6 +371,7 @@ public class HisSyncHandler
                     super.run();
                     purgeStatus = true;
                     CcuLog.d(TAG, "doPurge ->");
+                    Log.d("Bharath", "Bharath debug log data purge started ");
                     try {
                         ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
                         for (HashMap<Object, Object> point : allHisPoints) {

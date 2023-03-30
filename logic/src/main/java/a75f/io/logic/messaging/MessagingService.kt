@@ -68,10 +68,6 @@ class ServiceGenerator {
                         val response = chain.proceed(request)
 
                         CcuLog.d("CCU_HTTP_RESPONSE", "MessagingService-: ${response.code} - [${request.method}] ${request.url}")
-
-                        if (response.code == 401) {
-                            CCUHsApi.getInstance().authorised = false
-                        }
                         response
                     }
             )

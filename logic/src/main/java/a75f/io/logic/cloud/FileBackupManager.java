@@ -64,11 +64,6 @@ public class FileBackupManager {
                     okhttp3.Response response = chain.proceed(request);
 
                     CcuLog.d("CCU_HTTP_RESPONSE", "FileBackupManager: " + response.code() + " - [" + request.method() + "] " + request.url());
-
-                    if (response.code() == 401) {
-                        CCUHsApi.getInstance().setAuthorised(false);
-                    }
-
                     return response;
                 })
                 .connectTimeout(60, TimeUnit.SECONDS)

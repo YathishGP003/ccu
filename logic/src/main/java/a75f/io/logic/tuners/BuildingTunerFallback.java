@@ -146,6 +146,7 @@ class BuildingTunerFallback {
         tagsValMap.put("reheat,integral,time",TunerConstants.DEFAULT_INTEGRAL_TIMEOUT);
         tagsValMap.put("reheat,proportional,kFactor",TunerConstants.DEFAULT_PROPORTIONAL_GAIN);
         tagsValMap.put("reheat,integral,kFactor",TunerConstants.DEFAULT_PROPORTIONAL_GAIN);
+        tagsValMap.put("network,watchdog,timeout",TunerConstants.CCU_NETWORK_WATCHDOG_TIMEOUT_DEFAULT_VAL);
 
         return tagsValMap;
     }

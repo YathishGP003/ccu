@@ -28,13 +28,25 @@ public class CloudConnectionManager {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
+                    String bearerToken =  CCUHsApi.getInstance().getJwt();
+
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
-                            .header("Authorization", "Bearer "+ CCUHsApi.getInstance().getJwt())
+                            .header("Authorization", "Bearer " + bearerToken)
                             .build();
+
+                    CcuLog.d("CCU_HTTP_REQUEST", "CloudConnectionManager: [" + chain.request().method() + "] " + chain.request().url() + " - Token: " + bearerToken);
+
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(loggingInterceptor)
+                .addInterceptor(chain -> {
+                        Request request = chain.request();
+                        okhttp3.Response response = chain.proceed(request);
+
+                        CcuLog.d("CCU_HTTP_RESPONSE", "CloudConnectionManager: " + response.code() + " - [" + request.method() + "] " + request.url());
+                        return response;
+                 })
                 .connectTimeout(50, TimeUnit.SECONDS)
                 .writeTimeout(50, TimeUnit.SECONDS)
                 .readTimeout(50, TimeUnit.SECONDS)
@@ -43,6 +55,10 @@ public class CloudConnectionManager {
     }
 
     public void getCloudConnectivityStatus(CloudConnectionResponseCallback responseCallback){
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            return;
+        }
+
         Retrofit retrofit = getRetrofitForHaystackBaseUrl();
             Call<ResponseBody> call = retrofit.create(CloudConnectionService.class).getAbout();
             long requestTime = new Date().getTime();

@@ -46,14 +46,26 @@ public class FileBackupManager {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
+                    String bearerToken = CCUHsApi.getInstance().getJwt();
+
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
-                            .header("Authorization", "Bearer "+ CCUHsApi.getInstance().getJwt())
+                            .header("Authorization", "Bearer " + bearerToken)
                             .header("Accept-Encoding", "gzip, deflate, br")
                             .build();
+
+                    CcuLog.d("CCU_HTTP_REQUEST", "FileBackupManager: [" + chain.request().method() + "] " + chain.request().url() + " - Token: " + bearerToken);
+
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(loggingInterceptor)
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    okhttp3.Response response = chain.proceed(request);
+
+                    CcuLog.d("CCU_HTTP_RESPONSE", "FileBackupManager: " + response.code() + " - [" + request.method() + "] " + request.url());
+                    return response;
+                })
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)

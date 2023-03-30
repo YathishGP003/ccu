@@ -1,6 +1,7 @@
 package a75f.io.logic.messaging
 
 import a75f.io.alerts.cloud.DateTimeTypeConverter
+import a75f.io.api.haystack.CCUHsApi
 import retrofit2.http.*
 
 import a75f.io.logger.CcuLog
@@ -36,16 +37,13 @@ class ServiceGenerator {
         }
     }
 
-    fun createService(baseUrl: String, token: String): MessagingService {
-        CcuLog.d(L.TAG_CCU_MESSAGING, "MessagingService: createService $baseUrl, $token")
+    fun createService(baseUrl: String): MessagingService {
+        CcuLog.d(L.TAG_CCU_MESSAGING, "MessagingService: createService $baseUrl")
 
-        return createRetrofit(
-                baseUrl,
-                token
-        ).create(MessagingService::class.java)
+        return createRetrofit(baseUrl).create(MessagingService::class.java)
     }
 
-    fun createRetrofit(baseUrl: String, token: String): Retrofit {
+    fun createRetrofit(baseUrl: String): Retrofit {
         val okhttpLogging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -54,9 +52,23 @@ class ServiceGenerator {
             addInterceptor(okhttpLogging)
             addInterceptor(
                     Interceptor { chain ->
+                        val bearerToken = CCUHsApi.getInstance().jwt
+
+                        CcuLog.d("CCU_HTTP_REQUEST", "MessagingService: [${chain.request().method}] ${chain.request().url} - Token: $bearerToken")
+
                         val builder = chain.request().newBuilder()
-                        builder.header("Authorization", "Bearer $token")
+                                .header("Authorization", "Bearer $bearerToken")
+
                         return@Interceptor chain.proceed(builder.build())
+                    }
+            )
+            addInterceptor(
+                    Interceptor { chain ->
+                        val request = chain.request()
+                        val response = chain.proceed(request)
+
+                        CcuLog.d("CCU_HTTP_RESPONSE", "MessagingService-: ${response.code} - [${request.method}] ${request.url}")
+                        response
                     }
             )
         }.build()

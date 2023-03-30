@@ -258,7 +258,8 @@ public abstract class UtilityApplication extends Application {
 
         if (BuildConfig.BUILD_TYPE.equals("staging") ||
                 BuildConfig.BUILD_TYPE.equals("prod") ||
-                BuildConfig.BUILD_TYPE.equals("daikin_prod")) {
+                BuildConfig.BUILD_TYPE.equals("daikin_prod") ||
+                BuildConfig.BUILD_TYPE.equals("qa")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 String crashMessage = getCrashMessage();
                 AlertManager.getInstance().fixPreviousCrashAlert();

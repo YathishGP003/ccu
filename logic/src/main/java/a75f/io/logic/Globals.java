@@ -226,9 +226,8 @@ public class Globals {
         PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
 
-        // Start AlertManager whether or not token is empty
-        String token = CCUHsApi.getInstance().getJwt();
-        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl(), token);
+        AlertManager.getInstance(this.mApplicationContext, urls.getAlertsUrl())
+                .fetchPredefinedAlertsIfEmpty();
 
         //set SN address band
         String addrBand = getSmartNodeBand();
@@ -361,9 +360,8 @@ public class Globals {
         if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
             String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
-            String bearerToken = CCUHsApi.getInstance().getJwt();
 
-            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl, bearerToken);
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
             Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }

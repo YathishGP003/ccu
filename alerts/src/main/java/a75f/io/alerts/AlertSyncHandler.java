@@ -41,7 +41,7 @@ public class AlertSyncHandler
 
         // We are not doing anything with these rx disposables, but we could...
         AlertsService alertService = AlertManager.getInstance().getAlertsService();
-        if (! CCUHsApi.getInstance().siteSynced()) {
+        if (!CCUHsApi.getInstance().siteSynced() || !CCUHsApi.getInstance().getAuthorised()) {
             return;
         }
         String siteId = CCUHsApi.getInstance().getSiteIdRef().val;
@@ -69,10 +69,7 @@ public class AlertSyncHandler
                                             a.setSyncStatus(true);
                                             syncedAlerts.add(a);
                                             dataStore.updateAlert(a);
-                                        } else if (response.code() == 401) {
-                                            CCUHsApi.getInstance().setAuthorised(false);
-                                        }
-                                        else {
+                                        } else {
                                             handleCreateAlertErrorResponse(response, a, dataStore);
                                         }
                                     },

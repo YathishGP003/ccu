@@ -879,6 +879,7 @@ public class FloorPlanFragment extends Fragment {
 
     private void addRenamedFloor(){
         if (floorToRename != null) {
+            int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
             floorList.remove(floorToRename);
             siteFloorList.removeIf(f -> f.getDisplayName().equals(floorToRename.getDisplayName().trim()));
             Floor hsFloor = new Floor.Builder()
@@ -955,11 +956,15 @@ public class FloorPlanFragment extends Fragment {
             L.saveCCUState();
             CCUHsApi.getInstance().syncEntityTree();
             siteFloorList.add(hsFloor);
+            if(this.floorList.size() == 0 || floorSelectedIndex == -1){
+                this.systemDeviceOnClick();
+            }
         }
     }
 
     private void addNewFloor(){
         if (addFloorEdit.getText().toString().length() > 0) {
+            int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
             ArrayList<String> flrMarkers = new ArrayList<>();
             flrMarkers.add("writable");
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -1010,6 +1015,9 @@ public class FloorPlanFragment extends Fragment {
             Toast.makeText(getActivity().getApplicationContext(),
                     "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
             siteFloorList.add(hsFloor);
+            if(this.floorList.size() == 0 || floorSelectedIndex == -1){
+                this.systemDeviceOnClick();
+            }
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
         }

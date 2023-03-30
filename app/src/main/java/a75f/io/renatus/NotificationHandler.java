@@ -98,7 +98,7 @@ public class NotificationHandler {
     }
 
     private static void rebootDeviceByCCUNetworkWatchdogTimeoutTuner() {
-        double ccuNetworkWatchdogTimeoutTunerValue =  TunerUtil.readTunerValByQuery("network and watchdog and tuner");
+        double ccuNetworkWatchdogTimeoutTunerValue =  TunerUtil.readTunerValByQuery("network and watchdog and timeout");
         CcuLog.i("NotificationHandler", "ccuNetworkWatchdogTimeoutTunerValue "+ccuNetworkWatchdogTimeoutTunerValue);
         if(ccuNetworkWatchdogTimeoutTunerValue != 0) { // 0 - ccuNetworkWatchdogTimeout is disabled
             DateTime currentDateTime = new DateTime();

@@ -1,9 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
-import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.Point
-import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -220,6 +217,7 @@ class HyperStatPointsUtil(
             .setTz(tz)
             .setGroup(nodeAddress)
             .setHisInterpolate(Tags.COV)
+            .setKind(Kind.STRING)
 
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
@@ -1593,7 +1591,7 @@ class HyperStatPointsUtil(
         val equipStatusPointMarkers = arrayOf("zone", "status", "his")
         val equipStatusMessagePointMarkers = arrayOf("zone", "status", "his", "message", "writable")
         val scheduleStatusPointMarkers = arrayOf("zone", "scheduleStatus", "his", "message", "writable", "logical")
-        val scheduleTypePointMarkers = arrayOf("zone", "scheduleType", "his", "message", "writable", "logical")
+        val scheduleTypePointMarkers = arrayOf("zone", "scheduleType", "his", "writable", "logical")
 
 
         val desiredTempPointMarkers =

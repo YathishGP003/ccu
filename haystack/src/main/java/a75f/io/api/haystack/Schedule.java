@@ -215,32 +215,31 @@ public class Schedule extends Entity
 
     public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
         HashMap<Object, Object> zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
-
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
-
         String ref;
         if (vacation)
             ref = build.getVacationRef();
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals("")) {
+        Double scheduleType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and scheduleType " +
+                "and roomRef == \""+ StringUtils.prependIfMissing(zoneId, "@")+"\"");
+        //ScheduleType enum is not reachable in haystack module ,hence using hardcoded ordinal value.
+        if (ref != null && !ref.equals("") && scheduleType != null && scheduleType.intValue() != 0) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-            
-            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation)) {
-                CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
+            if (schedule != null ) {
+                CcuLog.d("CCU_SCHEDULER", "Zone Schedule for "+build.getDisplayName()+" : "
+                        + schedule.toString());
                 return schedule;
             }
         }
-    
-        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule"+scheduleType);
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0) {
-            CcuLog.d("Schedule", "Building Schedule:  "+retVal.get(0).toString());
-            return retVal.get(0);
-    
+            Schedule schedule = retVal.get(0);
+            CcuLog.d("CCU_SCHEDULER", "Building Schedule :  "+schedule);
+            return schedule;
         }
-        
         return null;
     }
 

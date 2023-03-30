@@ -33,12 +33,24 @@ public class OtpManager {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
+                    String bearerToken = CCUHsApi.getInstance().getJwt();
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
-                            .header("Authorization", "Bearer "+ CCUHsApi.getInstance().getJwt())
+                            .header("Authorization", "Bearer " + bearerToken)
                             .addHeader("Content-Type", "application/json")
                             .build();
+
+                    CcuLog.d("CCU_HTTP_REQUEST", "OtpManager: [" + chain.request().method() + "] " + chain.request().url() + " - Token: " + bearerToken);
+
                     return chain.proceed(newRequest);
+                })
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    okhttp3.Response response = chain.proceed(request);
+
+                    CcuLog.d("CCU_HTTP_RESPONSE", "OtpManager: " + response.code() + " - [" + request.method() + "] " + request.url());
+
+                    return response;
                 })
                 .addInterceptor(loggingInterceptor)
                 .build();

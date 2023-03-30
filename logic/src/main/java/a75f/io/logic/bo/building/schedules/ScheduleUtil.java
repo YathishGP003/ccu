@@ -461,9 +461,9 @@ public class ScheduleUtil {
         }
     }
 
-    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef) {
+    public static boolean isZoneOccupied(CCUHsApi hayStack, String roomRef, Occupancy occupancyType) {
         return hayStack.readHisValByQuery("point and occupancy and state and " +
-                            "roomRef == \""+roomRef+"\"").intValue() == OCCUPIED.ordinal();
+                            "roomRef == \""+roomRef+"\"").intValue() == occupancyType.ordinal();
     }
 
 

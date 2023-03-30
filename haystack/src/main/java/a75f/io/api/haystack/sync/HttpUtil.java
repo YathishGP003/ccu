@@ -81,12 +81,13 @@ public class HttpUtil
                 .build();
         Call call = client.newCall(request);
         call.enqueue(callback);
+
+        CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:post: [POST] " + url + " - Token: " + token);
+
         return call;
     }
 
     public static void executePostAsync(String targetURL, String urlParameters) {
-
-        CcuLog.d("CCU_HS","Posting to " + targetURL + ": " + urlParameters);
 
         post(targetURL, urlParameters, CCUHsApi.getInstance().getJwt(), new Callback() {
             @Override
@@ -96,6 +97,8 @@ public class HttpUtil
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePostAsync: " + response.code() + " - [" + response.request().method() + "] "+ response.request().url() );
+
                 if (response.isSuccessful()) {
                     String responseStr = response.body().string();
                     CcuLog.i("CCU_HS","executePostAsync Succeeded : "+responseStr);
@@ -109,8 +112,6 @@ public class HttpUtil
 
     public static String executePost(String targetURL, String urlParameters, String bearerToken)
     {
-        CcuLog.i("CCU_HS","Client Token: " + bearerToken);
-
         if (StringUtils.isNotBlank(bearerToken)) {
             URL url;
             HttpURLConnection connection = null;
@@ -126,8 +127,7 @@ public class HttpUtil
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "text/zinc");
                 connection.setRequestProperty("Accept", "text/zinc");
-                
-                CcuLog.i("CCU_HS",url.toString());
+
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {
                     Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
@@ -143,13 +143,17 @@ public class HttpUtil
                 connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
                 connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
 
+
+                CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executePost: [POST] " + url + " - Token: " + bearerToken);
+
                 //Send request
                 DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
                 wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
                 wr.flush ();
 
                 int responseCode = connection.getResponseCode();
-                CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePost: " + responseCode + " - [POST] " + url.toString());
 
                 if (responseCode >= 400) {
 
@@ -202,8 +206,6 @@ public class HttpUtil
      */
     public static EntitySyncResponse executeEntitySync(String targetURL, String urlParameters, String bearerToken)
     {
-        CcuLog.i("CCU_HS","Client Token: " + bearerToken);
-        
         if (StringUtils.isNotBlank(bearerToken)) {
             URL url;
             HttpURLConnection connection = null;
@@ -220,8 +222,7 @@ public class HttpUtil
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "text/zinc");
                 connection.setRequestProperty("Accept", "text/zinc");
-                
-                CcuLog.i("CCU_HS",url.toString());
+
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {
                     Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
@@ -236,6 +237,8 @@ public class HttpUtil
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
                 connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
+
+                CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executeEntitySync: [POST] " + url + " - Token: " + bearerToken);
                 
                 //Send request
                 DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
@@ -243,7 +246,8 @@ public class HttpUtil
                 wr.flush ();
                 
                 int responseCode = connection.getResponseCode();
-                CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeEntitySync: " + responseCode + " - [POST] " + url.toString());
                 
                 syncResponse.setRespCode(responseCode);
                 if (responseCode >= HTTP_RESPONSE_ERR_REQUEST) {
@@ -319,6 +323,8 @@ public class HttpUtil
                     connection.setRequestProperty("Authorization", " Bearer " + token);
                 }
 
+                CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executeJson: [" + httpMethod + "] " + url + " - Token: " + token);
+
                 connection.setUseCaches (false);
                 connection.setRequestMethod(httpMethod);
                 
@@ -341,6 +347,8 @@ public class HttpUtil
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeJson: " + responseCode + " - [POST] " + url.toString());
                 
                 if (responseCode >= 400) {
 

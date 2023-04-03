@@ -171,7 +171,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         // it is 3 constant because in sensor manager class Airflow Sensor position in external sensor list is 3
         // do not change it
         profileEquip.setupDeviceThermistors(
-            config.isEnableDoorWindowSensor, "3",
+            config.isEnableAirFlowTempSensor, "3",
             config.isEnableDoorWindowSensor,HyperStatAssociationUtil.getSensorNameByType(AnalogInAssociation.DOOR_WINDOW_SENSOR),
             masterPoints, hyperStatDevice
         )

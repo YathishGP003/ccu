@@ -41,6 +41,7 @@ import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1214,6 +1215,7 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
+                setBackFillDuration(siteRoomList);
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
@@ -1221,6 +1223,23 @@ public class FloorPlanFragment extends Fragment {
         }
         return false;
     }
+
+    private void setBackFillDuration(ArrayList<String> siteRoomList) {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+
+        int[] sizes = {0, 6, 11, 21, 31, 41};
+        double[] times = {0.0, 24.0, 18.0, 12.0, 6.0, 1.0};
+        int index = Arrays.binarySearch(sizes, siteRoomList.size());
+        if (index < 0) {
+            index = -(index + 1) - 1;
+        }
+        double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
+        if (currentBackFillTime > times[index]) {
+            currentBackFillTime = times[index];
+        }
+        ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
+    }
+
 
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {

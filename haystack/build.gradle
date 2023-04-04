@@ -37,6 +37,7 @@ android {
             minifyEnabled false
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-ae578c76-067e-4c19-8ec2-a9394b9b2e86\"'
             buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-907ad94f-a08c-40fe-ab48-dc5e09a9a694\"'
+
         }
         prod {
             minifyEnabled false

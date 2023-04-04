@@ -209,4 +209,6 @@ public class TunerConstants
 
     public static final double DAB_REHEAT_OFFSET_DEFAULT_VAL = 2;
     public static final double DAB_RELAY_HYSTERESIS_DEFAULT_VAL = 10;
+
+    public static final double CCU_NETWORK_WATCHDOG_TIMEOUT_DEFAULT_VAL = 45;
 }

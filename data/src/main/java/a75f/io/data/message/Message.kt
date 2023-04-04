@@ -1,6 +1,7 @@
 package a75f.io.data.message
 
 import androidx.room.*
+import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "messages")
 data class Message(@PrimaryKey val messageId: String,
@@ -11,6 +12,7 @@ data class Message(@PrimaryKey val messageId: String,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_IDS)
     var ids: List<String>? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_VAL)
+    @SerializedName("val")
     var value: String? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_WHO)
     var who: String? = null,
@@ -24,6 +26,8 @@ data class Message(@PrimaryKey val messageId: String,
     var version: String? = null,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_TIME_TOKEN)
     var timeToken: Long = 0,
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_RECEIVED_TIME)
+    var receivedTime: Long = 0,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_HANDLED_TIME)
     var handledTime: Long = 0,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_HANDLING_STATUS)

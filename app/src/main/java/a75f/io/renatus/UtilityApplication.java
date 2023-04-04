@@ -122,8 +122,7 @@ public abstract class UtilityApplication extends Application {
     private MessagingAckJob messagingAckJob = null;
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
-    private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
-
+    private static final int MESSAGING_ACK_INTERVAL = 30;
     @Inject
     MessageHandlerSubscriber messageHandlerSubscriber;
 
@@ -980,7 +979,7 @@ public abstract class UtilityApplication extends Application {
             String bearerToken = CCUHsApi.getInstance().getJwt();
 
             messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
-            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 

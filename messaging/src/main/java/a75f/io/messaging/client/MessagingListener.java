@@ -178,6 +178,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
         if (messageHandlerService.isCommandSupported(msg.getCommand())) {
             if (isMessageDbSizeWithinMaxLimit()) {
+                msg.setReceivedTime(System.currentTimeMillis());
                 MessageDbUtilKt.insert(msg, Globals.getInstance().getApplicationContext());
             } else {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Message DB reached max limit. ");

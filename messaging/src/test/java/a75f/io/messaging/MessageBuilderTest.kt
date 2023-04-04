@@ -46,6 +46,9 @@ class MessageBuilderTest {
                 retryCount=0,
                 error="")
         )
+
+        val messageJson = messageToJson(message);
+        println(messageJson)
     }
 
 

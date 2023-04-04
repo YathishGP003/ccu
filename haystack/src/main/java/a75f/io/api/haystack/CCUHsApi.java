@@ -1996,7 +1996,6 @@ public class CCUHsApi
 
         HashMap site = CCUHsApi.getInstance().read("site");
         Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-
         // tcase 05/26/21 -- this isNetworkConnected check is a bug.
         //  1) The check gives the wrong answer right after I fix network by connecting to wifi.
         //  2) If we think there is no network here, we silently fail the registration  :_(  This is like a puppy dying.
@@ -2007,7 +2006,6 @@ public class CCUHsApi
             HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
-
             if (! entitySynced(ccuLuid)) {
                 String facilityManagerEmail = site.get("fmEmail").toString();
                 String installEmail = installerEmail;
@@ -2020,7 +2018,6 @@ public class CCUHsApi
                 String equipRef = ccu.get("equipRef").toString();
 
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
-
                 if (ccuRegistrationRequest != null) {
                     Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
                     String ccuRegistrationResponse = HttpUtil.executeJson(

@@ -54,7 +54,7 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
                     //Since the precessing time for Update_ccu is network dependent,
                     //it is given a longer time before retrying.
                     if (isUpdateCcuCommand(message)) {
-                        if (message.timeToken < (System.currentTimeMillis() -
+                        if (message.receivedTime < (System.currentTimeMillis() -
                                                     message.retryCount * UPDATE_CCU_RETRY_MILLIS)) {
                             updateMessageRetryStatus(message)
                             doHandleMessage(message, appContext)

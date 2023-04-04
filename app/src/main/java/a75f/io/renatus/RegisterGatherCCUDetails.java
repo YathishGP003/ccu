@@ -201,6 +201,18 @@ public class RegisterGatherCCUDetails extends Activity {
                 String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
                 HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                if(schedulePoint == null) {
+                    Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
+                    RegisterGatherCCUDetails.this.runOnUiThread( (new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Display the text we just generated within the LogView.
+                            Toast.makeText(RegisterGatherCCUDetails.this,"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
+
+                        }
+                    })));
+                    return null;
+                }
                 Iterator it = schedulePoint.iterator();
                 while (it.hasNext())
                 {

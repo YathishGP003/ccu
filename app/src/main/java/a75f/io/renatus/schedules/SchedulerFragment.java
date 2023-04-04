@@ -330,7 +330,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-                if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
+
 
                 loadSchedule();
                 drawCurrentTime();

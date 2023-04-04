@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -152,8 +153,8 @@ public class FloorPlanFragment extends Fragment {
     //
     private Zone roomToRename;
     private Floor floorToRename;
-    ArrayList<Floor> siteFloorList = new ArrayList<>();
-    ArrayList<String> siteRoomList = new ArrayList<>();
+    CopyOnWriteArrayList<Floor> siteFloorList = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<String> siteRoomList = new CopyOnWriteArrayList<>();
     private FloorListActionMenuListener floorListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {

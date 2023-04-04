@@ -1,16 +1,20 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.app;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1238,7 +1242,12 @@ public class FloorPlanFragment extends Fragment {
             currentBackFillTime = times[index];
         }
         ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
-    }
+        SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
+        int[] durations = {1, 2, 3, 6, 12, 18, 24, 48, 72};
+        SharedPreferences.Editor editor = backFillTimePref.edit();
+        editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
+        editor.putInt("backFillTimeSpSelected",Arrays.binarySearch(durations, (int) currentBackFillTime) + 1);
+        editor.apply();    }
 
 
     @OnClick(R.id.pairModuleBtn)

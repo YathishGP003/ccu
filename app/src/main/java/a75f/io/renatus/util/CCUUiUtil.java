@@ -147,7 +147,6 @@ public class CCUUiUtil {
         int totalZones = totalNumberOfZones.size();
         String[] strings = BackFillDuration.getDisplayNames();
         ArrayList<String> backFillTimeArray = new ArrayList<String>(Arrays.asList(strings));
-        Log.d("Bharath", "Bharath debug logs back fill time array " + backFillTimeArray);
         return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, totalZones);
     }
 

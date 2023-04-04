@@ -213,7 +213,7 @@ public class RangeBar extends View {
 
     // init temps
     public void setData(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
-                        float upperCoolingTemp, float cdb, float hdb, boolean isZoneSchedule) {
+                        float upperCoolingTemp, float cdb, float hdb) {
         temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] = lowerHeatingTemp;
         temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()] = upperHeatingTemp;
         temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] = lowerCoolingTemp;
@@ -225,7 +225,6 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
-        this.isZoneSchedule = isZoneSchedule;
         Log.d("RangeControl"," setData lowerHeatingTemp "+lowerHeatingTemp+" upperHeatingTemp "+upperHeatingTemp
                              +" lowerCoolingTemp "+lowerCoolingTemp+" upperCoolingTemp "+upperCoolingTemp+" cdb "+cdb+" hdb "+hdb);
               mDataSet = true;
@@ -250,7 +249,7 @@ public class RangeBar extends View {
                 getBitmapFromVectorDrawable(getContext(), R.drawable.ic_heat_thumb);
 
 
-        setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, (float) cdb, (float) hdb, false);
+        setData(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, (float) cdb, (float) hdb);
 
 
         mLinePaint = new Paint();

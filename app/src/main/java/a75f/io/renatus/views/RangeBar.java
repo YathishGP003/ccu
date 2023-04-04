@@ -117,17 +117,10 @@ public class RangeBar extends View {
         } else {
             mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
-
-        //different overlap constant has to be calculated for Zone schedule and Building Schedule
-        double textOverLapConstant = 0.0;
-        if (isZoneSchedule) {
-            textOverLapConstant = 2.5;
-        }
-
         //force push the text if overlap
         int dbWidth = 0;
         Log.d("TAG", "drawSliderIcon: coolband " + cdb);
-        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + textOverLapConstant)){
+        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] < (float) (cdb + hdb + 2.5)){
             dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 20;
         }
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){

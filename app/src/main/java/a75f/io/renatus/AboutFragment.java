@@ -598,17 +598,17 @@ public class AboutFragment extends Fragment {
 
     private void setBackFillTimeSpinner(View rootView) {
 
-        int[] durations = {1, 2, 3, 6, 12, 18, 24, 48, 72};
+        int[] durations = BackFillDuration.toIntArray();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sharedPreferences.edit();
         this.backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
         this.backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",0));
+        this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",7));
 
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 6;
+                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 0;
                 int backFillDurationSelected = durations[index];
 
                 CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));

@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -1231,7 +1232,7 @@ public class FloorPlanFragment extends Fragment {
     private void setBackFillDuration(ArrayList<String> siteRoomList) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
-        int[] sizes = {0, 6, 11, 21, 31, 41};
+        int[] sizes = {0, 6, 10, 20, 30, 40};
         double[] times = {0.0, 24.0, 18.0, 12.0, 6.0, 1.0};
         int index = Arrays.binarySearch(sizes, siteRoomList.size());
         if (index < 0) {
@@ -1243,11 +1244,12 @@ public class FloorPlanFragment extends Fragment {
         }
         ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
         SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-        int[] durations = {1, 2, 3, 6, 12, 18, 24, 48, 72};
+        int[] durations = BackFillDuration.toIntArray();
         SharedPreferences.Editor editor = backFillTimePref.edit();
         editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
         editor.putInt("backFillTimeSpSelected",Arrays.binarySearch(durations, (int) currentBackFillTime) + 1);
-        editor.apply();    }
+        editor.apply();
+    }
 
 
     @OnClick(R.id.pairModuleBtn)

@@ -28,4 +28,17 @@ public enum BackFillDuration {
         return displayNames;
     }
 
+    public static int[] toIntArray() {
+        int[] intValues = new int[values().length];
+        for (int i = 0; i < values().length; i++) {
+            String stringValue = values()[i].displayName;
+            if (stringValue.equals("None")) {
+                intValues[i] = 0;
+            } else {
+                intValues[i] = Integer.parseInt(stringValue.split(" ")[0]);
+            }
+        }
+        return intValues;
+    }
+
 }

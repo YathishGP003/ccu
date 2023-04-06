@@ -24,6 +24,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.modbusbox.EquipsManager;
@@ -164,6 +165,10 @@ public class UpdatePointHandler
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
         }
 
+        if (HSUtil.isPointUpdateNeedsSystemProfileReset(pointUid, hayStack)
+                    && L.ccu().systemProfile != null) {
+            L.ccu().systemProfile.reset();
+        }
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }

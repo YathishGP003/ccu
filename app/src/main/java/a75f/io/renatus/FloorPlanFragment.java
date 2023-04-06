@@ -890,6 +890,9 @@ public class FloorPlanFragment extends Fragment {
             hsFloor.setId(floorToRename.getId());
             hsFloor.setOrientation(floorToRename.getOrientation());
             hsFloor.setFloorNum(floorToRename.getFloorNum());
+            hsFloor.setCreatedDateTime(floorToRename.getCreatedDateTime());
+            hsFloor.setLastModifiedBy(floorToRename.getLastModifiedBy());
+            hsFloor.setLastModifiedDateTime(floorToRename.getLastModifiedDateTime());
             for (Floor floor : siteFloorList) {
                 if (floor.getDisplayName().equals(addFloorEdit.getText().toString().trim())) {
                     AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());

@@ -53,6 +53,7 @@ import a75f.io.logic.bo.building.vav.VavEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
@@ -272,6 +273,12 @@ public class MigrationUtil {
             PreferenceUtil.setFreeInternalDiskStorageMigration();
         }
 
+        if(!PreferenceUtil.getCcuRefTagMigration()){
+            Log.i(TAG, "ccuRef migration started");
+            CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
+            PreferenceUtil.setCcuRefTagMigration(true);
+            Log.i(TAG, "ccuRef migration completed");
+        }
 
         if(!PreferenceUtil.getNewOccupancyMode()) {
             addBuildingLimitsBreachedOccupancy(CCUHsApi.getInstance());

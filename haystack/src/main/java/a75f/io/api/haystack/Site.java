@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -102,6 +104,9 @@ public class Site extends Entity
         public String  fcManagerEmail;
         public String  installerEmail;
         public String  weatherRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
 
 
         public Builder setGeoZip(String siteZip) {
@@ -174,6 +179,22 @@ public class Site extends Entity
             return this;
         }
 
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
+            return this;
+        }
+
         public Site build()
         {
             Site s = new Site();
@@ -192,6 +213,9 @@ public class Site extends Entity
             s.fcManagerEmail = this.fcManagerEmail;
             s.installerEmail = this.installerEmail;
             s.weatherRef = this.weatherRef;
+            s.setCreatedDateTime(createdDateTime);
+            s.setLastModifiedDateTime(lastModifiedDateTime);
+            s.setLastModifiedBy(lastModifiedBy);
             return s;
         }
 
@@ -256,6 +280,18 @@ public class Site extends Entity
                 else if(pair.getKey().equals("weatherRef"))
                 {
                     this.weatherRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
 
                 //it.remove();

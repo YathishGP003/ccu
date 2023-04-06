@@ -2,9 +2,10 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import java.util.Date;
 
 public class PreferenceUtil {
     private static final String AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION = "airflowSampleWaitTimeMigration";
@@ -68,6 +69,8 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+    private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
+    private static final String LAST_TIME_TOKEN = "lastTimeToken";
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
@@ -602,5 +605,33 @@ public class PreferenceUtil {
 
     public static void setKindCorrectionMigration() {
         setBooleanPreference(KIND_CORRECTION, true);
+    }
+
+    public static boolean getCcuRefTagMigration() {
+        return false;
+    }
+
+    public static void setCcuRefTagMigration(boolean status) {
+        setBooleanPreference(CCUREF_TAG_MIGRATION, status);
+    }
+
+    private static void setLongPreference(String key, long value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putLong(key, value);
+        editor.apply();
+    }
+
+    public static long getLastCCUUpdatedTime() {
+        return getLongPreference(LAST_TIME_TOKEN);
+    }
+
+    public static void setLastCCUUpdatedTime(long lastTimeToken) {
+        Log.i("CCU_READ_CHANGES", "setLastCCUUpdatedTime " + new Date(lastTimeToken));
+        setLongPreference(LAST_TIME_TOKEN, lastTimeToken);
+    }
+
+    private static long getLongPreference(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getLong(key, 0);
     }
 }

@@ -453,13 +453,23 @@ public class HSUtil
 
     public static void addPointToLocalDB(HDict dict){
         HashMap<Object, Object> map = new HashMap<>();
-        Iterator it   = dict.iterator();
-        while (it.hasNext())
-        {
+        Iterator it = dict.iterator();
+        while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             map.put(entry.getKey().toString(), entry.getValue().toString());
         }
         Point point = new Point.Builder().setHashMap(map).build();
         CCUHsApi.getInstance().addPoint(point);
+    }
+
+    public static String getLevelEntityOfPoint(String id, int level, String value, CCUHsApi hayStack) {
+        ArrayList<HashMap> values = hayStack.readPoint(id);
+        if (!values.isEmpty()) {
+            HashMap valMap = values.get(level - 1);
+            if (valMap.containsKey(value)) {
+                return valMap.get(value).toString();
+            }
+        }
+        return null;
     }
 }

@@ -383,6 +383,15 @@ public class CCUTagsDb extends HServer {
                 .add("fmEmail", s.getFcManagerEmail())
                 .add("installerEmail", s.getInstallerEmail())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+        if(s.getCreatedDateTime() != null){
+            site.add("createdDateTime", s.getCreatedDateTime());
+        }
+        if(s.getLastModifiedDateTime() != null){
+            site.add("lastModifiedDateTime", s.getLastModifiedDateTime());
+        }
+        if(s.getLastModifiedBy() != null){
+            site.add("lastModifiedBy", s.getLastModifiedBy());
+        }
 
         for (String m : s.getMarkers()) {
             site.add(m);
@@ -413,11 +422,22 @@ public class CCUTagsDb extends HServer {
         if (StringUtils.isNotEmpty(weatherRef)) {
             site.add("weatherRef", weatherRef);
         }
+        if(s.getCreatedDateTime() != null){
+            site.add("createdDateTime", s.getCreatedDateTime());
+        }
+        if(s.getLastModifiedDateTime() != null){
+            site.add("lastModifiedDateTime", s.getLastModifiedDateTime());
+        }
+        if(s.getLastModifiedBy() != null){
+            site.add("lastModifiedBy", s.getLastModifiedBy());
+        }
 
         for (String m : s.getMarkers()) {
             site.add(m);
         }
-
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+site.get("id") + " dis>>> "+site.get("dis") + " createdDateTime>>> "+
+                site.get("createdDateTime") +" lastModifiedDateTime>>> "+site.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + site.get("lastModifiedBy"));*/
         HRef id = (HRef) site.get("id");
         tagsMap.put(id.toVal(), site.toDict());
     }
@@ -452,6 +472,9 @@ public class CCUTagsDb extends HServer {
         if (q.getAhuRef() != null) {
             equip.add("ahuRef",q.getAhuRef());
         }
+        if (q.getCcuRef() != null) {
+            equip.add("ccuRef", q.getCcuRef());
+        }
         if(q.getGatewayRef() != null){
             equip.add("gatewayRef",q.getGatewayRef());
         }
@@ -461,10 +484,22 @@ public class CCUTagsDb extends HServer {
         if(q.getModel() != null){
             equip.add("model",q.getModel());
         }
+        if(q.getCreatedDateTime() != null){
+            equip.add("createdDateTime", q.getCreatedDateTime());
+        }
+        if(q.getLastModifiedDateTime() != null){
+            equip.add("lastModifiedDateTime", q.getLastModifiedDateTime());
+        }
+        if(q.getLastModifiedBy() != null){
+            equip.add("lastModifiedBy", q.getLastModifiedBy());
+        }
 
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
+                equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
         HRef ref = (HRef) equip.get("id");
         tagsMap.put(ref.toVal(), equip.toDict());
         return ref.toCode();
@@ -486,6 +521,18 @@ public class CCUTagsDb extends HServer {
         if (q.getAhuRef() != null) {
             equip.add("ahuRef",q.getAhuRef());
         }
+        if (q.getCcuRef() != null) {
+            equip.add("ccuRef", q.getCcuRef());
+        }
+        if(q.getCreatedDateTime() != null){
+            equip.add("createdDateTime", q.getCreatedDateTime());
+        }
+        if(q.getLastModifiedDateTime() != null){
+            equip.add("lastModifiedDateTime", q.getLastModifiedDateTime());
+        }
+        if(q.getLastModifiedBy() != null){
+            equip.add("lastModifiedBy", q.getLastModifiedBy());
+        }
 		if(q.getGatewayRef() != null){
             equip.add("gatewayRef",q.getGatewayRef());
         }
@@ -498,6 +545,9 @@ public class CCUTagsDb extends HServer {
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
+                equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
         HRef id = (HRef) equip.get("id");
         tagsMap.put(id.toVal(), equip.toDict());
     }
@@ -531,10 +581,24 @@ public class CCUTagsDb extends HServer {
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
-
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -560,11 +624,25 @@ public class CCUTagsDb extends HServer {
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
 
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
@@ -598,10 +676,25 @@ public class CCUTagsDb extends HServer {
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
         if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
 
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -632,9 +725,24 @@ public class CCUTagsDb extends HServer {
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
         if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
@@ -655,10 +763,24 @@ public class CCUTagsDb extends HServer {
                                  .add("kind", p.getKind() == null ? "Str" : p.getKind());
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+       /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -676,10 +798,25 @@ public class CCUTagsDb extends HServer {
                 .add("kind", p.getKind() == null ? "Str" : p.getKind());
 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if(p.getCcuRef() != null){
+            b.add("ccuRef", p.getCcuRef());
+        }
+        if(p.getCreatedDateTime() != null){
+            b.add("createdDateTime", p.getCreatedDateTime());
+        }
+        if(p.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", p.getLastModifiedDateTime());
+        }
+        if(p.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", p.getLastModifiedBy());
+        }
 
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
@@ -700,9 +837,25 @@ public class CCUTagsDb extends HServer {
                 .add("roomRef", d.getRoomRef() != null ? d.getRoomRef() : "SYSTEM")
                 .add("floorRef", d.getFloorRef() != null ? d.getFloorRef() : "SYSTEM");
 
+        if (d.getCcuRef() != null) {
+            b.add("ccuRef", d.getCcuRef());
+        }
+        if(d.getCreatedDateTime() != null){
+            b.add("createdDateTime", d.getCreatedDateTime());
+        }
+        if(d.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", d.getLastModifiedDateTime());
+        }
+        if(d.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", d.getLastModifiedBy());
+        }
+
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -720,9 +873,25 @@ public class CCUTagsDb extends HServer {
                 .add("roomRef", d.getRoomRef())
                 .add("floorRef", d.getFloorRef());
 
+        if (d.getCcuRef() != null) {
+            b.add("ccuRef", d.getCcuRef());
+        }
+        if(d.getCreatedDateTime() != null){
+            b.add("createdDateTime", d.getCreatedDateTime());
+        }
+        if(d.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", d.getLastModifiedDateTime());
+        }
+        if(d.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", d.getLastModifiedBy());
+        }
+
         for (String m : d.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
@@ -739,10 +908,22 @@ public class CCUTagsDb extends HServer {
                 .add("siteRef", f.getSiteRef())
                 .add("orientation", 0.0)
                 .add("floorNum", 0.0);
+        if(f.getCreatedDateTime() != null){
+            b.add("createdDateTime", f.getCreatedDateTime());
+        }
+        if(f.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", f.getLastModifiedDateTime());
+        }
+        if(f.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", f.getLastModifiedBy());
+        }
 
         for (String m : f.getMarkers()) {
             b.add(m);
         }
+        /*Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -756,10 +937,22 @@ public class CCUTagsDb extends HServer {
                 .add("siteRef", f.getSiteRef())
                 .add("orientation", f.getOrientation())
                 .add("floorNum", f.getFloorNum());
+        if(f.getCreatedDateTime() != null){
+            b.add("createdDateTime", f.getCreatedDateTime());
+        }
+        if(f.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", f.getLastModifiedDateTime());
+        }
+        if(f.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", f.getLastModifiedBy());
+        }
 
         for (String m : f.getMarkers()) {
             b.add(m);
         }
+/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
@@ -775,11 +968,25 @@ public class CCUTagsDb extends HServer {
                 .add("room", HMarker.VAL)
                 .add("siteRef", z.getSiteRef())
                 .add("scheduleRef", z.getScheduleRef())
-                .add("floorRef", z.getFloorRef());
+                .add("floorRef", z.getFloorRef())
+                .add("ccuRef", z.getCcuRef());
+
+        if(z.getCreatedDateTime() != null){
+            b.add("createdDateTime", z.getCreatedDateTime());
+        }
+        if(z.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", z.getLastModifiedDateTime());
+        }
+        if(z.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", z.getLastModifiedBy());
+        }
 
         for (String m : z.getMarkers()) {
             b.add(m);
         }
+/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef ref = (HRef) b.get("id");
         tagsMap.put(ref.toVal(), b.toDict());
         return ref.toCode();
@@ -792,14 +999,27 @@ public class CCUTagsDb extends HServer {
                                  .add("room", HMarker.VAL)
                                  .add("siteRef", z.getSiteRef())
                                  .add("scheduleRef", z.getScheduleRef())
-                                 .add("floorRef", z.getFloorRef());
+                                 .add("floorRef", z.getFloorRef())
+                                 .add("ccuRef", z.getCcuRef());
         if (z.getScheduleRef() != null) {
             b.add("scheduleRef", z.getScheduleRef());
+        }
+        if(z.getCreatedDateTime() != null){
+            b.add("createdDateTime", z.getCreatedDateTime());
+        }
+        if(z.getLastModifiedDateTime() != null){
+            b.add("lastModifiedDateTime", z.getLastModifiedDateTime());
+        }
+        if(z.getLastModifiedBy() != null){
+            b.add("lastModifiedBy", z.getLastModifiedBy());
         }
         
         for (String m : z.getMarkers()) {
             b.add(m);
         }
+/*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
+                b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
+                " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
@@ -920,7 +1140,7 @@ public class CCUTagsDb extends HServer {
         b.addCol("val");
         b.addCol("who");
         b.addCol("duration");
-        
+        b.addCol("lastModifiedDateTime");
         
         for (int i = 0; i < 17; ++i) {
             
@@ -934,19 +1154,22 @@ public class CCUTagsDb extends HServer {
                     HStr.make("" + (i + 1)),
                     array.val[i],
                     HStr.make(array.who[i]),
-                    HNum.make(array.duration[i] >  System.currentTimeMillis() ? array.duration[i] : 0)
+                    HNum.make(array.duration[i] >  System.currentTimeMillis() ? array.duration[i] : 0),
+                    array.lastModifiedDateTime[i]
             });
             }
         return b.toGrid();
     }
 
-    protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts) {
+    protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts,
+                                HDateTime lastModifiedDateTime) {
         CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
         array.who[level - 1] = who;
         array.duration[level-1] = dur.val > 0 ? System.currentTimeMillis() + dur.millis() : 0;
+        array.lastModifiedDateTime[level-1]= lastModifiedDateTime;
     }
 
     public void deletePointArray(HRef id) {
@@ -988,6 +1211,7 @@ public class CCUTagsDb extends HServer {
         final HVal[] val = new HVal[17];
         final String[] who = new String[17];
         final long[] duration = new long[17];
+        final HDateTime[] lastModifiedDateTime = new HDateTime[17];
     }
 
     //////////////////////////////////////////////////////////////////////////

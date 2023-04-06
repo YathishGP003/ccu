@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.here.oksse.ServerSentEvent;
 
-import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
 

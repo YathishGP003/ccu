@@ -496,11 +496,13 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
+                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
 
                         HDict pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
+                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)
+                                .add("lastModifiedDateTime", lastModifiedDateTime).toDict();
                         hDictList.add(pid);
                         HDict rec = hsClient.readById(HRef.copy(id));
                         if(row.has("his") && NumberUtils.isCreatable(val.toString())){
@@ -511,7 +513,7 @@ public class RestoreCCUHsApi {
                         }
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ?
-                                HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                                HStr.make(val.toString()) : val, who, HNum.make(0), rec, lastModifiedDateTime);
                     }
                 }
             }
@@ -793,11 +795,13 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
+                        HDateTime lastModifiedDateTime = (HDateTime)dataElement.get("lastModifiedDateTime");
 
                         HDict pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
+                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)
+                                .add("lastModifiedDateTime", lastModifiedDateTime).toDict();
                         hDictList.add(pid);
 
                         //save his data to local cache
@@ -806,7 +810,8 @@ public class RestoreCCUHsApi {
                             tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
                         }
                         //save points on tagsDb
-                        tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ?
+                                HStr.make(val.toString()) : val, who, HNum.make(0), rec, lastModifiedDateTime);
 
                     }
 

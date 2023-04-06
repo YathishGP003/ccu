@@ -29,7 +29,7 @@
 
     <application
             android:name=".RenatusApp"
-            android:allowBackup="true"
+            android:allowBackup="false"
             android:icon="${appicon}"
             android:label="${applicationLabel}"
             android:roundIcon="${roundicon}"

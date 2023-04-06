@@ -1230,7 +1230,7 @@ public class FloorPlanFragment extends Fragment {
         return false;
     }
 
-    private void setBackFillDuration(ArrayList<String> siteRoomList) {
+    private void setBackFillDuration(CopyOnWriteArrayList<String> siteRoomList) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
         int[] sizes = {0, 6, 10, 20, 30, 40};

@@ -608,7 +608,7 @@ public class AboutFragment extends Fragment {
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int index = i > 0 ? Math.min(i - 1, durations.length - 1) : 0;
+                int index = i > 0 ? Math.min(i , durations.length - 1) : 0;
                 int backFillDurationSelected = durations[index];
 
                 CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));

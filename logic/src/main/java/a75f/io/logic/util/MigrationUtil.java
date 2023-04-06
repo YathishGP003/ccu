@@ -354,19 +354,23 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
-        if (!PreferenceUtil.getBackFillDurationMigration()) {
+        if (!verifyPointsAvailability()) {
             backFillDurationMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setBackFillDurationMigration();
         }
 
         L.saveCCUState();
     }
 
+
+    private static boolean verifyPointsAvailability(){
+        HashMap<Object, Object> backFillDuration = CCUHsApi.getInstance().readEntity("backfill and duration");
+        return backFillDuration != null && backFillDuration.size() > 0;
+    }
+
     private static void backFillDurationMigration(CCUHsApi ccuHsApi) {
 
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object, Object> siteMap = hayStack.readEntity(Tags.SITE);
-        HashMap<Object, Object> equipMap = hayStack.readEntity("equip and system");
+        HashMap<Object, Object> siteMap = ccuHsApi.readEntity(Tags.SITE);
+        HashMap<Object, Object> equipMap = ccuHsApi.readEntity("equip and system");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String equipRef = equip.getId();
         String floorRef = equip.getFloorRef();

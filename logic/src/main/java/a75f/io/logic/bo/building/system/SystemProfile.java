@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -32,6 +34,7 @@ import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.L.app;
 import static a75f.io.logic.L.ccu;
 
 /**
@@ -839,11 +842,13 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
 
-        if(!verifyPointsAvailability("point and backfill and duration",equipref)) {
-            Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").setFloorRef(floorRef).build();
+        if(!verifyPointsAvailability("backfill and duration",equipref)) {
+            SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
+            int backFillTimeSelectedPrefs = backFillTimePref.getInt("backFillTimeDuration",0);
+            Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("config").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").setFloorRef(floorRef).build();
             String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
-            CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
-            CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
+            CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) backFillTimeSelectedPrefs, 0);
+            CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, (double) backFillTimeSelectedPrefs);
         }
         
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);

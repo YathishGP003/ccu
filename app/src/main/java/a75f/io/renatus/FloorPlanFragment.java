@@ -1,16 +1,20 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.app;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -41,10 +45,12 @@ import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -1215,6 +1221,7 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
+                setBackFillDuration(siteRoomList);
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
@@ -1222,6 +1229,29 @@ public class FloorPlanFragment extends Fragment {
         }
         return false;
     }
+
+    private void setBackFillDuration(ArrayList<String> siteRoomList) {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+
+        int[] sizes = {0, 6, 10, 20, 30, 40};
+        double[] times = {0.0, 24.0, 18.0, 12.0, 6.0, 1.0};
+        int index = Arrays.binarySearch(sizes, siteRoomList.size());
+        if (index < 0) {
+            index = -(index + 1) - 1;
+        }
+        double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
+        if (currentBackFillTime > times[index]) {
+            currentBackFillTime = times[index];
+        }
+        ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
+        SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
+        int[] durations = BackFillDuration.toIntArray();
+        SharedPreferences.Editor editor = backFillTimePref.edit();
+        editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
+        editor.putInt("backFillTimeSpSelected",Arrays.binarySearch(durations, (int) currentBackFillTime) + 1);
+        editor.apply();
+    }
+
 
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {

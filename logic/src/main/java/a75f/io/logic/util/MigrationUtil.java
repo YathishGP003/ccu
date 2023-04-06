@@ -370,7 +370,7 @@ public class MigrationUtil {
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String equipRef = equip.getId();
         String floorRef = equip.getFloorRef();
-        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
 

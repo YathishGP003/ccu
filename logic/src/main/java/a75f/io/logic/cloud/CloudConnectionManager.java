@@ -2,13 +2,26 @@ package a75f.io.logic.cloud;
 
 import android.util.Log;
 
-import org.jetbrains.annotations.NotNull;
+import android.app.AlarmManager;
+import android.content.Context;
 
+import org.jetbrains.annotations.NotNull;
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+import org.projecthaystack.io.HZincReader;
+
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.cloudservice.CloudConnectionService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,7 +67,15 @@ public class CloudConnectionManager {
         return okHttpClient;
     }
 
-    public void getCloudConnectivityStatus(CloudConnectionResponseCallback responseCallback){
+
+
+
+
+    /**
+     * This method hits /about end point update System time in CCU and also checks if /about is reachable from CCU
+     * @param responseCallback
+     */
+    public void processAboutResponse(CloudConnectionResponseCallback responseCallback){
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             return;
         }
@@ -65,6 +86,25 @@ public class CloudConnectionManager {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if(response.isSuccessful()) {
+                        String result = "";
+                        try {
+                            result = response.body().string();
+                            List<HashMap> rowList = CCUHsApi.getInstance().HGridToList(new HZincReader(result).readGrid());
+                            if (rowList.size()>0 && rowList.get(0).containsKey("serverTime")) {
+                                long siloCurrTime = HDateTime.make(rowList.get(0).get("serverTime").toString()).millis();
+                                if(Math.abs(siloCurrTime - System.currentTimeMillis()) > (30 * 1000)){
+                                    Context appContext = Globals.getInstance().getApplicationContext();
+                                    AlarmManager alarmMgr = (AlarmManager) appContext.getSystemService(Context.ALARM_SERVICE);
+                                    alarmMgr.setTime(siloCurrTime);
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            CcuLog.i(TAG_CLOUD_CONNECTION_STATUS,
+                                    "Exception occurred while processing /about response : " + result);
+                        }
+                    }
                     CcuLog.i(TAG_CLOUD_CONNECTION_STATUS,
                             "Time taken for the success response " + (new Date().getTime() - requestTime));
                     responseCallback.onSuccessResponse(response.isSuccessful());

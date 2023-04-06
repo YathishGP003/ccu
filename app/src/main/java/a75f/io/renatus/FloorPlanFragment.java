@@ -1094,7 +1094,7 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
         };
-        new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
+        new CloudConnectionManager().processAboutResponse(responseCallback);
     }
 
     @OnClick(R.id.addRoomBtn)

@@ -25,7 +25,7 @@ public abstract class SystemController
     public enum State {OFF, COOLING, HEATING}
     public enum EffectiveSatConditioning {SAT_OFF, SAT_COOLING, SAT_HEATING}
     public State systemState = OFF;
-    
+    public static final int MIN_DAMPER_FOR_CUMULATIVE_CALCULATION = 1;
     public boolean emergencyMode = false;
     
     public abstract int getCoolingSignal() ;

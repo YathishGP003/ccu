@@ -1236,13 +1236,9 @@ public class FloorPlanFragment extends Fragment {
         int[] sizes = {0, 6, 10, 20, 30, 40};
         double[] times = {0.0, 24.0, 18.0, 12.0, 6.0, 1.0};
         int index = Arrays.binarySearch(sizes, siteRoomList.size());
-        if (index < 0) {
-            index = -(index + 1) - 1;
-        }
+        if (index < 0) index = -(index + 1) - 1;
         double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
-        if (currentBackFillTime > times[index]) {
-            currentBackFillTime = times[index];
-        }
+        if (currentBackFillTime > times[index]) currentBackFillTime = times[index];
         ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
         SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
         int[] durations = BackFillDuration.toIntArray();

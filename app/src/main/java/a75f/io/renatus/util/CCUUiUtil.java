@@ -173,8 +173,6 @@ public class CCUUiUtil {
             private int getMaxNormalRows() {
                 if (totalZones <= 6) {
                     return 10;
-                } else if (totalZones <= 10) {
-                    return 8;
                 } else if (totalZones <= 20) {
                     return 7;
                 } else if (totalZones <= 30) {

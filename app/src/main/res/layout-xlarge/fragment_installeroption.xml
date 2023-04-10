@@ -258,6 +258,83 @@
                 android:textColor="@color/black"
                 android:textSize="19.5sp" />
 
+            <TextView
+                android:id="@+id/textBackfillDurationTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/relativeLayoutBACnet"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="42dp"
+                android:alpha="0.87"
+                android:text="@string/backFill_duration"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
+
+            <TextView
+                android:id="@+id/textBackfillTimeDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textBackfillDurationTime"
+                android:layout_marginStart="76dp"
+                android:alpha="0.60"
+                android:text="@string/backFill_duration_description"
+                android:textColor="@color/black"
+                android:textSize="19.5sp" />
+
+
+            <Spinner
+                android:id="@+id/spinnerBackfillTime"
+                style="@style/Widget.AppCompat.Spinner.Underlined"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="42dp"
+                android:layout_alignBaseline="@+id/textBackfillDurationTime" />
+
+            <LinearLayout
+                android:id="@+id/layoutFooterButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_below="@id/spinnerBackfillTime"
+                android:layout_alignEnd="@id/spinnerBackfillTime"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buttonCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:background="@null"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:padding="5sp"
+                    android:text="@string/cancel"
+                    android:textColor="?orange_75f"
+                    android:textSize="19.5sp" />
+
+                <View
+                    android:id="@+id/tunerDivider"
+                    android:layout_width="0.5sp"
+                    android:layout_height="25sp"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:background="@color/light_gray" />
+
+                <Button
+                    android:id="@+id/buttonApply"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:background="@null"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:padding="5sp"
+                    android:text="@string/button_apply"
+                    android:textColor="?orange_75f"
+                    android:textSize="19.5sp" />
+            </LinearLayout>
+
             <a75f.io.renatus.views.TempLimit.TempLimitView
                 android:id="@+id/imageTemp"
                 android:layout_width="match_parent"
@@ -557,9 +634,9 @@
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/relativeLayoutBACnet"
+                android:layout_below="@+id/layoutFooterButtons"
                 android:layout_alignParentEnd="true"
-                android:layout_marginTop="36dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="24dp"
                 android:background="@null"
                 android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"

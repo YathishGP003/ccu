@@ -354,7 +354,7 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
-        if (!verifyPointsAvailability()) {
+        if (verifyPointsAvailability()) {
             backFillDurationMigration(CCUHsApi.getInstance());
         }
 

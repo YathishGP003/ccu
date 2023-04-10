@@ -7,12 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,13 +18,10 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +38,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -54,7 +48,6 @@ import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
-import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,7 +62,6 @@ public class AboutFragment extends Fragment {
     private boolean mCCUAppDownloaded = false;
     private boolean mHomeAppDownloaded = false;
     private CountDownTimer otpCountDownTimer;
-    private Spinner backFillTimeSpinner;
     @BindView(R.id.tvSerialNumber)
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
@@ -151,8 +143,6 @@ public class AboutFragment extends Fragment {
             getActivity().registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
         ButterKnife.bind(this, rootView);
-
-        setBackFillTimeSpinner(rootView);
 
         HashMap site = CCUHsApi.getInstance().read("site");
 
@@ -592,35 +582,6 @@ public class AboutFragment extends Fragment {
                     default:
                         throw new IllegalStateException("Unexpected value: " + editText.getId());
                 }
-            }
-        });
-    }
-
-    private void setBackFillTimeSpinner(View rootView) {
-
-        int[] durations = BackFillDuration.toIntArray();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        this.backFillTimeSpinner = rootView.findViewById(R.id.backFillTimeSp);
-        this.backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",7));
-
-        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int index = i > 0 ? Math.min(i , durations.length - 1) : 0;
-                int backFillDurationSelected = durations[index];
-
-                CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));
-
-                editor.putInt("backFillTimeDuration", backFillDurationSelected);
-                editor.putInt("backFillTimeSpSelected",i);
-                editor.apply();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }

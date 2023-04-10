@@ -36,6 +36,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.util.CCUUtils;
@@ -83,6 +84,7 @@ public class RemoteCommandHandlerUtil {
                             long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                             Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                             if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                                RxTask.executeAsync(()->Globals.getInstance().getMessagingAckJob().doMessageAck());
                                 if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
                                     AppInstaller.getHandle().install(null, false, true, true);
                                 } else {

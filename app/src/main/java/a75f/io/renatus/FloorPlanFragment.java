@@ -1221,7 +1221,7 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
-                setBackFillDuration(siteRoomList);
+                setBackFillDuration();
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
@@ -1230,12 +1230,13 @@ public class FloorPlanFragment extends Fragment {
         return false;
     }
 
-    private void setBackFillDuration(CopyOnWriteArrayList<String> siteRoomList) {
+    private void setBackFillDuration() {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
         int[] sizes = {0, 6, 10, 20, 30, 40};
         double[] times = {0.0, 24.0, 18.0, 12.0, 6.0, 1.0};
-        int index = Arrays.binarySearch(sizes, siteRoomList.size());
+        int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
+        int index = Arrays.binarySearch(sizes, equipCount);
         if (index < 0) index = -(index + 1) - 1;
         double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
         if (currentBackFillTime > times[index]) currentBackFillTime = times[index];

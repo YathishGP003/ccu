@@ -143,11 +143,10 @@ public class CCUUiUtil {
     }
 
     public static ArrayAdapter<String> getBackFillTimeArrayAdapter(Context context) {
-        ArrayList<HashMap<Object, Object>> totalNumberOfZones = CCUHsApi.getInstance().readAllEntities("room");
-        int totalZones = totalNumberOfZones.size();
+        int equipCount = CCUHsApi.getInstance().readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
         String[] strings = BackFillDuration.getDisplayNames();
         ArrayList<String> backFillTimeArray = new ArrayList<String>(Arrays.asList(strings));
-        return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, totalZones);
+        return getDynamicBackFillTimeArrayAdapter(context, backFillTimeArray, equipCount);
     }
 
     private static ArrayAdapter<String> getDynamicBackFillTimeArrayAdapter(Context context, ArrayList<String> backFillTimeArray, int totalZones) {

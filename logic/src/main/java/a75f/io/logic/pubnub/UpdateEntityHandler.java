@@ -1,6 +1,12 @@
 package a75f.io.logic.pubnub;
 
+import static a75f.io.logic.pubnub.DataSyncHandler.isCloudEntityHasLatestValue;
+
+import android.util.Log;
+
 import com.google.gson.JsonObject;
+
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
@@ -16,13 +22,16 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ScheduleType;
 
 public class UpdateEntityHandler {
     public static final String CMD = "updateEntity";
-    public static void updateEntity(JsonObject msgObject){
+    public static void updateEntity(JsonObject msgObject, Long timeToken){
         String uid = msgObject.get("ids").getAsJsonArray().get(0).toString().replaceAll("\"", "");
         HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
+        if(!isCloudEntityHasLatestValue(entity, timeToken)){
+            Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
+            return;
+        }
         if(entity.get("room") != null){
             updateNamedSchedule(entity,uid);
         }
@@ -43,6 +52,9 @@ public class UpdateEntityHandler {
                     floor.setId(row.get("id").toString());
                     floor.setOrientation(Double.parseDouble(row.get("orientation").toString()));
                     floor.setFloorNum(Double.parseDouble(row.get("floorNum").toString()));
+                    floor.setCreatedDateTime(HDateTime.make(row.get("createdDateTime").toString()));
+                    floor.setLastModifiedDateTime((HDateTime)row.get("lastModifiedDateTime"));
+                    floor.setLastModifiedBy(row.get("lastModifiedBy").toString());
                     CCUHsApi.getInstance().updateFloorLocally(floor, floor.getId());
                 }
             }
@@ -67,6 +79,9 @@ public class UpdateEntityHandler {
                         .build();
                 zone.setId(row.get("id").toString());
                 zone.setScheduleRef(row.get("scheduleRef").toString());
+                zone.setCreatedDateTime(HDateTime.make(row.get("createdDateTime").toString()));
+                zone.setLastModifiedDateTime((HDateTime)row.get("lastModifiedDateTime"));
+                zone.setLastModifiedBy(row.get("lastModifiedBy").toString());
                 CCUHsApi.getInstance().updateZoneLocally(zone, entity.get("id").toString());
             }
         }

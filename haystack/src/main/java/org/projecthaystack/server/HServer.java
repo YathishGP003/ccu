@@ -272,7 +272,7 @@ public abstract class HServer extends HProj
   /**
    * Write to the given priority array level.
    */
-  public final void pointWrite(HRef id, int level, HVal val, String who, HNum dur, HDict opts)
+  public final void pointWrite(HRef id, int level, HVal val, String who, HNum dur, HDict opts, HDateTime lastModifiedDateTime)
   {
     // argument checks
     if (level < 1 || level > 17) throw new IllegalArgumentException("Invalid level 1-17: " + level);
@@ -285,7 +285,7 @@ public abstract class HServer extends HProj
     if (rec.missing("writable"))
       throw new UnknownNameException("Rec missing 'writable' tag: " + rec.dis());
 
-    onPointWrite(rec, level, val, who, dur, opts);
+    onPointWrite(rec, level, val, who, dur, opts, lastModifiedDateTime);
   }
 
   /**
@@ -296,7 +296,8 @@ public abstract class HServer extends HProj
   /**
    * Implementation hook for pointWrite
    */
-  protected abstract void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts);
+  protected abstract void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts,
+                                       HDateTime lastModifiedDateTime);
 
 //////////////////////////////////////////////////////////////////////////
 // History

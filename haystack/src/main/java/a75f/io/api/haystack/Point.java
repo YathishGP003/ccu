@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HDateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class Point extends Entity
     private String            tunerGroup;
     private String            hisInterpolate;
     private String            shortDis;
+    private String ccuRef;
 
     public void setDisplayName(String displayName)
     {
@@ -116,6 +118,15 @@ public class Point extends Entity
     {
         this.enums = enums;
     }
+
+    public String getCcuRef() {
+        return ccuRef;
+    }
+
+    public void setCcuRef(String ccuRef) {
+        this.ccuRef = ccuRef;
+    }
+
     private Point(){
     }
 
@@ -136,6 +147,11 @@ public class Point extends Entity
         private String tunerGroup;
         private String hisInterpolate;
         private String shortDis;
+        private String ccuRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
+
         public Builder setKind(Kind kind)
         {
             this.kind = kind;
@@ -171,6 +187,26 @@ public class Point extends Entity
         public Builder setSiteRef(String siteRef)
         {
             this.siteRef = siteRef;
+            return this;
+        }
+        public Builder setCcuRef(String ccuRef)
+        {
+            this.ccuRef = ccuRef;
+            return this;
+        }
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
             return this;
         }
         public Builder setEquipRef(String equipRef)
@@ -239,6 +275,10 @@ public class Point extends Entity
             p.displayName = this.displayName;
             p.markers = this.markers;
             p.siteRef = this.siteRef;
+            p.ccuRef = this.ccuRef;
+            p.setCreatedDateTime(createdDateTime);
+            p.setLastModifiedDateTime(lastModifiedDateTime);
+            p.setLastModifiedBy(lastModifiedBy);
             p.equipRef = this.equipRef;
             p.unit = this.unit;
             p.tz = this.tz;
@@ -342,6 +382,22 @@ public class Point extends Entity
                 }else if (pair.getKey().equals("shortDis"))
                 {
                     this.shortDis = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
                 //it.remove();
             }

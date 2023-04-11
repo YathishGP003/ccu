@@ -1,9 +1,12 @@
 package a75f.io.logic.pubnub;
 
+import static a75f.io.logic.pubnub.DataSyncHandler.isCloudEntityHasLatestValue;
+
 import android.util.Log;
 
 import com.google.gson.JsonObject;
 
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -19,14 +22,11 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
-import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.logic.pubnub.hyperstat.HyperstatReconfigurationHandler;
 
 public class UpdatePointHandler
@@ -36,16 +36,19 @@ public class UpdatePointHandler
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
-    public static void handleMessage(final JsonObject msgObject) {
+    public static void handleMessage(final JsonObject msgObject, Long timeToken) {
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
-
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
 
         if (canIgnorePointUpdate(src, pointUid, hayStack)) {
             return;
         }
-        
+        if(!isCloudEntityHasLatestValue(pointEntity, timeToken)){
+            Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
+            return;
+        }
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
@@ -164,6 +167,10 @@ public class UpdatePointHandler
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
         }
 
+        if (HSUtil.isPointUpdateNeedsSystemProfileReset(pointUid, hayStack)
+                    && L.ccu().systemProfile != null) {
+            L.ccu().systemProfile.reset();
+        }
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }
@@ -189,11 +196,13 @@ public class UpdatePointHandler
                 double level = Double.parseDouble(r.get("level").toString());
                 double val = Double.parseDouble(r.get("val").toString());
                 HVal durHVal = r.get("duration", false);
+                HDateTime lastModifiedDateTime = (HDateTime)r.get("lastModifiedDateTime");
                 double duration = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
                 //If duration shows it has already expired, then just write 1ms to force-expire it locally.
                 double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur));
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                        CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur), lastModifiedDateTime);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }

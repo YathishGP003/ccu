@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HRef;
@@ -22,6 +23,7 @@ public class Zone extends Entity
     private String            scheduleRef;
     private String            vacationRef;
     private String            createdByApplication;
+    private String ccuRef;
 
     public boolean isSystemSchedule()
     {
@@ -101,6 +103,14 @@ public class Zone extends Entity
 
     public String getCreatedByApplication() { return createdByApplication; }
 
+    public String getCcuRef() {
+        return ccuRef;
+    }
+
+    public void setCcuRef(String ccuRef) {
+        this.ccuRef = ccuRef;
+    }
+
     public HDict getHDict()
     {
         HDictBuilder b = new HDictBuilder()
@@ -116,6 +126,10 @@ public class Zone extends Entity
         if(getSiteRef() != null)
         {
             b.add("siteRef", getSiteRef());
+        }
+
+        if(getCcuRef() != null){
+            b.add("ccuRef", getCcuRef());
         }
 
 
@@ -138,6 +152,10 @@ public class Zone extends Entity
         private String scheduleRef;
         private String vacationRef;
         private String createdByApplication;
+        private String ccuRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
 
         public Builder setDisplayName(String displayName)
         {
@@ -154,6 +172,27 @@ public class Zone extends Entity
         public Builder setSiteRef(String siteRef)
         {
             this.siteRef = siteRef;
+            return this;
+        }
+
+        public Builder setCcuRef(String ccuRef) {
+            this.ccuRef = ccuRef;
+            return this;
+        }
+
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
             return this;
         }
 
@@ -186,6 +225,10 @@ public class Zone extends Entity
             z.vacationRef = this.vacationRef;
             z.id = this.id;
             z.createdByApplication = this.createdByApplication;
+            z.ccuRef = this.ccuRef;
+            z.setCreatedDateTime(createdDateTime);
+            z.setLastModifiedDateTime(lastModifiedDateTime);
+            z.setLastModifiedBy(lastModifiedBy);
             return z;
         }
 
@@ -219,6 +262,22 @@ public class Zone extends Entity
                 } else if (pair.getKey().equals("createdByApplication"))
                 {
                     this.createdByApplication = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
                 //it.remove();
             }

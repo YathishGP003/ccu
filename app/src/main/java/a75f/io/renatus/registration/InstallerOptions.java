@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -134,6 +135,7 @@ public class InstallerOptions extends Fragment {
     Button buttonSendIAM;
     Button buttonApply;
     Button buttonCancel;
+    LinearLayout linearLayout;
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
@@ -252,6 +254,7 @@ public class InstallerOptions extends Fragment {
         buttonSendIAM.setVisibility(View.GONE);
         buttonApply = rootView.findViewById(R.id.buttonApply);
         buttonCancel = rootView.findViewById(R.id.buttonCancel);
+        linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_backfill));
 
@@ -551,6 +554,7 @@ public class InstallerOptions extends Fragment {
                 toast.setView(toastLayout);
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
+                linearLayout.setVisibility(View.INVISIBLE);
             }
         });
 
@@ -976,6 +980,11 @@ public class InstallerOptions extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
+                if (sharedPreferences.getInt("backFillTimeSpSelected",6) == i) {
+                    linearLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.VISIBLE);
+                }
                 adapterView.setSelection(i);
             }
 

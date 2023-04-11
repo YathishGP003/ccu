@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -777,7 +778,7 @@ public abstract class SystemProfile
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
-        addBackFillDurationPointIfNotExists(equipref);
+        addBackFillDurationPointIfNotExists(siteRef, equipDis);
     }
 
     //VAV & DAB System profile common points are added here.
@@ -809,8 +810,6 @@ public abstract class SystemProfile
     public void addNewSystemUserIntentPoints(String equipref){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap siteMap = hayStack.read(Tags.SITE);
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(equipref);
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
@@ -840,7 +839,7 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
 
-        addBackFillDurationPointIfNotExists(equipref);
+        addBackFillDurationPointIfNotExists(siteRef, equipDis);
         
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }
@@ -1046,14 +1045,24 @@ public abstract class SystemProfile
     }
 
 
-    private void addBackFillDurationPointIfNotExists(String equipref) {
-        if(!verifyPointsAvailability("backfill and duration",equipref)) {
-            SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-            int backFillTimeSelectedPrefs = backFillTimePref.getInt("backFillTimeDuration",6);
-            Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("config").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").build();
+    private void addBackFillDurationPointIfNotExists(String siteRef, String equipDis) {
+        if(!verifyBackFillPointAvailability()) {
+            Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration")
+                    .setSiteRef(siteRef).addMarker("sp").addMarker("system").setHisInterpolate("config")
+                    .addMarker("backfill").addMarker("writable").addMarker("config").addMarker("duration")
+                    .addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, " +
+                            "4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs")
+                    .setTz(tz).setUnit("hrs")
+                    .build();
+
             String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
-            CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) backFillTimeSelectedPrefs, 24);
+            CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0,0);
             CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
         }
+    }
+
+    private static boolean verifyBackFillPointAvailability(){
+        HashMap<Object, Object> backFillDuration = CCUHsApi.getInstance().readEntity("backfill and duration");
+        return backFillDuration != null && backFillDuration.size() > 0;
     }
 }

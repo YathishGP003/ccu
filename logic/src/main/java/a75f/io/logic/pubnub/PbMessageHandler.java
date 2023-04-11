@@ -63,7 +63,7 @@ public class PbMessageHandler
                 super.handleMessage(msg);
                 PbMessage pbMessage = (PbMessage) msg.obj;
                 try {
-                    handlePbMessage(pbMessage.msg, pbMessage.cxt);
+                    handlePbMessage(pbMessage.msg, pbMessage.cxt, pbMessage.timeToken);
                 } catch (Exception e) {
                     //We do understand the consequences of doing this.
                     //But the system could still continue to work in standalone mode controlling the hvac system
@@ -98,6 +98,7 @@ public class PbMessageHandler
         try {
             pbMessage.msg = receivedMessageObject.getAsJsonObject();
             pbMessage.cxt = appContext;
+            pbMessage.timeToken = timeToken;
             message.obj = pbMessage;
             messageHandler.sendMessage(message);
             //PbMessageHandler.handlePbMessage(, appContext);
@@ -108,21 +109,21 @@ public class PbMessageHandler
         PbPreferences.setLastHandledTimeToken(timeToken, appContext);
     }
     
-    private void handlePbMessage(JsonObject msg, Context context){
+    private void handlePbMessage(JsonObject msg, Context context, Long timeToken){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
             case UpdateEntityHandler.CMD:
-               UpdateEntityHandler.updateEntity(msg);
+               UpdateEntityHandler.updateEntity(msg, timeToken);
                 break;
             case UpdatePointHandler.CMD:
-                UpdatePointHandler.handleMessage(msg);
+                UpdatePointHandler.handleMessage(msg, timeToken);
                 break;
             case SiteSyncHandler.CMD:
                 SiteSyncHandler.handleMessage(msg, context);
                 break;
             case UpdateScheduleHandler.CMD:
             case UpdateScheduleHandler.ADD_SCHEDULE:
-                UpdateScheduleHandler.handleMessage(msg);
+                UpdateScheduleHandler.handleMessage(msg, timeToken);
                 break;
             case UpdateScheduleHandler.DELETE_SCHEDULE:
                 CCUHsApi.getInstance().removeEntity(msg.get("id").getAsString());
@@ -158,5 +159,6 @@ public class PbMessageHandler
     class PbMessage {
         JsonObject msg;
         Context cxt;
+        Long timeToken;
     }
 }

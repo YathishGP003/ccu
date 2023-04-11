@@ -7,11 +7,23 @@
 //
 package org.projecthaystack.io;
 
-import java.io.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.*;
-import org.projecthaystack.*;
+import org.projecthaystack.HBin;
+import org.projecthaystack.HCol;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HList;
+import org.projecthaystack.HMarker;
+import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
+import org.projecthaystack.HXStr;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map;
 
 import a75f.io.logger.CcuLog;
 
@@ -27,18 +39,7 @@ public class HZincWriter extends HGridWriter
 // Construction
 //////////////////////////////////////////////////////////////////////////
 
-  /** Write using UTF-8 */
-  public HZincWriter(OutputStream out)
-  {
-    try
-    {
-      this.out = new PrintWriter(new OutputStreamWriter(out, "UTF-8"));
-    }
-    catch (IOException e)
-    {
-      throw new RuntimeException(e);
-    }
-  }
+  private final PrintWriter out;
 
 
   /**
@@ -53,21 +54,27 @@ public class HZincWriter extends HGridWriter
    * @param version the grid version (2 or 3)
    * @return the zinc encoding of the grid
    */
-  public static String gridToString(HGrid grid, final int version)
-  {
-    if (version != 2 && version != 3) throw new IllegalArgumentException("Invalid version: " + version);
+  public static String gridToString(HGrid grid, final int version) {
+    if (version != 2 && version != 3)
+      throw new IllegalArgumentException("Invalid version: " + version);
     StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 16);
     HZincWriter w = new HZincWriter(out);
     w.version = version;
     w.writeGrid(grid);
     return out.toString();
   }
-  
-  public static String tagsGridToString(HGrid grid)
-  {
+
+  /**
+   * Write using UTF-8
+   */
+  public HZincWriter(OutputStream out) {
+    this.out = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+  }
+
+  public static String tagsGridToString(HGrid grid) {
     CcuLog.i("CCU_PROFILING", "tagsGridToString Cols: " + grid.numCols() +
-                              " Rows: " + grid.numRows() +
-                              " Size: " + (grid.numCols()*grid.numRows()*2));
+            " Rows: " + grid.numRows() +
+            " Size: " + (grid.numCols() * grid.numRows() * 2));
     StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 2);
     HZincWriter w = new HZincWriter(out);
     w.version = 3;//Hard coding for custom use.
@@ -264,18 +271,39 @@ public class HZincWriter extends HGridWriter
 //////////////////////////////////////////////////////////////////////////
 
   private HZincWriter p(int i) { out.print(i); return this; }
-  private HZincWriter p(char c) { out.print(c); return this; }
-  private HZincWriter p(Object obj) { out.print(obj); return this; }
-  private HZincWriter nl() { out.print('\n'); return this; }
+  private HZincWriter p(char c) { out.print(c); return this;
+  }
+
+  private HZincWriter p(Object obj) {
+    out.print(obj);
+    return this;
+  }
+
+  private HZincWriter nl() {
+    out.print('\n');
+    return this;
+  }
 
 //////////////////////////////////////////////////////////////////////////
 // Fields
 //////////////////////////////////////////////////////////////////////////
 
-  /** Version of Zinc to write */
+  /**
+   * Version of Zinc to write
+   */
   public int version = 3;
 
-  private PrintWriter out;
+  public static String gridToString(HGrid grid, final int version, int page, int size) {
+    if (version != 2 && version != 3)
+      throw new IllegalArgumentException("Invalid version: " + version);
+    StringWriter out = new StringWriter(grid.numCols() * grid.numRows() * 16);
+    HZincWriter w = new HZincWriter(out);
+    w.version = version;
+    w.p("page:" + page + " size:" + size + " ");
+    w.writeGrid(grid);
+    return out.toString();
+  }
+
   private int gridDepth = 0;
 
 }

@@ -1,5 +1,7 @@
 package a75f.io.logic.pubnub;
 
+import static a75f.io.logic.pubnub.DataSyncHandler.isCloudEntityHasLatestValue;
+
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -37,9 +39,14 @@ public class UpdateScheduleHandler
     private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
     
-    public static void handleMessage(JsonObject msgObject)
+    public static void handleMessage(JsonObject msgObject, Long timeToken)
     {
         String uid = msgObject.get("id").getAsString();
+        HashMap<Object,Object> scheduleEntity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
+        if(!isCloudEntityHasLatestValue(scheduleEntity, timeToken)){
+            Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
+            return;
+        }
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));

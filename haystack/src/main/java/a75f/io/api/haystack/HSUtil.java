@@ -395,6 +395,20 @@ public class HSUtil
                 || pointEntity.containsKey("th2")
                 || pointEntity.containsKey("main")));
     }
+
+    /**
+     * Currently on conditioning mode change is being considered for loop reset.
+     * We will have
+     * @param pointUid
+     * @param instance
+     * @return
+     */
+    public static boolean isPointUpdateNeedsSystemProfileReset(String pointUid, CCUHsApi instance) {
+        HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
+        return ((pointEntity.containsKey(Tags.CONDITIONING)
+                && pointEntity.containsKey(Tags.MODE)));
+    }
+
     /**
      * Checks a given point is a limit tuner.
      * @param id
@@ -439,13 +453,23 @@ public class HSUtil
 
     public static void addPointToLocalDB(HDict dict){
         HashMap<Object, Object> map = new HashMap<>();
-        Iterator it   = dict.iterator();
-        while (it.hasNext())
-        {
+        Iterator it = dict.iterator();
+        while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             map.put(entry.getKey().toString(), entry.getValue().toString());
         }
         Point point = new Point.Builder().setHashMap(map).build();
         CCUHsApi.getInstance().addPoint(point);
+    }
+
+    public static String getLevelEntityOfPoint(String id, int level, String value, CCUHsApi hayStack) {
+        ArrayList<HashMap> values = hayStack.readPoint(id);
+        if (!values.isEmpty()) {
+            HashMap valMap = values.get(level - 1);
+            if (valMap.containsKey(value)) {
+                return valMap.get(value).toString();
+            }
+        }
+        return null;
     }
 }

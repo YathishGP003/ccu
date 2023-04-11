@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,6 +71,9 @@ public class Floor extends Entity
         private double orientation;
         private String id;
         private String createdByApplication;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
 
         public Builder setDisplayName(String displayName)
         {
@@ -91,6 +96,22 @@ public class Floor extends Entity
             this.createdByApplication = createdByApplication;
             return this;
         }
+
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
+            return this;
+        }
         
         public Floor build(){
             Floor f = new Floor();
@@ -101,6 +122,9 @@ public class Floor extends Entity
             f.floorNum = this.floorNum;
             f.orientation = this.orientation;
             f.createdByApplication = this.createdByApplication;
+            f.setCreatedDateTime(createdDateTime);
+            f.setLastModifiedDateTime(lastModifiedDateTime);
+            f.setLastModifiedBy(lastModifiedBy);
             return f;
         }
     
@@ -137,6 +161,18 @@ public class Floor extends Entity
                 else if (pair.getKey().equals("createdByApplication"))
                 {
                     this.createdByApplication = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
                 //it.remove();
             }

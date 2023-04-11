@@ -241,7 +241,7 @@ public class TestDatabase extends HServer
     return b.toGrid();
   }
 
-  protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts)
+  protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts, HDateTime lastModifiedDateTime)
   {
     CcuLog.d("CCU_HS", "onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
     WriteArray array = (WriteArray)writeArrays.get(rec.id());

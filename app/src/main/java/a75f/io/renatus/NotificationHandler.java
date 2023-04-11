@@ -1,48 +1,49 @@
 package a75f.io.renatus;
 
-
-import static a75f.io.renatus.UtilityApplication.context;
-
-import java.util.Date;
-
+import static a75f.io.logic.pubnub.DataSyncHandler.getMessageExpiryTime;
+import static a75f.io.logic.pubnub.DataSyncHandler.isMessageTimeExpired;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.util.Log;
+
 import org.joda.time.DateTime;
+
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
+import a75f.io.logic.pubnub.DataSyncHandler;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.util.Prefs;
 
-import org.joda.time.DateTime;
-
-import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.renatus.util.Prefs;
 public class NotificationHandler {
-
+    private static final long DELAY_FOR_DATA_SYNC = 480000;
+    private static final long DELAY_FOR_POINT_WRITE = 120000;
     private NotificationManager mNM = null;
-    private int mServerConnectionStatusID = 1;
-    private int mCMConnectionStatusID = 2;
+    private static final Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
+    static private final NotificationHandler mHandler = new NotificationHandler();
     private static CloudConnectivityListener cloudConnectivityListener;
     private static final String INTERNET_DISCONNECTED_TIMESTAMP = "disconnectedInternetTime";
-    private static Prefs prefs  = new Prefs(Globals.getInstance().getApplicationContext());
-    private Notification.Builder mServerConnectionStatus =
+    private final int mServerConnectionStatusID = 1;
+    private final int mCMConnectionStatusID = 2;
+    private final Notification.Builder mServerConnectionStatus =
             new Notification.Builder(Globals.getInstance().getApplicationContext())
                     .setSmallIcon(R.drawable.offline_cloud_notification)
                     .setColor((Color.RED))
                     .setContentTitle("Cloud Connection Status");
-
-    private Notification.Builder mCMConnectionStatus =
+    private final Notification.Builder mCMConnectionStatus =
             new Notification.Builder(Globals.getInstance().getApplicationContext())
                     .setSmallIcon(R.drawable.newserial)
                     .setContentTitle("CM Connection Status");
-
-    static private NotificationHandler mHandler = new NotificationHandler();
 
 
     private NotificationHandler () {
@@ -68,10 +69,16 @@ public class NotificationHandler {
     }
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
-        if(bIsConnected){
+        if (bIsConnected) {
+            CcuLog.i(L.TAG_CCU_READ_CHANGES, "CCU IS CONNECTED TO WIFI " + new Date(System.currentTimeMillis()));
+            long lastCCUUpdateTime = PreferenceUtil.getLastCCUUpdatedTime();
+            if (isMessageTimeExpired(lastCCUUpdateTime)) {
+               syncCCUData(lastCCUUpdateTime);
+            }
+            PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
             CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", 1.0);
-            prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP,"");
-        }else{
+            prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP, "");
+        } else {
             rebootDeviceByCCUNetworkWatchdogTimeoutTuner();
         }
         refreshCloudConnectivityLastUpdatedTime();
@@ -83,6 +90,31 @@ public class NotificationHandler {
         notification.when = new Date().getTime();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         mHandler.mNM.notify(mHandler.mServerConnectionStatusID, notification);
+    }
+
+
+
+    private static void syncCCUData(long lastCCUUpdateTime) {
+        CcuLog.i(L.TAG_CCU_READ_CHANGES, "Call Data Sync ");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                DataSyncHandler dataSyncHandler = new DataSyncHandler();
+                dataSyncHandler.initialiseDataSync(lastCCUUpdateTime, CCUHsApi.getInstance(), getMessageExpiryTime());
+                Log.i(L.TAG_CCU_READ_CHANGES," All Entitiesare Synced");
+                initialisePointWrite();
+            }
+        }, DELAY_FOR_DATA_SYNC);
+    }
+
+    private static void initialisePointWrite() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                CcuLog.i(L.TAG_CCU_READ_CHANGES, "After Data Sync, pointwrite ");
+                CCUHsApi.getInstance().syncEntityWithPointWrite();
+            }
+        }, DELAY_FOR_POINT_WRITE);
     }
 
     public static void setCMConnectionStatus(boolean bIsConnected) {

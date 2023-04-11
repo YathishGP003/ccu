@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +43,7 @@ public class Device extends Entity
     private String addr;
     private String profileType;
     private String id;
+    private String ccuRef;
     
     public String getAddr()
     {
@@ -74,6 +77,15 @@ public class Device extends Entity
     {
         return id;
     }
+
+    public String getCcuRef() {
+        return ccuRef;
+    }
+
+    public void setCcuRef(String ccuRef) {
+        this.ccuRef = ccuRef;
+    }
+
     private Device(){
     
     }
@@ -88,6 +100,11 @@ public class Device extends Entity
         private String floorRef;
         private String id;
         private String profileType;
+        private String ccuRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
+
         public String toString() {
             return displayName;
         }
@@ -145,6 +162,27 @@ public class Device extends Entity
             this.siteRef = siteRef;
             return this;
         }
+
+        public Builder setCcuRef(String ccuRef)
+        {
+            this.ccuRef = ccuRef;
+            return this;
+        }
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
+            return this;
+        }
         public Builder setProfileType(String type)
         {
             this.profileType = type;
@@ -161,6 +199,10 @@ public class Device extends Entity
             d.floorRef = this.floorRef;
             d.profileType =this.profileType;
             d.id = this.id;
+            d.ccuRef = this.ccuRef;
+            d.setCreatedDateTime(createdDateTime);
+            d.setLastModifiedDateTime(lastModifiedDateTime);
+            d.setLastModifiedBy(lastModifiedBy);
             return d;
         }
     
@@ -205,6 +247,22 @@ public class Device extends Entity
                 else if(pair.getKey().equals("profileType"))
                 {
                     this.profileType = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
                 //it.remove();
             }

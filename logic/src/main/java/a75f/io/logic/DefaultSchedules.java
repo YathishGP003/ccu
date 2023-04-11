@@ -60,10 +60,13 @@ public class DefaultSchedules {
                 .add("cooling")
                 .add("dis", zone ? "Zone Schedule" : "Building Schedule")
                 .add("days", hList)
+                .add("createdDateTime", HDateTime.make(System.currentTimeMillis()))
+                .add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()))
+                .add("lastModifiedBy", CCUHsApi.getInstance().getCCUUserName())
                 .add("siteRef", siteId);
-        
         if (zoneId != null) {
             defaultSchedule.add("roomRef", HRef.copy(zoneId));
+            defaultSchedule.add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
             defaultSchedule.add("disabled");// Zone schedule to be disabled by default
         }
         
@@ -91,15 +94,21 @@ public class DefaultSchedules {
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
+        HDateTime createdDateTime = null;
 
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
+            createdDateTime = HDateTime.make(System.currentTimeMillis());
         }
         else {
             localId = HRef.make(id);
+            HDict vacDict = CCUHsApi.getInstance().getScheduleDictById(id);
+            if(vacDict.has("createdDateTime")) {
+                createdDateTime = HDateTime.make(vacDict.get("createdDateTime").toString());
+            }
         }
 
-        HDict defaultSchedule = new HDictBuilder()
+        HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("temp")
                 .add("schedule")
@@ -110,14 +119,19 @@ public class DefaultSchedules {
                 .add("range", buildVacationHDictRange(startDate, endDate))
                 .add("dis", vacationName)
                 .add("siteRef", siteId)
-                .toDict();
-        Log.d("CCU_HS","upsertVacation: "+defaultSchedule.toZinc());
+                .add("lastModifiedBy", CCUHsApi.getInstance().getCCUUserName())
+                .add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
+
+        if(createdDateTime != null){
+            defaultSchedule.add("createdDateTime", createdDateTime);
+        }
         if (id == null)
         {
-            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
         } else {
-            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
+            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule.toDict());
         }
+        Log.d("CCU_HS","upsertVacation: "+defaultSchedule.toDict().toZinc());
     }
 
     private static HDict buildVacationHDictRange(DateTime startDate, DateTime endDate){
@@ -139,15 +153,21 @@ public class DefaultSchedules {
     {
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
+        HDateTime createdDateTime = null;
 
         if(id == null) {
             localId = HRef.make(UUID.randomUUID().toString());
+            createdDateTime = HDateTime.make(System.currentTimeMillis());
         }
         else {
             localId = HRef.make(id);
+            HDict vacDict = CCUHsApi.getInstance().getScheduleDictById(id);
+            if(vacDict.has("createdDateTime")) {
+                createdDateTime = HDateTime.make(vacDict.get("createdDateTime").toString());
+            }
         }
 
-        HDict defaultSchedule = new HDictBuilder()
+        HDictBuilder defaultSchedule = new HDictBuilder()
                                         .add("id", localId)
                                         .add("temp")
                                         .add("schedule")
@@ -159,15 +179,21 @@ public class DefaultSchedules {
                                         .add("dis", vacationName)
                                         .add("siteRef", siteId)
                                         .add("roomRef", HRef.copy(roomRef))
-                                        .toDict();
-    
-        Log.d("CCU_HS","upsertZoneVacation: "+defaultSchedule.toZinc());
+                                        .add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()))
+                                        .add("lastModifiedBy", CCUHsApi.getInstance().getCCUUserName())
+                                       .add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
+                                        //.toDict();
+        if(createdDateTime != null){
+            defaultSchedule.add("createdDateTime", createdDateTime);
+        }
+
         if (id == null)
         {
-            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
         } else {
-            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
+            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule.toDict());
         }
+        Log.d("CCU_HS","upsertZoneVacation: "+defaultSchedule.toDict().toZinc());
     }
 
     public static void setDefaultCoolingHeatingTemp(){

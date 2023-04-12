@@ -361,7 +361,7 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
-        if (!verifyPointsAvailability() && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+        if (!verifyPointsAvailability(CCUHsApi.getInstance()) && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             backFillDurationMigration(CCUHsApi.getInstance());
         }
 
@@ -369,8 +369,10 @@ public class MigrationUtil {
     }
 
 
-    private static boolean verifyPointsAvailability(){
-        HashMap<Object, Object> backFillDuration = CCUHsApi.getInstance().readEntity("backfill and duration");
+    private static boolean verifyPointsAvailability(CCUHsApi ccuHsApi){
+        HashMap<Object, Object> equipMap = ccuHsApi.readEntity("equip and system");
+        Equip equipRef = new Equip.Builder().setHashMap(equipMap).build();
+        ArrayList<HashMap<Object, Object>> backFillDuration = CCUHsApi.getInstance().readAllEntities("point and system and backfill and duration and equipRef == \"" + equipRef + "\"");
         return backFillDuration != null && backFillDuration.size() > 0;
     }
 
@@ -379,12 +381,19 @@ public class MigrationUtil {
         HashMap<Object, Object> siteMap = ccuHsApi.readEntity(Tags.SITE);
         HashMap<Object, Object> equipMap = ccuHsApi.readEntity("equip and system");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        String floorRef = equip.getFloorRef();
+        String equipRef = equip.getId();
         String siteRef = Objects.requireNonNull(siteMap.get(Tags.ID)).toString();
         String tz = siteMap.get("tz").toString();
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
 
-        Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration").setSiteRef(siteRef).addMarker("sp").addMarker("system").setHisInterpolate("config").addMarker("backfill").addMarker("writable").addMarker("duration").addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, 4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs").setTz(tz).setUnit("hrs").setFloorRef(floorRef).build();
+        Point backFillDurationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "backFillDuration")
+                .setSiteRef(siteRef).setEquipRef(equipRef).addMarker("sp").addMarker("system").setHisInterpolate("config")
+                .addMarker("backfill").addMarker("writable").addMarker("config").addMarker("duration")
+                .addMarker("ventilation").setEnums("0 - None, 1 - 1 hr, 2 - 2 hrs, 3 - 3 hrs, " +
+                        "4 - 6 hrs, 5 - 12 hrs, 6 - 24 hrs, 7 - 48 hrs, 8 - 72 hrs")
+                .setTz(tz).setUnit("hrs")
+                .build();
+
         String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
         CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
         CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);

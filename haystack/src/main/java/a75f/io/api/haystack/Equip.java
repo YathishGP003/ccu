@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDateTime;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,6 +19,7 @@ public class Equip extends Entity
     private String roomRef;
     private String floorRef;
     private String createByApplication;
+    private String ccuRef;
 
     public String getVendor() {
         return vendor;
@@ -115,6 +118,15 @@ public class Equip extends Entity
     public String toString() {
         return displayName;
     }
+
+    public String getCcuRef() {
+        return ccuRef;
+    }
+
+    public void setCcuRef(String ccuRef) {
+        this.ccuRef = ccuRef;
+    }
+
     public static class Builder{
         private String            displayName;
         private HashSet<String> markers = new HashSet<>();
@@ -123,6 +135,10 @@ public class Equip extends Entity
         private String floorRef;
         private String group;
         private String createdByApplication;
+        private String ccuRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
 
         public Builder setAhuRef(String ahuRef)
         {
@@ -207,6 +223,26 @@ public class Equip extends Entity
             this.siteRef = siteRef;
             return this;
         }
+        public Builder setCcuRefRef(String ccuRef)
+        {
+            this.ccuRef = ccuRef;
+            return this;
+        }
+        public Builder setCreatedDateTime(HDateTime createdDateTime)
+        {
+            this.createdDateTime = createdDateTime;
+            return this;
+        }
+        public Builder setLastModifiedDateTime(HDateTime lastModifiedDateTime)
+        {
+            this.lastModifiedDateTime = lastModifiedDateTime;
+            return this;
+        }
+        public Builder setLastModifiedBy(String lastModifiedBy)
+        {
+            this.lastModifiedBy = lastModifiedBy;
+            return this;
+        }
         public Builder setCreatedByApplication(String createdByApplication) {
             this.createdByApplication = createdByApplication;
             return this;
@@ -229,6 +265,10 @@ public class Equip extends Entity
             q.model = this.model;
             q.vendor = this.vendor;
             q.createByApplication = this.createdByApplication;
+            q.ccuRef = this.ccuRef;
+            q.setCreatedDateTime(createdDateTime);
+            q.setLastModifiedDateTime(lastModifiedDateTime);
+            q.setLastModifiedBy(lastModifiedBy);
             return q;
         }
         
@@ -299,6 +339,22 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("createdByApplication"))
                 {
                     this.createdByApplication = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
                 }
                 //it.remove();
             }

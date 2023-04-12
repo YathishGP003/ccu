@@ -1,5 +1,7 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -44,10 +46,14 @@ public class UpdateScheduleHandler implements MessageHandler
     public static final String DELETE_SCHEDULE = "deleteSchedule";
     private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
-    
-    public void handleMessage(JsonObject msgObject)
-    {
+
+    public static void handleMessage(JsonObject msgObject, Long timeToken) {
         String uid = msgObject.get("id").getAsString();
+        HashMap<Object,Object> scheduleEntity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
+        if(!isCloudEntityHasLatestValue(scheduleEntity, timeToken)){
+            Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
+            return;
+        }
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
@@ -94,7 +100,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 if (s.isVacation()) {
                     CCUHsApi.getInstance().updateScheduleNoSync(s, null);
                     if (s.getRoomRef()!= null)
-                    CCUHsApi.getInstance().updateScheduleNoSync(s, s.getRoomRef());
+                        CCUHsApi.getInstance().updateScheduleNoSync(s, s.getRoomRef());
                 }
                 else if (s.getMarkers().contains("building") && !s.getMarkers().contains("zone"))
                 {
@@ -246,7 +252,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 }
                 Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
                 if (zoneSchedule.getRoomRef()!= null)
-                CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+                    CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
             }
         }
     }
@@ -283,6 +289,7 @@ public class UpdateScheduleHandler implements MessageHandler
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").toString());
             return;
         }
-        handleMessage(jsonObject);
+        long timeToken = jsonObject.get("timeToken").getAsLong();
+        handleMessage(jsonObject, timeToken);
     }
 }

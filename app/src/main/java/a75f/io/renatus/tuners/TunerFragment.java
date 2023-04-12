@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
@@ -652,7 +653,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             @Override
             protected Void doInBackground(final String... params) {
                 if (val == null){
-                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1));
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), (int) level,
+                            CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1),
+                            HDateTime.make(System.currentTimeMillis()));
                     HDictBuilder b = new HDictBuilder()
                             .add("id", HRef.copy(id))
                             .add("level",level)

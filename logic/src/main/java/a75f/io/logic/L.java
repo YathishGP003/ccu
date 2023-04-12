@@ -52,6 +52,7 @@ public class L
     public static final String TAG_CCU_MIGRATION_UTIL = "MIGRATION_UTIL";
     public static final String TAG_OTN = "CCU_OTN";
     public static final String TAG_CCU_BLE = "CCU_BLE";
+    public static final String TAG_CCU_READ_CHANGES = "CCU_READ_CHANGES";
 
     public static Context app()
     {

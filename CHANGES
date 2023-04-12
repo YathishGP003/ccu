@@ -1,3 +1,38 @@
+ - Merged PR 6301: Updating CCU's system time with Silo server time
+ - Merged PR 6774: ccuRef for all entities related to CCU
+ - Merged PR 6971: Operating mode descrepancy
+ - Merged PR 7141: Fix merge issue for unauthrized token
+ - Fix merge issue for unauthrized token
+ - Merged PR 7017: US - 16065
+ - Merged PR 7052: US - 16074
+ - Merged PR 6047: 3 VAPT issues resolved.
+ - Merged PR 7121: 18555 Airflow temp configuration fix
+ - Merged PR 7058: Fallback for networkWatchdogTimeout tuner
+ - Merged PR 6934: 18288 CCU: Desired temperature adjustments reverting immediately
+ - Merge branch 'Bug/samjith/18166_fix_unauthorized_mode' into Bug/samjith/18250_network_watchdog_tuner_default
+ - Merge master
+ - Merged PR 6884: Refactor CCU authorization logic
+ - Merge master
+ - Merged PR 6987: Fix incorrect enum mapping
+ - Fallback for networkWatchdogTimeout tuner
+ - Merged PR 6862: Bug 18225: Portals: discrepancy seen for 'AnalogIn1' heatmap runtime widget f...
+ - Merged PR 6880: Bug 17427: SSE Fan should tun on in AutoForceOccupied & Forceoccupied conditions
+ - Merged PR 4512: Bug 13189: CCU | Celsisus Support | Alerts generated shows temperature withou...
+ - Merged PR 6980: Fix to find out pairing start  address of CCU during replace process
+ - Merged PR 7069: 18410 Hyperstat VRV seed message fix
+ - Merged PR 7000: fixed dependency when deleting the floor.
+ - Merged PR 6577: 17642 - HTTP Client Token Management
+ - Merged PR 6928:  "kind" should be  "Str" is the value is String
+ - Merged PR 6689: Resolved Raygun crashes
+ - Merged PR 7027: Handle cancel timer crash
+ - Merged PR 7015: CCU tablet Back button exits "Safe mode"
+ - Fahrenheit set to one decimal place in AlertsFragment.java
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
+ - Fix incorrect enum mapping
+ - Initialze conditioning mode
+ - Reset system PI loop when conditioning mode is changed.
+ - comments resolved
+ - Version bump to 1.638.0
  - Merged PR 6480: 16044 - Safe mode screen
  - Merged PR 6933: Fix tuner group name display
  - Merged PR 6714: Relay2 reheat config mapping
@@ -17,9 +52,20 @@
  - Merged PR 6761: 17034 - Fix to restore modbus modules
  - Merged PR 6912: output text does not consider the unit of the input value.
  - Merged PR 6812: 18104 - Issues with restoring setting points resolved
+ - resolving comments to optimise AlertsFragment.formatMessageToCelsius method
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
+ - Addressed review comments
+ - Refactor CCU authorization logic
  - Merged PR 6691: 17817 - Humidity Number Format Issue
+ - extracting into a method
+ - extracting into a method
+ - code refractorization
+ - Bug 17427: SSE Fan should tun on in AutoForceOccupied & Forceoccupied conditions
+ - Bug 18225: Portals: discrepancy seen for 'AnalogIn1' heatmap runtime widget for SSE zone profile
  - output text does not consider the unit of the input value.
+ - alert message round off to one decimal
  - Added logs and remove scheduleSync
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
  - Merged PR 6819: - Auto forced tag name correction: `occupancy` to 'occupied'
  - Merged PR 6495: Bug 13402: CCU | 'Intrinsic Schedule' tiles discrepancy seen on CCU's system...
  - Sync issue race condition
@@ -199,6 +245,9 @@
  - Merged PR 5612: Integration bug fixes
  - Merged PR 5815: 15037 - Weather API Migration
  - Bug 13241: CCU | Celsius Support | Discrepancy when Toggle is enabled during Multiple CCU
+ - alertMessage format changed
+ - alertMessage format changed
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into Bug/bharath/13189/Alerts_value_round_off
  - changed getErrRespString to getRespString
  - Fix decimal placement in weather widget humidity value
  - focussable changed to title
@@ -392,7 +441,6 @@
  - AutforcedOccupied should consider next occupied temp
  - Version bump to 1.640.0
  - Version bump to 1.639.0
- - Version bump to 1.638.0
  - Log upload from CCU
  - Remove occupancy mode update from smartstat profiles , it is currently done by scheduler
  - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
@@ -455,6 +503,8 @@
  - Merging 12735 for 622.2 release
  - Merging 13230 for 622.2 release
  - Merging 12930 for 622.2 release
+ - code formatted
+ - Bug 13189: CCU | Celsisus Support | Alerts generated shows temperature without round off.
  - deleting unwanted patch files
  - bug 12826 fix into 622 hot fix branch
  - Merge patches for 13065 and 12873

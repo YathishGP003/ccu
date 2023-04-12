@@ -8,13 +8,10 @@
 //
 package org.projecthaystack.client;
 
-import a75f.io.api.haystack.BuildConfig;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.constants.CcuFieldConstants;
-import a75f.io.constants.HttpConstants;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -43,7 +40,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.BuildConfig;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
 
@@ -416,7 +415,7 @@ public class HClient extends HProj
     */
   public HGrid pointWrite(
     HRef id, int level, String who,
-    HVal val, HNum dur)
+    HVal val, HNum dur, HDateTime lastModifiedDateTime)
   {
     HGridBuilder b = new HGridBuilder();
     b.addCol("id");
@@ -424,13 +423,16 @@ public class HClient extends HProj
     b.addCol("who");
     b.addCol("val");
     b.addCol("duration");
+    b.addCol("lastModifiedDateTime");
 
     b.addRow(new HVal[] {
       id,
       HNum.make(level),
       HStr.make(who),
       val,
-      dur });
+      dur,
+      lastModifiedDateTime
+    });
 
     HGrid req = b.toGrid();
     HGrid res = call("pointWrite", req);
@@ -541,19 +543,38 @@ public class HClient extends HProj
     CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
-    if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
+    if (res != null && res.isErr()) {
+      CcuLog.e("CCU_HS", "Network Error: " + res);
+    }
     return res;
   }
 
-  private HGrid postGrid(String op, HGrid req)
-  {
+  private HGrid postGrid(String op, HGrid req) {
     String reqStr = HZincWriter.gridToString(req, this.version);
     String resStr = postString(uri + op, reqStr);
-    return (resStr == null? null : new HZincReader(resStr).readGrid());
+    return (resStr == null ? null : new HZincReader(resStr).readGrid());
   }
 
-  private String postString(String uriStr, String req)
-  {
+  public HGrid call(String op, HGrid req, int page, int size) {
+    req.dump();
+    HGrid res = postGrid(op, req, page, size);
+    if (res != null && res.isErr()) {
+      CcuLog.e("CCU_HS", "Network Error: " + res);
+    }
+    return res;
+  }
+
+  private HGrid postGrid(String op, HGrid req, int page, int size) {
+    String reqStr = HZincWriter.gridToString(req, this.version, page, size);
+    CcuLog.d("CCU_HCLIENT", "reqStr: " + reqStr);
+    uri = getUri(uri, op);
+    String resStr = postString(uri + op, reqStr);
+    return (resStr == null ? null : new HZincReader(resStr).readGrid());
+  }
+
+  private final HashMap watches = new HashMap();
+
+  private String postString(String uriStr, String req) {
     return postString(uriStr, req, null);
   }
 
@@ -571,15 +592,15 @@ public class HClient extends HProj
           c.setDoOutput(true);
           c.setDoInput(true);
           c.setRequestProperty("Connection", "Close");
-          c.setRequestProperty("Content-Type", mimeType == null ? "text/zinc": mimeType);
+          c.setRequestProperty("Content-Type", mimeType == null ? "text/zinc" : mimeType);
           c.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
           if (StringUtils.isNotBlank(bearerToken)) {
             c.setRequestProperty("Authorization", "Bearer " + bearerToken);
           } else {
             c.setRequestProperty("api-key", apiKey);
           }
-          c.setConnectTimeout(30000);
-          c.setReadTimeout(30000);
+          c.setConnectTimeout(300000);
+          c.setReadTimeout(300000);
           c.connect();
 
           CcuLog.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
@@ -727,7 +748,13 @@ public class HClient extends HProj
 //////////////////////////////////////////////////////////////////////////
 
   private AuthClientContext auth;
-  private HashMap watches = new HashMap();
+
+  private String getUri(String uri, String op) {
+    if (op.equalsIgnoreCase("readChanges")) {
+      return uri.replace("v1", "v2");
+    }
+    return uri;
+  }
 
   ///////////////////////////////////////////////////////////////////////
   public HGrid invoke(String op, HGrid req) throws IOException {
@@ -736,8 +763,10 @@ public class HClient extends HProj
     req.dump();
     String reqStr = HZincWriter.gridToString(req, getVersion());
     String resStr = postStringWithIOException(uri + op, reqStr);
-    HGrid res = (resStr == null? null : new HZincReader(resStr).readGrid());
-    if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
+    HGrid res = (resStr == null ? null : new HZincReader(resStr).readGrid());
+    if (res != null && res.isErr()) {
+      CcuLog.e("CCU_HS", "Network Error: " + res);
+    }
     return res;
   }
   // Assuming this old, alternate code is only for Haystack calls since it attaches Haystack API key

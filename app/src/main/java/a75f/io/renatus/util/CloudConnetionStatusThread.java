@@ -80,7 +80,7 @@ public class CloudConnetionStatusThread extends Thread {
             }
         };
 
-        new CloudConnectionManager().getCloudConnectivityStatus(responseCallback);
+        new CloudConnectionManager().processAboutResponse(responseCallback);
     }
 
     private synchronized void pingCloudServer() {

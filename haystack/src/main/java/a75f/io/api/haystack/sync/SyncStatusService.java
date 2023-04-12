@@ -56,6 +56,7 @@ public class SyncStatusService {
         refTypes.add("ahuRef");
         refTypes.add("gatewayRef");
         refTypes.add("scheduleRef");
+        refTypes.add("ccuRef");
         
     }
     

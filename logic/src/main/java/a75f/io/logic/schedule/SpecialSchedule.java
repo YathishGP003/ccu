@@ -14,6 +14,7 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projecthaystack.HDate;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HNum;
@@ -36,20 +37,13 @@ public class SpecialSchedule {
     }
     public static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final String OVERLAP_DAY = "YYYY-MM-dd";
-    private static final String OVERLAP_END_TIME_FORMAT = "hh:mm aa";
 
     public static void createSpecialSchedule(String specialScheduleId, String scheduleName, DateTime startDate,
                                              DateTime endDate, double coolVal, double heatVal, boolean isZone,
                                              String zoneId){
 
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-        HRef localId;
-        if(StringUtils.isEmpty(specialScheduleId)) {
-            localId = HRef.make(UUID.randomUUID().toString());
-        }
-        else {
-            localId = HRef.make(specialScheduleId.replaceFirst("@", ""));
-        }
+
         boolean isLastHour = endDate.getHourOfDay() == 23 && endDate.getMinuteOfHour() == 59;
         HDict hDict = new HDictBuilder()
                 .add("stdt", HDate.make(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth()))
@@ -62,8 +56,7 @@ public class SpecialSchedule {
                 .add("heatVal", HNum.make(heatVal))
                 .toDict();
 
-        HDictBuilder defaultSchedule = new HDictBuilder()
-                .add("id", localId)
+        HDictBuilder specialSchedule = new HDictBuilder()
                 .add("special")
                 .add(isZone ? "zone":"building")
                 .add("temp")
@@ -72,12 +65,29 @@ public class SpecialSchedule {
                 .add("cooling")
                 .add("dis", scheduleName)
                 .add("range", hDict)
+                .add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()))
+                .add("lastModifiedBy", CCUHsApi.getInstance().getCCUUserName())
                 .add("siteRef", siteId);
 
         if (zoneId != null) {
-            defaultSchedule.add("roomRef", HRef.copy(zoneId));
+            specialSchedule.add("roomRef", HRef.copy(zoneId));
+            specialSchedule.add("ccuRef", CCUHsApi.getInstance().getCcuId());
         }
-        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
+        HRef localId;
+        if(StringUtils.isEmpty(specialScheduleId)) {
+            specialSchedule.add("createdDateTime", HDateTime.make(System.currentTimeMillis()));
+            localId = HRef.make(UUID.randomUUID().toString());
+        }
+        else {
+            String ssId = specialScheduleId.replaceFirst("@", "");
+            localId = HRef.make(ssId);
+            HDict ssDict = CCUHsApi.getInstance().getScheduleDictById(ssId);
+            if(ssDict.has("createdDateTime")){
+                specialSchedule.add("createdDateTime", HDateTime.make(ssDict.get("createdDateTime").toString()));
+            }
+        }
+        specialSchedule.add("id", localId);
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), specialSchedule.toDict());
     }
 
     public static boolean isSpecialScheduleNameAvailable(String specialScheduleName,

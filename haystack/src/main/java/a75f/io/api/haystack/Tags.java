@@ -162,4 +162,7 @@ public class Tags
 
     public static final String MESSAGE = "message";
     public static final String KIND = "kind";
+    public static final String VACATION = "vacation";
+    public static final String NAMED = "named";
+    public static final String LAST_MODIFIED_TIME = "lastModifiedDateTime";
 }

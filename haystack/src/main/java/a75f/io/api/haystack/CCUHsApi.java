@@ -28,6 +28,7 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
+import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
@@ -221,6 +222,9 @@ public class CCUHsApi
     }
 
     public String addSite(Site s) {
+        s.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        s.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        s.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String siteId = tagsDb.addSite(s);
         Log.i("CCU_HS"," add Site "+siteId);
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(siteId, "@"));
@@ -233,7 +237,16 @@ public class CCUHsApi
         return tagsDb.addSiteWithId(s, id);
     }
 
+    private boolean isBuildingTunerEquip(Equip equip){
+        return equip.getMarkers().contains("tuner");
+    }
     public String addEquip(Equip q) {
+        if(!isBuildingTunerEquip(q)){
+            q.setCcuRef(getCcuId());
+        }
+        q.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        q.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String equipId = tagsDb.addEquip(q);
         syncStatusService.addUnSyncedEntity(equipId);
         return equipId;
@@ -241,10 +254,25 @@ public class CCUHsApi
 
     /** For adding an equip originating from server, e.g. import tuners */
     public String addRemoteEquip(Equip q, String id) {
+        if(!isBuildingTunerEquip(q)){
+            q.setCcuRef(getCcuId());
+        }
         return tagsDb.addEquipWithId(q, id);
     }
 
+    private boolean isBuildingTunerPoint(Point point){
+        if(point.getEquipRef() != null){
+            return CCUHsApi.getInstance().readMapById(point.getEquipRef()).containsKey("tuner");
+        }
+        return false;
+    }
     public String addPoint(Point p) {
+        if(!isBuildingTunerPoint(p)){
+            p.setCcuRef(getCcuId());
+        }
+        p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String pointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
@@ -252,6 +280,9 @@ public class CCUHsApi
 
     /** For adding an point originating from server, e.g. import tuners */
     public String addRemotePoint(Point p, String id) {
+        if(!isBuildingTunerPoint(p)){
+            p.setCcuRef(getCcuId());
+        }
         return tagsDb.addPointWithId(p, id);
     }
 
@@ -260,16 +291,25 @@ public class CCUHsApi
     }
 
     public String addPoint(RawPoint p) {
+        p.setCcuRef(getCcuId());
+        p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String rawPointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(rawPointId);
         return rawPointId;
     }
 
     public String addRemotePoint(RawPoint p, String id) {
+        p.setCcuRef(getCcuId());
         return tagsDb.addPointWithId(p, id);
     }
 
     public String addPoint(SettingPoint p) {
+        p.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        p.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
+        p.setCcuRef(getCcuId());
         String pointId = tagsDb.addPoint(p);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
@@ -277,18 +317,31 @@ public class CCUHsApi
 
     // From EntityPullHandler
     public String addPointWithId(SettingPoint p, String id) {
+        p.setCcuRef(getCcuId());
         String pointId = tagsDb.addPointWithId(p, id);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
     }
 
     public String updateSettingPoint(SettingPoint p, String id) {
+        p.setCcuRef(getCcuId());
+        p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         String pointId = tagsDb.updateSettingPoint(p,id);
         syncStatusService.addUnSyncedEntity(pointId);
         return pointId;
     }
 
+    private boolean isDeviceCCU(Device device){
+        return device.getMarkers().contains("ccu");
+    }
+
     public String addDevice(Device d) {
+        if(!isDeviceCCU(d)){
+            d.setCcuRef(getCcuId());
+        }
+        d.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        d.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        d.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String deviceId = tagsDb.addDevice(d);
         syncStatusService.addUnSyncedEntity(deviceId);
         return deviceId;
@@ -296,16 +349,26 @@ public class CCUHsApi
 
     // From EntityPullHandler
     public String addRemoteDevice(Device d, String id) {
+        if(!isDeviceCCU(d)){
+            d.setCcuRef(getCcuId());
+        }
         return tagsDb.addDeviceWithId(d, id);
     }
 
     public void updateDevice(Device d, String id) {
+        if(!isDeviceCCU(d)){
+            d.setCcuRef(getCcuId());
+        }
+        d.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateDevice(d, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
     }
     public String addFloor(Floor f) {
+        f.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        f.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        f.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String floorId = tagsDb.addFloor(f);
         syncStatusService.addUnSyncedEntity(floorId);
         return floorId;
@@ -332,8 +395,12 @@ public class CCUHsApi
                               .build();
         CCUHsApi.getInstance().addPoint(occupancy);
     }
-    
+
     public String addZone(Zone z) {
+        z.setCcuRef(getCcuId());
+        z.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        z.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        z.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         addZoneOccupancyPoint(zoneId, z);
@@ -342,10 +409,14 @@ public class CCUHsApi
 
     // From EntityPullHandler
     public String addRemoteZone(Zone z, String id) {
+        z.setCcuRef(getCcuId());
         return tagsDb.addZoneWithId(z, id);
     }
 
     public void updateSite(Site s, String id) {
+        s.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        s.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        s.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         tagsDb.updateSite(s, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -371,6 +442,10 @@ public class CCUHsApi
 
     public void updateEquip(Equip q, String id)
     {
+        if(!isBuildingTunerEquip(q)){
+            q.setCcuRef(getCcuId());
+        }
+        q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateEquip(q, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -379,6 +454,8 @@ public class CCUHsApi
 
     public void updatePoint(RawPoint r, String id)
     {
+        r.setCcuRef(getCcuId());
+        r.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updatePoint(r, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -387,6 +464,10 @@ public class CCUHsApi
 
     public void updatePoint(Point point, String id)
     {
+        if(!isBuildingTunerPoint(point)){
+            point.setCcuRef(getCcuId());
+        }
+        point.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updatePoint(point, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -395,6 +476,7 @@ public class CCUHsApi
 
     public void updateFloor(Floor r, String id)
     {
+        r.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateFloor(r, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -408,6 +490,8 @@ public class CCUHsApi
 
     public void updateZone(Zone z, String id)
     {
+        z.setCcuRef(getCcuId());
+        z.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateZone(z, id);
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
@@ -416,6 +500,8 @@ public class CCUHsApi
 
     public void updateZoneLocally(Zone z, String id)
     {
+        Log.i("ccu_read_changes","updateZoneLocally  "+z.getScheduleRef());
+        z.setCcuRef(getCcuId());
         tagsDb.updateZone(z, id);
     }
 
@@ -581,11 +667,12 @@ public class CCUHsApi
      * @param duration
      */
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
-        hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
+        hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration), HDateTime.make(System.currentTimeMillis()));
     }
 
     public void writePointStrValLocal(String id, int level, String who, String val, int duration) {
-        hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration));
+        hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration),
+                HDateTime.make(System.currentTimeMillis()));
     }
 
     /**
@@ -639,7 +726,7 @@ public class CCUHsApi
     }
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
-        hsClient.pointWrite(id, level, who, val, dur);
+        hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
 
         if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
@@ -803,6 +890,21 @@ public class CCUHsApi
             }
         }
         return 0;
+    }
+
+    public String readPointPriorityLatestTime(String id) {
+
+        ArrayList values = readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("lastModifiedDateTime") != null) {
+                    return (valMap.get("lastModifiedDateTime").toString());
+                }
+            }
+        }
+        return null;
     }
 
     public Double readPointPriorityValByQuery(String query)
@@ -1526,6 +1628,8 @@ public class CCUHsApi
         hDictBuilder.add("siteRef", getSiteIdRef());
         hDictBuilder.add("equipRef", equipRef);
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
+        hDictBuilder.add("createdDateTime", HDateTime.make(System.currentTimeMillis()));
+        hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
@@ -1555,6 +1659,8 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("createdDateTime", HDateTime.make(ccu.get("createdDateTime").toString()));
+        hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
@@ -1599,9 +1705,18 @@ public class CCUHsApi
         }
         Equip q = new Equip.Builder().setHashMap(diag).build();
         q.setGatewayRef(systemEquipRef);
+        q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         CCUHsApi.getInstance().updateEquip(q, q.getId());
+        updateCcuRefForDiagPoints(q);
     }
 
+    private void updateCcuRefForDiagPoints(Equip diagEquip){
+        ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + diagEquip.getId()+"\"");
+        for(HashMap<Object, Object> equipPoint : equipPoints){
+            Point point = new Point.Builder().setHashMap(equipPoint).build();
+            updatePoint(point, point.getId());
+        }
+    }
     public void updateCCUahuRef(String ahuRef) {
 
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
@@ -1762,6 +1877,7 @@ public class CCUHsApi
 
     public void updateSchedule(Schedule schedule)
     {
+        schedule.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
 
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
@@ -1770,6 +1886,7 @@ public class CCUHsApi
 
     public void updateZoneSchedule(Schedule schedule, String zoneId)
     {
+        schedule.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
@@ -2492,20 +2609,22 @@ public class CCUHsApi
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
+                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
 
-                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                        HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
                                 .add("val", kind.equals(Kind.STRING.getValue()) ?
-                                        HStr.make(val.toString()) : val).toDict();
-                        hDictList.add(pid);
+                                        HStr.make(val.toString()) : val);
+                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                        hDictList.add(pid.toDict());
 
                         HDict rec = hsClient.readById(HRef.copy(id));
 
                         //save points on tagsDb
                         tagsDb.onPointWrite(rec, Integer.parseInt(level),
                                 kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                        val, who, HNum.make(0), rec);
+                                        val, who, HNum.make(0), rec, lastModifiedDateTime);
 
                     }
                     //save his data to local cache

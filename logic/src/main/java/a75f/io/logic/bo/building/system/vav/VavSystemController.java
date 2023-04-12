@@ -137,7 +137,12 @@ public class VavSystemController extends SystemController
             reset();
             return;
         }else if(systemState == OFF) {
-            systemState = COOLING;
+            //Initialize System State
+            if (conditioningMode == AUTO || conditioningMode == COOLONLY) {
+                systemState = COOLING;
+            } else if (conditioningMode == HEATONLY) {
+                systemState = HEATING;
+            }
             piController.reset();
         }
 
@@ -950,11 +955,13 @@ public class VavSystemController extends SystemController
     
     @Override
     public void reset(){
+        CcuLog.i(L.TAG_CCU_SYSTEM, "Reset system loop");
         weightedAverageCoolingOnlyLoadMAQueue.clear();
         weightedAverageHeatingOnlyLoadMAQueue.clear();
         piController.reset();
         heatingSignal = 0;
         coolingSignal = 0;
+        systemState = OFF;
     }
     
     public void resetLoop() {

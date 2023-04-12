@@ -3,7 +3,7 @@ package a75f.io.api.haystack;
 import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
-import org.apache.commons.lang3.StringUtils;
+
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
@@ -204,6 +204,7 @@ public class Schedule extends Entity
                     .add("siteRef", CCUHsApi.getInstance().getSiteIdRef());
             if(isZone){
                 hDictBuilder.add("zone");
+                hDictBuilder.add("ccuRef", CCUHsApi.getInstance().getCcuId());
             }
             else{
                 hDictBuilder.add("building");
@@ -819,8 +820,16 @@ public class Schedule extends Entity
 
     private DateTime mStartDate;
     private DateTime mEndDate;
-    
-    
+    private String ccuRef;
+
+    public String getCcuRef() {
+        return ccuRef;
+    }
+
+    public void setCcuRef(String ccuRef) {
+        this.ccuRef = ccuRef;
+    }
+
     public String getRoomRef()
     {
         return mRoomRef;
@@ -1314,11 +1323,21 @@ public class Schedule extends Entity
         private DateTime        mStartDate;
         private DateTime        mEndDate;
         private String mRoomRef;
-    
+        private String ccuRef;
+        private HDateTime createdDateTime;
+        private HDateTime lastModifiedDateTime;
+        private String lastModifiedBy;
+
     
         public Schedule.Builder setmRoomRef(String mRoomRef)
         {
             this.mRoomRef = mRoomRef;
+            return this;
+        }
+
+        public Schedule.Builder setCcuRef(String ccuRef)
+        {
+            this.ccuRef = ccuRef;
             return this;
         }
         
@@ -1392,6 +1411,10 @@ public class Schedule extends Entity
             s.mStartDate = this.mStartDate;
             s.mEndDate = this.mEndDate;
             s.mRoomRef = this.mRoomRef;
+            s.ccuRef = this.ccuRef;
+            s.setCreatedDateTime(createdDateTime);
+            s.setLastModifiedDateTime(lastModifiedDateTime);
+            s.setLastModifiedBy(lastModifiedBy);
             return s;
         }
 
@@ -1432,12 +1455,28 @@ public class Schedule extends Entity
                 {
                     this.mRoomRef = schedule.getRef("roomRef").toString();
                 }
+                else if (pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = CCUHsApi.getInstance().getCcuId();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
+                }
                 else if(pair.getKey().equals("range"))
                 {
                     HDict range = (HDict) schedule.get("range");
                     this.mStartDate = new DateTime((HDateTime.make(range.get("stdt").toString()).millisDefaultTZ()));
                     this.mEndDate = new DateTime((HDateTime.make(range.get("etdt").toString()).millisDefaultTZ()));
-                    
+
                 }
                 else if (pair.getKey().equals("stdt"))
                 {
@@ -1445,7 +1484,7 @@ public class Schedule extends Entity
                 } else if (pair.getKey().equals("etdt"))
                 {
                     this.mEndDate = new DateTime(((HDateTime) schedule.get("etdt")).millisDefaultTZ());
-                } else
+                } else if (pair.getValue().toString().equals("marker"))
                 {
                     this.mMarkers.add(pair.getKey().toString());
                 }
@@ -1674,8 +1713,8 @@ public class Schedule extends Entity
             HDict hDict = new HDictBuilder()
                                   .add("stdt", HDateTime.make(mStartDate.getMillis()))
                                   .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
-            
-            HDict vacationSchedule = new HDictBuilder()
+
+            HDictBuilder vacationSchedule = new HDictBuilder()
                                             .add("id", HRef.copy(getId()))
                                             .add("temp")
                                             .add("schedule")
@@ -1685,9 +1724,18 @@ public class Schedule extends Entity
                                             .add("heating")
                                             .add("range", hDict)
                                             .add("dis", getDis())
-                                            .add("siteRef", HRef.copy(mSiteId))
-                                            .toDict();
-            return vacationSchedule;
+                                            .add("siteRef", HRef.copy(mSiteId));
+
+            if (getCreatedDateTime() != null) {
+                vacationSchedule.add("createdDateTime", getCreatedDateTime());
+            }
+            if (getLastModifiedDateTime() != null) {
+                vacationSchedule.add("lastModifiedDateTime", getLastModifiedDateTime());
+            }
+            if (getLastModifiedBy() != null) {
+                vacationSchedule.add("lastModifiedBy", getLastModifiedBy());
+            }
+            return vacationSchedule.toDict();
         }
         
         HDict[] days = new HDict[getDays().size()];
@@ -1722,6 +1770,15 @@ public class Schedule extends Entity
                 .add("dis", "Building Schedule")
                 .add("days", hList)
                 .add("siteRef", HRef.copy(mSiteId));
+        if (getCreatedDateTime() != null) {
+            defaultSchedule.add("createdDateTime", getCreatedDateTime());
+        }
+        if (getLastModifiedDateTime() != null) {
+            defaultSchedule.add("lastModifiedDateTime", getLastModifiedDateTime());
+        }
+        if (getLastModifiedBy() != null) {
+            defaultSchedule.add("lastModifiedBy", getLastModifiedBy());
+        }
         
         for (String marker : getMarkers())
         {
@@ -1739,8 +1796,8 @@ public class Schedule extends Entity
             HDict hDict = new HDictBuilder()
                                   .add("stdt", HDateTime.make(mStartDate.getMillis()))
                                   .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
-        
-            HDict vacationSchedule = new HDictBuilder()
+
+            HDictBuilder vacationSchedule = new HDictBuilder()
                                              .add("id", HRef.copy(getId()))
                                              .add("temp")
                                              .add("schedule")
@@ -1752,8 +1809,19 @@ public class Schedule extends Entity
                                              .add("dis", getDis())
                                              .add("siteRef", HRef.copy(mSiteId))
                                              .add("roomRef", HRef.copy(roomRef))
-                                             .toDict();
-            return vacationSchedule;
+                                             .add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
+
+            if (getCreatedDateTime() != null) {
+                vacationSchedule.add("createdDateTime", getCreatedDateTime());
+            }
+            if (getLastModifiedDateTime() != null) {
+                vacationSchedule.add("lastModifiedDateTime", getLastModifiedDateTime());
+            }
+            if (getLastModifiedBy() != null) {
+                vacationSchedule.add("lastModifiedBy", getLastModifiedBy());
+            }
+
+            return vacationSchedule.toDict();
         }
         
         HDict[] days = new HDict[getDays().size()];
@@ -1788,13 +1856,23 @@ public class Schedule extends Entity
                                                .add("dis", "Zone Schedule")
                                                .add("days", hList)
                                                .add("roomRef",HRef.copy(roomRef))
-                                               .add("siteRef", HRef.copy(mSiteId));
-        
+                                               .add("siteRef", HRef.copy(mSiteId))
+                                               .add("ccuRef", HRef.copy(CCUHsApi.getInstance().getCcuId()));
+
+        if (getCreatedDateTime() != null) {
+            defaultSchedule.add("createdDateTime", getCreatedDateTime());
+        }
+        if (getLastModifiedDateTime() != null) {
+            defaultSchedule.add("lastModifiedDateTime", getLastModifiedDateTime());
+        }
+        if (getLastModifiedBy() != null) {
+            defaultSchedule.add("lastModifiedBy", getLastModifiedBy());
+        }
         for (String marker : getMarkers())
         {
             defaultSchedule.add(marker);
         }
-        
+
         return defaultSchedule.toDict();
     }
 

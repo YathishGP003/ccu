@@ -550,11 +550,13 @@ public class InstallerOptions extends Fragment {
                 editor.putInt("backFillTimeSpSelected",backFillTimeSpinner.getSelectedItemPosition());
                 editor.apply();
 
-                Toast toast = new Toast(Globals.getInstance().getApplicationContext());
-                toast.setGravity(Gravity.BOTTOM, 50, 50);
-                toast.setView(toastLayout);
-                toast.setDuration(Toast.LENGTH_LONG);
-                toast.show();
+                if (!isFreshRegister) {
+                    Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                    toast.setGravity(Gravity.BOTTOM, 50, 50);
+                    toast.setView(toastLayout);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.show();
+                }
                 linearLayout.setVisibility(View.INVISIBLE);
             }
         });

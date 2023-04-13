@@ -31,6 +31,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.PreferenceUtil;
 
 import static a75f.io.logic.L.ccu;
 
@@ -1054,7 +1055,9 @@ public abstract class SystemProfile
 
             String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
             CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0,0);
-            CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
+            if (!CCUHsApi.getInstance().isCCURegistered()) {
+                PreferenceUtil.setBackfillDuration();
+            }
         }
     }
 

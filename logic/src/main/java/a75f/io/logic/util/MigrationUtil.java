@@ -54,6 +54,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
@@ -355,7 +356,7 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
-        if (!verifyPointsAvailability(CCUHsApi.getInstance()) && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+        if (!verifyPointsAvailability(CCUHsApi.getInstance()) && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty() && !PreferenceUtil.getBackfillDurationMIgration()) {
             backFillDurationMigration(CCUHsApi.getInstance());
         }
 
@@ -390,7 +391,7 @@ public class MigrationUtil {
 
         String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
         CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
-        CCUHsApi.getInstance().writeHisValById(backFillDurationPointId, 24.0);
+        PreferenceUtil.getBackfillDurationMIgration();
     }
 
     private static void updateKind(CCUHsApi ccuHsApi) {

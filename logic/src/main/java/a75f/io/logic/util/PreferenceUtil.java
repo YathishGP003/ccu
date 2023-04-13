@@ -14,6 +14,7 @@ public class PreferenceUtil {
     private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
+    private static final String BACKFILL_DURATION_MIGRATION = "backFillDuration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -636,4 +637,11 @@ public class PreferenceUtil {
         return sharedPreferences.getLong(key, 0);
     }
 
+    public static boolean getBackfillDurationMIgration() {
+        return getBooleanPreference(BACKFILL_DURATION_MIGRATION);
+    }
+
+    public static void setBackfillDuration() {
+        setBooleanPreference(BACKFILL_DURATION_MIGRATION, true);
+    }
 }

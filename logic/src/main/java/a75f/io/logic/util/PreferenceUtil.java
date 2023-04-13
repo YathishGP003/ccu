@@ -53,7 +53,7 @@ public class PreferenceUtil {
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
-    private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
+    private static final String STATIC_PRESSURE_SP_TRIM_MIGRATION = "staticPressureSPTriMigration";
     private static final String VRV_AUTO_AWAY_AUTO_FORCED_MIGRATION = "autoAwayAutoForcedMigration";
 
     private static final String BUILDING_BREACH_MIGRATION = "buildingLimitsBreachedOccupancy";
@@ -513,11 +513,11 @@ public class PreferenceUtil {
         setBooleanPreference(AIRFLOW_SAMPLE_WAIT_TIME_MIGRATION, true);
     }
     public static boolean getstaticPressureSpTrimMigration() {
-        return getBooleanPreference(STATIC_SP_TRIM_MIGRATION);
+        return getBooleanPreference(STATIC_PRESSURE_SP_TRIM_MIGRATION);
     }
 
     public static void setStaticPressureSpTrimMigration() {
-        setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+        setBooleanPreference(STATIC_PRESSURE_SP_TRIM_MIGRATION, true);
     }
 
     public static boolean getNewOccupancyMode() {

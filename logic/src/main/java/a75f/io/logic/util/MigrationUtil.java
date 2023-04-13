@@ -1757,10 +1757,10 @@ public class MigrationUtil {
 
     private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
 
-        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
-        String updatedMaxVal = "-0.5";
-        String updatedMinVal = "-0.01";
-        String updatedIncrementalVal = "-0.01";
+        ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim");
+        String updatedMaxVal = "-0.01";
+        String updatedMinVal = "-0.5";
+        String updatedIncrementalVal = "0.01";
         for (HashMap<Object,Object> staticPressureSPTrim : staticPressureSPTrimPoint) {
             Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
             CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());

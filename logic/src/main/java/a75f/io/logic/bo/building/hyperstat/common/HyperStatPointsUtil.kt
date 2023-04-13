@@ -255,10 +255,6 @@ class HyperStatPointsUtil(
 
     // Adding Point to Haystack and returns point id
     fun addPointToHaystack(point: Point): String {
-        Log.i("PTDT", "addPointToHaystack: "+point.toString())
-        Log.i("PTDT", "addPointToHaystack: "+point.displayName)
-        Log.i("PTDT", "addPointToHaystack: "+point.id)
-
         return if(point.id != null){
             hayStackAPI.updatePoint(point, point.id)
             point.id

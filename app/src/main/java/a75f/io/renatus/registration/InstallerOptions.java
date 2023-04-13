@@ -405,6 +405,7 @@ public class InstallerOptions extends Fragment {
                         .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(editGateway.getText() != null ? editGateway.getText().toString() : "").build();
                 CCUHsApi.getInstance().addPoint(bacnetGateway);
                 // TODO Auto-generated method stub
+                buttonApply.callOnClick();
                 goTonext();
             }
         });
@@ -983,7 +984,9 @@ public class InstallerOptions extends Fragment {
                 if (sharedPreferences.getInt("backFillTimeSpSelected",6) == i) {
                     linearLayout.setVisibility(View.INVISIBLE);
                 } else {
-                    linearLayout.setVisibility(View.VISIBLE);
+                    if (!isFreshRegister) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    }
                 }
                 adapterView.setSelection(i);
             }

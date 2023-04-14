@@ -1055,9 +1055,6 @@ public abstract class SystemProfile
 
             String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
             CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0,0);
-            if (!CCUHsApi.getInstance().isCCURegistered()) {
-                PreferenceUtil.setBackfillDuration();
-            }
         }
     }
 

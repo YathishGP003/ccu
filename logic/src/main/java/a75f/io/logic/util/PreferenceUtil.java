@@ -636,12 +636,4 @@ public class PreferenceUtil {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getLong(key, 0);
     }
-
-    public static boolean getBackfillDurationMIgration() {
-        return getBooleanPreference(BACKFILL_DURATION_MIGRATION);
-    }
-
-    public static void setBackfillDuration() {
-        setBooleanPreference(BACKFILL_DURATION_MIGRATION, true);
-    }
 }

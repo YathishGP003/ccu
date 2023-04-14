@@ -356,7 +356,7 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
-        if (!verifyPointsAvailability(CCUHsApi.getInstance()) && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty() && !PreferenceUtil.getBackfillDurationMIgration()) {
+        if (!verifyPointsAvailability(CCUHsApi.getInstance()) && !CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             backFillDurationMigration(CCUHsApi.getInstance());
         }
 
@@ -391,7 +391,6 @@ public class MigrationUtil {
 
         String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
         CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 24.0, 0);
-        PreferenceUtil.getBackfillDurationMIgration();
     }
 
     private static void updateKind(CCUHsApi ccuHsApi) {

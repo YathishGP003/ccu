@@ -66,10 +66,12 @@ import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.modbusbox.EquipsManager;
@@ -565,7 +567,7 @@ public class FloorPlanFragment extends Fragment {
         } else {
             moduleListView.setAdapter(null);
         }
-        setBackFillDuration();
+        BackFillUtil.setBackFillDuration();
     }
 
     private ArrayList<String> createAddressList(ArrayList<Equip> equips) {
@@ -1232,40 +1234,6 @@ public class FloorPlanFragment extends Fragment {
         }
         return false;
     }
-
-    private void setBackFillDuration() {
-        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        int equipCount = ccuHsApi.readAllEntities("equip and (gatewayRef or ahuRef) and not diag").size();
-        boolean backFillTimeChange = false;
-
-        Map<Integer, Double> thresholdMap = new HashMap<>();
-        thresholdMap.put(40, 1.0);
-        thresholdMap.put(30, 6.0);
-        thresholdMap.put(20, 12.0);
-        thresholdMap.put(6, 24.0);
-
-        double currentBackFillTime = ccuHsApi.readDefaultVal("backfill and duration");
-
-        for (Map.Entry<Integer, Double> entry : thresholdMap.entrySet()) {
-            int threshold = entry.getKey();
-            double thresholdValue = entry.getValue();
-            if (equipCount > threshold && currentBackFillTime > thresholdValue) {
-                currentBackFillTime = thresholdValue;
-                backFillTimeChange = true;
-            }
-        }
-
-        if (backFillTimeChange) {
-            ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
-            SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-            int[] durations = BackFillDuration.toIntArray();
-            SharedPreferences.Editor editor = backFillTimePref.edit();
-            editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
-            editor.putInt("backFillTimeSpSelected", Arrays.binarySearch(durations, (int) currentBackFillTime));
-            editor.apply();
-        }
-    }
-
 
 
     @OnClick(R.id.pairModuleBtn)

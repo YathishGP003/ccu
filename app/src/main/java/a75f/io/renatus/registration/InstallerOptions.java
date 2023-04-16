@@ -59,15 +59,15 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.renatus.BackFillDuration;
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.tuners.TunerFragment;
+import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -976,7 +976,7 @@ public class InstallerOptions extends Fragment {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sharedPreferences.edit();
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
-        this.backFillTimeSpinner.setAdapter(CCUUiUtil.getBackFillTimeArrayAdapter(getContext()));
+        this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
         this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));
 
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

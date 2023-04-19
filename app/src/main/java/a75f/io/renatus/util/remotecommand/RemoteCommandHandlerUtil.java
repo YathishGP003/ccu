@@ -23,6 +23,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.LSmartNode;
@@ -124,7 +125,7 @@ public class RemoteCommandHandlerUtil {
                                     if (d.getMarkers().contains("smartstat")) {
                                         sendSmartStatResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("smartnode") ||
-                                            d.getMarkers().contains("otn")) {
+                                            d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                         sendSmarNodeResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("hyperstat")) {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -138,7 +139,7 @@ public class RemoteCommandHandlerUtil {
                             if (d.getMarkers().contains("smartstat")) {
                                 sendSmartStatResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("smartnode") ||
-                                    d.getMarkers().contains("otn")) {
+                                    d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                 sendSmarNodeResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("hyperstat")) {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -150,7 +151,7 @@ public class RemoteCommandHandlerUtil {
                         if (equip.getMarkers().contains("smartstat")) {
                             sendSmartStatResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("smartnode") ||
-                                equip.getMarkers().contains("otn")) {
+                                equip.getMarkers().contains("otn") || equip.getMarkers().contains(Tags.HELIO_NODE)) {
                             sendSmarNodeResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));

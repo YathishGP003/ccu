@@ -80,7 +80,7 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'dev' + "_" + versionSuffix
-            debuggable true
+            debuggable false
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         prod {
@@ -95,7 +95,7 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
-            debuggable true
+            debuggable false
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         staging {

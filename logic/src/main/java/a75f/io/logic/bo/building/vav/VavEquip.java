@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.vav;
 
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY;
 
 import android.util.Log;
@@ -105,7 +106,8 @@ public class VavEquip
     double vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
     CCUHsApi hayStack= CCUHsApi.getInstance();
-    
+    String equipRef = null;
+
     public VavEquip(ProfileType T, int node) {
         
         coolingLoop = new ControlLoop();
@@ -146,6 +148,7 @@ public class VavEquip
     public void init() {
         
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
+        equipRef = equipMap.get("id").toString();
         
         if (equipMap != null && equipMap.size() > 0)
         {
@@ -310,21 +313,6 @@ public class VavEquip
                                   .setTz(tz)
                                   .build();
         String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
-    
-        Point reheatPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-reheatPos")
-                                  .setEquipRef(equipRef)
-                                  .setSiteRef(siteRef)
-                                  .setRoomRef(room)
-                                  .setFloorRef(floor).setHisInterpolate("cov")
-                                  .addMarker("reheat").addMarker("vav").addMarker(fanMarker)
-                                  .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
-                                  .setGroup(String.valueOf(nodeAddr))
-                                  .setUnit("%")
-                                  .setTz(tz)
-                                  .build();
-        String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
-        hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
         
         Point currentTemp = new Point.Builder()
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-currentTemp")
@@ -655,6 +643,13 @@ public class VavEquip
                 floor,fanMarker,tz);
         hisItems.add(new HisItem(damperFeedbackID, new Date(System.currentTimeMillis()), 0.0));
 
+        Equip vavEquip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build();
+        String rhID = null;
+        if (config.reheatType > 0) {
+            rhID = createReheatPosPointVav(vavEquip, hayStack);
+            hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
+        }
+
         //Create Physical points and map
         SmartNode device;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
@@ -669,7 +664,9 @@ public class VavEquip
         device.th2In.setEnabled(true);
         device.analog1Out.setPointRef(normalizedDPId);
         //device.analog1Out.setEnabled(true);
-        device.analog2Out.setPointRef(rhID);
+        if (rhID != null && !rhID.isEmpty()) {
+            device.analog2Out.setPointRef(rhID);
+        }
         device.relay1.setPointRef(rhID);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
@@ -708,7 +705,12 @@ public class VavEquip
             }
         }
         device.analog1Out.setEnabled(config.isOpConfigured(ANALOG_OUT_ONE));
-        device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        if (rhID != null && !rhID.isEmpty()) {
+            device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        } else {
+            device.analog2Out.setEnabled(false);
+
+        }
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
         device.addPointsToDb();
@@ -724,7 +726,23 @@ public class VavEquip
         setScheduleStatus("");
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(hisItems);
     }
-    
+
+    private String createReheatPosPointVav(Equip vavEquip, CCUHsApi hayStack) {
+        Point reheatPos = new Point.Builder()
+                .setDisplayName(vavEquip.getDisplayName()+"-VAV-"+nodeAddr+"-reheatPos")
+                .setEquipRef(vavEquip.getId())
+                .setSiteRef(vavEquip.getSiteRef())
+                .setRoomRef(vavEquip.getRoomRef())
+                .setFloorRef(vavEquip.getFloorRef()).setHisInterpolate("cov")
+                .addMarker("reheat").addMarker("vav").addMarker(getFanMarker())
+                .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
+                .setTz(vavEquip.getTz())
+                .build();
+        return hayStack.addPoint(reheatPos);
+    }
+
     private String createFanOutPoint(String siteDis,
                                    String equipRef,
                                    String siteRef,
@@ -1085,7 +1103,9 @@ public class VavEquip
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
-                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    if (config.reheatType > 0) {
+                        SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    }
                     break;
                 case RELAY_ONE:
                 case RELAY_TWO:
@@ -1093,7 +1113,11 @@ public class VavEquip
                     break;
             }
         }
-        
+        if (config.reheatType == 0) {
+            SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), false);
+        } else {
+            SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        }
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
@@ -1128,6 +1152,8 @@ public class VavEquip
         setDamperLimit("heating","max",config.maxDamperHeating);
         setHisVal("heating and max and damper and pos",config.maxDamperHeating);
 
+        updateReheatTypeVav(config.reheatType, equipRef, hayStack);
+
         if (config.enableCFMControl) {
             setConfigNumVal("min and trueCfm and cooling", config.numMinCFMCooling);
             setHisVal("min and trueCfm and cooling", config.numMinCFMCooling);
@@ -1149,6 +1175,18 @@ public class VavEquip
         }
         setConfigNumVal("trueCfm and enable ", config.enableCFMControl ? 1.0 : 0);
         setHisVal("trueCfm and enable ", config.enableCFMControl ? 1.0 : 0);
+    }
+
+    private void updateReheatTypeVav(int reheatType, String equipRef, CCUHsApi hayStack) {
+        HashMap<Object, Object> reheatPos = hayStack.readEntity("reheat and valve and equipRef == \""+equipRef+"\"");
+        Equip.Builder equipBuilder = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef));
+        if (reheatType > 0) {
+            String rhID = createReheatPosPointVav(equipBuilder.build(), hayStack);
+            hayStack.writeHisValueByIdWithoutCOV(rhID, 0.0);
+            SmartNode.updatePhysicalPointRef(nodeAddr, ANALOG_OUT_TWO.toString(), rhID);
+        } else if (!reheatPos.isEmpty()) {
+            hayStack.deleteEntity(reheatPos.get("id").toString());
+        }
     }
     
     private void handleTrueCfmConfiguration(VavProfileConfiguration config) {

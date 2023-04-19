@@ -1,0 +1,40 @@
+package a75f.io.domain.modeldef
+
+object Tags {
+    const val CREATED_BY_APPLICATION = "createdByApplication"
+    const val COMMAND = "cmd"
+    const val CUR = "cur"
+    const val DIS = "dis"
+    const val ENUMERATIONS = "enum"
+    const val EQUIP = "equip"
+    const val EQUIP_REF = "equipRef"
+    const val FILTER = "filter"
+    const val FLOOR = "floor"
+    const val FLOOR_REF = "floorRef"
+    const val HIS = "his"
+    const val ID = "id"
+
+    const val SOURCE_MODEL = "sourceModel"
+    const val SOURCE_MODEL_VERSION = "sourceModelVersion"
+    const val SOURCE_POINT = "sourcePoint"
+
+    const val KIND = "kind"
+    const val MIN_VALUE = "minVal"
+    const val MAX_VALUE = "maxVal"
+    const val INCREMENT_VALUE = "incrementVal"
+    const val UNIT = "unit"
+    const val SENSOR = "sensor"
+    const val SET_POINT = "sp"
+
+    const val ORIENTATION = "orientation"
+    const val POINT = "point"
+    const val ROOM = "room"
+    const val ROOM_REF = "roomRef"
+    const val SITE = "site"
+    const val SITE_REF = "siteRef"
+    const val SPACE = "space"
+    const val SPACE_REF = "spaceRef"
+    const val TIMEZONE = "tz"
+    const val WRITABLE = "writable"
+    const val ZONE = "zone"
+}

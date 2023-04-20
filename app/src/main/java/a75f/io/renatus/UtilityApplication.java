@@ -119,7 +119,7 @@ public abstract class UtilityApplication extends Application {
     public static WifiManager wifiManager;
     public static Context context = null;
 
-    private MessagingAckJob messagingAckJob = null;
+    private static MessagingAckJob messagingAckJob = null;
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
     private static final int MESSAGING_ACK_INTERVAL = 30;
@@ -976,11 +976,13 @@ public abstract class UtilityApplication extends Application {
         if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
             String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
-            String bearerToken = CCUHsApi.getInstance().getJwt();
-
             messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
             Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
+    }
+
+    public static MessagingAckJob getMessagingAckJob() {
+        return messagingAckJob;
     }
 
 }

@@ -664,8 +664,4 @@ public class Globals {
             CCUHsApi.getInstance().updateCCUahuRef(systemProf);
         }
     }
-
-    public MessagingAckJob getMessagingAckJob() {
-        return messagingAckJob;
-    }
 }

@@ -297,10 +297,8 @@ public class MigrationUtil {
             PreferenceUtil.setAirflowSampleWaitTimeMigration();
         }
 
-        if (!PreferenceUtil.getstaticPressureSpTrimMigration()) {
-            staticPressureSpTrimMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setStaticPressureSpTrimMigration();
-        }
+        staticPressureSpTrimMigration(CCUHsApi.getInstance());
+
 
         if (!PreferenceUtil.getMinorTagMigration()) {
             MinorTagMigration(CCUHsApi.getInstance());
@@ -1762,10 +1760,11 @@ public class MigrationUtil {
         String updatedMinVal = "-0.5";
         String updatedIncrementalVal = "0.01";
         for (HashMap<Object,Object> staticPressureSPTrim : staticPressureSPTrimPoint) {
-            Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
-            CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+            if (staticPressureSPTrim.get("maxVal").toString().equals("-0.5") || staticPressureSPTrim.get("minVal").toString().equals("-0.01")) {
+                Point updatedStaticPressureSPTrimPoint = new Point.Builder().setHashMap(staticPressureSPTrim).setMaxVal(updatedMaxVal).setMinVal(updatedMinVal).setIncrementVal(updatedIncrementalVal).build();
+                CCUHsApi.getInstance().updatePoint(updatedStaticPressureSPTrimPoint, updatedStaticPressureSPTrimPoint.getId());
+            }
         }
-
     }
 
     private static void airflowSampleWaitTimeMigration(CCUHsApi ccuHsApi) {

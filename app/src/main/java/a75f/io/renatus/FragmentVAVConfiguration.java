@@ -481,7 +481,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
             damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
             reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
-//            enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
             enableAutoAwayControl.setChecked(mProfileConfig.enableAutoAwayControl);
@@ -601,7 +600,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.reheatType = reheatTypeSelected.ordinal();
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);
-//        vavConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         vavConfig.enableCO2Control = enableCO2Control.isChecked();
         vavConfig.enableIAQControl = enableIAQControl.isChecked();
         vavConfig.enableAutoAwayControl = enableAutoAwayControl.isChecked();

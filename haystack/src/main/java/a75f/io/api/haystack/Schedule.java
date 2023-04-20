@@ -1459,15 +1459,15 @@ public class Schedule extends Entity
                 {
                     this.ccuRef = CCUHsApi.getInstance().getCcuId();
                 }
-                else if (pair.getKey().equals("createdDateTime"))
+                else if (pair.getKey().equals("createdDateTime") && !pair.getValue().toString().equals("marker"))
                 {
                     this.createdDateTime = HDateTime.make(pair.getValue().toString());
                 }
-                else if (pair.getKey().equals("lastModifiedDateTime"))
+                else if (pair.getKey().equals("lastModifiedDateTime") && !pair.getValue().toString().equals("marker"))
                 {
                     this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
                 }
-                else if (pair.getKey().equals("lastModifiedBy"))
+                else if (pair.getKey().equals("lastModifiedBy") && !pair.getValue().toString().equals("marker"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
                 }

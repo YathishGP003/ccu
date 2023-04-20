@@ -14,7 +14,7 @@ public class VavProfileConfiguration extends BaseProfileConfiguration
     public int damperShape;
     public int reheatType;
     
-    public boolean enableOccupancyControl;
+//    public boolean enableOccupancyControl;
     public boolean enableCO2Control;
     public boolean enableIAQControl;
     public boolean enableAutoAwayControl;

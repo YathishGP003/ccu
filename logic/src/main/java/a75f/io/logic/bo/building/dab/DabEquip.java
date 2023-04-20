@@ -634,22 +634,6 @@ public class DabEquip
         String damper2ShapeId = CCUHsApi.getInstance().addPoint(damper2Shape);
         CCUHsApi.getInstance().writeDefaultValById(damper2ShapeId, (double)config.damper2Shape);
         
-        
-        
-        Point enableOccupancyControl = new Point.Builder()
-                                               .setDisplayName(equipDis+"-enableOccupancyControl")
-                                               .setEquipRef(equipRef)
-                                               .setSiteRef(siteRef).setHisInterpolate("cov")
-                                               .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("his").addMarker("sp")
-                                               .setGroup(String.valueOf(nodeAddr))
-                                               .setEnums("false,true")
-                                               .setTz(tz)
-                                               .build();
-        String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
-        CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
                                          .setEquipRef(equipRef)
@@ -786,7 +770,7 @@ public class DabEquip
         config.damper2Size = (int)getConfigNumVal("damper and secondary and size");
         config.damper2Shape = (int)getConfigNumVal("damper and secondary and shape");
         
-        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
+//        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal(IAQ_ENABLED) > 0;
 
@@ -898,8 +882,6 @@ public class DabEquip
         setHisVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1 :0);
         setHisVal("auto and away",config.enableAutoAwayControl ? 1 :0);
 
-        setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
-        setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal(IAQ_ENABLED,config.enableIAQControl ? 1.0 : 0);

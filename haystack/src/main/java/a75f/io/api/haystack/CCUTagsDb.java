@@ -1281,15 +1281,14 @@ public class CCUTagsDb extends HServer {
         return HGrid.EMPTY;
     }
 
-    public List<HisItem> getUnsyncedHisItemsBatchOrderDesc(String pointId) {
+    public List<HisItem> getUnsyncedHisItemsBatch(String pointId) {
         List<HisItem> validHisItems = new ArrayList<>();
-        int hisItemsLimit = 5;
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-        List<HisItem> hisItems = hisQuery.build().find(0,hisItemsLimit);
+        List<HisItem> hisItems = hisQuery.build().find(0,5);
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
         for (HisItem hisItem : hisItems) {
             if  (hisItem != null) {

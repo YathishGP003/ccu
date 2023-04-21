@@ -1628,7 +1628,6 @@ public class CCUHsApi
         hDictBuilder.add("siteRef", getSiteIdRef());
         hDictBuilder.add("equipRef", equipRef);
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
-        hDictBuilder.add("createdDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -1659,7 +1658,6 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("createdDateTime", HDateTime.make(ccu.get("createdDateTime").toString()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());

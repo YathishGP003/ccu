@@ -73,6 +73,8 @@ public class DamperReheatTypeHandler {
                 if ((typeVal - 1) == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                } else {
+                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), false);
                 }
 
                 double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+configPoint.getGroup()+"\"");

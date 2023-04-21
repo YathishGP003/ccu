@@ -17,9 +17,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 
 interface MessagingService {
     @PUT("/messages/{channel}/acknowledge")
+    @Throws(SocketTimeoutException::class)
     fun acknowledgeMessages(
             @Path("channel") channel: String,
             @Query("subscriberId") ccuId: String,
@@ -50,6 +52,9 @@ class ServiceGenerator {
 
         val okHttpClient = OkHttpClient.Builder().apply {
             addInterceptor(okhttpLogging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             addInterceptor(
                     Interceptor { chain ->
                         val bearerToken = CCUHsApi.getInstance().jwt
@@ -66,7 +71,6 @@ class ServiceGenerator {
                     Interceptor { chain ->
                         val request = chain.request()
                         val response = chain.proceed(request)
-
                         CcuLog.d("CCU_HTTP_RESPONSE", "MessagingService-: ${response.code} - [${request.method}] ${request.url}")
                         response
                     }

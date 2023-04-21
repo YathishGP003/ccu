@@ -1,5 +1,6 @@
 package a75f.io.messaging.service;
 
+import java.net.SocketTimeoutException;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,17 +47,22 @@ public class MessagingAckJob {
         if (CCUHsApi.getInstance().getAuthorised()) {
             channelsToMessageIds.forEach((channel, messageIds) ->
             {
-                messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
-                        .subscribe(
-                                response -> {
-                                    if (response.isSuccessful()) {
-                                        CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
-                                    } else {
-                                        CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
-                                    }
-                                },
-                                error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
-                        );
+                try {
+                    messagingService.acknowledgeMessages(channel, ccuId, new AcknowledgeRequest(messageIds))
+                            .subscribe(
+                                    response -> {
+                                        if (response.isSuccessful()) {
+                                            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Job Succeeded for Messages: " + messageIds);
+                                        } else {
+                                            CcuLog.w(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds + " ERR: " + response.code());
+                                        }
+                                    },
+                                    error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
+                            );
+                }catch (SocketTimeoutException | RuntimeException e) {
+                    CcuLog.d(L.TAG_CCU_MESSAGING, "Ack request Failed: " + e.getMessage());
+                    e.printStackTrace();
+                }
             });
         }
     }

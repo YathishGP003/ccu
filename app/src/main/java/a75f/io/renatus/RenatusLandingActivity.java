@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -27,26 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.tabs.TabItem;
-import com.google.android.material.tabs.TabLayout;
-
-import a75f.io.alerts.AlertManager;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
-import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
-import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
-import a75f.io.renatus.registration.CustomViewPager;
-import a75f.io.renatus.schedules.SchedulerFragment;
-import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CloudConnetionStatusThread;
-import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
-import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
-import a75f.io.usbserial.UsbServiceActions;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -56,7 +38,26 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+
+import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
+import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
+import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+import a75f.io.renatus.registration.CustomViewPager;
+import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CloudConnetionStatusThread;
+import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.usbserial.UsbServiceActions;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -575,7 +576,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
-        CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
+        CcuLog.d("RemoteCommand","RenatusLandingActivity="+commands+","+cmdLevel);
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
     }
 

@@ -1,6 +1,7 @@
 package a75f.io.device.mesh.hyperstat;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+
 import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -32,6 +33,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -49,7 +51,6 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 
 public class HyperStatMsgReceiver {
     

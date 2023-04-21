@@ -108,6 +108,7 @@
             android:value="7jO0gpjtHlBZhyN4cZuHQ" />
 
         <service android:name=".WeatherDataDownloadService"/>
+
     </application>
 
 </manifest>

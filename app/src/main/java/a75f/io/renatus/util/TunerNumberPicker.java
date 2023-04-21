@@ -1768,7 +1768,7 @@ public class TunerNumberPicker extends LinearLayout {
         float x, y;
         if (isHorizontalMode()) {
             x = mCurrentScrollOffset;
-            y = mSelectedText.getBaseline() + mSelectedText.getTop();
+            y = (float) mSelectedText.getBaseline() + mSelectedText.getTop();
             if (mRealWheelItemCount < DEFAULT_WHEEL_ITEM_COUNT) {
                 canvas.clipRect(mLeftDividerLeft, 0, mRightDividerRight, getBottom());
             }
@@ -2169,12 +2169,12 @@ public class TunerNumberPicker extends LinearLayout {
         int totalTextSize = (int) ((selectorIndices.length - 1) * mTextSize + mSelectedTextSize);
         float textGapCount = selectorIndices.length;
         if (isHorizontalMode()) {
-            float totalTextGapWidth = (getRight() - getLeft()) - totalTextSize;
+            float totalTextGapWidth = (float) (getRight() - getLeft()) - totalTextSize;
             mSelectorTextGapWidth = (int) (totalTextGapWidth / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapWidth;
             mInitialScrollOffset = (int) (mSelectedTextCenterX - mSelectorElementSize * mWheelMiddleItemIndex);
         } else {
-            float totalTextGapHeight = (getBottom() - getTop()) - totalTextSize;
+            float totalTextGapHeight = (float) (getBottom() - getTop()) - totalTextSize;
             mSelectorTextGapHeight = (int) (totalTextGapHeight / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapHeight;
             mInitialScrollOffset = (int) (mSelectedTextCenterY - mSelectorElementSize * mWheelMiddleItemIndex);

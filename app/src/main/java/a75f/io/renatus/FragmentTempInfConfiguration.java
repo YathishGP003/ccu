@@ -294,7 +294,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         cazConfig.setNodeType(mNodeType);
         cazConfig.setNodeAddress(mSmartNodeAddress);
         cazConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
-        cazConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        cazConfig.temperaturOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         cazConfig.setRoomTempSensor(RoomTempSensor.values()[roomTempSpinner.getSelectedItemPosition()]);
         cazConfig.setSupplyTempSensor(SupplyTempSensor.values()[supplyAirTempSpinner.getSelectedItemPosition()]);
 

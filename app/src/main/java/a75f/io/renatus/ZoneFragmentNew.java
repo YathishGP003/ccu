@@ -6,7 +6,6 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -240,11 +239,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
         tableLayout = (TableLayout) view.findViewById(R.id.tableRoot);
         gridlayout = (GridLayout) view.findViewById(R.id.gridview);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerEquip);
-
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         in = AnimationUtils.makeInAnimation(getActivity(), false);
         inleft = AnimationUtils.makeInAnimation(getActivity(), true);

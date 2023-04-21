@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
@@ -56,10 +57,10 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.diag.otastatus.OtaStatusMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
-import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTuners;
@@ -342,6 +343,10 @@ public class MigrationUtil {
         if(!PreferenceUtil.getStandaloneAirflowSampleWaitMigration()){
             createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
+        }
+        if(!PreferenceUtil.getOtaStatusMigration()){
+            OtaStatusMigration.Companion.migrateOtaStatusPoint();
+            PreferenceUtil.setOtaStatusMigration();
         }
 
         if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){

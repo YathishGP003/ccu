@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -13,14 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -39,12 +29,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import a75f.io.logic.messaging.MessagingClient;
-import a75f.io.logic.pubnub.PbSubscriptionHandler;
-import a75f.io.renatus.AboutFragment;
-import a75f.io.renatus.BuildConfig;
+import a75f.io.logic.L;
+import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -60,7 +55,6 @@ import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -1249,10 +1243,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                     () -> {
-                        if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-                            if (Globals.getInstance().isAckdMessagingEnabled()) {
-                                MessagingClient.getInstance().init();
-                            }
+                        if (Globals.getInstance().isAckdMessagingEnabled()) {
+                            MessagingClient.getInstance().init();
                         }
                         CCUHsApi.getInstance().syncEntityWithPointWrite();
                     },  // ignore success

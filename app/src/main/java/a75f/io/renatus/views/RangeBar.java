@@ -102,7 +102,7 @@ public class RangeBar extends View {
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
 
         matrix.reset();
-        matrix.postTranslate(xPos - mHitBoxPadding + 5, yPos - mHitBoxPadding);
+        matrix.postTranslate(xPos - (float) mHitBoxPadding + 5, (float) yPos - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
         matrix.preScale(2.5f, 2.0f);

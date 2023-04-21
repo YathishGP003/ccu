@@ -524,7 +524,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setMinCoolingDamperPos(minCoolingDamperPos.getValue());
         dualductConfig.setMaxCoolingDamperPos(maxCoolingDamperPos.getValue());
     
-        dualductConfig.setTemperatureOffset(temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
+        dualductConfig.setTemperatureOffset((double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
     
         dualductConfig.setAnalog1OutAtMinDamperHeating(Double.parseDouble
                                                                   (ao1MinDamperHeatingSpinner.getSelectedItem().toString()));

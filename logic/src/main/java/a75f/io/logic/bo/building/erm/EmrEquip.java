@@ -14,6 +14,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 
 public class EmrEquip
 {
@@ -121,11 +123,15 @@ public class EmrEquip
                 siteRef, roomRef, floorRef, nodeAddr, "emr", tz, false));
 
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
             device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.SN;
         }else  {
             device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, roomRef, floorRef, nodeAddr, tz, hayStack);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
         device.addPointsToDb();

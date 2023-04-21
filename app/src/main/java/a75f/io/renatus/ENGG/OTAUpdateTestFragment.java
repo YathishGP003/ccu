@@ -19,6 +19,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
+import a75f.io.renatus.ota.OtaCache;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -78,6 +79,8 @@ public class OTAUpdateTestFragment extends Fragment {
 
     @OnClick(R.id.resetOtaTestBtn)
     public void handleResetOtaTest() {
+        OtaCache cache = new OtaCache();
+        cache.clear();
         Activity activity = getActivity();
 
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_RESET);

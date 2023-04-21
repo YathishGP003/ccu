@@ -81,6 +81,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
@@ -91,8 +93,16 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.MessageHandlerSubscriber;
+import a75f.io.messaging.service.MessageCleanUpWork;
+import a75f.io.messaging.service.MessageRetryHandlerWork;
+import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.ota.OTAUpdateHandlerService;
+import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
@@ -110,6 +120,13 @@ public abstract class UtilityApplication extends Application {
     public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
+
+    private static MessagingAckJob messagingAckJob = null;
+    private static final int TASK_SEPARATION = 15;
+    private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
+    private static final int MESSAGING_ACK_INTERVAL = 30;
+    @Inject
+    MessageHandlerSubscriber messageHandlerSubscriber;
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
@@ -245,6 +262,10 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+
+        initMessaging();
+        OtaCache cache = new OtaCache();
+        cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
 
     }
@@ -941,6 +962,31 @@ public abstract class UtilityApplication extends Application {
         }
         String response = ipRoutes.get(0);
         return response;
+    }
+
+    private void initMessaging() {
+        if (CCUHsApi.getInstance().getSite() != null) {
+            if (CCUHsApi.getInstance().siteSynced()) {
+                MessagingClient.getInstance().init();
+            }
+        }
+        scheduleMessagingAckJob();
+        MessageRetryHandlerWork.Companion.scheduleMessageRetryWork(context);
+        MessageCleanUpWork.Companion.scheduleMessageCleanUpWork(context);
+        messageHandlerSubscriber.subscribeAllHandlers();
+    }
+
+    private void scheduleMessagingAckJob() {
+        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
+            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
+            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
+            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
+            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+        }
+    }
+
+    public static MessagingAckJob getMessagingAckJob() {
+        return messagingAckJob;
     }
 
 }

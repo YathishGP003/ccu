@@ -376,7 +376,7 @@ class HSHaystackUtil(
 
     fun setEquipStatus(status: Double) {
         haystack.writeHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\"", status
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\"", status
         )
     }
 
@@ -414,13 +414,13 @@ class HSHaystackUtil(
 
     fun getStatus(): Double {
         return haystack.readHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\""
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\""
         )
     }
 
     fun setStatus(status: Double) {
         haystack.writeHisValByQuery(
-            "point and status and not message and his and equipRef == \"$equipRef\"", status
+            "point and status and not message and not ota and his and equipRef == \"$equipRef\"", status
         )
     }
 

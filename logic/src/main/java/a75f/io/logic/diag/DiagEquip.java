@@ -24,12 +24,14 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
 public class DiagEquip
 {
+    private static final String CMD_UPDATE_CCU = "update_ccu";
     private static DiagEquip instance = null;
     private DiagEquip(){
     }
@@ -278,6 +280,7 @@ public class DiagEquip
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
+                MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
             }
 
         } catch (PackageManager.NameNotFoundException e) {

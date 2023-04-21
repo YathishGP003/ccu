@@ -17,6 +17,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -228,13 +230,39 @@ public class DeviceUtil {
         return 0;
     }
 
-    public static String parseNodeStatusMessage(int data){
+    public static String parseNodeStatusMessage(int data, int nodeAddress){
 
         String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
         int message = Integer.parseInt(binaryValue.substring(0,5),2);
         int msgType = Integer.parseInt(binaryValue.substring(5),2);
         if(msgType == 1) return getCause(message);
         return DeviceFieldConstants.NO_INFO;
+    }
+
+    public static OtaStatus getNodeStatus(int data){
+
+        String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
+        int message = Integer.parseInt(binaryValue.substring(0,5),2);
+        int msgType = Integer.parseInt(binaryValue.substring(5),2);
+        Log.i(L.TAG_CCU_OTA_PROCESS, "getNodeStatus: message : "+message + " msgType : "+msgType);
+        if(msgType == 1)
+            return getStatus(message);
+        return OtaStatus.NO_INFO;
+    }
+
+
+    public static OtaStatus getStatus(int msgType) {
+        switch (msgType) {
+            case 0: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_SUCCESSFUL;
+            case 1: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_REBOOT_INTERRUPTION;
+            case 2: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_NOT_FOR_ME_DEV_TYPE;
+            case 3: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_NOT_FOR_ME_FW_VERSION;
+            case 4: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_IMAGE_SIZE;
+            case 5: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_EXT_FLASH_ERROR;
+            case 6: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_IMAGE_VERIFICATION;
+            case 7: return OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_INACTIVITY_TIMEOUT;
+            default: return OtaStatus.NO_INFO;
+        }
     }
 
     public static String  getCause(int msgType) {

@@ -151,9 +151,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 			int width = ViewGroup.LayoutParams.MATCH_PARENT;
 			int height = ViewGroup.LayoutParams.MATCH_PARENT;
 			dialog.getWindow().setLayout(width, height);
+			dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 		}
-
-		dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 	}
 
 

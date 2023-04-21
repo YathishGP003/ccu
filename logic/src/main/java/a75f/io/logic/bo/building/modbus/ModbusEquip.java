@@ -79,7 +79,7 @@ public class ModbusEquip {
 
         for (String equip :
                 modbusEquipTypes) {
-            mbEquip.addMarker(equip.toLowerCase());
+            mbEquip.addMarker(equip.trim());
         }
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             mbEquip.addMarker("zone");

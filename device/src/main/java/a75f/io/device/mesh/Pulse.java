@@ -1,5 +1,14 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ccu.CazEquip;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
@@ -51,21 +61,11 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
-import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
-import static a75f.io.api.haystack.CCUHsApi.TAG;
-import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
-import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -879,7 +879,7 @@ public class Pulse
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
@@ -887,7 +887,7 @@ public class Pulse
 				if(oldCurTempVal != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 					}
 				}
@@ -939,17 +939,14 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 
-
-		String cause = DeviceUtil.parseNodeStatusMessage(snRebootIndicationMsgs.nodeStatus.get());
-
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
-				", "+snRebootIndicationMsgs.rebootCause+ "Node Status "+cause);
+				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 		String firmwareVersion =
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
-			String str = "addr:"+address+ " Node status: "+cause;
+			String str = "addr:"+address+ " Node status: ";
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:

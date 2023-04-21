@@ -2,9 +2,8 @@ package a75f.io.renatus.schedules;
 
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.usbserial.UsbModbusService.TAG;
 
 import android.app.AlertDialog;
@@ -31,6 +30,20 @@ import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.apache.commons.lang3.StringUtils;
 import org.javolution.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -54,32 +67,17 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.pubnub.BuildingScheduleListener;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.schedule.SpecialSchedule;
+import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import static a75f.io.usbserial.UsbModbusService.TAG;
-
-public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener{
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
@@ -313,7 +311,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewScheduletitle.setFocusable(true);
 
+        return rootView;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
         //After they are measured d the schedule.
         ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
@@ -326,7 +329,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 View viewHourTwo = viewTimeLines.get(2);
 
                 mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                mPixelsBetweenADay = constraintScheduler.getHeight() / 7;
+                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
 
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
@@ -337,7 +340,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
             }
         });
-        return rootView;
+
     }
 
     private void loadSchedule()
@@ -1179,34 +1182,37 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
     private void drawCurrentTime() {
-
-        DateTime now = new DateTime(MockTime.getInstance().getMockTime());
-
-
-        DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        Log.i("Scheduler", "DAY: " + day.toString());
-        int hh = now.getHourOfDay();
-        int mm = now.getMinuteOfHour();
+        try {
+            DateTime now = new DateTime(MockTime.getInstance().getMockTime());
 
 
-        AppCompatImageView imageView = new AppCompatImageView(getActivity());
+            DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
+            Log.i("Scheduler", "DAY: " + day.toString());
+            int hh = now.getHourOfDay();
+            int mm = now.getMinuteOfHour();
 
-        imageView.setImageResource(R.drawable.ic_time_marker_svg);
-        imageView.setId(View.generateViewId());
-        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        //imageView.setPadding(0, 50,0, 0);
-        //imageView.setForegroundGravity(Gravity.CENTER);
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
-        //lp.topMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-        //lp.bottomMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-        lp.bottomToBottom = getTextViewFromDay(day).getId();
-        lp.topToTop = getTextViewFromDay(day).getId();
-        lp.startToStart = viewTimeLines.get(hh).getId();
 
-        lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+            AppCompatImageView imageView = new AppCompatImageView(requireContext());
 
-        constraintScheduler.addView(imageView, lp);
+            imageView.setImageResource(R.drawable.ic_time_marker_svg);
+            imageView.setId(View.generateViewId());
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            //imageView.setPadding(0, 50,0, 0);
+            //imageView.setForegroundGravity(Gravity.CENTER);
+            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
+            //lp.topMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
+            //lp.bottomMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
+            lp.bottomToBottom = getTextViewFromDay(day).getId();
+            lp.topToTop = getTextViewFromDay(day).getId();
+            lp.startToStart = viewTimeLines.get(hh).getId();
 
+            lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+
+            constraintScheduler.addView(imageView, lp);
+        }catch(IllegalStateException exception){
+            // if context is null we will get this exception, some rare scenario we get this.
+            Log.e(L.TAG_CCU_UI,exception.getMessage());
+        }
 
     }
 

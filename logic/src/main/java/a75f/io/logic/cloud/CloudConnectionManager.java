@@ -83,6 +83,12 @@ public class CloudConnectionManager {
         Retrofit retrofit = getRetrofitForHaystackBaseUrl();
             Call<ResponseBody> call = retrofit.create(CloudConnectionService.class).getAbout();
             long requestTime = new Date().getTime();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    call.cancel();
+                }
+            });
+
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -112,7 +118,7 @@ public class CloudConnectionManager {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                         CcuLog.i(TAG_CLOUD_CONNECTION_STATUS,
-                                "Time taken for the failed  response " + (new Date().getTime() - requestTime));
+                                    "Time taken for the failed  response " + (new Date().getTime() - requestTime));
                         CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "Error while Checking cloud connection status " + t.getMessage(),
                                 t);
                         responseCallback.onErrorResponse(false);

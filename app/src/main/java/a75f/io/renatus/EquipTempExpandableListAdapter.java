@@ -216,7 +216,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                         "not vacation and roomRef == " +zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
                             }
-                            scheduleImageButton.setTag(scheduleById.getId());
+                            if (scheduleById != null) {
+                                scheduleImageButton.setTag(scheduleById.getId());
+                            }
                             scheduleImageButton.setVisibility(View.VISIBLE);
                             CCUHsApi.getInstance().scheduleSync();
                         }
@@ -271,9 +273,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             if(finalSsFanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"target and dehumidifier",position+1);
+                                StandaloneScheduler.updateOperationalPoints(equipId,"target and dehumidifier",(double) position+1);
                             else
-                                StandaloneScheduler.updateOperationalPoints(equipId,"target and humidity",position+1);
+                                StandaloneScheduler.updateOperationalPoints(equipId,"target and humidity",(double) position+1);
 
                         }
 

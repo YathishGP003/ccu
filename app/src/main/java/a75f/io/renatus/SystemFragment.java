@@ -77,12 +77,12 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
-import a75f.io.logic.pubnub.IntrinsicScheduleListener;
-import a75f.io.logic.pubnub.UpdatePointHandler;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
-import a75f.io.logic.pubnub.ZoneDataInterface;
+import a75f.io.logic.interfaces.IntrinsicScheduleListener;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.schedule.IntrinsicScheduleCreator;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.messaging.handler.UpdatePointHandler;
+import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -195,7 +195,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	Schedule schedule;
 
-	private Context mContext;
 
 	public SystemFragment()
 	{
@@ -204,7 +203,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
-		this.mContext = context;
+
 	}
 
 	public static SystemFragment newInstance()
@@ -373,30 +372,32 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void drawCurrentTime() {
 
-		DateTime now = new DateTime(MockTime.getInstance().getMockTime());
+		try {
+			DateTime now = new DateTime(MockTime.getInstance().getMockTime());
 
 
-		DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-		Log.i("Scheduler", "DAY: " + day.toString());
-		int hh = now.getHourOfDay();
-		int mm = now.getMinuteOfHour();
+			DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
+			Log.i("Scheduler", "DAY: " + day.toString());
+			int hh = now.getHourOfDay();
+			int mm = now.getMinuteOfHour();
 
-		if (mContext == null) {
-			Log.d(L.TAG_CCU_UI," SystemFragment is not attached with an activity");
-			return;
+			AppCompatImageView imageView = new AppCompatImageView(requireContext());
+
+			imageView.setImageResource(R.drawable.ic_time_marker_svg);
+			imageView.setId(View.generateViewId());
+			imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+			ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
+			lp.bottomToBottom = getTextViewFromDay(day).getId();
+			lp.topToTop = getTextViewFromDay(day).getId();
+			lp.startToStart = viewTimeLines.get(hh).getId();
+			lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+
+			constraintScheduler.addView(imageView, lp);
 		}
-		AppCompatImageView imageView = new AppCompatImageView(mContext);
-
-		imageView.setImageResource(R.drawable.ic_time_marker_svg);
-		imageView.setId(View.generateViewId());
-		imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
-		lp.bottomToBottom = getTextViewFromDay(day).getId();
-		lp.topToTop = getTextViewFromDay(day).getId();
-		lp.startToStart = viewTimeLines.get(hh).getId();
-		lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
-
-		constraintScheduler.addView(imageView, lp);
+		catch (IllegalStateException exception) {
+			// if context is null we will get this exception, some rare scenario we get this.
+			Log.d(L.TAG_CCU_UI,exception.getMessage());
+		}
 	}
 
 	private TextView getTextViewFromDay(DAYS day) {
@@ -810,7 +811,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				sbComfortValue.setContentDescription(String.valueOf(seekBar.getProgress()));
-				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - seekBar.getProgress());
+				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - (double) seekBar.getProgress());
 			}
 		});
 		

@@ -95,4 +95,27 @@ fun updateAllRemoteCommandsHandled(context: Context, cmdType : String) {
     }
 }
 
+/**
+ * Function to update ota request message as handled when requested file is downloaded
+ */
+fun updateOtaRequestCommandHandled(context: Context, cmdType : String, messageId: String) {
+    appScope.launch {
+        if (messageDbHelper == null) {
+            messageDbHelper = MessageDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
+        }
+        messageDbHelper?.getAllUnhandledMessage()?.collect {
+            for (message in it) {
+                if (message.remoteCmdType != null && message.remoteCmdType == cmdType
+                    && message.messageId.contentEquals(messageId)
+                ) {
+                    message.handlingStatus = true
+                    message.handledTime = System.currentTimeMillis()
+                    Log.i(CCU_TAG_MESSAGING,"updateMessageHandled $message")
+                    messageDbHelper?.update(message)
+                }
+            }
+        }
+    }
+}
+
 

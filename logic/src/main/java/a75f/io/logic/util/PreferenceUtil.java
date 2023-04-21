@@ -69,6 +69,7 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+    private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
 
@@ -598,6 +599,13 @@ public class PreferenceUtil {
         setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
     }
 
+    public static boolean getOtaStatusMigration() {
+        return getBooleanPreference(OTA_STATUS_MIGRATION);
+    }
+
+    public static void setOtaStatusMigration() {
+        setBooleanPreference(OTA_STATUS_MIGRATION, true);
+    }
 
     public static boolean getKindCorrectionMigration() {
         return getBooleanPreference(KIND_CORRECTION);

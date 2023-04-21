@@ -101,6 +101,8 @@ import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.ota.OTAUpdateHandlerService;
+import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
@@ -262,6 +264,8 @@ public abstract class UtilityApplication extends Application {
         FileBackupService.scheduleFileBackupServiceJob(context);
 
         initMessaging();
+        OtaCache cache = new OtaCache();
+        cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
 
     }

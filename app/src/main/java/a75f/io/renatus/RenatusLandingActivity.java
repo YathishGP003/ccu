@@ -41,12 +41,22 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.HashMap;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
+import a75f.io.device.mesh.LSmartNode;
+import a75f.io.device.mesh.LSmartStat;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
@@ -604,4 +614,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
     };
 
+
+    public static void updateCCUOtaStatus(OtaStatus status){
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        HashMap<Object,Object> diag = hsApi.readEntity("diag and equip");
+        OtaStatusDiagPoint.Companion.updateOtaStatusPoint(hsApi,diag.get(Tags.ID).toString(),status);
+    }
 }

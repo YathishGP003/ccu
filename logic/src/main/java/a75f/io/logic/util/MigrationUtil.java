@@ -57,6 +57,7 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.diag.otastatus.OtaStatusMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
@@ -342,6 +343,10 @@ public class MigrationUtil {
         if(!PreferenceUtil.getStandaloneAirflowSampleWaitMigration()){
             createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
+        }
+        if(!PreferenceUtil.getOtaStatusMigration()){
+            OtaStatusMigration.Companion.migrateOtaStatusPoint();
+            PreferenceUtil.setOtaStatusMigration();
         }
 
         if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){

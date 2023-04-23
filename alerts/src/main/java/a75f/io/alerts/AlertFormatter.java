@@ -92,7 +92,6 @@ public class AlertFormatter
      * if 'point' might be null.
      */
     private static String getValue(AlertDefinition def, String token, String point) throws NullPointerException {
-        //token.replace("#","");
         int n = getConditionalIndex(token);
         Conditional c = n > 0 ? def.conditionals.get(n-1) : null;
         CCUHsApi hs = CCUHsApi.getInstance();

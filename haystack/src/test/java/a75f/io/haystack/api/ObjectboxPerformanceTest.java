@@ -104,7 +104,7 @@ public class ObjectboxPerformanceTest {
     public void doHisReadOnAllPoints(CCUHsApi hayStack) {
         for (int i = 1; i <= ITEM_COUNT_DB; i++) {
             HashMap idMap = hayStack.read("point and tag" + i);
-            List<HisItem> unsyncedHisItems = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString());
+            List<HisItem> unsyncedHisItems = hayStack.tagsDb.getUnsyncedHisItemsBatch(idMap.get("id").toString());
             /*for (HisItem item : unsyncedHisItems) {
                 //System.out.println("id " + idMap.get("id") + " val " + item.getVal());
             }*/
@@ -115,7 +115,7 @@ public class ObjectboxPerformanceTest {
     
         for (int i = 1; i <= ITEM_COUNT_DB; i++) {
             HashMap idMap = hayStack.read("point and tag" + i);
-            List<HisItem> items = hayStack.tagsDb.getUnsyncedHisItemsOrderDesc(idMap.get("id").toString());
+            List<HisItem> items = hayStack.tagsDb.getUnsyncedHisItemsBatch(idMap.get("id").toString());
             hayStack.tagsDb.updateHisItemSynced(items);
         }
     }

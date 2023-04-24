@@ -12,12 +12,15 @@ import java.util.Objects;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -32,7 +35,6 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-
 /**
  * System profile to handle AHU via IE gateways.
  *
@@ -167,6 +169,11 @@ public class VavIERtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
 
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
+        }
+
         int coolingDat, heatingDat;
         setSystemLoopOp("cooling", systemCoolingLoopOp);
         if (getConfigEnabled("cooling") > 0) {
@@ -189,6 +196,11 @@ public class VavIERtu extends VavSystemProfile
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
+        }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.HEATING, systemHeatingLoopOp);
+            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
         }
 
         setSystemLoopOp("heating", systemHeatingLoopOp);
@@ -229,10 +241,11 @@ public class VavIERtu extends VavSystemProfile
 
             if(VavSystemController.getInstance().getSystemState() == COOLING &&
                (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
-                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
+                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp)) {
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
-                else
+                }else{
                     systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin))  ;
+                }
             }else if(VavSystemController.getInstance().getSystemState() == HEATING)
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeDabFanLoopOp);
 
@@ -249,6 +262,12 @@ public class VavIERtu extends VavSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.FAN, systemFanLoopOp);
+            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
+        }
+
         setSystemLoopOp("fan", systemFanLoopOp);
 
         if (getConfigEnabled("fan") > 0) {

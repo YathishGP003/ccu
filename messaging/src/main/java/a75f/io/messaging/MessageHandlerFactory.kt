@@ -5,7 +5,7 @@ import a75f.io.messaging.handler.*
 class MessageHandlerFactory {
     enum class Command{
         UpdateEntity, UpdatePoint, UpdateSchedule, SiteSync, RemoveEntity, RemoteCommand,
-        PredefinedAlert, CustomAlert, AlertRemoval, AlertDefRemoval
+        PredefinedAlert, CustomAlert, AlertRemoval, AlertDefRemoval, AutoCommissioningMode
     }
     companion object {
         fun createInstance(handlerCmd: Command) : MessageHandler =
@@ -20,6 +20,7 @@ class MessageHandlerFactory {
                 Command.CustomAlert -> AlertMessageHandler.CustomAlertDefHandler()
                 Command.AlertRemoval -> AlertMessageHandler.AlertRemoveHandler()
                 Command.AlertDefRemoval -> AlertMessageHandler.AlertDefRemoveHandler()
+                Command.AutoCommissioningMode -> AutoCommissioningStateHandler()
             }
     }
 }

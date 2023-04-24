@@ -64,5 +64,10 @@ class MessageHandlerSubscriber @Inject constructor(){
                 MessageHandlerFactory.Command.AlertDefRemoval
             )
         )
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.AutoCommissioningMode
+            )
+        )
     }
 }

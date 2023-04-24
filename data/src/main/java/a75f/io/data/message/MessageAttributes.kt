@@ -17,4 +17,6 @@ const val MESSAGE_ATTRIBUTE_HANDLED_TIME = "handledTime"
 const val MESSAGE_ATTRIBUTE_HANDLING_STATUS = "handlingStatus"
 const val MESSAGE_ATTRIBUTE_RETRY_COUNT = "retryCount"
 const val MESSAGE_ATTRIBUTE_ERR_MESSAGE = "error"
+const val MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME = "stopDateTime"
+const val MESSAGE_ATTRIBUTE_AUTO_CX_STATE = "state"
 

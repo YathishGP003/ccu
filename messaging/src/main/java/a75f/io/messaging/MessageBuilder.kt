@@ -47,11 +47,17 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
     messagePojo.version = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_VERSION)?.asString
     messagePojo.timeToken = msgJson.get("timetoken").asLong
 
+    if(messagePojo.command.equals(AutoCommissioningStateHandler.CMD)){
+        messagePojo.autoCXStopTime = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME)?.asString
+        messagePojo.autoCXState = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STATE)?.asInt?: 0
+    }
+
     return messagePojo
 }
 
 private fun parseId(messageContent : JsonObject , command : String) : String?{
     return when(command) {
+        AutoCommissioningStateHandler.CMD -> messageContent.asJsonObject.get("ccuId")?.asString
         SiteSyncHandler.CMD -> messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SITE_ID)?.asString
         CREATE_CUSTOM_ALERT_DEF_CMD,
         UPDATE_CUSTOM_ALERT_DEF_CMD,

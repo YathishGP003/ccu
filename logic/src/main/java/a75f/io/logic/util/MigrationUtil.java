@@ -148,7 +148,7 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
-        
+
         migrateVocPm2p5(CCUHsApi.getInstance());
 
         if(!PreferenceUtil.getDiagEquipMigration()){
@@ -358,6 +358,12 @@ public class MigrationUtil {
         if (!PreferenceUtil.getKindCorrectionMigration()) {
             updateKind(CCUHsApi.getInstance());
             PreferenceUtil.setKindCorrectionMigration();
+        }
+
+
+        if(!PreferenceUtil.getAutoCommissioningMigration()){
+            createAutoCommissioningDiagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAutoCommissioningMigration();
         }
 
         L.saveCCUState();
@@ -1964,4 +1970,30 @@ public class MigrationUtil {
 
         }
     }
+    private static void createAutoCommissioningDiagMigration(CCUHsApi instance) {
+        Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration started");
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        if(siteMap.size()>0){
+            HashMap diagEquip = instance.read("equip and diag");
+
+            Point autoCommission = new Point.Builder()
+                    .setDisplayName(diagEquip.get("dis")+"-autoCommissioning")
+                    .setEquipRef(diagEquip.get("id")+"")
+                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("cov").addMarker("cur")
+                    .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
+                    .setTz(diagEquip.get("tz")+"")
+                    .build();
+            String autoCommissioningId = instance.addPoint(autoCommission);
+            instance.writeHisValById(autoCommissioningId, 0.0);
+
+            ArrayList<HashMap<Object, Object>> systemLoopOutputPoints = CCUHsApi.getInstance().readAllEntities("system and loop and output and point and not writable");
+
+            for(HashMap<Object, Object> point : systemLoopOutputPoints){
+                Point up = new Point.Builder().setHashMap(point).addMarker("writable").build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        }
+        Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration completed");
+    }
+
 }

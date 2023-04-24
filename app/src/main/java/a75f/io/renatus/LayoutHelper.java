@@ -72,12 +72,12 @@ public class LayoutHelper
 				{
 					if (!lcmdab)
 					{
-						totalHeight = ((openItems) * dpToPx(100)) +
+						totalHeight = (double) ((openItems) * dpToPx(100)) +
 						              ((totalItems - openItems + 2) * dpToPx(45));
 					}
 					else
 					{
-						totalHeight = ((openItems + 1) * dpToPx(100)) +
+						totalHeight = (double) ((openItems + 1) * dpToPx(100)) +
 						              ((totalItems - openItems + 4) * dpToPx(45));
 					}
 				}

@@ -9,6 +9,8 @@ import android.content.pm.ApplicationInfo;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.util.Prefs;
+import dagger.hilt.android.HiltAndroidApp;
+
 import androidx.multidex.MultiDex;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.util.Log;
@@ -24,6 +26,7 @@ import java.io.InputStreamReader;
  * Created by ryanmattison isOn 7/24/17.
  */
 
+@HiltAndroidApp
 public class RenatusApp extends UtilityApplication
 {
 

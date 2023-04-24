@@ -187,18 +187,6 @@ public class MasterControl extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float selectedTemp = getTempForPX((int) event.getX());
-
-                Log.i("DEV_DEBUG", "mSelected - " + mSelected.name() +
-                        "onTouchEvent: selected temp "+selectedTemp+
-                        "\n UPPER_HEATING_LIMIT "+temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()]+
-                        "\n LOWER_COOLING_LIMIT "+temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]+
-                        "\n UPPER_COOLING_LIMIT "+temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]+
-                        "\n hdb"+hdb+ "cdb "+cdb+
-                        "\n first "+(selectedTemp>= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb)+
-                        "\n second old"+(selectedTemp <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()])+
-                        "\n second new"+(selectedTemp <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()])
-
-                );
                 if (selectedTemp >= mLowerBound && selectedTemp <= mUpperBound) {
 
                     if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {

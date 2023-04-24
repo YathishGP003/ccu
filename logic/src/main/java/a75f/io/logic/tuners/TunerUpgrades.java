@@ -282,7 +282,6 @@ public class TunerUpgrades {
            String tz = siteMap.get("tz").toString();
            HashMap<Object, Object> useCelsiusPoint = CCUHsApi.getInstance().readEntity("displayUnit");
             if(useCelsiusPoint.isEmpty()) {
-                Log.i("DEV_DEBUG", "migrateCelsiusSupportConfiguration: useCelsiusPoint Creating");
                 Point useCelsius = new Point.Builder()
                         .setDisplayName(equipDis + "-" + "displayUnit")
                         .setSiteRef(siteRef)

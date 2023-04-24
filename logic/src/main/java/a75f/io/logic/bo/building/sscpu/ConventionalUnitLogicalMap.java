@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.util.RxTask;
@@ -465,7 +466,8 @@ public class ConventionalUnitLogicalMap {
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, "cpu", tz));
-///Create Physical points and map
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(Tags.SS+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, CCUHsApi.getInstance());
+
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
       

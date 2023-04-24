@@ -159,7 +159,18 @@ public class Tags
     public static final String TZ = "tz";
     public static final String HELIO_NODE = "helionode";
     public static final String SMART_NODE = "smartnode";
+    public static final String SMART_STAT = "smartstat";
+    public static final String CUR = "cur";
+    public static final String DIAG = "diag";
+    public static final String OTA = "ota";
+    public static final String STATUS = "status";
+    public static final String LINEAR = "linear";
 
+    public static final String CM = "CM";
+    public static final String SN = "SN";
+    public static final String HN = "HN";
+    public static final String HS = "HS";
+    public static final String SS = "SS";
     public static final String MESSAGE = "message";
     public static final String KIND = "kind";
     public static final String VACATION = "vacation";

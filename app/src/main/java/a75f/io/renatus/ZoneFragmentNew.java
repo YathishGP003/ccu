@@ -6,7 +6,6 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -99,13 +98,13 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
-import a75f.io.logic.pubnub.UpdatePointHandler;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
@@ -240,11 +239,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
         tableLayout = (TableLayout) view.findViewById(R.id.tableRoot);
         gridlayout = (GridLayout) view.findViewById(R.id.gridview);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerEquip);
-
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         in = AnimationUtils.makeInAnimation(getActivity(), false);
         inleft = AnimationUtils.makeInAnimation(getActivity(), true);
@@ -2269,7 +2263,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
                                 String equipType = equipTypes.get(0);
-                                equipType.trim();
+                                equipType = equipType.trim();
                                 tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
@@ -2704,19 +2698,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2939,19 +2933,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -3641,7 +3635,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void hideWeather() {
-        TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
+        TranslateAnimation animate = new TranslateAnimation(0, (float) -weather_data.getWidth() + 5, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);

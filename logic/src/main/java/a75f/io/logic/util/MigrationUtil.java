@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
@@ -56,10 +57,10 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.diag.otastatus.OtaStatusMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
-import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTuners;
@@ -147,11 +148,8 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
-
-        if(!PreferenceUtil.getVocPm2p5Migration()){
-            migrateVocPm2p5(CCUHsApi.getInstance());
-            PreferenceUtil.setVocPm2p5Migration();
-        }
+        
+        migrateVocPm2p5(CCUHsApi.getInstance());
 
         if(!PreferenceUtil.getDiagEquipMigration()){
             doDiagPointsMigration(CCUHsApi.getInstance());
@@ -285,13 +283,10 @@ public class MigrationUtil {
             PreferenceUtil.setNewOccupancyMode();
         }
 
-
         if(!PreferenceUtil.getSafeModeMigration()){
             addSafeModeDiagPoint(CCUHsApi.getInstance());
             PreferenceUtil.setSafeModeMigration();
         }
-
-
 
         if(!PreferenceUtil.getSSEFanStageMigration()){
             SSEFanStageMigration(CCUHsApi.getInstance());
@@ -348,6 +343,10 @@ public class MigrationUtil {
         if(!PreferenceUtil.getStandaloneAirflowSampleWaitMigration()){
             createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
+        }
+        if(!PreferenceUtil.getOtaStatusMigration()){
+            OtaStatusMigration.Companion.migrateOtaStatusPoint();
+            PreferenceUtil.setOtaStatusMigration();
         }
 
         if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){
@@ -629,26 +628,37 @@ public class MigrationUtil {
     }
     private static void migrateVocPm2p5(CCUHsApi instance) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = instance.readAllEntities("equip and hyperstat");
+        if (hyperstatEquips.isEmpty())
+            return;
+
         hyperstatEquips.forEach(rawEquip -> {
             Equip equip = new Equip.Builder().setHashMap(rawEquip).build();
 
-            boolean isCovThresholdExist = isPointExist ("point and hyperstat and voc and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
-            boolean isCovTargetExist = isPointExist ("point and hyperstat and voc and target and equipRef == \"" +equip.getId()+"\"" ,instance);
-            boolean isPm2p5ThresholdExist = isPointExist ("point and hyperstat and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
-            boolean isPm2p5TargetExist = isPointExist ("point and hyperstat and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isVocThresholdExist = isPointExist ("point and voc and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isVocTargetExist = isPointExist ("point and voc and target and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isPm2p5ThresholdExist = isPointExist ("point and pm2p5 and threshold and equipRef == \"" +equip.getId()+"\"" ,instance);
+            boolean isPm2p5TargetExist = isPointExist ("point and pm2p5 and target and equipRef == \"" +equip.getId()+"\"" ,instance);
 
             HyperStatPointsUtil hyperStatPointsUtil = HyperStatReconfigureUtil.Companion.getEquipPointsUtil(equip, instance);
 
             List<Pair<Point, Object>> list = hyperStatPointsUtil.createPointVOCPmConfigPoint(
                     equip.getDisplayName(), 1000, 1000, 1000, 1000
             );
+
             list.forEach(pointObjectPair -> {
-                if((pointObjectPair.getFirst().getDisplayName().contains("zoneVOCThreshold") && !isCovThresholdExist)
-                        ||(pointObjectPair.getFirst().getDisplayName().contains("zoneVOCTarget") && !isCovTargetExist)
-                        ||(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Threshold") && !isPm2p5ThresholdExist)
-                        ||(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Target") && !isPm2p5TargetExist)){
+                if(pointObjectPair.getFirst().getDisplayName().contains("zoneVOCThreshold") && !isVocThresholdExist){
                     pushPointToHS(hyperStatPointsUtil,pointObjectPair);
                 }
+                if(pointObjectPair.getFirst().getDisplayName().contains("zoneVOCTarget") && !isVocTargetExist){
+                    pushPointToHS(hyperStatPointsUtil,pointObjectPair);
+                }
+                if(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Threshold") && !isPm2p5ThresholdExist){
+                    pushPointToHS(hyperStatPointsUtil,pointObjectPair);
+                }
+                if(pointObjectPair.getFirst().getDisplayName().contains("zonePm2p5Target") && !isPm2p5TargetExist){
+                    pushPointToHS(hyperStatPointsUtil,pointObjectPair);
+                }
+
             });
         });
     }

@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -56,10 +55,10 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -73,7 +72,6 @@ import androidx.fragment.app.Fragment;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
@@ -358,6 +356,15 @@ public class InstallerOptions extends Fragment {
                         .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                 CCUHsApi.getInstance().addPoint(snBand);
 
+                HashMap ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
+
+                OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                        siteMap.get("dis").toString()+"-CCU",
+                        ccu.get("equipRef").toString(),
+                        ccu.get("siteRef").toString(),
+                        siteMap.get(Tags.TZ).toString(),
+                        CCUHsApi.getInstance()
+                );
 
 
                 SettingPoint useBacnet = new SettingPoint.Builder()

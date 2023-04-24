@@ -12,7 +12,9 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class RenatusEngineeringActivity extends AppCompatActivity
 {
 	private EngineeringPagerAdapter mEnggPagerAdapter;

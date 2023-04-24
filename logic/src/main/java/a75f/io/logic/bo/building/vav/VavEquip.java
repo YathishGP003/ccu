@@ -645,7 +645,7 @@ public class VavEquip
 
         Equip vavEquip = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef)).build();
         String rhID = null;
-        if (config.reheatType > 0) {
+        if (config.reheatType != -1) {
             rhID = createReheatPosPointVav(vavEquip, hayStack);
             hisItems.add(new HisItem(rhID, new Date(System.currentTimeMillis()), 0.0));
         }
@@ -1103,7 +1103,7 @@ public class VavEquip
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
-                    if (config.reheatType > 0) {
+                    if (config.reheatType != -1) {
                         SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     }
                     break;
@@ -1113,7 +1113,7 @@ public class VavEquip
                     break;
             }
         }
-        if (config.reheatType == 0) {
+        if (config.reheatType == -1) {
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), false);
         } else {
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO));
@@ -1180,11 +1180,11 @@ public class VavEquip
     private void updateReheatTypeVav(int reheatType, String equipRef, CCUHsApi hayStack) {
         HashMap<Object, Object> reheatPos = hayStack.readEntity("reheat and valve and equipRef == \""+equipRef+"\"");
         Equip.Builder equipBuilder = new Equip.Builder().setHashMap(hayStack.readMapById(equipRef));
-        if (reheatType > 0) {
+        if (reheatType != -1 && reheatPos.isEmpty()) {
             String rhID = createReheatPosPointVav(equipBuilder.build(), hayStack);
             hayStack.writeHisValueByIdWithoutCOV(rhID, 0.0);
             SmartNode.updatePhysicalPointRef(nodeAddr, ANALOG_OUT_TWO.toString(), rhID);
-        } else if (!reheatPos.isEmpty()) {
+        } else if (reheatType == -1 && !reheatPos.isEmpty()) {
             hayStack.deleteEntity(reheatPos.get("id").toString());
         }
     }

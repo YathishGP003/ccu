@@ -483,7 +483,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
             damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
-            reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName)-1, false);
+            reheatType.setSelection(mProfileConfig.reheatType != -1 ? reheatTypesAdapter.getPosition(
+                    ReheatType.values()[mProfileConfig.reheatType].displayName) : 0, false);
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
@@ -602,9 +603,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());
         vavConfig.damperShape = DamperType.values()[damperShape.getSelectedItemPosition()].ordinal();
         if (reheatType.getSelectedItemPosition() > 0) {
-            vavConfig.reheatType = reheatTypeSelected.ordinal() + 1;
+            vavConfig.reheatType = reheatTypeSelected.ordinal();
         } else {
-            vavConfig.reheatType = 0;
+            vavConfig.reheatType = -1;
         }
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);

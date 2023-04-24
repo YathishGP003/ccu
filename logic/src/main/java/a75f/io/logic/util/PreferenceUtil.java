@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -13,6 +14,7 @@ public class PreferenceUtil {
     private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
+    private static final String BACKFILL_DURATION_MIGRATION = "backFillDuration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";

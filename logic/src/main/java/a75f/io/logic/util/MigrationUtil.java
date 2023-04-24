@@ -34,6 +34,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
@@ -55,6 +56,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -360,6 +362,10 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
+        if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
+            BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        }
+
 
         if(!PreferenceUtil.getAutoCommissioningMigration()){
             createAutoCommissioningDiagMigration(CCUHsApi.getInstance());
@@ -368,6 +374,7 @@ public class MigrationUtil {
 
         L.saveCCUState();
     }
+
 
     private static void updateKind(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");

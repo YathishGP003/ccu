@@ -222,7 +222,7 @@ public class HisSyncHandler
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsBatch(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {
@@ -368,7 +368,7 @@ public class HisSyncHandler
             return;
         }
         DateTime now = new DateTime();
-        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0 ? true : false;
+        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0;
         
         if (forcedPurge || timeForPurge) {
             Thread purgeThread = new Thread() {

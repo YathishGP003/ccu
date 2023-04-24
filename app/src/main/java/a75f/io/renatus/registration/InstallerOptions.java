@@ -1,18 +1,22 @@
 package a75f.io.renatus.registration;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +27,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -55,6 +60,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -63,6 +69,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.tuners.TunerFragment;
+import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -127,17 +134,22 @@ public class InstallerOptions extends Fragment {
     TextInputLayout textInputIP;
     RadioGroup radioGroupConfig;
     Button buttonSendIAM;
+    Button buttonApply;
+    Button buttonCancel;
+    LinearLayout linearLayout;
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
-    
+    View toastLayout;
+
     private ToggleButton toggleCoolingLockout;
     private ToggleButton toggleHeatingLockout;
     private TextView textCoolingLockoutTemp;
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;
     private Spinner spinnerHeatingLockoutTemp;
-    
+    private Spinner backFillTimeSpinner;
+
     private TextView textCoolingLockout;
     private TextView textUseCoolingLockoutDesc;
     private TextView textHeatingLockout;
@@ -200,6 +212,7 @@ public class InstallerOptions extends Fragment {
         getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -241,7 +254,12 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-        
+        buttonApply = rootView.findViewById(R.id.buttonApply);
+        buttonCancel = rootView.findViewById(R.id.buttonCancel);
+        linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
+        LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_backfill));
+
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
         textCoolingLockoutTemp = rootView.findViewById(R.id.textCoolingLockoutTemp);
@@ -398,6 +416,7 @@ public class InstallerOptions extends Fragment {
                         .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(editGateway.getText() != null ? editGateway.getText().toString() : "").build();
                 CCUHsApi.getInstance().addPoint(bacnetGateway);
                 // TODO Auto-generated method stub
+                buttonApply.callOnClick();
                 goTonext();
             }
         });
@@ -525,6 +544,40 @@ public class InstallerOptions extends Fragment {
         });
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
+
+        setBackFillTimeSpinner(rootView);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        buttonApply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
+                int[] durations = BackFillDuration.toIntArray();
+                int index = selectedSpinnerItem > 0 ? Math.min(selectedSpinnerItem , durations.length - 1) : 0;
+                int backFillDurationSelected = durations[index];
+                CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));
+
+                editor.putInt("backFillTimeDuration", backFillDurationSelected);
+                editor.putInt("backFillTimeSpSelected",backFillTimeSpinner.getSelectedItemPosition());
+                editor.apply();
+
+                if (!isFreshRegister) {
+                    Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+                    toast.setGravity(Gravity.BOTTOM, 50, 50);
+                    toast.setView(toastLayout);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.show();
+                }
+                linearLayout.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));
+            }
+        });
 
         getBACnetConfig();
 
@@ -926,5 +979,35 @@ public class InstallerOptions extends Fragment {
                 lockBACnetConfig();
             }
         }
+    }
+
+    private void setBackFillTimeSpinner(View rootView) {
+
+        int[] durations = BackFillDuration.toIntArray();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
+        this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
+        this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));
+
+        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if (sharedPreferences.getInt("backFillTimeSpSelected",6) == i) {
+                    linearLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    if (!isFreshRegister) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    }
+                }
+                adapterView.setSelection(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 }

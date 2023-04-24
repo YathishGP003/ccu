@@ -306,7 +306,6 @@ private fun handleDeHumidityMode(selectedPosition: Int, equipId: String) {
 
 fun getHyperStatCPUEquipPoints(equipDetails: Equip): HashMap<String, Any> {
 
-    Log.i("DEV_DEBUG", "getHyperStatCPUEquipPoints: ")
     // All the result points
     val cpuPoints = HashMap<String, Any>()
 

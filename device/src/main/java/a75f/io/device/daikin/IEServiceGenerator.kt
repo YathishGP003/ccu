@@ -165,7 +165,10 @@ class IEServiceGenerator {
                 val keyStore = readKeyStore(Globals.getInstance().applicationContext)
                 val ca : X509Certificate= keyStore?.getCertificate("ca") as X509Certificate
                 CcuLog.i(L.TAG_CCU_DEVICE, " root certificate subject ${ca.subjectX500Principal.name}")
-                check(validateCertificates(issuerName.toString(), ca?.subjectX500Principal.name))
+                ca?.subjectX500Principal?.let {
+                    check(validateCertificates(issuerName.toString(), it.name))
+                }
+
             }
         }
     }

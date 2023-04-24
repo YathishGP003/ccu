@@ -8,6 +8,7 @@ import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,11 +20,15 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
@@ -63,8 +68,6 @@ import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
-import a75f.io.logic.messaging.MessagingAckJob;
-import a75f.io.logic.messaging.MessagingClient;
 import a75f.io.logic.migration.firmware.FirmwareVersionPointMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
@@ -72,7 +75,6 @@ import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
 import a75f.io.logic.migration.idupoints.IduPointsMigration;
 import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.migration.smartnode.SmartNodeMigration;
-import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
@@ -84,6 +86,9 @@ import a75f.io.logic.watchdog.Watchdog;
     This is used to keep track of global static associated with application context.
  */
 public class Globals {
+    private static final String RESTART_CCU = "restart_ccu";
+    private static final String RESTART_TABLET = "restart_tablet";
+
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
         public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
@@ -108,8 +113,6 @@ public class Globals {
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
 
     AlertProcessJob mAlertProcessJob;
-
-    MessagingAckJob messagingAckJob;
 
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
@@ -236,6 +239,10 @@ public class Globals {
         importTunersAndScheduleJobs();
         updateCCUAhuRef();
         setRecoveryMode();
+
+        MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
+        MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
+        handleAutoCommissioning();
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -322,15 +329,6 @@ public class Globals {
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);
 
-                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
-                {
-                    if (!site.isEmpty()) {
-                        if (CCUHsApi.getInstance().siteSynced()) {
-                            MessagingClient.getInstance().init();
-                        }
-                    }
-                }
-
                 mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                         TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
 
@@ -353,16 +351,6 @@ public class Globals {
 
         if (isTestMode()) {
             setTestMode(false);
-        }
-    }
-
-    public void scheduleMessagingAckJob() {
-        if (CCUHsApi.getInstance().isCCURegistered() && messagingAckJob == null) {
-            String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
-            String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
-
-            messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
-            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 
@@ -679,6 +667,14 @@ public class Globals {
 
         if(!(systemProf.equals(ahuRef))) {
             CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+        }
+    }
+
+    private void handleAutoCommissioning() {
+        String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+        if (autoCommissioningPointId != null && AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
+            AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);
         }
     }
 }

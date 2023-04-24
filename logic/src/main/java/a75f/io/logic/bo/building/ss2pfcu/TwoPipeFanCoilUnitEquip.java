@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.util.RxTask;
@@ -470,6 +471,9 @@ public class TwoPipeFanCoilUnitEquip {
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, room, floor, nodeAddr, profile, tz ));
+
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(Tags.SS+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, CCUHsApi.getInstance());
+
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(equipScheduleTypeId, 0.0);

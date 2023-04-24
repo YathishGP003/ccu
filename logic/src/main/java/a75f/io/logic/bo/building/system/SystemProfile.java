@@ -5,8 +5,11 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +19,7 @@ import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -65,7 +69,7 @@ public abstract class SystemProfile
     
     private boolean mechanicalCoolingAvailable;
     private boolean mechanicalHeatingAvailable;
-    
+
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();
@@ -844,7 +848,7 @@ public abstract class SystemProfile
         }
 
         BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
-        
+
         createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
     }
     
@@ -1046,5 +1050,16 @@ public abstract class SystemProfile
     
     public boolean isHeatingLockoutActive() {
         return !mechanicalHeatingAvailable;
+    }
+
+    public double getSystemLoopOutputValue(String state){
+         double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");
+         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
+         return systemLoopOPValue;
+    }
+
+    public void writeSystemLoopOutputValue(String state, double value){
+        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS");
+        CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 }

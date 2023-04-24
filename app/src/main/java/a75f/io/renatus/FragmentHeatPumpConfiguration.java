@@ -377,7 +377,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         hpuConfig.setNodeAddress(mSmartNodeAddress);
         hpuConfig.enableOccupancyControl = switchOccSensor.isChecked();
         hpuConfig.setPriority(ZonePriority.NONE);
-        hpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        hpuConfig.temperatureOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         hpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         hpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         hpuConfig.changeOverRelay6Type = hpChangeOverTypeSpinner.getSelectedItemPosition()+1;

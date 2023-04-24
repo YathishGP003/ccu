@@ -46,6 +46,7 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.building.dualduct.DualDuctEquip;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
@@ -58,10 +59,10 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.diag.otastatus.OtaStatusMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
-import a75f.io.logic.pubnub.hyperstat.HyperStatReconfigureUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTuners;
@@ -149,7 +150,7 @@ public class MigrationUtil {
             addUnitToTuners(CCUHsApi.getInstance());
             PreferenceUtil.setUnitAddedToTuners();
         }
-        
+
         migrateVocPm2p5(CCUHsApi.getInstance());
 
         if(!PreferenceUtil.getDiagEquipMigration()){
@@ -345,6 +346,10 @@ public class MigrationUtil {
             createStandaloneAirflowSampleWaitMigration(CCUHsApi.getInstance());
             PreferenceUtil.setAirflowSampleWaitTimeUnitMigration();
         }
+        if(!PreferenceUtil.getOtaStatusMigration()){
+            OtaStatusMigration.Companion.migrateOtaStatusPoint();
+            PreferenceUtil.setOtaStatusMigration();
+        }
 
         if(!PreferenceUtil.getAutoForcedTagNameCorrectionMigration()){
             changeOccupancyToOccupiedForAutoForcedEnabledPoint(CCUHsApi.getInstance());
@@ -359,6 +364,12 @@ public class MigrationUtil {
 
         if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        }
+
+
+        if(!PreferenceUtil.getAutoCommissioningMigration()){
+            createAutoCommissioningDiagMigration(CCUHsApi.getInstance());
+            PreferenceUtil.setAutoCommissioningMigration();
         }
 
         L.saveCCUState();
@@ -1966,4 +1977,30 @@ public class MigrationUtil {
 
         }
     }
+    private static void createAutoCommissioningDiagMigration(CCUHsApi instance) {
+        Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration started");
+        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        if(siteMap.size()>0){
+            HashMap diagEquip = instance.read("equip and diag");
+
+            Point autoCommission = new Point.Builder()
+                    .setDisplayName(diagEquip.get("dis")+"-autoCommissioning")
+                    .setEquipRef(diagEquip.get("id")+"")
+                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("cov").addMarker("cur")
+                    .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
+                    .setTz(diagEquip.get("tz")+"")
+                    .build();
+            String autoCommissioningId = instance.addPoint(autoCommission);
+            instance.writeHisValById(autoCommissioningId, 0.0);
+
+            ArrayList<HashMap<Object, Object>> systemLoopOutputPoints = CCUHsApi.getInstance().readAllEntities("system and loop and output and point and not writable");
+
+            for(HashMap<Object, Object> point : systemLoopOutputPoints){
+                Point up = new Point.Builder().setHashMap(point).addMarker("writable").build();
+                CCUHsApi.getInstance().updatePoint(up,up.getId());
+            }
+        }
+        Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration completed");
+    }
+
 }

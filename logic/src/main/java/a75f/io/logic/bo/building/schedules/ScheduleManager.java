@@ -41,6 +41,8 @@ import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -50,7 +52,6 @@ import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class ScheduleManager {
@@ -574,6 +575,11 @@ public class ScheduleManager {
      * @return
      */
     public String getZoneStatusMessage(String zoneId, String equipId) {
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            CcuLog.i(TAG_CCU_SCHEDULER, "Zone page status - AutoCommissioning is Started ");
+            return "In Diagnostic Mode";
+        }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipId);
         OccupancyData equipOccupancyData = equipOccupancy.get(equipId);
         if (equipOccupancyData == null) {
@@ -642,6 +648,11 @@ public class ScheduleManager {
         Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
         CcuLog.i(TAG_CCU_SCHEDULER,
                  " getZoneStatusString "+equip.getDisplayName()+" "+cachedOccupied+" "+curOccupancyMode);
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            CcuLog.i(TAG_CCU_SCHEDULER, "Zone page status - AutoCommissioning is Started ");
+            return "In Diagnostic Mode";
+        }
         if(cachedOccupied == null) {
             CcuLog.i(TAG_CCU_SCHEDULER, "Occupied schedule not found "+equip.getDisplayName());
             return "No schedule configured";
@@ -755,6 +766,12 @@ public class ScheduleManager {
         
         CcuLog.i(TAG_CCU_SCHEDULER, " getSystemStatusString systemOccupancy "+systemOccupancy+" currentOccupiedInfo "+currentOccupiedInfo);
         //This might happen when getSystemStatusString is called too early, even before the systemProfile is loaded.
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            CcuLog.i(TAG_CCU_SCHEDULER, "System page status - AutoCommissioning is Started");
+            return "In Diagnostic Mode";
+        }
+
         if (L.ccu().systemProfile == null) {
             return "Loading...";
         }

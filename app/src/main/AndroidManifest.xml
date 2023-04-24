@@ -40,8 +40,8 @@
             tools:replace="android:label">
 
         <service android:name=".bluetooth.BLEProvisionService"/>
-        <service android:name=".OTAUpdateHandlerService"/>
-        <service android:name=".OTAUpdateService"/>
+        <service android:name=".ota.OTAUpdateHandlerService"/>
+        <service android:name=".ota.OTAUpdateService"/>
         <service android:name="a75f.io.usbserial.UsbService" android:enabled="true"></service>
         <service android:name="a75f.io.usbserial.UsbModbusService" android:enabled="true"></service>
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
@@ -108,6 +108,7 @@
             android:value="7jO0gpjtHlBZhyN4cZuHQ" />
 
         <service android:name=".WeatherDataDownloadService"/>
+
     </application>
 
 </manifest>

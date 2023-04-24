@@ -295,7 +295,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         fourPfcuConfig.setNodeAddress(mSmartNodeAddress);
         fourPfcuConfig.enableOccupancyControl = switchOccSensor.isChecked();
         fourPfcuConfig.setPriority(ZonePriority.NONE);
-        fourPfcuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        fourPfcuConfig.temperatureOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         fourPfcuConfig.enableThermistor1 = switchThermistor1.isChecked();
         fourPfcuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
 

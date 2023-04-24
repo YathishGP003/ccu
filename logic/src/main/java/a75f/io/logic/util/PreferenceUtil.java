@@ -53,6 +53,7 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
+    private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
     private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
@@ -71,6 +72,7 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+    private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
 
@@ -469,8 +471,26 @@ public class PreferenceUtil {
 
     public static void setHyperStatCpuTagMigration() {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
+     }
+
+    public static boolean getAutoCommissioningMigration() {
+        return getBooleanPreference(AUTO_COMMISSIONING_MIGRATION);
     }
 
+    public static void setAutoCommissioningMigration() {
+        setBooleanPreference(AUTO_COMMISSIONING_MIGRATION, true);
+
+    }
+    public static long getScheduledStopDatetime(String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getLong(key, 0);
+    }
+
+    public static void setScheduledStopDatetime(String key, long value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putLong(key, value);
+        editor.apply();
+    }
     public static void setFreeInternalDiskStorageMigration() {
         setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
     }
@@ -600,6 +620,13 @@ public class PreferenceUtil {
         setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
     }
 
+    public static boolean getOtaStatusMigration() {
+        return getBooleanPreference(OTA_STATUS_MIGRATION);
+    }
+
+    public static void setOtaStatusMigration() {
+        setBooleanPreference(OTA_STATUS_MIGRATION, true);
+    }
 
     public static boolean getKindCorrectionMigration() {
         return getBooleanPreference(KIND_CORRECTION);

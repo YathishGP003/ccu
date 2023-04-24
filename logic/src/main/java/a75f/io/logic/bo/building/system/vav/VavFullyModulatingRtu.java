@@ -11,11 +11,14 @@ import java.util.HashMap;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -30,7 +33,6 @@ import a75f.io.logic.util.SystemProfileUtil;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-
 /**
  * Default System handles PI controlled op
  */
@@ -137,7 +139,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             systemCoolingLoopOp = 0;
         }
-        
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
+        }
+
         int signal;
         double analogMin, analogMax;
         setSystemLoopOp("cooling", systemCoolingLoopOp);
@@ -171,6 +178,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
+        }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.HEATING,systemHeatingLoopOp);
+            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
         }
         
         setSystemLoopOp("heating", systemHeatingLoopOp);
@@ -210,13 +222,16 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
             if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
-                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeVAVFanLoopOp))
+                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeVAVFanLoopOp)){
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeVAVFanLoopOp);
-                else systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
-            }else if(VavSystemController.getInstance().getSystemState() == HEATING)
-                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeVAVFanLoopOp);
-            else
+                }else {
+                    systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+                }
+            }else if(VavSystemController.getInstance().getSystemState() == HEATING) {
+                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier), smartPurgeVAVFanLoopOp);
+            }else {
                 systemFanLoopOp = smartPurgeVAVFanLoopOp;
+            }
         }else if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -230,6 +245,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.FAN,systemFanLoopOp);
+            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
+        }
+
         setSystemLoopOp("fan", systemFanLoopOp);
         
         if (getConfigVal("analog2 and output and enabled") > 0)

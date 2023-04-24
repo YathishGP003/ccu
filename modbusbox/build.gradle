@@ -6,7 +6,7 @@ android {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
     }
 
-    compileSdkVersion 30
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion 24

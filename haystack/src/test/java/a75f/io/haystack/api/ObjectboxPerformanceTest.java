@@ -21,7 +21,7 @@ public class ObjectboxPerformanceTest {
     
     private static final int ITEM_COUNT_DB = 10;
     
-    @Test @Ignore("an experiment rather than a unit test")
+    @Ignore("an experiment rather than a unit test")
     public void testHisReadPerformance() {
         CCUHsApi hayStack = new CCUHsApi();
     

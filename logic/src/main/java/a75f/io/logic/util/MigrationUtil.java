@@ -36,6 +36,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.DamperType;
@@ -527,7 +528,7 @@ public class MigrationUtil {
                 .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddress)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(CCUHsApi.getInstance().getTimeZone())
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);

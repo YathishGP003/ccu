@@ -221,7 +221,7 @@ public class HisSyncHandler
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsBatch(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {

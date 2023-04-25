@@ -2607,7 +2607,7 @@ public class CCUHsApi
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
@@ -2617,11 +2617,10 @@ public class CCUHsApi
                         HDateTime lastModifiedDateTime;
                         if (lastModifiedTimeTag != null) {
                             lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
-                            pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         } else {
                             lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
                         }
-
+                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         hDictList.add(pid.toDict());
 
                         HDict rec = hsClient.readById(HRef.copy(id));

@@ -2010,8 +2010,8 @@ public class MigrationUtil {
 
     private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
 
-        ArrayList<HashMap<Object, Object>> vavEquips = ccuHsApi.readAllEntities("vav and equip and zone");
-        for (HashMap<Object, Object> equip : vavEquips) {
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        for (HashMap<Object, Object> equip : Equips) {
             ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
             if (!enableOccupancyControlPoints.isEmpty()) {
                 for (HashMap<Object, Object> enableOccupancyControlPoint : enableOccupancyControlPoints) {

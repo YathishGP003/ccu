@@ -776,7 +776,6 @@ public class DabEquip
         config.damper2Size = (int)getConfigNumVal("damper and secondary and size");
         config.damper2Shape = (int)getConfigNumVal("damper and secondary and shape");
         
-//        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal(IAQ_ENABLED) > 0;
 

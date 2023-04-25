@@ -305,7 +305,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
 
 
-        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);

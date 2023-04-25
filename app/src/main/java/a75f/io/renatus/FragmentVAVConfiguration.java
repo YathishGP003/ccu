@@ -252,7 +252,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
         initializeNumberPickers(view);
 
-        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
         enableAutoAwayControl = view.findViewById(R.id.enableAutoAwayControl);

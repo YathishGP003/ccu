@@ -28,6 +28,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
@@ -751,7 +752,8 @@ public class MigrationUtil {
         }else{
             Log.i(TAG_CCU_MIGRATION_UTIL, "Diag points are not available Restoring daig equips");
             // Locally diag points are missing check at silo
-            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString());
+            RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count during diag equip "+ retryCount);
+            new RestoreCCU().getDiagEquipOfCCU(ccu.get("equipRef").toString(), retryCountCallback);
 
         }
 

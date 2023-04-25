@@ -343,7 +343,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         cpuConfig.enableOccupancyControl = switchOccSensor.isChecked();
         cpuConfig.enableFanStage1 = switchEnableFanStage1.isChecked();
         cpuConfig.setPriority(ZonePriority.NONE);
-        cpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        cpuConfig.temperatureOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         cpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         cpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         cpuConfig.relay6Type = fanHumiDSpinner.getSelectedItemPosition() + 1;

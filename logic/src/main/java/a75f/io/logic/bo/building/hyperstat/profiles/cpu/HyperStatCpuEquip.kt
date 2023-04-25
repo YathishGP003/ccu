@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -14,6 +15,7 @@ import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperstatCpuTuners
 import a75f.io.logic.util.RxTask
 import android.util.Log
@@ -96,6 +98,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         Log.i(L.TAG_CCU_HSCPU, "New Profile  logical points are created")
 
         configHyperStatDevice(config, profileEquip)
+
+        addOTAStatusPoint("${Tags.HS}-$nodeAddress", equipRef!!, basicInfo.siteRef, roomRef!!, floorRef!!, nodeAddress, basicInfo.timeZone, haystack)
 
         updateConditioningMode()
         // Syncing the Points

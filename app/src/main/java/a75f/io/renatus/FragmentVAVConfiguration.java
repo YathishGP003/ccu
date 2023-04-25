@@ -609,7 +609,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
-        vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        vavConfig.temperaturOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
         vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
         vavConfig.enableCFMControl = enableCFMControl.isChecked();

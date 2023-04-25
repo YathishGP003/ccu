@@ -48,6 +48,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTunerUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -657,11 +658,15 @@ public class VavEquip
 
         //Create Physical points and map
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
              device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
+            nodeName = Tags.SN;
         }else  {
              device = new HelioNode(nodeAddr, siteRef, floor, room, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, hayStack);
 
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(true);

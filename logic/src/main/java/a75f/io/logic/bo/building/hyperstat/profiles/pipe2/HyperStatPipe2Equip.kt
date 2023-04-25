@@ -10,9 +10,11 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.*
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperStat2PipeTuners
 import a75f.io.logic.util.RxTask
 import android.util.Log
@@ -117,6 +119,10 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
 
         configHyperStatDevice(config, profileEquip)
 
+        addOTAStatusPoint(
+            "${Tags.HS}-$nodeAddress", equipRef!!, basicInfo.siteRef,
+            roomRef!!, floorRef!!, nodeAddress, basicInfo.timeZone, haystack
+        )
         // Syncing the Points
         haystack.syncEntityTree()
     }

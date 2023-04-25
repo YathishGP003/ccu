@@ -518,7 +518,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         dabConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
         dabConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         dabConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
-        dabConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        dabConfig.temperaturOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         dabConfig.enableCFMControl = enableTrueCFMControl.isChecked();
         dabConfig.minCFMForIAQ = minCFMForIAQPos.getValue()*STEP;
         dabConfig.kFactor = (((kFactor.getSelectedItemPosition()-100)*(.01))+2);

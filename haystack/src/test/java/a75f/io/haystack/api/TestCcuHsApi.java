@@ -18,7 +18,7 @@ import a75f.io.api.haystack.Zone;
 
 public class TestCcuHsApi {
     
-    @Test //@Ignore("Not a unit test; only for visualizing data with printlns")
+    @Ignore("Not a unit test; only for visualizing data with printlns")
     public void testSite()
     {
         CCUHsApi hayStack = new CCUHsApi();

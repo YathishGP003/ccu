@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.OAOTuners;
 
 public class OAOEquip
@@ -324,13 +325,17 @@ public class OAOEquip
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "oao", tz, false));
-    
+
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
             device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.SN;
         }else  {
             device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, roomRef, floorRef, nodeAddr, tz, CCUHsApi.getInstance());
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
         device.analog1In.setType("5");//TODO - Hard coding to CO2 sensor type.

@@ -46,6 +46,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -278,6 +280,7 @@ public class CreateNewSite extends Fragment {
             if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                 && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
                 && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
+            && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
             ) {
 
                 ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
@@ -759,6 +762,14 @@ public class CreateNewSite extends Fragment {
                         mSiteOrg.setError(null);
                     } else {
                         mTextInputOrg.setError("");
+                    }
+                    if(!CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())){
+                        if(mSiteOrg.getText().toString().startsWith("_") ||
+                                mSiteOrg.getText().toString().startsWith("-")  ||
+                                mSiteOrg.getText().toString().startsWith(" ") )
+                            mSiteOrg.setError("Cannot start with Special characters");
+                        else
+                            mSiteOrg.setError("Special characters are not allowed");
                     }
 
                 case R.id.editFacilityEmail:

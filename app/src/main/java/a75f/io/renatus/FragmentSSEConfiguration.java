@@ -300,7 +300,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         sseConfig.setNodeType(mNodeType);
         sseConfig.setNodeAddress(mSmartNodeAddress);
         sseConfig.setPriority(ZonePriority.NONE);
-        sseConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        sseConfig.temperaturOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         sseConfig.enableThermistor1 = switchAirflowTempSensor.isChecked();
         sseConfig.enableThermistor2 = switchExtTempSensor.isChecked();
         sseConfig.enableAutoAway = autoAway.isChecked();

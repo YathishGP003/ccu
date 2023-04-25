@@ -1,5 +1,7 @@
 package a75f.io.renatus.ENGG;
 
+import static a75f.io.renatus.RenatusLandingActivity.updateCCUOtaStatus;
+
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
@@ -25,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.renatus.RenatusApp;
 
 public class AppInstaller
@@ -242,11 +245,13 @@ public class AppInstaller
                 String sFilePath = RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ;
                 if (!sFilePath.isEmpty())
                 {
+                    updateCCUOtaStatus(OtaStatus.OTA_UPDATE_STARTED);
                     File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     RenatusApp.executeAsRoot(commands);
+                    updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }
             }

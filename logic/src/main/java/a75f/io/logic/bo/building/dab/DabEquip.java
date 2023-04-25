@@ -52,6 +52,7 @@ import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -464,12 +465,17 @@ public class DabEquip
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
                 siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
 
+
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
             device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.SN;
         }else  {
             device = new HelioNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, roomRef, floorRef, nodeAddr, tz, hayStack);
 
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);

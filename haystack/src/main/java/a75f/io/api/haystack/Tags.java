@@ -18,6 +18,8 @@ public class Tags
     public static final String DEVICE = "device";
     public static final String FLOOR = "floor";
     public static final String ROOM = "room";
+    public static final String ROOMREF = "roomRef";
+    public static final String FLOORREF = "floorRef";
     public static final String SCHEDULE = "schedule";
     public static final String CONNECTION = "connection";
     public static final String ID = "id";
@@ -159,10 +161,22 @@ public class Tags
     public static final String TZ = "tz";
     public static final String HELIO_NODE = "helionode";
     public static final String SMART_NODE = "smartnode";
+    public static final String SMART_STAT = "smartstat";
+    public static final String CUR = "cur";
+    public static final String DIAG = "diag";
+    public static final String OTA = "ota";
+    public static final String STATUS = "status";
+    public static final String LINEAR = "linear";
 
+    public static final String CM = "CM";
+    public static final String SN = "SN";
+    public static final String HN = "HN";
+    public static final String HS = "HS";
+    public static final String SS = "SS";
     public static final String MESSAGE = "message";
     public static final String KIND = "kind";
     public static final String VACATION = "vacation";
     public static final String NAMED = "named";
     public static final String LAST_MODIFIED_TIME = "lastModifiedDateTime";
+    public static final String MODBUS = "modbus";
 }

@@ -6,11 +6,14 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -34,7 +37,6 @@ import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHA
 public class DabFullyModulatingRtu extends DabSystemProfile
 {
     private static final int ANALOG_SCALE = 10;
-    
     public int getAnalog1Out() {
         return (int) ControlMote.getAnalogOut("analog1");
     }
@@ -94,7 +96,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     DcwbAlgoHandler dcwbAlgoHandler = null;
     
     private synchronized void updateSystemPoints() {
-        
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
         
@@ -263,12 +264,16 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
         double signal = 0;
         if (dabSystem.getSystemState() == COOLING) {
-            systemCoolingLoopOp = dabSystem.getCoolingSignal();
+                systemCoolingLoopOp = dabSystem.getCoolingSignal();
         } else {
-            systemCoolingLoopOp = 0;
+                systemCoolingLoopOp = 0;
+        }
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
         }
         setSystemLoopOp("cooling", systemCoolingLoopOp);
-    
+
         if (getConfigVal("analog1 and output and enabled") > 0) {
             double analogMin = getConfigVal("analog1 and cooling and min");
             double analogMax = getConfigVal("analog1 and cooling and max");
@@ -347,6 +352,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         } else {
             systemHeatingLoopOp = 0;
         }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.HEATING,systemHeatingLoopOp);
+            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
+        }
         setSystemLoopOp("heating", systemHeatingLoopOp);
     
         if (getConfigVal("analog3 and output and enabled") > 0) {
@@ -377,6 +387,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             systemCoolingLoopOp = dabSystem.getCoolingSignal();
         } else {
             systemCoolingLoopOp = 0;
+        }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
         }
         setSystemLoopOp("cooling", systemCoolingLoopOp);
     
@@ -479,16 +494,15 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 systemFanLoopOp = Math.max(systemCoolingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
             }else if(dabSystem.getSystemState() == HEATING){
                 systemFanLoopOp = Math.max(systemHeatingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
-            }else
+            }else {
                 systemFanLoopOp = smartPurgeDabFanLoopOp;
-            
+            }
         } else if (dabSystem.getSystemState() == COOLING) {
             //When the system is economizing we need to ramp up the fan faster to take advantage of the free cooling. In such a case
             //systemFanLoopOutput = systemCoolingLoopOutput * 100/economizingToMainCoolingLoopMap
             if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
                 double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
                                                                                        L.ccu().oaoProfile.getEquipRef());
-            
                 systemFanLoopOp = dabSystem.getCoolingSignal() * 100/economizingToMainCoolingLoopMap ;
             } else {
                 systemFanLoopOp = (int) (dabSystem.getCoolingSignal() * analogFanSpeedMultiplier);
@@ -499,6 +513,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.FAN,systemFanLoopOp);
+            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
+        }
         setSystemLoopOp("fan", systemFanLoopOp);
     
     }

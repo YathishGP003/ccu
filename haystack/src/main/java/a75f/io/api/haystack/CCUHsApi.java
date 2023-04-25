@@ -2607,14 +2607,21 @@ public class CCUHsApi
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime");
 
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
                                 .add("val", kind.equals(Kind.STRING.getValue()) ?
                                         HStr.make(val.toString()) : val);
-                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                        HDateTime lastModifiedDateTime;
+                        if (lastModifiedTimeTag != null) {
+                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                            pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                        } else {
+                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                        }
+
                         hDictList.add(pid.toDict());
 
                         HDict rec = hsClient.readById(HRef.copy(id));

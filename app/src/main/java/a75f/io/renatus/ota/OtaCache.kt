@@ -108,16 +108,11 @@ class OtaCache {
     }
 
     fun updateRetryCount(messageId: String) {
-        try {
-            val requestMap = getRequestMap()
-
-            val request = requestMap[messageId]
-            if (request != null) {
-                request[RETRY_COUNT] = (request[RETRY_COUNT]!!.toInt() + 1).toString()
-                saveRequestList(requestMap)
-            }
-        } catch (e: Exception){
-            logIt(e.message!!)
+        val requestMap = getRequestMap()
+        val request = requestMap[messageId]
+        if (request != null) {
+            request[RETRY_COUNT] = (request[RETRY_COUNT]!!.toInt() + 1).toString()
+            saveRequestList(requestMap)
         }
     }
 
@@ -137,24 +132,19 @@ class OtaCache {
     fun restoreOtaRequests (context: Context) {
        val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         appScope.launch {
-            val dispatcher = this.coroutineContext
-            CoroutineScope(dispatcher).launch {
-                try {
-                    withContext(Dispatchers.IO) {
-                        Thread.sleep(FIVE_MINUTES)
+            try {
+                delay(FIVE_MINUTES)
+                val cache = OtaCache()
+                val otaRequests = cache.getRequestMap()
+                logIt("Request list $otaRequests")
+                if (!otaRequests.isEmpty()) {
+                    otaRequests.forEach { (_: String?, request: LinkedTreeMap<String, String>) ->
+                        val intent = cache.getIntentFromRequest(request)
+                        context.sendBroadcast(intent)
                     }
-                    val cache = OtaCache()
-                    val otaRequests = cache.getRequestMap()
-                    logIt("Request list $otaRequests")
-                    if (!otaRequests.isEmpty()) {
-                        otaRequests.forEach { (_: String?, request: LinkedTreeMap<String, String>) ->
-                            val intent = cache.getIntentFromRequest(request)
-                            context.sendBroadcast(intent)
-                        }
-                    }
-                } catch (e : InterruptedException) {
-                    e.printStackTrace()
                 }
+            } catch (e : InterruptedException) {
+                e.printStackTrace()
             }
         }
     }

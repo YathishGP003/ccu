@@ -1386,7 +1386,7 @@ public class CCUTagsDb extends HServer {
         HDict entity = readById(id);
         long backfillduration;
         Double backfillDurationPoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and backfill and duration");
-        if (backfillDurationPoint == null) {
+        if (null == backfillDurationPoint) {
             backfillduration = 24;
         } else {
             backfillduration = backfillDurationPoint.intValue();

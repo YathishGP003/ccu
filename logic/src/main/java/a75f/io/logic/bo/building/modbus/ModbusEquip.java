@@ -79,7 +79,11 @@ public class ModbusEquip {
 
         for (String equip :
                 modbusEquipTypes) {
-            mbEquip.addMarker(equip.trim());
+            if (areAllWordsUpperCase(equip)) {
+                mbEquip.addMarker(equip.toLowerCase());
+            } else {
+                mbEquip.addMarker(equip.trim());
+            }
         }
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             mbEquip.addMarker("zone");
@@ -361,5 +365,17 @@ public class ModbusEquip {
     public double getHisVal(String query)
     {
         return hayStack.readHisValByQuery( query+" and equipRef == \""+equipRef+"\"");
+    }
+
+    public static boolean areAllWordsUpperCase(String str) {
+        String[] words = str.split("\\s+");
+
+        for (String word : words) {
+            if (!word.equals(word.toUpperCase())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

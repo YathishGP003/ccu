@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.sshpu.HeatPumpPackageUnitUtil;
@@ -31,6 +32,18 @@ public class StandaloneConfigHandler {
             CCUHsApi.getInstance().writeHisValById(configPoint.getId(),
                     HSUtil.getPriorityVal(configPoint.getId()));
         }
+
+        if (configPoint.getMarkers().contains(Tags.USERINTENT)
+                && configPoint.getMarkers().contains(Tags.FAN)
+                && configPoint.getMarkers().contains(Tags.MODE) ){
+            int configVal = msgObject.get("val").getAsInt();
+            SmartStatFanModeCache cache = new SmartStatFanModeCache();
+            if ((configVal != 0) && (configVal % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
+                cache.saveFanModeInCache(configPoint.getEquipRef(), configVal);
+            else
+                cache.removeFanModeFromCache(configPoint.getEquipRef());
+        }
+
         
     }
     

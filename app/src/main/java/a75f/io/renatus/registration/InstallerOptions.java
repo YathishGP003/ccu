@@ -50,6 +50,7 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -377,10 +378,10 @@ public class InstallerOptions extends Fragment {
                 HashMap ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
 
                 OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                        siteMap.get("dis").toString()+"-CCU",
-                        ccu.get("equipRef").toString(),
-                        ccu.get("siteRef").toString(),
-                        siteMap.get(Tags.TZ).toString(),
+                        Objects.requireNonNull(siteMap.get("dis")) +"-CCU",
+                        Objects.requireNonNull(ccu.get("equipRef")).toString(),
+                        Objects.requireNonNull(ccu.get("siteRef")).toString(),
+                        Objects.requireNonNull(siteMap.get(Tags.TZ)).toString(),
                         CCUHsApi.getInstance()
                 );
 

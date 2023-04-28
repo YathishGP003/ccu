@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
@@ -53,7 +52,6 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOtaStatus_t;
-import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.FirmwareComponentType_t;
@@ -65,6 +63,7 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.ByteArrayUtils;
+import a75f.io.logic.diag.otastatus.OtaState;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.usbserial.UsbService;
@@ -236,7 +235,7 @@ public class OTAUpdateService extends IntentService {
         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKET_REQ));
         OTAUpdateHandlerService.lastOTAUpdateTime = System.currentTimeMillis();
         if ( mUpdateLength == -1 ){
-            firmwareFileExist();
+            downloadFileIfMissing();
         } else {
             CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
             msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
@@ -253,7 +252,7 @@ public class OTAUpdateService extends IntentService {
     }
 
 
-    private void firmwareFileExist() {
+    private void downloadFileIfMissing() {
         OtaCache cache = new OtaCache();
         FirmwareComponentType_t deviceType = FirmwareComponentType_t.values()[cache.getDeviceType()];
         int versionMinor = cache.getMinorVersion();
@@ -290,19 +289,20 @@ public class OTAUpdateService extends IntentService {
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
         Log.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+msg.currentState.get() + " Data : "+msg.data.get());
-        if ( msg.currentState.get() == 1 || msg.currentState.get() == 3) {
+        if ( msg.currentState.get() == OtaState.FIRMWARE_RECEIVED.ordinal()
+                || msg.currentState.get() == OtaState.FIRMWARE_COPY_AVAILABLE.ordinal()) {
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
             short currentBand = L.ccu().getSmartNodeAddressBand();
             if (mCurrentLwMeshAddress != (currentBand + 99)){
                 OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_PACKET_STARTED, mCurrentLwMeshAddress);
             }
             mUpdateWaitingToComplete = true;
-        } else if ( msg.currentState.get() == 2) {
+        } else if ( msg.currentState.get() == OtaState.CM_DEVICE_IN_PROGRESS.ordinal()) {
             OtaStatusDiagPoint.Companion.updateCmToDeviceOtaProgress(
-                    (mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE),
+                    mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE,
                     msg.data.get(), mCurrentLwMeshAddress
             );
-        } else if ( msg.currentState.get() == 4) {
+        } else if ( msg.currentState.get() == OtaState.CM_DEVICE_TIMEOUT.ordinal()) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
         }
     }

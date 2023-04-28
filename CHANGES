@@ -1,3 +1,7 @@
+ - Merged PR 7425: Version downgrade
+ - Version downgrade
+ - Merged PR 7407: Smart Stat CPU fan relay issue fix
+ - Version bump to 1.640.0
  - Merged PR 7364: OTA observations
  - Merged PR 7342: Damper actuator type enum update
  - Merged PR 7386: Master Version bump to 640

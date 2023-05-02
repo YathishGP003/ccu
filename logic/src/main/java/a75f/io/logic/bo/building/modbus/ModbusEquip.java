@@ -79,8 +79,8 @@ public class ModbusEquip {
 
         for (String equip :
                 modbusEquipTypes) {
-            if (areAllWordsUpperCase(equip)) {
-                mbEquip.addMarker(equip.toLowerCase());
+            if (isEquipTypeInUpperCase(equip)) {
+                mbEquip.addMarker(equip.toLowerCase().trim());
             } else {
                 mbEquip.addMarker(equip.trim());
             }
@@ -367,7 +367,7 @@ public class ModbusEquip {
         return hayStack.readHisValByQuery( query+" and equipRef == \""+equipRef+"\"");
     }
 
-    public static boolean areAllWordsUpperCase(String str) {
+    public static boolean isEquipTypeInUpperCase(String str) {
         String[] words = str.split("\\s+");
 
         for (String word : words) {

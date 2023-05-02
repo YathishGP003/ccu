@@ -107,7 +107,7 @@ class FileSystemTools(private val appContext: Context) {
                                     .getInstance(Globals.getInstance().applicationContext))
 
       val messageList = messageDatabaseHelper.getAllMessagesList()
-      if (messageList.size < 1000) {
+      if (messageList.size < 5000) {
          messageList.forEach {
             message -> log.append("$message \n")
          }

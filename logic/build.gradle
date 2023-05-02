@@ -72,6 +72,16 @@ android {
             buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-dev\"'
             buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-dev.azurewebsites.net/api/v1/\"'
         }
+        dev_qa {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_API_BASE', '\"https://messaging-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'MESSAGING_GLOBAL_CHANNEL', '\"global-qa\"'
+            buildConfigField "String", 'WEATHER_API_BASE', '\"https://weather-75f-service-qa.azurewebsites.net/api/v1/\"'
+            minifyEnabled false
+        }
         qa {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'

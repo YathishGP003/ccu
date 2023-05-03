@@ -293,6 +293,7 @@ public class Globals {
                         fall back hard-coded constant tuner values. Creating new tuner instances here will result in
                         multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
+                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
             }
 
             if(!isHeatingLimitUpdated()){

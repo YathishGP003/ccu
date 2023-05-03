@@ -304,7 +304,7 @@ public class TunerUpgrades {
 
    }
 
-    private static void migrateAutoAwaySetbackTuner(CCUHsApi hayStack) {
+    public static void migrateAutoAwaySetbackTuner(CCUHsApi hayStack) {
         if(!PreferenceUtil.getAutoAwaySetBackMigration()){
             //Create the tuner point on all equips
             ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav");

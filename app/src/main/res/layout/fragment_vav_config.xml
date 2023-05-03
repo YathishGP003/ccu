@@ -110,32 +110,6 @@
                     android:entries="@array/hvac_stage_selector"
                     tools:listitem="@layout/spinner_dropdown_item" />
 
-                <TextView
-                    android:id="@+id/textEnableOccupancy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textDamperType"
-                    android:layout_alignStart="@id/textDamperType"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="32dp"
-                    android:text="@string/label_enableoccupance"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
-
-                <ToggleButton
-                    android:id="@+id/enableOccupancyControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_below="@+id/textDamperType"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="65dp"
-                    android:layout_marginTop="35dp"
-                    android:layout_toEndOf="@+id/textEnableOccupancy"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/textReheatType"
@@ -168,7 +142,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/vavReheatType"
-                    android:layout_alignStart="@+id/textEnableOccupancy"
+                    android:layout_alignStart="@+id/textDamperType"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enableIAQ"
@@ -180,7 +154,7 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_below="@+id/vavReheatType"
-                    android:layout_alignStart="@id/enableOccupancyControl"
+                    android:layout_marginStart="65dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
                     android:layout_toEndOf="@+id/textEnableIAQ"

@@ -363,6 +363,8 @@ public class MigrationUtil {
             PreferenceUtil.setKindCorrectionMigration();
         }
 
+        migrateEnableOccupancyControl(CCUHsApi.getInstance());
+
         if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
         }
@@ -2005,4 +2007,20 @@ public class MigrationUtil {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration completed");
     }
 
+
+    private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        for (HashMap<Object, Object> equip : Equips) {
+            ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
+            if (!enableOccupancyControlPoints.isEmpty()) {
+                for (HashMap<Object, Object> enableOccupancyControlPoint : enableOccupancyControlPoints) {
+                    if (!enableOccupancyControlPoint.isEmpty()) {
+                        ccuHsApi.deleteEntity(enableOccupancyControlPoint.get("id").toString());
+                    }
+                }
+            }
+        }
+
+    }
 }

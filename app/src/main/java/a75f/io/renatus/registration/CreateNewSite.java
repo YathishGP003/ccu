@@ -22,6 +22,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +32,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputLayout;
@@ -133,11 +136,6 @@ public class CreateNewSite extends Fragment {
 
         mContext = getContext().getApplicationContext();
         isFreshRegister = getActivity() instanceof FreshRegistration;
-
-        if (!isFreshRegister) {
-            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
-            p.setMargins(50, 50, 0, 0);
-        }
 
         prefs = new Prefs(mContext);
 
@@ -486,7 +484,24 @@ public class CreateNewSite extends Fragment {
 
         return rootView;
     }
-    
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewTreeObserver vto = view.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                if (!isFreshRegister) {
+                    ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                    p.setMargins(50, 50, 0, 0);
+                    view.setLayoutParams(p);
+                }
+            }
+        });
+    }
+
     private void handleRegistrationAsync(String installerEmail) {
         
         RxjavaUtil.executeBackgroundTask(

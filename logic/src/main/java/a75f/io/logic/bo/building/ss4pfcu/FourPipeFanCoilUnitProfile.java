@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.ss4pfcu;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -19,7 +18,7 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
-import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -123,8 +122,8 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             setTempHeating = fourPfcuDevice.getDesiredTempHeating();
             String zoneId = HSUtil.getZoneIdFromEquipId(fourPfcuEquip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(fourPfcuEquip.getId(),0);
-
+            SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+            int fanModeSaved = fanCacheStorage.getFanModeFromCache(fourPfcuEquip.getId());
             boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             //For dual temp but for single mode we use tuners
 

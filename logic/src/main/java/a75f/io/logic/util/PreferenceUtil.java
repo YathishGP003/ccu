@@ -638,7 +638,7 @@ public class PreferenceUtil {
     }
 
     public static boolean getCcuRefTagMigration() {
-        return false;
+        return getBooleanPreference(CCUREF_TAG_MIGRATION);
     }
 
     public static void setCcuRefTagMigration(boolean status) {

@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.interfaces.ModbusDataInterface;
@@ -157,6 +158,9 @@ public class UpdatePointHandler implements MessageHandler
             TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
         }
 
+        if (HSUtil.isBackfillConfig(pointUid, CCUHsApi.getInstance())) {
+            BackFillUtil.updateBackfillDuration(msgObject.get("val").getAsDouble());
+        }
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

@@ -142,6 +142,8 @@ public class Tags
     public static final String AUTO = "auto";
     public static final String AWAY = "away";
     public static final String SETBACK = "setback";
+    public static final String BACKFILL = "backfill";
+    public static final String DURATION = "duration";
 
 
     public static final String TEMP = "temp";

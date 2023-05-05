@@ -1002,9 +1002,7 @@ public class InstallerOptions extends Fragment {
 
     private void setBackFillTimeSpinner(View rootView) {
 
-        int[] durations = BackFillDuration.toIntArray();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
         this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
         this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));

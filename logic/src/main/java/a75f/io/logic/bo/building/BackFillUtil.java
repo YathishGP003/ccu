@@ -79,15 +79,17 @@ public class BackFillUtil {
 
         if (backFillTimeChange) {
             ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
-            SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-            int[] durations = BackFillDuration.toIntArray();
-            SharedPreferences.Editor editor = backFillTimePref.edit();
-            editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
-            editor.putInt("backFillTimeSpSelected", Arrays.binarySearch(durations, (int) currentBackFillTime));
-            editor.apply();
+            updateBackfillDuration(currentBackFillTime);
         }
     }
-
+    public static void updateBackfillDuration(double currentBackFillTime) {
+        SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
+        int[] durations = BackFillDuration.toIntArray();
+        SharedPreferences.Editor editor = backFillTimePref.edit();
+        editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
+        editor.putInt("backFillTimeSpSelected", Arrays.binarySearch(durations, (int) currentBackFillTime));
+        editor.apply();
+    }
 
 
 }

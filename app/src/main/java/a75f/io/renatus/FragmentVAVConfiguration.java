@@ -485,7 +485,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
             reheatType.setSelection(mProfileConfig.reheatType != -1 ? reheatTypesAdapter.getPosition(
                     ReheatType.values()[mProfileConfig.reheatType].displayName) : 0, false);
-            enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
             enableAutoAwayControl.setChecked(mProfileConfig.enableAutoAwayControl);

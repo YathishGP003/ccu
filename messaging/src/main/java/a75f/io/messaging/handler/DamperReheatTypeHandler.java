@@ -88,8 +88,10 @@ public class DamperReheatTypeHandler {
             SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
                                               DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
-            
-            if (typeVal <= ReheatType.Pulse.ordinal()) {
+
+            if (typeVal < 0) {
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), false);
+            } else if (typeVal <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
                 SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal].displayName);
                 SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);

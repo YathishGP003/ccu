@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.ss2pfcu;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +20,7 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
+import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.BuildingTunerCache;
@@ -125,7 +125,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             supplyWaterTempTh2 = twoPfcuDevice.getSupplyWaterTemp();
             String zoneId = HSUtil.getZoneIdFromEquipId(twoPfcuEquip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(twoPfcuEquip.getId(),0);
+            SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
+            int fanModeSaved = fanCacheStorage.getFanModeFromCache(twoPfcuEquip.getId());
             Log.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
 
             boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());

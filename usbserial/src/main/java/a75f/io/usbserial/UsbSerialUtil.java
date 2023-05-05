@@ -24,6 +24,7 @@ public class UsbSerialUtil {
         }
         
         if (BuildConfig.BUILD_TYPE.equals("qa") ||
+            BuildConfig.BUILD_TYPE.equals("dev_qa") ||
             BuildConfig.BUILD_TYPE.equals("dev") ||
             BuildConfig.BUILD_TYPE.equals("local")) {
             if (deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context)) {
@@ -37,6 +38,7 @@ public class UsbSerialUtil {
         int deviceVID = device.getVendorId();
     
         if ((BuildConfig.BUILD_TYPE.equals("qa") ||
+                BuildConfig.BUILD_TYPE.equals("dev_qa") ||
             BuildConfig.BUILD_TYPE.equals("dev") ||
             BuildConfig.BUILD_TYPE.equals("local")) && (deviceVID == DEVICE_ID_FTDI && isBiskitModeEnabled(context))) {
             return false;

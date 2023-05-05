@@ -49,6 +49,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 import a75f.io.logic.bo.haystack.device.HelioNode;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTunerUtil;
 import a75f.io.logic.tuners.TrueCFMTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -652,11 +653,15 @@ public class VavEquip
 
         //Create Physical points and map
         SmartNode device;
+        String nodeName;
         if(nodeType.equals(NodeType.valueOf("SMART_NODE"))){
              device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
+            nodeName = Tags.SN;
         }else  {
              device = new HelioNode(nodeAddr, siteRef, floor, room, equipRef);
+            nodeName = Tags.HN;
         }
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(nodeName+"-"+nodeAddr, equipRef, siteRef, room, floor, nodeAddr, tz, hayStack);
 
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(true);
@@ -880,22 +885,6 @@ public class VavEquip
         }
         String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatTypeBuilder.build());
         CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, (double)config.reheatType);
-    
-        Point enableOccupancyControl = new Point.Builder()
-                                   .setDisplayName(equipDis+"-enableOccupancyControl")
-                                   .setEquipRef(equipRef)
-                                   .setSiteRef(siteRef)
-                                   .setRoomRef(room)
-                                   .setFloorRef(floor).setHisInterpolate("cov")
-                                   .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("zone")
-                                   .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker("his")
-                                   .setGroup(String.valueOf(nodeAddr))
-                                   .setEnums("false,true")
-                                   .setTz(tz)
-                                   .build();
-        String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
-        CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
     
         Point enableCO2Control = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableCO2Control")
@@ -1130,8 +1119,6 @@ public class VavEquip
         setConfigNumVal("damper and size",config.damperSize);
         setConfigNumVal("damper and shape",config.damperShape);
         setConfigNumVal("reheat and type",config.reheatType);
-        setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
-        setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
@@ -1223,7 +1210,6 @@ public class VavEquip
         config.damperSize = (int)getConfigNumVal("damper and size");
         config.damperShape = (int)getConfigNumVal("damper and shape");
         config.reheatType = (int)getConfigNumVal("reheat and type");
-        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
         //config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);

@@ -2,6 +2,7 @@ package a75f.io.logic.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -13,6 +14,7 @@ public class PreferenceUtil {
     private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
     private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
+    private static final String BACKFILL_DURATION_MIGRATION = "backFillDuration";
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -51,6 +53,7 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_CPU_TAG_MIGRATION = "HyperStatCpuTagMigration";
     private static final String AUTOAWAY_SETBACK_CPU = "autoAwaySetBackTunerCPU";
     private static final String VAV_DISCHARGE_TUNER_MIGRATION = "vavDischargeTunersMigration";
+    private static final String AUTO_COMMISSIONING_MIGRATION = "autoCommissioningMigration";
     private static final String SMART_NODE_DAMPER_MIGRATION = "SmartNodeDamperMigration";
     private static final String FREE_INTERNAL_DISK_STORAGE_MIGRATION = "freeInternalDiskStorageMigration";
     private static final String STATIC_SP_TRIM_MIGRATION = "staticPressureSPTrimMigration";
@@ -69,8 +72,10 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
     private static final String TAG_MINOR_MIGRATION = "MinorTagCorrectionMigration";
+    private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
+    private static final String SCHEDULES_MIGRATION = "schedulesMigration";
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
@@ -467,8 +472,26 @@ public class PreferenceUtil {
 
     public static void setHyperStatCpuTagMigration() {
         setBooleanPreference(HYPERSTAT_CPU_TAG_MIGRATION, true);
+     }
+
+    public static boolean getAutoCommissioningMigration() {
+        return getBooleanPreference(AUTO_COMMISSIONING_MIGRATION);
     }
 
+    public static void setAutoCommissioningMigration() {
+        setBooleanPreference(AUTO_COMMISSIONING_MIGRATION, true);
+
+    }
+    public static long getScheduledStopDatetime(String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getLong(key, 0);
+    }
+
+    public static void setScheduledStopDatetime(String key, long value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putLong(key, value);
+        editor.apply();
+    }
     public static void setFreeInternalDiskStorageMigration() {
         setBooleanPreference(FREE_INTERNAL_DISK_STORAGE_MIGRATION, true);
     }
@@ -598,6 +621,13 @@ public class PreferenceUtil {
         setBooleanPreference(AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION, true);
     }
 
+    public static boolean getOtaStatusMigration() {
+        return getBooleanPreference(OTA_STATUS_MIGRATION);
+    }
+
+    public static void setOtaStatusMigration() {
+        setBooleanPreference(OTA_STATUS_MIGRATION, true);
+    }
 
     public static boolean getKindCorrectionMigration() {
         return getBooleanPreference(KIND_CORRECTION);
@@ -608,7 +638,7 @@ public class PreferenceUtil {
     }
 
     public static boolean getCcuRefTagMigration() {
-        return false;
+        return getBooleanPreference(CCUREF_TAG_MIGRATION);
     }
 
     public static void setCcuRefTagMigration(boolean status) {
@@ -633,5 +663,12 @@ public class PreferenceUtil {
     private static long getLongPreference(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getLong(key, 0);
+    }
+
+    public static void setScheduleMigration() {
+        setBooleanPreference(SCHEDULES_MIGRATION, true);
+    }
+    public static boolean getScheduleMigration() {
+        return getBooleanPreference(SCHEDULES_MIGRATION);
     }
 }

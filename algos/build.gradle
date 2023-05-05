@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
 
 
@@ -37,6 +37,9 @@ android {
             minifyEnabled false
         }
         dev {
+            minifyEnabled false
+        }
+        dev_qa {
             minifyEnabled false
         }
         prod {

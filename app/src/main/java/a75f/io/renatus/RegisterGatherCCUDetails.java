@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +32,7 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
@@ -43,10 +43,10 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
@@ -179,6 +179,17 @@ public class RegisterGatherCCUDetails extends Activity {
                         .setSiteRef(siteMap.get("id").toString())
                         .setDisplayName(ccuName + "-smartNodeBand")
                         .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+
+                HashMap ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
+
+
+                OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                        Objects.requireNonNull(ccu.get("dis")) +"-CCU",
+                        Objects.requireNonNull(ccu.get("equipRef")).toString(),
+                        Objects.requireNonNull(ccu.get("siteRef")).toString(),
+                        Objects.requireNonNull(siteMap.get(Tags.TZ)).toString(),
+                        CCUHsApi.getInstance()
+                );
                 CCUHsApi.getInstance().addPoint(snBand);
                 next();
             }else{
@@ -319,7 +330,6 @@ public class RegisterGatherCCUDetails extends Activity {
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
-                    DefaultSchedules.generateDefaultSchedule(false, null);
                 }
                 return null;
             }

@@ -553,7 +553,7 @@ public class SeekArc extends View
             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - ((float) bounds.width() / 2);
             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
             float heightOfCurrentStringText = bounds.height();
@@ -562,7 +562,7 @@ public class SeekArc extends View
 
 
             float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
-            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - ((float) bounds.width() / 2);
              canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
              canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
              canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
@@ -611,7 +611,7 @@ public class SeekArc extends View
             float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
             mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - ((float) bounds.width() / 2);
             float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
             float heightOfCurrentStringText = bounds.height();
@@ -620,7 +620,7 @@ public class SeekArc extends View
 
 
             float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
-            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - ((float) bounds.width() / 2);
 
             canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
             canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);

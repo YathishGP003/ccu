@@ -252,7 +252,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
         initializeNumberPickers(view);
 
-        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
         enableAutoAwayControl = view.findViewById(R.id.enableAutoAwayControl);
@@ -483,6 +482,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
             damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
+            reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
             reheatType.setSelection(mProfileConfig.reheatType != -1 ? reheatTypesAdapter.getPosition(
                     ReheatType.values()[mProfileConfig.reheatType].displayName) : 0, false);
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
@@ -609,7 +609,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);
-        vavConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         vavConfig.enableCO2Control = enableCO2Control.isChecked();
         vavConfig.enableIAQControl = enableIAQControl.isChecked();
         vavConfig.enableAutoAwayControl = enableAutoAwayControl.isChecked();
@@ -619,7 +618,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
-        vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        vavConfig.temperaturOffset = (double) temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         vavConfig.nuMaxCFMCooling = numMaxCFMCooling.getValue()*STEP;
         vavConfig.numMaxCFMReheating = numMaxCFMReheating.getValue()*STEP;
         vavConfig.enableCFMControl = enableCFMControl.isChecked();
@@ -665,7 +664,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
             vavConfig.getOutputs().add(relay2Op);
         }
-        
+
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
 
         CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "

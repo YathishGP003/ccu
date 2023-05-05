@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 
 /*
  * created by spoorthidev on 30-May-2021
@@ -307,7 +308,7 @@ public class HyperStatSenseEquip {
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, mEquipRef,
                 siteRef, roomRef, floorRef, mNodeAddr, "sense", tz));
-
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(Tags.HS+"-"+mNodeAddr, mEquipRef, siteRef, roomRef, floorRef, mNodeAddr, tz, CCUHsApi.getInstance());
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
 
         if (config.isAnalog1Enable) {

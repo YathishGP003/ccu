@@ -1,7 +1,6 @@
 package a75f.io.renatus;
-
-import static a75f.io.logic.pubnub.DataSyncHandler.getMessageExpiryTime;
-import static a75f.io.logic.pubnub.DataSyncHandler.isMessageTimeExpired;
+import static a75f.io.messaging.handler.DataSyncHandler.getMessageExpiryTime;
+import static a75f.io.messaging.handler.DataSyncHandler.isMessageTimeExpired;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -20,9 +19,10 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
-import a75f.io.logic.pubnub.DataSyncHandler;
+
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.renatus.util.Prefs;
 
 public class NotificationHandler {

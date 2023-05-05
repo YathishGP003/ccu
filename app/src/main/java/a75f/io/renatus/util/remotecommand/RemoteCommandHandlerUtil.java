@@ -1,12 +1,13 @@
 package a75f.io.renatus.util.remotecommand;
 
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_PASSWORD;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
-import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_CM;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_PASSWORD;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_CCU;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_MODULE;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_TABLET;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
+
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -36,9 +37,13 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
@@ -74,6 +79,7 @@ public class RemoteCommandHandlerUtil {
                 LSerial.getInstance().setResetSeedMessage(true);
                 break;
             case UPDATE_CCU:
+                OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
                 Log.d("CCU_DOWNLOAD", "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
                 RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
 
@@ -84,6 +90,7 @@ public class RemoteCommandHandlerUtil {
                             long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                             Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                             if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                                RxTask.executeAsync(()-> UtilityApplication.getMessagingAckJob().doMessageAck());
                                 if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
                                     AppInstaller.getHandle().install(null, false, true, true);
                                 } else {

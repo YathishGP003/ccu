@@ -8,8 +8,8 @@ android {
     if (project.rootProject.file("local.properties").exists()) {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
     }
-	
-    compileSdkVersion 30
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion 24
@@ -36,6 +36,9 @@ android {
             minifyEnabled false
         }
         dev {
+            minifyEnabled false
+        }
+        dev_qa {
             minifyEnabled false
         }
         prod {

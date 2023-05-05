@@ -21,3 +21,17 @@ class FanModeCacheStorage {
     fun removeFanModeFromCache(equipId: String){  sharedPreferences.edit().remove(equipId).apply() }
 
 }
+
+class SmartStatFanModeCache {
+    private var sharedPreferences: SharedPreferences = Globals.getInstance()
+        .applicationContext.getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE)
+
+    fun saveFanModeInCache(equipId: String, value: Int){
+        sharedPreferences.edit().putInt(equipId,value).apply()
+    }
+
+    fun getFanModeFromCache(equipId: String): Int{ return sharedPreferences.getInt(equipId,0) }
+
+    fun removeFanModeFromCache(equipId: String){  sharedPreferences.edit().remove(equipId).apply() }
+
+}

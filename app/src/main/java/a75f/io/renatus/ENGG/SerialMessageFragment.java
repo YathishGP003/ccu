@@ -290,7 +290,7 @@ public class SerialMessageFragment extends DialogFragment {
                                                         Integer.parseInt(registerSpinner.getSelectedItem().toString()));
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS,
-                             "SerialMessage: modbus readHoldingRegister " + rtuMessageRequest.getMessageData().toString());
+                             "SerialMessage: modbus readHoldingRegister " + Arrays.toString(rtuMessageRequest.getMessageData()));
                     //ReadHoldingRegistersResponse response = (ReadHoldingRegistersResponse) master.send(request);
                     Log.d(L.TAG_CCU_MODBUS, "send msg prep=" + modbusRequest.getClass() + "," + modbusRequest.toString());
                     break;

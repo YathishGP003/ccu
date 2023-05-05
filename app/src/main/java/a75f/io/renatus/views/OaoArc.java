@@ -188,7 +188,7 @@ public class OaoArc extends View {
     protected void onDraw(Canvas canvas) {
         // Draw the arcs
         float arcSweep = mSweepAngle;
-        float arcStart = mStartAngle + 120;
+        float arcStart = (float) mStartAngle + 120;
 
         canvas.drawArc(mArcRect, arcStart, arcSweep, false, mArcPaint);
         if (mProgressSweep > 0) {
@@ -320,8 +320,8 @@ public class OaoArc extends View {
         int arcStart = (int) getAngle(angle);
         float mScaledICCTDrawable = bitmap.getHeight() / 2f;
 
-        mThumbXPos = (int) ((mArcRadius + mScaledICCTDrawable) * Math.cos(Math.toRadians(arcStart - 90)));
-        mThumbYPos = (int) ((mArcRadius + mScaledICCTDrawable) * Math.sin(Math.toRadians(arcStart - 90)));
+        mThumbXPos = (int) ((mArcRadius + mScaledICCTDrawable) * Math.cos(Math.toRadians((double) arcStart - 90)));
+        mThumbYPos = (int) ((mArcRadius + mScaledICCTDrawable) * Math.sin(Math.toRadians((double) arcStart - 90)));
 
         matrix.postScale(0.5f * mScale, 0.6f * mScale);
         matrix.postRotate(arcStart);

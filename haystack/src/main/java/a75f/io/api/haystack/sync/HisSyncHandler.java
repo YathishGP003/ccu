@@ -28,6 +28,7 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Kind;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.exceptions.OnErrorNotImplementedException;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class HisSyncHandler
@@ -89,8 +90,8 @@ public class HisSyncHandler
         Observable.fromCallable(() -> {
             syncHistorizedDevicePoints(syncAllData);
             return true;
-        })
-                  .subscribeOn(Schedulers.io())
+        }).doOnError( throwable -> CcuLog.d(TAG,"Historized device points sync failed: "+throwable.getMessage()))
+                .subscribeOn(Schedulers.io())
                   .subscribe();
     
         //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
@@ -221,7 +222,7 @@ public class HisSyncHandler
             
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
-            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsBatch(pointID);
 
             if (!unsyncedHisItems.isEmpty()) {
                 for (HisItem hisItem : unsyncedHisItems) {
@@ -288,11 +289,17 @@ public class HisSyncHandler
             if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
                 try {
                     ccuHsApi.tagsDb.updateHisItemSynced(hisItemList);
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | OnErrorNotImplementedException e) {
                     /* There is a corner case where this HisItem might have been removed from Objectbox since the
                      * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
                      * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
                      * monitor how frequently this is happening or there is more to it than what we see now.
+                     */
+                     /*
+                        We are catching OnErrorNotImplementedException
+                        This commit transaction is not happening for the below reasons:
+                        - reports error code 30 (file is in read only)
+                        - reports when db is full.
                      */
                     CcuLog.e(TAG, "Failed to update HisItem !", e);
                 }
@@ -361,7 +368,7 @@ public class HisSyncHandler
             return;
         }
         DateTime now = new DateTime();
-        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0 ? true : false;
+        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0;
         
         if (forcedPurge || timeForPurge) {
             Thread purgeThread = new Thread() {

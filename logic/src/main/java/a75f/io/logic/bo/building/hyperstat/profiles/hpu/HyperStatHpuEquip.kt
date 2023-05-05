@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperStatHpuTuners
 import a75f.io.logic.util.RxTask
 import android.util.Log
@@ -111,6 +112,10 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
 
         configHyperStatDevice(config, profileEquip)
 
+        addOTAStatusPoint(
+            "${Tags.HS}-$nodeAddress", equipRef!!, basicInfo.siteRef,
+            roomRef!!, floorRef!!, nodeAddress, basicInfo.timeZone, haystack
+        )
         // Syncing the Points
         haystack.syncEntityTree()
     }

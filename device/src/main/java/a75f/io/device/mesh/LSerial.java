@@ -1,8 +1,10 @@
 package a75f.io.device.mesh;
 
-import android.os.Build;
+import static a75f.io.device.mesh.DLog.LogdStructAsJson;
+
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import org.javolution.io.Struct;
 
@@ -18,6 +20,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
+import a75f.io.device.serial.CmToCcuOtaStatus_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
@@ -35,8 +38,6 @@ import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
-
-import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 
 /**
  * Created by Yinten isOn 8/21/2017.
@@ -156,6 +157,13 @@ public class LSerial
             } else if (isHyperStatMessage(messageType) ) {
                 HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
+            else if (messageType == MessageType.CM_TO_CCU_OTA_STATUS) {
+                CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
+                msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+                DLog.LogdSerial("Event Type CM_TO_CCU_OTA_STATUS Status :" +msg.currentState+ " Data : "+msg.data);
+
+            }
+
             // Pass event to external handlers
             Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);

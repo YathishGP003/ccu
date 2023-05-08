@@ -459,7 +459,10 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 		
-		SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), new Point.Builder().setHashMap(heatinDtPoint).build(), new Point.Builder().setHashMap(singleDtPoint).build(), coolingDesiredTemp, heatingDesiredTemp, dt);
+		DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+				new Point.Builder().setHashMap(heatinDtPoint).build(),
+				new Point.Builder().setHashMap(singleDtPoint).build(),
+				coolingDesiredTemp, heatingDesiredTemp, dt, CCUHsApi.getInstance());
 		sendSNControlMessage((short)node,equip.getId());
 		sendSetTemperatureAck((short)node);
 
@@ -516,7 +519,10 @@ public class Pulse
         }catch (Exception e){
 		    e.printStackTrace();
         }
-	    SystemScheduleUtil.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
+	    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
+				new Point.Builder().setHashMap(heatinDtPoint).build(),
+				new Point.Builder().setHashMap(singleDtPoint).build(),
+				coolingDesiredTemp,heatingDesiredTemp,dt, CCUHsApi.getInstance());
         if(sendAck) {
 			sendSmartStatControlMessage((short) node, equip.getId());
 			sendSetTemperatureAck((short) node);

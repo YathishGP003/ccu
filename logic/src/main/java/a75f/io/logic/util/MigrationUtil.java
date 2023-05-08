@@ -11,6 +11,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import org.projecthaystack.HDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -357,11 +358,17 @@ public class MigrationUtil {
             PreferenceUtil.setAutoForcedTagNameCorrectionMigration();
         }
 
-
         if (!PreferenceUtil.getKindCorrectionMigration()) {
             updateKind(CCUHsApi.getInstance());
             PreferenceUtil.setKindCorrectionMigration();
         }
+
+        if (!PreferenceUtil.getScheduleMigration()) {
+            migrateZoneAndBuildingSchedules(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleMigration();
+        }
+
+        migrateEnableOccupancyControl(CCUHsApi.getInstance());
 
         if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
@@ -1979,6 +1986,36 @@ public class MigrationUtil {
 
         }
     }
+
+    private static void migrateZoneAndBuildingSchedules(CCUHsApi ccuHsApi) {
+         List<HashMap<Object, Object>> schedules = ccuHsApi.readAllEntities("(building or zone) and schedule and not special and not vacation");
+         schedules.forEach(schedule ->{
+             Schedule scheduleObj = ccuHsApi.getScheduleById(schedule.get(Tags.ID).toString());
+             updateSchedule(scheduleObj, ccuHsApi);
+         });
+    }
+
+    private static void updateSchedule(Schedule scheduleObj, CCUHsApi ccuHsApi) {
+
+        if (scheduleObj.getMarkers().contains("lastModifiedDateTime")) {
+            scheduleObj.getMarkers().remove("lastModifiedDateTime");
+            scheduleObj.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        }
+        if (scheduleObj.getMarkers().contains("createdDateTime")) {
+            scheduleObj.getMarkers().remove("createdDateTime");
+            scheduleObj.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        }
+        if (scheduleObj.getMarkers().contains("lastModifiedBy")) {
+            scheduleObj.getMarkers().remove("lastModifiedBy");
+            scheduleObj.setLastModifiedBy(ccuHsApi.getCCUUserName());
+        }
+
+        if (scheduleObj.isZoneSchedule()) {
+            ccuHsApi.updateZoneSchedule(scheduleObj, scheduleObj.getRoomRef());
+        } else {
+            ccuHsApi.updateSchedule(scheduleObj);
+        }
+    }
     private static void createAutoCommissioningDiagMigration(CCUHsApi instance) {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration started");
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
@@ -2005,4 +2042,20 @@ public class MigrationUtil {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration completed");
     }
 
+
+    private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        for (HashMap<Object, Object> equip : Equips) {
+            ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
+            if (!enableOccupancyControlPoints.isEmpty()) {
+                for (HashMap<Object, Object> enableOccupancyControlPoint : enableOccupancyControlPoints) {
+                    if (!enableOccupancyControlPoint.isEmpty()) {
+                        ccuHsApi.deleteEntity(enableOccupancyControlPoint.get("id").toString());
+                    }
+                }
+            }
+        }
+
+    }
 }

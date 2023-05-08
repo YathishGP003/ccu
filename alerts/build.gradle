@@ -38,6 +38,9 @@ android {
         dev {
             minifyEnabled false
         }
+        dev_qa {
+            minifyEnabled false
+        }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"

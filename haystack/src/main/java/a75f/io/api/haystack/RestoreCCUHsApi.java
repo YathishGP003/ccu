@@ -76,7 +76,7 @@ public class RestoreCCUHsApi {
         hisSyncHandler = ccuHsApi.getHisSyncHandler();
     }
 
-    public void importZoneSpecialSchedule(Set<String> zoneRefSet){
+    public void importZoneSpecialSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
         StringBuilder zoneRefString = new StringBuilder("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -93,7 +93,8 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict zoneScheduleDict = new HDictBuilder().add("filter",
                 "schedule and zone and special and " + zoneRefString).toDict();
-        HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict));
+        HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict),
+                retryCountCallback);
         if (zoneScheduleGrid == null) {
             return;
         }
@@ -108,8 +109,8 @@ public class RestoreCCUHsApi {
         }
     }
 
-    public void importZoneSchedule(Set<String> zoneRefSet){
-        Log.i(TAG, " Importing Zone  schedule started");
+    public void importZoneSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
+        Log.i(TAG, "Importing Zone  schedule started");
         StringBuffer zoneRefString = new StringBuffer("(");
         int index = 0;
         for(String zoneRef : zoneRefSet){
@@ -126,7 +127,8 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict zoneScheduleDict = new HDictBuilder().add("filter",
                 "schedule and zone and not special and " + zoneRefString).toDict();
-        HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict));
+        HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict),
+                retryCountCallback);
         if (zoneScheduleGrid == null) {
             return;
         }
@@ -141,23 +143,23 @@ public class RestoreCCUHsApi {
         Log.i(TAG, " Importing Zone  schedule completed");
     }
 
-    public HGrid getAllCCUs(String siteId){
+    public HGrid getAllCCUs(String siteId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         Log.i("CCU_REPLACE","query "+"ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
         HDict ccuDict = new HDictBuilder().add("filter",
                 "ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public HGrid getAllEquips(String ahuRef, String gatewayRef){
+    public HGrid getAllEquips(String ahuRef, String gatewayRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
                 "equip and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef == "+
                         StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public void importFloors(Set<String> floorRefSet) {
+    public void importFloors(Set<String> floorRefSet, RetryCountCallback retryCountCallback) {
         Log.i(TAG, " Importing floor started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[floorRefSet.size()];
@@ -167,7 +169,7 @@ public class RestoreCCUHsApi {
             dictArr[index] = hDictBuilder.toDict();
             index++;
         }
-        HGrid floorGrid = invokeWithRetry("read", hClient, HGridBuilder.dictsToGrid(dictArr));
+        HGrid floorGrid = invokeWithRetry("read", hClient, HGridBuilder.dictsToGrid(dictArr), retryCountCallback);
         List<HashMap> zoneMaps = ccuHsApi.HGridToList(floorGrid);
         List<Floor> floors = new ArrayList<>();
         zoneMaps.forEach(m -> floors.add(new Floor.Builder().setHashMap(m).build()));
@@ -178,7 +180,7 @@ public class RestoreCCUHsApi {
         Log.i(TAG, " Importing floor completed");
     }
 
-    public void importZones(Set<String> zoneRefSet){
+    public void importZones(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
         Log.i(TAG, " Importing Zone started");
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict[] dictArr = new HDict[zoneRefSet.size()];
@@ -188,7 +190,7 @@ public class RestoreCCUHsApi {
             dictArr[index] = hDictBuilder.toDict();
             index++;
         }
-        HGrid zoneGrid = invokeWithRetry("read", hClient, HGridBuilder.dictsToGrid(dictArr));
+        HGrid zoneGrid = invokeWithRetry("read", hClient, HGridBuilder.dictsToGrid(dictArr), retryCountCallback);
         List<HashMap> zoneMaps = ccuHsApi.HGridToList(zoneGrid);
         List<Zone> zones = new ArrayList<>();
         zoneMaps.forEach(m -> zones.add(new Zone.Builder().setHashMap(m).build()));
@@ -201,14 +203,16 @@ public class RestoreCCUHsApi {
 
     public Map<String, String> getCCUVersion(List<String> equipRefs){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        List<String> diagEquipPointList = getDiagEquipPointId(equipRefs, hClient);
+        RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count to get CCU version "+ retryCount);
+        List<String> diagEquipPointList = getDiagEquipPointId(equipRefs, hClient, retryCountCallback);
         HDict[] dictArr = new HDict[diagEquipPointList.size()];
         for(int index = 0; index < dictArr.length; index++){
             HDictBuilder hDictBuilder =new HDictBuilder()
                     .add("id", HRef.copy(diagEquipPointList.get(index)));
             dictArr[index] = hDictBuilder.toDict();
         }
-        HGrid ccuVersionGrid = invokeWithRetry("pointWriteMany", hClient, HGridBuilder.dictsToGrid(dictArr));
+        HGrid ccuVersionGrid = invokeWithRetry("pointWriteMany", hClient, HGridBuilder.dictsToGrid(dictArr),
+                retryCountCallback);
         Map<String, String> ccuVersionMap = new HashMap<>();
         if(ccuVersionGrid == null){
             CcuLog.i(TAG,"No CCU version found");
@@ -232,7 +236,8 @@ public class RestoreCCUHsApi {
         return ccuVersionMap;
     }
 
-    private List<String> getDiagEquipPointId(List<String> equipRefs, HClient hClient) {
+    private List<String> getDiagEquipPointId(List<String> equipRefs, HClient hClient,
+                                             RetryCountCallback retryCountCallback) {
         StringBuffer equipRefString = new StringBuffer("(");
         for(int index = 0; index < equipRefs.size(); index++){
             equipRefString.append("equipRef == ");
@@ -248,7 +253,8 @@ public class RestoreCCUHsApi {
         List<String> diagEquipPointList = new LinkedList<>();
         HDict diagVersionDict = new HDictBuilder().add("filter",
                 "diag and version and " + equipRefString).toDict();
-        HGrid diagVersionGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(diagVersionDict));
+        HGrid diagVersionGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(diagVersionDict),
+                retryCountCallback);
         if(diagVersionGrid == null){
             return diagEquipPointList;
         }
@@ -260,10 +266,10 @@ public class RestoreCCUHsApi {
         return diagEquipPointList;
     }
 
-    public void readCCUEquip(String ccuId){
+    public void readCCUDevice(String ccuId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(ccuId, "@"))).toDict();
-        HGrid ccuGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        HGrid ccuGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(ccuGrid == null){
             throw new NullHGridException("CCU Grid is NULL");
         }
@@ -276,48 +282,27 @@ public class RestoreCCUHsApi {
         }
     }
 
-    public HGrid getCCUSystemEquip(String ahuRef){
+    public HGrid getCCUSystemEquip(String ahuRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(ahuRef, "@"))).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public HGrid getDevice(String equipId){
+    public HGrid getDevice(String equipId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
                 "device and equipRef == " + StringUtils.prependIfMissing(equipId, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public HGrid getZoneEquipWithGatewayRef(String gatewayRef){
+    public HGrid getEquip(String equipId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and zone and gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+                "equip and id == " + StringUtils.prependIfMissing(equipId, "@")).toDict();
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
-    public HGrid getZoneEquipWithAhuRef(String ahuRef){
-        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and zone and ahuRef == " + StringUtils.prependIfMissing(ahuRef, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
-    }
-
-    public HGrid getOAOEquip(String ahuRef){
-        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and oao and ahuRef == " + StringUtils.prependIfMissing(ahuRef, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
-    }
-
-    public HGrid getModbusSystemEquip(String gatewayRef){
-        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and modbus and not zone and gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@")).toDict();
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
-    }
-
-    public void importEquip(HRow equipRow){
+    public void importEquip(HRow equipRow, RetryCountCallback retryCountCallback){
         Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
@@ -327,7 +312,7 @@ public class RestoreCCUHsApi {
         HDict ccuDict = new HDictBuilder().add("filter",
                 "point and equipRef == " + StringUtils.prependIfMissing(equipRow.get("id").toString()
                         , "@")).toDict();
-        HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        HGrid pointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(pointsGrid == null){
             throw new NullHGridException("Null occurred while fetching points for the equip Id: "+ equipRow.get("id").toString());
         }
@@ -337,18 +322,11 @@ public class RestoreCCUHsApi {
         pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
 
         addEquipAndPoints(equips, points);
-        writeValueToEquipPoints(equips, hClient);
-        /*for(Point point : points){
-            HashMap pointMap = ccuHsApi.readMapById(point.getId());
-            if(pointMap != null){
-                CcuLog.i("CCU_REPLACE_POINT", " Name: "+pointMap.get("dis").toString());
-                CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
-            }
-        }*/
+        writeValueToEquipPoints(equips, hClient, retryCountCallback);
         Log.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
     }
 
-    public void importDevice(HRow deviceRow){
+    public void importDevice(HRow deviceRow, RetryCountCallback retryCountCallback){
         Log.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
         List<Device> devices = new ArrayList<>();
         List<HashMap> deviceMap = ccuHsApi.HGridToList(deviceRow.grid());
@@ -358,7 +336,7 @@ public class RestoreCCUHsApi {
         HDict ccuDict = new HDictBuilder().add("filter",
                 "point and deviceRef == " + StringUtils.prependIfMissing(deviceRow.get("id").toString()
                         , "@")).toDict();
-        HGrid systemPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        HGrid systemPointsGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
         if(systemPointsGrid == null){
             throw new NullHGridException("Null occurred while fetching points for "+deviceRow.get("id").toString());
         }
@@ -367,14 +345,7 @@ public class RestoreCCUHsApi {
         pointMaps.forEach(m -> points.add(new RawPoint.Builder().setHashMap(m).build()));
 
         addDeviceAndPoints(devices, points);
-        writeValueToDevicePoints(devices, hClient);
-        /*for(RawPoint point : points){
-            HashMap pointMap = ccuHsApi.readMapById(point.getId());
-            if(pointMap != null){
-                CcuLog.i("CCU_REPLACE_POINT", " Name: "+pointMap.get("dis").toString());
-                CcuLog.i("CCU_REPLACE_POINT", " id: "+pointMap.get("id").toString());
-            }
-        }*/
+        writeValueToDevicePoints(devices, hClient, retryCountCallback);
         Log.i(TAG, "Import device completed for "+deviceRow.get("dis").toString());
     }
 
@@ -424,49 +395,19 @@ public class RestoreCCUHsApi {
         }
     }
 
-    private void writeValueToDevicePoints(List<Device> devices, HClient hClient) {
+    private void writeValueToDevicePoints(List<Device> devices, HClient hClient, RetryCountCallback retryCountCallback) {
         for(Device device : devices){
             Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" started");
             List<HDict> devicePoints = getDevicePoints(device);
-            writeValueToPoints(devicePoints, hClient);
+            writeValueToPoints(devicePoints, hClient, retryCountCallback);
             Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" completed");
         }
     }
-    private HGrid invokeWithRetry(String op, HClient hClient, HGrid req){
-        HGrid responseHGrid;
-        try{
-            responseHGrid = hClient.invoke(op, req);
-        }
-        catch(Exception exception){
-            try {
-                if (exception instanceof SocketTimeoutException) {
-                    CcuLog.i(TAG, "SocketTimeoutException occurred, hence retrying " + op);
-                    responseHGrid = hClient.invoke(op, req);
-
-                } else if (exception instanceof IOException) {
-                    CcuLog.i(TAG, exception.getClass().getSimpleName() +" occurred, while " + op + " waiting " +
-                            "for 30 seconds.....");
-                    Thread.sleep(30000);
-                    CcuLog.i(TAG, " retrying after 30 seconds.....");
-                    responseHGrid = hClient.invoke(op, req);
-                }
-                else{
-                    exception.printStackTrace();
-                    CcuLog.i(TAG, "Exception occurred while calling "+op );
-                    throw new NullHGridException("Exception occurred while calling "+op);
-                }
-            }
-            catch(Exception ex){
-                ex.printStackTrace();
-                CcuLog.i(TAG, "Exception occurred while calling "+op);
-                throw new NullHGridException("Exception occurred while calling "+op);
-            }
-
-        }
-       return responseHGrid;
+    private HGrid invokeWithRetry(String op, HClient hClient, HGrid req, RetryCountCallback retryCountCallback){
+        return hClient.invoke(op, req, retryCountCallback);
     }
 
-    private void writeValueToPoints(List<HDict> points, HClient hClient){
+    private void writeValueToPoints(List<HDict> points, HClient hClient, RetryCountCallback retryCountCallback){
         int partitionSize = 15;
         List<List<HDict>> partitions = new ArrayList<>();
         for (int i = 0; i<points.size(); i += partitionSize) {
@@ -474,7 +415,7 @@ public class RestoreCCUHsApi {
         }
         for (List<HDict> sublist : partitions) {
             HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
-                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])), retryCountCallback);
 
             if (writableArrayPoints == null) {
                 CcuLog.e(TAG, "Failed to fetch point array values during syncing Profile.");
@@ -496,14 +437,21 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
-                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                        HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)
-                                .add("lastModifiedDateTime", lastModifiedDateTime).toDict();
-                        hDictList.add(pid);
+                                .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                        HStr.make(val.toString()) : val);
+                        HDateTime lastModifiedDateTime;
+                        if (lastModifiedTimeTag != null) {
+                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                        } else {
+                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                        }
+                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                        hDictList.add(pid.toDict());
                         HDict rec = hsClient.readById(HRef.copy(id));
                         if(row.has("his") && NumberUtils.isCreatable(val.toString())){
                             //save his data to local cache
@@ -520,11 +468,11 @@ public class RestoreCCUHsApi {
         }
     }
 
-    private void writeValueToEquipPoints(List<Equip> equips, HClient hClient) {
+    private void writeValueToEquipPoints(List<Equip> equips, HClient hClient, RetryCountCallback retryCountCallback) {
         for(Equip equip : equips){
             Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" started");
             List<HDict> equipPoints = getEquipPoints(equip);
-            writeValueToPoints(equipPoints, hClient);
+            writeValueToPoints(equipPoints, hClient, retryCountCallback);
             Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" completed");
         }
     }
@@ -557,7 +505,7 @@ public class RestoreCCUHsApi {
      * @param siteId
      * @param hClient
      */
-    private void importBuildingSchedule(String siteId, HClient hClient){
+    private void importBuildingSchedule(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
         Log.i(TAG, "Import building schedule started");
         HashMap<Object, Object> currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and not special");
         if (!currentBuildingSchedule.isEmpty()) {
@@ -571,7 +519,7 @@ public class RestoreCCUHsApi {
                     new HDictBuilder().add("filter",
                             "building and schedule and not special and siteRef == " +
                                     StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid buildingSch = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict));
+            HGrid buildingSch = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict), retryCountCallback);
 
             if (buildingSch == null) {
                 throw new NullHGridException("Null occurred while importing building schedule");
@@ -595,7 +543,7 @@ public class RestoreCCUHsApi {
         Log.i(TAG, "Import building schedule completed");
     }
 
-    private void importBuildingSpecialSchedule(String siteId, HClient hClient){
+    private void importBuildingSpecialSchedule(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
 
         HashMap<Object, Object>  currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and special");
         if (!currentBuildingSchedule.isEmpty()) {
@@ -608,7 +556,7 @@ public class RestoreCCUHsApi {
             HDict buildingDict =
                     new HDictBuilder().add("filter", "building and schedule and special and siteRef == "
                             + siteId).toDict();
-            HGrid buildingSch = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict));
+            HGrid buildingSch = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(buildingDict), retryCountCallback);
 
             if (buildingSch == null) {
                 return;
@@ -635,14 +583,14 @@ public class RestoreCCUHsApi {
      * @param hClient
      */
 
-    private void importBuildingTuners(String siteId, HClient hClient) {
+    private void importBuildingTuners(String siteId, HClient hClient,RetryCountCallback retryCountCallback) {
         CcuLog.i(TAG, " import BuildingTuners started");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         try {
             HDict tunerEquipDict = new HDictBuilder().add("filter",
                     "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerEquipGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerEquipDict));
+            HGrid tunerEquipGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerEquipDict), retryCountCallback);
             if (tunerEquipGrid == null) {
                 throw new NullHGridException("Null occurred while importing building tuner");
             }
@@ -651,7 +599,7 @@ public class RestoreCCUHsApi {
 
             HDict tunerPointsDict = new HDictBuilder().add("filter",
                     "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict));
+            HGrid tunerPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(tunerPointsDict), retryCountCallback);
             if (tunerPointsGrid == null) {
                 throw new NullHGridException("Null occurred while importing building tuner");
             }
@@ -704,13 +652,13 @@ public class RestoreCCUHsApi {
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
 
-    public HGrid getRemoteSite(String siteId) {
+    public HGrid getRemoteSite(String siteId, RetryCountCallback retryCountCallback) {
         /* Sync a site*/
         HClient hClient   = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
 
-        HGrid siteGrid = invokeWithRetry(HStdOps.read.name(), hClient, hGrid);
+        HGrid siteGrid = invokeWithRetry(HStdOps.read.name(), hClient, hGrid, retryCountCallback);
         if (siteGrid != null) {
             siteGrid.dump();
         } else {
@@ -724,14 +672,14 @@ public class RestoreCCUHsApi {
      * copied from CCuHsApi
      * @param siteId
      */
-    public void syncExistingSite(String siteId) {
+    public void syncExistingSite(String siteId, RetryCountCallback retryCountCallback) {
         siteId = StringUtils.stripStart(siteId,"@");
 
         if (StringUtils.isBlank(siteId)) {
             throw new NullHGridException("Failed to fetch point array values during syncing existing site.");
         }
 
-        HGrid remoteSite = getRemoteSite(siteId);
+        HGrid remoteSite = getRemoteSite(siteId, retryCountCallback);
 
         if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr())
         {
@@ -746,13 +694,13 @@ public class RestoreCCUHsApi {
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        importBuildingSchedule(siteId, hClient);
+        importBuildingSchedule(siteId, hClient, retryCountCallback);
 
         //import building special schedule
-        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient);
+        importBuildingSpecialSchedule(StringUtils.prependIfMissing(siteId, "@"), hClient, retryCountCallback);
 
         //import building tuners
-        importBuildingTuners(siteId, hClient);
+        importBuildingTuners(siteId, hClient, retryCountCallback);
 
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
@@ -769,7 +717,7 @@ public class RestoreCCUHsApi {
 
         for (List<HDict> sublist : partitions) {
             HGrid writableArrayPoints = invokeWithRetry("pointWriteMany", hClient,
-                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+                    HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])), retryCountCallback);
 
             //We cannot proceed replacing an existing CCU without fetching all the point array values.
             if (writableArrayPoints == null) {
@@ -795,14 +743,21 @@ public class RestoreCCUHsApi {
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HDateTime lastModifiedDateTime = (HDateTime)dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
-                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                        HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)
-                                .add("lastModifiedDateTime", lastModifiedDateTime).toDict();
-                        hDictList.add(pid);
+                                .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                        HStr.make(val.toString()) : val);
+                        HDateTime lastModifiedDateTime;
+                        if (lastModifiedTimeTag != null) {
+                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                        } else {
+                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                        }
+                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                        hDictList.add(pid.toDict());
 
                         //save his data to local cache
                         HDict rec = hsClient.readById(HRef.copy(id));
@@ -821,7 +776,7 @@ public class RestoreCCUHsApi {
         }
     }
 
-    public void importNamedSchedule() {
+    public void importNamedSchedule(RetryCountCallback retryCountCallback) {
         Log.i(TAG, " Import Named schedule started");
         Site site = CCUHsApi.getInstance().getSite();
         HClient hClient =new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -829,7 +784,8 @@ public class RestoreCCUHsApi {
             String org = site.getOrganization();
             HDict zoneScheduleDict = new HDictBuilder().add("filter",
                     "named and schedule and organization == \""+org+"\"").toDict();
-            HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict));
+            HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict),
+                    retryCountCallback);
 
             if (zoneScheduleGrid == null) {
                 CcuLog.d(TAG, "zoneScheduleGrid is null");
@@ -840,16 +796,17 @@ public class RestoreCCUHsApi {
             while (it.hasNext()) {
                 HRow row = (HRow) it.next();
                 tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                CcuLog.i(TAG, "Import Named schedule Imported");
             }
         }
+        CcuLog.i(TAG, "Import Named schedule completed");
     }
-    public void restoreSNBandPointByCCUId(String ccuDeviceID){
+    public void restoreSettingPointsOfCCUDevice(String ccuDeviceID, RetryCountCallback retryCountCallback){
 
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict settingPoints = new HDictBuilder().add("filter",
                 "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
-        HGrid settingPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints));
+        HGrid settingPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints),
+                retryCountCallback);
 
         List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
 
@@ -866,11 +823,11 @@ public class RestoreCCUHsApi {
         });
     }
 
-    public HGrid getDiagEquipByEquipId(String equipId){
+    public HGrid getDiagEquipByEquipId(String equipId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("id", HRef.copy(StringUtils.prependIfMissing(equipId, "@"))).toDict();
 
-        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict));
+        return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
 }

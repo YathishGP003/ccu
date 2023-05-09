@@ -32,6 +32,7 @@ import org.projecthaystack.io.HZincWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -42,6 +43,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.RetryCountCallback;
+import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
@@ -757,12 +760,12 @@ public class HClient extends HProj
   }
 
   ///////////////////////////////////////////////////////////////////////
-  public HGrid invoke(String op, HGrid req) throws IOException {
+  public HGrid invoke(String op, HGrid req, RetryCountCallback retryCountCallback) {
     CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
     CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
     String reqStr = HZincWriter.gridToString(req, getVersion());
-    String resStr = postStringWithIOException(uri + op, reqStr);
+    String resStr = postStringWithRetry(uri + op, reqStr, retryCountCallback);
     HGrid res = (resStr == null ? null : new HZincReader(resStr).readGrid());
     if (res != null && res.isErr()) {
       CcuLog.e("CCU_HS", "Network Error: " + res);
@@ -770,54 +773,72 @@ public class HClient extends HProj
     return res;
   }
   // Assuming this old, alternate code is only for Haystack calls since it attaches Haystack API key
-  private String postStringWithIOException(String uriStr, String req) throws IOException {
+  private String postStringWithRetry(String uriStr, String req, RetryCountCallback retryCountCallback) {
     String bearerToken = CCUHsApi.getInstance().getJwt();
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       Log.d("CCU_HCLIENT", "Request to " + uriStr);
       Log.d("CCU_HCLIENT", "Request body: " + req);
       Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
-      URL url = new URL(uriStr);
-      HttpURLConnection c = openHttpConnection(url, "POST");
-      try {
-        c.setDoOutput(true);
-        c.setDoInput(true);
-        c.setRequestProperty("Connection", "Close");
-        c.setRequestProperty("Content-Type", "text/zinc");
-        c.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
-        if (StringUtils.isNotBlank(bearerToken)) {
-          c.setRequestProperty("Authorization", "Bearer " + bearerToken);
-        } else {
-          c.setRequestProperty("api-key", apiKey);
+      int retry = 0;
+      int maxRetryCount = 15;
+      long delay = 1000 * 30;
+      boolean isOKResponse = true;
+      HttpURLConnection httpConnection;
+      do{
+        try{
+        if(!isOKResponse){
+          Log.i("CCU_REPLACE", "Delay in the thread!");
+          Thread.sleep(delay);
         }
-        c.setConnectTimeout(60000);
-        c.setReadTimeout(60000);
-        c.connect();
-
+          Log.i("CCU_REPLACE", "retry count : " +retry);
+          URL url = new URL(uriStr);
+        httpConnection = openHttpConnection(url, "POST");
+        httpConnection.setDoOutput(true);
+        httpConnection.setDoInput(true);
+        httpConnection.setRequestProperty("Connection", "Close");
+        httpConnection.setRequestProperty("Content-Type", "text/zinc");
+        httpConnection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
+        if (StringUtils.isNotBlank(bearerToken)) {
+          httpConnection.setRequestProperty("Authorization", "Bearer " + bearerToken);
+        } else {
+          httpConnection.setRequestProperty("api-key", apiKey);
+        }
+        httpConnection.connect();
         Log.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
 
         // post expression
-        Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
+        Writer cout = new OutputStreamWriter(httpConnection.getOutputStream(), StandardCharsets.UTF_8);
         cout.write(req);
         cout.close();
 
-        Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
-        Log.d("CCU_HTTP_RESPONSE", "HClient:postString: " + c.getResponseCode() + " - [POST] "+ uriStr);
+        Log.i("CCU_HCLIENT", "Request response code: " + httpConnection.getResponseCode());
+        Log.i("CCU_HCLIENT", "HClient:postString: " + httpConnection.getResponseCode() + " - [POST] "+ uriStr);
 
-        // read response into string
+
         StringBuffer s = new StringBuffer(1024);
-        Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
+        Reader r = new BufferedReader(new InputStreamReader(httpConnection.getInputStream(), StandardCharsets.UTF_8));
         int n;
         while ((n = r.read()) > 0) s.append((char)n);
-        c.getInputStream().close();
-        return s.toString();
-      } finally {
-        try {
-          c.disconnect();
-        } catch(Exception e) {
-          CcuLog.e("CCU_HCLIENT", "Could not disconnect");
+        httpConnection.getInputStream().close();
+        httpConnection.disconnect();
+        if(httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+          retry = 0;
+          retryCountCallback.onRetry(0);
+          return s.toString();
         }
-      }
+        }catch (Exception e){
+          if(e instanceof InterruptedIOException){
+            throw new NullHGridException(e.getMessage());
+          }
+          Log.i("CCU_REPLACE","Exception occurred while hitting "+uriStr);
+          Log.i("CCU_REPLACE", "Retry "+Log.getStackTraceString(e));
+        }
+        retry++;
+        retryCountCallback.onRetry(retry);
+        isOKResponse = false;
+
+      }while(retry <= maxRetryCount);
     }
     return null;
   }

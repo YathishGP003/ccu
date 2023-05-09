@@ -465,7 +465,7 @@ public class ScheduleManager {
             }
         }
         
-        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.areAllZonesForcedOccupied(ahuServedEquipsOccupancy)) {
+        if (systemOccupancy == UNOCCUPIED && ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
             systemOccupancy = FORCEDOCCUPIED;
         }
         

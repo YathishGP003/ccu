@@ -259,6 +259,14 @@ class OtaStatusDiagPoint {
         }
 
 
+        fun updateCCUOtaStatus(status: OtaStatus) {
+            val hsApi = CCUHsApi.getInstance()
+            val diag = hsApi.readEntity("diag and equip")
+            updateOtaStatusPoint(
+                hsApi, diag[Tags.ID].toString(),
+                status
+            )
+        }
 
     }
 }

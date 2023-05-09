@@ -16,7 +16,7 @@ public class DabProfileConfiguration extends BaseProfileConfiguration
     public int damper2Size;
     public int damper2Shape;
     
-    public boolean enableOccupancyControl;
+//    public boolean enableOccupancyControl;
     public boolean enableCO2Control;
     public boolean enableIAQControl;
     public boolean enableAutoForceOccupied;

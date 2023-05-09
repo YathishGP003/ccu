@@ -23,7 +23,8 @@ public class AutoCommissioningUtil {
 
     public static AutoCommissioningState getAutoCommissionState(){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        return AutoCommissioningState.values()[hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning").intValue()];
+        Double autoCommissioningPoint = hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning");
+        return autoCommissioningPoint == null ? AutoCommissioningState.NOT_STARTED : AutoCommissioningState.values()[autoCommissioningPoint.intValue()];
     }
 
     public static boolean isAutoCommissioningStarted(){

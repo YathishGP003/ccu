@@ -305,7 +305,6 @@ public class TunerUpgrades {
    }
 
     public static void migrateAutoAwaySetbackTuner(CCUHsApi hayStack) {
-        if(!PreferenceUtil.getAutoAwaySetBackMigration()){
             //Create the tuner point on all equips
             ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav");
             ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab");
@@ -316,7 +315,6 @@ public class TunerUpgrades {
             createPoint(hayStack,dabDualDuctEquips);
             createPoint(hayStack,ssEquips);
             PreferenceUtil.setAutoAwaySetBackMigration();
-        }
     }
     private static void migrateAutoAwayCpuSetbackTuner(CCUHsApi hayStack) {
         if(!PreferenceUtil.getAutoAwaySetBackCpuMigration()){

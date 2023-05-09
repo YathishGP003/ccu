@@ -293,7 +293,6 @@ public class Globals {
                         fall back hard-coded constant tuner values. Creating new tuner instances here will result in
                         multiple CCUs having duplicate instances of tuners. */
                 CCUHsApi.getInstance().importBuildingTuners();
-                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
             }
 
             if(!isHeatingLimitUpdated()){
@@ -326,6 +325,7 @@ public class Globals {
                 migrateIduPoints(site);
                 migrateSNPoints(site);
                 loadEquipProfiles();
+                TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
                 Site siteObject = new Site.Builder().setHashMap(site).build();
                 CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                         HayStackConstants.USER, HayStackConstants.PASS),siteObject);

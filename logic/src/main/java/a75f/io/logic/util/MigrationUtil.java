@@ -381,7 +381,23 @@ public class MigrationUtil {
             PreferenceUtil.setAutoCommissioningMigration();
         }
 
+        migrateTIProfileEnum(CCUHsApi.getInstance());
+
         L.saveCCUState();
+    }
+
+    private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> tiEquips = ccuHsApi.readAllEntities("equip and ti");
+        for (HashMap<Object, Object> equipMap : tiEquips) {
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            HashMap<Object,Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
+                    "temp and ti and space and type and equipRef == \""+equip.getId()+"\"");
+            if (roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
+                Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(equipMap).setEnums(RoomTempSensor.getEnumStringDefinition()).build();
+                CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
+            }
+        }
     }
 
 

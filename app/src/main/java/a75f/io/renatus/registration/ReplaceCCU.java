@@ -59,6 +59,7 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
+import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUListAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -447,6 +448,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);
                 ReplaceCCU.this.loadRenatusLandingIntent();
                 ReplaceCCU.this.updatePreference();
+                MessagingClient.getInstance().init();
             }
         });
         return equipResponseCallback;

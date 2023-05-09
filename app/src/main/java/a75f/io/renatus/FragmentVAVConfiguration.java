@@ -313,7 +313,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         reheatType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                reheatTypeSelected = ReheatType.values()[position];
+                if (position > 0) {
+                    reheatTypeSelected = ReheatType.values()[position-1];
+                }
                 setReheatTypeText(reheatTypeSelected);
             }
         
@@ -356,6 +358,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         damperType.setAdapter(damperTypesAdapter);
     
         ArrayList<String> reheatTypes = new ArrayList<>();
+        reheatTypes.add("Not Installed");
         for (ReheatType actuator : ReheatType.values()) {
             reheatTypes.add(actuator.displayName);
         }
@@ -480,6 +483,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
             damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
             reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
+            reheatType.setSelection(mProfileConfig.reheatType != -1 ? reheatTypesAdapter.getPosition(
+                    ReheatType.values()[mProfileConfig.reheatType].displayName) : 0, false);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
             enableAutoAwayControl.setChecked(mProfileConfig.enableAutoAwayControl);
@@ -596,7 +601,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.damperType = damperTypeSelected.ordinal();
         vavConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());
         vavConfig.damperShape = DamperType.values()[damperShape.getSelectedItemPosition()].ordinal();
-        vavConfig.reheatType = reheatTypeSelected.ordinal();
+        if (reheatType.getSelectedItemPosition() > 0) {
+            vavConfig.reheatType = reheatTypeSelected.ordinal();
+        } else {
+            vavConfig.reheatType = -1;
+        }
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);
         vavConfig.enableCO2Control = enableCO2Control.isChecked();
@@ -642,7 +651,35 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
         analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damperTypeSelected.displayName);
         vavConfig.getOutputs().add(analog1Op);
-    
+
+        if (reheatType.getSelectedItemPosition() != 0 ) {
+            updateVavReheatConfig(reheatTypeSelected, vavConfig);
+        }
+
+        if (mProfileType != ProfileType.VAV_REHEAT) {
+            Output relay2Op = new Output();
+            relay2Op.setAddress(mSmartNodeAddress);
+            relay2Op.setPort(Port.RELAY_TWO);
+            relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+            vavConfig.getOutputs().add(relay2Op);
+        }
+
+        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+
+        CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "
+                +vavConfig.enableAutoForceoccupied+"----------"+vavConfig.enableAutoAwayControl);
+        if (mProfileConfig == null) {
+            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef, mNodeType);
+        } else
+        {
+            mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
+        }
+        L.ccu().zoneProfiles.add(mVavProfile);
+        CcuLog.d(L.TAG_CCU_UI, "Set Vav Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+
+    private void updateVavReheatConfig(ReheatType reheatTypeSelected, VavProfileConfiguration vavConfig) {
+
         switch (reheatTypeSelected) {
             case ZeroToTenV:
             case TwoToTenV:
@@ -668,29 +705,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;;
                 vavConfig.getOutputs().add(relay1Op);
                 break;
-                
-        }
-        
-        if (mProfileType != ProfileType.VAV_REHEAT) {
-            Output relay2Op = new Output();
-            relay2Op.setAddress(mSmartNodeAddress);
-            relay2Op.setPort(Port.RELAY_TWO);
-            relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
-            vavConfig.getOutputs().add(relay2Op);
-        }
-        
-        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
 
-        CcuLog.d(L.TAG_CCU_UI, "sent config frag:  - "
-                +vavConfig.enableAutoForceoccupied+"----------"+vavConfig.enableAutoAwayControl);
-        if (mProfileConfig == null) {
-            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef, mNodeType);
-        } else
-        {
-            mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
         }
-        L.ccu().zoneProfiles.add(mVavProfile);
-        CcuLog.d(L.TAG_CCU_UI, "Set Vav Config: Profiles - "+L.ccu().zoneProfiles.size());
+
     }
 
     private void setDividerColor(NumberPicker picker) {

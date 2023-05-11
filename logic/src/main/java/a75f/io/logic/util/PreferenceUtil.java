@@ -75,6 +75,7 @@ public class PreferenceUtil {
     private static final String OTA_STATUS_MIGRATION = "OtaStatusMigration";
     private static final String CCUREF_TAG_MIGRATION = "ccuRefTagMigration";
     private static final String LAST_TIME_TOKEN = "lastTimeToken";
+    private static final String SCHEDULES_MIGRATION = "schedulesMigration";
 
     private static final String AUTO_FORCED_TAG_CORRECTION_VRV_MIGRATION ="Auto_forced_tag_correction_vrv_migration";
 
@@ -637,7 +638,7 @@ public class PreferenceUtil {
     }
 
     public static boolean getCcuRefTagMigration() {
-        return false;
+        return getBooleanPreference(CCUREF_TAG_MIGRATION);
     }
 
     public static void setCcuRefTagMigration(boolean status) {
@@ -662,5 +663,12 @@ public class PreferenceUtil {
     private static long getLongPreference(String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getLong(key, 0);
+    }
+
+    public static void setScheduleMigration() {
+        setBooleanPreference(SCHEDULES_MIGRATION, true);
+    }
+    public static boolean getScheduleMigration() {
+        return getBooleanPreference(SCHEDULES_MIGRATION);
     }
 }

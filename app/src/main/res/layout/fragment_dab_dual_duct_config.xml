@@ -278,34 +278,32 @@
                 android:paddingTop="20dp">
 
 
-                <TextView
-                    android:id="@+id/textEnableOccupancy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="32dp"
-                    android:text="@string/label_enableoccupance"
-                    android:textAppearance="@style/label_values" />
+<!--                <TextView-->
+<!--                    android:id="@+id/textEnableOccupancy"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:layout_marginTop="32dp"-->
+<!--                    android:text="@string/label_enableoccupance"-->
+<!--                    android:textAppearance="@style/label_values" />-->
 
-                <ToggleButton
-                    android:id="@+id/enableOccupancyControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_toEndOf="@+id/textEnableOccupancy"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
+<!--                <ToggleButton-->
+<!--                    android:id="@+id/enableOccupancyControl"-->
+<!--                    android:layout_width="46.12dp"-->
+<!--                    android:layout_height="27.42dp"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:layout_marginTop="35dp"-->
+<!--                    android:layout_marginLeft="16dp"-->
+<!--                    android:layout_toEndOf="@+id/textEnableOccupancy"-->
+<!--                    android:background="@drawable/toggle_selector"-->
+<!--                    android:checked="false"-->
+<!--                    android:textOff=""-->
+<!--                    android:textOn="" />-->
 
                 <TextView
                     android:id="@+id/textEnableautoforceoccupied"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/textEnableOccupancy"
-                    android:layout_alignStart="@+id/textEnableOccupancy"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/autoforceoccupied"
@@ -315,10 +313,10 @@
                     android:id="@+id/enableAFOControl"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_below="@+id/enableOccupancyControl"
-                    android:layout_alignEnd="@id/enableOccupancyControl"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_toEndOf="@+id/textEnableautoforceoccupied"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""

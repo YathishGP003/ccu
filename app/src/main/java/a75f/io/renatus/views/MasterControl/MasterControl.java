@@ -139,7 +139,7 @@ public class MasterControl extends View {
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
 
         matrix.reset();
-        matrix.postTranslate(xPos - mHitBoxPadding, yPos - mHitBoxPadding);
+        matrix.postTranslate((float) xPos - mHitBoxPadding, (float) yPos - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
         matrix.preScale(2.0f, 2.0f);
@@ -155,7 +155,7 @@ public class MasterControl extends View {
                     (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         } else {
             canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
-                    xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
+                    (float) xPos + (float) bitmaps[stateReflected.ordinal()].getWidth() / 2,
                      (yPos + (float) bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         }
     }
@@ -431,7 +431,7 @@ public class MasterControl extends View {
                 @Override
                 public void run() {
                     ((HorizontalScrollView) MasterControl.this.getParent())
-                            .scrollTo(getPXForTemp(mDefaultStartDegree - mEdgeDegrees), 0);
+                            .scrollTo(getPXForTemp((float) mDefaultStartDegree - mEdgeDegrees), 0);
                 }
             });
         }
@@ -445,7 +445,7 @@ public class MasterControl extends View {
         if (mMeasured) {
             drawTempLine(canvas);
             drawWhiteDelimiters(canvas);
-            drawArrowText(canvas, "BUILDING LIMITS", mBuildingLimitSpacing + 50, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
+            drawArrowText(canvas, "BUILDING LIMITS", (float) mBuildingLimitSpacing + 50, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
                     temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()],
                     Color.parseColor("#5E000000"),
                     Color.parseColor("#5E231f20"));
@@ -459,7 +459,7 @@ public class MasterControl extends View {
                     coolTextColor = Color.parseColor("#5E000000");
                 }
 
-                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", mEnergySavingsSpacing - 18,
+                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", (float) mEnergySavingsSpacing - 18,
                         temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
                         temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
                         Color.parseColor("#5E000000"),
@@ -472,55 +472,55 @@ public class MasterControl extends View {
                     heatTextColor = Color.parseColor("#5E000000");
                 }
 
-                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", mEnergySavingsSpacing - 18,
+                drawArrowText(canvas, ((int)mSetBack)+"\u00B0 SETBACK", (float) mEnergySavingsSpacing - 18,
                         (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
                         temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
                         Color.parseColor("#5E000000"),
                         heatTextColor);
 
                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT && temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential) && temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] == (getEnergySavingLowerLimit() - mZoneDifferential)) {
-                    drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", mEnergySavingsSpacing - 18, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", (float) mEnergySavingsSpacing - 18, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
                             temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack,
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.UPPER_COOLING_LIMIT && temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential) && temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] == (getEnergySavingUpperLimit() + mZoneDifferential)) {
-                    drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
+                    drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", (float) mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
                             temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.UPPER_COOLING_LIMIT && temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb)) {
-                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 105, temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb,
+                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND", (float) mEnergySavingsSpacing - 105, temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] + cdb,
                             temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.LOWER_COOLING_LIMIT && temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] - cdb)) {
-                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 105, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, (int) cdb + "\u00B0\nDEAD\nBAND", (float) mEnergySavingsSpacing - 105, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
                             temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT && temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - hdb)) {
-                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 125, temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND", (float) mEnergySavingsSpacing - 125, temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()],
                             temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
                 if (mSelected == MasterControlState.LOWER_HEATING_LIMIT && temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] + hdb)) {
-                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND", mEnergySavingsSpacing - 125, temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
+                    drawArrowDiffText(canvas, (int) hdb + "\u00B0\nDEAD\nBAND", (float) mEnergySavingsSpacing - 125, temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
                             temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
                             Color.RED);
                 }
 
-                drawArrowText(canvas, "ENERGY SAVINGS RANGE", mEnergySavingsSpacing + 30,
+                drawArrowText(canvas, "ENERGY SAVINGS RANGE", (float) mEnergySavingsSpacing + 30,
                         getEnergySavingLowerLimit(), getEnergySavingUpperLimit(),
                         Color.parseColor("#5E000000"),
                         Color.parseColor("#5E231f20"));
@@ -578,7 +578,7 @@ public class MasterControl extends View {
 
         float textXLocation = (getPXForTemp(uTemp) + getPXForTemp(lTemp)) / 2.0f;
         float textYLocation = getTempLineYLocation() - yValue +
-                (yValue > 0 ? bounds.height() / 2 : -(bounds.height() / 2));
+                (yValue > 0 ? (float) bounds.height() / 2 : -((float) bounds.height() / 2));
 
         StaticLayout mTextLayout = new StaticLayout(text, mDiffTextPaint, canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
 
@@ -605,9 +605,9 @@ public class MasterControl extends View {
         mTempLinePaint.setColor(parseColor);
 
         //draw two more circle for shadow effect
-        canvas.drawLine(getPXForTemp(mLowerHeatingTemp), getTempLineYLocation() + yDisplacement, getPXForTemp(mUpperHeatingTemp), getTempLineYLocation() + yDisplacement, mTempLinePaint);
-        canvas.drawCircle(getPXForTemp(mLowerHeatingTemp), getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
-        canvas.drawCircle(getPXForTemp(mUpperHeatingTemp), getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
+        canvas.drawLine(getPXForTemp(mLowerHeatingTemp), (float) getTempLineYLocation() + yDisplacement, getPXForTemp(mUpperHeatingTemp), (float) getTempLineYLocation() + yDisplacement, mTempLinePaint);
+        canvas.drawCircle(getPXForTemp(mLowerHeatingTemp), (float) getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
+        canvas.drawCircle(getPXForTemp(mUpperHeatingTemp), (float) getTempLineYLocation() + yDisplacement, mTempCircleRadius, mTempPaint);
 
     }
 
@@ -636,12 +636,12 @@ public class MasterControl extends View {
         }
 
         matrix.reset();
-        hitBoxes[controlState.ordinal()].set(0, 0, bitmaps[controlState.ordinal()].getWidth() - 10,
-                bitmaps[controlState.ordinal()].getHeight() - 10);
+        hitBoxes[controlState.ordinal()].set(0, 0, (float) bitmaps[controlState.ordinal()].getWidth() - 10,
+                (float) bitmaps[controlState.ordinal()].getHeight() - 10);
 
 
         matrix.reset();
-        matrix.postTranslate(xLoc - mHitBoxPadding, yLoc - mHitBoxPadding);
+        matrix.postTranslate((float) xLoc - mHitBoxPadding, (float) yLoc - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
         matrix.preScale(2.0f, 2.0f);
@@ -688,12 +688,12 @@ public class MasterControl extends View {
                                float uTemp, int lineColor, int textColor) {
 
         mDebugTextAlignCenterPaint.setColor(textColor);
-        mDebugTextAlignCenterPaint.setTextSize(mArrowTextSize+5);
+        mDebugTextAlignCenterPaint.setTextSize((float) mArrowTextSize+5);
         mDebugTextAlignCenterPaint.getTextBounds(text, 0, text.length(), bounds);
 
         float textXLocation = (getPXForTemp(uTemp) + getPXForTemp(lTemp)) / 2.0f;
         float textYLocation = getTempLineYLocation() - yValue +
-                (yValue > 0 ? bounds.height() / 2 : -(bounds.height() / 2));
+                (yValue > 0 ? (float) bounds.height() / 2 : -((float) bounds.height() / 2));
 
         //to draw horizontal texts
         canvas.drawText(text, textXLocation, textYLocation - mTextPadding * 6, mDebugTextAlignCenterPaint);
@@ -711,8 +711,8 @@ public class MasterControl extends View {
         canvas.drawLine(startOfLowerTemp + mArrowImageWidth, yOfLowerTemp - mTextPadding * 6, endOfLowerTemp, yOfLowerTemp - mTextPadding * 6, mSmallLinePaint);
         canvas.drawLine(startOfUpperTemp, yOfLowerTemp - mTextPadding * 6, endOfUpperTemp - mArrowImageWidth, yOfLowerTemp - mTextPadding * 6, mSmallLinePaint);
         //to draw vertical lines
-        canvas.drawLine(startOfLowerTemp, yOfLowerTemp - mTextPadding * 6, startOfLowerTemp, getTempLineYLocation() - mTextPadding, mSmallLinePaint);
-        canvas.drawLine(endOfUpperTemp, yOfLowerTemp - mTextPadding * 6, endOfUpperTemp, getTempLineYLocation() - mTextPadding, mSmallLinePaint);
+        canvas.drawLine(startOfLowerTemp, yOfLowerTemp - mTextPadding * 6, startOfLowerTemp, (float) getTempLineYLocation() - mTextPadding, mSmallLinePaint);
+        canvas.drawLine(endOfUpperTemp, yOfLowerTemp - mTextPadding * 6, endOfUpperTemp, (float) getTempLineYLocation() - mTextPadding, mSmallLinePaint);
         //to draw  arrow
         canvas.drawBitmap(mArrowHeadLeftBitmap, startOfLowerTemp, yOfLowerTemp - mTextPadding * 7, mSmallLinePaint);
         canvas.drawBitmap(mArrowHeadRightBitmap, endOfUpperTemp - mArrowImageWidth, yOfLowerTemp - mTextPadding * 7, mSmallLinePaint);
@@ -724,7 +724,7 @@ public class MasterControl extends View {
     }
 
     private float getTempForPX(int px) {
-        return ((px - mPaddingPX) / mDegreeIncremntPX) + mLowerBound;
+        return ((float) (px - mPaddingPX) / mDegreeIncremntPX) + mLowerBound;
     }
 
 
@@ -732,7 +732,7 @@ public class MasterControl extends View {
         mLinePaint.setStrokeWidth(mTempLineHeight);
 
         //why 10
-        canvas.drawLine(mPaddingPX - 10, getTempLineYLocation(), mViewWidth - mPaddingPX + 10, getTempLineYLocation(), mLinePaint);
+        canvas.drawLine((float) mPaddingPX - 10, getTempLineYLocation(), mViewWidth - (float) mPaddingPX + 10, getTempLineYLocation(), mLinePaint);
     }
 
     private int getTempLineYLocation() {

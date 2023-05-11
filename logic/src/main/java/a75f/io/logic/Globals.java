@@ -236,13 +236,17 @@ public class Globals {
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-        importTunersAndScheduleJobs();
+        if(!isSafeMode()){
+            importTunersAndScheduleJobs();
+            handleAutoCommissioning();
+        }
+
         updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
-        handleAutoCommissioning();
+
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){

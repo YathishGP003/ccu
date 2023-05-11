@@ -6,14 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -61,6 +59,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BackfillPref;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
@@ -547,8 +546,7 @@ public class InstallerOptions extends Fragment {
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
         setBackFillTimeSpinner(rootView);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        BackfillPref backfillPref = new BackfillPref();
         buttonApply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -558,9 +556,7 @@ public class InstallerOptions extends Fragment {
                 int backFillDurationSelected = durations[index];
                 CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));
 
-                editor.putInt("backFillTimeDuration", backFillDurationSelected);
-                editor.putInt("backFillTimeSpSelected",backFillTimeSpinner.getSelectedItemPosition());
-                editor.apply();
+                backfillPref.saveBackfillConfig(backFillDurationSelected, backFillTimeSpinner.getSelectedItemPosition());
 
                 if (!isFreshRegister) {
                     Toast toast = new Toast(Globals.getInstance().getApplicationContext());
@@ -576,7 +572,7 @@ public class InstallerOptions extends Fragment {
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));
+                backFillTimeSpinner.setSelection(backfillPref.getBackFillTimeSPSelected());
             }
         });
 
@@ -1002,21 +998,19 @@ public class InstallerOptions extends Fragment {
 
     private void setBackFillTimeSpinner(View rootView) {
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        BackfillPref backfillPref = new BackfillPref();
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
         this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(sharedPreferences.getInt("backFillTimeSpSelected",6));
+        this.backFillTimeSpinner.setSelection(backfillPref.getBackFillTimeSPSelected());
 
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                if (sharedPreferences.getInt("backFillTimeSpSelected",6) == i) {
+                if (backfillPref.getBackFillTimeSPSelected() == i) {
                     linearLayout.setVisibility(View.INVISIBLE);
-                } else {
-                    if (!isFreshRegister) {
-                        linearLayout.setVisibility(View.VISIBLE);
-                    }
+                } else if (!isFreshRegister){
+                    linearLayout.setVisibility(View.VISIBLE);
                 }
                 adapterView.setSelection(i);
             }

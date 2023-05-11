@@ -4,6 +4,8 @@ package a75f.io.logic.bo.building.system;
  * Created by samjithsadasivan on 1/8/19.
  */
 
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -11,6 +13,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
@@ -46,6 +49,10 @@ public class DefaultSystem extends SystemProfile
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
         {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
+            if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+                CcuLog.i(TAG_CCU_SCHEDULER, "System page status(when no central device is available) - AutoCommissioning is Started");
+                CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus","In Diagnostic Mode");
+            }
         }
     }
     

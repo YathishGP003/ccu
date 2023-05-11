@@ -62,7 +62,7 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
-            if (buildingTunerPoint.containsKey("displayUnit")) {
+            if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
                 zoneDataInterface.refreshScreen("");
             }
             return;

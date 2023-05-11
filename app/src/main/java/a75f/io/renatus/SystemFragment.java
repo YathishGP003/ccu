@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -70,6 +71,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -925,7 +927,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				if (L.ccu().systemProfile instanceof DefaultSystem) {
 					equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
-					occupancyStatus.setText("No Central equipment connected.");
+					occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
 					tbCompHumidity.setChecked(false);
 					tbDemandResponse.setChecked(false);
 					tbSmartPrePurge.setChecked(false);

@@ -615,9 +615,4 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     };
 
 
-    public static void updateCCUOtaStatus(OtaStatus status){
-        CCUHsApi hsApi = CCUHsApi.getInstance();
-        HashMap<Object,Object> diag = hsApi.readEntity("diag and equip");
-        OtaStatusDiagPoint.Companion.updateOtaStatusPoint(hsApi,diag.get(Tags.ID).toString(),status);
-    }
 }

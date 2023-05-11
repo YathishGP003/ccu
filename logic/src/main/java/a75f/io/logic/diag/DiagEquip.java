@@ -28,6 +28,8 @@ import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 
 public class DiagEquip
 {
@@ -89,6 +91,16 @@ public class DiagEquip
                                            .setTz(tz)
                                            .build();
         hsApi.addPoint(batteryLevel);
+
+        Point autoCommission = new Point.Builder()
+                .setDisplayName(equipDis+"-autoCommissioning")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("cov").addMarker("cur")
+                .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(autoCommission);
+        AutoCommissioningUtil.setAutoCommissionState(AutoCommissioningState.NOT_STARTED);
     
         Point chargingStatus = new Point.Builder()
                                      .setDisplayName(equipDis+"-chargingStatus")

@@ -7,6 +7,7 @@ import a75f.io.data.message.updateMessageHandled
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.messaging.MessageHandler
+import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler
 import a75f.io.messaging.messageToJson
 import android.content.Context
@@ -130,7 +131,8 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
     private fun shouldUpdateMessageBeforeHandling(message : Message) : Boolean {
         return message.remoteCmdType != null &&
             (message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_CCU
-                    || message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_TABLET)
+                    || message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_TABLET
+                    || message.command == AutoCommissioningStateHandler.CMD)
     }
 
     private fun isUpdateCcuCommand(message: Message) : Boolean {

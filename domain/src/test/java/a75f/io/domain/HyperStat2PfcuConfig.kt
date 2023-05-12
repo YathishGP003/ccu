@@ -19,7 +19,7 @@ class HyperStat2fcuProfileConfiguration(nodeAddress: Int,
     var relay5OutputEnabled = ProfileConfig(false, "relay5OutputEnabled")
     var relay6OutputEnabled = ProfileConfig(false, "relay6OutputEnabled")
 
-    //enabled is already present in outputEnabled config. But both are not linked now.
+    //enabled is already present in outputEnabled config. But both are linked only in the domain model.
     var relay1OutputAssociation = PortConfig( false, "relay1OutputAssociation", "fanMediumSpeed")
     var relay2OutputAssociation = PortConfig( false, "relay2OutputAssociation", "fanHighSpeed")
     var relay3OutputAssociation = PortConfig( false, "relay3OutputAssociation", "fanLowSpeed")

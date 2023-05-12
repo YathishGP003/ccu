@@ -1988,7 +1988,7 @@ public class MigrationUtil {
     }
 
     private static void migrateZoneAndBuildingSchedules(CCUHsApi ccuHsApi) {
-         List<HashMap<Object, Object>> schedules = ccuHsApi.readAllEntities("(building or zone) and schedule and not special and not vacation");
+         List<HashMap<Object, Object>> schedules = ccuHsApi.readAllEntities("(building or zone) and schedule and not special and not vacation and not named");
          schedules.forEach(schedule ->{
              Schedule scheduleObj = ccuHsApi.getScheduleById(schedule.get(Tags.ID).toString());
              updateSchedule(scheduleObj, ccuHsApi);

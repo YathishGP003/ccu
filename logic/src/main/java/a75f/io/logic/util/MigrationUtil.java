@@ -380,6 +380,11 @@ public class MigrationUtil {
             PreferenceUtil.setAutoCommissioningMigration();
         }
 
+        if (!PreferenceUtil.getRemoveDupCoolingLockoutTuner()) {
+            removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
+            PreferenceUtil.setRemoveDupCoolingLockoutTuner();
+        }
+
         L.saveCCUState();
     }
 
@@ -2055,6 +2060,31 @@ public class MigrationUtil {
                     }
                 }
             }
+        }
+
+    }
+
+    private static void removeDuplicateCoolingLockoutTuner(CCUHsApi hayStack) {
+         HashMap<Object, Object> systemEquip = hayStack.readEntity("system and equip and vav");
+         //Vav System Equip does not exist, no migration needed.
+         if (systemEquip.isEmpty()) {
+             return;
+         }
+
+         ArrayList<HashMap<Object, Object>> coolingLockoutTempTuner = hayStack.readAllEntities("tuner and " +
+                 "system and outsideTemp and cooling and lockout and equipRef == \""+systemEquip.get("id").toString()+"\"");
+
+         if (coolingLockoutTempTuner.size() > 1) {
+             coolingLockoutTempTuner.remove(0);
+             coolingLockoutTempTuner.forEach( point -> hayStack.deleteEntityTree(point.get("id").toString()));
+         }
+
+        ArrayList<HashMap<Object, Object>> heatingLockoutTempTuner = hayStack.readAllEntities("tuner and " +
+                "system and outsideTemp and heating and lockout and equipRef == \""+systemEquip.get("id").toString()+"\"");
+
+        if (heatingLockoutTempTuner.size() > 1) {
+            heatingLockoutTempTuner.remove(0);
+            heatingLockoutTempTuner.forEach( point -> hayStack.deleteEntityTree(point.get("id").toString()));
         }
 
     }

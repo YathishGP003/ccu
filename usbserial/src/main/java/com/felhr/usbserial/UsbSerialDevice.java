@@ -272,31 +272,35 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		{
 			while(working.get())
 			{
-				UsbRequest request = connection.requestWait();
-				if(request != null && request.getEndpoint().getType() == UsbConstants.USB_ENDPOINT_XFER_BULK
-				   && request.getEndpoint().getDirection() == UsbConstants.USB_DIR_IN)
-				{
-					byte[] inReg = serialBuffer.getDataReceived();
-					int nRet = inReg.length;
-					serialBuffer.clearReadBuffer();
-					if(nRet > 0) {
-						int nCount = 0;
-						if (isFTDIDevice())
-							nCount = 2;
-						
-						for (; nCount < nRet; nCount++) {
-							byte inData =  inReg[nCount];
-							if (isModbusDevice) {
-								//byte[] data = {inData};
-								//onReceivedData(data, 1);
-								handleIncomigModbusData(inData);
-							} else {
-								handleIncomingSerialByte(inData);
+				try {
+					UsbRequest request = connection.requestWait();
+					if (request != null && request.getEndpoint().getType() == UsbConstants.USB_ENDPOINT_XFER_BULK
+							&& request.getEndpoint().getDirection() == UsbConstants.USB_DIR_IN) {
+						byte[] inReg = serialBuffer.getDataReceived();
+						int nRet = inReg.length;
+						serialBuffer.clearReadBuffer();
+						if (nRet > 0) {
+							int nCount = 0;
+							if (isFTDIDevice())
+								nCount = 2;
+
+							for (; nCount < nRet; nCount++) {
+								byte inData = inReg[nCount];
+								if (isModbusDevice) {
+									//byte[] data = {inData};
+									//onReceivedData(data, 1);
+									handleIncomigModbusData(inData);
+								} else {
+									handleIncomingSerialByte(inData);
+								}
 							}
 						}
+						// Queue a new request
+						requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
 					}
-					// Queue a new request
-					requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
+				}catch (NullPointerException e){
+					Log.e("USB_SERIAL","Exception on while invoking the requestWait() method.");
+					e.printStackTrace();
 				}
 			}
 		}

@@ -311,7 +311,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewScheduletitle.setFocusable(true);
 
+        return rootView;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
         //After they are measured d the schedule.
         ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
@@ -324,7 +329,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 View viewHourTwo = viewTimeLines.get(2);
 
                 mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                mPixelsBetweenADay = constraintScheduler.getHeight() / 7;
+                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
 
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
@@ -335,7 +340,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
             }
         });
-        return rootView;
+
     }
 
     private void loadSchedule()
@@ -1177,34 +1182,37 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
     private void drawCurrentTime() {
-
-        DateTime now = new DateTime(MockTime.getInstance().getMockTime());
-
-
-        DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        Log.i("Scheduler", "DAY: " + day.toString());
-        int hh = now.getHourOfDay();
-        int mm = now.getMinuteOfHour();
+        try {
+            DateTime now = new DateTime(MockTime.getInstance().getMockTime());
 
 
-        AppCompatImageView imageView = new AppCompatImageView(getActivity());
+            DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
+            Log.i("Scheduler", "DAY: " + day.toString());
+            int hh = now.getHourOfDay();
+            int mm = now.getMinuteOfHour();
 
-        imageView.setImageResource(R.drawable.ic_time_marker_svg);
-        imageView.setId(View.generateViewId());
-        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        //imageView.setPadding(0, 50,0, 0);
-        //imageView.setForegroundGravity(Gravity.CENTER);
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
-        //lp.topMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-        //lp.bottomMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-        lp.bottomToBottom = getTextViewFromDay(day).getId();
-        lp.topToTop = getTextViewFromDay(day).getId();
-        lp.startToStart = viewTimeLines.get(hh).getId();
 
-        lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+            AppCompatImageView imageView = new AppCompatImageView(requireContext());
 
-        constraintScheduler.addView(imageView, lp);
+            imageView.setImageResource(R.drawable.ic_time_marker_svg);
+            imageView.setId(View.generateViewId());
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            //imageView.setPadding(0, 50,0, 0);
+            //imageView.setForegroundGravity(Gravity.CENTER);
+            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
+            //lp.topMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
+            //lp.bottomMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
+            lp.bottomToBottom = getTextViewFromDay(day).getId();
+            lp.topToTop = getTextViewFromDay(day).getId();
+            lp.startToStart = viewTimeLines.get(hh).getId();
 
+            lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+
+            constraintScheduler.addView(imageView, lp);
+        }catch(IllegalStateException exception){
+            // if context is null we will get this exception, some rare scenario we get this.
+            Log.e(L.TAG_CCU_UI,exception.getMessage());
+        }
 
     }
 

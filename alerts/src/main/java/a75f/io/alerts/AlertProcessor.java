@@ -3,7 +3,7 @@ package a75f.io.alerts;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertDefOccurrence;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -57,17 +58,43 @@ public class AlertProcessor
                 continue;
             }
 
-            Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
-            def.evaluate(defaultSharedPrefs);
+           if(isInAutoCommissioningMode() && suppressAlert(def)) {
+               Log.d("CCU_ALERTS", "In AutoCommissioning mode ");
+               continue;
+           }
+           Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
+           def.evaluate(defaultSharedPrefs);
 
-            if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
-                List<AlertDefOccurrence> retunredList = processForEquips(def);
-                occurrences.addAll(retunredList);
-            } else {
-                occurrences.add(process(def));
-            }
+           if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
+               List<AlertDefOccurrence> retunredList = processForEquips(def);
+               occurrences.addAll(retunredList);
+           } else {
+               occurrences.add(process(def));
+           }
+
         }
         return occurrences;
+    }
+
+    private boolean suppressAlert(AlertDefinition def) {
+        if (def.conditionals.size() > 0) {
+            boolean isAlertMatches = false;
+            for (Conditional conditional : def.conditionals) {
+                if(conditional.value != null && (conditional.value.equalsIgnoreCase("system and building and limit and min") ||
+                        conditional.value.equalsIgnoreCase("system and building and limit and max")) &&
+                        (!def.alert.getmSeverity().toString().equalsIgnoreCase("SEVERE"))) {
+                    isAlertMatches = true;
+                    Log.d("CCU_ALERTS", ""+def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
+                }
+            }
+            return isAlertMatches;
+        }
+        return false;
+    }
+
+    private boolean isInAutoCommissioningMode() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        return hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning") == 1.0;
     }
 
     /**

@@ -23,11 +23,11 @@ public class ValvePIController extends GenericPIController
     public double getValveControlSignal(double setTemp, double roomTemp) {
         Log.d("ValvePIController", "setTemp " + setTemp + " roomTemp " + roomTemp);
         updateControlVariable(setTemp, roomTemp);
-        return minPosition + (maxPosition - minPosition)/2 * (1+ getControlVariable()/getMaxAllowedError());
+        return minPosition + ((double) maxPosition - minPosition)/2 * (1+ getControlVariable()/getMaxAllowedError());
     }
     
     public double getValveControlSignal() {
-        return minPosition + (maxPosition - minPosition)/2 * (1+ getControlVariable()/getMaxAllowedError());
+        return minPosition + ((double) maxPosition - minPosition)/2 * (1+ getControlVariable()/getMaxAllowedError());
     }
     
 }

@@ -8,11 +8,14 @@ import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -136,6 +139,11 @@ public class DabStagedRtu extends DabSystemProfile
         } else {
             systemCoolingLoopOp = 0;
         }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
+        }
         
         if (currentConditioning == HEATING)
         {
@@ -143,6 +151,12 @@ public class DabStagedRtu extends DabSystemProfile
         } else {
             systemHeatingLoopOp = 0;
         }
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.HEATING,systemHeatingLoopOp);
+            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
+        }
+
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
@@ -167,7 +181,12 @@ public class DabStagedRtu extends DabSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
-        
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.FAN,systemFanLoopOp);
+            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
+        }
+
         setSystemLoopOp("cooling", systemCoolingLoopOp);
         setSystemLoopOp("heating", systemHeatingLoopOp);
         setSystemLoopOp("fan", systemFanLoopOp);

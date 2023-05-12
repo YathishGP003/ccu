@@ -48,6 +48,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
+            String messageId = msgObject.get("messageId").getAsString();
+
             CcuLog.d("RemoteCommand","handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
             switch (cmdLevel){
                 case "site":
@@ -87,6 +89,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 otaUpdateIntent.putExtra("id", msgObject.get("remoteCmdLevel").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
                                 otaUpdateIntent.putExtra("cmdLevel", cmdLevel);
+                                otaUpdateIntent.putExtra("messageId", messageId);
+                                otaUpdateIntent.putExtra("remoteCmdType", cmdType);
 
                                 context.sendBroadcast(otaUpdateIntent);
                                 break;
@@ -123,6 +127,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());
                             otaUpdateIntent.putExtra("cmdLevel", cmdLevel);
+                            otaUpdateIntent.putExtra("messageId", messageId);
+                            otaUpdateIntent.putExtra("remoteCmdType", cmdType);
                             context.sendBroadcast(otaUpdateIntent);
                             break;
                         case RESTART_MODULE:

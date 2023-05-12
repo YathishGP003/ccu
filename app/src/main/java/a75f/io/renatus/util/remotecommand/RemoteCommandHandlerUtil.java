@@ -8,6 +8,7 @@ import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_TABLE
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
 
+
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.LSmartNode;
@@ -35,9 +37,13 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.logtasks.UploadLogs;
+import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
@@ -73,6 +79,7 @@ public class RemoteCommandHandlerUtil {
                 LSerial.getInstance().setResetSeedMessage(true);
                 break;
             case UPDATE_CCU:
+                OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
                 Log.d("CCU_DOWNLOAD", "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
                 RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
 
@@ -83,6 +90,7 @@ public class RemoteCommandHandlerUtil {
                             long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                             Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                             if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                                RxTask.executeAsync(()-> UtilityApplication.getMessagingAckJob().doMessageAck());
                                 if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
                                     AppInstaller.getHandle().install(null, false, true, true);
                                 } else {
@@ -124,7 +132,7 @@ public class RemoteCommandHandlerUtil {
                                     if (d.getMarkers().contains("smartstat")) {
                                         sendSmartStatResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("smartnode") ||
-                                            d.getMarkers().contains("otn")) {
+                                            d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                         sendSmarNodeResetMsg(d.getAddr());
                                     } else if (d.getMarkers().contains("hyperstat")) {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -138,7 +146,7 @@ public class RemoteCommandHandlerUtil {
                             if (d.getMarkers().contains("smartstat")) {
                                 sendSmartStatResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("smartnode") ||
-                                    d.getMarkers().contains("otn")) {
+                                    d.getMarkers().contains("otn") || d.getMarkers().contains(Tags.HELIO_NODE)) {
                                 sendSmarNodeResetMsg(d.getAddr());
                             } else if (d.getMarkers().contains("hyperstat")) {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
@@ -150,7 +158,7 @@ public class RemoteCommandHandlerUtil {
                         if (equip.getMarkers().contains("smartstat")) {
                             sendSmartStatResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("smartnode") ||
-                                equip.getMarkers().contains("otn")) {
+                                equip.getMarkers().contains("otn") || equip.getMarkers().contains(Tags.HELIO_NODE)) {
                             sendSmarNodeResetMsg(equip.getGroup());
                         } else if (equip.getMarkers().contains("hyperstat")) {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));

@@ -8,6 +8,7 @@ import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,12 +20,15 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
@@ -232,12 +236,17 @@ public class Globals {
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         CCUHsApi.getInstance().trimObjectBoxHisStore();
-        importTunersAndScheduleJobs();
+        if(!isSafeMode()){
+            importTunersAndScheduleJobs();
+            handleAutoCommissioning();
+        }
+
         updateCCUAhuRef();
         setRecoveryMode();
 
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_CCU);
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
+
     }
 
     private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
@@ -662,6 +671,14 @@ public class Globals {
 
         if(!(systemProf.equals(ahuRef))) {
             CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+        }
+    }
+
+    private void handleAutoCommissioning() {
+        String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+        if (autoCommissioningPointId != null && AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
+            AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);
         }
     }
 }

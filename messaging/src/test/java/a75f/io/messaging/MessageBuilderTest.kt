@@ -3,13 +3,8 @@ package a75f.io.messaging
 import a75f.io.data.message.Message
 import a75f.io.messaging.exceptions.InvalidMessageFormatException
 import com.google.common.truth.Truth.assertThat
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.json.JSONArray
-import org.json.JSONObject
 
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -24,9 +19,8 @@ class MessageBuilderTest {
     private val updateSchedule = "{\"channel\":\"ba328874-6d8d-47f7-a4a5-386f74124233\",\"timetoken\":1679501490358,\"messageId\":\"1679501490358-0\",\"message\":{\"id\":\"d3fdb2c5-d982-4468-9389-cb85b21bbcfd\",\"command\":\"updateSchedule\"}}"
     private val customAlertDef = "{\"channel\":\"ba328874-6d8d-47f7-a4a5-386f74124233\",\"timetoken\":1679511401326,\"messageId\":\"1679511401326-0\",\"message\":{\"command\":\"newCustomAlertDefinition\",\"definitionId\":\"641b4f68255a887a48b59c62\"}}"
     private val customAlertDel = "{\"channel\":\"ba328874-6d8d-47f7-a4a5-386f74124233\",\"timetoken\":1679512958991,\"messageId\":\"1679512958991-0\",\"message\":{\"command\":\"removeCustomAlertDefinition\",\"definitionId\":\"641b4f68255a887a48b59c62\"}}"
-
     private val nullCommandMsg = "{\"channel\":\"c57f5bec-d3a6-446b-b061-144ffaa3cc95\",\"timetoken\":1679087721460,\"messageId\":\"1679087721460-0\",\"message\":{\"ids\":[\"4c57933c-b05b-4a28-b1cf-e5d8da17ca66\"]}}"
-
+    private val autoCVMsg = "{\"channel\":\"9201f3ca-263c-4c2c-92f8-b77bba614425\",\"timetoken\":1682095218299,\"messageId\":\"1682095218299-0\",\n" + "\"message\":{\"ccuId\":\"71e6997f-4a6f-45b1-8b05-8071c5a99c20\",\"stopDateTime\":\"2023-04-21T16:27:00.985Z\",\"state\":1,\n" + "\"command\":\"autoCommissioningMode\"},\n" + "\"traceparent\":\"00-464ae256cbe831340ccf0cd1e6b4893b-439ac049bd3f38df-00\"}"
     @Test
     fun messageFromJson_checkAllFieldsAreParsedForValidUpdatePointMessage() {
         val msgJson: JsonObject = JsonParser.parseString(updatePointMsg).asJsonObject
@@ -44,7 +38,9 @@ class MessageBuilderTest {
                 timeToken=1679453749690,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
         )
 
         val messageJson = messageToJson(message);
@@ -69,7 +65,9 @@ class MessageBuilderTest {
                 timeToken=1679087721460,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
         )
     }
 
@@ -90,7 +88,9 @@ class MessageBuilderTest {
                 timeToken=1679087721471,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
         )
     }
 
@@ -111,7 +111,9 @@ class MessageBuilderTest {
                 timeToken=1679087432502,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
         )
     }
 
@@ -140,7 +142,9 @@ class MessageBuilderTest {
                 timeToken=1679353233848,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
 
         )
     }
@@ -164,7 +168,9 @@ class MessageBuilderTest {
                 timeToken=1679501490358,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
 
         )
     }
@@ -186,7 +192,9 @@ class MessageBuilderTest {
                 timeToken=1679511401326,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
         )
     }
 
@@ -207,7 +215,32 @@ class MessageBuilderTest {
                 timeToken=1679512958991,
                 handlingStatus=false,
                 retryCount=0,
-                error="")
+                error="",
+                autoCXState = 0,
+                autoCXStopTime = "")
+        )
+    }
+
+    @Test
+    fun messageFromJson_checkAllFieldsAreParsedForValidAutoCXMessage() {
+        val msgJson: JsonObject = JsonParser.parseString(autoCVMsg).asJsonObject
+        val message = jsonToMessage(msgJson)
+        assertThat(message).isEqualTo(
+            Message(messageId="1682095218299-0",
+                command="autoCommissioningMode",
+                id="71e6997f-4a6f-45b1-8b05-8071c5a99c20",
+                ids=null,
+                value=null,
+                who=null,
+                level=null,
+                remoteCmdType=null,
+                remoteCmdLevel=null,
+                timeToken=1682095218299,
+                handlingStatus=false,
+                retryCount=0,
+                error="",
+                autoCXState = 1,
+                autoCXStopTime = "2023-04-21T16:27:00.985Z")
         )
     }
 

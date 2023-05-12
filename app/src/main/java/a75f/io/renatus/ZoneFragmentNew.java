@@ -6,7 +6,6 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.FragmentPLCConfiguration.TAG;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -57,7 +56,6 @@ import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -87,13 +85,13 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.hyperstat.common.SmartStatFanModeCache;
 import a75f.io.logic.bo.building.otn.OTNUtil;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -240,11 +238,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
         tableLayout = (TableLayout) view.findViewById(R.id.tableRoot);
         gridlayout = (GridLayout) view.findViewById(R.id.gridview);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerEquip);
-
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         in = AnimationUtils.makeInAnimation(getActivity(), false);
         inleft = AnimationUtils.makeInAnimation(getActivity(), true);
@@ -2269,7 +2262,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
                                 String equipType = equipTypes.get(0);
-                                equipType.trim();
+                                equipType = equipType.trim();
                                 tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
                                 HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
@@ -2704,19 +2697,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2768,6 +2761,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
+        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -2775,17 +2769,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                         if ((position != 0) && (position % 3 == 0))
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                            fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                            fanCacheStorage.removeFanModeFromCache(tempEquipId);
                     }
                     isCPUFromPubNub = false;
                 } else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                     if ((position != 0) && (position % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                        fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                        fanCacheStorage.removeFanModeFromCache(tempEquipId);
                 }
             }
 
@@ -2939,19 +2933,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             if (fanHighHumdOption == 2.0) {
                                 if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                                 }
                             } else if (fanHighHumdOption == 3.0) {
                                 if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position + 1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                                 }
                             }
                         } else {
                             if (fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", (double) position + 1);
                             else if (fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", (double) position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -3009,7 +3003,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
-
+        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
         fanSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3019,19 +3013,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             Log.i("PubNub", "fanMode:" + tempfanMode + " position:" + position);
                             StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                             if ((position != 0) && (position % 3 == 0))
-                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                                fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                             else
-                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                                fanCacheStorage.removeFanModeFromCache(tempEquipId);
                         }
                         isHPUFromPubNub = false;
                     } else {
-                        //if(isHPUloaded) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                         if ((position != 0) && (position % 3 == 0))
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                            fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
-                        //}
+                            fanCacheStorage.removeFanModeFromCache(tempEquipId);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -3179,6 +3171,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             }
         });
+        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3186,17 +3179,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (tempfanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                         if ((position != 0) && (position % 3 == 0))
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                            fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                            fanCacheStorage.removeFanModeFromCache(tempEquipId);
                     }
                     isFromPubNub = false;
                 } else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
                     if ((position != 0) && (position % 3 == 0))
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                        fanCacheStorage.saveFanModeInCache(tempEquipId, position);
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                        fanCacheStorage.removeFanModeFromCache(tempEquipId);
                 }
             }
 
@@ -3320,6 +3313,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
         isFromPubNub = isPubNub;
+        SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3346,17 +3340,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
                         if ((position != 0) && (position % 3 == 0))
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
+                            fanCacheStorage.saveFanModeInCache(equipId, position);
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(equipId).commit();
+                            fanCacheStorage.removeFanModeFromCache(equipId);
                     }
                     isFromPubNub = false;
                 } else {
                     StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
                     if ((position != 0) && (position % 3 == 0))
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
+                        fanCacheStorage.saveFanModeInCache(equipId, position);
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(equipId).commit();
+                        fanCacheStorage.removeFanModeFromCache(equipId);
                 }
             }
 
@@ -3641,7 +3635,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void hideWeather() {
-        TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
+        TranslateAnimation animate = new TranslateAnimation(0, (float) -weather_data.getWidth() + 5, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);

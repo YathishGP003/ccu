@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -70,6 +71,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -195,7 +197,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	Schedule schedule;
 
-	private Context mContext;
 
 	public SystemFragment()
 	{
@@ -204,7 +205,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
-		this.mContext = context;
+
 	}
 
 	public static SystemFragment newInstance()
@@ -373,30 +374,32 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void drawCurrentTime() {
 
-		DateTime now = new DateTime(MockTime.getInstance().getMockTime());
+		try {
+			DateTime now = new DateTime(MockTime.getInstance().getMockTime());
 
 
-		DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-		Log.i("Scheduler", "DAY: " + day.toString());
-		int hh = now.getHourOfDay();
-		int mm = now.getMinuteOfHour();
+			DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
+			Log.i("Scheduler", "DAY: " + day.toString());
+			int hh = now.getHourOfDay();
+			int mm = now.getMinuteOfHour();
 
-		if (mContext == null) {
-			Log.d(L.TAG_CCU_UI," SystemFragment is not attached with an activity");
-			return;
+			AppCompatImageView imageView = new AppCompatImageView(requireContext());
+
+			imageView.setImageResource(R.drawable.ic_time_marker_svg);
+			imageView.setId(View.generateViewId());
+			imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+			ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
+			lp.bottomToBottom = getTextViewFromDay(day).getId();
+			lp.topToTop = getTextViewFromDay(day).getId();
+			lp.startToStart = viewTimeLines.get(hh).getId();
+			lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
+
+			constraintScheduler.addView(imageView, lp);
 		}
-		AppCompatImageView imageView = new AppCompatImageView(mContext);
-
-		imageView.setImageResource(R.drawable.ic_time_marker_svg);
-		imageView.setId(View.generateViewId());
-		imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
-		lp.bottomToBottom = getTextViewFromDay(day).getId();
-		lp.topToTop = getTextViewFromDay(day).getId();
-		lp.startToStart = viewTimeLines.get(hh).getId();
-		lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
-
-		constraintScheduler.addView(imageView, lp);
+		catch (IllegalStateException exception) {
+			// if context is null we will get this exception, some rare scenario we get this.
+			Log.d(L.TAG_CCU_UI,exception.getMessage());
+		}
 	}
 
 	private TextView getTextViewFromDay(DAYS day) {
@@ -810,7 +813,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				sbComfortValue.setContentDescription(String.valueOf(seekBar.getProgress()));
-				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - seekBar.getProgress());
+				SystemProfileUtil.setUserIntentBackground("desired and ci", 5 - (double) seekBar.getProgress());
 			}
 		});
 		
@@ -924,7 +927,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				if (L.ccu().systemProfile instanceof DefaultSystem) {
 					equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
-					occupancyStatus.setText("No Central equipment connected.");
+					occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
 					tbCompHumidity.setChecked(false);
 					tbDemandResponse.setChecked(false);
 					tbSmartPrePurge.setChecked(false);

@@ -145,12 +145,16 @@ public class MessagingListener implements ServerSentEvent.Listener {
         }
 
         String messageId = payloadObject.get("messageId").getAsString();
-
-        Single<retrofit2.Response<Void>> ackResponse = messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(new HashSet<>(Collections.singletonList(messageId))));
-        if (ackResponse.blockingGet().isSuccessful()) {
-            CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Succeeded for Message:  " + messageId);
-        } else {
-            CcuLog.w(L.TAG_CCU_MESSAGING, "Failed to ACK Message: " + messageId);
+        try{
+            Single<retrofit2.Response<Void>> ackResponse = messagingService.acknowledgeMessages(siteId, ccuId, new AcknowledgeRequest(new HashSet<>(Collections.singletonList(messageId))));
+            if (ackResponse.blockingGet().isSuccessful()) {
+                CcuLog.d(L.TAG_CCU_MESSAGING, "ACK Succeeded for Message:  " + messageId);
+            } else {
+                CcuLog.w(L.TAG_CCU_MESSAGING, "Failed to ACK Message: " + messageId);
+            }
+        }catch (SocketTimeoutException | RuntimeException e) {
+            CcuLog.d(L.TAG_CCU_MESSAGING, "Ack request Failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

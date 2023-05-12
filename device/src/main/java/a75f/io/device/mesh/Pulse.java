@@ -61,6 +61,7 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
@@ -938,17 +939,14 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 
-
-		String cause = DeviceUtil.parseNodeStatusMessage(snRebootIndicationMsgs.nodeStatus.get());
-
 		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
-				", "+snRebootIndicationMsgs.rebootCause+ "Node Status "+cause);
+				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
 		String firmwareVersion =
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
 		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
-			String str = "addr:"+address+ " Node status: "+cause;
+			String str = "addr:"+address+ " Node status: ";
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:

@@ -73,6 +73,8 @@ public class DamperReheatTypeHandler {
                 if ((typeVal - 1) == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
+                } else {
+                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), false);
                 }
 
                 double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+configPoint.getGroup()+"\"");
@@ -86,8 +88,10 @@ public class DamperReheatTypeHandler {
             SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
                                               DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
-            
-            if (typeVal <= ReheatType.Pulse.ordinal()) {
+
+            if (typeVal < 0) {
+                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), false);
+            } else if (typeVal <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
                 SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal].displayName);
                 SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import android.content.Intent;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,11 +10,14 @@ import java.util.HashSet;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
+import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -48,7 +52,6 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
-
 /**
  * Created by samjithsadasivan on 8/14/18.
  */
@@ -181,7 +184,7 @@ public class VavStagedRtu extends VavSystemProfile
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
-        
+
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         stageStatus = new int[17];
     
@@ -207,13 +210,23 @@ public class VavStagedRtu extends VavSystemProfile
         } else {
             systemCoolingLoopOp = 0;
         }
-        
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.COOLING, systemCoolingLoopOp);
+            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
+        }
+
         if (VavSystemController.getInstance().getSystemState() == HEATING) {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
         }
-        
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.HEATING, systemHeatingLoopOp);
+            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
+        }
+
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
@@ -229,10 +242,12 @@ public class VavStagedRtu extends VavSystemProfile
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
             if((VavSystemController.getInstance().getSystemState() == COOLING)
                                         && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
-                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
+                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp)) {
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
-                else
-                    systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+                }
+                else {
+                    systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax - spSpMin));
+                }
             } else if(VavSystemController.getInstance().getSystemState() == HEATING) {
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier), smartPurgeDabFanLoopOp);
             } else {
@@ -253,6 +268,11 @@ public class VavStagedRtu extends VavSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+
+        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
+            writeSystemLoopOutputValue(Tags.FAN, systemFanLoopOp);
+            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
+        }
         
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;

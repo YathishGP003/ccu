@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ota;
 
 import android.app.DownloadManager;
 import android.app.Service;
@@ -6,22 +6,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateHandlerService extends Service {
 
     private static String TAG = "OTAUpdateHandlerService";
 
-    private static int FIVE_MINUTES_MS = 300000*6;
-    private static int TWENTY_SECONDS_MS = 20000;
 
+    private static final int THREE_MINUTE = 60000 * 3;
+    private static final long TWELVE_HR_IN_MS = 12 * 60 * 60 * 1000;
     private boolean mIsTimerStarted = false;
-    private CountDownTimer mTimeoutTimer;
+    private Timer mTimeoutTimer;
+    static long lastOTAUpdateTime = 0;
 
     private final BroadcastReceiver mOtaUpdateEventReceiver = new BroadcastReceiver() {
         @Override
@@ -36,11 +40,12 @@ public class OTAUpdateHandlerService extends Service {
                 case Globals.IntentActions.OTA_UPDATE_START:
                     startOtaUpdateTimeoutTimer();
                     break;
+                case UsbService.ACTION_USB_DETACHED:
+                    if (!OTAUpdateService.isCmOtaInProgress())
+                        stopOtaUpdateTimeoutTimer();
+                    break;
 
                 case Globals.IntentActions.ACTIVITY_RESET:
-                case UsbService.ACTION_USB_DETACHED:
-                case Globals.IntentActions.OTA_UPDATE_CM_ACK:
-                case Globals.IntentActions.OTA_UPDATE_PACKET_REQ:
                 case Globals.IntentActions.OTA_UPDATE_NODE_REBOOT:
                 case Globals.IntentActions.OTA_UPDATE_COMPLETE:
                     stopOtaUpdateTimeoutTimer();
@@ -90,33 +95,27 @@ public class OTAUpdateHandlerService extends Service {
     private void startOtaUpdateTimeoutTimer() {
         if (!mIsTimerStarted) {
             mIsTimerStarted = true;
-
-            mTimeoutTimer = new CountDownTimer(FIVE_MINUTES_MS, TWENTY_SECONDS_MS) {
-
+            mTimeoutTimer = new Timer();
+             TimerTask otaTimeOutTask = new TimerTask() {
                 @Override
-                public void onTick(long millisUntilFinished) {
-                    Log.d(TAG, "[TIMER] Update will time out in " +
-                            Math.ceil(millisUntilFinished / 1000) + "s");
+                public void run() {
+                    Log.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout check is running lastOTAUpdateTime :"+lastOTAUpdateTime);
+                    if (lastOTAUpdateTime != 0 && ( System.currentTimeMillis()-lastOTAUpdateTime ) > TWELVE_HR_IN_MS) {
+                        stopOtaUpdateTimeoutTimer();
+                        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
+                    }
                 }
-
-                @Override
-                public void onFinish() {
-                    Log.d(TAG, "[TIMER] Update timed out, resetting");
-                    stopOtaUpdateTimeoutTimer();
-
-                    sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
-
-                    //TODO notify something (PubNub?) that an update has timed out
-                }
-            }.start();
+            };
+            mTimeoutTimer.schedule(otaTimeOutTask, 0, THREE_MINUTE);
         }
     }
 
-    private void stopOtaUpdateTimeoutTimer() {
+     void stopOtaUpdateTimeoutTimer() {
+        Log.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout stopOtaUpdateTimeoutTimer");
+        lastOTAUpdateTime = 0;
         if(mTimeoutTimer != null ) {
             mTimeoutTimer.cancel();
         }
-
         mIsTimerStarted = false;
     }
 }

@@ -160,7 +160,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
 
     private void setupOTNProfile() {
         OTNConfiguration otn = new OTNConfiguration();
-        otn.settempOffset(mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
+        otn.settempOffset((double) mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
         otn.setPriority(ZonePriority.values()[mZonePriority.getSelectedItemPosition()]);
         otn.setzonePriority(mZonePriority.getSelectedItemPosition());
         otn.setautoforceOccupied(mAutoforceoccupied.isChecked());

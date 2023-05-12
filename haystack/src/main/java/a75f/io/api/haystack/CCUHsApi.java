@@ -1628,7 +1628,6 @@ public class CCUHsApi
         hDictBuilder.add("siteRef", getSiteIdRef());
         hDictBuilder.add("equipRef", equipRef);
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
-        hDictBuilder.add("createdDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -1659,7 +1658,6 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("createdDateTime", HDateTime.make(ccu.get("createdDateTime").toString()));
         hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
@@ -2609,13 +2607,19 @@ public class CCUHsApi
                         String who = dataElement.getStr("who");
                         String level = dataElement.get("level").toString();
                         HVal val = dataElement.get("val");
-                        HDateTime lastModifiedDateTime = (HDateTime) dataElement.get("lastModifiedDateTime");
+                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
                         HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
                                 .add("level", Integer.parseInt(level))
                                 .add("who", who)
                                 .add("val", kind.equals(Kind.STRING.getValue()) ?
                                         HStr.make(val.toString()) : val);
+                        HDateTime lastModifiedDateTime;
+                        if (lastModifiedTimeTag != null) {
+                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                        } else {
+                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                        }
                         pid.add("lastModifiedDateTime", lastModifiedDateTime);
                         hDictList.add(pid.toDict());
 

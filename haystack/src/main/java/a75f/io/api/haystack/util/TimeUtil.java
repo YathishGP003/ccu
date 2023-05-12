@@ -1,5 +1,11 @@
 package a75f.io.api.haystack.util;
 
+import android.util.Log;
+
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.ParseException;
+
+
 public class TimeUtil {
 
     private static final int END_HOUR = 24;
@@ -81,4 +87,15 @@ public class TimeUtil {
         return String.valueOf(minute);
     }
 
+    public static long getDateTimeInMillis(String dateTime) {
+        long dateTimeInMillis = 0;
+        try {
+            dateTimeInMillis = HDateTime.make(dateTime).millis();
+            Log.d("CCU_AUTO_COMMISSIONING","converted in millis "+dateTimeInMillis);
+        }catch (ParseException pe){
+            Log.d("CCU_AUTO_COMMISSIONING",""+pe.getMessage()+" Exception caught while parsing received date "+dateTime);
+            pe.printStackTrace();
+        }
+        return dateTimeInMillis;
+    }
 }

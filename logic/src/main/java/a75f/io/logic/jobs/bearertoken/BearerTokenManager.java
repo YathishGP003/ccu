@@ -19,7 +19,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class BearerTokenManager{
-    
+
+    private static final long REFRESH_INITIAL_DELAY_MILLIS = 15 * 60 * 1000;
     private static BearerTokenManager instance = null;
 
     private List<OnBearerTokenRefreshListener> tokenRefreshListeners = new ArrayList<>();
@@ -40,9 +41,8 @@ public class BearerTokenManager{
         AlarmManager alarmMgr = (AlarmManager)appContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(appContext, BearerTokenManagerService.class);
         PendingIntent alarmIntent = PendingIntent.getService(appContext, 0, intent, 0);
-    
-        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
-                                     AlarmManager.INTERVAL_DAY, alarmIntent);
+        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()
+                        + REFRESH_INITIAL_DELAY_MILLIS, AlarmManager.INTERVAL_DAY, alarmIntent);
     }
     
     public void fetchToken(CCUHsApi hayStack) {

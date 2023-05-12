@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import a75f.io.logic.diag.otastatus.OtaStatus;
+import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.renatus.RenatusApp;
 
 public class AppInstaller
@@ -242,11 +244,13 @@ public class AppInstaller
                 String sFilePath = RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ;
                 if (!sFilePath.isEmpty())
                 {
+                    OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_UPDATE_STARTED);
                     File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     RenatusApp.executeAsRoot(commands);
+                    OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }
             }

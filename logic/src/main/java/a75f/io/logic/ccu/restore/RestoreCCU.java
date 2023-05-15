@@ -1,8 +1,8 @@
 package a75f.io.logic.ccu.restore;
 
 import android.content.SharedPreferences;
-import android.nfc.Tag;
 import android.util.Log;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -114,13 +115,11 @@ public class RestoreCCU {
     }
 
     public void restoreCCUDevice(CCU ccu, ReplaceCCUTracker replaceCCUTracker){
-        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CCU_DEVICE, ReplaceStatus.RUNNING.toString());
         RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring CCU device "+ retryCount);
         restoreCCUHsApi.readCCUDevice(ccu.getCcuId(), retryCountCallback);
         getSettingPointsOfCCUDevice(ccu.getCcuId(), retryCountCallback);
         getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode(), retryCountCallback);
         L.saveCCUState();
-        replaceCCUTracker.updateReplaceStatus(RestoreCCU.CCU_DEVICE, ReplaceStatus.COMPLETED.toString());
     }
 
     public void restoreSystemProfile(CCU ccu, AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
@@ -143,7 +142,6 @@ public class RestoreCCU {
     private void initReplaceStatusForSystemEntities(SharedPreferences.Editor editor){
         editor.putString(CONFIG_FILES, ReplaceStatus.PENDING.toString());
         editor.putString(SYNC_SITE, ReplaceStatus.PENDING.toString());
-        editor.putString(CCU_DEVICE, ReplaceStatus.PENDING.toString());
         editor.putString(SYSTEM_PROFILE, ReplaceStatus.PENDING.toString());
         editor.putString(ZONES, ReplaceStatus.PENDING.toString());
         editor.putString(ZONE_SCHEDULE, ReplaceStatus.PENDING.toString());
@@ -152,7 +150,7 @@ public class RestoreCCU {
     }
 
     public Map<String, Set<String>> getEquipDetailsOfCCU(String ccuId, String siteCode,
-                                                         SharedPreferences.Editor editor){
+                                                         SharedPreferences.Editor editor, boolean isReplaceClosed){
 
         HGrid equipGrid = getAllEquips(ccuId, siteCode);
         if(equipGrid == null){
@@ -162,11 +160,15 @@ public class RestoreCCU {
         Map<String, Set<String>> floorAndZoneIds = new HashMap<>();
         Set<String> floorRefSet = new HashSet<>();
         Set<String> roomRefSet = new HashSet<>();
-        initReplaceStatusForSystemEntities(editor);
+        if(!isReplaceClosed) {
+            initReplaceStatusForSystemEntities(editor);
+        }
         while(equipGridIterator.hasNext()) {
             HRow equipRow = (HRow) equipGridIterator.next();
             String equipID = equipRow.get(Tags.ID).toString();
-            editor.putString(equipID, ReplaceStatus.PENDING.toString());
+            if(!isReplaceClosed) {
+                editor.putString(equipID, ReplaceStatus.PENDING.toString());
+            }
             if(equipRow.has(Tags.ROOMREF) && !equipRow.get(Tags.ROOMREF).toString().contains(SYSTEM)){
                 roomRefSet.add(equipRow.get(Tags.ROOMREF).toString());
             }
@@ -469,4 +471,35 @@ public class RestoreCCU {
         restoreCCUHsApi.restoreSettingPointsOfCCUDevice(ccuDeviceID, retryCountCallback);
         Log.i(TAG, "Saving Setting points completed");
     }
+
+    public static boolean isReplaceCCUUnderProcess(){
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.RUNNING.toString())){
+                replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.PENDING.toString());
+                return true;
+            }
+            else if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.PENDING.toString())){
+                return true;
+            }
+        }return false;
+    }
+
+    public static boolean isReplaceCCUCompleted(){
+        ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
+        ConcurrentHashMap<String, ?> currentReplacementProgress =
+                new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
+        for (String equipId : currentReplacementProgress.keySet()) {
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.RUNNING.toString())){
+                return false;
+            }
+            else if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.PENDING.toString())){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -145,9 +145,9 @@ public class RestoreCCUHsApi {
 
     public HGrid getAllCCUs(String siteId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        Log.i("CCU_REPLACE","query "+"ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
+        Log.i("CCU_REPLACE","query "+"ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
         HDict ccuDict = new HDictBuilder().add("filter",
-                "ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                "ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 

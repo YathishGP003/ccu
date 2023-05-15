@@ -104,8 +104,10 @@ public class RestoreCCU {
                     lastUpdatedDatetimeString = "n/a";
                 }
                 String ccuId = ccuDetails.getString("deviceId");
-                ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
-                        ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
+                if(null != ccuVersionMap.get(ccuIdMap.get(ccuId))) {
+                    ccuList.add(new CCU(siteCode, ccuId, ccuDetails.getString("deviceName"),
+                            ccuVersionMap.get(ccuIdMap.get(ccuId)), lastUpdatedDatetimeString, isCCUOnline));
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }

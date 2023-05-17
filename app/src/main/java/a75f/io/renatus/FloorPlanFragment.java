@@ -981,11 +981,9 @@ public class FloorPlanFragment extends Fragment {
     private void addNewFloor(){
         if (addFloorEdit.getText().toString().length() > 0) {
             int floorSelectedIndex = this.mFloorListAdapter.getSelectedPostion();
-            ArrayList<String> flrMarkers = new ArrayList<>();
-            flrMarkers.add("writable");
             HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
             Floor hsFloor = new Floor.Builder()
-                    .setDisplayName(addFloorEdit.getText().toString().trim()).setMarkers(flrMarkers)
+                    .setDisplayName(addFloorEdit.getText().toString().trim())
                     .setSiteRef(siteMap.get("id").toString())
                     .build();
             for (Floor floor : siteFloorList) {

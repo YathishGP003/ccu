@@ -10,6 +10,7 @@ import a75f.io.logic.Globals;
 public class ReplaceCCUTracker {
     private Editor editor;
     private static final String CCU_REPLACE_STATUS_SHARED_CONFIG = "ccu_replace_status";
+    public static final String REPLACING_CCU_INFO = "replacing_ccu_info";
 
     public ReplaceCCUTracker(){
         editor =  Globals.getInstance().getApplicationContext().getSharedPreferences(CCU_REPLACE_STATUS_SHARED_CONFIG,

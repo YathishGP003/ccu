@@ -1,10 +1,5 @@
 package a75f.io.logic.bo.building;
 
-import static a75f.io.logic.L.app;
-
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,10 +17,7 @@ public class BackFillUtil {
 
     public static void addBackFillDurationPointIfNotExists(CCUHsApi ccuHsApi) {
 
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-
+            BackfillPref backfillPref = new BackfillPref();
             HashMap<Object, Object> siteMap = ccuHsApi.readEntity(Tags.SITE);
             HashMap<Object, Object> equipMap = ccuHsApi.readEntity("equip and system");
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
@@ -43,10 +35,10 @@ public class BackFillUtil {
                     .setTz(tz).setUnit("hrs")
                     .build();
 
-            int defaultBackFillDurationSelected = sharedPreferences.getInt("backFillTimeDuration",24);
+            int defaultBackFillDurationSelected = backfillPref.getBackFillTimeDuration();
             String backFillDurationPointId = CCUHsApi.getInstance().addPoint(backFillDurationPoint);
             CCUHsApi.getInstance().writePointForCcuUser(backFillDurationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) defaultBackFillDurationSelected,0);
-            editor.putInt("backFillTimeDuration",defaultBackFillDurationSelected).apply();
+            backfillPref.saveBackfillConfig(defaultBackFillDurationSelected, Arrays.binarySearch(BackFillDuration.toIntArray(), defaultBackFillDurationSelected));
         }
     }
 
@@ -79,15 +71,13 @@ public class BackFillUtil {
 
         if (backFillTimeChange) {
             ccuHsApi.writeDefaultVal("backfill and duration", currentBackFillTime);
-            SharedPreferences backFillTimePref = PreferenceManager.getDefaultSharedPreferences(app().getApplicationContext());
-            int[] durations = BackFillDuration.toIntArray();
-            SharedPreferences.Editor editor = backFillTimePref.edit();
-            editor.putInt("backFillTimeDuration", (int) currentBackFillTime);
-            editor.putInt("backFillTimeSpSelected", Arrays.binarySearch(durations, (int) currentBackFillTime));
-            editor.apply();
+            updateBackfillDuration(currentBackFillTime);
         }
     }
-
+    public static void updateBackfillDuration(double currentBackFillTime) {
+        BackfillPref backfillPref = new BackfillPref();
+        backfillPref.saveBackfillConfig((int) currentBackFillTime, Arrays.binarySearch(BackFillDuration.toIntArray(), (int) currentBackFillTime));
+    }
 
 
 }

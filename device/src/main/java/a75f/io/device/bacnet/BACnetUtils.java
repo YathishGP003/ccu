@@ -92,8 +92,6 @@ public class BACnetUtils{
     public static float incrementValue = 0.5f;
     public static float currentTempCOV = 0.1f;
 
-    //Password for Device Initialise
-    public static String PASSWORD = "admin@75f";
     public static void setLocalDevice(LocalDevice bacnetDevice){
         localDevice = bacnetDevice;
     }

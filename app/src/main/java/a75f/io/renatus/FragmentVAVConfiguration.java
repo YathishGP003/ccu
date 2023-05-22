@@ -482,7 +482,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
             damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
-            reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
             reheatType.setSelection(mProfileConfig.reheatType != -1 ? reheatTypesAdapter.getPosition(
                     ReheatType.values()[mProfileConfig.reheatType].displayName) : 0, false);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);

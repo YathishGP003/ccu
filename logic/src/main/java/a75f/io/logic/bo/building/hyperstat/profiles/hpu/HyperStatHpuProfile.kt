@@ -73,7 +73,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         val config = equip.getConfiguration()
         val hyperStatTuners = fetchHyperStatTuners(equip)
         val userIntents = fetchUserIntents(equip)
-        val averageDesiredTemp = updateAverageTemperature(equip, userIntents)
+        val averageDesiredTemp = getAverageTemp(userIntents)
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = HSHaystackUtil.getHpuActualFanMode(equip.node.toString(), fanModeSaved)
@@ -177,14 +177,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             logIt("Resetting heating")
         }
     }
-    
-    private fun updateAverageTemperature(equip: HyperStatHpuEquip, userIntents: UserIntents): Double{
-        val averageDesiredTemp = (userIntents.zoneCoolingTargetTemperature + userIntents.zoneHeatingTargetTemperature) / 2.0
-        if (averageDesiredTemp != equip.hsHaystackUtil.getDesiredTemp()) {
-            equip.hsHaystackUtil.setDesiredTemp(averageDesiredTemp)
-        }
-        return averageDesiredTemp
-    }
+
     private fun runRelayOperations(
         config: HyperStatHpuConfiguration,
         tuner: HyperStatProfileTuners,

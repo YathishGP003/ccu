@@ -1,9 +1,5 @@
 package a75f.io.domain.modeldef
 
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
-import com.squareup.moshi.ToJson
-
 var i = 0
 var nameS = "name "
 
@@ -147,7 +143,7 @@ class PointDefDto(
     val allowedValues: List<PointState>?,
     val minValue: Double?,
     val maxValue: Double?,
-    val presentationData: Map<String, Any>?,
+    val presentationData: Map<String, Any>?
 ) {
     fun getValueConstraint(): Constraint {
         return if (minValue != null && maxValue !== null) {

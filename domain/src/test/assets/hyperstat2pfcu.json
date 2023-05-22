@@ -3692,11 +3692,11 @@
         "allowedValues": [
           {
             "index": 0,
-            "value": "COOLING_STAGE_1"
+            "value": "coolingStage1"
           },
           {
             "index": 1,
-            "value": "COOLING_STAGE_2"
+            "value": "coolingStage2"
           },
           {
             "index": 2,

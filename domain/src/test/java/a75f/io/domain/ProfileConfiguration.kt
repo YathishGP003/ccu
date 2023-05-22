@@ -1,4 +1,7 @@
 package a75f.io.domain
 
-open class ProfileConfiguration (nodeAddress : Int, nodeType : String, priority : Int) {
+abstract class ProfileConfiguration (nodeAddress : Int, nodeType : String, priority : Int) {
+    open fun getAssociations() : List<String> {
+        return listOf()
+    }
 }

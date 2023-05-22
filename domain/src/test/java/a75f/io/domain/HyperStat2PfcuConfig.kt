@@ -22,7 +22,7 @@ class HyperStat2fcuProfileConfiguration(nodeAddress: Int,
     //enabled is already present in outputEnabled config. But both are linked only in the domain model.
     var relay1OutputAssociation = PortConfig( false, "relay1OutputAssociation", "fanMediumSpeed")
     var relay2OutputAssociation = PortConfig( false, "relay2OutputAssociation", "fanHighSpeed")
-    var relay3OutputAssociation = PortConfig( false, "relay3OutputAssociation", "fanLowSpeed")
+    var relay3OutputAssociation = PortConfig( false, "relay3OutputAssociation", "fanStage1")
     var relay4OutputAssociation = PortConfig( false, "relay4OutputAssociation", "auxHeatingStage1")
     var relay5OutputAssociation = PortConfig( false, "relay5OutputAssociation", "auxHeatingStage2")
     var relay6OutputAssociation = PortConfig( false, "relay6OutputAssociation", "auxHeatingStage3")
@@ -65,6 +65,17 @@ class HyperStat2fcuProfileConfiguration(nodeAddress: Int,
     var displayVOC = ProfileConfig(false, "displayVOC")
     var displayPp2p5 = ProfileConfig(false, "displayPp2p5")
     var displayCo2 = ProfileConfig(true, "displayCo2")
+
+    override fun getAssociations() : List<String> {
+        var associations = mutableListOf<String>()
+        associations.add(relay1OutputAssociation.association)
+        associations.add(relay2OutputAssociation.association)
+        associations.add(relay3OutputAssociation.association)
+        associations.add(relay4OutputAssociation.association)
+        associations.add(relay5OutputAssociation.association)
+        associations.add(relay6OutputAssociation.association)
+        return associations
+    }
 }
 
 
@@ -78,15 +89,15 @@ open class ProfileConfig (var enabled: Boolean, val domainName : String) {
 }
 
 //A generic port config
-open class PortConfig(enabled: Boolean, domainName: String, association : String)
+open class PortConfig(enabled: Boolean, domainName: String, var association : String)
     : ProfileConfig(enabled, domainName)
 
-open class RelayConfig(enabled: Boolean, domainName: String, association : String, actuatorType : String)
+open class RelayConfig(enabled: Boolean, domainName: String, association : String, var actuatorType : String)
     : PortConfig(enabled, domainName, association)
 
-open class AnalogInConfig(enabled: Boolean, domainName: String, association: String, sensorType : Int)
+open class AnalogInConfig(enabled: Boolean, domainName: String, association: String, var sensorType : Int)
     : PortConfig(enabled, domainName, association)
 
-open class AnalogOutConfig(enabled: Boolean, domainName: String, association : String, minVoltage : Double, maxVoltage : Double)
+open class AnalogOutConfig(enabled: Boolean, domainName: String, association : String, var minVoltage : Double, var maxVoltage : Double)
     : PortConfig (enabled, domainName, association)
 

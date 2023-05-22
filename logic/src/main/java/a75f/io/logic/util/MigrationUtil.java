@@ -177,7 +177,7 @@ public class MigrationUtil {
 
         if(!PreferenceUtil.getSiteNameEquipMigration()){
             ControlMote.updateOnSiteNameChange();
-            PreferenceUtil.setDiagEquipMigration();
+            PreferenceUtil.setSiteNameEquipMigration();
         }
 
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){

@@ -11,6 +11,7 @@ package org.projecthaystack.client;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -45,9 +46,18 @@ import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.exception.NullHGridException;
+import a75f.io.api.haystack.sync.SiloApiService;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * HClient manages a logical connection to a HTTP REST haystack server.
@@ -652,13 +662,10 @@ public class HClient extends HProj
     throws IOException
   {
     HttpURLConnection connection;
+    String targetUrl = StringUtils.appendIfMissing(String.valueOf(url),"/");
+    URL modifiedUrl = new URL(targetUrl);
 
-    if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
-      connection = (HttpURLConnection)url.openConnection();
-    } else {
-      connection = NetCipher.getHttpsURLConnection(url);
-    }
-
+    connection = openConnection("", modifiedUrl, targetUrl, method);
     connection.setRequestMethod(method);
     connection.setInstanceFollowRedirects(false);
     connection.setConnectTimeout(connectTimeout);
@@ -842,6 +849,61 @@ public class HClient extends HProj
     }
     return null;
   }
+
+  private static OkHttpClient getOkHttpClient(){
+    return new OkHttpClient.Builder()
+            .build();
+  }
+
+  @NotNull
+  private static Retrofit getRetrofitForHaystackBaseUrl(URL url) {
+    return new Retrofit.Builder()
+            .baseUrl(url)
+            .client(getOkHttpClient())
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+  }
+
+  private static HttpURLConnection openConnection(String urlParameters, URL url, String targetURL, String httpMethod) {
+    RequestBody requestBody = RequestBody.create(MediaType.parse("text/zinc"), urlParameters);
+    SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url).create(SiloApiService.class);
+    retrofit2.Call<ResponseBody> call = null;
+
+    try {
+      switch (httpMethod) {
+        case HttpConstants.HTTP_METHOD_POST:
+          call = siloApiService.postData(
+                  targetURL,
+                  requestBody
+          );
+          break;
+        case HttpConstants.HTTP_METHOD_PUT:
+          call = siloApiService.putData(
+                  targetURL,
+                  requestBody
+          );
+          break;
+        case HttpConstants.HTTP_METHOD_GET:
+          call = siloApiService.getData(
+                  targetURL
+          );
+          break;
+      }
+
+      OkHttpClient okHttpClient = new OkHttpClient();
+      Request request = call.request();
+      okhttp3.Call okHttpCall = okHttpClient.newCall(request);
+      Response okHttpResponse;
+
+      okHttpResponse = okHttpCall.execute();
+      return (HttpURLConnection) okHttpResponse.request().url().url().openConnection();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+
+  }
+
 
 
 }

@@ -192,9 +192,10 @@ public class OTAUpdateService extends IntentService {
                 c.close();
 
             Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
-            OtaCache cache = new OtaCache();
-            cache.updateRetryCount(currentOtaRequest);
-
+            if (currentOtaRequest != null) {
+                OtaCache cache = new OtaCache();
+                cache.updateRetryCount(currentOtaRequest);
+            }
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_FIRMWARE_DOWNLOAD_FAILED, mCurrentLwMeshAddress);
             resetUpdateVariables();
             completeUpdate();
@@ -254,31 +255,35 @@ public class OTAUpdateService extends IntentService {
 
     private void downloadFileIfMissing() {
         OtaCache cache = new OtaCache();
-        FirmwareComponentType_t deviceType = FirmwareComponentType_t.values()[cache.getDeviceType()];
-        int versionMinor = cache.getMinorVersion();
-        int versionMajor = cache.getMajorVersion();
-        mCurrentLwMeshAddress = cache.getRunningNodeAddress();
-        Set<String> meshList = cache.getMeshList();
-        meshList.forEach(i -> mLwMeshAddresses.add(Integer.parseInt(i)));
-        String filename = makeFileName(versionMajor, versionMinor, deviceType);
+        if (cache.getDeviceType() != -1) {
+            FirmwareComponentType_t deviceType = FirmwareComponentType_t.values()[cache.getDeviceType()];
+            int versionMinor = cache.getMinorVersion();
+            int versionMajor = cache.getMajorVersion();
+            mCurrentLwMeshAddress = cache.getRunningNodeAddress();
+            Set<String> meshList = cache.getMeshList();
+            meshList.forEach(i -> mLwMeshAddresses.add(Integer.parseInt(i)));
+            String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
-        File metadata = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, METADATA_FILE_FORMAT);
-        if (metadata == null) {
-            mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
-            return;
-        } else {
-            boolean isExtracted = extractFirmwareMetadata(metadata);
-            if (!isExtracted || !versionMatches( (short) versionMajor, (short) versionMinor) ) {
-                Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
+            File metadata = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, METADATA_FILE_FORMAT);
+            if (metadata == null) {
                 mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
                 return;
+            } else {
+                boolean isExtracted = extractFirmwareMetadata(metadata);
+                if (!isExtracted || !versionMatches((short) versionMajor, (short) versionMinor)) {
+                    Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
+                    mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
+                    return;
+                }
             }
-        }
-        File binary = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, BINARY_FILE_FORMAT);
-        if (binary == null) {
-            mBinaryDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
+            File binary = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, BINARY_FILE_FORMAT);
+            if (binary == null) {
+                mBinaryDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
+            } else {
+                packets = importFile(binary, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+            }
         } else {
-            packets = importFile(binary, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+            Log.i(L.TAG_CCU_OTA_PROCESS, " OTA request device is not found..!");
         }
     }
 

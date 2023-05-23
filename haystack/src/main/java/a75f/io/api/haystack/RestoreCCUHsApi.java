@@ -145,16 +145,17 @@ public class RestoreCCUHsApi {
 
     public HGrid getAllCCUs(String siteId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        Log.i("CCU_REPLACE","query "+"ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
+        Log.i("CCU_REPLACE","query "+"ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
         HDict ccuDict = new HDictBuilder().add("filter",
-                "ccu and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                "ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 
     public HGrid getAllEquips(String ahuRef, String gatewayRef, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "equip and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef == "+
+                "equip and not diag and (gatewayRef == " + StringUtils.prependIfMissing(gatewayRef, "@") +" or ahuRef" +
+                        " == "+
                         StringUtils.prependIfMissing(ahuRef, "@")+")").toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
@@ -291,7 +292,7 @@ public class RestoreCCUHsApi {
     public HGrid getDevice(String equipId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
-                "device and equipRef == " + StringUtils.prependIfMissing(equipId, "@")).toDict();
+                "device and not ccu and equipRef == " + StringUtils.prependIfMissing(equipId, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
     }
 

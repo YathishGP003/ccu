@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_75f">Renatus</string>
     <string name="app_daikin">Daikin</string>
     <string name="title_home">Home</string>
@@ -1317,4 +1317,6 @@
     <!-- Safe mode -->
     <string name="in_safe_mode">CCU is in Safe Mode</string>
     <string name="exit_safe_mode">EXIT SAFE MODE</string>
+
+    <string name="bacnet_admin">admin@75f</string>
 </resources>

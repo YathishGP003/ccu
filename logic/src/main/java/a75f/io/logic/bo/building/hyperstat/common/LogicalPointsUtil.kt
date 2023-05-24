@@ -1071,6 +1071,11 @@ class LogicalPointsUtil {
                 CCUHsApi.getInstance().deleteEntityTree(Point.Builder().setHashMap(point).build().id)
             }
         }
+
+        fun readAnalogOutStagedFanLogicalPoint(equipRef: String): HashMap<Any, Any>? {
+            return CCUHsApi.getInstance().readEntity(
+                "analog and logical and output and staged and fan and equipRef == \"$equipRef\"")
+        }
     }
 
 

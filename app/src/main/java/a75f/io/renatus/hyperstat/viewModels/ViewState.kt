@@ -441,9 +441,10 @@ val CpuAnalogOutAssociation.displayName: Int
     get() {
         return when (this) {
             CpuAnalogOutAssociation.COOLING -> R.string.cooling
-            CpuAnalogOutAssociation.FAN_SPEED -> R.string.fan_speed
+            CpuAnalogOutAssociation.LINEAR_FAN_SPEED -> R.string.linear_fan_speed
             CpuAnalogOutAssociation.HEATING -> R.string.heating
             CpuAnalogOutAssociation.DCV_DAMPER -> R.string.dcv_damper
+            CpuAnalogOutAssociation.STAGED_FAN_SPEED -> R.string.staged_fan_speed
         }
     }
 
@@ -467,9 +468,10 @@ fun getAnalogOutDisplayName(profileType: ProfileType, enumValue: Int): Int{
         ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT ->{
             when (enumValue) {
                 CpuAnalogOutAssociation.COOLING.ordinal-> return R.string.cooling
-                CpuAnalogOutAssociation.FAN_SPEED.ordinal -> return R.string.fan_speed
+                CpuAnalogOutAssociation.LINEAR_FAN_SPEED.ordinal -> return R.string.linear_fan_speed
                 CpuAnalogOutAssociation.HEATING.ordinal -> return R.string.heating
                 CpuAnalogOutAssociation.DCV_DAMPER.ordinal -> return R.string.dcv_damper
+                CpuAnalogOutAssociation.STAGED_FAN_SPEED.ordinal -> return R.string.staged_fan_speed
             }
         }
         ProfileType.HYPERSTAT_TWO_PIPE_FCU ->{

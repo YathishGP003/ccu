@@ -66,9 +66,10 @@ class HyperStatAssociationUtil {
             return when (state) {
                 // Order is important here
                 0 -> CpuAnalogOutAssociation.COOLING
-                1 -> CpuAnalogOutAssociation.FAN_SPEED
+                1 -> CpuAnalogOutAssociation.LINEAR_FAN_SPEED
                 2 -> CpuAnalogOutAssociation.HEATING
                 3 -> CpuAnalogOutAssociation.DCV_DAMPER
+                4 -> CpuAnalogOutAssociation.STAGED_FAN_SPEED
                 // assuming it never going to call
                 else -> CpuAnalogOutAssociation.COOLING
             }
@@ -117,7 +118,7 @@ class HyperStatAssociationUtil {
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
         fun isAnalogOutAssociatedToFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuAnalogOutAssociation.FAN_SPEED)
+            return (analogOut.association == CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
         }
 
         //Function which checks the Analog out is Associated  to HEATING
@@ -213,7 +214,7 @@ class HyperStatAssociationUtil {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.HEATING)
         }
         fun isAnyAnalogAssociatedToFan(config: HyperStatCpuConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuAnalogOutAssociation.FAN_SPEED)
+            return isAnalogOutMapped(config,CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
         }
         fun isAnyAnalogAssociatedToDCV(config: HyperStatCpuConfiguration): Boolean {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.DCV_DAMPER)

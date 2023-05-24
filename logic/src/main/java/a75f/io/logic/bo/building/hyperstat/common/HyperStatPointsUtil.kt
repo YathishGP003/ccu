@@ -1799,9 +1799,10 @@ class HyperStatPointsUtil(
     fun getCpuAnalogOutLogicalPoint(association: CpuAnalogOutAssociation): Point {
         return when(association){
             CpuAnalogOutAssociation.COOLING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogCoolingLogicalPoint(equipRef)).build()
-            CpuAnalogOutAssociation.FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.LINEAR_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.HEATING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogHeatingLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.DCV_DAMPER-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutDcvLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.STAGED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutStagedFanLogicalPoint(equipRef)).build()
         }
     }
 

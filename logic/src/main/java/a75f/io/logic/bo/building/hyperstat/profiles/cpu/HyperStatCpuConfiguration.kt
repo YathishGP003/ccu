@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration
+import android.widget.Spinner
+import android.widget.TextView
 
 /**
  * Models just the configuration for HyperStat CPU
@@ -23,7 +25,7 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var relay6State = RelayState(false, CpuRelayAssociation.FAN_HIGH_SPEED)
 
    var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.LINEAR_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
    var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
 
    var isEnableAirFlowTempSensor = false
@@ -74,6 +76,11 @@ data class AnalogInState(
    val association: AnalogInAssociation
 )
 
+data class StagedFanState(
+   val stagedFanLabel: TextView,
+   val stagedFanSelector: Spinner
+)
+
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
 // Do not change order without a migration.
 enum class CpuRelayAssociation {
@@ -95,9 +102,10 @@ enum class CpuRelayAssociation {
 // Order is important -- FAN_HIGH_SPEED
 enum class CpuAnalogOutAssociation {
    COOLING,
-   FAN_SPEED,
+   LINEAR_FAN_SPEED,
    HEATING,
-   DCV_DAMPER
+   DCV_DAMPER,
+   STAGED_FAN_SPEED
 }
 
 // Order is important -- see comment above.

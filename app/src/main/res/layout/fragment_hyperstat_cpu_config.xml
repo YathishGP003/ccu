@@ -387,7 +387,6 @@
                             <Spinner
                                 android:id="@+id/analog3Spinner"
                                 style="@style/TableSpinner"
-                                android:entries="@array/hyperstat_analog_out_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
 
                         </LinearLayout>
@@ -527,14 +526,99 @@
                 android:layout_marginBottom="20dp">
 
                 <TextView
+                    android:id="@+id/fanOutCoolingStage1Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_fan_out_cooling_stage_1" />
+
+                <Spinner
+                    android:id="@+id/fanOutCoolingStage1Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_toEndOf="@+id/fanOutCoolingStage1Label"
+                    android:layout_marginEnd="14dp"
+                    android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+
+                <TextView
+                    android:id="@+id/fanOutCoolingStage2Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_gravity="end"
+                    android:layout_toEndOf="@+id/fanOutCoolingStage1Spinner"
+                    android:text="@string/hyperstat_fan_out_cooling_stage_2" />
+
+                <Spinner
+                    android:id="@+id/fanOutCoolingStage2Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_gravity="top"
+                    android:layout_toEndOf="@id/fanOutCoolingStage2Label"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/fanOutCoolingStage3Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/fanOutCoolingStage2Label"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_fan_out_cooling_stage_3" />
+
+                <Spinner
+                    android:id="@+id/fanOutCoolingStage3Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/fanOutCoolingStage2Label"
+                    android:layout_toEndOf="@+id/fanOutCoolingStage3Label"
+                    android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+
+                <TextView
+                    android:id="@+id/fanOutHeatingStage1Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/fanOutCoolingStage3Label"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hyperstat_fan_out_heating_stage_1" />
+
+                <Spinner
+                    android:id="@+id/fanOutHeatingStage1Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/fanOutCoolingStage3Label"
+                    android:layout_toEndOf="@+id/fanOutHeatingStage1Label"
+                    android:layout_marginEnd="14dp"
+                    android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+
+                <TextView
+                    android:id="@+id/fanOutHeatingStage2Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@+id/fanOutCoolingStage3Label"
+                    android:layout_toEndOf="@+id/fanOutHeatingStage1Spinner"
+                    android:text="@string/hyperstat_fan_out_heating_stage_2" />
+
+                <Spinner
+                    android:id="@+id/fanOutHeatingStage2Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/fanOutCoolingStage3Label"
+                    android:layout_toEndOf="@+id/fanOutHeatingStage2Label"
+                    android:entries="@array/hyperstat_analog_out_voltage_selector" />
+
+                <TextView
+                    android:id="@+id/fanOutHeatingStage3Label"
+                    style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/fanOutHeatingStage2Label"
+                    android:text="@string/hyperstat_fan_out_heating_stage_3" />
+
+                <Spinner
+                    android:id="@+id/fanOutHeatingStage3Spinner"
+                    style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@id/fanOutHeatingStage2Label"
+                    android:layout_toEndOf="@+id/fanOutHeatingStage3Label"
+                    android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+
+                <TextView
                     android:id="@+id/ao1MinDamperLabel"
                     style="@style/DamperPositionLabel_HyperStat"
+                    android:layout_below="@id/fanOutHeatingStage3Label"
                     android:layout_alignParentStart="true"
                     android:text="@string/hyperstat_analog_out_1_at_max_damper" />
 
                 <Spinner
                     android:id="@+id/ao1MinDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
+                    android:layout_below="@+id/fanOutHeatingStage3Label"
                     android:layout_toEndOf="@+id/ao1MinDamperLabel"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
@@ -543,14 +627,15 @@
                     style="@style/DamperPositionLabel_HyperStat"
                     android:layout_gravity="end"
                     android:layout_marginStart="14dp"
+                    android:layout_below="@+id/fanOutHeatingStage3Label"
                     android:layout_toStartOf="@+id/ao1MaxDamperSpinner"
                     android:text="@string/hyperstat_analog_out_1_at_max_damper" />
 
                 <Spinner
                     android:id="@+id/ao1MaxDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
-                    android:layout_alignParentEnd="true"
-                    android:layout_gravity="top"
+                    android:layout_below="@id/fanOutHeatingStage3Label"
+                    android:layout_toEndOf="@+id/fanOutHeatingStage2Label"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
                 <TextView
@@ -594,7 +679,7 @@
                     android:id="@+id/ao3MinDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
                     android:layout_below="@id/ao2MinDamperLabel"
-                    android:layout_toEndOf="@+id/ao2MinDamperLabel"
+                    android:layout_toEndOf="@+id/ao3MinDamperLabel"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
                 <TextView

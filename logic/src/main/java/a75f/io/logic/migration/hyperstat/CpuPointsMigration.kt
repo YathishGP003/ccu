@@ -471,7 +471,7 @@ class CpuPointsMigration {
                             analog,
                             port
                         )
-                        CpuAnalogOutAssociation.FAN_SPEED.ordinal -> {
+                        CpuAnalogOutAssociation.LINEAR_FAN_SPEED.ordinal -> {
                             migrateAnalogOutFanSpeed(equipRef, analog, port)
                             migrateAnalogOutFanOptionPoints(equipRef, analog)
                         }
@@ -583,7 +583,7 @@ class CpuPointsMigration {
                 updateAnalogDuplicatePoints(
                     port,
                     logicalPoint[Tags.ID].toString(),
-                    CpuAnalogOutAssociation.FAN_SPEED,
+                    CpuAnalogOutAssociation.LINEAR_FAN_SPEED,
                     logicalPoint[Tags.GROUP].toString().toInt(),
                     equipRef,
                 )

@@ -132,28 +132,16 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
 
     override fun analogOutMappingSelected(index: Int, position: Int) {
         val analogOuts = currentState.analogOutUis
-        val association = when (position) {
-            0 -> 0
-            1 -> 1
-            3 -> 2
-            4 -> 3
-            2 -> 4
-            else -> analogOuts[index].association // Use the existing association if position doesn't match any of the specified values
-        }
-
         val newAnalogOuts = analogOuts.updated(
-            index, analogOuts[index].copy(association = association)
+            index, analogOuts[index].copy(association = position)
         )
-
+        newAnalogOuts[index].enabled
         viewState.onNext(
             currentState.copy(
                 analogOutUis = newAnalogOuts
             )
         )
     }
-
-
-
 
     override fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int) {
         val analogOuts = currentState.analogOutUis

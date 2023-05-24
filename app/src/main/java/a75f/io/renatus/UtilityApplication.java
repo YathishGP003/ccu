@@ -692,7 +692,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
 
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName() + " IP:" + localDevice.getNetwork().getAllLocalAddresses()[0] + " IP2:" + localDevice.getNetwork().getAllLocalAddresses()[1] + " IP3:" + localDevice.getNetwork().getAllLocalAddresses()[2]);
 
@@ -731,7 +731,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported();
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
         } catch (Exception e) {
             e.printStackTrace();
         }

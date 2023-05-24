@@ -39,6 +39,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -382,6 +383,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         });
         CCUUiUtil.setSpinnerDropDownColor(spinnerSystemProile,FreshRegistration.this);
         selectItem(position);
+
+        if(RestoreCCU.isReplaceCCUUnderProcess()){
+            loadReplaceCCUFragment(getSupportFragmentManager());
+        }
     }
 
     public void showIcons(boolean showIcons) {
@@ -647,34 +652,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 8) {
-
-            fragment = new ReplaceCCU();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .commit();
-
-
-            verticalTabAdapter.setCurrentSelected(2);
-
-            textView_title.setText(getText(R.string.installreplaceccu));
-            textView_title.setVisibility(View.VISIBLE);
-            spinnerSystemProile.setVisibility(View.GONE);
-            imageView_Goback.setVisibility(View.VISIBLE);
-            toggleWifi.setVisibility(View.GONE);
-            buttonNext.setVisibility(View.GONE);
-            imageRefresh.setVisibility(View.GONE);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0, 0, 240, 0);
-            textView_title.setLayoutParams(params);
-
-            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
-            paramsPager.topMargin = 156;
-            paramsPager.leftMargin = 420;
-            paramsPager.bottomMargin = 24;
-            paramsPager.rightMargin = 90;
-            container.setLayoutParams(paramsPager);
+            loadReplaceCCUFragment(fragmentManager);
         }
         if (position == 9) {
             fragment = new DefaultSystemProfile();
@@ -1193,6 +1171,36 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             Intent intent = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
             startActivity(intent);
         }
+    }
+
+    private void loadReplaceCCUFragment(FragmentManager fragmentManager) {
+        Fragment fragment = new ReplaceCCU();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, fragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
+
+
+        verticalTabAdapter.setCurrentSelected(2);
+
+        textView_title.setText(getText(R.string.installreplaceccu));
+        textView_title.setVisibility(View.VISIBLE);
+        spinnerSystemProile.setVisibility(View.GONE);
+        imageView_Goback.setVisibility(View.VISIBLE);
+        toggleWifi.setVisibility(View.GONE);
+        buttonNext.setVisibility(View.GONE);
+        imageRefresh.setVisibility(View.GONE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        params.setMargins(0, 0, 240, 0);
+        textView_title.setLayoutParams(params);
+
+        ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+        paramsPager.topMargin = 156;
+        paramsPager.leftMargin = 420;
+        paramsPager.bottomMargin = 24;
+        paramsPager.rightMargin = 90;
+        container.setLayoutParams(paramsPager);
     }
 
     private void updateCCURegistrationInfo() {

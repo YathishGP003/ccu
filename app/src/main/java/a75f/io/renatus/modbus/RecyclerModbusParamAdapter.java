@@ -25,6 +25,11 @@ public class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerMod
         this.context = context;
         this.modbusParam = modbusParam;
         this.isNewConfig = isNewConfig;
+        if(isNewConfig) {
+            for (Parameter configParam : modbusParam) {
+                configParam.setDisplayInUI(configParam.isDisplayInUiDefault());
+            }
+        }
     }
 
     @NonNull

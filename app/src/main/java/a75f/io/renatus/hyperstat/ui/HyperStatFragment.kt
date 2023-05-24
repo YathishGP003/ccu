@@ -388,6 +388,16 @@ class HyperStatFragment : BaseDialogFragment() {
             it.analogOutAtFanMedium.adapter = adapter
             it.analogOutAtFanHigh.adapter = adapter
         }
+
+        stagedFanUIs.forEachIndexed { index, stagedFanState ->
+            stagedFanState.stagedFanSelector.adapter = getAdapterValue(analogVoltageAtSpinnerValues())
+            val spinner = stagedFanState.stagedFanSelector
+            if (index == 0 || index == 3) {
+                spinner.setSelection(7)
+            } else {
+                spinner.setSelection(10)
+            }
+        }
     }
 
     private fun setUpViewListeners() {

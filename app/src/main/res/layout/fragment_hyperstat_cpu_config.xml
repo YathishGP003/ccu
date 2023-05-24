@@ -556,8 +556,7 @@
                                 <Spinner
                                     android:id="@+id/fanOutCoolingStage1Spinner"
                                     style="@style/DamperPositionSpinner_HyperStat"
-                                    android:layout_marginEnd="14dp"
-                                    android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                    android:layout_marginEnd="14dp" />
 
                             </LinearLayout>
 
@@ -573,8 +572,7 @@
 
                             <Spinner
                                 android:id="@+id/fanOutCoolingStage3Spinner"
-                                style="@style/DamperPositionSpinner_HyperStat"
-                                android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                style="@style/DamperPositionSpinner_HyperStat" />
 
                         </LinearLayout>
 
@@ -594,14 +592,11 @@
                             <TextView
                                 android:id="@+id/fanOutCoolingStage2Label"
                                 style="@style/DamperPositionLabel_HyperStat"
-                                android:layout_gravity="end"
                                 android:text="@string/hyperstat_fan_out_cooling_stage_2" />
 
                             <Spinner
                                 android:id="@+id/fanOutCoolingStage2Spinner"
-                                style="@style/DamperPositionSpinner_HyperStat"
-                                android:layout_gravity="top"
-                                android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                style="@style/DamperPositionSpinner_HyperStat" />
 
                         </LinearLayout>
 
@@ -634,8 +629,7 @@
                             <Spinner
                                 android:id="@+id/fanOutHeatingStage1Spinner"
                                 style="@style/DamperPositionSpinner_HyperStat"
-                                android:layout_marginEnd="14dp"
-                                android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                android:layout_marginEnd="14dp" />
 
                         </LinearLayout>
 
@@ -651,8 +645,7 @@
 
                             <Spinner
                                 android:id="@+id/fanOutHeatingStage3Spinner"
-                                style="@style/DamperPositionSpinner_HyperStat"
-                                android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                style="@style/DamperPositionSpinner_HyperStat"/>
 
                         </LinearLayout>
 
@@ -676,8 +669,7 @@
 
                             <Spinner
                                 android:id="@+id/fanOutHeatingStage2Spinner"
-                                style="@style/DamperPositionSpinner_HyperStat"
-                                android:entries="@array/hyperstat_fan_out_cooling_stage_1_selector" />
+                                style="@style/DamperPositionSpinner_HyperStat" />
 
                         </LinearLayout>
 

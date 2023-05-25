@@ -868,6 +868,7 @@ public class VavSystemController extends SystemController
             if (isZoneDead(equip.get("id").toString())) {
                 adjustedDamperOpeningMap.put(damperPos.get("id").toString() , damperPosVal);
             } else {
+                damperPosVal = Math.max(damperPosVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);
                 double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;
                 adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
                 adjustedDamperOpeningMap.put(damperPos.get("id").toString(), adjustedDamperPos);

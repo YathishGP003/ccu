@@ -398,8 +398,9 @@ public class MigrationUtil {
                 Equip equip = new Equip.Builder().setHashMap(equipMap).build();
                 HashMap<Object, Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
                         "temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
-                if (roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
-                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(equipMap).setEnums(RoomTempSensor.getEnumStringDefinition()).build();
+                if (!roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
+                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(roomTemperatureTypePoint).build();
+                    enumUpdatedRoomTempTypePoint.setEnums(RoomTempSensor.getEnumStringDefinition());
                     CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
                 }
             }

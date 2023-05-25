@@ -315,10 +315,6 @@ public class ScheduleManager {
                 CcuLog.i(TAG_CCU_SCHEDULER, "SchedulerCache : Reusing old occupied values");
                 return false;
             } else {
-                //TODO-Schedules - BPOS revisit
-                //if(!currentOccupiedMode.isOccupied()){
-                    //checkforOccUpdate(occupied);
-                //}
                 CcuLog.i(TAG_CCU_SCHEDULER, "SchedulerCache : Putting in new occupied values");
                 occupiedHashMap.put(id, occupied);
                 return true;

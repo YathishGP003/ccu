@@ -34,6 +34,13 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
    var analogIn2State = AnalogInState(false, AnalogInAssociation.CURRENT_TX_0_20)
 
+   var coolingStage1State = 7
+   var coolingStage2State = 10
+   var coolingStage3State = 10
+   var heatingStage1State = 7
+   var heatingStage2State = 10
+   var heatingStage3State = 10
+
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0
    var zoneCO2Target = 4000.0
@@ -74,11 +81,6 @@ data class AnalogOutState(
 data class AnalogInState(
    val enabled: Boolean,
    val association: AnalogInAssociation
-)
-
-data class StagedFanState(
-   val stagedFanLabel: TextView,
-   val stagedFanSelector: Spinner
 )
 
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.

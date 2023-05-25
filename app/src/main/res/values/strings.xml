@@ -254,20 +254,6 @@
         <item>  Door/Window Sensor</item>
     </string-array>
 
-    <string-array name="hyperstat_fan_out_cooling_stage_1_selector">
-        <item>  0V </item>
-        <item>  1V </item>
-        <item>  2V </item>
-        <item>  3V </item>
-        <item>  4V </item>
-        <item>  5V </item>
-        <item>  6V </item>
-        <item>  7V </item>
-        <item>  8V </item>
-        <item>  9V </item>
-        <item>  10V </item>
-    </string-array>
-
     <!--    Placeholder -->
     <string-array name="hyperstat_analog_out_voltage_selector">
         <item>  2V </item>

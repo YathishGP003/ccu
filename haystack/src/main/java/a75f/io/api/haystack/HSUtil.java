@@ -391,9 +391,8 @@ public class HSUtil
         HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
         return ((pointEntity.containsKey("ti")
                 && pointEntity.containsKey("config"))
-                && (pointEntity.containsKey("th1")
-                || pointEntity.containsKey("th2")
-                || pointEntity.containsKey("main")));
+                && (pointEntity.containsKey("space")
+                || pointEntity.containsKey("supply")));
     }
 
     /**

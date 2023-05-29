@@ -1116,11 +1116,13 @@ public class CCUHsApi
 
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {
+        CcuLog.d("CCU_HS", "deleteEntity: " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         removeId(id);
     }
 
     public void removeId(String id) {
+        CcuLog.d("CCU_HS", "removeId: " + id);
         //tagsDb.removeIdMap.remove(id.replace("@", ""));
         if (syncStatusService.getDeletedData().contains(id)) {
             syncStatusService.setDeletedEntitySynced(id);
@@ -1129,6 +1131,7 @@ public class CCUHsApi
 
     public void deleteWritableArray(String id)
     {
+        CcuLog.d("CCU_HS", "deleteWritableArray: " + id);
         tagsDb.writeArrays.remove(id.replace("@", ""));
     }
 
@@ -1138,6 +1141,7 @@ public class CCUHsApi
     }
 
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
+        CcuLog.d("CCU_HS", "deleteFloorEntityTreeLeavingRemoteFloorIntact: " + id);
         HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
         if (entity.get("floor") == null) {
             // not a floor :-(

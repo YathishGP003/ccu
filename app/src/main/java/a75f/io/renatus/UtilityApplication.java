@@ -73,6 +73,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -282,27 +284,7 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("daikin_prod") ||
                 BuildConfig.BUILD_TYPE.equals("qa")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
-                String crashMessage = getCrashMessage();
-                AlertManager.getInstance().fixPreviousCrashAlert();
-                AlertManager.getInstance().generateCrashAlert(
-                        "CCU CRASH",
-                        crashMessage);
-
-
-                SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
-                crashPreference.edit().putString("crash_message", crashMessage).commit();
-
-                List<String> crashTimesWithinLastHour = getCrashTimestampsWithinLastHour();
-
-                //add the new crash to the list
-                crashTimesWithinLastHour.add(String.valueOf(System.currentTimeMillis()));
-                Set<String> timeSet = new HashSet<>(crashTimesWithinLastHour);
-                crashPreference.edit().putStringSet("crash", timeSet).commit();
-
-                if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
-                    CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
-                }
-
+                handleSafeMode(paramThrowable);
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
@@ -313,6 +295,33 @@ public abstract class UtilityApplication extends Application {
     
     }
 
+    private void handleSafeMode(Throwable paramThrowable) {
+        StringWriter sw = new StringWriter();
+        paramThrowable.printStackTrace(new PrintWriter(sw));
+        String stackTrace = sw.toString();
+        SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
+        updateCrashStackTrace(crashPreference,stackTrace);
+
+        String crashMessage = getCrashMessage();
+        AlertManager.getInstance().fixPreviousCrashAlert();
+        AlertManager.getInstance().generateCrashAlert(
+                "CCU CRASH",
+                crashMessage);
+
+
+        crashPreference.edit().putString("crash_message", crashMessage).commit();
+
+        List<String> crashTimesWithinLastHour = getCrashTimestampsWithinLastHour();
+
+        //add the new crash to the list
+        crashTimesWithinLastHour.add(String.valueOf(System.currentTimeMillis()));
+        Set<String> timeSet = new HashSet<>(crashTimesWithinLastHour);
+        crashPreference.edit().putStringSet("crash", timeSet).commit();
+
+        if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
+            CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        }
+    }
     private List<String> getCrashTimestampsWithinLastHour() {
         List<String> timeList = new ArrayList<>();
         SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
@@ -328,6 +337,16 @@ public abstract class UtilityApplication extends Application {
             }
         }
         return timeList;
+    }
+
+    private void updateCrashStackTrace(SharedPreferences crashPreference, String stackTrace){
+        if(crashPreference.getStringSet("crash", null) != null ){
+            int size = crashPreference.getStringSet("crash", null).size() + 1;
+            crashPreference.edit().putString("crash"+size, stackTrace).commit();
+
+        } else {
+            crashPreference.edit().putString("crash1", stackTrace).commit();
+        }
     }
 
     private String getCrashMessage(){
@@ -673,7 +692,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
 
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName() + " IP:" + localDevice.getNetwork().getAllLocalAddresses()[0] + " IP2:" + localDevice.getNetwork().getAllLocalAddresses()[1] + " IP3:" + localDevice.getNetwork().getAllLocalAddresses()[2]);
 
@@ -712,7 +731,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported();
             Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
-            localDevice.withPassword(BACnetUtils.PASSWORD);
+            localDevice.withPassword(context.getResources().getString(R.string.bacnet_admin));
         } catch (Exception e) {
             e.printStackTrace();
         }

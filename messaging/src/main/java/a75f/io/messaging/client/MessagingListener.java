@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import javax.inject.Inject;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.data.message.DatabaseHelper;
 import a75f.io.data.message.Message;
 import a75f.io.data.message.MessageDbUtilKt;
@@ -167,6 +168,11 @@ public class MessagingListener implements ServerSentEvent.Listener {
     }
 
     private void handleMessage(JsonObject payload) {
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.d(L.TAG_CCU_MESSAGING,"CCU does not have active registration, Ignore message "
+                    +payload);
+            return;
+        }
         if (messageHandlerService == null) {
             CcuLog.e(L.TAG_CCU_MESSAGING, "MessageHandlerService not initialized: Cant process messages");
             return;

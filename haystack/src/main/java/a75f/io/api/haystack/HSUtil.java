@@ -471,4 +471,9 @@ public class HSUtil
         }
         return null;
     }
+
+    public static boolean isPointBackfillConfigPoint(String id, CCUHsApi ccuHsApi) {
+        HashMap<Object,Object> pointEntity = ccuHsApi.readMapById(id);
+        return ((pointEntity.containsKey(Tags.BACKFILL))&&(pointEntity.containsKey(Tags.DURATION)));
+    }
 }

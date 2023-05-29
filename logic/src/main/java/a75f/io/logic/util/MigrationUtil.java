@@ -11,7 +11,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import org.projecthaystack.HDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,8 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -57,7 +61,6 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -357,11 +360,17 @@ public class MigrationUtil {
             PreferenceUtil.setAutoForcedTagNameCorrectionMigration();
         }
 
-
         if (!PreferenceUtil.getKindCorrectionMigration()) {
             updateKind(CCUHsApi.getInstance());
             PreferenceUtil.setKindCorrectionMigration();
         }
+
+        if (!PreferenceUtil.getScheduleMigration()) {
+            migrateZoneAndBuildingSchedules(CCUHsApi.getInstance());
+            PreferenceUtil.setScheduleMigration();
+        }
+
+        migrateEnableOccupancyControl(CCUHsApi.getInstance());
 
         if (!CCUHsApi.getInstance().readEntity(Tags.SITE).isEmpty()) {
             BackFillUtil.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
@@ -373,6 +382,8 @@ public class MigrationUtil {
             PreferenceUtil.setAutoCommissioningMigration();
         }
 
+        removeWritableTagForFloor();
+        migrateUserIntentMarker();
         L.saveCCUState();
     }
 
@@ -1997,6 +2008,36 @@ public class MigrationUtil {
 
         }
     }
+
+    private static void migrateZoneAndBuildingSchedules(CCUHsApi ccuHsApi) {
+         List<HashMap<Object, Object>> schedules = ccuHsApi.readAllEntities("(building or zone) and schedule and not special and not vacation and not named");
+         schedules.forEach(schedule ->{
+             Schedule scheduleObj = ccuHsApi.getScheduleById(schedule.get(Tags.ID).toString());
+             updateSchedule(scheduleObj, ccuHsApi);
+         });
+    }
+
+    private static void updateSchedule(Schedule scheduleObj, CCUHsApi ccuHsApi) {
+
+        if (scheduleObj.getMarkers().contains("lastModifiedDateTime")) {
+            scheduleObj.getMarkers().remove("lastModifiedDateTime");
+            scheduleObj.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
+        }
+        if (scheduleObj.getMarkers().contains("createdDateTime")) {
+            scheduleObj.getMarkers().remove("createdDateTime");
+            scheduleObj.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
+        }
+        if (scheduleObj.getMarkers().contains("lastModifiedBy")) {
+            scheduleObj.getMarkers().remove("lastModifiedBy");
+            scheduleObj.setLastModifiedBy(ccuHsApi.getCCUUserName());
+        }
+
+        if (scheduleObj.isZoneSchedule()) {
+            ccuHsApi.updateZoneSchedule(scheduleObj, scheduleObj.getRoomRef());
+        } else {
+            ccuHsApi.updateSchedule(scheduleObj);
+        }
+    }
     private static void createAutoCommissioningDiagMigration(CCUHsApi instance) {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration started");
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
@@ -2023,4 +2064,66 @@ public class MigrationUtil {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning migration completed");
     }
 
+
+    private static void migrateEnableOccupancyControl(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> Equips = ccuHsApi.readAllEntities("equip and zone");
+        for (HashMap<Object, Object> equip : Equips) {
+            ArrayList<HashMap<Object, Object>> enableOccupancyControlPoints = ccuHsApi.readAllEntities("enable and occupancy and control and equipRef == \"" + equip.get("id") + "\"");
+            if (!enableOccupancyControlPoints.isEmpty()) {
+                for (HashMap<Object, Object> enableOccupancyControlPoint : enableOccupancyControlPoints) {
+                    if (!enableOccupancyControlPoint.isEmpty()) {
+                        ccuHsApi.deleteEntity(enableOccupancyControlPoint.get("id").toString());
+                    }
+                }
+            }
+        }
+
+    }
+
+    private static void removeWritableTagForFloor() {
+        ArrayList<HashMap<Object, Object>> floors = CCUHsApi.getInstance().readAllEntities("floor");
+        floors.forEach(floorMap -> {
+            Floor floor = new Floor.Builder().setHashMap(floorMap).build();
+            if (floor.getMarkers().contains("writable")){
+                removeWritableMarkerForFloor(floorMap);
+            }
+        });
+    }
+
+    private static void removeWritableMarkerForFloor(HashMap<Object, Object> floorMap) {
+        Floor.Builder newFloor = new Floor.Builder().setHashMap(floorMap);
+        newFloor.setMarkers(new ArrayList<>());
+        Floor markerRemovedFloor = newFloor.build();
+        CCUHsApi.getInstance().updateFloor(markerRemovedFloor, markerRemovedFloor.getId());
+    }
+
+    private static void migrateUserIntentMarker() {
+
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("hyperstat and equip and (cpu or pipe2 or hpu)");
+        equips.forEach(objectObjectHashMap -> {
+
+            if (objectObjectHashMap != null && objectObjectHashMap.containsKey(Tags.ID)) {
+                HashMap<Object, Object> fanMode = CpuPointsMigration.Companion.readPoint(
+                        "fan and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
+                HashMap<Object, Object> conditioningMode = CpuPointsMigration.Companion.readPoint(
+                        "conditioning and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
+
+                if (!fanMode.isEmpty() && !fanMode.containsKey("userIntent")) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            fanMode,
+                            new String[]{"userIntent"},
+                            new String[]{},
+                            null);
+                }
+                if (!conditioningMode.isEmpty() && !conditioningMode.containsKey("userIntent")) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            conditioningMode,
+                            new String[]{"userIntent"},
+                            new String[]{},
+                            null);
+                }
+            }
+        });
+    }
 }

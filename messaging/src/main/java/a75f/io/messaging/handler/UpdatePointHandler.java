@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HDateTime;
@@ -27,10 +28,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
@@ -62,7 +62,7 @@ public class UpdatePointHandler implements MessageHandler
         if (HSUtil.isBuildingTuner(pointUid, hayStack)) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
-            if (buildingTunerPoint.containsKey("displayUnit")) {
+            if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
                 zoneDataInterface.refreshScreen("");
             }
             return;
@@ -157,6 +157,12 @@ public class UpdatePointHandler implements MessageHandler
             TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
         }
 
+        if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
+            JsonElement backFillVal = msgObject.get("val");
+            if (!backFillVal.isJsonNull()){
+                BackFillUtil.updateBackfillDuration(backFillVal.getAsDouble());
+            }
+        }
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {

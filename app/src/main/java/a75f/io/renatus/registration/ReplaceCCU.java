@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -29,6 +30,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +62,7 @@ import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.ResponseCallback;
+import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUListAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -83,12 +87,15 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private CopyOnWriteArrayList<Future<?>> futures;
     private ExecutorService executorService;
     private Handler handler;
+    private boolean isReplaceClosed;
 
     public ReplaceCCU() {
         // Required empty public constructor
         futures = new CopyOnWriteArrayList<>();
         isProcessPaused = new AtomicBoolean(false);
+        restoreCCU = new RestoreCCU();
         handler = new Handler();
+        isReplaceClosed = false;
     }
 
     @Override
@@ -178,7 +185,24 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
             }
         });
+        if(RestoreCCU.isReplaceCCUUnderProcess()){
+            ProgressDialogUtils.showProgressDialog(getActivity(), "Retrieving Replace Status...");
+            isReplaceClosed = true;
+            pauseReplaceProcess();
+            passCode_1.setFocusable(false);
+            passCode_2.setFocusable(false);
+            passCode_3.setFocusable(false);
+            passCode_4.setFocusable(false);
+            passCode_5.setFocusable(false);
+            passCode_6.setFocusable(false);
+            next.setClickable(false);
+            SharedPreferences sharedPreferences =
+                    Globals.getInstance().getApplicationContext().getSharedPreferences(ReplaceCCUTracker.REPLACING_CCU_INFO,
+                            Context.MODE_PRIVATE);
+            CCU ccu =  new Gson().fromJson(sharedPreferences.getString("CCU", ""), CCU.class);
+            RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
 
+        }
         return rootView;
     }
 
@@ -334,6 +358,11 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 CCUHsApi.getInstance().setJwt(accessToken);
                 ProgressDialogUtils.showProgressDialog(getActivity(),
                         "Fetching equip details...");
+                SharedPreferences.Editor editor =
+                        Globals.getInstance().getApplicationContext().getSharedPreferences(ReplaceCCUTracker.REPLACING_CCU_INFO,
+                        Context.MODE_PRIVATE).edit();
+                editor.putString("CCU", new Gson().toJson(ccu));
+                editor.commit();
                 RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
 
             }
@@ -410,15 +439,14 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         this.ccu = ccu;
         Log.i(TAG_CCU_REPLACE, "Replace CCU Started");
         ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
-        restoreCCU = new RestoreCCU();
         floorAndZoneIds = restoreCCU.getEquipDetailsOfCCU(ccu.getCcuId(), ccu.getSiteCode(),
-                replaceCCUTracker.getEditor());
+                replaceCCUTracker.getEditor(), isReplaceClosed);
         ConcurrentHashMap<String, ?> currentReplacementProgress =
                 new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
         restoreCCU.restoreCCUDevice(ccu, replaceCCUTracker);
 
         deviceCount = new AtomicInteger();
-        deviceCount.set(currentReplacementProgress.size()-1);
+        deviceCount.set(currentReplacementProgress.size());
         total = deviceCount.get();
 
         handler.post(() -> {
@@ -427,8 +455,15 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             progressBar.setMax(total);
             progressAlertDialog.show();
         });
+        EquipResponseCallback equipResponseCallback = getEquipResponseCallback(ccu);
 
-        replaceEquipsParallelly(replaceCCUTracker, getEquipResponseCallback(ccu), currentReplacementProgress,
+        currentReplacementProgress.values().forEach(v ->{
+            if(((String) v).equals(ReplaceStatus.COMPLETED.toString())){
+                equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+            }
+        });
+
+        replaceEquipsParallelly(replaceCCUTracker, equipResponseCallback, currentReplacementProgress,
                 getRetryCountCallback());
     }
 
@@ -441,12 +476,13 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                     "%)");
             replaceStatus.setText("Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
                     "%)");
-            if (percentCompleted == 100) {
+            if (RestoreCCU.isReplaceCCUCompleted()) {
                 Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
                 progressAlertDialog.dismiss();
                 ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);
                 ReplaceCCU.this.loadRenatusLandingIntent();
                 ReplaceCCU.this.updatePreference();
+                MessagingClient.getInstance().init();
             }
         });
         return equipResponseCallback;
@@ -510,7 +546,9 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         for (Future<?> future : futures) {
             future.cancel(true);
         }
-        executorService.shutdown();
+        if(executorService != null) {
+            executorService.shutdown();
+        }
         futures.clear();
     }
 

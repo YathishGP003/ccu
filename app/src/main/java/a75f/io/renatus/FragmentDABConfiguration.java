@@ -305,7 +305,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
 
 
-        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
         minCFMForIAQ = view.findViewById(R.id.minCFMForIAQ);
@@ -419,7 +418,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             damper2Size.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damper2Size)), false);
             damper2Shape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damper2Shape].displayName), false);
             
-            enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
             enableAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
@@ -510,7 +508,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         
         dabConfig.setNodeType(mNodeType);
         dabConfig.setNodeAddress(mSmartNodeAddress);
-        dabConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
         dabConfig.enableCO2Control = enableCO2Control.isChecked();
         dabConfig.enableIAQControl = enableIAQControl.isChecked();
         dabConfig.enableAutoForceOccupied = enableAutoForceOccupied.isChecked();

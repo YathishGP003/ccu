@@ -439,7 +439,7 @@ public class ScheduleUtil {
                                           +"currentVal "+HSUtil.getPriorityLevelVal(pointId,level)+" : "
                                           +hayStack.readMapById(pointId).get("dis"));
         }
-        
+
         hayStack.pointWrite(HRef.make(pointId.replace("@","")),
                             level, "Scheduler",
                             HNum.make(desiredTemp),

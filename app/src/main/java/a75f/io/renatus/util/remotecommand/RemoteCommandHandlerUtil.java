@@ -91,7 +91,7 @@ public class RemoteCommandHandlerUtil {
                             Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                             if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
                                 RxTask.executeAsync(()-> UtilityApplication.getMessagingAckJob().doMessageAck());
-                                if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0) {
+                                if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
                                     AppInstaller.getHandle().install(null, false, true, true);
                                 } else {
                                     CcuLog.d("CCU_DOWNLOAD", "Update command ignored, Invalid version downloaded");

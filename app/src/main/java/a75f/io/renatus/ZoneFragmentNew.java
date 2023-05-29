@@ -71,6 +71,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -539,6 +540,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         lvFloorList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
     }
 
+    private void updateView(TextView textView, String value){
+        if(textView != null){
+            textView.setText(value);
+        }
+    }
+
     public void UpdateWeatherData(TextView temperature, TextView maximumTemp, TextView minimumTemp,
                                   TextView note, TextView place, TextView weatherCondition, ImageView weatherIcon) {
         WeakReference<TextView> mTemperatureRef = new WeakReference<>(temperature);
@@ -548,38 +555,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         WeakReference<TextView> mPlaceRef = new WeakReference<>(place);
         WeakReference<TextView> mWeatherConditionRef = new WeakReference<>(weatherCondition);
         WeakReference<ImageView> mWeatherIconRef = new WeakReference<>(weatherIcon);
+        String forMatValue = "%4.0f";
 
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
-
-            if( isCelsiusTunerAvailableStatus()) {
-                final TextView tvTemperature = mTemperatureRef.get();
-                if(tvTemperature != null){
-                    tvTemperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
-                }
-
-                final TextView tvMaximumTemp = mMaxTemperatureRef.get();
-                if(tvMaximumTemp != null){
-                    tvMaximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
-                }
-
-                final TextView tvMinTemp = mMinTemperatureRef.get();
-                if(tvMinTemp != null){
-                    tvMinTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
-                }
+            if (isCelsiusTunerAvailableStatus()) {
+                updateView(mTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
+                updateView(mMaxTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
+                updateView(mMinTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
             } else {
-                final TextView tvTemperature = mTemperatureRef.get();
-                if(tvTemperature != null){
-                    tvTemperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
-                }
-                final TextView tvMaximumTemp = mMaxTemperatureRef.get();
-                if(tvMaximumTemp != null){
-                    tvMaximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
-                }
-
-                final TextView tvMinTemp = mMinTemperatureRef.get();
-                if(tvMinTemp != null){
-                    tvMinTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
-                }
+                updateView(mTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getTemperature()));
+                updateView(mMaxTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMaxTemperature()));
+                updateView(mMinTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMinTemperature()));
             }
 
             double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
@@ -589,19 +575,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
 
             final TextView tvNote = mNoteRef.get();
-            if(tvNote != null){
-                tvNote.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
-            }
+            updateView(mNoteRef.get(), "Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
             if (address.isEmpty()) {
-
-                final TextView tvPlace = mPlaceRef.get();
-                if(tvPlace != null){
-                    tvPlace.setText(city + ", " + country);
-                }
+                updateView(mPlaceRef.get(), city + ", " + country);
             } else {
                 //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
                 String[] addrArray = address.split(",");
@@ -613,17 +593,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else {
                     placeStr = city + ", " + country;
                 }
-
-                final TextView tvPlace = mPlaceRef.get();
-                if(tvPlace != null){
-                    tvPlace.setText(placeStr);
-                }
+                updateView(mPlaceRef.get(), placeStr);
             }
-
-            final TextView tvWeatherCondition = mWeatherConditionRef.get();
-            if(tvWeatherCondition != null){
-                tvWeatherCondition.setText(WeatherDataDownloadService.getSummary());
-            }
+            updateView(mWeatherConditionRef.get(), WeatherDataDownloadService.getSummary());
 
             final ImageView ivWeatherIcon = mWeatherIconRef.get();
             if(ivWeatherIcon != null){

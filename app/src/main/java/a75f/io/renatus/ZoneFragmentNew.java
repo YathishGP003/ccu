@@ -59,8 +59,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.javolution.text.Text;
 import org.joda.time.Interval;
 
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -145,7 +147,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private TextView maximumTemp;
     private TextView minimumTemp;
     private TextView note;
-    private Runnable weatherUpdate;
+    private static Runnable weatherUpdate;
     private Handler weatherUpdateHandler;
     public RecyclerView recyclerView;
     GridLayout gridlayout;
@@ -193,9 +195,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private final DecimalFormat HUMIDITY_DECIMAL_FORMAT = new DecimalFormat("#.#");
 
     TextView zoneLoadTextView = null;
+
+    private BroadcastReceiver siteLocationChangedReceiver;
+
     public ZoneFragmentNew() {
     }
-    
+
     /**
      * We are currently dependent on deprecated API setUserVisibleHint to enable listeners for updating the temperature
      * and heartbeat. This might get called even before zoneView is drawn completely , all the updates from nodes can
@@ -256,9 +261,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         zoneLoadTextView = view.findViewById(R.id.zoneLoadTextView);
         zoneLoadTextView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
-        
+
         loadGrid(parentRootView);
-        
+
         if (floorList != null && floorList.size() > 0) {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
@@ -277,14 +282,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         });
 
-        getContext().registerReceiver(new BroadcastReceiver() {
+        siteLocationChangedReceiver = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 CcuLog.i("CCU_WEATHER","ACTION_SITE_LOCATION_UPDATED ");
                 WeatherDataDownloadService.getWeatherData();
                 if (weatherUpdateHandler != null)
                     weatherUpdateHandler.post(weatherUpdate);
             }
-        }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
+        };
+
+        getContext().registerReceiver(siteLocationChangedReceiver, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onViewCreated Done");
         weatherUpdateHandler = new Handler();
         weatherInIt(3000);
@@ -317,12 +324,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        weatherUpdateHandler.removeCallbacksAndMessages(null);
+        if(siteLocationChangedReceiver != null){
+            getContext().unregisterReceiver(siteLocationChangedReceiver);
+        }
+    }
+
     public void weatherInIt(int delay) {
         weatherUpdate = () -> {
             if (weatherUpdateHandler != null && getActivity() != null) {
                 if (weather_data.getVisibility() == View.VISIBLE) {
                     Log.e("weather", "update");
-                    UpdateWeatherData();
+                    UpdateWeatherData(temperature, maximumTemp, minimumTemp, note, place, weather_condition, weather_icon);
                 }
                 weatherUpdateHandler.postDelayed(weatherUpdate, delay);
             }
@@ -352,7 +368,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
     HashMap<String, View> zoneStatus = new HashMap<>();
-    
+
     public void refreshHeartBeatStatus(String id) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshHeartBeatStatus zoneOpen "+zoneOpen);
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+id+"\"");
@@ -523,17 +539,47 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         lvFloorList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
     }
 
-    public void UpdateWeatherData() {
+    public void UpdateWeatherData(TextView temperature, TextView maximumTemp, TextView minimumTemp,
+                                  TextView note, TextView place, TextView weatherCondition, ImageView weatherIcon) {
+        WeakReference<TextView> mTemperatureRef = new WeakReference<>(temperature);
+        WeakReference<TextView> mMaxTemperatureRef = new WeakReference<>(maximumTemp);
+        WeakReference<TextView> mMinTemperatureRef = new WeakReference<>(minimumTemp);
+        WeakReference<TextView> mNoteRef = new WeakReference<>(note);
+        WeakReference<TextView> mPlaceRef = new WeakReference<>(place);
+        WeakReference<TextView> mWeatherConditionRef = new WeakReference<>(weatherCondition);
+        WeakReference<ImageView> mWeatherIconRef = new WeakReference<>(weatherIcon);
+
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
 
             if( isCelsiusTunerAvailableStatus()) {
-                temperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
-                maximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
-                minimumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
+                final TextView tvTemperature = mTemperatureRef.get();
+                if(tvTemperature != null){
+                    tvTemperature.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
+                }
+
+                final TextView tvMaximumTemp = mMaxTemperatureRef.get();
+                if(tvMaximumTemp != null){
+                    tvMaximumTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
+                }
+
+                final TextView tvMinTemp = mMinTemperatureRef.get();
+                if(tvMinTemp != null){
+                    tvMinTemp.setText(String.format("%4.0f", fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
+                }
             } else {
-                temperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
-                maximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
-                minimumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
+                final TextView tvTemperature = mTemperatureRef.get();
+                if(tvTemperature != null){
+                    tvTemperature.setText(String.format("%4.0f", WeatherDataDownloadService.getTemperature()));
+                }
+                final TextView tvMaximumTemp = mMaxTemperatureRef.get();
+                if(tvMaximumTemp != null){
+                    tvMaximumTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMaxTemperature()));
+                }
+
+                final TextView tvMinTemp = mMinTemperatureRef.get();
+                if(tvMinTemp != null){
+                    tvMinTemp.setText(String.format("%4.0f", WeatherDataDownloadService.getMinTemperature()));
+                }
             }
 
             double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
@@ -542,31 +588,50 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double formattedPrecipitation = Double.parseDouble(PRECIPITATION_DECIMAL_FORMAT.format(weatherPrecipitation));
             double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
 
-            note.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
-
+            final TextView tvNote = mNoteRef.get();
+            if(tvNote != null){
+                tvNote.setText("Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
+            }
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
             if (address.isEmpty()) {
-                place.setText(city + ", " + country);
+
+                final TextView tvPlace = mPlaceRef.get();
+                if(tvPlace != null){
+                    tvPlace.setText(city + ", " + country);
+                }
             } else {
                 //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
                 String[] addrArray = address.split(",");
+                String placeStr = "";
                 if (addrArray != null && addrArray.length >= 3) {
-                    place.setText(addrArray[0] + ", " + addrArray[2]);
+                    placeStr = addrArray[0] + ", " + addrArray[2];
                 } else if (addrArray != null && addrArray.length == 2) {
-                    place.setText(address);
+                    placeStr = address;
                 } else {
-                    place.setText(city + ", " + country);
+                    placeStr = city + ", " + country;
+                }
+
+                final TextView tvPlace = mPlaceRef.get();
+                if(tvPlace != null){
+                    tvPlace.setText(placeStr);
                 }
             }
 
-            weather_condition.setText(WeatherDataDownloadService.getSummary());
-            String weatherIconId = WeatherDataDownloadService.getIcon();
-            Context context = weather_icon.getContext();
-            int id = context.getResources().getIdentifier("weather_icon_" + weatherIconId, "drawable", context.getPackageName());
-            weather_icon.setImageResource(id);
+            final TextView tvWeatherCondition = mWeatherConditionRef.get();
+            if(tvWeatherCondition != null){
+                tvWeatherCondition.setText(WeatherDataDownloadService.getSummary());
+            }
+
+            final ImageView ivWeatherIcon = mWeatherIconRef.get();
+            if(ivWeatherIcon != null){
+                String weatherIconId = WeatherDataDownloadService.getIcon();
+                Context context = ivWeatherIcon.getContext();
+                int id = context.getResources().getIdentifier("weather_icon_" + weatherIconId, "drawable", context.getPackageName());
+                ivWeatherIcon.setImageResource(id);
+            }
         }
     }
 
@@ -650,7 +715,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.loadGrid Done");
     }
-    
+
     private void setCcuReady() {
         isZoneViewReady = true;
         CCUHsApi.getInstance().setCcuReady();
@@ -1627,7 +1692,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
-        
+
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -3532,7 +3597,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         // loadGrid(parentRootView);
         if (weather_data.getVisibility() == View.VISIBLE) {
             Log.e("weather", "update");
-            UpdateWeatherData();
+            UpdateWeatherData(temperature, maximumTemp, minimumTemp, note, place, weather_condition, weather_icon);
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");
@@ -3749,7 +3814,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private String getScheduleTypeId(String equipId) {
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
-    
+
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
 

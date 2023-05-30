@@ -88,6 +88,7 @@ import javax.inject.Inject;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
+import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
@@ -264,6 +265,7 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+        EveryDaySchedulerService.scheduleJobForDay(context);
 
         initMessaging();
         OtaCache cache = new OtaCache();

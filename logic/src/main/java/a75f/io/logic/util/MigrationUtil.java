@@ -182,13 +182,6 @@ public class MigrationUtil {
             PreferenceUtil.setDiagEquipMigration();
         }
 
-        if(!isTIThermisterMigrated()){
-            Log.d(TAG,"isTIThermisterMigrated return true");
-            addTIThermisters(CCUHsApi.getInstance());
-        }else{
-            Log.d(TAG,"isTIThermisterMigrated is false");
-        }
-
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){
             updateScheduleRefs(CCUHsApi.getInstance());
             PreferenceUtil.setScheduleRefUpdateMigration();
@@ -555,10 +548,12 @@ public class MigrationUtil {
         if (existingTh1ConfigVal == 1) {
             existingConfigVal = 1;
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
+            ControlMote.setCMPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
             ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), roomTempTypeId);
         } else if (existingTh2ConfigVal == 1) {
             existingConfigVal = 2;
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
+            ControlMote.setCMPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
             ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), roomTempTypeId);
         } else {
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), true);
@@ -732,28 +727,6 @@ public class MigrationUtil {
             PointMigrationHandler.updatePILoopAnalog1InputUnitPointDisplayName();
             PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
         }
-    }
-
-    private static void addTIThermisters(CCUHsApi ccuHsApi) {
-        Log.d(TAG,"addTIThermisters++");
-        HashMap<Object,Object> tiEquip = ccuHsApi.readEntity("equip and ti");
-        if(!tiEquip.isEmpty()) {
-            Log.d(TAG,"ti isnt empty");
-            String tiEquipRef = tiEquip.get("id").toString();
-            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
-                    "temp and ti and equipRef == \"" + tiEquipRef + "\"");
-            String nodeAddress = currentTemp.get("group").toString();
-            createTIThermisterPoints(tiEquipRef,nodeAddress);
-        }
-    }
-
-    private static boolean isTIThermisterMigrated() {
-        Log.d(TAG,"isTIThermisterMigrated");
-        HashMap<Object,Object> th1Config = CCUHsApi.getInstance().readEntity("point and ti and " +
-                "config and th1");
-        HashMap<Object,Object> th2Config = CCUHsApi.getInstance().readEntity("point and ti and " +
-                "config and th2");
-        return !th1Config.isEmpty() && !th2Config.isEmpty();
     }
 
     private static void doDiagPointsMigration(CCUHsApi ccuHsApi) {
@@ -1422,59 +1395,6 @@ public class MigrationUtil {
                 }
             }
         });
-    }
-
-    private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
-        Log.d("TIThermistor","createTIThermisterPoints");
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
-        String siteRef = siteMap.get(Tags.ID).toString();
-        String siteDis = siteMap.get("dis").toString();
-        String equipDis = siteDis + "-TI-" + nodeAddress;
-        String tz = siteMap.get("tz").toString();
-        Point mainSensor = new Point.Builder()
-                .setDisplayName(equipDis+"-mainTemperatureSensor")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
-        hayStack.writeDefaultValById(mainSensorId, 1.0);
-
-        Point th1Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th1")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th1").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
-        hayStack.writeDefaultValById(th1ConfigId, 0.0);
-
-        Point th2Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th2")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th2").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
-        hayStack.writeDefaultValById(th2ConfigId, 0.0);
-
-        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
-                "temp and ti and equipRef == \""+tiEquipRef+"\"");
-        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH1_IN.name(), false);
-        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
-        ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(), currentTemp.get("id").toString());
-
-        Log.d("TIThermistor","createTIThermisterPoints completed");
     }
 
     private static void updateScheduleRefForZones(CCUHsApi hayStack){

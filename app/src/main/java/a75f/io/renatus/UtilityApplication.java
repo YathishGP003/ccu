@@ -290,7 +290,11 @@ public abstract class UtilityApplication extends Application {
                 RaygunClient.send(paramThrowable);
                 paramThrowable.printStackTrace();
                 CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Crash");
-                RenatusApp.closeApp();
+                if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+                    RenatusApp.rebootTablet();
+                } else {
+                    RenatusApp.closeApp();
+                }
             });
         }
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");

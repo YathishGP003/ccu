@@ -20,8 +20,6 @@ import a75f.io.messaging.handler.DataSyncHandler;
  * Created by mahesh on 05-11-2020.
  */
 public class ConnectionChangeReceiver extends BroadcastReceiver {
-
-    Boolean isConnected = null;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Connection_Info", "Result Action: " + intent.getAction());
@@ -29,7 +27,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
-            if (isConnected != null && info.isConnected()) {
+            if (info.isConnected()) {
                 CcuLog.i("CCU_READ_CHANGES", " CONNECTION CHANGE RECEIVER");
                 if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime())) {
                     CcuLog.i("CCU_READ_CHANGES", " DATA SYNC NOT IN PROGRESS");
@@ -41,7 +39,6 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
                     }, 300000);
                 }
             }
-            isConnected = info.isConnected();
         }
     }
 }

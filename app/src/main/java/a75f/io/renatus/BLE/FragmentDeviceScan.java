@@ -6,7 +6,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import a75f.io.device.serial.SerialConsts;
 import a75f.io.logic.L;
@@ -70,19 +73,12 @@ public class FragmentDeviceScan extends BaseDialogFragment
             if(getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     BluetoothDevice device = result.getDevice();
+                    Log.d(L.TAG_CCU_BLE,"onScanResult called "+device.getName()+" address "+device.getAddress());
                     if(device != null && device.getName() != null && !(isDeviceMatching(device.getName()))){
                         setListViewEmptyView();
                         return;
                     }
-
-                    if (device != null && device.getName() != null &&
-                            (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
-                                    device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME) ||
-                                    device.getName().equalsIgnoreCase(SerialConsts.HYPERSTAT_NAME) ||
-                                    device.getName().equalsIgnoreCase(SerialConsts.HELIONODE_NAME))) {
-                        mLeDeviceListAdapter.addDevice(device);
-
-                    }
+                    mLeDeviceListAdapter.addDevice(device);
                 });
             }
         }
@@ -233,12 +229,37 @@ public class FragmentDeviceScan extends BaseDialogFragment
             mScanning = true;
             new Handler(Looper.getMainLooper()).postDelayed(() -> mBluetoothLeScanner.stopScan(mScanCallback),SCAN_PERIOD);
 
-            mBluetoothLeScanner.startScan(mScanCallback);
+
+            List<ScanFilter> filters = new ArrayList<>();
+            ScanFilter smartNode = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.SMART_NODE_NAME)
+                    .build();
+            ScanFilter smartStat = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.SMART_STAT_NAME)
+                    .build();
+            ScanFilter hyperStat = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.HYPERSTAT_NAME)
+                    .build();
+            ScanFilter helioNode = new ScanFilter.Builder()
+                    .setDeviceName(SerialConsts.HELIONODE_NAME)
+                    .build();
+            filters.add(smartNode);
+            filters.add(smartStat);
+            filters.add(hyperStat);
+            filters.add(helioNode);
+
+            ScanSettings scanSettings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                    .setReportDelay(0)
+                    .build();
+
+            mBluetoothLeScanner.startScan(filters, scanSettings, mScanCallback);
             Log.d(L.TAG_CCU_BLE,"Scan Started");
         }
         else
         {
             mScanning = false;
+            mBluetoothLeScanner.flushPendingScanResults(mScanCallback);
             mBluetoothLeScanner.stopScan(mScanCallback);
             Log.d(L.TAG_CCU_BLE,"Scan Stopped");
         }

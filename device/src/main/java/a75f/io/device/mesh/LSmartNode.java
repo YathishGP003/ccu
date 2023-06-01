@@ -261,7 +261,7 @@ public class LSmartNode
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
-        if (profileType.equals("vav")){
+        if (profileType.equals("vav") && reheatConfig != -1){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));

@@ -41,6 +41,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.DamperType;
@@ -381,7 +382,26 @@ public class MigrationUtil {
         }
         removeWritableTagForFloor();
         migrateUserIntentMarker();
+        migrateTIProfileEnum(CCUHsApi.getInstance());
+
         L.saveCCUState();
+    }
+
+    private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> tiEquips = ccuHsApi.readAllEntities("equip and ti");
+        if (!tiEquips.isEmpty()) {
+            for (HashMap<Object, Object> equipMap : tiEquips) {
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                HashMap<Object, Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
+                        "temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
+                if (!roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
+                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(roomTemperatureTypePoint).build();
+                    enumUpdatedRoomTempTypePoint.setEnums(RoomTempSensor.getEnumStringDefinition());
+                    CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
+                }
+            }
+        }
     }
 
 
@@ -536,7 +556,7 @@ public class MigrationUtil {
                 .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddress)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(CCUHsApi.getInstance().getTimeZone())
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);

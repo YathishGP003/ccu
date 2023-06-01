@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 import android.annotation.SuppressLint;
@@ -108,6 +109,7 @@ import a75f.io.renatus.ota.OTAUpdateHandlerService;
 import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
@@ -448,6 +450,7 @@ public abstract class UtilityApplication extends Application {
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
         CcuLog.e(L.TAG_CCU, "RenatusLifeCycleEvent App Terminated");
+        UtilityApplication.stopRestServer();
         super.onTerminate();
     }
 
@@ -1008,6 +1011,16 @@ public abstract class UtilityApplication extends Application {
 
     public static MessagingAckJob getMessagingAckJob() {
         return messagingAckJob;
+    }
+
+    public static boolean isBACnetIntialized() { return prefs.getBoolean(IS_BACNET_INITIALIZED); }
+
+    public static void stopRestServer() {
+        HttpServer.Companion.getInstance(context).stopServer();
+    }
+
+    public static void startRestServer() {
+        HttpServer.Companion.getInstance(context).startServer();
     }
 
 }

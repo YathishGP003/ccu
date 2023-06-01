@@ -55,6 +55,7 @@ public class L
     public static final String TAG_CCU_READ_CHANGES = "CCU_READ_CHANGES";
     public static final String TAG_CCU_OTA_PROCESS= "OTA_PROCESS";
     public static final String TAG_CCU_AUTO_COMMISSIONING = "CCU_AUTO_COMMISSIONING";
+    public static final String TAG_CCU_BACNET = "CCU_BACNET";
 
     public static Context app()
     {

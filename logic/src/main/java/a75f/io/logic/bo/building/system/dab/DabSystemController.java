@@ -1001,6 +1001,7 @@ public class DabSystemController extends SystemController
                                                                             + dabEquip.get("id").toString() + "\""
              );
             double primaryDamperVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
+            primaryDamperVal = Math.max(primaryDamperVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);
             double adjustedDamperPos = primaryDamperVal + (primaryDamperVal * percent) / 100;
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
@@ -1016,6 +1017,7 @@ public class DabSystemController extends SystemController
                                                                              + dabEquip.get("id").toString() + "\""
             );
             double secondaryDamperVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
+            secondaryDamperVal = Math.max(secondaryDamperVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);
             adjustedDamperPos = secondaryDamperVal + (secondaryDamperVal * percent) / 100;
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             

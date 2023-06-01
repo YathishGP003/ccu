@@ -382,6 +382,7 @@ public class HisSyncHandler
                             ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
                         CcuLog.d(TAG, "doPurge -> Failed" , e);
                     } finally {
                         purgeStatus = false;

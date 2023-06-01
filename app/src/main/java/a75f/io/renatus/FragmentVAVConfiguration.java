@@ -495,7 +495,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             maxCoolingDamperPos.setValue(mProfileConfig.maxDamperCooling);
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
-            setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition()]);
+            if (reheatType.getSelectedItemPosition() == 0) {
+                relay1TextView.setText(R.string.vav_label_relay1);
+                relay1TextVal.setText(R.string.vav_label_staged_heater);
+            } else {
+                setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition() - 1]);
+            }
+
 
             enableCFMControl.setChecked(mProfileConfig.enableCFMControl);
             if (!enableCFMControl.isChecked()) {

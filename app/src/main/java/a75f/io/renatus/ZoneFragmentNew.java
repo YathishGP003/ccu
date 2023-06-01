@@ -339,7 +339,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             if (weatherUpdateHandler != null && getActivity() != null) {
                 if (weather_data.getVisibility() == View.VISIBLE) {
                     Log.e("weather", "update");
-                    UpdateWeatherData(temperature, maximumTemp, minimumTemp, note, place, weather_condition, weather_icon);
+                    UpdateWeatherData();
                 }
                 weatherUpdateHandler.postDelayed(weatherUpdate, delay);
             }
@@ -546,15 +546,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
-    public void UpdateWeatherData(TextView temperature, TextView maximumTemp, TextView minimumTemp,
-                                  TextView note, TextView place, TextView weatherCondition, ImageView weatherIcon) {
+    public void UpdateWeatherData() {
         WeakReference<TextView> mTemperatureRef = new WeakReference<>(temperature);
         WeakReference<TextView> mMaxTemperatureRef = new WeakReference<>(maximumTemp);
         WeakReference<TextView> mMinTemperatureRef = new WeakReference<>(minimumTemp);
         WeakReference<TextView> mNoteRef = new WeakReference<>(note);
         WeakReference<TextView> mPlaceRef = new WeakReference<>(place);
-        WeakReference<TextView> mWeatherConditionRef = new WeakReference<>(weatherCondition);
-        WeakReference<ImageView> mWeatherIconRef = new WeakReference<>(weatherIcon);
+        WeakReference<TextView> mWeatherConditionRef = new WeakReference<>(weather_condition);
+        WeakReference<ImageView> mWeatherIconRef = new WeakReference<>(weather_icon);
         String forMatValue = "%4.0f";
 
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
@@ -3569,7 +3568,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         // loadGrid(parentRootView);
         if (weather_data.getVisibility() == View.VISIBLE) {
             Log.e("weather", "update");
-            UpdateWeatherData(temperature, maximumTemp, minimumTemp, note, place, weather_condition, weather_icon);
+            UpdateWeatherData();
         }
         weatherInIt(15*60000);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.onResume Done");

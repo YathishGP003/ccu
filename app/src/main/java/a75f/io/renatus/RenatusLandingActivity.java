@@ -631,7 +631,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
     }
 
-
     private void intializeBACnet() {
         if(UtilityApplication.isBACnetIntialized()) {
             UtilityApplication.stopRestServer();

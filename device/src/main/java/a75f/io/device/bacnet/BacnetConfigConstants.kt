@@ -36,6 +36,8 @@ object  BacnetConfigConstants {
     const val DAYLIGHT_SAVING_STATUS = "daylightSavingStatus"
     const val SERIAL_NUMBER = "serialNumber"
     const val DESCRIPTION = "description"
+    const val NULL = "null"
+    const val EMPTY_STRING = ""
 
     //"objectConf" constants
     const val NUMBER_OF_NOTIFICATION_CLASS_OBJECTS = "noOfNotificationClassObjects"

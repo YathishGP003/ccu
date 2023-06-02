@@ -12,6 +12,7 @@ import a75f.io.logic.cloudservice.FileBackupService;
 import static a75f.io.logic.L.TAG_CCU_BACKUP;
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 import com.google.gson.Gson;
 
@@ -79,7 +80,7 @@ public class FileBackupManager {
         }
     }
 
-    public Map<String, Integer> getConfigFiles(String siteId, String ccuId){
+    public Map<String, Integer> getConfigFiles(String siteId, String ccuId, SharedPreferences bacnet_pref){
         Retrofit retrofit = getRetrofitForFileStorageService();
         Call<ResponseBody> call = retrofit.create(FileBackupService.class).getConfigFiles(siteId, ccuId);
         Map<String, Integer> modbusConfigs = new HashMap<>();
@@ -106,6 +107,35 @@ public class FileBackupManager {
                         CcuLog.e(TAG_CCU_REPLACE, "name:" + name +"-"+ "value:" + value);
                     }
                 }
+
+                NodeList stringList = doc.getElementsByTagName("string");
+                for (int temp = 0; temp < stringList.getLength(); temp++) {
+                    Node node = stringList.item(temp);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) node;
+                        String name = element.getAttribute("name");
+                        if(name.equals("BACnet_Config")){
+                            String value = element.getTextContent();
+                            CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
+                    }
+                }
+
+                NodeList aBooleanList = doc.getElementsByTagName("boolean");
+                for (int temp = 0; temp < aBooleanList.getLength(); temp++) {
+                    Node node = aBooleanList.item(temp);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) node;
+                        String name = element.getAttribute("name");
+                        if(name.equals("isBACnetinitialized") || name.equals("isBACnetConfigFileCreated")){
+                            String value = element.getAttribute("value");
+                            CcuLog.e(TAG_CCU_REPLACE, "Boolean : name" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
+                        }
+                    }
+                }
+
             }
         } catch (IOException | SAXException e) {
             e.printStackTrace();

@@ -3,6 +3,11 @@ package a75f.io.renatus.registration;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
 import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
+
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
+import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -978,6 +983,7 @@ public class CreateNewSite extends Fragment {
                 deviceObject.put(IP_DEVICE_OBJECT_NAME,siteName+"_"+ccuName);
                 prefs.setString(BACNET_CONFIGURATION, config.toString());
                 sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                performConfigFileBackup();
             }
         } catch (JSONException e) {
             e.printStackTrace();

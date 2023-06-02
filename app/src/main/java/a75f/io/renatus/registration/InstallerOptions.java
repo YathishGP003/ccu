@@ -90,6 +90,7 @@ import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
@@ -352,6 +353,7 @@ public class InstallerOptions extends Fragment {
                             deviceObject.put(IP_DEVICE_INSTANCE_NUMBER,Integer.parseInt(addressBandSelected) + 99);
                             prefs.setString(BACNET_CONFIGURATION, config.toString());
                             sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
+                            performConfigFileBackup();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

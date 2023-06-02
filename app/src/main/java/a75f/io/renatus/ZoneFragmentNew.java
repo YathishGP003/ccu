@@ -547,24 +547,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void UpdateWeatherData() {
-        WeakReference<TextView> mTemperatureRef = new WeakReference<>(temperature);
-        WeakReference<TextView> mMaxTemperatureRef = new WeakReference<>(maximumTemp);
-        WeakReference<TextView> mMinTemperatureRef = new WeakReference<>(minimumTemp);
-        WeakReference<TextView> mNoteRef = new WeakReference<>(note);
-        WeakReference<TextView> mPlaceRef = new WeakReference<>(place);
-        WeakReference<TextView> mWeatherConditionRef = new WeakReference<>(weather_condition);
-        WeakReference<ImageView> mWeatherIconRef = new WeakReference<>(weather_icon);
         String forMatValue = "%4.0f";
 
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
             if (isCelsiusTunerAvailableStatus()) {
-                updateView(mTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
-                updateView(mMaxTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
-                updateView(mMinTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
+                updateView(temperature, String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getTemperature())));
+                updateView(maximumTemp, String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMaxTemperature())));
+                updateView(minimumTemp, String.format(Locale.ENGLISH, forMatValue, fahrenheitToCelsius(WeatherDataDownloadService.getMinTemperature())));
             } else {
-                updateView(mTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getTemperature()));
-                updateView(mMaxTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMaxTemperature()));
-                updateView(mMinTemperatureRef.get(), String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMinTemperature()));
+                updateView(temperature, String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getTemperature()));
+                updateView(maximumTemp, String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMaxTemperature()));
+                updateView(minimumTemp, String.format(Locale.ENGLISH, forMatValue, WeatherDataDownloadService.getMinTemperature()));
             }
 
             double weatherPrecipitation = WeatherDataDownloadService.getPrecipitation();
@@ -573,14 +566,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double formattedPrecipitation = Double.parseDouble(PRECIPITATION_DECIMAL_FORMAT.format(weatherPrecipitation));
             double formattedHumidity = Double.parseDouble(HUMIDITY_DECIMAL_FORMAT.format(weatherHumidity));
 
-            final TextView tvNote = mNoteRef.get();
-            updateView(mNoteRef.get(), "Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
+            updateView(note, "Humidity : " + formattedHumidity + "%" + "\n" + "Precipitation : " + formattedPrecipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
             String country = spDefaultPrefs.getString("country", "");
             if (address.isEmpty()) {
-                updateView(mPlaceRef.get(), city + ", " + country);
+                updateView(place, city + ", " + country);
             } else {
                 //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
                 String[] addrArray = address.split(",");
@@ -592,11 +584,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 } else {
                     placeStr = city + ", " + country;
                 }
-                updateView(mPlaceRef.get(), placeStr);
+                updateView(place, placeStr);
             }
-            updateView(mWeatherConditionRef.get(), WeatherDataDownloadService.getSummary());
+            updateView(weather_condition, WeatherDataDownloadService.getSummary());
 
-            final ImageView ivWeatherIcon = mWeatherIconRef.get();
+            final ImageView ivWeatherIcon = weather_icon;
             if(ivWeatherIcon != null){
                 String weatherIconId = WeatherDataDownloadService.getIcon();
                 Context context = ivWeatherIcon.getContext();

@@ -253,9 +253,8 @@ public class DabSystemController extends SystemController
                                                                       tempMidPoint - desiredTempCooling;
                 double zoneHeatingLoad = zoneCurTemp < tempMidPoint ? desiredTempHeating - zoneCurTemp :
                                                                       desiredTempHeating - tempMidPoint;
-                
-                double zoneDynamicPriority = getEquipDynamicPriority(systemState == COOLING ?
-                                                                         zoneCoolingLoad : zoneHeatingLoad, equip.getId());
+                double zoneLoad = Math.max(zoneCoolingLoad, zoneHeatingLoad);
+                double zoneDynamicPriority = getEquipDynamicPriority(Math.max(zoneLoad, 0), equip.getId());
                 totalCoolingLoad += Math.max(zoneCoolingLoad, 0);
                 totalHeatingLoad += Math.max(zoneHeatingLoad, 0);
                 zoneCount++;
@@ -308,8 +307,9 @@ public class DabSystemController extends SystemController
                                                                           tempMidPoint - desiredTempCooling;
                     double cmHeatingLoad = cmCurrentTemp < tempMidPoint ? desiredTempHeating - cmCurrentTemp :
                                                                           desiredTempHeating - tempMidPoint;
-                    double zoneDynamicPriority = getCMDynamicPriority(systemState == COOLING ? cmCoolingLoad :
-                                                                                               cmHeatingLoad);
+
+                    double zoneLoad = Math.max(cmCoolingLoad, cmHeatingLoad);
+                    double zoneDynamicPriority = getCMDynamicPriority(Math.max(zoneLoad, 0));
                     
                     totalCoolingLoad += Math.max(cmCoolingLoad, 0);
                     totalHeatingLoad += Math.max(cmHeatingLoad, 0);

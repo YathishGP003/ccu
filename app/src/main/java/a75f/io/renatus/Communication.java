@@ -453,8 +453,8 @@ public class Communication extends Fragment {
 
         if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString()))
         {
-            Toast.makeText(context, "Virtual Network Number and Local Network Number Should not be Same.", LENGTH_LONG).show();
-            return false;
+             Toast.makeText(context, "Virtual Network Number and Local Network Number Should not be Same.", LENGTH_LONG).show();
+             return false;
         }
 
         if(port.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(port.getText().toString()), 4069, 65535, 1))) return false;

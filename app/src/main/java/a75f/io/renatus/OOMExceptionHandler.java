@@ -25,7 +25,7 @@ public class OOMExceptionHandler {
                 long freeBytes = Long.parseLong(Objects.requireNonNull(matcher.group(2)));
                 numbers = new long[]{byteAllocation, freeBytes};
             }
-            if (numbers != null) {
+            if (numbers != null && numbers.length >= 2) {
                 long firstNumber = numbers[0];
                 long secondNumber = numbers[1];
                 return isByteAllocationLessThanFreeBytes(firstNumber, secondNumber);

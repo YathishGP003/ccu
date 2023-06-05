@@ -322,6 +322,8 @@ public abstract class UtilityApplication extends Application {
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            RenatusApp.rebootTablet();
         }
     }
     private List<String> getCrashTimestampsWithinLastHour() {

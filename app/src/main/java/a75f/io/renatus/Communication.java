@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static android.widget.Toast.LENGTH_LONG;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
@@ -50,6 +51,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.material.textfield.TextInputLayout;
@@ -449,7 +451,11 @@ public class Communication extends Fragment {
 
         if(virtualNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(virtualNetworkNumber.getText().toString()), 1, 65535, 1)))  return false;
 
-        if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString()))  return false;
+        if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString()))
+        {
+            Toast.makeText(context, "Virtual Network Number and Local Network Number Should not be Same.", LENGTH_LONG).show();
+            return false;
+        }
 
         if(port.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(port.getText().toString()), 4069, 65535, 1))) return false;
 

@@ -8,49 +8,48 @@ class HyperStat2pfcuTestConfiguration(nodeAddress: Int,
 ) : ProfileConfiguration(nodeAddress, nodeType, priority) {
 
 
-    var temperatureOffset = ProfileConfig(true, "temperatureOffset")
-    var autoForcedOccupied = ProfileConfig(false, "autoForcedOccupiedEnabled")
-    var autoAway = ProfileConfig(false, "autoAwayEnabled")
+    var temperatureOffset = ValueConfig("temperatureOffset", 0.0)
+    var autoForcedOccupied = EnableConfig("autoForcedOccupiedEnabled", false)
+    var autoAway = EnableConfig("autoAwayEnabled", false)
 
     //Explore data binding to directly map config value to a UI element.
 
-    var relay1OutputEnabled = ProfileConfig(false, "relay1OutputEnabled")
-    var relay2OutputEnabled = ProfileConfig(false, "relay2OutputEnabled")
-    var relay3OutputEnabled = ProfileConfig(false, "relay3OutputEnabled")
-    var relay4OutputEnabled = ProfileConfig(false, "relay4OutputEnabled")
-    var relay5OutputEnabled = ProfileConfig(false, "relay5OutputEnabled")
-    var relay6OutputEnabled = ProfileConfig(false, "relay6OutputEnabled")
+    var relay1OutputEnabled = EnableConfig("relay1Enabled")
+    var relay2OutputEnabled = EnableConfig( "relay2Enabled")
+    var relay3OutputEnabled = EnableConfig( "relay3Enabled")
+    var relay4OutputEnabled = EnableConfig( "relay4Enabled")
+    var relay5OutputEnabled = EnableConfig( "relay5Enabled")
+    var relay6OutputEnabled = EnableConfig( "relay6Enabled")
 
     //enabled is already present in outputEnabled config. But both are linked only in the domain model.
-    var relay1OutputAssociation = PortConfig( false, "relay1OutputAssociation", "fanMediumSpeed")
-    var relay2OutputAssociation = PortConfig( false, "relay2OutputAssociation", "fanHighSpeed")
-    var relay3OutputAssociation = PortConfig( false, "relay3OutputAssociation", "fanStage1")
-    var relay4OutputAssociation = PortConfig( false, "relay4OutputAssociation", "auxHeatingStage1")
-    var relay5OutputAssociation = PortConfig( false, "relay5OutputAssociation", "auxHeatingStage2")
-    var relay6OutputAssociation = PortConfig( false, "relay6OutputAssociation", "auxHeatingStage3")
+    var relay1OutputAssociation = RelayAssociationConfig( "relay1Association", 1)
+    var relay2OutputAssociation = RelayAssociationConfig(  "relay2Association", 2)
+    var relay3OutputAssociation = RelayAssociationConfig( "relay3Association", 3,)
+    var relay4OutputAssociation = RelayAssociationConfig( "relay4Association", 3)
+    var relay5OutputAssociation = RelayAssociationConfig( "relay5Association", 4)
+    var relay6OutputAssociation = RelayAssociationConfig( "relay6Association", 1)
 
-    var analogOut1Enabled = ProfileConfig(false, "analogOut1Enabled")
-    var analogOut2Enabled = ProfileConfig(false, "analogOut2Enabled")
-    var analogOut3Enabled = ProfileConfig(false, "analogOut3Enabled")
+    var analogOut1Enabled = EnableConfig("analogOut1Enabled")
+    var analogOut2Enabled = EnableConfig("analogOut2Enabled")
+    var analogOut3Enabled = EnableConfig("analogOut3Enabled")
 
-    var analogOut1Association = AnalogOutConfig( false, "analogOut1Association", "waterValve", 2.0, 10.0)
-    var analogOut2Association = AnalogOutConfig( false, "analogOut2Association", "fanSpeed", 2.0, 10.0)
-    var analogOut3Association = AnalogOutConfig( false, "analogOut3Association", "dcvDamper", 2.0, 10.0)
+    var analogOut1Association = AnalogOutAssociationConfig( "analogOut1Association", 2, 2.0, 10.0)
+    var analogOut2Association = AnalogOutAssociationConfig( "analogOut2Association", 1, 2.0, 10.0)
+    var analogOut3Association = AnalogOutAssociationConfig( "analogOut3Association", 3, 2.0, 10.0)
 
-    var airflowSensorEnabled = ProfileConfig(false, "airflowSensorEnabled")
-    var supplyWaterSensorEnabled = ProfileConfig(true, "supplyWaterSensorEnabled")
+    var airflowSensorEnabled = EnableConfig("airflowSensorEnabled")
+    var supplyWaterSensorEnabled = EnableConfig("supplyWaterSensorEnabled")
 
-    var analogIn1Config = AnalogInConfig(false, "analog1InEnabled", "keyCardSensor", 0)
-    var analogIn2Config = AnalogInConfig(false, "analog2InEnabled", "doorWindowSensor", 0)
+    var analogIn1Config = AnalogInAssociationConfig( "analog1InEnabled", 2, 0)
+    var analogIn2Config = AnalogInAssociationConfig("analog2InEnabled", 1, 0)
 
-    var zoneCO2DamperOpeningRate = ProfileConfig(false, "zoneCO2DamperOpeningRate")
-
-    var zoneCO2Threshold = ProfileConfig(false, "zoneCO2Threshold")
-    var zoneCO2Target = ProfileConfig(false, "zoneCO2Target")
-    var zoneVOCThreshold = ProfileConfig(false, "zoneVOCThreshold")
-    var zoneVOCTarget = ProfileConfig(false, "zoneVOCTarget")
-    var zonePm2p5Threshold = ProfileConfig(false, "zonePm2p5Threshold")
-    var zonePm2p5Target = ProfileConfig(false, "zonePm2p5Target")
+    var zoneCO2DamperOpeningRate = ValueConfig("zoneCO2DamperOpeningRate")
+    var zoneCO2Threshold = ValueConfig("zoneCO2Threshold")
+    var zoneCO2Target = ValueConfig("zoneCO2Target")
+    var zoneVOCThreshold = ValueConfig("zoneVOCThreshold")
+    var zoneVOCTarget = ValueConfig("zoneVOCTarget")
+    var zonePm2p5Threshold = ValueConfig("zonePm2p5Threshold")
+    var zonePm2p5Target = ValueConfig("zonePm2p5Target")
 
     init {
         zoneCO2DamperOpeningRate.currentVal = 10.0
@@ -63,19 +62,23 @@ class HyperStat2pfcuTestConfiguration(nodeAddress: Int,
 
     }
 
-    var displayHumidity = ProfileConfig(true, "displayHumidity")
-    var displayVOC = ProfileConfig(false, "displayVOC")
-    var displayPp2p5 = ProfileConfig(false, "displayPp2p5")
-    var displayCo2 = ProfileConfig(true, "displayCo2")
+    var displayHumidity = EnableConfig( "displayHumidity", true)
+    var displayVOC = EnableConfig("displayVOC")
+    var displayPp2p5 = EnableConfig("displayPp2p5")
+    var displayCo2 = EnableConfig("displayCo2")
 
-    override fun getAssociations() : List<String> {
-        var associations = mutableListOf<String>()
-        associations.add(relay1OutputAssociation.association)
-        associations.add(relay2OutputAssociation.association)
-        associations.add(relay3OutputAssociation.association)
-        associations.add(relay4OutputAssociation.association)
-        associations.add(relay5OutputAssociation.association)
-        associations.add(relay6OutputAssociation.association)
+    var dcwbEnabled = EnableConfig( "dcwbEnabled",true)
+
+    override fun getAssociationConfigs() : List<AssociationConfig> {
+        var associations = mutableListOf<AssociationConfig>()
+        associations.add(AssociationConfig("relay1Association", 0))
         return associations
+    }
+
+    override fun getEnableConfigs() : List<EnableConfig> {
+        var enabled = mutableListOf<EnableConfig>()
+        enabled.add(EnableConfig("relay1Enabled", true))
+        enabled.add(EnableConfig("dcwbEnabled", true))
+        return enabled
     }
 }

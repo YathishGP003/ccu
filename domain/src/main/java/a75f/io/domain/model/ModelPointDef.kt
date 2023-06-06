@@ -42,6 +42,6 @@ class ModelPointDef(
     }
 
     override fun toString(): String {
-        return "$displayName $tags"
+        return "$domainName $displayName $tags"
     }
 }

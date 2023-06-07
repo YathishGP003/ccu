@@ -74,8 +74,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
     @Override
     public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-        CcuLog.d(L.TAG_CCU_MESSAGING, message);
-
+        CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "original message: "+message);
         JsonObject payload = JsonParser.parseString(message).getAsJsonObject();
         JsonElement messageContents = payload.getAsJsonObject().get("message");
 

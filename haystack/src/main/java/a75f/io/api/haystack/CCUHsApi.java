@@ -2086,6 +2086,7 @@ public class CCUHsApi
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
         setCcuReady();
+        Log.d("CCU_HS", "CCU Registered");
     }
 
     public void setCcuUnregistered() {
@@ -2094,6 +2095,7 @@ public class CCUHsApi
         editor.remove("isCcuRegistered");
         editor.commit();
         resetCcuReady();
+        Log.d("CCU_HS", "CCU Unregistered");
     }
 
     public boolean isNetworkConnected() {
@@ -2466,6 +2468,7 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder()
                              .add("ccuId", HRef.copy(ccuId));
         HDict[] dictArr = {b.toDict()};
+        Log.d("CCU_HS", "removeCCU API call");
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }

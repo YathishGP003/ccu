@@ -297,7 +297,7 @@ public class CazEquip
                 .setSiteRef(siteRef).setFloorRef(floorRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddr)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);

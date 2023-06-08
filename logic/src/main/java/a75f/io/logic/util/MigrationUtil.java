@@ -41,6 +41,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.DamperType;
@@ -173,20 +174,13 @@ public class MigrationUtil {
             PreferenceUtil.setNewOccupancy();
         }
 
-        if(isFanControlDelayDefaultValueUpdated(CCUHsApi.getInstance())){
+        /*if(isFanControlDelayDefaultValueUpdated(CCUHsApi.getInstance())){
             updateFanControlDefaultValue(CCUHsApi.getInstance());
-        }
+        }*/
 
         if(!PreferenceUtil.getSiteNameEquipMigration()){
             ControlMote.updateOnSiteNameChange();
-            PreferenceUtil.setDiagEquipMigration();
-        }
-
-        if(!isTIThermisterMigrated()){
-            Log.d(TAG,"isTIThermisterMigrated return true");
-            addTIThermisters(CCUHsApi.getInstance());
-        }else{
-            Log.d(TAG,"isTIThermisterMigrated is false");
+            PreferenceUtil.setSiteNameEquipMigration();
         }
 
         if(!PreferenceUtil.getScheduleRefUpdateMigration()){
@@ -382,9 +376,32 @@ public class MigrationUtil {
             PreferenceUtil.setAutoCommissioningMigration();
         }
 
+        if (!PreferenceUtil.getRemoveDupCoolingLockoutTuner()) {
+            removeDuplicateCoolingLockoutTuner(CCUHsApi.getInstance());
+            PreferenceUtil.setRemoveDupCoolingLockoutTuner();
+        }
         removeWritableTagForFloor();
         migrateUserIntentMarker();
+        migrateTIProfileEnum(CCUHsApi.getInstance());
+
         L.saveCCUState();
+    }
+
+    private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> tiEquips = ccuHsApi.readAllEntities("equip and ti");
+        if (!tiEquips.isEmpty()) {
+            for (HashMap<Object, Object> equipMap : tiEquips) {
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                HashMap<Object, Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
+                        "temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
+                if (!roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
+                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(roomTemperatureTypePoint).build();
+                    enumUpdatedRoomTempTypePoint.setEnums(RoomTempSensor.getEnumStringDefinition());
+                    CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
+                }
+            }
+        }
     }
 
 
@@ -539,7 +556,7 @@ public class MigrationUtil {
                 .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddress)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(CCUHsApi.getInstance().getTimeZone())
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);
@@ -715,20 +732,6 @@ public class MigrationUtil {
             PointMigrationHandler.updatePILoopAnalog2InputUnitPointDisplayName();
         }
     }
-
-    private static void addTIThermisters(CCUHsApi ccuHsApi) {
-        Log.d(TAG,"addTIThermisters++");
-        HashMap<Object,Object> tiEquip = ccuHsApi.readEntity("equip and ti");
-        if(!tiEquip.isEmpty()) {
-            Log.d(TAG,"ti isnt empty");
-            String tiEquipRef = tiEquip.get("id").toString();
-            HashMap<Object, Object> currentTemp = ccuHsApi.readEntity("point and current and " +
-                    "temp and ti and equipRef == \"" + tiEquipRef + "\"");
-            String nodeAddress = currentTemp.get("group").toString();
-            createTIThermisterPoints(tiEquipRef,nodeAddress);
-        }
-    }
-
     private static boolean isTIThermisterMigrated() {
         Log.d(TAG,"isTIThermisterMigrated");
         HashMap<Object,Object> th1Config = CCUHsApi.getInstance().readEntity("point and ti and " +
@@ -1366,28 +1369,6 @@ public class MigrationUtil {
         ConfigUtil.Companion.addConfigPoints(profiletag,siteRef,roomRef,floorRef,equipRef,tz,nodeAddr,
                 equipDis,tags,0,0);
     }
-
-    private static boolean isFanControlDelayDefaultValueUpdated(CCUHsApi hsApi){
-        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl check");
-        HashMap<Object, Object> fanControlTuner =
-                hsApi.readEntity("point and tuner and fan and control and time and delay");
-        return !fanControlTuner.isEmpty();
-    }
-
-    private static void updateFanControlDefaultValue(CCUHsApi hsApi){
-        Log.d(TAG_CCU_MIGRATION_UTIL,"FanControl update");
-        ArrayList<HashMap<Object, Object>> fanControlTunerAll =
-                hsApi.readAllEntities("point and tuner and fan and control and time and delay");
-        if(!fanControlTunerAll.isEmpty()) {
-            for (HashMap<Object, Object> fanControlTuner: fanControlTunerAll) {
-                hsApi.clearPointArrayLevel(fanControlTuner.get("id").toString(), TUNER_EQUIP_VAL_LEVEL, false);
-
-                hsApi.writePointForCcuUser(fanControlTuner.get("id").toString(), TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
-                        TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY, 0);
-            }
-        }
-    }
-
     private static void updateScheduleRefs(CCUHsApi hayStack) {
         CcuLog.i("MIGRATION_UTIL", " updateScheduleRefs ");
         List<HashMap<Object,Object>> rooms = hayStack.readAllEntities("room");
@@ -1404,59 +1385,6 @@ public class MigrationUtil {
                 }
             }
         });
-    }
-
-    private static void createTIThermisterPoints(String tiEquipRef,String nodeAddress){
-        Log.d("TIThermistor","createTIThermisterPoints");
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
-        String siteRef = siteMap.get(Tags.ID).toString();
-        String siteDis = siteMap.get("dis").toString();
-        String equipDis = siteDis + "-TI-" + nodeAddress;
-        String tz = siteMap.get("tz").toString();
-        Point mainSensor = new Point.Builder()
-                .setDisplayName(equipDis+"-mainTemperatureSensor")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("main").addMarker("current").addMarker("temperature").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String mainSensorId = CCUHsApi.getInstance().addPoint(mainSensor);
-        hayStack.writeDefaultValById(mainSensorId, 1.0);
-
-        Point th1Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th1")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th1").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String th1ConfigId = CCUHsApi.getInstance().addPoint(th1Config);
-        hayStack.writeDefaultValById(th1ConfigId, 0.0);
-
-        Point th2Config = new Point.Builder()
-                .setDisplayName(equipDis+"-th2")
-                .setEquipRef(tiEquipRef)
-                .setSiteRef(siteRef)
-                .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
-                .addMarker("th2").addMarker("sp").addMarker("enable")
-                .setGroup((nodeAddress))
-                .setTz(tz)
-                .build();
-        String th2ConfigId =CCUHsApi.getInstance().addPoint(th2Config);
-        hayStack.writeDefaultValById(th2ConfigId, 0.0);
-
-        HashMap<Object,Object> currentTemp = hayStack.readEntity("point and current and " +
-                "temp and ti and equipRef == \""+tiEquipRef+"\"");
-        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH1_IN.name(), false);
-        ControlMote.setPointEnabled(Integer.valueOf(nodeAddress), Port.TH2_IN.name(), false);
-        ControlMote.updatePhysicalPointRef(Integer.valueOf(nodeAddress), Port.SENSOR_RT.name(), currentTemp.get("id").toString());
-
-        Log.d("TIThermistor","createTIThermisterPoints completed");
     }
 
     private static void updateScheduleRefForZones(CCUHsApi hayStack){
@@ -2063,6 +1991,29 @@ public class MigrationUtil {
 
     }
 
+    private static void removeDuplicateCoolingLockoutTuner(CCUHsApi hayStack) {
+        HashMap<Object, Object> systemEquip = hayStack.readEntity("system and equip and vav");
+        //Vav System Equip does not exist, no migration needed.
+        if (systemEquip.isEmpty()) {
+            return;
+        }
+
+        ArrayList<HashMap<Object, Object>> coolingLockoutTempTuner = hayStack.readAllEntities("tuner and " +
+                "system and outsideTemp and cooling and lockout and equipRef == \"" + systemEquip.get("id").toString() + "\"");
+
+        if (coolingLockoutTempTuner.size() > 1) {
+            coolingLockoutTempTuner.remove(0);
+            coolingLockoutTempTuner.forEach(point -> hayStack.deleteEntityTree(point.get("id").toString()));
+        }
+
+        ArrayList<HashMap<Object, Object>> heatingLockoutTempTuner = hayStack.readAllEntities("tuner and " +
+                "system and outsideTemp and heating and lockout and equipRef == \"" + systemEquip.get("id").toString() + "\"");
+
+        if (heatingLockoutTempTuner.size() > 1) {
+            heatingLockoutTempTuner.remove(0);
+            heatingLockoutTempTuner.forEach(point -> hayStack.deleteEntityTree(point.get("id").toString()));
+        }
+    }
     private static void removeWritableTagForFloor() {
         ArrayList<HashMap<Object, Object>> floors = CCUHsApi.getInstance().readAllEntities("floor");
         floors.forEach(floorMap -> {

@@ -21,31 +21,31 @@ class EntityMapper (private val modelDef: ModelDef) {
         entityConfiguration.tobeAdded.addAll(getEnabledDependencies(configuration).map { EntityConfig(it)})
     }
 
-    private fun getBasePoints() : List<ModelPointDef> {
+    fun getBasePoints() : List<ModelPointDef> {
         return modelDef.points.filter {
                 point -> point.configuration?.configurationType == PointConfiguration.ConfigType.BASE
         }
     }
 
-    private fun getAssociationPoints() : List<ModelPointDef> {
+    fun getAssociationPoints() : List<ModelPointDef> {
         return modelDef.points.filter {
                 point -> point.configuration?.configurationType == PointConfiguration.ConfigType.ASSOCIATION
         }
     }
 
-    private fun getDependentPoints() : List<ModelPointDef> {
+    fun getDependentPoints() : List<ModelPointDef> {
         return modelDef.points.filter {
                 point -> point.configuration?.configurationType == PointConfiguration.ConfigType.DEPENDENT
         }
     }
 
-    private fun getAssociatedPoints() : List<ModelPointDef> {
+    fun getAssociatedPoints() : List<ModelPointDef> {
         return modelDef.points.filter {
                 point -> point.configuration?.configurationType == PointConfiguration.ConfigType.ASSOCIATED
         }
     }
 
-    private fun getDynamicSensorPoints() : List<ModelPointDef> {
+    fun getDynamicSensorPoints() : List<ModelPointDef> {
         return modelDef.points.filter {
                 point -> point.configuration?.configurationType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
         }
@@ -58,12 +58,12 @@ class EntityMapper (private val modelDef: ModelDef) {
         return point
     }
 
-    private fun getAssociatedPoints(configuration: ModelDef) : List<ModelPointDef> {
+    fun getAssociatedPoints(configuration: ModelDef) : List<ModelPointDef> {
         return modelDef.points.filter { point -> point.tags.find { it.name.contains("associated") } != null }
 
     }
 
-    private fun getPointByDomainName(name : String) : ModelPointDef? {
+    fun getPointByDomainName(name : String) : ModelPointDef? {
         return modelDef.points.find { it.domainName == name }
     }
 

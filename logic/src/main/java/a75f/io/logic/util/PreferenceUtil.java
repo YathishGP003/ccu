@@ -81,6 +81,7 @@ public class PreferenceUtil {
 
     private static final String KIND_CORRECTION ="Kind_Correction";
 
+    private static final String REMOTE_DUP_COOLING_LOCKOUT_TUNER = "removeDupCoolingLockoutTuner";
     public static void setContext(Context c) {
         context= c;
     }
@@ -670,5 +671,12 @@ public class PreferenceUtil {
     }
     public static boolean getScheduleMigration() {
         return getBooleanPreference(SCHEDULES_MIGRATION);
+    }
+
+    public static void setRemoveDupCoolingLockoutTuner() {
+        setBooleanPreference(REMOTE_DUP_COOLING_LOCKOUT_TUNER, true);
+    }
+    public static boolean getRemoveDupCoolingLockoutTuner() {
+        return getBooleanPreference(REMOTE_DUP_COOLING_LOCKOUT_TUNER);
     }
 }

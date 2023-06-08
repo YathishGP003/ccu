@@ -494,6 +494,10 @@ public class CCUTagsDb extends HServer {
             equip.add("lastModifiedBy", q.getLastModifiedBy());
         }
 
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
+        }
+
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -541,6 +545,9 @@ public class CCUTagsDb extends HServer {
         }
         if(q.getModel() != null){
             equip.add("model",q.getModel());
+        }
+        if (q.getDomainName() != null) {
+            equip.add("domainName", q.getDomainName());
         }
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -593,6 +600,10 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -636,7 +647,9 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -688,7 +701,9 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -737,6 +752,9 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -775,6 +793,9 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -810,7 +831,9 @@ public class CCUTagsDb extends HServer {
         if(p.getLastModifiedBy() != null){
             b.add("lastModifiedBy", p.getLastModifiedBy());
         }
-
+        if (p.getDomainName() != null) {
+            b.add("domainName", p.getDomainName());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -849,7 +872,9 @@ public class CCUTagsDb extends HServer {
         if(d.getLastModifiedBy() != null){
             b.add("lastModifiedBy", d.getLastModifiedBy());
         }
-
+        if (d.getDomainName() != null) {
+            b.add("domainName", d.getDomainName());
+        }
         for (String m : d.getMarkers()) {
             b.add(m);
         }
@@ -885,7 +910,9 @@ public class CCUTagsDb extends HServer {
         if(d.getLastModifiedBy() != null){
             b.add("lastModifiedBy", d.getLastModifiedBy());
         }
-
+        if (d.getDomainName() != null) {
+            b.add("domainName", d.getDomainName());
+        }
         for (String m : d.getMarkers()) {
             b.add(m);
         }

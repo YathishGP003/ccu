@@ -68,15 +68,14 @@ class ModelTest {
 
             val enabledAssociations = entityMapper.getEnabledAssociations(getTestProfileConfig())
             println("Enabled Associations")
-            enabledAssociations.forEach { println(it.domainName) }
+            enabledAssociations.forEach { println(it) }
             assert(enabledAssociations.size == 1)
 
             val enabledDependencies = entityMapper.getEnabledDependencies(getTestProfileConfig())
             println("Enabled Dependencies")
-            enabledDependencies.forEach { println(it.domainName) }
+            enabledDependencies.forEach { println(it) }
             assert(enabledDependencies.size == 1)
         }
-
 
     }
 

@@ -88,6 +88,7 @@ import javax.inject.Inject;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.DeviceUpdateJob;
+import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
@@ -264,6 +265,7 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
         FileBackupService.scheduleFileBackupServiceJob(context);
+        EveryDaySchedulerService.scheduleJobForDay(context);
 
         initMessaging();
         OtaCache cache = new OtaCache();
@@ -320,6 +322,8 @@ public abstract class UtilityApplication extends Application {
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            RenatusApp.rebootTablet();
         }
     }
     private List<String> getCrashTimestampsWithinLastHour() {

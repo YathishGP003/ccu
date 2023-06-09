@@ -275,9 +275,9 @@ public class RestoreCCU {
         if(equipGrid  == null){
             throw new NullHGridException("Null occurred while fetching modbus");
         }
-        getDeviceFromEquip(equipGrid, deviceCount, equipResponseCallback, retryCountCallback);
+        getDeviceFromEquip(equipId, equipGrid, deviceCount, equipResponseCallback, replaceCCUTracker,
+                retryCountCallback);
         L.saveCCUState();
-        replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
     }
 
     public void setStartingPairAddress(AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
@@ -322,8 +322,9 @@ public class RestoreCCU {
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
     }
 
-    private void getDeviceFromEquip(HGrid equipGrid, AtomicInteger deviceCount,
-                                    EquipResponseCallback equipResponseCallback, RetryCountCallback retryCountCallback) {
+    private void getDeviceFromEquip(String equipId, HGrid equipGrid, AtomicInteger deviceCount,
+                                    EquipResponseCallback equipResponseCallback, ReplaceCCUTracker replaceCCUTracker,
+                                    RetryCountCallback retryCountCallback) {
         if(equipGrid != null){
             Iterator equipGridIterator = equipGrid.iterator();
             while(equipGridIterator.hasNext()){
@@ -332,8 +333,8 @@ public class RestoreCCU {
                 if(equipRow.has(Tags.MODBUS)){
                     saveToBox(equipRow);
                 }
-                getDevicesFromEquips(equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
-                        retryCountCallback);
+                getDevicesFromEquips(equipId, equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
+                        replaceCCUTracker, retryCountCallback);
             }
         }
     }
@@ -423,8 +424,9 @@ public class RestoreCCU {
         return restoreCCUHsApi.getEquip(equipId, retryCountCallback);
     }
 
-    private void getDevicesFromEquips(String equipRef, AtomicInteger deviceCount,
-                                      EquipResponseCallback equipResponseCallback, RetryCountCallback retryCountCallback){
+    private void getDevicesFromEquips(String equipId, String equipRef, AtomicInteger deviceCount,
+                                      EquipResponseCallback equipResponseCallback,
+                                      ReplaceCCUTracker replaceCCUTracker,RetryCountCallback retryCountCallback){
         HGrid deviceGrid = restoreCCUHsApi.getDevice(equipRef, retryCountCallback);
         if(deviceGrid == null){
             throw new NullHGridException("Null occurred while fetching device.");
@@ -433,6 +435,7 @@ public class RestoreCCU {
         while(deviceGridIterator.hasNext()) {
             HRow zoneDeviceRow = (HRow) deviceGridIterator.next();
             getDeviceAndPoints(zoneDeviceRow, retryCountCallback);
+            replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
             equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
         }
     }

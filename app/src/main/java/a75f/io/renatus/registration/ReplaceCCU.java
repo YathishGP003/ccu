@@ -458,7 +458,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         EquipResponseCallback equipResponseCallback = getEquipResponseCallback(ccu);
 
         currentReplacementProgress.values().forEach(v ->{
-            if(((String) v).equals(ReplaceStatus.COMPLETED.toString())){
+            if(v.equals(ReplaceStatus.COMPLETED.toString())){
                 equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
             }
         });
@@ -514,8 +514,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private void replaceEquipsParallelly(ReplaceCCUTracker replaceCCUTracker, EquipResponseCallback equipResponseCallback,
                                          ConcurrentHashMap<String, ?> currentReplacementProgress,
                                          RetryCountCallback retryCountCallback) {
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()
-                -1);
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() -1);
         for (String equipId : currentReplacementProgress.keySet()) {
             if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.COMPLETED.toString())){
                 continue;

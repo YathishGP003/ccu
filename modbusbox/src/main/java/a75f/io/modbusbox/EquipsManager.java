@@ -118,5 +118,8 @@ public class EquipsManager
         return modbusSubEquipList;
     }
 
+    public void readExternalJSONFiles(){
+        processor.readExternalJsonData();
+    }
 }
 

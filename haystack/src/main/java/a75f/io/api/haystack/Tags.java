@@ -159,6 +159,9 @@ public class Tags
     public static final String HUMIDITY = "humidity";
     public static final String VOC = "voc";
     public static final String PM2P5 = "pm2p5";
+    public static final String HVAC_MODE = "hvacMode";
+    public static final String ZONE_HVAC_MODE = "zoneHvacMode";
+    public static final String OCCUPANCY_STATE = "occupancyState";
 
     public static final String TZ = "tz";
     public static final String HELIO_NODE = "helionode";

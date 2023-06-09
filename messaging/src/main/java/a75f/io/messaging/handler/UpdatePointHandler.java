@@ -98,8 +98,10 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isSSEConfig(pointUid, CCUHsApi.getInstance())) {
-            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, ccuHsApi);
             updatePoints(localPoint);
+            SSEConfigHandler.updateTemperatureMode(localPoint, ccuHsApi);
             return;
         }
 

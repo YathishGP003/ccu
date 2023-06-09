@@ -1,5 +1,6 @@
 package a75f.io.logic.util;
 
+import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
@@ -62,6 +63,9 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.ccu.restore.CCU;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -271,6 +275,10 @@ public class MigrationUtil {
             PreferenceUtil.setFreeInternalDiskStorageMigration();
         }
 
+        if (!PreferenceUtil.isZonesMigratedForSingleAndDualTempSupport()) {
+            addSingleAndDualTempSupportForAllZones(CCUHsApi.getInstance());
+            PreferenceUtil.setZonesMigratedForSingleAndDualTempSupport();
+        }
         if(!PreferenceUtil.getCcuRefTagMigration()){
             Log.i(TAG, "ccuRef migration started");
             CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
@@ -303,6 +311,12 @@ public class MigrationUtil {
             PreferenceUtil.setStaticPressureSpTrimMigration();
         }
 
+        if (!PreferenceUtil.getOccupancyModePointMigration()) {
+            Log.i("CCU_MIGRATION","start migration for occupancy mode");
+            migrateOccupancyStatePoint(CCUHsApi.getInstance());
+            Log.i("CCU_MIGRATION","end migration for occupancy mode");
+            PreferenceUtil.setOccupancyModePointMigration();
+        }
         if (!PreferenceUtil.getMinorTagMigration()) {
             MinorTagMigration(CCUHsApi.getInstance());
             PreferenceUtil.setMinorTagMigration();
@@ -407,8 +421,6 @@ public class MigrationUtil {
 
     private static void updateKind(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");
-
-
         for (HashMap<Object, Object> hyperstatEquip :
                 hyperstatEquips) {
             String equipRef = hyperstatEquip.get(Tags.ID).toString();
@@ -419,16 +431,11 @@ public class MigrationUtil {
                     ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
                 }
             }
-
-
             ArrayList<HashMap<Object, Object>> scheduleTypes = ccuHsApi.readAllEntities("scheduleType and message and equipRef == \"" + equipRef + "\"");
             for (HashMap<Object, Object> scheduleType : scheduleTypes) {
                 Point updatedPoint = new Point.Builder().setHashMap(scheduleType).removeMarker(Tags.MESSAGE).build();
                 ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
-
             }
-
-
         }
 
         ccuHsApi.scheduleSync();
@@ -1714,6 +1721,15 @@ public class MigrationUtil {
         }
     }
 
+    private static void addSingleAndDualTempSupportForAllZones(CCUHsApi ccuHsApi){
+        ArrayList<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        rooms.forEach(room->{
+            Zone zone = new Zone.Builder().setHashMap(room).build();
+            ccuHsApi.addZoneTemperatureModePoint(zone.getId(), zone);
+            DesiredTempDisplayMode.setModeType(zone.getId(), ccuHsApi);
+        });
+    }
+
     private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
@@ -1751,6 +1767,20 @@ public class MigrationUtil {
         hayStack.scheduleSync();
     }
 
+    private static void migrateOccupancyStatePoint(CCUHsApi hayStack){
+        Log.i("CCU_MIGRATION","started migration for occupancy mode");
+        ArrayList<HashMap<Object, Object>> occStatePoints = hayStack.readAllEntities("occupancy and state");
+        Log.i("CCU_MIGRATION","All Occupancy state points "+occStatePoints);
+        occStatePoints.forEach( occState -> {
+            Point occStatePoint = new Point.Builder().setHashMap(occState).build();
+            Log.i("CCU_MIGRATION","Occupancy state points "+occStatePoint.getDisplayName());
+            if(!occStatePoint.getDisplayName().equals(OCCUPANCY_STATE)) {
+                Log.i("CCU_MIGRATION","Migrate Occupancy point "+occStatePoint.getDisplayName());
+                occStatePoint.setDisplayName(OCCUPANCY_STATE);
+                hayStack.updatePoint(occStatePoint, occStatePoint.getId());
+            }
+        });
+    }
      /**
       * This is need to recover from few CCUs having a corrupted named scheduled with "building" tag.
       * The corrupted schedules were removed from backend. But some CCUs in the field are still

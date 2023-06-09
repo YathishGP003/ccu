@@ -39,6 +39,7 @@ import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.device.mesh.MeshUtil.getSetTemp;
 import static a75f.io.device.serial.DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT;
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
@@ -409,7 +410,7 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));
+            controls_t.setTemperature.set((short) (getSetTemp(equipRef) * 2));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
     
         }
@@ -650,7 +651,8 @@ public class LSmartNode
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }
-            controlsMessage.controls.setTemperature.set((short) (getDesiredTemp(Short.parseShort(node)) * 2));
+            Equip equip = HSUtil.getEquipForModule((Short) device.get("id"));
+            controlsMessage.controls.setTemperature.set((short) (getSetTemp(equip.getId()) * 2));
             controlsMessage.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
         }
         return controlsMessage;

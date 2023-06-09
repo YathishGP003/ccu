@@ -1,6 +1,9 @@
 package a75f.io.renatus;
 
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
+
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -136,6 +139,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                         systemProfile = new VavStagedRtu();
                         systemProfile.addSystemEquip();
                         L.ccu().systemProfile = systemProfile;
+                        setSystemModeForVav(CCUHsApi.getInstance());
                         return null;
                     }
 

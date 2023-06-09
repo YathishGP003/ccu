@@ -78,6 +78,8 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -944,7 +946,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
 					if (isCelsiusTunerAvailableStatus()) {
-						occupancyStatus.setText(StatusCelsiusVal(ScheduleManager.getInstance().getSystemStatusString()));
+						occupancyStatus.setText(StatusCelsiusVal(ScheduleManager.getInstance()
+								.getSystemStatusString(), TemperatureMode.DUAL.ordinal()));
 					} else {
 						occupancyStatus.setText(ScheduleManager.getInstance().getSystemStatusString());
 					}

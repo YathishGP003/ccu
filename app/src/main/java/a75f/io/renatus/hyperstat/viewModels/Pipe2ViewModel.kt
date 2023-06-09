@@ -1,5 +1,6 @@
 package a75f.io.renatus.hyperstat.viewModels
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -8,6 +9,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Configuration
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2AnalogOutAssociation
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.R
 import android.app.Application
 
@@ -75,7 +77,7 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
         // Saving profile details
         L.ccu().zoneProfiles.add(hyperStatProfile)
         L.saveCCUState()
-
+        DesiredTempDisplayMode.setModeType(roomName, CCUHsApi.getInstance())
     }
 
     override fun getRelayMapping(): Array<String> {

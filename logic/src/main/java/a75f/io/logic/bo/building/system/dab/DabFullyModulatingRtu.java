@@ -33,6 +33,7 @@ import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteAnalog4
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteConfigPoints;
 import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.deleteLoopOutputPoints;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
 {
@@ -918,6 +919,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
 
             CCUHsApi.getInstance().scheduleSync();
         }
+        setSystemModeForDab(CCUHsApi.getInstance());
     }
     
     /**

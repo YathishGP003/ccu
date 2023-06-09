@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.sse.SingleStageEquip;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -274,6 +275,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                     protected Void doInBackground( final String ... params ) {
                         setupSSEZoneProfile();
                         L.saveCCUState();
+                        DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
                         return null;
                     }
 

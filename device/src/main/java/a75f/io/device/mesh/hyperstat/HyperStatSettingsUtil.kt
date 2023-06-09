@@ -6,6 +6,7 @@ import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -369,6 +370,21 @@ class HyperStatSettingsUtil {
             return field
 
         }
+        // Below method returns query based on DesiredTempMode
+        fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+            return if (mode == TemperatureMode.COOLING) {
+                "cooling and user and limit and $query"
+            } else {
+                "heating and user and limit and $query"
+            }
+        }
 
+        fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+            return if(mode == TemperatureMode.HEATING){
+                "heating and user and limit and $query"
+            }else{
+                "cooling and user and limit and $query"
+            }
+        }
     }
 }

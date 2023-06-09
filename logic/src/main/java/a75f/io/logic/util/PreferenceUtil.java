@@ -66,8 +66,10 @@ public class PreferenceUtil {
     private static final String DAB_REHEAT_SUPPORT = "dabReheatSupport";
     private static final String SSE_FAN_STAGE_MIGRATION = "sseFanStageMigration";
 
+    private static final String SINGLE_AND_DUAL_TEMP_SUPPORT="singleAndDualTempSupport";
     private static final String REMOVE_CORRUPTED_NAMED_SCHEDULE = "removeCorruptedNamedSchedule";
     private static final String TI_PROFILE_MIGRATION = "ti_profile_migration";
+    private static final String OCCUPANCY_MODE_POINT_MIGRATION = "occupancy_mode_point_migration";
 
     private static final String DAB_REHEAT_STAGE2_FIX_MIGRATION = "dabReheatStage2FixMigration";
 
@@ -522,6 +524,13 @@ public class PreferenceUtil {
     public static void setSmartNodeDamperMigration() {
         setBooleanPreference(SMART_NODE_DAMPER_MIGRATION,true);
     }
+
+    public static boolean isZonesMigratedForSingleAndDualTempSupport() {
+        return getBooleanPreference(SINGLE_AND_DUAL_TEMP_SUPPORT);
+    }
+    public static void setZonesMigratedForSingleAndDualTempSupport() {
+        setBooleanPreference(SINGLE_AND_DUAL_TEMP_SUPPORT,true);
+    }
     public static boolean getSSEFanStageMigration() {
         return getBooleanPreference(SSE_FAN_STAGE_MIGRATION);
     }
@@ -542,6 +551,14 @@ public class PreferenceUtil {
 
     public static void setStaticPressureSpTrimMigration() {
         setBooleanPreference(STATIC_SP_TRIM_MIGRATION, true);
+    }
+
+    public static boolean getOccupancyModePointMigration() {
+        return getBooleanPreference(OCCUPANCY_MODE_POINT_MIGRATION);
+    }
+
+    public static void setOccupancyModePointMigration() {
+        setBooleanPreference(OCCUPANCY_MODE_POINT_MIGRATION, true);
     }
 
     public static boolean getNewOccupancyMode() {

@@ -1,6 +1,6 @@
 package a75f.io.renatus.hyperstat.viewModels
 
-import a75f.io.logger.CcuLog
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -8,9 +8,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.vrv.VrvMasterController
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.R
-import a75f.io.renatus.hyperstat.vrv.canEnableMasterControllerMode
 import android.app.Application
 import android.content.Context
 import android.graphics.Color
@@ -18,7 +17,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import kotlinx.android.synthetic.main.fragment_cpu_config.view.*
 
 /**
  * Created by Manjunath K on 28-12-2022.
@@ -95,6 +93,7 @@ class HpuViewModel(application: Application) : HyperStatViewModel(application) {
         // Saving profile details
         L.ccu().zoneProfiles.add(hyperStatProfile)
         L.saveCCUState()
+        DesiredTempDisplayMode.setModeType(roomName, CCUHsApi.getInstance())
     }
 
     private fun initialViewState(address: Short): ViewState {

@@ -8,19 +8,13 @@ import com.x75f.modbus4j.serial.rtu.RtuMessageResponse;
 import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Device;
-import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.modbus.Register;
-import a75f.io.device.mesh.DLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.Port;
 
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
@@ -86,10 +80,12 @@ public class ModbusPulse {
     private static void updateResponseToHaystack(int slaveid, RtuMessageResponse response,byte registerType){
         //EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfile(slaveid);
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap device = hayStack.read("device and addr == \""+slaveid+"\"");
-        if (device != null && device.size() > 0) {
-            updateModbusRespone(device.get("id").toString(), response, registerType);
-            updateHeartBeatPoint(slaveid, hayStack);
+        List<HashMap<Object, Object>> deviceList = hayStack.readAllEntities("device and addr == \""+slaveid+"\"");
+        for(HashMap<Object, Object> device : deviceList) {
+            if (device.size() > 0) {
+                updateModbusRespone(device.get("id").toString(), response, registerType);
+                updateHeartBeatPoint(slaveid, hayStack);
+            }
         }
     }
 

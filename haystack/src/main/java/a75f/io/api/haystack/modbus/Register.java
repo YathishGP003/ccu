@@ -1,6 +1,5 @@
 package a75f.io.api.haystack.modbus;
 
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
@@ -10,9 +9,7 @@ import com.google.gson.reflect.TypeToken;
 import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
-import io.objectbox.annotation.Index;
 import io.objectbox.converter.PropertyConverter;
-import io.objectbox.relation.ToMany;
 
 import java.util.List;
 @Entity

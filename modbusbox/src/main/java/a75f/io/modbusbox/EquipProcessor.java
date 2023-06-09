@@ -152,11 +152,11 @@ public class EquipProcessor
         }
     }
 
-    public EquipmentDevice getConfig(String equipRef){
+    /*public EquipmentDevice getConfig(String equipRef){
         QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
         configQuery.equal(EquipmentDevice_.equipRef, equipRef);
         return configQuery.build().findFirst();
-    }
+    }*/
     public EquipmentDevice getEquipBySlave(int slaveId){
         QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
         configQuery.equal(EquipmentDevice_.slaveId, slaveId);

@@ -1030,6 +1030,7 @@
     <string name="title_temperature_setpoint">Temperature Setpoint</string>
     <string name="title_heater_on_off_status">Heater ON/OFF status</string>
     <string name="title_humidity_setpoint">Humidity Setpoint</string>
+    <string name="title_select_all_params">Select All Parameters</string>
 
     <string-array name="equipment_type">
         <item>Company PAC model 1</item>

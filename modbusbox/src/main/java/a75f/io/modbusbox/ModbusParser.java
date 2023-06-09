@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +41,7 @@ public class ModbusParser {
             fileList = c.getAssets().list("modbus");
             for (String filename : fileList) {
                 String equipJson = readFileFromAssets(c, "modbus/" + filename);
-                EquipmentDevice device =parseModbusDataFromString(equipJson);
+                EquipmentDevice device = parseModbusDataFromString(equipJson);
                 deviceList.add(device);
                 assetEquipments.add(device);
             }

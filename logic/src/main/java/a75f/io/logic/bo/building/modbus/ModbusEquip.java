@@ -47,7 +47,13 @@ public class ModbusEquip {
         }
     }
 
-    public void createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo, List<Parameter> configParams) {
+    public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
+                                 List<Parameter> configParams) {
+     return createEntities(floorRef, roomRef, equipmentInfo, configParams, null, false);
+    }
+
+    public String createEntities(String floorRef, String roomRef, EquipmentDevice equipmentInfo,
+                               List<Parameter> configParams, String parentEquipId, boolean isSlaveIdSameAsParent) {
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -60,7 +66,7 @@ public class ModbusEquip {
             modbusEquipType = modbusEquipTypes.get(0);
         }
         String modbusName = equipmentInfo.getName();
-        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
+        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + equipmentInfo.getSlaveId();
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
@@ -75,7 +81,10 @@ public class ModbusEquip {
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
                     .addMarker("equip").addMarker("modbus")
-                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(equipmentInfo.getSlaveId()));
+        if (parentEquipId != null) {
+            mbEquip.setEquipRef(parentEquipId);
+        }
 
         for (String equip :
                 modbusEquipTypes) {
@@ -96,23 +105,31 @@ public class ModbusEquip {
 
             mbEquip.setModel(equipmentInfo.getModelNumbers().get(0));
         }
-        equipRef = hayStack.addEquip(mbEquip.build());
+        if (equipmentInfo.getCell() != null) {
+            mbEquip.setCell(equipmentInfo.getCell());
+        }
+        if (equipmentInfo.getCapacity() != null) {
+            mbEquip.setCapacity(equipmentInfo.getCapacity());
+        }
+        String equipmentRef = hayStack.addEquip(mbEquip.build());
 
         String zoneMarker = "";
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             zoneMarker = "zone";
         }
-        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, slaveId, "modbus", profileType,  tz));
+        if(!isSlaveIdSameAsParent) {
+            CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
+                    siteRef, roomRef, floorRef, equipmentInfo.getSlaveId(), "modbus", profileType, tz));
+        }
         Point equipScheduleType = new Point.Builder()
-                    .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
-                    .setEquipRef(equipRef)
+                    .setDisplayName(siteDis+"-"+modbusEquipType+"-"+equipmentInfo.getSlaveId()+"-scheduleType")
+                    .setEquipRef(equipmentRef)
                     .setSiteRef(siteRef)
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef).setHisInterpolate("cov")
                     .addMarker(modbusEquipType.toLowerCase()).addMarker("modbus").addMarker("scheduleType").addMarker("writable").addMarker("his")
                     .addMarker(zoneMarker)
-                    .setGroup(String.valueOf(slaveId))
+                    .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                     .setEnums("building,named")
                     .setTz(tz).build();
 
@@ -121,12 +138,12 @@ public class ModbusEquip {
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
         Device modbusDevice = new Device.Builder()
-                .setDisplayName(modbusEquipType+"-"+slaveId)
+                .setDisplayName(modbusEquipType+"-"+equipmentInfo.getSlaveId())
                 .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("his")
-                .setAddr(slaveId)
+                .setAddr(equipmentInfo.getSlaveId())
                 .setSiteRef(siteRef)
                 .setFloorRef(floorRef)
-                .setEquipRef(equipRef)
+                .setEquipRef(equipmentRef)
                 .setRoomRef(roomRef)
                 .build();
         String deviceRef = CCUHsApi.getInstance().addDevice(modbusDevice);
@@ -135,11 +152,11 @@ public class ModbusEquip {
             Point.Builder logicalParamPoint = new Point.Builder()
                         .setDisplayName(equipDis+"-"+configParam.getName())
                         .setShortDis(configParam.getName())
-                        .setEquipRef(equipRef)
+                        .setEquipRef(equipmentRef)
                         .setSiteRef(siteRef)
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef).addMarker("logical").addMarker("modbus")
-                        .setGroup(String.valueOf(slaveId))
+                        .setGroup(String.valueOf(equipmentInfo.getSlaveId()))
                         .setTz(tz);
             if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
                  logicalParamPoint.addMarker("zone");
@@ -293,6 +310,7 @@ public class ModbusEquip {
 
         }
         CCUHsApi.getInstance().syncEntityTree();
+        return equipmentRef;
     }
 
     public void updateHaystackPoints(String equipRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
@@ -356,15 +374,6 @@ public class ModbusEquip {
 
             return null;
         }
-    }
-    public void setHisVal(String query, double val)
-    {
-        hayStack.writeHisValByQuery( query+" and equipRef == \""+equipRef+"\"", val);
-    }
-
-    public double getHisVal(String query)
-    {
-        return hayStack.readHisValByQuery( query+" and equipRef == \""+equipRef+"\"");
     }
 
     public static boolean isEquipTypeInUpperCase(String str) {

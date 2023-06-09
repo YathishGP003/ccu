@@ -20,7 +20,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.data.message.MessageDbUtilKt;
@@ -35,7 +37,10 @@ public class UpdateEntityHandler implements MessageHandler {
             CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
             String uid = msgJson.toString().replaceAll("\"", "");
             HashMap<Object,Object> entity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
-            if(entity.get("room") != null){
+            if(entity.get(Tags.MODBUS) != null && entity.get(Tags.EQUIP) != null){
+                updatePipeRefForModbusEquip(uid, entity);
+            }
+            else if(entity.get("room") != null){
                 updateNamedSchedule(entity,uid);
             }
             else if (entity.get("floor") != null) {
@@ -61,6 +66,25 @@ public class UpdateEntityHandler implements MessageHandler {
             }
         });
 
+    }
+
+    private static void updatePipeRefForModbusEquip(String uid, HashMap<Object, Object> entity) {
+        HDictBuilder b = new HDictBuilder().add(Tags.ID, HRef.copy(uid));
+        HDict[] dictArr  = {b.toDict()};
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read",
+                HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        if (response != null) {
+            HZincReader hZincReader = new HZincReader(response);
+            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+            while (hZincReaderIterator.hasNext()) {
+                HRow row = (HRow) hZincReaderIterator.next();
+                if(row.has(Tags.PIPEREF)) {
+                    entity.put(Tags.PIPEREF, row.get(Tags.PIPEREF).toString());
+                    Equip modbusEquip = new Equip.Builder().setHashMap(entity).build();
+                    CCUHsApi.getInstance().updateEquipLocally(modbusEquip, modbusEquip.getId());
+                }
+            }
+        }
     }
 
     private static void updateNamedSchedule(HashMap<Object,Object> entity,String uid) {

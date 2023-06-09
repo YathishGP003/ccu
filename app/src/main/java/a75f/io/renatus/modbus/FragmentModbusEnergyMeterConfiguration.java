@@ -11,11 +11,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,6 +86,11 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
 
     @BindView(R.id.textTitleFragment)
     TextView tvtitle;
+
+    @BindView(R.id.toggleSelectAllParams)
+    ToggleButton toggleSelectAllParams;
+
+    private CompoundButton.OnCheckedChangeListener toggleButtonChangeListener;
     List<EquipmentDevice> equipmentDeviceCollection;
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     boolean isEditConfig = false;
@@ -118,6 +125,14 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             }
         });
         equipmentDeviceCollection  = EquipsManager.getInstance().getEnergyMeterEquipments();
+
+        toggleButtonChangeListener = (compoundButton, isChecked) -> {
+            for(Parameter parameter : recyclerModbusParamAdapter.modbusParam) {
+                parameter.setDisplayInUI(isChecked);
+            }
+            recyclerModbusParamAdapter.notifyDataSetChanged();
+        };
+        toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
         return view;
     }
     @Override
@@ -236,7 +251,16 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             paramHeader1.setVisibility(View.VISIBLE);
             paramHeader2.setVisibility(View.GONE);
         }
-        recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig);
+
+        SelectAllParameters selectAllParameters = enable -> {
+            if(!enable) {
+                toggleSelectAllParams.setOnCheckedChangeListener(null);
+                toggleSelectAllParams.setChecked(false);
+                toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+            }
+        };
+
+        recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(getActivity(), parameterList, isNewConfig, selectAllParameters);
         recyclerParams.setLayoutManager(gridLayoutManager);
         recyclerParams.setAdapter(recyclerModbusParamAdapter);
         recyclerParams.invalidate();
@@ -404,7 +428,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             modbusDevice.setId(0);
             modbusDevice.setPaired(true);
         }
-        modbusDevice.setEquipRef(equipRef);
+        modbusDevice.setDeviceEquipRef(equipRef);
         modbusDevice.setZoneRef(zoneRef);
         modbusDevice.setFloorRef(floorRef);
         modbusDevice.setSlaveId(slaveId);

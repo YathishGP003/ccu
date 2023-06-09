@@ -398,7 +398,7 @@ public class RestoreCCU {
         modbusDevice.setPaired(true);
         String zoneRef = equipRow.get("roomRef").toString().replace("@SYSTEM","SYSTEM");
         String floorRef = equipRow.get("floorRef").toString().replace("@SYSTEM","SYSTEM");
-        modbusDevice.setEquipRef(equipRow.get("id").toString());
+        modbusDevice.setDeviceEquipRef(equipRow.get("id").toString());
         modbusDevice.setZoneRef(zoneRef);
         modbusDevice.setFloorRef(floorRef);
         modbusDevice.setSlaveId(Integer.parseInt(equipRow.get("group").toString()));

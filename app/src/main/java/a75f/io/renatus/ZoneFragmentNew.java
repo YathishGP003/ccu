@@ -60,13 +60,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.javolution.text.Text;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Interval;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -2266,6 +2266,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             ll_schedule.setVisibility(View.GONE);
 
                             List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
+                            HashMap<Object, Object> parentModbusEquip = CCUHsApi.getInstance().readEntity("equip " +
+                                    "and not equipRef and roomRef  == " + "\""+nonTempEquip.getRoomRef()+"\"");
+
+                            for(EquipmentDevice equipmentDevice : modbusDevices){
+                                if(null != equipmentDevice.getEquips()) {
+                                    modbusDevices.addAll(equipmentDevice.getEquips());
+                                }
+                            }
 
                             Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
@@ -2287,22 +2295,42 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
-                                List<String> equipTypes = Arrays.asList(modbusDevices.get(i).getEquipType().split(","));
-                                String equipType = equipTypes.get(0);
-                                equipType = equipType.trim();
-                                tvEquipmentType.setText(equipType+ "("+modbusDevices.get(i).getSlaveId()+")");
+
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                                HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+                                TextView textViewUpdatedTimeHeading =
+                                        zoneDetails.findViewById(R.id.last_updated);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
-                                textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+
+                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
+                                String[] equipTypes = modbusDevices.get(i).getEquipType().split(",");
+                                StringBuffer equipString = new StringBuffer();
+                                for(String equipType : equipTypes){
+                                    equipString.append(StringUtils.capitalize(equipType.trim()));
+                                    equipString.append(" ");
+                                }
+                                tvEquipmentType.setText(equipString.toString().trim()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                if((Integer.parseInt(parentModbusEquip.get("group").toString()) == modbusDevices.get(i).getSlaveId() &&
+                                null == modbusDevices.get(i).getEquipRef()) ||
+                                        (Integer.parseInt(parentModbusEquip.get("group").toString()) != modbusDevices.get(i).getSlaveId())) {
+                                    textViewModule.setVisibility(View.VISIBLE);
+                                    textViewUpdatedTimeHeading.setVisibility(View.VISIBLE);
+                                    textViewUpdatedTime.setVisibility(View.VISIBLE);
+                                    HeartBeatUtil.moduleStatus(textViewModule,
+                                            Integer.toString(modbusDevices.get(i).getSlaveId()));
+                                    textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(
+                                            Integer.toString(modbusDevices.get(i).getSlaveId())));
+                                }
+                                else{
+                                    textViewModule.setVisibility(View.GONE);
+                                    textViewUpdatedTimeHeading.setVisibility(View.GONE);
+                                    textViewUpdatedTime.setVisibility(View.GONE);
+                                }
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
                                         new ZoneRecyclerModbusParamAdapter(getContext(),
-                                                                           modbusDevices.get(i).getEquipRef(),
-                                                                           parameterList,
-                                                                           modbusDevices.get(i).getSlaveId());
+                                                                           modbusDevices.get(i).getDeviceEquipRef(),
+                                                                           parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

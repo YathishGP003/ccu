@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -557,7 +558,7 @@ public class FloorPlanFragment extends Fragment {
 
     private void updateModules(Zone zone) {
         Log.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
-        ArrayList<Equip> zoneEquips = HSUtil.getEquips(zone.getId());
+        List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
         if (zoneEquips != null && (zoneEquips.size() > 0)) {
             mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
             getActivity().runOnUiThread(new Runnable() {
@@ -572,7 +573,7 @@ public class FloorPlanFragment extends Fragment {
         BackFillUtil.setBackFillDuration();
     }
 
-    private ArrayList<String> createAddressList(ArrayList<Equip> equips) {
+    private ArrayList<String> createAddressList(List<Equip> equips) {
         Collections.sort(equips, new ModuleComparator());
         ArrayList<String> arrayList = new ArrayList<>();
 
@@ -1316,6 +1317,11 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
                 }
+            }
+            if(HSUtil.isZoneHasSubEquips(selectedZone.getId())){
+                Toast.makeText(getActivity(), "No module can be paired as modbus with sub equips is paired",
+                        Toast.LENGTH_LONG).show();
+                return;
             }
         }
 

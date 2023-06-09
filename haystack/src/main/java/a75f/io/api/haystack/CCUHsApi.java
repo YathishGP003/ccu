@@ -452,6 +452,10 @@ public class CCUHsApi
         }
     }
 
+    public void updateEquipLocally(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
+    }
+
     public void updatePoint(RawPoint r, String id)
     {
         r.setCcuRef(getCcuId());

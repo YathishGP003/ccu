@@ -34,6 +34,8 @@ public class Point extends Entity
     private String            shortDis;
     private String ccuRef;
 
+    private String domainName;
+
     public void setDisplayName(String displayName)
     {
         this.displayName = displayName;
@@ -127,6 +129,12 @@ public class Point extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
     private Point(){
     }
 
@@ -159,6 +167,9 @@ public class Point extends Entity
         }
         private Kind kind;
         private String id;
+
+        private String domainName;
+
         public Builder setGroup(String group)
         {
             this.group = group;
@@ -270,6 +281,10 @@ public class Point extends Entity
             this.shortDis = shortDis;
             return this;
         }
+        public Builder setDomainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -294,6 +309,7 @@ public class Point extends Entity
             p.tunerGroup = this.tunerGroup;
             p.hisInterpolate = this.hisInterpolate;
             p.shortDis = this.shortDis;
+            p.domainName = this.domainName;
             return p;
         }
     
@@ -398,6 +414,10 @@ public class Point extends Entity
                 else if (pair.getKey().equals("lastModifiedBy"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
             }

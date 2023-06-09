@@ -21,6 +21,8 @@ public class Equip extends Entity
     private String createByApplication;
     private String ccuRef;
 
+    private String domainName;
+
     public String getVendor() {
         return vendor;
     }
@@ -127,6 +129,12 @@ public class Equip extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
     public static class Builder{
         private String            displayName;
         private HashSet<String> markers = new HashSet<>();
@@ -139,6 +147,8 @@ public class Equip extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+
+        private String domainName;
 
         public Builder setAhuRef(String ahuRef)
         {
@@ -247,6 +257,11 @@ public class Equip extends Entity
             this.createdByApplication = createdByApplication;
             return this;
         }
+
+        public Builder setDomainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
         public Equip build() {
             
             Equip q = new Equip();
@@ -269,6 +284,7 @@ public class Equip extends Entity
             q.setCreatedDateTime(createdDateTime);
             q.setLastModifiedDateTime(lastModifiedDateTime);
             q.setLastModifiedBy(lastModifiedBy);
+            q.setDomainName(domainName);
             return q;
         }
         
@@ -355,6 +371,10 @@ public class Equip extends Entity
                 else if (pair.getKey().equals("lastModifiedBy"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
             }

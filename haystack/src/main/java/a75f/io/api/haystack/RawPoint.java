@@ -52,6 +52,7 @@ public class RawPoint extends Entity
     private String registerType;
     private String parameterId;
 
+    private String domainName;
     public boolean getEnabled()
     {
         return enabled;
@@ -167,6 +168,12 @@ public class RawPoint extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -193,6 +200,8 @@ public class RawPoint extends Entity
         private String endBit;
         private String registerType;
         private String parameterId;
+
+        private String domainName;
         public Builder setEnabled(boolean enabled)
         {
             this.enabled = enabled;
@@ -331,6 +340,11 @@ public class RawPoint extends Entity
             this.parameterId = parameterId;
             return this;
         }
+
+        public Builder setDomainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
     
         public RawPoint build(){
             RawPoint p = new RawPoint();
@@ -361,7 +375,7 @@ public class RawPoint extends Entity
             p.endBit = this.endBit;
             p.registerType = this.registerType;
             p.parameterId = this.parameterId;
-            //CCUHsApi.getInstance().addRawPoint(p);
+            p.domainName = this.domainName;
             return p;
         }
 
@@ -487,6 +501,10 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("lastModifiedBy"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
             }

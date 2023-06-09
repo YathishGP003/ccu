@@ -37,6 +37,8 @@ public class SettingPoint extends Entity
     private String val;
     private String ccuRef;
 
+    private String domainName;
+
     public String getDisplayName()
     {
         return displayName;
@@ -74,6 +76,13 @@ public class SettingPoint extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
     public static class Builder {
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -86,6 +95,8 @@ public class SettingPoint extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
+
+        private String domainName;
 
         public Builder setVal(String val)
         {
@@ -155,6 +166,12 @@ public class SettingPoint extends Entity
             this.markers.add(marker);
             return this;
         }
+
+        public Builder setDomainName(String domainName)
+        {
+            this.domainName = domainName;
+            return this;
+        }
     
         public SettingPoint build(){
             SettingPoint p = new SettingPoint();
@@ -170,6 +187,7 @@ public class SettingPoint extends Entity
             p.id = this.id;
             p.kind = this.kind;
             p.val = this.val;
+            p.domainName = this.domainName;
             return p;
         }
     
@@ -228,7 +246,10 @@ public class SettingPoint extends Entity
                 {
                     this.lastModifiedBy = pair.getValue().toString();
                 }
-                //it.remove();
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                }
             }
             return this;
         }

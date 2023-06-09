@@ -78,7 +78,6 @@ public class ModbusPulse {
     }
 
     private static void updateResponseToHaystack(int slaveid, RtuMessageResponse response,byte registerType){
-        //EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfile(slaveid);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         List<HashMap<Object, Object>> deviceList = hayStack.readAllEntities("device and addr == \""+slaveid+"\"");
         for(HashMap<Object, Object> device : deviceList) {
@@ -90,7 +89,16 @@ public class ModbusPulse {
     }
 
     private static void updateHeartBeatPoint(int slaveId, CCUHsApi hayStack){
-        LModbus.setHeartbeatUpdateReceived(true);
+        List<HashMap<Object, Object>> equipList =
+                hayStack.readAllEntities("equip and modbus and group == \"" + slaveId +
+                        "\"");
+        for(HashMap<Object, Object> equip : equipList) {
+            HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and heartbeat and equipRef == " +
+                    "\""+equip.get("id")+ "\"");
+            if(heartBeatPoint.size() > 0){
+                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
+            }
+        }
     }
 
     private static void updateModbusRespone(String deviceRef, RtuMessageResponse response,byte registerType){

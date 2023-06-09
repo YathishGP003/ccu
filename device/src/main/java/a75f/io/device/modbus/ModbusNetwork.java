@@ -52,26 +52,10 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                     for (Register register : modbusDevice.getRegisters()) {
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
                     }
-                    if (LModbus.getHeartbeatUpdateReceived()) {
-                        updateHeartBeat((short)modbusDevice.getSlaveId(), CCUHsApi.getInstance());
-                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
-            }
-        }
-    }
-
-    private static void updateHeartBeat(int slaveId, CCUHsApi hayStack){
-        List<HashMap<Object, Object>> equipList =
-                hayStack.readAllEntities("equip and modbus and group == \"" + slaveId +
-                "\"");
-        for(HashMap<Object, Object> equip : equipList) {
-            HashMap<Object, Object> heartBeatPoint = hayStack.readEntity("point and heartbeat and equipRef == " +
-                    "\""+equip.get("id")+ "\"");
-            if(heartBeatPoint.size() > 0){
-                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(), 1.0);
             }
         }
     }

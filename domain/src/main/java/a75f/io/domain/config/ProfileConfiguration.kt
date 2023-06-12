@@ -8,7 +8,7 @@ package a75f.io.domain.config
  * Each profile shall override these methods and provide list of domainNames for further processing
  * by the framework.
  */
-abstract class ProfileConfiguration (nodeAddress : Int, nodeType : String, priority : Int) {
+abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : String, var priority : Int, var roomRef : String, var floorRef : String) {
 
 
     /**

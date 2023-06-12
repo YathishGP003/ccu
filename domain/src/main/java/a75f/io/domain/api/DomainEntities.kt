@@ -60,22 +60,22 @@ class Room(domainName : String, id : String) : Entity(domainName, id) {
     }
 }
 class Equip(domainName : String, id : String) : Entity(domainName, id) {
-    val points = mutableListOf<Point>()
+    val points = mutableMapOf<String, Point>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         if (domainName != null && id != null) {
-            points.add(Point(domainName, id))
+            points[id] = Point(domainName, id)
         }
     }
 }
 class Device(domainName : String, id : String) : Entity(domainName, id) {
-    val points = mutableListOf<RawPoint>()
+    val points = mutableMapOf<String, RawPoint>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         if (domainName != null && id != null) {
-            points.add(RawPoint(domainName, id))
+            points[id] = RawPoint(domainName, id)
         }
     }
 }

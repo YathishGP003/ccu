@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HNum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -160,6 +161,12 @@ public class Point extends Entity
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
 
+        /**
+         * Support for arbitrary KVP. This is only intended for new tags/profiles at this time.
+         * Eventually we will move other existing tags to similar format.
+         */
+        private Map<String, HNum> tags = new HashMap<>();
+
         public Builder setKind(Kind kind)
         {
             this.kind = kind;
@@ -312,7 +319,7 @@ public class Point extends Entity
             p.domainName = this.domainName;
             return p;
         }
-    
+
         public Builder setHashMap(HashMap site)
         {
             Iterator it = site.entrySet().iterator();

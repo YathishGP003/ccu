@@ -1,0 +1,438 @@
+{
+    "id": "6476b4bb2b1b51594b4e8e9c",
+    "name": "testModel_05_30_2023",
+    "domainName": "testEquip",
+    "tagNames": ["dab", "equip", "profile", "system"],
+    "tags": [
+        {
+            "name": "dab",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        },
+        {
+            "name": "equip",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        },
+        {
+            "name": "profile",
+            "kind": "STR",
+            "defaultValue": "demo",
+            "valueEnum": []
+        },
+        {
+            "name": "system",
+            "kind": "MARKER",
+            "defaultValue": null,
+            "valueEnum": []
+        }
+    ],
+    "points": [
+        {
+            "id": "646ae96cb18f1b7eb926d994",
+            "domainName": "relay1Enabled",
+            "name": "Relay 1 Enabled",
+            "tagNames": [
+                "cmd",
+                "relay",
+                "writable"
+            ],
+            "rootTagNames": [
+                "relay",
+                "cmd",
+                "writable"
+            ],
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "relay",
+                    "kind": "NUMBER",
+                    "defaultValue": 1,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "NUMBER",
+            "hisInterpolate": "NONE",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 1,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 2,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": { 
+                "configurationType": "BASE"
+            }
+        },
+        {
+            "id": "646ae906b18f1b7eb926d993",
+            "domainName": "relay1Association",
+            "name": "Relay 1 Association",
+            "tagNames": [
+                "relay",
+                "association",
+                "sp",
+                "writable"
+            ],
+            "rootTagNames": [
+                "relay",
+                "association",
+                "sp",
+                "writable"
+            ],
+            "tags": [
+                {
+                    "name": "relay",
+                    "kind": "NUMBER",
+                    "defaultValue": 1,
+                    "valueEnum": []
+                },
+                {
+                    "name": "association",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "sp",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "NUMBER",
+            "hisInterpolate": "NONE",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "coolingStage1"
+                    },
+                    {
+                        "index": 1,
+                        "value": "coolingStage2"
+                    },
+                    {
+                        "index": 2,
+                        "value": "heatingStage1"
+                    },
+                    {
+                        "index": 3,
+                        "value": "heatingStage2"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "domainName": "relay1Enabled",
+                "value": { "index": 2, "value": "ON" },
+                "comparisonType": "EQUALS",
+                "configurationType": "ASSOCIATION"
+            }
+        },
+        {
+            "id": "646b09a9f712f76909e0ac7b",
+            "domainName": "coolingStage1",
+            "name": "Cooling Stage 1",
+            "tagNames": [
+                "hvac",
+                "cooling",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "rootTagNames": [
+                "hvac",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "tags": [
+                {
+                    "name": "hvac",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cooling",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "stage",
+                    "kind": "NUMBER",
+                    "defaultValue": 1,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "BOOL",
+            "hisInterpolate": "NONE",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 1,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": { 
+                "configurationType": "ASSOCIATED"
+            }
+        },
+        {
+            "id": "62ded57db877ba4d67083c42",
+            "domainName": "coConcentrationSensor",
+            "name": "Air CO Concentration Sensor",
+            "tagNames": [
+                "air",
+                "co",
+                "concentration",
+                "sensor"
+            ],
+            "rootTagNames": [
+                "air",
+                "co",
+                "concentration",
+                "sensor"
+            ],
+            "tags": [
+                {
+                    "name": "air",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "co",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "concentration",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "sensor",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "NUMBER",
+            "hisInterpolate": "COV",
+            "valueConstraint": {
+                "minValue": 0,
+                "maxValue": 1000,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {
+                "tagValueIncrement": 0.1
+            },
+            "defaultUnit": "ppm",
+            "configuration": {
+                "sensorType": "15",
+                "value": 0.0,
+                "comparisonType": "GREATER_THAN",
+                "configurationType": "DYNAMIC_SENSOR"
+            }
+        },
+        {
+            "id": "646ae96cb18f1b7eb926d994",
+            "domainName": "dcwbEnabled",
+            "name": "DCWB Enabled",
+            "tagNames": [
+                "dcwb",
+                "enable",
+                "config",
+                "cmd",
+                "writable"
+            ],
+            "rootTagNames": [
+                "enable",
+                "config",
+                "cmd",
+                "writable"
+            ],
+            "tags": [
+                {
+                    "name": "dcwb",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "enable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "config",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "NUMBER",
+            "hisInterpolate": "NONE",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 1,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 2,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": { 
+                "configurationType": "BASE"
+            }
+        },
+        {
+            "id": "638c267732cb094fe2b40f96",
+            "domainName": "dcwbValveLoopOutput",
+            "name": "DCWB Valve Loop Output",
+            "tagNames": [
+                "dcwb",
+                "valve",
+                "loop",
+                "output",
+                "cmd",
+                "writable"
+            ],
+            "rootTagNames": [
+                "loop",
+                "output",
+                "cmd",
+                "writable"
+            ],
+            "tags": [
+                {
+                    "name": "dcwb",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "valve",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "loop",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "output",
+                    "kind": "NUMBER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "pointType": "NUMBER",
+            "hisInterpolate": "COV",
+            "valueConstraint": {
+                "minValue": 0,
+                "maxValue": 100,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {
+                "tagValueIncrement": 1
+            },
+            "defaultUnit": "%",
+            "configuration": {
+                "domainName": "dcwbEnabled",
+                "value": { "index": 2, "value": "ON"},
+                "configurationType": "DEPENDENT"
+            }
+        }
+    ],
+    "equips": [],
+    "namespace": "bms75f"
+}

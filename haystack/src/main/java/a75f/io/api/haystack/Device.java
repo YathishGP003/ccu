@@ -44,6 +44,8 @@ public class Device extends Entity
     private String profileType;
     private String id;
     private String ccuRef;
+
+    private String domainName;
     
     public String getAddr()
     {
@@ -86,6 +88,13 @@ public class Device extends Entity
         this.ccuRef = ccuRef;
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
     private Device(){
     
     }
@@ -105,6 +114,7 @@ public class Device extends Entity
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
 
+        private String domainName;
         public String toString() {
             return displayName;
         }
@@ -188,6 +198,11 @@ public class Device extends Entity
             this.profileType = type;
             return this;
         }
+        public Builder setDomainName(String domainName)
+        {
+            this.domainName = domainName;
+            return this;
+        }
         public Device build(){
             Device d = new Device();
             d.displayName = this.displayName;
@@ -203,6 +218,7 @@ public class Device extends Entity
             d.setCreatedDateTime(createdDateTime);
             d.setLastModifiedDateTime(lastModifiedDateTime);
             d.setLastModifiedBy(lastModifiedBy);
+            d.domainName = this.domainName;
             return d;
         }
     
@@ -263,6 +279,10 @@ public class Device extends Entity
                 else if (pair.getKey().equals("lastModifiedBy"))
                 {
                     this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
             }

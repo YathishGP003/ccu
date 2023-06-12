@@ -14,11 +14,12 @@ import a75f.io.domain.model.common.point.*
  */
 class EntityMapper (private val modelDef: ModelDef) {
 
-    fun getEntityConfiguration(configuration: ProfileConfiguration) {
+    fun getEntityConfiguration(configuration: ProfileConfiguration) : EntityConfiguration{
         val entityConfiguration = EntityConfiguration()
         entityConfiguration.tobeAdded.addAll(getBasePoints().map { EntityConfig(it.domainName)})
         entityConfiguration.tobeAdded.addAll(getEnabledAssociations(configuration).map { EntityConfig(it)})
         entityConfiguration.tobeAdded.addAll(getEnabledDependencies(configuration).map { EntityConfig(it)})
+        return entityConfiguration
     }
 
     fun getBasePoints() : List<ModelPointDef> {

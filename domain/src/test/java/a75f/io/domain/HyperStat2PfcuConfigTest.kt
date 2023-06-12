@@ -4,8 +4,8 @@ import a75f.io.domain.config.*
 
 
 class HyperStat2pfcuTestConfiguration(nodeAddress: Int,
-                                      nodeType: String, priority: Int
-) : ProfileConfiguration(nodeAddress, nodeType, priority) {
+                                      nodeType: String, priority: Int, roomRef : String, floorRef : String
+) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef ) {
 
 
     var temperatureOffset = ValueConfig("temperatureOffset", 0.0)

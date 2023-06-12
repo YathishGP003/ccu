@@ -17,23 +17,22 @@ object DomainManager {
         site?.let { Domain.site = Site(site.displayName, site.id) }
         val floors = hayStack.readAllEntities("floor")
         floors.forEach{ floor ->
-            run {
-                val floorId = floor["id"]
-                floorId?.let {
-                    Domain.site.addFloor(floor)
-                    val rooms = hayStack.readAllEntities(
-                        "room and floorRef == \"$floorId\"")
+            val floorId = floor["id"]
+            floorId?.let {
+                Domain.site.addFloor(floor)
+                val rooms = hayStack.readAllEntities(
+                    "room and floorRef == \"$floorId\"")
 
-                    rooms.forEach { room ->
-                        val roomId = room["id"]
-                        roomId?.let {
-                            Domain.site.floors[floorId.toString()]?.addRoom(room)
-                            addEquips(hayStack, floorId.toString(), roomId.toString())
-                            addDevices(hayStack, floorId.toString(), roomId.toString())
-                        }
+                rooms.forEach { room ->
+                    val roomId = room["id"]
+                    roomId?.let {
+                        Domain.site.floors[floorId.toString()]?.addRoom(room)
+                        addEquips(hayStack, floorId.toString(), roomId.toString())
+                        addDevices(hayStack, floorId.toString(), roomId.toString())
                     }
                 }
             }
+
         }
     }
 
@@ -65,12 +64,13 @@ object DomainManager {
                 Domain.site.floors[floorId]?.rooms?.get(roomId)?.addDevice(device)
                 val points =
                     hayStack.readAllEntities("point and deviceRef == \"$deviceId\"")
-                points.forEach {
-                    val domainName = it["domainName"]
+                points.forEach { point ->
+                    val domainName = point["domainName"]
                     domainName?.let {
+                        Domain.site.floors[floorId]?.rooms?.get(roomId)?.devices?.get(deviceId)
+                            ?.addPoint(point)
                     }
-                    Domain.site.floors[floorId]?.rooms?.get(roomId)?.devices?.get(deviceId)
-                        ?.addPoint(it)
+
                 }
             }
         }

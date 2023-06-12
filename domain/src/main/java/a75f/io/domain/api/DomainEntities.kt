@@ -65,7 +65,7 @@ class Equip(domainName : String, id : String) : Entity(domainName, id) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         if (domainName != null && id != null) {
-            points[id] = Point(domainName, id)
+            points[domainName] = Point(domainName, id)
         }
     }
 }
@@ -75,18 +75,18 @@ class Device(domainName : String, id : String) : Entity(domainName, id) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         if (domainName != null && id != null) {
-            points[id] = RawPoint(domainName, id)
+            points[domainName] = RawPoint(domainName, id)
         }
     }
 }
 
 class CcuDevice(domainName : String, id : String) : Entity(domainName, id) {
-    val points = mutableListOf<SettingPoint>()
+    val points = mutableMapOf<String, SettingPoint>()
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         if (domainName != null && id != null) {
-            points.add(SettingPoint(domainName, id))
+            points[domainName] = SettingPoint(domainName, id)
         }
     }
 }

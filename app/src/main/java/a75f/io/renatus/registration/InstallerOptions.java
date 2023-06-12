@@ -1001,7 +1001,7 @@ public class InstallerOptions extends Fragment {
         BackfillPref backfillPref = new BackfillPref();
         this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
         this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(backfillPref.getBackFillTimeSPSelected());
+        this.backFillTimeSpinner.setSelection(backfillTimeSelectedValue());
 
         this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1021,4 +1021,15 @@ public class InstallerOptions extends Fragment {
             }
         });
     }
+
+    private int backfillTimeSelectedValue() {
+        Double value = CCUHsApi.getInstance().readDefaultVal("backfill and duration");
+        if (value != null && !Double.isNaN(value)) {
+            return value.intValue();
+        } else {
+            return 6;
+        }
+    }
+
+
 }

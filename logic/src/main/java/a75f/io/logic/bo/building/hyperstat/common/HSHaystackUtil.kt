@@ -559,4 +559,11 @@ class HSHaystackUtil(
             "point and pm2p5 and enabled and equipRef == \"$equipRef\""
         )
     }
+
+    fun getFanStageValue(fanType: String): Double {
+        return  haystack.readDefaultVal(
+            "point and output and fan and $fanType and equipRef == \"$equipRef\""
+        )
+    }
+
 }

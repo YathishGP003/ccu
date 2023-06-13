@@ -34,12 +34,12 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
    var analogIn2State = AnalogInState(false, AnalogInAssociation.CURRENT_TX_0_20)
 
-   var coolingStage1State = 7
-   var coolingStage2State = 10
-   var coolingStage3State = 10
-   var heatingStage1State = 7
-   var heatingStage2State = 10
-   var heatingStage3State = 10
+   var coolingStage1FanState = 7
+   var coolingStage2FanState = 10
+   var coolingStage3FanState = 10
+   var heatingStage1FanState = 7
+   var heatingStage2FanState = 10
+   var heatingStage3FanState = 10
 
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0

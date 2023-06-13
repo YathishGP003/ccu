@@ -474,6 +474,12 @@ class HyperStatFragment : BaseDialogFragment() {
         zonePMThreshold.setOnItemSelected { position ->viewModel.zonePmThresholdSelect(position)  }
         zonePMTarget.setOnItemSelected { position ->viewModel.zonePmTargetSelect(position)  }
 
+        stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+            stagedFanWidgets.selector.setOnItemSelected {
+                position -> viewModel.voltageAtStagedFanSelected(index, position)
+            }
+        }
+
         displayHumidity.setOnCheckedChangeListener { _, isChecked ->
             if(enableDisplay(displayHumidity))
                 viewModel.onDisplayHumiditySelected(isChecked)
@@ -668,6 +674,12 @@ class HyperStatFragment : BaseDialogFragment() {
         displayCo2.isChecked = viewState.isDisplayCo2Enabled
         displayVOC.isChecked = viewState.isDisplayVOCEnabled
         displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
+
+        stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+            with(stagedFanWidgets) {
+                selector.setSelection(viewState.stagedFanUis[index])
+            }
+        }
 
 
     }

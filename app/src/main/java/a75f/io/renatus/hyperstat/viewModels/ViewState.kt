@@ -34,6 +34,7 @@ import a75f.io.renatus.R
     var isDisplayVOCEnabled: Boolean,
     var isDisplayPp2p5Enabled: Boolean,
     var isDisplayCo2Enabled: Boolean,
+    var stagedFanUis: List<Int>
 ) {
 
     companion object {
@@ -121,6 +122,10 @@ import a75f.io.renatus.R
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
             isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = listOf(
+                config.coolingStage1FanState, config.coolingStage2FanState, config.coolingStage3FanState,
+                config.heatingStage1FanState, config.heatingStage2FanState, config.heatingStage3FanState
+            )
         )
 
         private fun fromConfigPipe2(config: HyperStatPipe2Configuration) = ViewState(
@@ -183,7 +188,8 @@ import a75f.io.renatus.R
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5
+            isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = emptyList()
         )
 
         private fun fromConfigHpu(config: HyperStatHpuConfiguration) = ViewState(
@@ -245,7 +251,8 @@ import a75f.io.renatus.R
             isDisplayHumidityEnabled = config.displayHumidity,
             isDisplayCo2Enabled = config.displayCo2,
             isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5
+            isDisplayPp2p5Enabled = config.displayPp2p5,
+            stagedFanUis = emptyList()
         )
 
     }
@@ -295,6 +302,13 @@ import a75f.io.renatus.R
             )
             analogIn1State = AnalogInState(analogIns[0].enabled,AnalogInAssociation.values()[analogIns[0].association])
             analogIn2State = AnalogInState(analogIns[1].enabled,AnalogInAssociation.values()[analogIns[1].association])
+
+            coolingStage1FanState = stagedFanUis[0]
+            coolingStage2FanState = stagedFanUis[1]
+            coolingStage3FanState = stagedFanUis[2]
+            heatingStage1FanState = stagedFanUis[3]
+            heatingStage2FanState = stagedFanUis[4]
+            heatingStage3FanState = stagedFanUis[5]
 
             zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
             zoneCO2Threshold = openingDamperValueFromIndex(zoneCO2ThresholdPos)

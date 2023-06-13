@@ -11,6 +11,12 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.model.ModelDef
 import a75f.io.domain.model.ModelPointDef
 import a75f.io.domain.model.ph.core.TagType
+import a75f.io.domain.util.TagsUtil
+import a75f.io.logger.CcuLog
+import org.projecthaystack.HBool
+import org.projecthaystack.HNum
+import org.projecthaystack.HStr
+import org.projecthaystack.HVal
 
 class EquipBuilder(private val hayStack : CCUHsApi) {
     fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDef) {
@@ -27,7 +33,22 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
             .setDomainName(modelDef.domainName)
             .setRoomRef(profileConfiguration.roomRef)
             .setFloorRef(profileConfiguration.floorRef)
-        modelDef.tagNames.forEach{ equipBuilder.addMarker(it)}
+
+        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
+        modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+            tag.defaultValue?.let {
+                equipBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+            }
+        }
+        modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+            TagsUtil.getTagDefHVal(tag)?.let { equipBuilder.addTag(tag.name, it) }
+        }
+        modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
+            tag.defaultValue?.let {
+                equipBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
+            }
+        }
+
         return hayStack.addEquip(equipBuilder.build())
     }
 
@@ -53,9 +74,23 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
             .setUnit(modelDef.defaultUnit)
 
 
+        //TODO - Support added for currently used tag types. Might need updates in future.
         modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+            TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
+        }
 
-        //TODO- Support for other tag types to be added. Existing point structure does not support arbitrary KVP.
+        modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
+            tag.defaultValue?.let {
+                pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+            }
+        }
+        modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
+            tag.defaultValue?.let {
+                pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
+            }
+        }
+
         return hayStack.addPoint(pointBuilder.build())
     }
 

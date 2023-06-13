@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HVal;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,6 +78,8 @@ public class Equip extends Entity
         return tz;
     }
     private String tz;
+
+    private Map<String, HVal> tags = new HashMap<>();
     public void setSiteRef(String siteRef)
     {
         this.siteRef = siteRef;
@@ -135,6 +139,10 @@ public class Equip extends Entity
     public void setDomainName(String domainName) {
         this.domainName = domainName;
     }
+
+    public Map<String, HVal> getTags() {
+        return tags;
+    }
     public static class Builder{
         private String            displayName;
         private HashSet<String> markers = new HashSet<>();
@@ -183,6 +191,9 @@ public class Equip extends Entity
         private String profile;
         private String vendor;
         private String model;
+
+        private Map<String, HVal> tags = new HashMap<>();
+
         public Builder setVendor(String vendor)
         {
             this.vendor = vendor;
@@ -262,6 +273,10 @@ public class Equip extends Entity
             this.domainName = domainName;
             return this;
         }
+        public Builder addTag(String tag, HVal val) {
+            this.tags.put(tag, val);
+            return this;
+        }
         public Equip build() {
             
             Equip q = new Equip();
@@ -285,6 +300,7 @@ public class Equip extends Entity
             q.setLastModifiedDateTime(lastModifiedDateTime);
             q.setLastModifiedBy(lastModifiedBy);
             q.setDomainName(domainName);
+            q.tags = this.tags;
             return q;
         }
         
@@ -377,6 +393,100 @@ public class Equip extends Entity
                     this.domainName = pair.getValue().toString();
                 }
                 //it.remove();
+            }
+            return this;
+        }
+
+        public Builder setHDict(HDict equipDict)
+        {
+
+            Iterator it = equipDict.iterator();
+            while (it.hasNext()) {
+                HDict.MapEntry pair =  (HDict.MapEntry) it.next();
+                if(pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                {
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
+                }
+                else if(pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("roomRef"))
+                {
+                    this.roomRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ahuRef"))
+                {
+                    this.ahuRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("gatewayRef"))
+                {
+
+                    this.gatewayRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("profile"))
+                {
+                    this.profile  = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("group"))
+                {
+                    this.group = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("priorityLevel"))
+                {
+                    this.priority = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("vendor"))
+                {
+                    this.vendor = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("model"))
+                {
+                    this.model = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("createdByApplication"))
+                {
+                    this.createdByApplication = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
             }
             return this;
         }

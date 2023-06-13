@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +48,9 @@ public class Device extends Entity
     private String ccuRef;
 
     private String domainName;
-    
+
+    private Map<String, HVal> tags = new HashMap<>();
+
     public String getAddr()
     {
         return addr;
@@ -95,6 +99,9 @@ public class Device extends Entity
         this.domainName = domainName;
     }
 
+    public Map<String, HVal> getTags() {
+        return tags;
+    }
     private Device(){
     
     }
@@ -115,6 +122,8 @@ public class Device extends Entity
         private String lastModifiedBy;
 
         private String domainName;
+
+        private Map<String, HVal> tags = new HashMap<>();
         public String toString() {
             return displayName;
         }
@@ -203,6 +212,12 @@ public class Device extends Entity
             this.domainName = domainName;
             return this;
         }
+
+        public Builder addTag(String tag, HVal val) {
+            this.tags.put(tag, val);
+            return this;
+        }
+
         public Device build(){
             Device d = new Device();
             d.displayName = this.displayName;
@@ -219,6 +234,7 @@ public class Device extends Entity
             d.setLastModifiedDateTime(lastModifiedDateTime);
             d.setLastModifiedBy(lastModifiedBy);
             d.domainName = this.domainName;
+            d.tags = this.tags;
             return d;
         }
     
@@ -287,6 +303,76 @@ public class Device extends Entity
                 //it.remove();
             }
         
+            return this;
+        }
+
+        public Builder setHDict(HDict deviceDict)
+        {
+            Iterator it = deviceDict.iterator();
+            while (it.hasNext()) {
+                HDict.MapEntry pair =  (HDict.MapEntry) it.next();
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
+                if(pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                {
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
+                }
+                else if(pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("equipRef"))
+                {
+                    this.equipRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("roomRef"))
+                {
+                    this.roomRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("addr"))
+                {
+                    this.addr = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("profileType"))
+                {
+                    this.profileType = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ccuRef"))
+                {
+                    this.ccuRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("createdDateTime"))
+                {
+                    this.createdDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedDateTime"))
+                {
+                    this.lastModifiedDateTime = HDateTime.make(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("lastModifiedBy"))
+                {
+                    this.lastModifiedBy = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("domainName"))
+                {
+                    this.domainName = pair.getValue().toString();
+                }
+                else {
+                    this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
+                }
+            }
+
             return this;
         }
     }

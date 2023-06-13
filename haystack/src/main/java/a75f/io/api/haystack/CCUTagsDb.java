@@ -501,6 +501,9 @@ public class CCUTagsDb extends HServer {
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
+
+        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
+
        /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
@@ -552,6 +555,7 @@ public class CCUTagsDb extends HServer {
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
+        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
        /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/
@@ -607,6 +611,9 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
+
        /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/
@@ -653,6 +660,7 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
+        p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
        /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
                 b.get("createdDateTime") +" lastModifiedDateTime>>> "+b.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + b.get("lastModifiedBy"));*/

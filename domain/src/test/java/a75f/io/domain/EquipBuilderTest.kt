@@ -1,5 +1,7 @@
 package a75f.io.domain
 
+import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.EquipBuilder
@@ -12,7 +14,7 @@ class EquipBuilderTest {
 
     @Before
     fun setUp() {
-        dmModel = ResourceHelper.loadModelDefinition("testModel_05_30_2023.json")
+        dmModel = ResourceHelper.loadModelDefinition("EquipBuilder_TestModel.json")
     }
 
     @Test
@@ -30,6 +32,55 @@ class EquipBuilderTest {
         val points = mockHayStack.readAllEntities("point")
         points.forEach{ println(it) }
 
+    }
+
+    @Test
+    fun testCreatePoints() {
+        val mockHayStack = MockCcuHsApi()
+
+        dmModel?.let {
+            val equipBuilder = EquipBuilder(mockHayStack)
+            equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
+        }
+
+        val points = mockHayStack.readAllEntities("point")
+        assert(points.size == 4)
+
+    }
+
+    @Test
+    fun testVerifyEquipTagValType() {
+        val mockHayStack = MockCcuHsApi()
+
+        dmModel?.let {
+            val equipBuilder = EquipBuilder(mockHayStack)
+            equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
+        }
+
+        val equipDict = mockHayStack.readHDict("equip")
+
+        val equip = Equip.Builder().setHDict(equipDict).build()
+
+        //assert(equip.tags.isNotEmpty())
+        equip.tags.entries.forEach{println(it)}
+
+    }
+
+    @Test
+    fun testVerifyPointTagValType() {
+        val mockHayStack = MockCcuHsApi()
+
+        dmModel?.let {
+            val equipBuilder = EquipBuilder(mockHayStack)
+            equipBuilder.buildEquipAndPoints(getTestProfileConfig(), dmModel)
+        }
+
+        val pointDict = mockHayStack.readHDict("point")
+
+        val point = Point.Builder().setHDict(pointDict).build()
+
+        assert(point.tags.isNotEmpty())
+        point.tags.entries.forEach{println(it)}
 
     }
 

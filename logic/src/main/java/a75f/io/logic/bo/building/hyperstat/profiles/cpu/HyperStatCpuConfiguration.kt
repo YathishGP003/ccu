@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration
+import android.widget.Spinner
+import android.widget.TextView
 
 /**
  * Models just the configuration for HyperStat CPU

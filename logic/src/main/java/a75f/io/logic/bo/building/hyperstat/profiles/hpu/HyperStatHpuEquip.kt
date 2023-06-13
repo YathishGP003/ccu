@@ -402,9 +402,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog1 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao1AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao1fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog1 and output and low"
@@ -433,9 +433,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog2 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao2AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao2fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog2 and output and low"
@@ -464,9 +464,9 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
                 "analog3 and output and max"
             )
 
-            if (HyperStatAssociationUtil.getAnalogOutAssociatedStage(
+            if (HyperStatAssociationUtil.getHpuAnalogOutAssociatedStage(
                     ao3AssociatedTo.toInt()
-                ) == CpuAnalogOutAssociation.FAN_SPEED
+                ) == HpuAnalogOutAssociation.FAN_SPEED
             ) {
                 ao3fanLow = hsHaystackUtil.readConfigPointValue(
                     "analog3 and output and low"

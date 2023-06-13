@@ -23,7 +23,7 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var relay6State = RelayState(false, CpuRelayAssociation.FAN_HIGH_SPEED)
 
    var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.LINEAR_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
    var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
 
    var isEnableAirFlowTempSensor = false
@@ -31,6 +31,13 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
 
    var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
    var analogIn2State = AnalogInState(false, AnalogInAssociation.CURRENT_TX_0_20)
+
+   var coolingStage1FanState = 7
+   var coolingStage2FanState = 10
+   var coolingStage3FanState = 10
+   var heatingStage1FanState = 7
+   var heatingStage2FanState = 10
+   var heatingStage3FanState = 10
 
    var zoneCO2DamperOpeningRate = 10.0
    var zoneCO2Threshold = 4000.0
@@ -95,9 +102,10 @@ enum class CpuRelayAssociation {
 // Order is important -- FAN_HIGH_SPEED
 enum class CpuAnalogOutAssociation {
    COOLING,
-   FAN_SPEED,
+   LINEAR_FAN_SPEED,
+   STAGED_FAN_SPEED,
    HEATING,
-   DCV_DAMPER
+   DCV_DAMPER,
 }
 
 // Order is important -- see comment above.

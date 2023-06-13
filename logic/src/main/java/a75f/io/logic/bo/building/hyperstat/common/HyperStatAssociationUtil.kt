@@ -66,9 +66,10 @@ class HyperStatAssociationUtil {
             return when (state) {
                 // Order is important here
                 0 -> CpuAnalogOutAssociation.COOLING
-                1 -> CpuAnalogOutAssociation.FAN_SPEED
-                2 -> CpuAnalogOutAssociation.HEATING
-                3 -> CpuAnalogOutAssociation.DCV_DAMPER
+                1 -> CpuAnalogOutAssociation.LINEAR_FAN_SPEED
+                2 -> CpuAnalogOutAssociation.STAGED_FAN_SPEED
+                3 -> CpuAnalogOutAssociation.HEATING
+                4 -> CpuAnalogOutAssociation.DCV_DAMPER
                 // assuming it never going to call
                 else -> CpuAnalogOutAssociation.COOLING
             }
@@ -117,7 +118,7 @@ class HyperStatAssociationUtil {
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
         fun isAnalogOutAssociatedToFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuAnalogOutAssociation.FAN_SPEED)
+            return (analogOut.association == CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
         }
 
         //Function which checks the Analog out is Associated  to HEATING
@@ -213,10 +214,13 @@ class HyperStatAssociationUtil {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.HEATING)
         }
         fun isAnyAnalogAssociatedToFan(config: HyperStatCpuConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuAnalogOutAssociation.FAN_SPEED)
+            return isAnalogOutMapped(config,CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
         }
         fun isAnyAnalogAssociatedToDCV(config: HyperStatCpuConfiguration): Boolean {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.DCV_DAMPER)
+        }
+        fun isAnyAnalogAssociatedToStaged(config: HyperStatCpuConfiguration): Boolean {
+            return isAnalogOutMapped(config,CpuAnalogOutAssociation.STAGED_FAN_SPEED)
         }
         private fun isAnalogOutMapped(config: HyperStatCpuConfiguration, association: CpuAnalogOutAssociation): Boolean{
             return when {
@@ -1323,6 +1327,19 @@ class HyperStatAssociationUtil {
                 (config.relay6State.enabled && config.relay6State.association == association) -> true
                 else -> false
             }
+        }
+
+
+        fun isStagedFanEnabled(
+            hyperStatConfig: HyperStatCpuConfiguration,
+            fanStage: CpuRelayAssociation
+        ): Boolean {
+            return  hyperStatConfig.relay1State.enabled && hyperStatConfig.relay1State.association == fanStage ||
+                    hyperStatConfig.relay2State.enabled && hyperStatConfig.relay2State.association == fanStage ||
+                    hyperStatConfig.relay3State.enabled && hyperStatConfig.relay3State.association == fanStage ||
+                    hyperStatConfig.relay4State.enabled && hyperStatConfig.relay4State.association == fanStage ||
+                    hyperStatConfig.relay5State.enabled && hyperStatConfig.relay5State.association == fanStage ||
+                    hyperStatConfig.relay6State.enabled && hyperStatConfig.relay6State.association == fanStage
         }
 
     }

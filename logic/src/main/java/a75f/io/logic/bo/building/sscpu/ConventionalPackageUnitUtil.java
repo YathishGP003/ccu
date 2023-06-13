@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.sscpu;
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setModeType;
+
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
@@ -51,6 +53,10 @@ public class ConventionalPackageUnitUtil {
                 if (configPoint.getMarkers().contains(Tags.HIS)) {
                     hayStack.writeHisValById(configPoint.getId(), configVal);
                 }
+            }
+            if(configPoint.getMarkers().contains("relay1") || configPoint.getMarkers().contains("relay2")||
+                    configPoint.getMarkers().contains("relay4") || configPoint.getMarkers().contains("relay5")){
+                setModeType(configPoint.getRoomRef(), CCUHsApi.getInstance());
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +

@@ -944,6 +944,16 @@ public class ConventionalUnitLogicalMap {
         }
         return config;
     }
+
+    public ConventionalUnitConfiguration getRelayConfiguration(){
+        ConventionalUnitConfiguration config = new ConventionalUnitConfiguration();
+        config.enableRelay1 = getConfigNumVal("enable and relay1") > 0;
+        config.enableRelay2 = getConfigNumVal("enable and relay2") > 0;
+        config.enableRelay4 = getConfigNumVal("enable and relay4") > 0;
+        config.enableRelay5 = getConfigNumVal("enable and relay5") > 0;
+        return config;
+    }
+
     public double getCurrentTemp()
     {
         currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and standalone and group == \""+nodeAddr+"\"");

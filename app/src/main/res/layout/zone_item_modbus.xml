@@ -14,7 +14,7 @@
         <TextView
             android:id="@+id/tvParamLabel"
             style="@style/label_black"
-            android:layout_width="wrap_content"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:text="Unit Status" />
@@ -46,6 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:layout_gravity="start|center"
             android:visibility="gone" />

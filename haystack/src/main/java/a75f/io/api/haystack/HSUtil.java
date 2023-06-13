@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import a75f.io.logger.CcuLog;
@@ -66,7 +67,46 @@ public class HSUtil
         }
         return equipList;
     }
-    
+
+    public static List<Equip> getEquipsWithoutSubEquips(String roomRef) {
+
+        List<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and not equipRef and roomRef == \""+roomRef+"\"");
+        List<Equip> equipList = new ArrayList<>();
+        for (HashMap<Object, Object> m : equips)
+        {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
+        }
+        return equipList;
+    }
+
+    public static boolean isZoneHasSubEquips(String roomRef) {
+        return CCUHsApi.getInstance().readAllEntities("equip and equipRef and roomRef == \""+roomRef+"\"")
+                .size() > 0;
+    }
+
+    public static List<Equip> getSubEquips(String parentEquipId){
+        List<HashMap<Object, Object>> equips =
+                CCUHsApi.getInstance().readAllEntities("equip and equipRef == \""+parentEquipId+"\"");
+        List<Equip> equipList = new ArrayList<>();
+        for (HashMap<Object, Object> m : equips) {
+            equipList.add(new Equip.Builder().setHashMap(m).build());
+        }
+        return equipList;
+    }
+
+    public static List<Short> getSubEquipPairingAddr(String parentEquipPairingAddr){
+        HashMap<Object, Object> parentEquipMap =
+                CCUHsApi.getInstance().readEntity("equip and not equipRef and group == \""+parentEquipPairingAddr+"\"");
+        List<Equip> subEquipList = getSubEquips(parentEquipMap.get("id").toString());
+        List<Short> subEquipAddrList = new ArrayList<>();
+        for(Equip subEquip : subEquipList){
+            subEquipAddrList.add(Short.parseShort(subEquip.getGroup()));
+        }
+        return subEquipAddrList;
+    }
+
+
     public static ArrayList<Device> getDevices(String roomRef) {
         
         ArrayList<HashMap<Object, Object>> devices = CCUHsApi.getInstance().readAllEntities("device and roomRef == \""+roomRef+"\"");

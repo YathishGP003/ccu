@@ -565,7 +565,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     //  To show the existing profile configurations
     // config relays
-    private fun getRelayConfigurations(config: HyperStatCpuConfiguration) {
+    fun getRelayConfigurations(config: HyperStatCpuConfiguration):HyperStatCpuConfiguration {
         val r1 =  hsHaystackUtil.readConfigStatus("relay1").toInt()
         val r2 =  hsHaystackUtil.readConfigStatus("relay2").toInt()
         val r3 =  hsHaystackUtil.readConfigStatus("relay3").toInt()
@@ -593,10 +593,11 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         config.relay6State =
             RelayState(r6 == 1, HyperStatAssociationUtil.getRelayAssociatedStage(r6AssociatedTo.toInt()))
 
+        return config
     }
 
     //config Analog Out
-    private fun getAnalogOutConfigurations(config: HyperStatCpuConfiguration) {
+     fun getAnalogOutConfigurations(config: HyperStatCpuConfiguration):HyperStatCpuConfiguration {
         val ao1 = hsHaystackUtil.readConfigStatus("analog1 and output  ").toInt()
         val ao2 = hsHaystackUtil.readConfigStatus("analog2 and output ").toInt()
         val ao3 = hsHaystackUtil.readConfigStatus("analog3 and output ").toInt()
@@ -714,6 +715,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             HyperStatAssociationUtil.getAnalogOutAssociatedStage(ao3AssociatedTo.toInt()),
             ao3MinVal, ao3MaxVal, ao3fanLow, ao3fanMedium, ao3fanHigh
         )
+        return config
     }
 
     //config Analog In

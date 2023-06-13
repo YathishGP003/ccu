@@ -382,7 +382,7 @@ public class CCUHsApi
     //TODO - Replace CCU support
     public void addZoneOccupancyPoint(String zoneRef, Zone zone) {
         Point occupancy = new Point.Builder()
-                              .setDisplayName(zone.getDisplayName()+"-occupancyState")
+                              .setDisplayName("occupancyState")
                               //.setEquipRef(equipRef)
                               .setSiteRef(zone.getSiteRef())
                               .setRoomRef(zoneRef)
@@ -404,7 +404,23 @@ public class CCUHsApi
         String zoneId = tagsDb.addZone(z);
         syncStatusService.addUnSyncedEntity(zoneId);
         addZoneOccupancyPoint(zoneId, z);
+        addZoneTemperatureModePoint(zoneId, z);
         return zoneId;
+    }
+
+    public void addZoneTemperatureModePoint(String zoneId, Zone zone) {
+        Point ZoneTemperatureMode = new Point.Builder()
+                .setDisplayName(Tags.ZONE_HVAC_MODE)
+                .setSiteRef(zone.getSiteRef())
+                .setRoomRef(zoneId)
+                .setFloorRef(zone.getFloorRef()).setHisInterpolate("cov")
+                .addMarker(Tags.ZONE).addMarker(Tags.HVAC_MODE)
+                .addMarker("his")
+                .setEnums("DUAL_TEMP, SINGLE_COOLING, SINGLE_HEATING")
+                .setTz(getTimeZone())
+                .build();
+        String ZoneTemperatureModeId = CCUHsApi.getInstance().addPoint(ZoneTemperatureMode);
+        CCUHsApi.getInstance().writeHisValById(ZoneTemperatureModeId, 0.0);
     }
 
     // From EntityPullHandler
@@ -450,6 +466,10 @@ public class CCUHsApi
         if (syncStatusService.hasEntitySynced(id)) {
             syncStatusService.addUpdatedEntity(id);
         }
+    }
+
+    public void updateEquipLocally(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
     }
 
     public void updatePoint(RawPoint r, String id)
@@ -1199,6 +1219,10 @@ public class CCUHsApi
             for (HashMap<Object, Object> point : points) {
                 deleteEntityItem(point.get("id").toString());
             }
+            HashMap<Object, Object> zoneHvacModePoint =
+                    readEntity("hvacMode and zone and roomRef == \"" + id+"\"");
+            CcuLog.i("CCU_HS","  delete TemperatureMode point of room "+zoneHvacModePoint);
+                deleteEntityItem(zoneHvacModePoint.get("id").toString());
             
             deleteEntityItem(entity.get("id").toString());
         }else if (entity.get("equip") != null) {
@@ -2086,6 +2110,7 @@ public class CCUHsApi
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
         setCcuReady();
+        Log.d("CCU_HS", "CCU Registered");
     }
 
     public void setCcuUnregistered() {
@@ -2094,6 +2119,7 @@ public class CCUHsApi
         editor.remove("isCcuRegistered");
         editor.commit();
         resetCcuReady();
+        Log.d("CCU_HS", "CCU Unregistered");
     }
 
     public boolean isNetworkConnected() {
@@ -2466,6 +2492,7 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder()
                              .add("ccuId", HRef.copy(ccuId));
         HDict[] dictArr = {b.toDict()};
+        Log.d("CCU_HS", "removeCCU API call");
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }

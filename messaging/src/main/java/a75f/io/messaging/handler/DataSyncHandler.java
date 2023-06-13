@@ -1,5 +1,6 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.logic.util.PreferenceUtil.setDataSyncStopped;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshIntrinsicSchedulesScreen;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshSchedulesScreen;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.trimZoneSchedules;
@@ -25,6 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
@@ -39,18 +42,23 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.util.PreferenceUtil;
 
 public class DataSyncHandler {
     private static final Object DELETED_BY = "deletedBy";
     private static final Object PRIORITY_ARRAY = "priorityArray";
     private static final int PAGE_SIZE = 100;
-    private static final long MESSAGE_EXPIRY_TIME_FOR_DEV_QA = 3600000;
-    private static final long MESSAGE_EXPIRY_TIME_FOR_STAG_PROD = 129600000;
+    private static final long MESSAGE_EXPIRY_TIME_FOR_DEV_QA = 129600000; // 36 hours
+    private static final long MESSAGE_EXPIRY_TIME_FOR_PRODUCTION = 259200000; //3 days
+    private static final long MESSAGE_EXPIRY_TIME_FOR_STAGING = 129600000; // 36 hours
+    private static final long DELAY_FOR_DATA_SYNC = 240000; // 4 minutes
+    private enum SyncStatus {
+        NULL_RESPONSE, COMPLETED
+    }
 
-    public void initialiseDataSync(long startDateTime, CCUHsApi ccuHsApi, long messageExpiryTime) {
-        logIt("Initialise Data Sync ");
-        logIt("start time " + new Date(startDateTime) + " End time " + new Date(System.currentTimeMillis() - messageExpiryTime));
-        logIt("Build config " +BuildConfig.BUILD_TYPE + " messageExpiryTime "+ messageExpiryTime);
+    public SyncStatus syncData(long startDateTime, CCUHsApi ccuHsApi, long messageExpiryTime) {
+        logIt("Initialise Data Sync "+"start time " + new Date(startDateTime) + " End time " + new Date(System.currentTimeMillis()
+                - messageExpiryTime)+"Build config " +BuildConfig.BUILD_TYPE + " messageExpiryTime "+ messageExpiryTime);
         int pageNo = 0;
         long endDateTime = System.currentTimeMillis();
         HGridBuilder b = new HGridBuilder();
@@ -65,28 +73,34 @@ public class DataSyncHandler {
         HGrid readChanges = hClient.call("readChanges", req, pageNo, PAGE_SIZE);
         List<HGrid> readChangesResponse = new ArrayList<>();
         if (readChanges == null) {
-            logIt(" All Entities are in sync with cloud or received" +
-                    " null response from readChanges API");
-            return;
+            logIt(" Received null response from readChanges API");
+            setDataSyncStopped();
+            return SyncStatus.NULL_RESPONSE;
         }
         readChangesResponse.add(readChanges);
         int responsePageSize = getResponsePageSize(readChanges);
-        logIt("responsePageSize " + responsePageSize);
+        logIt("Response page size " + responsePageSize);
         if (responsePageSize > 0) {
             for (pageNo = 1; pageNo <= responsePageSize; pageNo++) {
                 HGrid nextReadChangesResponse = hClient.call("readChanges", req, pageNo, PAGE_SIZE);
-                readChangesResponse.add(nextReadChangesResponse);
-                logIt("iteration response size " + readChangesResponse.size());
+                if(nextReadChangesResponse == null){
+                    logIt(" Received null response from readChanges API while fetching next page");
+                    setDataSyncStopped();
+                    return SyncStatus.NULL_RESPONSE;
+                }else {
+                    readChangesResponse.add(nextReadChangesResponse);
+                    logIt("iteration response size " + readChangesResponse.size());
+                }
             }
         }
-        logIt("total response size " + readChangesResponse.size());
+
+        logIt("Total response size " + readChangesResponse.size());
 
         for (HGrid readChangesGrid : readChangesResponse) {
-            if (readChangesGrid == null) {
-                return;
-            }
             syncReadChangesApiResponseToCCU(readChangesGrid, ccuHsApi);
         }
+        PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
+        return SyncStatus.COMPLETED;
     }
 
     private int getResponsePageSize(HGrid readChanges) {
@@ -165,30 +179,32 @@ public class DataSyncHandler {
     private void syncFloor(List<HashMap<Object, Object>> floorEntities, CCUHsApi ccuHsApi) {
         for(HashMap<Object, Object> floorEntity : floorEntities) {
             logIt("Sync floor entity >> "+floorEntity);
-            HashMap<Object, Object> localFloor= CCUHsApi.getInstance().readMapById(floorEntity.get(Tags.ID).toString());
-            String lastModifiedTimeInCloud = floorEntity.get(Tags.LAST_MODIFIED_TIME).toString();
-            if (isCloudEntityHasLatestValue(localFloor, HDateTime.make(lastModifiedTimeInCloud).millis())) {
-                Floor floor = new Floor.Builder()
-                        .setDisplayName(floorEntity.get("dis").toString())
-                        .setSiteRef(floorEntity.get("siteRef").toString())
-                        .build();
-                floor.setId(floorEntity.get("id").toString());
-                floor.setOrientation(Double.parseDouble(floorEntity.get("orientation").toString()));
-                floor.setFloorNum(Double.parseDouble(floorEntity.get("floorNum").toString()));
-                floor.setCreatedDateTime(HDateTime.make(floorEntity.get("createdDateTime").toString()));
-                floor.setLastModifiedDateTime(HDateTime.make(floorEntity.get(Tags.LAST_MODIFIED_TIME).toString()));
-                floor.setLastModifiedBy(floorEntity.get("lastModifiedBy").toString());
-                ccuHsApi.updateFloorLocally(floor, floor.getId());
+            HashMap<Object, Object> localFloor= ccuHsApi.readMapById(floorEntity.get(Tags.ID).toString());
+            if (isFloorEntityValid(floorEntity, ccuHsApi)) {
+                if (isCloudEntityHasLatestValue(localFloor, floorEntity)) {
+                    Floor floor = new Floor.Builder()
+                            .setDisplayName(floorEntity.get("dis").toString())
+                            .setSiteRef(floorEntity.get("siteRef").toString())
+                            .build();
+                    floor.setId(floorEntity.get("id").toString());
+                    floor.setOrientation(Double.parseDouble(floorEntity.get("orientation").toString()));
+                    floor.setFloorNum(Double.parseDouble(floorEntity.get("floorNum").toString()));
+                    floor.setCreatedDateTime(getCreatedDateTime(floorEntity));
+                    floor.setLastModifiedDateTime(getLastModifiedTime(floorEntity));
+                    floor.setLastModifiedBy(getLastModifiedBy(floorEntity, ccuHsApi));
+                    ccuHsApi.updateFloorLocally(floor, floor.getId());
+                }
+            } else {
+                logIt("Floor entity is not valid >> "+floorEntity);
             }
         }
     }
-
-    private boolean isCloudScheduleHasLatestValue(HDict localSchedule, String lastModifiedTimeInCloud) {
-        if (localSchedule.has(Tags.LAST_MODIFIED_TIME)) {
+    private boolean isCloudScheduleHasLatestValue(HDict localSchedule, HDict lastModifiedTimeInCloud) {
+        if (localSchedule.has(Tags.LAST_MODIFIED_TIME) && lastModifiedTimeInCloud.has(Tags.LAST_MODIFIED_TIME)) {
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(localSchedule.get(Tags.LAST_MODIFIED_TIME).toString());
-            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud);
-            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU.millis());
-            logIt("lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud.millis());
+            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud.get(Tags.LAST_MODIFIED_TIME).toString());
+            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU+
+                    "lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud);
             logIt("Is CCU has latest value ? schedule " + (lastModifiedDateTimeInCCU.millis() > lastModifiedDateTimeInCloud.millis()));
             return lastModifiedDateTimeInCloud.millis() > lastModifiedDateTimeInCCU.millis();
         }
@@ -196,14 +212,14 @@ public class DataSyncHandler {
         return true;
     }
 
-    private boolean isCloudPointHasLatestValue(HashMap<Object, Object> localPoint, Integer level, String lastModifiedTimeInCloud, CCUHsApi ccuHsApi) {
+    private boolean isCloudPointHasLatestValue(HashMap<Object, Object> localPoint, Integer level, MapImpl map, CCUHsApi ccuHsApi) {
         String lastModifiedTimeInCCU = HSUtil.getLevelEntityOfPoint(Objects.requireNonNull(
                 localPoint.get(Tags.ID)).toString(), level, Tags.LAST_MODIFIED_TIME, ccuHsApi);
-        if (lastModifiedTimeInCCU != null) {
+        if (lastModifiedTimeInCCU != null & map.has(Tags.LAST_MODIFIED_TIME)) {
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
-            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud);
-            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU.millis());
-            logIt("lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud.millis());
+            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(map.get(Tags.LAST_MODIFIED_TIME).toString());
+            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU+
+                    "lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud);
             logIt("Is CCU has latest value point ? " + (lastModifiedDateTimeInCCU.millis() > lastModifiedDateTimeInCloud.millis()));
             return lastModifiedDateTimeInCloud.millis() > lastModifiedDateTimeInCCU.millis();
         }
@@ -211,15 +227,13 @@ public class DataSyncHandler {
         return true;
     }
 
-    private boolean isCloudPointHasLatestValue(HashMap<Object, Object> localPoint, String lastModifiedTimeInCloud, CCUHsApi ccuHsApi) {
+    private boolean isCloudPointHasLatestValue(HashMap<Object, Object> localPoint, MapImpl map, CCUHsApi ccuHsApi) {
         String lastModifiedTimeInCCU = ccuHsApi.readPointPriorityLatestTime(localPoint.get(Tags.ID).toString());
         logIt("lastModifiedTimeInCCU aaa >  " + lastModifiedTimeInCCU);
-
-        if (lastModifiedTimeInCCU != null) {
+        if (lastModifiedTimeInCCU != null && map.has(Tags.LAST_MODIFIED_TIME)) {
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
-            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(lastModifiedTimeInCloud);
-            logIt("lastModifiedDateTimeInCCU milli seconds >  " + lastModifiedDateTimeInCCU.millis());
-            logIt("lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud.millis());
+            HDateTime lastModifiedDateTimeInCloud = HDateTime.make(map.get(Tags.LAST_MODIFIED_TIME).toString());
+            logIt("lastModifiedTimeInCloud milli seconds >  " + lastModifiedDateTimeInCloud);
             logIt("Is CCU has latest value point ? " + (lastModifiedDateTimeInCCU.millis() > lastModifiedDateTimeInCloud.millis()));
             return lastModifiedDateTimeInCloud.millis() > lastModifiedDateTimeInCCU.millis();
         }
@@ -227,20 +241,28 @@ public class DataSyncHandler {
         return true;
     }
     public static boolean isCloudEntityHasLatestValue(HashMap<Object, Object> entity, Long timeToken) {
-        Log.i("ccu_read_changes","isCloudEntityHasLatestValue");
-        Log.i("ccu_read_changes","entity "+entity);
-        Log.i("ccu_read_changes","timetoken "+timeToken);
-        if(entity.containsKey(Tags.LAST_MODIFIED_TIME) && timeToken != null) {
+        CcuLog.i(L.TAG_CCU_READ_CHANGES,"Reconfiguration changes -> localEntity: "+entity+" ||  timeToken: "+timeToken);
+        if (entity.containsKey(Tags.LAST_MODIFIED_TIME) && timeToken != null) {
             String lastModifiedTimeInCCU = entity.get(Tags.LAST_MODIFIED_TIME).toString();
             HDateTime lastModifiedDateTimeInMessage = HDateTime.make(timeToken);
-            Log.i("ccu_read_changes","lastModifiedTimeInCCU "+lastModifiedTimeInCCU);
-            Log.i("ccu_read_changes","lastModifiedDateTimeInMessage "+lastModifiedDateTimeInMessage);
-
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"lastModifiedTimeInCCU: "+lastModifiedTimeInCCU+
+                    " ||lastModifiedDateTimeInMessage "+lastModifiedDateTimeInMessage);
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
-            Log.i("ccu_read_changes","lastModifiedDateTimeInMessage milli "+lastModifiedDateTimeInMessage.millis());
-            Log.i("ccu_read_changes","lastModifiedTimeInCCU milli "+lastModifiedDateTimeInCCU.millis());
-            Log.i("ccu_read_changes","Is cloud has latest value ? " + (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));
-
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is cloud has latest value ? " + (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));;
+            return lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis();
+        }
+        return true;
+    }
+    public static boolean isCloudEntityHasLatestValue(HashMap<Object, Object> localEntity, HashMap<Object, Object> cloudEntity) {
+        CcuLog.i(L.TAG_CCU_READ_CHANGES,"DataSync changes -> localEntity: "+localEntity+" ||  cloudEntity: "+cloudEntity);
+        if (localEntity.containsKey(Tags.LAST_MODIFIED_TIME) && cloudEntity.containsKey(Tags.LAST_MODIFIED_TIME)) {
+            String lastModifiedTimeInCCU = localEntity.get(Tags.LAST_MODIFIED_TIME).toString();
+            HDateTime lastModifiedDateTimeInMessage = HDateTime.make(cloudEntity.get(Tags.LAST_MODIFIED_TIME).toString());
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"lastModifiedTimeInCCU "+ lastModifiedTimeInCCU+
+                    "||  lastModifiedDateTimeInMessage: "+lastModifiedDateTimeInMessage);
+            HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is cloud has latest value ? " +
+                    (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));;
             return lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis();
         }
         return true;
@@ -250,23 +272,34 @@ public class DataSyncHandler {
         for (HashMap<Object, Object> roomEntity : roomEntities) {
             logIt("Sync room entity >> " + roomEntity);
             HashMap<Object, Object> localRoom = ccuHsApi.readMapById(roomEntity.get(Tags.ID).toString());
-            String lastModifiedTimeInCloud = roomEntity.get(Tags.LAST_MODIFIED_TIME).toString();
-            if (isCloudEntityHasLatestValue(localRoom, HDateTime.make(lastModifiedTimeInCloud).millis())) {
-                Zone zone = new Zone.Builder()
-                        .setDisplayName(roomEntity.get("dis").toString())
-                        .setSiteRef(roomEntity.get("siteRef").toString())
-                        .setFloorRef(roomEntity.get("floorRef").toString())
-                        .build();
-                zone.setId(roomEntity.get("id").toString());
-                zone.setScheduleRef(roomEntity.get("scheduleRef").toString());
-                zone.setCreatedDateTime(HDateTime.make(roomEntity.get("createdDateTime").toString()));
-                zone.setLastModifiedDateTime(HDateTime.make(roomEntity.get(Tags.LAST_MODIFIED_TIME).toString()));
-                zone.setLastModifiedBy(roomEntity.get("lastModifiedBy").toString());
-                ccuHsApi.updateZoneLocally(zone, roomEntity.get("id").toString());
+            if (isRoomEntityValid(roomEntity)) {
+                if (isCloudEntityHasLatestValue(localRoom, roomEntity)) {
+                    Zone zone = new Zone.Builder()
+                            .setDisplayName(Objects.requireNonNull(roomEntity.get("dis")).toString())
+                            .setSiteRef(Objects.requireNonNull(roomEntity.get("siteRef")).toString())
+                            .setFloorRef(Objects.requireNonNull(roomEntity.get("floorRef")).toString())
+                            .build();
+                    zone.setId(Objects.requireNonNull(roomEntity.get("id")).toString());
+                    zone.setScheduleRef(Objects.requireNonNull(roomEntity.get("scheduleRef")).toString());
+                    zone.setCreatedDateTime(getCreatedDateTime(roomEntity));
+                    zone.setLastModifiedDateTime(getLastModifiedTime(roomEntity));
+                    zone.setLastModifiedBy(getLastModifiedBy(roomEntity, ccuHsApi));
+                    ccuHsApi.updateZoneLocally(zone, Objects.requireNonNull(roomEntity.get("id")).toString());
+                }
+            } else {
+                logIt("room entity is not valid >> " + roomEntity);
             }
         }
     }
-
+    private boolean isRoomEntityValid(HashMap<Object, Object> roomEntity) {
+        return roomEntity.containsKey("id") && roomEntity.containsKey("dis") && roomEntity.containsKey("siteRef")
+                && roomEntity.containsKey("floorRef") && roomEntity.containsKey("scheduleRef");
+    }
+    private boolean isFloorEntityValid(HashMap<Object, Object> floorEntity, CCUHsApi ccuHsApi) {
+        return floorEntity.containsKey("dis") && floorEntity.containsKey("siteRef") && floorEntity.containsKey("id")
+                && floorEntity.containsKey("orientation") && floorEntity.containsKey("floorNum") &&
+                ccuHsApi.isEntityExisting(floorEntity.get("id").toString());
+    }
     private void removeEntities(List<HashMap<Object, Object>> hashMapList, CCUHsApi ccuHsApi) {
         hashMapList.forEach(deletedEntity -> {
             logIt("Deleted id" + Objects.requireNonNull(deletedEntity.get(Tags.ID)).toString());
@@ -282,8 +315,7 @@ public class DataSyncHandler {
                 logIt("Schedule Id  " + scheduleId);
                 if (ccuHsApi.isEntityExisting(scheduleId)) {
                     HDict schedule = ccuHsApi.getScheduleDictById(scheduleDict.get(Tags.ID).toString());
-                    if (isCloudScheduleHasLatestValue(schedule,
-                            scheduleDict.get(Tags.LAST_MODIFIED_TIME).toString())) {
+                    if (isCloudScheduleHasLatestValue(schedule, scheduleDict)) {
                         updateSchedule(scheduleDict, ccuHsApi);
                     }
                 } else {
@@ -361,64 +393,82 @@ public class DataSyncHandler {
             logIt(" hList " + hList);
             if (hList != null && hList.size() > 0) {
                 for (int priorityArrayIndex = 0; priorityArrayIndex < hList.size(); priorityArrayIndex++) {
-                    MapImpl map = (MapImpl) hList.get(priorityArrayIndex);
-                    logIt("Priority Array map " + map);
-                    setVal(map, pointToSync, ccuHsApi);
+                    MapImpl priorityArrayMap = (MapImpl) hList.get(priorityArrayIndex);
+                    logIt("Priority Array Map " + priorityArrayMap);
+                    if(isMapValid(priorityArrayMap)) {
+                        setVal(priorityArrayMap, pointToSync, ccuHsApi);
+                    }else {
+                        logIt("Priority Array Map is not valid "+priorityArrayMap);
+                    }
                 }
             }
         });
     }
 
-    private void setVal(MapImpl map, HashMap<Object, Object> pointHash, CCUHsApi ccuHsApi) {
-        int level = Integer.parseInt(map.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).toString());
-        String value = map.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString();
-        String who = map.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString();
+    private boolean isMapValid(MapImpl priorityArrayMap) {
+        return priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_LEVEL) && priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_VAL) &&
+                priorityArrayMap.has(HayStackConstants.WRITABLE_ARRAY_WHO);
+    }
+    private void setVal(MapImpl priorityArrayMap, HashMap<Object, Object> pointHash, CCUHsApi ccuHsApi) {
+        int level = Integer.parseInt(priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).toString());
+        String value = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString();
+        String who = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString();
         String localValue = HSUtil.getLevelEntityOfPoint(Objects.requireNonNull(
                 pointHash.get(Tags.ID)).toString(), level, HayStackConstants.WRITABLE_ARRAY_VAL, ccuHsApi);
         String pointRef = Objects.requireNonNull(pointHash.get(Tags.ID)).toString();
         logIt("LEVEL " + level + " VALUE FROM READ_CHANGES CALL " + value + " WHO " + who + " PointRef " +
                 pointRef + " LOCAL_VALUE " + localValue);
-        String lastModifiedTimeInCloud = map.get(Tags.LAST_MODIFIED_TIME).toString();
         if (!value.equals(localValue)) {
             HashMap<Object, Object> localPointHash = ccuHsApi.readMapById(pointHash.get(Tags.ID).toString());
             if (pointHash.containsKey("scheduleType") && !pointHash.containsKey("modbus")) {
-                 if(isCloudPointHasLatestValue(localPointHash, lastModifiedTimeInCloud, ccuHsApi)){
+                if(isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)){
                     updateScheduleType(pointRef, level, value, pointHash, who, ccuHsApi);
                 }
-                 return;
+                return;
             }
             if (pointHash.containsKey("desired") && !pointHash.containsKey("modbus")) {
-                if(isCloudPointHasLatestValue(localPointHash, lastModifiedTimeInCloud, ccuHsApi)) {
+                if(isCloudPointHasLatestValue(localPointHash, priorityArrayMap, ccuHsApi)) {
                     updateDesiredTemperature(pointRef, level, value, pointHash, who, ccuHsApi);
                 }
                 return;
             }
-            if(isCloudPointHasLatestValue(pointHash, level, lastModifiedTimeInCloud, ccuHsApi)) {
-                updatePoint(pointRef, level, value, pointHash, who, ccuHsApi);
-                Log.i("CCU_READ_CHANGES", " Synced Point " + pointRef);
+            if (isCloudPointHasLatestValue(pointHash, level, priorityArrayMap, ccuHsApi)) {
+                updatePoint(pointRef, pointHash, ccuHsApi, priorityArrayMap);
+                CcuLog.i("CCU_READ_CHANGES", " Synced Point " + pointRef);
             }
         }
     }
 
-    private void updatePoint(String pointRef, int level, String value, HashMap<Object, Object> pointHash, String who, CCUHsApi ccuHsApi) {
+
+    private void updatePoint(String pointRef, HashMap<Object, Object>
+            pointHash, CCUHsApi ccuHsApi, MapImpl priorityArrayMap) {
+        int level = Integer.parseInt(priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).toString());
+        String value = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString();
+        String who = priorityArrayMap.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString();
+        String duration = priorityArrayMap.get("duration").toString();
         try {
             double doubleValue = Double.parseDouble(value);
-            ccuHsApi.writePointLocal(pointRef, level,
-                    who, doubleValue, 0);
+            double doubleDuration = Double.parseDouble(duration);
             if (pointHash.containsKey(Tags.WRITABLE)) {
                 JsonObject body = new JsonObject();
-                body.addProperty("val", Integer.parseInt(value));
+                body.addProperty("val", (int) doubleValue);
                 body.addProperty("level", level);
                 body.addProperty("id", pointRef.replace("@", ""));
                 body.addProperty("command", "updatePoint");
                 body.addProperty("who", who);
-                UpdatePointHandler.handlePointUpdateMessage(body, null);
+                body.addProperty("lastModifiedDateTime", priorityArrayMap.get(Tags.LAST_MODIFIED_TIME).toString());
+                body.addProperty("duration", (int) doubleDuration);
+                UpdatePointHandler.handlePointUpdateMessage(body, null, true);
+            }else {
+                ccuHsApi.writePointLocal(pointRef, level,
+                        who, doubleValue, 0);
+                Log.i("CCU_READ_CHANGES", " Synced Point val Non writable" + doubleValue);
             }
             Log.i("CCU_READ_CHANGES", " Synced Point val " + doubleValue);
         } catch (NumberFormatException e) {
             logIt(" NumberFormatException " + e);
             ccuHsApi.writePointStrValLocal(pointRef, level, who, value, 0);
-            Log.i("CCU_READ_CHANGES", " Synced Point val " + value);
+            Log.i("CCU_READ_CHANGES", " Synced Point val with exception " + value);
         }
     }
 
@@ -439,14 +489,62 @@ public class DataSyncHandler {
         Point scheduleTypePoint = new Point.Builder().setHashMap(pointHash).build();
         SystemScheduleUtil.handleScheduleTypeUpdate(scheduleTypePoint);
     }
+    /*
+     * TTL (Time to live) for message in dev and qa is 1hr
+     * In staging 36hrs
+     * In production 7days
+     *  */
     public static long getMessageExpiryTime() {
         if(BuildConfig.BUILD_TYPE.equals("dev") || BuildConfig.BUILD_TYPE.equals("qa")){
             return MESSAGE_EXPIRY_TIME_FOR_DEV_QA;
+        }else if(BuildConfig.BUILD_TYPE.equals("staging")) {
+            return MESSAGE_EXPIRY_TIME_FOR_STAGING;
         }else {
-            return MESSAGE_EXPIRY_TIME_FOR_STAG_PROD;
+            return MESSAGE_EXPIRY_TIME_FOR_PRODUCTION;
         }
     }
+    public void syncCCUData(long lastCCUUpdateTime) {
+        setDataSyncRunning(lastCCUUpdateTime);
+        CcuLog.i(L.TAG_CCU_READ_CHANGES, "Call Data Sync ");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(syncData(lastCCUUpdateTime, CCUHsApi.getInstance(),
+                        getMessageExpiryTime()) == SyncStatus.COMPLETED) {
+                    Log.i(L.TAG_CCU_READ_CHANGES, " All Entities are Synced from cloud and starting to sync local data");
+                    CCUHsApi.getInstance().syncEntityWithPointWrite();
+                    setDataSyncStopped();
+                }
+            }
+        }, DELAY_FOR_DATA_SYNC);
+    }
+    private void setDataSyncRunning(long lastCCUUpdateTime) {
+        Log.i("CCU_READ_CHANGES","setDataSyncRunning  "+new Date(lastCCUUpdateTime));
+        a75f.io.logic.util.PreferenceUtil.setDataSyncRunning();
+        a75f.io.logic.util.PreferenceUtil.setSyncStartTime(lastCCUUpdateTime);
+    }
 
+    private static String getLastModifiedBy(HashMap<Object, Object> entity, CCUHsApi ccuHsApi) {
+        if(entity.containsKey("lastModifiedBy")){
+            return Objects.requireNonNull(entity.get("lastModifiedBy")).toString();
+        }else {
+            return ccuHsApi.getCCUUserName();
+        }
+    }
+    private static HDateTime getLastModifiedTime(HashMap<Object, Object> entity) {
+        if(entity.containsKey(Tags.LAST_MODIFIED_TIME)){
+            return HDateTime.make(Objects.requireNonNull(entity.get(Tags.LAST_MODIFIED_TIME)).toString());
+        }else {
+            return HDateTime.make(System.currentTimeMillis());
+        }
+    }
+    private static HDateTime getCreatedDateTime(HashMap<Object, Object> entity) {
+        if(entity.containsKey("createdDateTime")){
+            return HDateTime.make(Objects.requireNonNull(entity.get("createdDateTime")).toString());
+        }else {
+            return HDateTime.make(System.currentTimeMillis());
+        }
+    }
     public static boolean isMessageTimeExpired(long lastCCUUpdateTime) {
         if (lastCCUUpdateTime != 0) {
             return lastCCUUpdateTime < (System.currentTimeMillis() - getMessageExpiryTime());

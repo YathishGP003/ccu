@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.heartbeat;
 
+import static a75f.io.logic.BacnetUtilKt.BINARY_VALUE;
+import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
+
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -27,6 +30,8 @@ public class HeartBeat {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
+        addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
+
     }
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
                       String profile, String tz, boolean isStandAlone){
@@ -46,6 +51,7 @@ public class HeartBeat {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
+        addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
     }
 
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
@@ -67,6 +73,7 @@ public class HeartBeat {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
+        addBacnetTags(heartBeat, 29, BINARY_VALUE, nodeAddr);
     }
 
     private HeartBeat(int nodeAddr,String deviceRef, String siteRef, String room, String floor, String tz) {

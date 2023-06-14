@@ -1,11 +1,14 @@
 package a75f.io.device.bacnet
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.Tags
 import a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
 import a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT
 import a75f.io.device.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
+import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_ID
 import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
 import a75f.io.device.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
 import a75f.io.device.bacnet.BacnetConfigConstants.DESCRIPTION
@@ -162,5 +165,64 @@ import java.util.*
         if((isBACnetIntialized && (System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000)) {
             preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
             sendBroadCast(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App")
+        }
+    }
+
+    fun generateBacnetIdForRoom(zoneID: String): Int {
+        var bacnetID = 1
+        var isBacnetIDUsed = true
+        try {
+            val currentRoom = CCUHsApi.getInstance().readMapById(zoneID)
+            if (currentRoom.containsKey(BACNET_ID) && currentRoom[BACNET_ID] != 0) {
+                val bacnetID2 = (currentRoom[BACNET_ID].toString() + "").toDouble()
+                Log.d(L.TAG_CCU_BACNET, "Already have bacnetID $bacnetID2")
+                return bacnetID2.toInt()
+            }
+            val rooms = CCUHsApi.getInstance().readAllEntities("room")
+            if (rooms.size == 0) {
+                Log.d(L.TAG_CCU_BACNET, "rooms size : 0 ")
+                return bacnetID
+            }
+            while (isBacnetIDUsed) {
+                for (room in rooms) {
+                    if (room.containsKey(BACNET_ID)
+                        && room[BACNET_ID] != 0
+                        && (room[Tags.BACNET_ID].toString() + "").toDouble() == bacnetID.toDouble()
+                    ) {
+                        Log.d(L.TAG_CCU_BACNET,"In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room")
+                        bacnetID += 1
+                        isBacnetIDUsed = true
+                        break
+                    } else {
+                        isBacnetIDUsed = false
+                    }
+                }
+            }
+            Log.d(L.TAG_CCU_BACNET, "Generated bacnetID: $bacnetID")
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+        }
+        return bacnetID
+    }
+
+    fun addBacnetTags(
+        context: Context,
+        floorRef: String,
+        roomRef: String
+    ) {
+       updateZone(context, roomRef, floorRef)
+       CCUHsApi.getInstance().syncEntityTree()
+    }
+
+    private fun updateZone(context: Context, roomRef: String, floorRef: String){
+        try {
+            val bacnetId = generateBacnetIdForRoom(roomRef)
+            val zone = HSUtil.getZone(roomRef, floorRef)
+            zone.bacnetId = bacnetId;
+            zone.bacnetType = Tags.DEVICE;
+            CCUHsApi.getInstance().updateZone(zone, zone.id);
+        } catch (e: NullPointerException) {
+            Log.d(L.TAG_CCU_BACNET, "Unable to update zone:  " + e.message)
+            e.printStackTrace()
         }
     }

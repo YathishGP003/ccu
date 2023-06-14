@@ -181,4 +181,7 @@ public class Tags
     public static final String NAMED = "named";
     public static final String LAST_MODIFIED_TIME = "lastModifiedDateTime";
     public static final String MODBUS = "modbus";
+
+    public static final String BACNET_ID = "bacnetId";
+    public static final String BACNET_TYPE = "bacnetType";
 }

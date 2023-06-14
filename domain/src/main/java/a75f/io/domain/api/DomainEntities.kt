@@ -68,6 +68,10 @@ class Equip(domainName : String, id : String) : Entity(domainName, id) {
             points[domainName] = Point(domainName, id)
         }
     }
+
+    fun getPoint(domainName: String) : Point? {
+        return points[domainName]
+    }
 }
 class Device(domainName : String, id : String) : Entity(domainName, id) {
     val points = mutableMapOf<String, RawPoint>()
@@ -77,6 +81,9 @@ class Device(domainName : String, id : String) : Entity(domainName, id) {
         if (domainName != null && id != null) {
             points[domainName] = RawPoint(domainName, id)
         }
+    }
+    fun getPoint(domainName: String) : RawPoint? {
+        return points[domainName]
     }
 }
 
@@ -88,6 +95,9 @@ class CcuDevice(domainName : String, id : String) : Entity(domainName, id) {
         if (domainName != null && id != null) {
             points[domainName] = SettingPoint(domainName, id)
         }
+    }
+    fun getPoint(domainName: String) : SettingPoint? {
+        return points[domainName]
     }
 }
 class Point(domainName : String, id : String) : Entity(domainName, id)

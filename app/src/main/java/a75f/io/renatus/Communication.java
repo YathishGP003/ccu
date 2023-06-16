@@ -4,6 +4,7 @@ import static android.widget.Toast.LENGTH_LONG;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP;
 import static a75f.io.device.bacnet.BacnetConfigConstants.DESCRIPTION;
@@ -17,6 +18,7 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.LOCATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.NULL;
 import static a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_APDU_RETRIES;
 import static a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_NOTIFICATION_CLASS_OBJECTS;
+import static a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_OFFSET_VALUES;
 import static a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_SCHEDULE_OBJECTS;
 import static a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_TREND_LOG_OBJECTS;
 import static a75f.io.device.bacnet.BacnetConfigConstants.PASSWORD;
@@ -49,6 +51,8 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -151,6 +155,13 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tvZvdmHint) TextView tvzvdmHint;
 
+    @BindView(R.id.rg_configuration_type)
+    RadioGroup rgConfigurationType;
+
+    @BindView(R.id.etOffsetValues) EditText etOffsetValues;
+
+    @BindView(R.id.tvOffsetValue) TextView tvOffsetValue;
+
     SharedPreferences sharedPreferences;
     JSONObject config;
     JSONObject networkObject;
@@ -250,6 +261,13 @@ public class Communication extends Fragment {
             Log.d(L.TAG_CCU_BACNET,"Config data: "+config+", Error message: "+e.getMessage());
             e.printStackTrace();
         }
+
+        rgConfigurationType.setOnCheckedChangeListener((radioGroup, checkedId) -> {
+            RadioButton radioButton = view.findViewById(checkedId);
+            String label = radioButton.getText().toString();
+            Log.d(L.TAG_CCU_BACNET, "radioButton selected-->"+label);
+            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
+        });
     }
 
     private void setBACnetConfigurationValues() {
@@ -270,6 +288,7 @@ public class Communication extends Fragment {
             etNotificationClassObjects.setText(String.valueOf((objectConf.getString(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS).equals(NULL)) || (objectConf.getString(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS)));
             etTrendLogObjects.setText(String.valueOf((objectConf.getString(NUMBER_OF_TREND_LOG_OBJECTS).equals(NULL)) || (objectConf.getString(NUMBER_OF_TREND_LOG_OBJECTS).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_TREND_LOG_OBJECTS)));
             etScheduleObjects.setText(String.valueOf((objectConf.getString(NUMBER_OF_SCHEDULE_OBJECTS).equals(NULL)) || (objectConf.getString(NUMBER_OF_SCHEDULE_OBJECTS).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_SCHEDULE_OBJECTS)));
+			etOffsetValues.setText(String.valueOf((objectConf.getString(NUMBER_OF_OFFSET_VALUES).equals(NULL)) || (objectConf.getString(NUMBER_OF_OFFSET_VALUES).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_OFFSET_VALUES)));
         }catch (JSONException e){
             Log.d(L.TAG_CCU_BACNET, "Exception while populating");
             e.printStackTrace();
@@ -291,6 +310,7 @@ public class Communication extends Fragment {
         etNotificationClassObjects.addTextChangedListener(new EditTextWatcher(etNotificationClassObjects));
         etTrendLogObjects.addTextChangedListener(new EditTextWatcher(etTrendLogObjects));
         etScheduleObjects.addTextChangedListener(new EditTextWatcher(etScheduleObjects));
+        etOffsetValues.addTextChangedListener(new EditTextWatcher(etOffsetValues));
     }
 
     private void initializeBACnet() {
@@ -319,6 +339,7 @@ public class Communication extends Fragment {
             hideView(etNotificationClassObjects, tvNotificationClassObjects);
             hideView(etTrendLogObjects, tvTrendLogObjects);
             hideView(etScheduleObjects, tvScheduleObjects);
+            hideView(etOffsetValues, tvOffsetValue);
         }else{
             disableBACnet.setVisibility(View.GONE);
             initializeBACnet.setVisibility(View.VISIBLE);
@@ -354,6 +375,7 @@ public class Communication extends Fragment {
                     hideView(etNotificationClassObjects, tvNotificationClassObjects);
                     hideView(etTrendLogObjects, tvTrendLogObjects);
                     hideView(etScheduleObjects, tvScheduleObjects);
+                    hideView(etOffsetValues, tvOffsetValue);
                     startRestServer();
                     sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
                     sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App");
@@ -397,6 +419,8 @@ public class Communication extends Fragment {
                 tvTrendLogObjects.setVisibility(View.GONE);
                 etScheduleObjects.setVisibility(View.VISIBLE);
                 tvScheduleObjects.setVisibility(View.GONE);
+                etOffsetValues.setVisibility(View.VISIBLE);
+                tvOffsetValue.setVisibility(View.GONE);
                 stopRestServer();
                 sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
                 sendBroadCast(context, BROADCAST_BACNET_APP_STOP, "Stop BACnet App");
@@ -471,6 +495,7 @@ public class Communication extends Fragment {
 
         if(etTrendLogObjects.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etTrendLogObjects.getText().toString()), 0, 10, 1)))  return false;
 
+        if(etOffsetValues.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etOffsetValues.getText().toString()), 0, 100, 1)))  return false;
         return !etScheduleObjects.getText().toString().equals(EMPTY_STRING) && (CCUUiUtil.isValidNumber(Integer.parseInt(etScheduleObjects.getText().toString()), 0, 10, 1));
     }
 
@@ -632,6 +657,9 @@ public class Communication extends Fragment {
 
                 case R.id.etScheduleObjects:
                     validateAndSetValue(etScheduleObjects, NUMBER_OF_SCHEDULE_OBJECTS, etScheduleObjects.getText().toString(), objectConf, 0, 10, 1, getString(R.string.error_schedule_objects));
+                    break;
+                case R.id.etOffsetValues:
+                    validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 0, 100, 1, getString(R.string.error_offset_values));
                     break;
             }
         }

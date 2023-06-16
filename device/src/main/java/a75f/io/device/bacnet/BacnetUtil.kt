@@ -23,6 +23,7 @@ import a75f.io.device.bacnet.BacnetConfigConstants.LOCATION
 import a75f.io.device.bacnet.BacnetConfigConstants.MODEL_NAME
 import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_APDU_RETRIES
 import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_NOTIFICATION_CLASS_OBJECTS
+import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_OFFSET_VALUES
 import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_SCHEDULE_OBJECTS
 import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_TREND_LOG_OBJECTS
 import a75f.io.device.bacnet.BacnetConfigConstants.PASSWORD
@@ -97,6 +98,7 @@ import java.util.*
         objectConf.put(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS, 1)
         objectConf.put(NUMBER_OF_TREND_LOG_OBJECTS, 1)
         objectConf.put(NUMBER_OF_SCHEDULE_OBJECTS, 1)
+        objectConf.put(NUMBER_OF_OFFSET_VALUES, 0)
 
 
         configObject.put("device", deviceObject)

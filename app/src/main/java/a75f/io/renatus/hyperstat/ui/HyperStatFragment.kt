@@ -306,9 +306,19 @@ class HyperStatFragment : BaseDialogFragment() {
             analogOut1Test.setSelection(0,false)
             analogOut2Test.setSelection(0,false)
             analogOut3Test.setSelection(0,false)
-            analogOut1Test.setOnItemSelected { sendControl() }
-            analogOut2Test.setOnItemSelected { sendControl() }
-            analogOut3Test.setOnItemSelected { sendControl() }
+
+             val spinnerSelectionListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (parent?.isPressed == true) {
+                        sendControl()
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
+            }
+            analogOut1Test.onItemSelectedListener = spinnerSelectionListener
+            analogOut2Test.onItemSelectedListener = spinnerSelectionListener
+            analogOut3Test.onItemSelectedListener = spinnerSelectionListener
 
         }
     }

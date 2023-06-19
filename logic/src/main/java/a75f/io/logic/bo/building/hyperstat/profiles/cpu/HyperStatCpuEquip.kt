@@ -405,7 +405,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuRelayAssociation) {
             if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
                 if (!HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
-                    val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanConfigPoint(newConfiguration)
+                    val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration)
                     hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
                         stagedFanConfigPoints
                     ))

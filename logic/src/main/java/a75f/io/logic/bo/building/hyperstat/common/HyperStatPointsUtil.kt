@@ -1280,15 +1280,12 @@ class HyperStatPointsUtil(
     }
 
     fun analogOutConfiguration1(analogTag: String): Triple<Point, Any?, Any?> {
-
         return Triple(
             LogicalPointsUtil.createAnalogOutPointForStagedFanSpeed(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddress),
             null,
             null
         )
-
     }
-
 
     fun analogOutConfiguration(analogOutState: AnalogOutState, analogTag: String): Triple<Any, Any, Any> {
         //   AnalogOut can be Associated  to these all state
@@ -2517,9 +2514,73 @@ class HyperStatPointsUtil(
 
         return stagedFanConfigPointsList
     }
+        fun createStagedFanPoint(newConfiguration: HyperStatCpuConfiguration): MutableList<Pair<Point, Any>> {
+            val stagedFanConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
+            when {
+                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_1) -> {
+                    val coolingStage1FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutCoolingStage1",
+                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"),
+                        newConfiguration.coolingStage1FanState
+                    )
+                    stagedFanConfigPointsList.add(coolingStage1FanConfigPoint)
+                }
+                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2) -> {
+                    val coolingStage2FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutCoolingStage2",
+                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage2"),
+                        newConfiguration.coolingStage2FanState
+                    )
+                    stagedFanConfigPointsList.add(coolingStage2FanConfigPoint)
+                }
+                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3) -> {
+                    val coolingStage3FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutCoolingStage3",
+                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage3"),
+                        newConfiguration.coolingStage3FanState
+                    )
+                    stagedFanConfigPointsList.add(coolingStage3FanConfigPoint)
+                }
+                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1) -> {
+                    val heatingStage1FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutHeatingStage1",
+                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage1"),
+                        newConfiguration.heatingStage1FanState
+                    )
+                    stagedFanConfigPointsList.add(heatingStage1FanConfigPoint)
+                }
+                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2) -> {
+                    val heatingStage2FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutHeatingStage2",
+                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage2"),
+                        newConfiguration.heatingStage2FanState
+                    )
+                    stagedFanConfigPointsList.add(heatingStage2FanConfigPoint)
+                }
+                else -> {
+                    val heatingStage3FanConfigPoint = createFanConfigPoint(
+                        "$equipDis-fanOutHeatingStage3",
+                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage3"),
+                        newConfiguration.heatingStage3FanState
+                    )
+                    stagedFanConfigPointsList.add(heatingStage3FanConfigPoint)
+                }
+            }
 
-}
+            return stagedFanConfigPointsList
+        }
+
+        private fun createFanConfigPoint(
+            pointName: String,
+            markers: Array<String>,
+            fanState: Any
+        ): Pair<Point, Any> {
+            val fanConfigPoint = createHaystackPointWithUnit(pointName, markers, null, "V")
+            return Pair(fanConfigPoint, fanState)
+        }
+
+    }
 
 
 

@@ -8,6 +8,7 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.common.AnalogConfigState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -426,7 +427,18 @@ class HyperStatFragment : BaseDialogFragment() {
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogOutSwitchChanged(index, isChecked)
             }
-            widgets.selector.setOnItemSelected { position -> viewModel.analogOutMappingSelected(index, position) }
+            if (viewModel is CpuViewModel) {
+                widgets.selector.setOnItemSelected {
+                        position -> viewModel.cpuAnalogOutMappingSelected(index, position)
+                }
+            } else {
+                widgets.selector.setOnItemSelected { position ->
+                    viewModel.analogOutMappingSelected(
+                        index,
+                        position
+                    )
+                }
+            }
 
             widgets.vAtMinDamperSelector.setOnItemSelected { position ->
                 viewModel.voltageAtDamperSelected(
@@ -574,7 +586,7 @@ class HyperStatFragment : BaseDialogFragment() {
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
                 selector.isEnabled = analogOutState.enabled
-                selector.setSelection(analogOutState.association)
+                selector.setSelection(if (viewModel is CpuViewModel) getCpuAnalogOutState(analogOutState) else analogOutState.association)
                 vAtMinDamperLabel.text = String.format(
                     "%s%d at \nMin %s",
                     getString(R.string.hyperstat_analog_out),
@@ -683,6 +695,15 @@ class HyperStatFragment : BaseDialogFragment() {
 
 
     }
+
+    private fun getCpuAnalogOutState(analogOutState: AnalogConfigState): Int {
+        return when (analogOutState.association) {
+            2 -> 4
+            4 -> 2
+            else -> analogOutState.association
+        }
+    }
+
 
     private fun makeStagedFanVisible(
         isCoolingStage1Enabled: Boolean,

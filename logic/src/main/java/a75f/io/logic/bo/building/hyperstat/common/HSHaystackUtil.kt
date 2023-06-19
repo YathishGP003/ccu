@@ -560,10 +560,15 @@ class HSHaystackUtil(
         )
     }
 
-    fun getFanStageValue(fanType: String): Double {
-        return  haystack.readDefaultVal(
-            "point and output and fan and $fanType and equipRef == \"$equipRef\""
-        )
+    fun getFanStageValue(fanType: String, defaultValue: Int): Double {
+        val query = "point and output and fan and $fanType and equipRef == \"$equipRef\""
+        val fanStageValue = haystack.readEntity(query)
+
+        return if (fanStageValue.isEmpty()) {
+            defaultValue.toDouble()
+        } else {
+            haystack.readDefaultVal(query)
+        }
     }
 
 }

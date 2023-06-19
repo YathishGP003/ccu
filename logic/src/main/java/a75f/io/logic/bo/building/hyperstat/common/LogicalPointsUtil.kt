@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -619,18 +620,18 @@ class LogicalPointsUtil {
 
          fun createAnalogOutPointForFanSpeed(
              equipDis: String, siteRef: String, equipRef: String,
-             roomRef: String, floorRef: String, tz: String,
+             roomRef: String, floorRef: String, tz: String, nodeAddress: String,
          ): Point {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output",
-                    "fan", "speed","run","his","predefined"
+                    "cmd","zone","logical","cur","output",
+                    "fan", "speed","his","modulating","cpu","standalone"
                 )
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-fanSpeed")
-                    .setSiteRef(siteRef).setEquipRef(equipRef)
-                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setDisplayName("$equipDis-modulatingFanSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress)
+                    .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
@@ -659,25 +660,25 @@ class LogicalPointsUtil {
             return Point.Builder().setHashMap(readAnalogOutDcvLogicalPoint(equipRef)).build()
         }
 
-        fun createAnalogOutPointForStagedFanSpeed(
+        fun createAnalogOutPointForPredefinedFanSpeed(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String, nodeAddress: String,
         ): Point {
-            val existingPoint = readAnalogOutStagedFanSpeedLogicalPoint(equipRef)
+            val existingPoint = readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","analog", "output",
-                    "fan", "speed","run","his","modulating"
+                    "cmd","zone","logical","cur","output","standalone",
+                    "fan", "speed","his","predefined","cpu"
                 )
                 val point = Point.Builder()
-                    .setDisplayName("$equipDis-modulatingFanSpeed")
-                    .setSiteRef(siteRef).setEquipRef(equipRef)
-                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setDisplayName("$equipDis-predefinedFanSpeed")
+                    .setSiteRef(siteRef).setEquipRef(equipRef).setGroup(nodeAddress)
+                    .setRoomRef(roomRef).setFloorRef(floorRef).setKind(Kind.NUMBER)
                     .setTz(tz).setHisInterpolate("cov").setUnit("%")
                 markers.forEach { point.addMarker(it) }
                 addPointToHaystack(point.build())
             }
-            return Point.Builder().setHashMap(readAnalogOutStagedFanSpeedLogicalPoint(equipRef)).build()
+            return Point.Builder().setHashMap(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
         }
 
          fun createAnalogOutPointForWaterValve(
@@ -741,7 +742,7 @@ class LogicalPointsUtil {
         }
         fun readAnalogOutFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "analog and logical and output and fan and predefined and speed and equipRef == \"$equipRef\"")
+                "analog and logical and output and fan and modulating and speed and equipRef == \"$equipRef\"")
         }
         fun readAnalogOutDcvLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
@@ -753,9 +754,9 @@ class LogicalPointsUtil {
                 "analog and logical and output and compressor and speed and equipRef == \"$equipRef\"")
         }
 
-        fun readAnalogOutStagedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
+        fun readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "analog and logical and output and fan and modulating and speed and equipRef == \"$equipRef\"")
+                "analog and logical and output and fan and predefined and speed and equipRef == \"$equipRef\"")
         }
 
         /***   Thermistor logical points***/
@@ -958,7 +959,7 @@ class LogicalPointsUtil {
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToDCV(config))
                 removePoint(readAnalogOutDcvLogicalPoint(equipRef))
             if(!HyperStatAssociationUtil.isAnyAnalogAssociatedToStaged(config))
-                removePoint(readAnalogOutStagedFanSpeedLogicalPoint(equipRef))
+                removePoint(readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef))
         }
 
         fun cleanPipe2LogicalPoints(config: HyperStatPipe2Configuration, equipRef: String){

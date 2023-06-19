@@ -25,7 +25,7 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var relay6State = RelayState(false, CpuRelayAssociation.FAN_HIGH_SPEED)
 
    var analogOut1State = AnalogOutState(false, CpuAnalogOutAssociation.COOLING, 2.0 ,10.0,70.0,80.0,100.0)
-   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.LINEAR_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
+   var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.MODULATING_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
    var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0)
 
    var isEnableAirFlowTempSensor = false
@@ -104,10 +104,10 @@ enum class CpuRelayAssociation {
 // Order is important -- FAN_HIGH_SPEED
 enum class CpuAnalogOutAssociation {
    COOLING,
-   LINEAR_FAN_SPEED,
+   MODULATING_FAN_SPEED,
    DCV_DAMPER,
    HEATING,
-   STAGED_FAN_SPEED,
+   PREDEFINED_FAN_SPEED,
 }
 
 // Order is important -- see comment above.

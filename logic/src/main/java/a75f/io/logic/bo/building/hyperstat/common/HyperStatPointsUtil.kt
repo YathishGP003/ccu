@@ -1122,7 +1122,7 @@ class HyperStatPointsUtil(
 
         if (hyperStatConfig.analogOut1State.enabled) {
 
-            if (hyperStatConfig.analogOut1State.association != CpuAnalogOutAssociation.STAGED_FAN_SPEED) {
+            if (hyperStatConfig.analogOut1State.association != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
                 val pointData: Triple<Any, Any, Any> = analogOutConfiguration(
                     analogOutState = hyperStatConfig.analogOut1State,
                     analogTag = "analog1"
@@ -1160,9 +1160,7 @@ class HyperStatPointsUtil(
                     "analog1", configLogicalPointsList
                 )
             } else {
-                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1(
-                    analogTag = "analog1",
-                )
+                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1()
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
@@ -1176,7 +1174,7 @@ class HyperStatPointsUtil(
 
         if (hyperStatConfig.analogOut2State.enabled) {
 
-            if (hyperStatConfig.analogOut2State.association != CpuAnalogOutAssociation.STAGED_FAN_SPEED) {
+            if (hyperStatConfig.analogOut2State.association != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
                 val pointData: Triple<Any, Any, Any> = analogOutConfiguration(
                     analogOutState = hyperStatConfig.analogOut2State,
                     analogTag = "analog2"
@@ -1213,9 +1211,7 @@ class HyperStatPointsUtil(
                     "analog2", configLogicalPointsList
                 )
             } else {
-                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1(
-                    analogTag = "analog2",
-                )
+                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1()
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
@@ -1228,7 +1224,7 @@ class HyperStatPointsUtil(
 
         if (hyperStatConfig.analogOut3State.enabled) {
 
-            if (hyperStatConfig.analogOut3State.association != CpuAnalogOutAssociation.STAGED_FAN_SPEED) {
+            if (hyperStatConfig.analogOut3State.association != CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
                 val pointData: Triple<Any, Any, Any> = analogOutConfiguration(
                     analogOutState = hyperStatConfig.analogOut3State,
                     analogTag = "analog3"
@@ -1264,9 +1260,7 @@ class HyperStatPointsUtil(
                     "analog3", configLogicalPointsList
                 )
             } else {
-                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1(
-                    analogTag = "analog1",
-                )
+                val pointData: Triple<Point, Any?, Any?> = analogOutConfiguration1()
                 configLogicalPointsList.add(
                     Triple(
                         pointData.first,
@@ -1279,9 +1273,9 @@ class HyperStatPointsUtil(
         return configLogicalPointsList
     }
 
-    fun analogOutConfiguration1(analogTag: String): Triple<Point, Any?, Any?> {
+    fun analogOutConfiguration1(): Triple<Point, Any?, Any?> {
         return Triple(
-            LogicalPointsUtil.createAnalogOutPointForStagedFanSpeed(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddress),
+            LogicalPointsUtil.createAnalogOutPointForPredefinedFanSpeed(equipDis, siteRef, equipRef, roomRef, floorRef, tz, nodeAddress),
             null,
             null
         )
@@ -1314,7 +1308,7 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz,nodeAddress),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -1835,7 +1829,7 @@ class HyperStatPointsUtil(
     private fun getAnalogOutConfigEnum(profileType: ProfileType): String {
         when(profileType) {
             ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
-                return "$COOLING,$LINEAR_FAN_SPEED,$STAGED_FAN_SPEED$HEATING,$DCV_DAMPER"
+                return "$COOLING,$MODULATING_FAN_SPEED,$DCV_DAMPER,$HEATING,$PREDEFINED_FAN_SPEED"
             }
             ProfileType.HYPERSTAT_HEAT_PUMP_UNIT -> {
                 return "$COMPRESSORSPEED,$FAN_SPEED,$DCV_DAMPER"
@@ -1879,8 +1873,8 @@ class HyperStatPointsUtil(
     fun getCpuAnalogOutLogicalPoint(association: CpuAnalogOutAssociation): Point {
         return when(association){
             CpuAnalogOutAssociation.COOLING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogCoolingLogicalPoint(equipRef)).build()
-            CpuAnalogOutAssociation.LINEAR_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
-            CpuAnalogOutAssociation.STAGED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutStagedFanSpeedLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.MODULATING_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.HEATING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogHeatingLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.DCV_DAMPER-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutDcvLogicalPoint(equipRef)).build()
         }
@@ -2071,7 +2065,15 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(
+                        equipDis,
+                        siteRef,
+                        equipRef,
+                        roomRef,
+                        floorRef,
+                        tz,
+                        nodeAddress
+                    ),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -2356,7 +2358,15 @@ class HyperStatPointsUtil(
                 )
 
                 Triple(
-                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(equipDis,siteRef,equipRef,roomRef,floorRef,tz),
+                    LogicalPointsUtil.createAnalogOutPointForFanSpeed(
+                        equipDis,
+                        siteRef,
+                        equipRef,
+                        roomRef,
+                        floorRef,
+                        tz,
+                        nodeAddress
+                    ),
                     Pair(minMaxPoint.first, LogicalKeyID.MIN_FAN_SPEED),
                     Pair(minMaxPoint.second, LogicalKeyID.MAX_FAN_SPEED),
                 )
@@ -2514,11 +2524,14 @@ class HyperStatPointsUtil(
 
         return stagedFanConfigPointsList
     }
-        fun createStagedFanPoint(newConfiguration: HyperStatCpuConfiguration): MutableList<Pair<Point, Any>> {
+        fun createStagedFanPoint(
+            newConfiguration: HyperStatCpuConfiguration,
+            stage: CpuRelayAssociation
+        ): MutableList<Pair<Point, Any>> {
             val stagedFanConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
-            when {
-                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_1) -> {
+            when (stage) {
+                CpuRelayAssociation.COOLING_STAGE_1 -> {
                     val coolingStage1FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage1",
                         arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"),
@@ -2526,7 +2539,7 @@ class HyperStatPointsUtil(
                     )
                     stagedFanConfigPointsList.add(coolingStage1FanConfigPoint)
                 }
-                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2) -> {
+                CpuRelayAssociation.COOLING_STAGE_2 -> {
                     val coolingStage2FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage2",
                         arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage2"),
@@ -2534,7 +2547,7 @@ class HyperStatPointsUtil(
                     )
                     stagedFanConfigPointsList.add(coolingStage2FanConfigPoint)
                 }
-                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3) -> {
+                CpuRelayAssociation.COOLING_STAGE_3 -> {
                     val coolingStage3FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage3",
                         arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage3"),
@@ -2542,7 +2555,7 @@ class HyperStatPointsUtil(
                     )
                     stagedFanConfigPointsList.add(coolingStage3FanConfigPoint)
                 }
-                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1) -> {
+                CpuRelayAssociation.HEATING_STAGE_1 -> {
                     val heatingStage1FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutHeatingStage1",
                         arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage1"),
@@ -2550,7 +2563,7 @@ class HyperStatPointsUtil(
                     )
                     stagedFanConfigPointsList.add(heatingStage1FanConfigPoint)
                 }
-                HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2) -> {
+                CpuRelayAssociation.HEATING_STAGE_2 -> {
                     val heatingStage2FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutHeatingStage2",
                         arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage2"),
@@ -2567,7 +2580,6 @@ class HyperStatPointsUtil(
                     stagedFanConfigPointsList.add(heatingStage3FanConfigPoint)
                 }
             }
-
             return stagedFanConfigPointsList
         }
 

@@ -526,7 +526,7 @@
                 android:layout_marginBottom="20dp">
 
                 <LinearLayout
-                    android:id="@+id/stagedFanLinearLayout"
+                    android:id="@+id/predefinedFanLinearLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
@@ -686,14 +686,14 @@
                     android:id="@+id/ao1MinDamperLabel"
                     style="@style/DamperPositionLabel_HyperStat"
                     android:layout_alignParentStart="true"
-                    android:layout_below="@+id/stagedFanLinearLayout"
+                    android:layout_below="@+id/predefinedFanLinearLayout"
                     android:text="@string/hyperstat_analog_out_1_at_max_damper" />
 
                 <Spinner
                     android:id="@+id/ao1MinDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
                     android:layout_toEndOf="@+id/ao1MinDamperLabel"
-                    android:layout_below="@+id/stagedFanLinearLayout"
+                    android:layout_below="@+id/predefinedFanLinearLayout"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
                 <TextView
@@ -701,7 +701,7 @@
                     style="@style/DamperPositionLabel_HyperStat"
                     android:layout_gravity="end"
                     android:layout_marginStart="14dp"
-                    android:layout_below="@+id/stagedFanLinearLayout"
+                    android:layout_below="@+id/predefinedFanLinearLayout"
                     android:layout_toStartOf="@+id/ao1MaxDamperSpinner"
                     android:text="@string/hyperstat_analog_out_1_at_max_damper" />
 
@@ -709,7 +709,7 @@
                     android:id="@+id/ao1MaxDamperSpinner"
                     style="@style/DamperPositionSpinner_HyperStat"
                     android:layout_alignParentEnd="true"
-                    android:layout_below="@+id/stagedFanLinearLayout"
+                    android:layout_below="@+id/predefinedFanLinearLayout"
                     android:entries="@array/hyperstat_analog_out_voltage_selector" />
 
                 <TextView
@@ -948,7 +948,7 @@
                 <Spinner
                     android:id="@+id/zoneVocThresholdSpinner"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0.5"
                     android:layout_height="match_parent" />
 
                 <TextView
@@ -965,7 +965,7 @@
                 <Spinner
                     android:id="@+id/zoneVocTargetSpinner"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0.5"
                     android:layout_height="match_parent" />
 
 
@@ -996,7 +996,7 @@
                 <Spinner
                     android:id="@+id/zonepmThresholdSpinner"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0.5"
                     android:layout_height="match_parent" />
 
                 <TextView
@@ -1013,7 +1013,7 @@
                 <Spinner
                     android:id="@+id/zonepmTargetSpinner"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0.5"
                     android:layout_height="match_parent" />
 
 

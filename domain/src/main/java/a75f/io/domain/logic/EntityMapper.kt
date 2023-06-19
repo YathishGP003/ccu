@@ -3,16 +3,23 @@ package a75f.io.domain.logic
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.model.ModelDef
-import a75f.io.domain.model.ModelPointDef
-import a75f.io.domain.model.common.point.*
+import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
+import io.seventyfivef.domainmodeler.common.point.ComparisonType
+import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
+import io.seventyfivef.domainmodeler.common.point.DynamicSensorConfiguration
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+
 
 /**
  * EntityMapper helps extracting entity details from domain model.
  * A particular profile configuration can be used to resolve dependency and association relations.
  * Every instance of EntityMapper is tied a specific domain model.
  */
-class EntityMapper (private val modelDef: ModelDef) {
+class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     fun getEntityConfiguration(configuration: ProfileConfiguration) : EntityConfiguration{
         val entityConfiguration = EntityConfiguration()
@@ -22,33 +29,33 @@ class EntityMapper (private val modelDef: ModelDef) {
         return entityConfiguration
     }
 
-    fun getBasePoints() : List<ModelPointDef> {
+    fun getBasePoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.BASE
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.BASE
         }
     }
 
-    fun getAssociationPoints() : List<ModelPointDef> {
+    fun getAssociationPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.ASSOCIATION
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
         }
     }
 
-    fun getDependentPoints() : List<ModelPointDef> {
+    fun getDependentPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.DEPENDENT
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.DEPENDENT
         }
     }
 
-    fun getAssociatedPoints() : List<ModelPointDef> {
+    fun getAssociatedPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.ASSOCIATED
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATED
         }
     }
 
-    fun getDynamicSensorPoints() : List<ModelPointDef> {
+    fun getDynamicSensorPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
         }
     }
     private fun toPoint(pointDef : ModelPointDef) : Map <Any, Any> {
@@ -59,18 +66,13 @@ class EntityMapper (private val modelDef: ModelDef) {
         return point
     }
 
-    fun getAssociatedPoints(configuration: ModelDef) : List<ModelPointDef> {
-        return modelDef.points.filter { point -> point.tags.find { it.name.contains("associated") } != null }
-
-    }
-
-    fun getPointByDomainName(name : String) : ModelPointDef? {
+    fun getPointByDomainName(name : String) : SeventyFiveFProfilePointDef? {
         return modelDef.points.find { it.domainName == name }
     }
 
-    private fun getAssociationDefinitions() : List<ModelPointDef> {
+    private fun getAssociationDefinitions() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configurationType == PointConfiguration.ConfigType.ASSOCIATION
+                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
         }
     }
 
@@ -94,8 +96,8 @@ class EntityMapper (private val modelDef: ModelDef) {
 
                 //TODO - add to DM validation.
                 val constraint = def.valueConstraint as MultiStateConstraint
-                if (baseConfig != null && evaluateConfiguration(ComparisonType.valueOf(def.configuration.comparisonType),
-                        def.configuration.value.index - 1, //TODO -index starts at 1 ?
+                if (baseConfig != null && evaluateConfiguration(pointConfiguration.comparisonType,
+                        pointConfiguration.value as Int - 1, //TODO -index starts at 1 ?
                         baseConfig.enabled.toInt())) {
                     enabledAssociations.add(constraint.allowedValues[associationIndex].value)
                 }
@@ -116,7 +118,7 @@ class EntityMapper (private val modelDef: ModelDef) {
             val baseConfig = profileConfiguration.getEnableConfigs().find { point -> point.domainName == associationPointName }
 
             if (baseConfig != null && evaluateConfiguration(ComparisonType.EQUALS,
-                    def.configuration.value.index - 1, //TODO -index starts at 1 ?
+                    pointConfiguration.value as Int,
                     baseConfig.enabled.toInt())) {
                 enabledDependencies.add(def.domainName)
             }
@@ -134,15 +136,15 @@ class EntityMapper (private val modelDef: ModelDef) {
             isDynamicSensorTypeMatching(sensorType, it)
         }
         val sensorConfig = sensorPoint?.configuration as DynamicSensorConfiguration
-        if (evaluateConfiguration(ComparisonType.valueOf(sensorConfig.comparisonType),
-                sensorConfig.value.toInt(),
+        if (evaluateConfiguration(sensorConfig.comparisonType,
+                sensorConfig.value as Int,
                 currentVal.toInt())) {
             return sensorPoint
         }
         return null
     }
 
-    private fun isDynamicSensorTypeMatching(sensorType: Int, pointDef: ModelPointDef) : Boolean{
+    private fun isDynamicSensorTypeMatching(sensorType: Int, pointDef: SeventyFiveFProfilePointDef) : Boolean{
         val sensorConfig = pointDef.configuration as DynamicSensorConfiguration
         return sensorType == sensorConfig.sensorType.toInt()
     }

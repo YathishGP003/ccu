@@ -38,6 +38,15 @@ buildscript {
                 dirs '../libs'
             }
             maven { url 'https://maven.fabric.io/public' }
+            maven {
+                url 'https://pkgs.dev.azure.com/75fdevelopment/a92ce35a-2553-4a44-a5a8-434ed0f35204/_packaging/renatus/maven/v1'
+                name 'renatus'
+                credentials {
+                    username "Azure DevOps Services"
+                    //password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
+                    password "monvrqjjkbx3dxcqw6ysty5jrkc7ruayuhawlfxpggqbzs6qeoxq"
+                }
+            }
         }
     }
 

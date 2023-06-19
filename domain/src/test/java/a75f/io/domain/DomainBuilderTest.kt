@@ -9,17 +9,17 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EquipBuilder
-import a75f.io.domain.model.ModelDef
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import org.junit.Before
 import org.junit.Test
 
 class DomainBuilderTest {
 
-    private lateinit var dmModel: ModelDef
+    private lateinit var dmModel: ModelDirective
 
     @Before
     fun setUp() {
-        dmModel = ResourceHelper.loadModelDefinition("DomainBuilder_TestModel.json")
+        dmModel = ResourceHelper.loadProfileModelDefinition("DomainBuilder_TestModel.json")
     }
 
     @Test

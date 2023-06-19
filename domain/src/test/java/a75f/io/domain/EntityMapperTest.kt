@@ -2,24 +2,26 @@ package a75f.io.domain
 
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.model.ModelDef
+import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
 import org.junit.Before
 import org.junit.Test
 
 class EntityMapperTest {
 
-    private lateinit var dmModel: ModelDef
+    private lateinit var dmModel: ModelDirective
 
     @Before
     fun setUp() {
-        dmModel = ResourceHelper.loadModelDefinition("EntityMapper_TestModel.json")
+        dmModel = ResourceHelper.loadProfileModelDefinition("EntityMapper_TestModel.json")
+
     }
 
     @Test
     fun modelParseTest() {
 
         dmModel?.let {
-            val entityMapper = EntityMapper(dmModel)
+            val entityMapper = EntityMapper(dmModel as SeventyFiveFProfileDirective)
             println("Base points")
             val basePoints = entityMapper.getBasePoints()
             basePoints.forEach { println(it) }
@@ -28,7 +30,7 @@ class EntityMapperTest {
             println("Associated points")
             val associatedPoints = entityMapper.getAssociatedPoints()
             associatedPoints.forEach { println(it) }
-            assert(associatedPoints.size == 1)
+            assert(associatedPoints.size == 2)
 
             println("Association points")
             val associationPoints = entityMapper.getAssociationPoints()

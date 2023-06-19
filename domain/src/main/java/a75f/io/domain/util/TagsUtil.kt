@@ -1,15 +1,14 @@
 package a75f.io.domain.util
 
-import a75f.io.domain.model.TagDef
-import a75f.io.logger.CcuLog
+import io.seventyfivef.domainmodeler.client.ModelTagDef
 import org.projecthaystack.HNum
 import org.projecthaystack.HVal
 
 object TagsUtil {
-    fun getTagDefHVal(tag : TagDef) : HVal?{
+    fun getTagDefHVal(tag : ModelTagDef) : HVal?{
         return when (tag.defaultValue) {
-            is Int -> HNum.make(tag.defaultValue.toInt())
-            is Double -> HNum.make(tag.defaultValue.toDouble())
+            is Int -> HNum.make(tag.defaultValue as Int)
+            is Double -> HNum.make(tag.defaultValue as Double)
             else -> {
                 //CcuLog.i("CCU_DM", "Unknown tag type $tag")
                 println("Unknown tag type $tag")

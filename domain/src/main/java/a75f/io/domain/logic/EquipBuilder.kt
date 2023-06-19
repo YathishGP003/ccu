@@ -8,26 +8,24 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.model.ModelDef
-import a75f.io.domain.model.ModelPointDef
-import a75f.io.domain.model.ph.core.TagType
 import a75f.io.domain.util.TagsUtil
-import a75f.io.logger.CcuLog
+import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.SeventyFiveFProfilePointDef
+import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
-import org.projecthaystack.HNum
 import org.projecthaystack.HStr
-import org.projecthaystack.HVal
 
 class EquipBuilder(private val hayStack : CCUHsApi) {
-    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDef) {
-        val entityMapper = EntityMapper(modelDef)
+    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective) {
+        val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
         val equipRef = createEquip(modelDef, configuration)
         createPoints(modelDef, configuration, entityConfiguration, equipRef)
     }
 
-    private fun createEquip(modelDef: ModelDef, profileConfiguration: ProfileConfiguration) : String{
+    private fun createEquip(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration) : String{
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -52,7 +50,7 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         return hayStack.addEquip(equipBuilder.build())
     }
 
-    private fun createPoints(modelDef: ModelDef, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration, equipRef: String) {
+    private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeAdded.forEach { point ->
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
@@ -62,15 +60,15 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         }
 
     }
-    private fun createPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration, equipRef : String) : String{
+    private fun createPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : String{
 
         //TODO - Ref validation, zone/system equip differentiator.
-        val pointBuilder = Point.Builder().setDisplayName(modelDef.displayName)
+        val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
             .setEquipRef(equipRef)
             .setRoomRef(configuration.roomRef)
             .setFloorRef(configuration.floorRef)
-            .setKind(Kind.parse(modelDef.pointType.name))
+            .setKind(Kind.parsePointType(modelDef.kind.name))
             .setUnit(modelDef.defaultUnit)
 
 
@@ -94,7 +92,7 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         return hayStack.addPoint(pointBuilder.build())
     }
 
-    private fun createDevice(modelDef: ModelDef) : String{
+    private fun createDevice(modelDef: SeventyFiveFProfileDirective) : String{
 
         val deviceBuilder = Device.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -102,14 +100,14 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         return hayStack.addDevice(deviceBuilder.build())
     }
 
-    private fun createRawPoint(modelDef: ModelPointDef, configuration: ProfileConfiguration, deviceRef : String) : String{
+    private fun createRawPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, deviceRef : String) : String{
 
-        val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.displayName)
+        val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
             .setDeviceRef(deviceRef)
             .setRoomRef(configuration.roomRef)
             .setFloorRef(configuration.floorRef)
-            .setKind(Kind.parse(modelDef.pointType.name))
+            .setKind(Kind.parsePointType(modelDef.kind.name))
             .setUnit(modelDef.defaultUnit)
 
 

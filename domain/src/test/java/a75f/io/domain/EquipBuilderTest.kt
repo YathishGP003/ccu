@@ -5,16 +5,16 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.EquipBuilder
-import a75f.io.domain.model.ModelDef
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import org.junit.Before
 import org.junit.Test
 
 class EquipBuilderTest {
-     private lateinit var dmModel: ModelDef
+     private lateinit var dmModel: ModelDirective
 
     @Before
     fun setUp() {
-        dmModel = ResourceHelper.loadModelDefinition("EquipBuilder_TestModel.json")
+        dmModel = ResourceHelper.loadProfileModelDefinition("EquipBuilder_TestModel.json")
     }
 
     @Test

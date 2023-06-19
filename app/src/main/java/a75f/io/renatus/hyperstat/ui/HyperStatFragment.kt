@@ -67,7 +67,6 @@ class HyperStatFragment : BaseDialogFragment() {
     // 3 rows, 1 for each analog out, plus damper voltage selectors
     private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
-
     lateinit var airflowSensorSwitch: ToggleButton
     lateinit var th2Switch: ToggleButton
 
@@ -395,10 +394,10 @@ class HyperStatFragment : BaseDialogFragment() {
             stagedFanUIs.forEachIndexed { index, stagedFanState ->
                 stagedFanState.selector.adapter = getAdapterValue(analogVoltageAtSpinnerValues())
                 val spinner = stagedFanState.selector
-                if (index == 0 || index == 3) {
-                    spinner.setSelection(7)
+                if (index == CpuRelayAssociation.COOLING_STAGE_1.ordinal || index == CpuRelayAssociation.HEATING_STAGE_1.ordinal) {
+                    spinner.setSelection(analogVoltageAtSpinnerValues().indexOf("7V"))
                 } else {
-                    spinner.setSelection(10)
+                    spinner.setSelection(analogVoltageAtSpinnerValues().indexOf("10V"))
                 }
             }
         }
@@ -590,7 +589,7 @@ class HyperStatFragment : BaseDialogFragment() {
                 )
 
                 if (viewModel is CpuViewModel) {
-                    if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.STAGED_FAN_SPEED.ordinal) {
+                    if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
                         vAtMinDamperLabel.visibility = View.GONE
                         vAtMinDamperSelector.visibility = View.GONE
                         vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
@@ -615,7 +614,7 @@ class HyperStatFragment : BaseDialogFragment() {
 
                     vAtMaxDamperLabel.isEnabled = analogOutState.enabled
                     vAtMaxDamperSelector.isEnabled = analogOutState.enabled
-                    vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
+                    vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
                 }
 
                 analogOutFanConfig.visibility =
@@ -680,8 +679,6 @@ class HyperStatFragment : BaseDialogFragment() {
                 selector.setSelection(viewState.stagedFanUis[index])
             }
         }
-
-
     }
 
     private fun makeStagedFanVisible(

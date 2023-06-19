@@ -725,6 +725,10 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "analog and logical and output and dcv and damper and equipRef == \"$equipRef\"")
         }
+        fun readAnalogOutStagedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "analog and logical and output and fan and modulating and speed and equipRef == \"$equipRef\"")
+        }
 
         fun readAnalogOutCompressorSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(

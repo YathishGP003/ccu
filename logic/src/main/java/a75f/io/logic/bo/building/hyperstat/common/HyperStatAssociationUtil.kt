@@ -66,8 +66,8 @@ class HyperStatAssociationUtil {
             return when (state) {
                 // Order is important here
                 0 -> CpuAnalogOutAssociation.COOLING
-                1 -> CpuAnalogOutAssociation.LINEAR_FAN_SPEED
-                2 -> CpuAnalogOutAssociation.STAGED_FAN_SPEED
+                1 -> CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                2 -> CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
                 3 -> CpuAnalogOutAssociation.HEATING
                 4 -> CpuAnalogOutAssociation.DCV_DAMPER
                 // assuming it never going to call
@@ -118,7 +118,7 @@ class HyperStatAssociationUtil {
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
         fun isAnalogOutAssociatedToFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
+            return (analogOut.association == CpuAnalogOutAssociation.MODULATING_FAN_SPEED)
         }
 
         //Function which checks the Analog out is Associated  to HEATING
@@ -214,13 +214,13 @@ class HyperStatAssociationUtil {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.HEATING)
         }
         fun isAnyAnalogAssociatedToFan(config: HyperStatCpuConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuAnalogOutAssociation.LINEAR_FAN_SPEED)
+            return isAnalogOutMapped(config,CpuAnalogOutAssociation.MODULATING_FAN_SPEED)
         }
         fun isAnyAnalogAssociatedToDCV(config: HyperStatCpuConfiguration): Boolean {
             return isAnalogOutMapped(config,CpuAnalogOutAssociation.DCV_DAMPER)
         }
         fun isAnyAnalogAssociatedToStaged(config: HyperStatCpuConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuAnalogOutAssociation.STAGED_FAN_SPEED)
+            return isAnalogOutMapped(config,CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
         }
         private fun isAnalogOutMapped(config: HyperStatCpuConfiguration, association: CpuAnalogOutAssociation): Boolean{
             return when {

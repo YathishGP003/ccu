@@ -14,6 +14,7 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
+import io.ktor.request.receive
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
@@ -22,7 +23,9 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 
 class HttpServer {
@@ -142,7 +145,53 @@ class HttpServer {
                     CcuLog.i("HttpServer"," called end point: /bacnet/heartbeat ")
                     updateBacnetHeartBeat();
                 }
+                post("/watchSub") {
+                    CcuLog.i("HttpServer"," watch sub: ")
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchSubRequest = CCUHsApi.getInstance().hsClient.watchSubscribe(
+                            hGrid
+                        )
+                        CcuLog.i("HttpServer", "check values in response ${watchSubRequest.isEmpty}")
+                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+                post("/watchUnSub") {
+                    CcuLog.i("HttpServer"," watch un sub: ")
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchSubRequest = CCUHsApi.getInstance().hsClient.watchUnSubscribe(
+                            hGrid
+                        )
+                        CcuLog.i("HttpServer", "check values in response ${watchSubRequest.isEmpty}")
+                        call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+                post("/watchPoll") {
+                    val body = call.receive<String>()
+                    if (body != null) {
+                        val hGrid = retrieveGridFromRequest(body)
+                        val watchPollRequest = CCUHsApi.getInstance().hsClient.watchPoll(
+                            hGrid
+                        )
+                        CcuLog.i("HttpServer", "check values in response ${watchPollRequest.isEmpty}")
+                        call.respondText(HZincWriter.gridToString(watchPollRequest), ContentType.Any , HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
             }
         }
+    }
+
+    private fun retrieveGridFromRequest(response: String): HGrid {
+        val zReader = HZincReader(response)
+        return zReader.readGrid()
     }
 }

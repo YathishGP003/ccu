@@ -612,6 +612,15 @@ public class CCUHsApi
         return null;
     }
 
+    public HGrid readHDictByIds(HRef[] ids) {
+        try {
+            return hsClient.readByIds(ids);
+        } catch (UnknownRecException e) {
+            CcuLog.e("CCU_HS", "Entity does not exist ");
+        }
+        return null;
+    }
+
     public HDict readHDict(String query)
     {
         try
@@ -1228,6 +1237,7 @@ public class CCUHsApi
                 tagsDb.clearHistory(HRef.copy(entity.get("id").toString()));
             }
             deleteEntityItem(entity.get("id").toString());
+            hsClient.clearPointFromWatch(HRef.copy(entity.get("id").toString()));
         }
         syncStatusService.saveSyncStatus();
     }

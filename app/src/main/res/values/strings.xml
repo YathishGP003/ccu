@@ -1096,10 +1096,13 @@
     <string name="txt_trend_log_objects">Trend Log Objects <font color="#e5561a">*</font></string>
     <string name="txt_trend_log_objects_hint">In between 0 to 10</string>
     <string name="txt_schedule_objects">Schedule Objects <font color="#e5561a">*</font></string>
+    <string name="txt_offset_values">Offset Value(%) <font color="#e5561a">*</font></string>
     <string name="txt_schedule_objects_hint">In between 0 to 10</string>
+    <string name="txt_offset_values_hint">In between 0 to 100</string>
     <string name="error_notification_class_objects">Notification Class Objects should be within 0 to 10</string>
     <string name="error_trend_log_objects">Trend Log Objects should be within 0 to 10</string>
     <string name="error_schedule_objects">Schedule Objects should be within 0 to 10</string>
+    <string name="error_offset_values">Offset values be within 0 to 100</string>
     <string name="error_vnn_and_lnn_not_same">Virtual Network Number and Local Network Number should not be Same</string>
 
     <string name="txt_mb_restart_prompt">Disclaimer: Change in config requires app restart.</string>
@@ -1365,4 +1368,7 @@
     <string name="exit_safe_mode">EXIT SAFE MODE</string>
 
     <string name="bacnet_admin">admin@75f</string>
+    <string name="label_configure_as">Configure as</string>
+    <string name="label_bbmd">BBMD</string>
+    <string name="label_foreign_device">Foreign Device</string>
 </resources>

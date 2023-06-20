@@ -2,6 +2,7 @@ package a75f.io.device.bacnet
 
 
 object  BacnetConfigConstants {
+    const val BROADCAST_BACNET_APP_CONFIGURATION_TYPE = "a75f.io.renatus.BACNET_APP_CONFIGURATION";
     const val BROADCAST_BACNET_APP_START = "a75f.io.renatus.BACNET_APP_START";
     const val BROADCAST_BACNET_APP_STOP = "a75f.io.renatus.BACNET_APP_STOP";
     const val BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED"
@@ -47,6 +48,7 @@ object  BacnetConfigConstants {
     const val NUMBER_OF_NOTIFICATION_CLASS_OBJECTS = "noOfNotificationClassObjects"
     const val NUMBER_OF_TREND_LOG_OBJECTS = "noOfTrendLogObjects"
     const val NUMBER_OF_SCHEDULE_OBJECTS = "noOfScheduleObjects"
+    const val NUMBER_OF_OFFSET_VALUES = "noOfOffsetValues"
 
 
     const val IP_ADDRESS_VAL = "192.168.1.1"

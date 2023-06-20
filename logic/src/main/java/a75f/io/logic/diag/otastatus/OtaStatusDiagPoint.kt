@@ -121,7 +121,6 @@ class OtaStatusDiagPoint {
             "OTA_SUCCEEDED,"+
             "OTA_TIMEOUT,"+
             "OTA_CM_TO_DEVICE_FAILED,"+
-            "OTA_CM_TO_DEVICE_FAILED,"+
             "NODE_STATUS_VALUE_FW_OTA_SUCCESSFUL,"+
             "NODE_STATUS_VALUE_FW_OTA_FAIL_REBOOT_INTERRUPTION,"+
             "NODE_STATUS_VALUE_FW_OTA_FAIL_NOT_FOR_ME_DEV_TYPE,"+

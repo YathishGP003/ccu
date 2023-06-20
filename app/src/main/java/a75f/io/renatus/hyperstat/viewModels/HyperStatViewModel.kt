@@ -308,25 +308,6 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
         )
     }
 
-    override fun cpuAnalogOutMappingSelected(index: Int, position: Int) {
-        val analogOuts = currentState.analogOutUis
-        val positionSelected = when (position) {
-            2 -> 4
-            4 -> 2
-            else -> position
-        }
-
-        val newAnalogOuts = analogOuts.updated(
-            index, analogOuts[index].copy(association = positionSelected)
-        )
-        newAnalogOuts[index].enabled
-        viewState.onNext(
-            currentState.copy(
-                analogOutUis = newAnalogOuts
-            )
-        )
-    }
-
     override fun getRelayMappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
         return ArrayAdapter(context , R.layout.spinner_dropdown_item, values)
     }

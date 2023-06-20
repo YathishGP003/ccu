@@ -105,8 +105,8 @@ enum class CpuRelayAssociation {
 enum class CpuAnalogOutAssociation {
    COOLING,
    MODULATING_FAN_SPEED,
-   DCV_DAMPER,
    HEATING,
+   DCV_DAMPER,
    PREDEFINED_FAN_SPEED,
 }
 

@@ -59,6 +59,7 @@ class HyperStatAssociationUtilTest{
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(1), CpuAnalogOutAssociation.MODULATING_FAN_SPEED)
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(2), CpuAnalogOutAssociation.HEATING)
         Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(3), CpuAnalogOutAssociation.DCV_DAMPER)
+        Assert.assertEquals(HyperStatAssociationUtil.getAnalogOutAssociatedStage(4), CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
     }
     @Test
     fun getAnalogInStageTest(){

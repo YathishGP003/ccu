@@ -426,17 +426,11 @@ class HyperStatFragment : BaseDialogFragment() {
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogOutSwitchChanged(index, isChecked)
             }
-            if (viewModel is CpuViewModel) {
-                widgets.selector.setOnItemSelected {
-                        position -> viewModel.cpuAnalogOutMappingSelected(index, position)
-                }
-            } else {
-                widgets.selector.setOnItemSelected { position ->
-                    viewModel.analogOutMappingSelected(
-                        index,
-                        position
-                    )
-                }
+            widgets.selector.setOnItemSelected { position ->
+                viewModel.analogOutMappingSelected(
+                    index,
+                    position
+                )
             }
 
             widgets.vAtMinDamperSelector.setOnItemSelected { position ->
@@ -585,7 +579,7 @@ class HyperStatFragment : BaseDialogFragment() {
             with(analogOutUIs[index]) {
                 switch.isChecked = analogOutState.enabled
                 selector.isEnabled = analogOutState.enabled
-                selector.setSelection(if (viewModel is CpuViewModel) getCpuAnalogOutState(analogOutState) else analogOutState.association)
+                selector.setSelection(analogOutState.association)
                 vAtMinDamperLabel.text = String.format(
                     "%s%d at \nMin %s",
                     getString(R.string.hyperstat_analog_out),

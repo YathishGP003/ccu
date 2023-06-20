@@ -1829,7 +1829,7 @@ class HyperStatPointsUtil(
     private fun getAnalogOutConfigEnum(profileType: ProfileType): String {
         when(profileType) {
             ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
-                return "$COOLING,$MODULATING_FAN_SPEED,$DCV_DAMPER,$HEATING,$PREDEFINED_FAN_SPEED"
+                return "$COOLING,$MODULATING_FAN_SPEED,$HEATING,$DCV_DAMPER,$PREDEFINED_FAN_SPEED"
             }
             ProfileType.HYPERSTAT_HEAT_PUMP_UNIT -> {
                 return "$COMPRESSORSPEED,$FAN_SPEED,$DCV_DAMPER"
@@ -1874,9 +1874,9 @@ class HyperStatPointsUtil(
         return when(association){
             CpuAnalogOutAssociation.COOLING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogCoolingLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.MODULATING_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutFanSpeedLogicalPoint(equipRef)).build()
-            CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.HEATING-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogHeatingLogicalPoint(equipRef)).build()
             CpuAnalogOutAssociation.DCV_DAMPER-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutDcvLogicalPoint(equipRef)).build()
+            CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED-> Point.Builder().setHashMap(LogicalPointsUtil.readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)).build()
         }
     }
 

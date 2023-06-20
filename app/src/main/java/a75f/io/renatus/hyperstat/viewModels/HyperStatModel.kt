@@ -50,5 +50,4 @@ interface HyperStatModel {
     fun validateProfileConfig() : Boolean
     fun getValidationMessage() : String
     fun voltageAtStagedFanSelected(index: Int, position: Int)
-    fun cpuAnalogOutMappingSelected(index: Int, position: Int)
 }

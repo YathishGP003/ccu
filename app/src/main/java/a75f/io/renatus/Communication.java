@@ -160,7 +160,7 @@ public class Communication extends Fragment {
 
     @BindView(R.id.etOffsetValues) EditText etOffsetValues;
 
-    @BindView(R.id.tvOffsetValue) TextView tvOffsetValue;
+    @BindView(R.id.tvOffsetValue1) TextView tvOffsetValue;
 
     SharedPreferences sharedPreferences;
     JSONObject config;

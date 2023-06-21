@@ -83,6 +83,9 @@ public class Device extends Entity
     {
         return id;
     }
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getCcuRef() {
         return ccuRef;

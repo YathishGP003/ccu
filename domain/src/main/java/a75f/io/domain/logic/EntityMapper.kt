@@ -31,31 +31,31 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     fun getBasePoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.BASE
+                it.configuration?.configType == PointConfiguration.ConfigType.BASE
         }
     }
 
     fun getAssociationPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
+                it.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
         }
     }
 
     fun getDependentPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.DEPENDENT
+                it.configuration?.configType == PointConfiguration.ConfigType.DEPENDENT
         }
     }
 
     fun getAssociatedPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATED
+            it.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATED
         }
     }
 
     fun getDynamicSensorPoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
+                it.configuration?.configType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
         }
     }
     private fun toPoint(pointDef : ModelPointDef) : Map <Any, Any> {
@@ -72,7 +72,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
     private fun getAssociationDefinitions() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
-                point -> point.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
+                it.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
         }
     }
 
@@ -81,30 +81,38 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         val enabledAssociations = mutableListOf<String>()
         //Get all association that are present in the profileConfig.
         getAssociationDefinitions().forEach { def ->
+            val associationEnabled = isAssociationEnabled(def, profileConfiguration)
             val profileConfig =
                 profileConfiguration.getAssociationConfigs().find { it.domainName == def.domainName }
 
             profileConfig?.let {
-                //There is an association, we only create the corresponding point if associated point is enabled.
-                val associationIndex = it.associationVal
-
-                //TODO- add to DM validation
-                val pointConfiguration = def.configuration as AssociationConfiguration
-                val associationPointName = pointConfiguration.domainName
-
-                val baseConfig = profileConfiguration.getEnableConfigs().find { point -> point.domainName == associationPointName }
-
-                //TODO - add to DM validation.
-                val constraint = def.valueConstraint as MultiStateConstraint
-                if (baseConfig != null && evaluateConfiguration(pointConfiguration.comparisonType,
-                        pointConfiguration.value as Int - 1, //TODO -index starts at 1 ?
-                        baseConfig.enabled.toInt())) {
-                    enabledAssociations.add(constraint.allowedValues[associationIndex].value)
+                if (associationEnabled) {
+                    val constraint = def.valueConstraint as MultiStateConstraint
+                    enabledAssociations.add(constraint.allowedValues[it.associationVal].value)
                 }
-
             }
         }
         return enabledAssociations
+    }
+
+    private fun isAssociationEnabled(pointDef : SeventyFiveFProfilePointDef,
+                                     profileConfiguration: ProfileConfiguration) : Boolean {
+        //TODO- add to DM validation
+        val pointConfiguration = pointDef.configuration as AssociationConfiguration
+        val associationPointName = pointConfiguration.domainName
+
+        val baseConfig = profileConfiguration.getEnableConfigs()
+            .find { point -> point.domainName == associationPointName }
+
+        if (baseConfig != null && evaluateConfiguration(
+                pointConfiguration.comparisonType,
+                pointConfiguration.value as Int - 1, //TODO -index starts at 1 ?
+                baseConfig.enabled.toInt()
+            )
+        ) {
+            return true
+        }
+        return false
     }
 
     fun getEnabledDependencies(profileConfiguration: ProfileConfiguration) : List<String> {
@@ -147,6 +155,78 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     private fun isDynamicSensorTypeMatching(sensorType: Int, pointDef: SeventyFiveFProfilePointDef) : Boolean{
         val sensorConfig = pointDef.configuration as DynamicSensorConfiguration
         return sensorType == sensorConfig.sensorType.toInt()
+    }
+
+
+    private fun getPhysicalRefMapping(profileConfiguration: ProfileConfiguration) : Map<String, String>{
+        val refMapping = mutableMapOf<String, String>()
+        val pointsWithPhysicalRefs = modelDef.points.filter {it.associatedWithDevicePoint != null }
+        val associationPoints = modelDef.points.filter {
+                                        it.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
+                                    }
+
+        pointsWithPhysicalRefs.forEach{ profilePoint ->
+            if (associationPoints.contains(profilePoint)) {
+                //Linked profile point is an association point. Attach the link if it is enabled.
+                //&& isAssociationEnabled()
+
+                val associationPoint = associationPoints.find {
+                    val associationConfig = it.configuration as AssociationConfiguration
+                    profilePoint.domainName == associationConfig.domainName
+                }
+
+                associationPoint?.let {
+                    if (isAssociationEnabled(associationPoint, profileConfiguration)) {
+                        val profileConfig =
+                            profileConfiguration.getAssociationConfigs().find { it.domainName == associationPoint.domainName }
+
+                        val constraint = associationPoint.valueConstraint as MultiStateConstraint
+                        val profilePointDomainName = constraint.allowedValues[profileConfig?.associationVal!!].value
+                        refMapping[profilePoint.domainName] = profilePointDomainName
+                    }
+                }
+            } else {
+                profilePoint.associatedWithDevicePoint?.let {
+                    refMapping[profilePoint.domainName] = it
+                }
+
+            }
+        }
+        return refMapping
+    }
+
+    fun getPhysicalProfilePointRef(profileConfiguration: ProfileConfiguration, rawPointName : String) : String?{
+        val profilePointWithPhysicalMapping = modelDef.points.find {it.associatedWithDevicePoint == rawPointName }
+            ?: return null
+
+        val associationPoints = modelDef.points.filter {
+            it.configuration?.configType == PointConfiguration.ConfigType.ASSOCIATION
+        }
+
+        //Linked profile point is an association point. Attach the link if it is enabled.
+        val associationPoint = associationPoints.find {
+            val associationConfig = it.configuration as AssociationConfiguration
+            profilePointWithPhysicalMapping!!.domainName == associationConfig.domainName
+        }
+
+        if (associationPoint != null) {
+            if (isAssociationEnabled(associationPoint, profileConfiguration)) {
+                val profileConfig =
+                    profileConfiguration.getAssociationConfigs()
+                        .find { it.domainName == associationPoint.domainName }
+
+                val constraint = associationPoint.valueConstraint as MultiStateConstraint
+                return constraint.allowedValues[profileConfig?.associationVal!!].value
+            }
+        } else {
+            profilePointWithPhysicalMapping?.associatedWithDevicePoint?.let {
+                if (it == rawPointName) {
+                    return profilePointWithPhysicalMapping?.domainName
+                }
+            }
+        }
+
+        return null
     }
 
     private fun evaluateConfiguration(comparisonType: ComparisonType, leftVal : Int, rightVal: Int) :  Boolean{

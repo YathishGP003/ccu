@@ -63,8 +63,8 @@ class DomainBuilderTest {
 
         DomainManager.buildDomain(hayStack)
 
-        assert(Domain.site.floors.size == 1)
-        Domain.site.floors.entries.forEach{
+        assert(Domain.site?.floors?.size  == 1)
+        Domain.site?.floors?.entries?.forEach{
             val floor = it.value
             assert(floor.rooms.size == 1)
             floor.rooms.entries.forEach{ r ->

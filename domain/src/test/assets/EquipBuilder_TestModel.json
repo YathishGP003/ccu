@@ -543,6 +543,65 @@
                 "configType": "DYNAMIC_SENSOR"
             },
             "associatedWithDevicePoint": null
+        },
+        {
+            "id": "646ae96cb18f1bedb926bc94",
+            "name": "Supply Air Temp",
+            "domainName": "supplyAirTemp",
+            "tags": [
+                {
+                    "name": "sensor",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "supply",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "air",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "relay1",
+                "kind",
+                "tz",
+                "relay",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "sensor",
+                "writable"
+            ],
+            "kind": "NUMBER",
+            "valueConstraint": {
+                "minValue": 0.0,
+                "maxValue": 1000.0,
+                "constraintType": "NUMERIC"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "BASE"
+            },
+            "associatedWithDevicePoint": "thermistor1"
         }
     ],
     "equips": [],

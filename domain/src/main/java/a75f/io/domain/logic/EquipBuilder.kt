@@ -1,11 +1,9 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
-import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
@@ -17,15 +15,20 @@ import org.projecthaystack.HBool
 import org.projecthaystack.HStr
 
 class EquipBuilder(private val hayStack : CCUHsApi) {
-    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective) {
+    fun buildEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective) : String{
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
         val entityConfiguration = entityMapper.getEntityConfiguration(configuration)
 
-        val equipRef = createEquip(modelDef, configuration)
-        createPoints(modelDef, configuration, entityConfiguration, equipRef)
+        val hayStackEquip = buildEquip(modelDef, configuration)
+        val equipId = hayStack.addEquip(hayStackEquip)
+        hayStackEquip.id = equipId
+        DomainManager.addEquip(hayStackEquip)
+        createPoints(modelDef, configuration, entityConfiguration, equipId)
+
+        return equipId
     }
 
-    private fun createEquip(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration) : String{
+    private fun buildEquip(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration) : Equip{
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -47,20 +50,22 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
             }
         }
 
-        return hayStack.addEquip(equipBuilder.build())
+        return equipBuilder.build()
     }
 
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration, equipRef: String) {
         entityConfiguration.tobeAdded.forEach { point ->
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                createPoint(modelPointDef, profileConfiguration, equipRef)
+                val hayStackPoint = buildPoint(modelPointDef, profileConfiguration, equipRef)
+                val pointId = hayStack.addPoint(hayStackPoint)
+                hayStackPoint.id = pointId
+                DomainManager.addPoint(hayStackPoint)
             }
 
         }
-
     }
-    private fun createPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : String{
+    private fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
 
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
@@ -89,29 +94,6 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
             }
         }
 
-        return hayStack.addPoint(pointBuilder.build())
-    }
-
-    private fun createDevice(modelDef: SeventyFiveFProfileDirective) : String{
-
-        val deviceBuilder = Device.Builder().setDisplayName(modelDef.name)
-            .setDomainName(modelDef.domainName)
-        modelDef.tagNames.forEach{ deviceBuilder.addMarker(it)}
-        return hayStack.addDevice(deviceBuilder.build())
-    }
-
-    private fun createRawPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, deviceRef : String) : String{
-
-        val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
-            .setDomainName(modelDef.domainName)
-            .setDeviceRef(deviceRef)
-            .setRoomRef(configuration.roomRef)
-            .setFloorRef(configuration.floorRef)
-            .setKind(Kind.parsePointType(modelDef.kind.name))
-            .setUnit(modelDef.defaultUnit)
-
-
-        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
-        return hayStack.addPoint(pointBuilder.build())
+        return pointBuilder.build()
     }
 }

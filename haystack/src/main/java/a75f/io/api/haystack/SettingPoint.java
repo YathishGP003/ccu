@@ -63,6 +63,9 @@ public class SettingPoint extends Entity
     {
         return id;
     }
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getUnit()
     {
         return unit;

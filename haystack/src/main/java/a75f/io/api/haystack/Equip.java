@@ -96,6 +96,9 @@ public class Equip extends Entity
     {
         return id;
     }
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getGroup()
     {
         return group;

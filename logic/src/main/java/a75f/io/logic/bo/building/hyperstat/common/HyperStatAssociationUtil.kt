@@ -67,9 +67,9 @@ class HyperStatAssociationUtil {
                 // Order is important here
                 0 -> CpuAnalogOutAssociation.COOLING
                 1 -> CpuAnalogOutAssociation.MODULATING_FAN_SPEED
+                2 -> CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
                 3 -> CpuAnalogOutAssociation.HEATING
-                2 -> CpuAnalogOutAssociation.DCV_DAMPER
-                4 -> CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED
+                4 -> CpuAnalogOutAssociation.DCV_DAMPER
                 // assuming it never going to call
                 else -> CpuAnalogOutAssociation.COOLING
             }

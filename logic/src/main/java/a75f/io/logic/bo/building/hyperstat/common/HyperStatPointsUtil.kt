@@ -11,7 +11,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.hyperstat.profiles.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
-import android.util.Log
 import java.util.*
 
 /**

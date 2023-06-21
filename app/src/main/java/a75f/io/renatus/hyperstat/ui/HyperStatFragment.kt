@@ -685,14 +685,8 @@ class HyperStatFragment : BaseDialogFragment() {
                 selector.setSelection(viewState.stagedFanUis[index])
             }
         }
-    }
 
-    private fun getCpuAnalogOutState(analogOutState: AnalogConfigState): Int {
-        return when (analogOutState.association) {
-            2 -> 4
-            4 -> 2
-            else -> analogOutState.association
-        }
+
     }
 
     private fun makeStagedFanVisible(

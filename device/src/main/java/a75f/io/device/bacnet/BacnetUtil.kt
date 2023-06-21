@@ -44,15 +44,18 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
-import io.objectbox.android.BuildConfig
 import org.json.JSONObject
 import java.util.*
+import android.text.format.Formatter
+import java.net.InetAddress
+import java.net.NetworkInterface
 
 
-    fun sendBroadCast(context: Context, intentAction: String, message: String) {
+fun sendBroadCast(context: Context, intentAction: String, message: String) {
         Log.i("sendBroadCast", ""+intentAction)
         val intent = Intent(intentAction)
         intent.putExtra("message", message)
@@ -68,7 +71,7 @@ import java.util.*
 
         // "network" object
         val networkObject = JSONObject()
-        networkObject.put(IP_ADDRESS, IP_ADDRESS_VAL)
+        networkObject.put(IP_ADDRESS, getIpAddress())
         networkObject.put(LOCAL_NETWORK_NUMBER, JSONObject.NULL)
         networkObject.put(VIRTUAL_NETWORK_NUMBER, JSONObject.NULL)
         networkObject.put(PORT, PORT_VAL)
@@ -147,6 +150,44 @@ import java.util.*
     fun getDeviceObjectName() = CCUHsApi.getInstance().getSiteName() +"_"+ CCUHsApi.getInstance().getCcuName();
     fun getDayLightSavingStatus() = if(TimeZone.getTimeZone(TimeZone.getDefault().id).inDaylightTime(Date())) 1 else 0
     fun getSerialNumber() = CCUHsApi.getInstance().getCcuRef().toString()
+
+
+    fun getIpAddress(): String {
+
+        val ethernetIP = getEthernetIPAddress();
+        if(ethernetIP != null)
+            return ethernetIP
+
+        val wifiManager = Globals.getInstance().applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.connectionInfo
+        val ipAddress = wifiInfo.ipAddress
+        return if (ipAddress != 0) {
+            Formatter.formatIpAddress(ipAddress)
+        } else {
+            IP_ADDRESS_VAL
+        }
+    }
+
+
+    fun getEthernetIPAddress(): String? {
+        try {
+            val interfaces: List<NetworkInterface> = NetworkInterface.getNetworkInterfaces().toList()
+            for (networkInterface in interfaces) {
+                if (networkInterface.isUp && networkInterface.hardwareAddress != null && networkInterface.name.startsWith("eth")) {
+                    val addresses = networkInterface.inetAddresses.toList()
+                    for (address in addresses) {
+                        if (!address.isLoopbackAddress && address is InetAddress && address.isSiteLocalAddress && address.address.size == 4) {
+                            return address.hostAddress // Return IPv4 address
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+         return null
+    }
+
 
     fun readExternalBacnetJsonFile(): String {
         val sharedPreferences: SharedPreferences =  PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)

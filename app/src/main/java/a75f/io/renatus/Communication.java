@@ -475,10 +475,13 @@ public class Communication extends Fragment {
 
         if(virtualNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(virtualNetworkNumber.getText().toString()), 1, 65535, 1)))  return false;
 
-        if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString()))
-        {
-             Toast.makeText(context, "Virtual Network Number and Local Network Number Should not be Same.", LENGTH_LONG).show();
-             return false;
+        if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString())) {
+            virtualNetworkNumber.setError(context.getResources().getString(R.string.error_vnn_and_lnn_not_same));
+            localNetworkNumber.setError(context.getResources().getString(R.string.error_vnn_and_lnn_not_same));
+            return false;
+        }else{
+            virtualNetworkNumber.setError(null);
+            localNetworkNumber.setError(null);
         }
 
         if(port.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(port.getText().toString()), 4069, 65535, 1))) return false;

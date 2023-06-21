@@ -31,6 +31,7 @@ import org.projecthaystack.io.HZincWriter
 class HttpServer {
 
     private val PORT = 5001
+    private val HTTP_SERVER = "HttpServer"
 
     companion object{
         var sharedPreferences: SharedPreferences? = null
@@ -86,18 +87,9 @@ class HttpServer {
                 gzip()
             }
             routing {
-                get("/readAll/{query}") {
-                    CcuLog.i("HttpServer"," readAll: "+call.parameters["query"])
-                    val query = call.parameters["query"]
-                    if (query != null) {
-                        call.respond(HttpStatusCode.OK, BaseResponse(HZincWriter.gridToString(CCUHsApi.getInstance()
-                            .getHSClient().readAll(query))))
-                    } else {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
-                }
+
                 get("/read/{query}") {
-                    CcuLog.i("HttpServer"," read: "+call.parameters["query"])
+                    CcuLog.i(HTTP_SERVER," read: "+call.parameters["query"])
                     val query = call.parameters["query"]
                     if (query != null) {
                         call.respond(HttpStatusCode.OK, BaseResponse(HZincWriter.gridToString(
@@ -109,7 +101,7 @@ class HttpServer {
                 }
 
                 get("/hisRead/{query}") {
-                    CcuLog.i("HttpServer"," hisRead: "+call.parameters["query"])
+                    CcuLog.i(HTTP_SERVER," hisRead: "+call.parameters["query"])
                     val query = call.parameters["query"]
                     if (query != null) {
                         call.respond(HttpStatusCode.OK, BaseResponse(CCUHsApi.getInstance()
@@ -120,14 +112,11 @@ class HttpServer {
                 }
 
                 get("/readAll/{query}") {
-                    CcuLog.i("HttpServer"," readAll: "+call.parameters["query"])
                     val query = call.parameters["query"]
-                    CcuLog.i("HttpServer"," qyerry: "+query)
-
-
+                    CcuLog.i(HTTP_SERVER, " query: $query")
                     if (query != null) {
                         val response = HZincWriter.gridToString(CCUHsApi.getInstance().getHSClient().readAll(query));
-                        CcuLog.i("HttpServer", " response: $response")
+                        CcuLog.i(HTTP_SERVER, " response: $response")
                         call.respond(HttpStatusCode.OK, BaseResponse(response))
                     } else {
                         call.respond(HttpStatusCode.NotFound)
@@ -135,44 +124,47 @@ class HttpServer {
                 }
 
                 get("/bacnet/config") {
-                    CcuLog.i("HttpServer"," called end point: /bacnet/config ")
-                    val query = readExternalBacnetJsonFile()
-                    CcuLog.i("HttpServer", " response: $query")
-                    call.respond(HttpStatusCode.OK, query)
+                    CcuLog.i(HTTP_SERVER,"called API: /bacnet/config ")
+                    val response = readExternalBacnetJsonFile()
+                    CcuLog.i(HTTP_SERVER, " response: $response")
+                    call.respond(HttpStatusCode.OK, response)
                 }
 
                 get("/bacnet/heartbeat") {
-                    CcuLog.i("HttpServer"," called end point: /bacnet/heartbeat ")
+                    CcuLog.i(HTTP_SERVER,"called API: /bacnet/heartbeat ")
                     updateBacnetHeartBeat();
                 }
+
                 post("/watchSub") {
-                    CcuLog.i("HttpServer"," watch sub: ")
+                    CcuLog.i(HTTP_SERVER," watch sub: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
                         val watchSubRequest = CCUHsApi.getInstance().hsClient.watchSubscribe(
                             hGrid
                         )
-                        CcuLog.i("HttpServer", "check values in response ${watchSubRequest.isEmpty}")
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
                         call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
+
                 post("/watchUnSub") {
-                    CcuLog.i("HttpServer"," watch un sub: ")
+                    CcuLog.i(HTTP_SERVER," watch un sub: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
                         val watchSubRequest = CCUHsApi.getInstance().hsClient.watchUnSubscribe(
                             hGrid
                         )
-                        CcuLog.i("HttpServer", "check values in response ${watchSubRequest.isEmpty}")
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchSubRequest.isEmpty}")
                         call.respondText(HZincWriter.gridToString(watchSubRequest), ContentType.Any , HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
+
                 post("/watchPoll") {
                     val body = call.receive<String>()
                     if (body != null) {
@@ -180,17 +172,50 @@ class HttpServer {
                         val watchPollRequest = CCUHsApi.getInstance().hsClient.watchPoll(
                             hGrid
                         )
-                        CcuLog.i("HttpServer", "check values in response ${watchPollRequest.isEmpty}")
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchPollRequest.isEmpty}")
                         call.respondText(HZincWriter.gridToString(watchPollRequest), ContentType.Any , HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                //example call = http://127.0.0.1:5001/pointWrite/6a1f6539-86dd-48d3-be6c-0ae0b50fa388
+                get("/pointWrite/{id}") {
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} ")
+                    val id = call.parameters["id"]
+                    val response = CCUHsApi.getInstance().readPointArr("@"+id);
+                    CcuLog.i(HTTP_SERVER, " response: $response")
+                    call.respond(HttpStatusCode.OK, BaseResponse(response))
+                }
+
+                //example call = http://127.0.0.1:5001/pointWrite?id=6a1f6539-86dd-48d3-be6c-0ae0b50fa388&level=1&val=7.5&who=bacnet&duration=200000
+                get("/pointWrite") {
+                    CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
+                    val id = call.parameters["id"]
+                    val level = call.parameters["level"]
+                    val value = call.parameters["val"]
+                    val who = call.parameters["who"]
+                    val duration = call.parameters["duration"]
+
+                    if(id == null || level == null || value == null || who == null || duration == null) {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse( "Invalid request"))
+                    }else{
+                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value.toDouble(), duration.toInt())
+                        if (pointGrid != null) {
+                            if(!pointGrid.isEmpty || !pointGrid.isErr)
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK));
+                            else
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent));
+                        }else{
+                            call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun retrieveGridFromRequest(response: String): HGrid {
+    private fun retrieveGridFromRequest(response: String): HGrid? {
         val zReader = HZincReader(response)
         return zReader.readGrid()
     }

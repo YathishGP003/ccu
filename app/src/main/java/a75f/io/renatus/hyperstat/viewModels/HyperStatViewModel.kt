@@ -143,8 +143,6 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
         )
     }
 
-
-
     override fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int) {
         val analogOuts = currentState.analogOutUis
         val newAnalogOuts =

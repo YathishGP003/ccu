@@ -44,7 +44,7 @@ public class ThermistorUtil
                         (rawValue - resistance[leftIndex]) / (resistance[rightIndex] - resistance[leftIndex]) * (temperature[rightIndex] - temperature[leftIndex]));
             } else {
                 int midIndex = (int) (leftIndex + rightIndex) / 2;
-                if (rawValue == resistance[midIndex])
+                if ((long)rawValue == (long) resistance[midIndex])
                     return temperature[midIndex];
                 else {
                     if (rawValue > resistance[midIndex]) {

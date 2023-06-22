@@ -3,7 +3,7 @@ package a75f.io.domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.EntityMapper
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.junit.Before
 import org.junit.Test
 

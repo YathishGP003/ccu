@@ -7,9 +7,10 @@ import a75f.io.api.haystack.Point
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
+import a75f.io.domain.util.TunerUtil
 import io.seventyfivef.domainmodeler.client.ModelDirective
-import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.client.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
@@ -60,6 +61,9 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
                 val hayStackPoint = buildPoint(modelPointDef, profileConfiguration, equipRef)
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
+                if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
+                    initializeDefaultVal(hayStackPoint, modelPointDef.defaultValue as Number)
+                }
                 DomainManager.addPoint(hayStackPoint)
             }
 
@@ -95,5 +99,12 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         }
 
         return pointBuilder.build()
+    }
+
+    private fun initializeDefaultVal(point : Point, defaultVal : Number) {
+        when{
+            point.markers.contains("config") /*&& point.defaultVal is String*/-> hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
+            point.markers.contains("tuner") -> TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
+        }
     }
 }

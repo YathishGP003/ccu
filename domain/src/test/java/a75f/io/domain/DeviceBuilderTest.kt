@@ -5,13 +5,12 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.mock.MockCcuHsApi
-import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilder
-import io.seventyfivef.domainmodeler.client.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import org.junit.Before
 import org.junit.Test
 
@@ -70,7 +69,7 @@ class DeviceBuilderTest {
             deviceBuilder.buildDeviceAndPoints(profileConfig, dmModel, equipId)
         }
 
-        dumpDomain()
+        TestUtil.dumpDomain()
         val device = mockHayStack.readAllEntities("device")
         assert(device.size == 1)
 
@@ -104,28 +103,4 @@ class DeviceBuilderTest {
 
         return profile
     }
-
-    private fun dumpDomain() {
-        println("## Dump Domain start ## ")
-        Domain.site?.floors?.entries?.forEach{
-            val floor = it.value
-            println(floor)
-            floor.rooms.entries.forEach{ r ->
-                val room =  r.value
-                println(room)
-                room.equips.entries.forEach{ e ->
-                    val equip = e.value
-                    println(equip)
-                    equip.points.entries.forEach{ point -> println(point) }
-                }
-                room.devices.entries.forEach{ e ->
-                    val device = e.value
-                    println(device)
-                    device.points.entries.forEach{ point -> println(point) }
-                }
-            }
-        }
-        println("## Dump Domain end ## ")
-    }
-
 }

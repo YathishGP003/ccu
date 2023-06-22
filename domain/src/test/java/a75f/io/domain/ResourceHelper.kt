@@ -3,8 +3,8 @@ package a75f.io.domain
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
-import io.seventyfivef.domainmodeler.client.SeventyFiveFDeviceDirective
-import io.seventyfivef.domainmodeler.client.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.configuration.ObjectMapperConfig
 import java.io.ByteArrayOutputStream
 import java.io.IOException

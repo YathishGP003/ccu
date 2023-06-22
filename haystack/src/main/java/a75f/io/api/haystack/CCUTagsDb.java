@@ -1198,7 +1198,7 @@ public class CCUTagsDb extends HServer {
 
     protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts,
                                 HDateTime lastModifiedDateTime) {
-        CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
+        //CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;

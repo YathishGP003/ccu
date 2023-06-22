@@ -4,10 +4,9 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.RawPoint
-import a75f.io.domain.api.Domain
 import a75f.io.domain.config.ProfileConfiguration
-import io.seventyfivef.domainmodeler.client.SeventyFiveFDeviceDirective
-import io.seventyfivef.domainmodeler.client.SeventyFiveFDevicePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.ph.core.TagType
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {

@@ -1299,8 +1299,17 @@
                         android:fontFamily="@font/lato_regular"
                         android:layout_marginStart="30dp"
                         android:textSize="20sp"
-                        android:checked="true"
+                        android:checked="false"
                         android:text="@string/label_foreign_device"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <RadioButton
+                        android:id="@+id/rb_neither"
+                        android:fontFamily="@font/lato_regular"
+                        android:layout_marginStart="30dp"
+                        android:textSize="20sp"
+                        android:checked="true"
+                        android:text="@string/label_neither"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                 </RadioGroup>

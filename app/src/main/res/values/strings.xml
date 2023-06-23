@@ -1371,4 +1371,5 @@
     <string name="label_configure_as">Configure as</string>
     <string name="label_bbmd">BBMD</string>
     <string name="label_foreign_device">Foreign Device</string>
+    <string name="label_neither">Neither</string>
 </resources>

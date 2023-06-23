@@ -169,11 +169,18 @@ class HttpServer {
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)
-                        val watchPollRequest = CCUHsApi.getInstance().hsClient.watchPoll(
+                        val watchPollResponse = CCUHsApi.getInstance().hsClient.watchPoll(
                             hGrid
                         )
-                        CcuLog.i(HTTP_SERVER, "check values in response ${watchPollRequest.isEmpty}")
-                        call.respondText(HZincWriter.gridToString(watchPollRequest), ContentType.Any , HttpStatusCode.OK)
+                        CcuLog.i(HTTP_SERVER, "check values in response ${watchPollResponse.isEmpty}")
+                        if(!watchPollResponse.isEmpty){
+                            CcuLog.i(HTTP_SERVER, "no of rows in response ${watchPollResponse.numRows()}")
+                        }
+                        if(!watchPollResponse.isErr){
+                            call.respondText(HZincWriter.gridToString(watchPollResponse), ContentType.Any , HttpStatusCode.OK)
+                        }else{
+                            call.respond(HttpStatusCode.NotFound)
+                        }
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }

@@ -25,7 +25,6 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
-import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.auth.AuthClientContext;
 import org.projecthaystack.io.HZincReader;
@@ -56,7 +55,6 @@ import a75f.io.api.haystack.exception.NullHGridException;
 import a75f.io.api.haystack.sync.SiloApiService;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
-import info.guardianproject.netcipher.NetCipher;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -121,6 +119,7 @@ public class HClient extends HProj
 
   /* contains point id and point data*/
   private final HashMap sharedEntities = new HashMap();
+  private final HashMap sharedPointArrays = new HashMap();
 
   /** Base URI for connection such as "http://host/api/demo/".
       This string always ends with slash. */
@@ -328,6 +327,7 @@ public class HClient extends HProj
       HRow r = (HRow) it.next();
       HVal rowId = r.get("id");
       sharedEntities.put(rowId, r);
+      sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
     }
 
     return b.toGrid();
@@ -338,12 +338,14 @@ public class HClient extends HProj
     if (ids.length == 0) throw new IllegalArgumentException("ids are empty");
     if (w.id == null) throw new IllegalStateException("nothing subscribed yet");
     if (w.closed) throw new IllegalStateException("watch is closed");
-
+    CcuLog.i("CCU_HS","--watchUnsub---"+Arrays.toString(ids));
     for (int i = 0; i < ids.length; ++i) {
       sharedEntities.remove(ids[i]);
+      sharedPointArrays.remove(ids[i]);
+      w.subscribedIds.remove(ids[i]);
     }
-    w.subscribedIds.clear();
-    CcuLog.i("CCU_HS","--done clean up after unsub---");
+    //w.subscribedIds.clear();
+    CcuLog.i("CCU_HS","--unsub--sharedEntities-"+sharedEntities.size() + "-sharedPointArrays-" + sharedPointArrays.size() + "-subscribedIds-" + w.subscribedIds.size());
   }
 
   HGrid watchPoll(HClientWatch w, boolean refresh)
@@ -373,23 +375,88 @@ public class HClient extends HProj
       // send only change points
       ArrayList<HDict> pIds = new ArrayList<>();
       Iterator it = requestedGridData.iterator();
+
+      // iterate through entities subscribed as part of watch with latest data
+      String idStr = "id";
+      String lastModifiedDateTimeStr = "lastModifiedDateTime";
       while (it.hasNext()) {
         HRow r = (HRow) it.next();
-        HVal lastModifiedDateTime = r.get("lastModifiedDateTime");
-        HRow previousRow = (HRow) sharedEntities.get(r.get("id"));
-        HVal previousLastModifiedDateTime = previousRow.get("lastModifiedDateTime");
+        HVal lastModifiedDateTime = r.get(lastModifiedDateTimeStr);
+        HVal rowId = r.get(idStr);
+        HRow previousRow = (HRow) sharedEntities.get(rowId);
+        HVal previousLastModifiedDateTime = previousRow.get(lastModifiedDateTimeStr);
         if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
-          HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-          HDictBuilder pid = new HDictBuilder();
-          while (ri.hasNext()) {
-            HDict.MapEntry e = (HDict.MapEntry) ri.next();
-            pid.add((String) e.getKey(), e.getValue().toString());
+          pIds.add(getDictFromHRow(r));
+          sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
+        } else {
+          String currentPointArrString = CCUHsApi.getInstance().readPointArr(r.get(idStr).toString());
+          HZincReader hZincReaderCurrent = new HZincReader(currentPointArrString);
+          HGrid mGridPointArrayCurrent = hZincReaderCurrent.readGrid();
+
+          String sharedPointArrayString = (String) sharedPointArrays.get(r.get(idStr));
+          if (sharedPointArrayString != null) {
+            HZincReader sharedEntitiesZincReader = new HZincReader(sharedPointArrayString);
+            HGrid sharedEntitiesGridPointArray = sharedEntitiesZincReader.readGrid();
+
+            if(sharedEntitiesGridPointArray.numRows() != mGridPointArrayCurrent.numRows()){
+              // items are added or removed, right candidate for sharing
+              pIds.add(getDictFromHRow(r));
+              sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
+            }else{
+              Iterator itPr = sharedEntitiesGridPointArray.iterator();
+              while (itPr.hasNext()) {
+                HRow row = (HRow) itPr.next();
+                String lastModifiedDateTimeForVal = row.get(lastModifiedDateTimeStr).toString();
+                String val = row.get("val").toString();
+                String level = row.get("level").toString();
+                Log.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
+                if (!isValuePresent(level, lastModifiedDateTimeForVal, val , mGridPointArrayCurrent)) {
+                  pIds.add(getDictFromHRow(r));
+                  sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
+                }
+              }
+            }
+          } else {
+            Log.d("CCU_HS", "no previous record this is new data");
           }
-          pIds.add(pid.toDict());
         }
       }
       return HGridBuilder.dictsToGrid(pIds.toArray(new HDict[0]));
     }
+  }
+
+  private HDict getDictFromHRow(HRow r) {
+    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+    HDictBuilder pid = new HDictBuilder();
+    while (ri.hasNext()) {
+      HDict.MapEntry e = (HDict.MapEntry) ri.next();
+      pid.add((String) e.getKey(), e.getValue().toString());
+    }
+    return pid.toDict();
+  }
+
+  private boolean isValuePresent(String inputLevel, String inputTime, String inputValue, HGrid inputGrid) {
+    Iterator itPr = inputGrid.iterator();
+    while (itPr.hasNext()) {
+      HRow row = (HRow) itPr.next();
+      String level = row.get("level").toString();
+      String val = row.get("val").toString();
+      String lastModifiedDateTimeForVal = row.get("lastModifiedDateTime").toString();
+      if(inputLevel.equalsIgnoreCase(level)){
+        if (inputValue.equalsIgnoreCase(val)) {
+          if (lastModifiedDateTimeForVal.equalsIgnoreCase(inputTime)) {
+            return true;
+          } else {
+            return false;
+          }
+        }else{
+          return false;
+        }
+      }
+      Log.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
+    }
+    // shared value is removed
+    return false;
   }
 
   void watchClose(HClientWatch w, boolean send)
@@ -404,6 +471,7 @@ public class HClient extends HProj
       while (it.hasNext()) {
         HRef r = (HRef) it.next();
         sharedEntities.remove(r.val);
+        sharedPointArrays.remove(r.val);
       }
       //watchesWithIds.remove(w.id);
       w.subscribedIds.clear();

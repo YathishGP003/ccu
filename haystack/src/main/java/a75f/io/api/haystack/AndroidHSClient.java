@@ -1,10 +1,15 @@
 package a75f.io.api.haystack;
 
+import android.util.Log;
+
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
+import org.projecthaystack.UnknownRecException;
+import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
@@ -115,15 +120,29 @@ public class AndroidHSClient extends HClient
         return HGrid.EMPTY;
     }
 
-    public HGrid watchPoll(HGrid req){
+    public HGrid watchPoll(HGrid req) {
         String watchId = req.meta().getStr("watchId");
-        HWatch watch = watch(watchId);
+        try {
+            HWatch watch = watch(watchId);
+            // poll cov or refresh
+            if (req.meta().has("refresh"))
+                return watch.pollRefresh();
+            else
+                return watch.pollChanges();
+        } catch (UnknownWatchException | UnknownRecException unknownWatchException) {
+            Log.d("CCU_HS", unknownWatchException.getMessage());
+        }catch (Exception exception){
+            Log.d("CCU_HS", exception.getMessage());
+        }
+        return createEmptyGrid("err", "wrong watch id");
+    }
 
-        // poll cov or refresh
-        if (req.meta().has("refresh"))
-            return watch.pollRefresh();
-        else
-            return watch.pollChanges();
+    private HGrid createEmptyGrid(String metaInput, String message) {
+        HGridBuilder b = new HGridBuilder();
+        b.meta().add(metaInput)
+                .add("errTrace", message);
+        //b.addCol(message);
+        return b.toGrid();
     }
     
 }

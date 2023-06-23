@@ -112,10 +112,14 @@ public class AndroidHSClient extends HClient
         if (watch != null) {
             if (req.meta().has("close"))
                 watch.close();
-            else
-                watch.unsub(gridToIds(req));
+            else {
+                try {
+                    watch.unsub(gridToIds(req));
+                }catch (IllegalArgumentException illegalArgumentException){
+                    Log.d("CCU_HS", illegalArgumentException.getMessage());
+                }
+            }
         }
-
         // nothing to return
         return HGrid.EMPTY;
     }

@@ -327,7 +327,9 @@ public class HClient extends HProj
       HRow r = (HRow) it.next();
       HVal rowId = r.get("id");
       sharedEntities.put(rowId, r);
-      sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
+      sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+
+      //sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
     }
 
     return b.toGrid();
@@ -385,43 +387,31 @@ public class HClient extends HProj
         HVal rowId = r.get(idStr);
         HRow previousRow = (HRow) sharedEntities.get(rowId);
         HVal previousLastModifiedDateTime = previousRow.get(lastModifiedDateTimeStr);
-        if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
-          pIds.add(getDictFromHRow(r));
-          sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
-        } else {
-          String currentPointArrString = CCUHsApi.getInstance().readPointArr(r.get(idStr).toString());
-          HZincReader hZincReaderCurrent = new HZincReader(currentPointArrString);
-          HGrid mGridPointArrayCurrent = hZincReaderCurrent.readGrid();
 
-          String sharedPointArrayString = (String) sharedPointArrays.get(r.get(idStr));
-          if (sharedPointArrayString != null) {
-            HZincReader sharedEntitiesZincReader = new HZincReader(sharedPointArrayString);
-            HGrid sharedEntitiesGridPointArray = sharedEntitiesZincReader.readGrid();
-
-            if(sharedEntitiesGridPointArray.numRows() != mGridPointArrayCurrent.numRows()){
-              // items are added or removed, right candidate for sharing
-              pIds.add(getDictFromHRow(r));
-              sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
-            }else{
-              Iterator itPr = sharedEntitiesGridPointArray.iterator();
-              while (itPr.hasNext()) {
-                HRow row = (HRow) itPr.next();
-                String lastModifiedDateTimeForVal = row.get(lastModifiedDateTimeStr).toString();
-                String val = row.get("val").toString();
-                String level = row.get("level").toString();
-                Log.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
-                if (!isValuePresent(level, lastModifiedDateTimeForVal, val , mGridPointArrayCurrent)) {
-                  pIds.add(getDictFromHRow(r));
-                  sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointArr(rowId.toString()));
-                }
-              }
-            }
-          } else {
-            Log.d("CCU_HS", "no previous record this is new data");
+        if(previousLastModifiedDateTime != null && lastModifiedDateTime != null){
+          if (!previousLastModifiedDateTime.equals(lastModifiedDateTime)) {
+            pIds.add(getDictFromHRow(r));
+            sharedPointArrays.put(rowId, CCUHsApi.getInstance().readPointPriorityVal(rowId.toString()));
+          }else{
+            checkItemsWithInPointArray(pIds, idStr, r, rowId);
           }
+        }else{
+          checkItemsWithInPointArray(pIds, idStr, r, rowId);
         }
       }
       return HGridBuilder.dictsToGrid(pIds.toArray(new HDict[0]));
+    }
+  }
+
+  private void checkItemsWithInPointArray(ArrayList<HDict> pIds, String idStr, HRow r, HVal rowId) {
+    Double currentHighPriorityVal = CCUHsApi.getInstance().readPointPriorityVal(r.get(idStr).toString());
+    Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
+    Log.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
+    if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
+      pIds.add(getDictFromHRow(r));
+      sharedPointArrays.put(rowId, currentHighPriorityVal);
+    } else {
+      Log.d("CCU_HS", "no change in data");
     }
   }
 
@@ -526,7 +516,9 @@ public class HClient extends HProj
     public HNum lease() { return lease; }
     public String dis() { return dis; }
     public HGrid sub(HRef[] ids, boolean checked) { return client.watchSub(this, ids, checked); }
-    public void unsub(HRef[] ids) { client.watchUnsub(this, ids); }
+
+    public void unsub(HRef[] ids) throws IllegalArgumentException {
+      client.watchUnsub(this, ids); }
     public HGrid pollChanges() { return client.watchPoll(this, false); }
     public HGrid pollRefresh() { return client.watchPoll(this, true); }
     public void close() { client.watchClose(this, true); }

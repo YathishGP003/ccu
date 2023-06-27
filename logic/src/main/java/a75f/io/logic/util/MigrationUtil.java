@@ -40,6 +40,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
@@ -1987,11 +1988,13 @@ public class MigrationUtil {
             Point autoCommission = new Point.Builder()
                     .setDisplayName(diagEquip.get("dis")+"-autoCommissioning")
                     .setEquipRef(diagEquip.get("id")+"")
-                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("cov").addMarker("cur")
+                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("linear").addMarker("cur")
                     .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
                     .setTz(diagEquip.get("tz")+"")
+                    .setEnums(AutoCommissioningState.getEnum())
                     .build();
             String autoCommissioningId = instance.addPoint(autoCommission);
+            instance.writeDefaultValById(autoCommissioningId, 0.0);
             instance.writeHisValById(autoCommissioningId, 0.0);
 
             ArrayList<HashMap<Object, Object>> systemLoopOutputPoints = CCUHsApi.getInstance().readAllEntities("system and loop and output and point and not writable");

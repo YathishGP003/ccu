@@ -71,7 +71,7 @@ public class CCUHsApi
 {
 
     public static final String TAG = CCUHsApi.class.getSimpleName();
-
+    private SharedPreferences defaultSharedPrefs;
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
@@ -127,6 +127,7 @@ public class CCUHsApi
 
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
         updateJwtValidity();
+        this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -2183,7 +2184,7 @@ public class CCUHsApi
                             CCUHsApi.getInstance().setJwt(token);
                             CCUHsApi.getInstance().setCcuRegistered();
                             Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-
+                            defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
                             });

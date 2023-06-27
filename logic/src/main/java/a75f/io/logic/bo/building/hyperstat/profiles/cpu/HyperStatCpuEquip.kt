@@ -400,7 +400,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         newConfiguration: HyperStatCpuConfiguration
     ) {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuRelayAssociation) {
-            if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
+            if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
                 if (!HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
                     val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration, stage)
                     hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
@@ -408,7 +408,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                     ))
                 }
             } else {
-                if (HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
+                if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
                     val pointId = hsHaystackUtil.readPointID(fanStageQuery) as String
                     hsHaystackUtil.removePoint(pointId)
                 }
@@ -546,10 +546,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         config.zonePm2p5Target = hsHaystackUtil.getPm2p5TargetConfigValue()
 
         config.coolingStage1FanState = hsHaystackUtil.getFanStageValue("cooling and stage1",7).toInt()
-        config.coolingStage2FanState = hsHaystackUtil.getFanStageValue("cooling and stage2",7).toInt()
+        config.coolingStage2FanState = hsHaystackUtil.getFanStageValue("cooling and stage2",10).toInt()
         config.coolingStage3FanState = hsHaystackUtil.getFanStageValue("cooling and stage3",10).toInt()
         config.heatingStage1FanState = hsHaystackUtil.getFanStageValue("heating and stage1",7).toInt()
-        config.heatingStage2FanState = hsHaystackUtil.getFanStageValue("heating and stage2",7).toInt()
+        config.heatingStage2FanState = hsHaystackUtil.getFanStageValue("heating and stage2",10).toInt()
         config.heatingStage3FanState = hsHaystackUtil.getFanStageValue("heating and stage3",10).toInt()
 
         config.displayHumidity = hsHaystackUtil.getDisplayHumidity() == 1.0

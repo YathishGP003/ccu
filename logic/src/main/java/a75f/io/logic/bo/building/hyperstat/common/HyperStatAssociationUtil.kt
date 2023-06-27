@@ -1342,6 +1342,14 @@ class HyperStatAssociationUtil {
                     hyperStatConfig.relay6State.enabled && hyperStatConfig.relay6State.association == fanStage
         }
 
+        fun isAnyAnalogOutMappedToStagedFan(
+            hyperStatConfig: HyperStatCpuConfiguration,
+        ): Boolean {
+            return  (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut1State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) ||
+                    (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut2State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) ||
+                    (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut3State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
+        }
+
     }
 
 }

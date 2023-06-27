@@ -742,7 +742,7 @@ class LogicalPointsUtil {
         }
         fun readAnalogOutFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "point and logical and output and fan and modulating and speed and equipRef == \"$equipRef\"")
+                "point and logical and fan and modulating and speed and equipRef == \"$equipRef\"")
         }
         fun readAnalogOutDcvLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
@@ -760,7 +760,7 @@ class LogicalPointsUtil {
 
         fun readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "point and logical and output and fan and predefined and speed and equipRef == \"$equipRef\"")
+                "point and logical and fan and predefined and speed and equipRef == \"$equipRef\"")
         }
 
         /***   Thermistor logical points***/

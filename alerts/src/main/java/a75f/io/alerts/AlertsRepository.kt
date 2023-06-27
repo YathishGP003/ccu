@@ -335,4 +335,23 @@ class AlertsRepository(
    fun generateCrashAlertWithMessage(title: String, msg: String?) {
       generateAlert(title, msg ?: "","")
    }
+
+   fun removeAlertDefinition(id: String) {
+      val titles = mutableListOf<String>()
+      for (alertDef in alertDefsMap.values) {
+         if (alertDef._id == id) {
+            alertDef.alert?.mTitle?.let {
+               titles.add(it)
+            }
+         }
+      }
+      CcuLog.w("CCU_ALERTS", "removing alert definitions from map - $titles")
+      for (alertTitle in titles) {
+         val alertDef = alertDefsMap.remove(alertTitle)
+         alertDef?.let {
+            alertDefsState.removeAll(alertDef)
+         }
+      }
+      saveDefs()
+   }
 }

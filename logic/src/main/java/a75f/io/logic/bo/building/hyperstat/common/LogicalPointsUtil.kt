@@ -625,7 +625,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","cur","output",
+                    "cmd","zone","logical","cur",
                     "fan", "speed","his","modulating","cpu","standalone"
                 )
                 val point = Point.Builder()
@@ -667,7 +667,7 @@ class LogicalPointsUtil {
             val existingPoint = readAnalogOutPredefinedFanSpeedLogicalPoint(equipRef)
             if(existingPoint.isEmpty()) {
                 val markers = arrayOf(
-                    "cmd","zone","logical","cur","output","standalone",
+                    "cmd","zone","logical","cur","standalone",
                     "fan", "speed","his","predefined","cpu"
                 )
                 val point = Point.Builder()

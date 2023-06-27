@@ -8,7 +8,6 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hyperstat.common.AnalogConfigState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuRelayAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -391,7 +390,7 @@ class HyperStatFragment : BaseDialogFragment() {
             it.analogOutAtFanHigh.adapter = adapter
         }
 
-        if (viewModel is CpuViewModel) {
+        if (isViewModelCPUViewModel(viewModel)) {
             stagedFanUIs.forEachIndexed { index, stagedFanState ->
                 stagedFanState.selector.adapter = getAdapterValue(analogVoltageAtSpinnerValues())
                 val spinner = stagedFanState.selector
@@ -594,7 +593,7 @@ class HyperStatFragment : BaseDialogFragment() {
                     getString(getAnalogOutDisplayName(profileType,analogOutState.association))
                 )
 
-                if (viewModel is CpuViewModel) {
+                if (isViewModelCPUViewModel(viewModel)) {
                     if (analogOutState.enabled && analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
                         vAtMinDamperLabel.visibility = View.GONE
                         vAtMinDamperSelector.visibility = View.GONE
@@ -603,14 +602,15 @@ class HyperStatFragment : BaseDialogFragment() {
                         vAtMaxDamperLabel.visibility = View.GONE
                         vAtMaxDamperSelector.visibility = View.GONE
                         vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
-
                         isStagedFanEnabled = true
                     } else {
                         vAtMinDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
                         vAtMinDamperSelector.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMinDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMin))
 
                         vAtMaxDamperLabel.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
                         vAtMaxDamperSelector.visibility = if(analogOutState.enabled) View.VISIBLE else View.GONE
+                        vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
                     }
                 } else {
 
@@ -636,7 +636,7 @@ class HyperStatFragment : BaseDialogFragment() {
             }
         }
 
-        if (viewModel is CpuViewModel) {
+        if (isViewModelCPUViewModel(viewModel)) {
             makeStagedFanVisible(
                 isCoolingStage1Enabled,
                 isCoolingStage2Enabled,
@@ -645,6 +645,16 @@ class HyperStatFragment : BaseDialogFragment() {
                 isHeatingStage2Enabled,
                 isHeatingStage3Enabled,
                 isStagedFanEnabled
+            )
+        } else {
+            makeStagedFanVisible(
+                isCoolingStage1Enabled = false,
+                isCoolingStage2Enabled = false,
+                isCoolingStage3Enabled = false,
+                isHeatingStage1Enabled = false,
+                isHeatingStage2Enabled = false,
+                isHeatingStage3Enabled = false,
+                false
             )
         }
 
@@ -680,13 +690,17 @@ class HyperStatFragment : BaseDialogFragment() {
         displayVOC.isChecked = viewState.isDisplayVOCEnabled
         displayPp2p5.isChecked = viewState.isDisplayPp2p5Enabled
 
-        stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
-            with(stagedFanWidgets) {
-                selector.setSelection(viewState.stagedFanUis[index])
+        if (isViewModelCPUViewModel(viewModel)) {
+            stagedFanUIs.forEachIndexed { index, stagedFanWidgets ->
+                with(stagedFanWidgets) {
+                    selector.setSelection(viewState.stagedFanUis[index])
+                }
             }
         }
+    }
 
-
+    private fun isViewModelCPUViewModel(viewModel: HyperStatModel): Boolean {
+        return viewModel is CpuViewModel
     }
 
     private fun makeStagedFanVisible(

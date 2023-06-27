@@ -243,8 +243,8 @@ class HyperStatPointsUtil(
 
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
-           if(!hisInterpolate.isNullOrEmpty())
-               point.setHisInterpolate(hisInterpolate)
+        if(!hisInterpolate.isNullOrEmpty())
+            point.setHisInterpolate(hisInterpolate)
 
         // add specific markers
         markers.forEach { point.addMarker(it) }
@@ -2534,7 +2534,7 @@ class HyperStatPointsUtil(
                 CpuRelayAssociation.COOLING_STAGE_1 -> {
                     val coolingStage1FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage1",
-                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"),
+                        arrayOf("config", "writable", "zone", "fan", "cooling","output", "sp", "stage1"),
                         newConfiguration.coolingStage1FanState
                     )
                     stagedFanConfigPointsList.add(coolingStage1FanConfigPoint)
@@ -2542,7 +2542,7 @@ class HyperStatPointsUtil(
                 CpuRelayAssociation.COOLING_STAGE_2 -> {
                     val coolingStage2FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage2",
-                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage2"),
+                        arrayOf("config", "writable", "zone", "fan", "cooling","output", "sp", "stage2"),
                         newConfiguration.coolingStage2FanState
                     )
                     stagedFanConfigPointsList.add(coolingStage2FanConfigPoint)
@@ -2550,7 +2550,7 @@ class HyperStatPointsUtil(
                 CpuRelayAssociation.COOLING_STAGE_3 -> {
                     val coolingStage3FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutCoolingStage3",
-                        arrayOf("config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage3"),
+                        arrayOf("config", "writable", "zone", "fan", "cooling","output", "sp", "stage3"),
                         newConfiguration.coolingStage3FanState
                     )
                     stagedFanConfigPointsList.add(coolingStage3FanConfigPoint)
@@ -2558,7 +2558,7 @@ class HyperStatPointsUtil(
                 CpuRelayAssociation.HEATING_STAGE_1 -> {
                     val heatingStage1FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutHeatingStage1",
-                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage1"),
+                        arrayOf("config", "writable", "zone", "fan", "heating", "output", "sp", "stage1"),
                         newConfiguration.heatingStage1FanState
                     )
                     stagedFanConfigPointsList.add(heatingStage1FanConfigPoint)
@@ -2566,7 +2566,7 @@ class HyperStatPointsUtil(
                 CpuRelayAssociation.HEATING_STAGE_2 -> {
                     val heatingStage2FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutHeatingStage2",
-                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage2"),
+                        arrayOf("config", "writable", "zone", "fan", "heating", "output", "sp", "stage2"),
                         newConfiguration.heatingStage2FanState
                     )
                     stagedFanConfigPointsList.add(heatingStage2FanConfigPoint)
@@ -2574,7 +2574,7 @@ class HyperStatPointsUtil(
                 else -> {
                     val heatingStage3FanConfigPoint = createFanConfigPoint(
                         "$equipDis-fanOutHeatingStage3",
-                        arrayOf("config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage3"),
+                        arrayOf("config", "writable", "zone", "fan", "heating", "output", "sp", "stage3"),
                         newConfiguration.heatingStage3FanState
                     )
                     stagedFanConfigPointsList.add(heatingStage3FanConfigPoint)

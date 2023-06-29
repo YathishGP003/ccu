@@ -400,7 +400,14 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         newConfiguration: HyperStatCpuConfiguration
     ) {
         fun createStagedFanConfigPointIfEnabled(fanStageQuery: String, stage: CpuRelayAssociation) {
-            if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
+            if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && !HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration)) {
+                if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration,stage)) {
+                    val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration, stage)
+                    hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
+                        stagedFanConfigPoints
+                    ))
+                }
+            } else if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(newConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, stage)) {
                 if (!HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
                     val stagedFanConfigPoints : MutableList<Pair<Point, Any>> = hyperStatPointsUtil.createStagedFanPoint(newConfiguration, stage)
                     hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
@@ -409,8 +416,10 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
                 }
             } else {
                 if (HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(existingConfiguration) && HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, stage)) {
-                    val pointId = hsHaystackUtil.readPointID(fanStageQuery) as String
-                    hsHaystackUtil.removePoint(pointId)
+                    val pointId = hsHaystackUtil.readPointID(fanStageQuery)
+                    if (!pointId.isNullOrEmpty()) {
+                        hsHaystackUtil.removePoint(pointId)
+                    }
                 }
             }
         }
@@ -453,72 +462,78 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_1) &&
             coolingStage1FanOld != coolingStage1FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage1 and cooling and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage1 and cooling and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_1))
                 coolingStage1FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 7
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
         if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2) &&
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_2) &&
             coolingStage2FanOld != coolingStage2FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage2 and cooling and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage2 and cooling and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_2))
                 coolingStage2FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 10
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
         if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3) &&
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.COOLING_STAGE_3) &&
             coolingStage3FanOld != coolingStage3FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage3 and cooling and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage3 and cooling and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.COOLING_STAGE_3))
                 coolingStage3FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 10
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
         if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1) &&
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_1) &&
             heatingStage1FanOld != heatingStage1FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage1 and heating and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage1 and heating and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_1))
                 heatingStage1FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 7
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
         if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2) &&
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_2) &&
             heatingStage2FanOld != heatingStage2FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage2 and heating and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage2 and heating and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_2))
                 heatingStage2FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 10
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
         if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_3) &&
             HyperStatAssociationUtil.isStagedFanEnabled(existingConfiguration, CpuRelayAssociation.HEATING_STAGE_3) &&
             heatingStage3FanOld != heatingStage3FanNew
         ) {
-            val pointId = hsHaystackUtil.readPointID("stage3 and heating and fan") as String
+            val pointId = hsHaystackUtil.readPointID("stage3 and heating and fan")
             val defaultValue = if (HyperStatAssociationUtil.isStagedFanEnabled(newConfiguration, CpuRelayAssociation.HEATING_STAGE_3))
                 heatingStage3FanNew
-            else
-                0
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            else 10
+            if (!pointId.isNullOrEmpty()) {
+                hyperStatPointsUtil.addDefaultValueForPoint(pointId, defaultValue)
+            }
         }
 
     }

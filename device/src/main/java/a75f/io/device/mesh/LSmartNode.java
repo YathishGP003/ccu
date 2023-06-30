@@ -573,7 +573,7 @@ public class LSmartNode
     }
     
     public static double getStatus(short nodeAddr) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
     
     public static double getConfigNumVal(String tags, short nodeAddr) {

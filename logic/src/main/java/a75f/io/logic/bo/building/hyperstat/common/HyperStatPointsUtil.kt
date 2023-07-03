@@ -1777,7 +1777,7 @@ class HyperStatPointsUtil(
      fun getCPUDefaultFanSpeed(config: HyperStatCpuConfiguration): StandaloneFanStage {
 
         return if (HyperStatAssociationUtil.isAnyAnalogOutEnabledAssociatedToFanSpeed(config)
-            || HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToFan(config)){
+            || HyperStatAssociationUtil.isAnyRelayEnabledAssociatedToFan(config) || HyperStatAssociationUtil.isAnyAnalogOutMappedToStagedFan(config)){
              StandaloneFanStage.AUTO
         }
         else StandaloneFanStage.OFF

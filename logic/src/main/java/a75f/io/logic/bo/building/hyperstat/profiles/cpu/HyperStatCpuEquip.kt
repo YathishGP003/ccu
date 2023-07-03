@@ -32,6 +32,8 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     val haystack: CCUHsApi = CCUHsApi.getInstance()
     private val profileTag = "hyperstatcpu"
+    private val analogOutVoltageMax = 0
+    private val analogOutVoltageMin = 10
 
     private var masterPoints: HashMap<Any, String> = HashMap()
 
@@ -159,9 +161,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         )
         profileEquip.setupDeviceAnalogOuts(
-            config.analogOut1State.enabled, config.analogOut1State.voltageAtMin.toInt(),config.analogOut1State.voltageAtMax.toInt(),
-            config.analogOut2State.enabled, config.analogOut2State.voltageAtMin.toInt(),config.analogOut2State.voltageAtMax.toInt(),
-            config.analogOut3State.enabled, config.analogOut3State.voltageAtMin.toInt(),config.analogOut3State.voltageAtMax.toInt(),
+            config.analogOut1State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut1State),getCpuAnalogOutVoltageAtMax(config.analogOut1State),
+            config.analogOut2State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut2State),getCpuAnalogOutVoltageAtMax(config.analogOut2State),
+            config.analogOut3State.enabled, getCpuAnalogOutVoltageAtMin(config.analogOut3State),getCpuAnalogOutVoltageAtMax(config.analogOut3State),
             masterPoints, hyperStatDevice
         )
 
@@ -190,6 +192,22 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         hyperStatDevice.rssi.pointRef = heartBeatId
         hyperStatDevice.rssi.enabled = true
         hyperStatDevice.addPointsToDb()
+    }
+
+    private fun getCpuAnalogOutVoltageAtMin(analogOutState: AnalogOutState): Int {
+        return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
+            analogOutVoltageMax
+        } else {
+            analogOutState.voltageAtMin.toInt()
+        }
+    }
+
+    private fun getCpuAnalogOutVoltageAtMax(analogOutState: AnalogOutState): Int {
+        return if (analogOutState.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) {
+            analogOutVoltageMin
+        } else {
+            analogOutState.voltageAtMax.toInt()
+        }
     }
 
 
@@ -1037,7 +1055,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     ): Boolean {
         return (newConfiguration != null && ((changeIn == AnalogOutChanges.MAPPING ||changeIn == AnalogOutChanges.ENABLED)
                     && (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)
-                    || HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(existingAnalogOutState))))
+                    || HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(existingAnalogOutState) || HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(existingAnalogOutState))))
     }
 
      private fun updateConditioningMode() {

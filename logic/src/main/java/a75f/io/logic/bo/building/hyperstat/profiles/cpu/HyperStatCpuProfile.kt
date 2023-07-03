@@ -9,6 +9,7 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
@@ -19,6 +20,7 @@ import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
+import kotlin.math.roundToInt
 
 
 /**
@@ -456,7 +458,51 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                     port,analogOutStages,config.zoneCO2Threshold,config.zoneCO2DamperOpeningRate,isDoorOpenState(config,equip)
                 )
             }
+            (HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) -> {
+                doAnalogStagedFanAction(
+                    port, basicSettings.fanMode, basicSettings.conditioningMode, fanLoopOutput, analogOutStages,
+                )
+            }
         }
+    }
+
+    private fun doAnalogStagedFanAction(
+        port: Port,
+        fanMode: StandaloneFanStage,
+        conditioningMode: StandaloneConditioningMode,
+        fanLoopOutput: Int,
+        analogOutStages: HashMap<String, Int>,
+    ) {
+        if (fanMode != StandaloneFanStage.OFF) {
+            var fanLoopForAnalog = 0
+            if (conditioningMode == StandaloneConditioningMode.OFF) {
+                updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                return
+            }
+            fanLoopForAnalog = fanLoopOutput
+            if (conditioningMode == StandaloneConditioningMode.AUTO) {
+                if (getOperatingMode() == 1.0) {
+                    fanLoopForAnalog = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+                } else if (getOperatingMode() == 2.0) {
+                    fanLoopForAnalog = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+                }
+            } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                fanLoopForAnalog = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
+            } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                fanLoopForAnalog = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
+            }
+            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
+                fanLoopForAnalog
+            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed  analogSignal   $fanLoopForAnalog")
+        }
+
+    }
+
+    private fun getOperatingMode(): Double {
+
+        return hsHaystackUtil.readHisVal("point and operating and mode")
+
     }
 
     private fun handleDeadZone(equip: HyperStatCpuEquip) {
@@ -641,5 +687,36 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun logIt(msg: String){
         Log.i(L.TAG_CCU_HSCPU,msg)
+    }
+
+    private fun getCoolingStateActivated (): Double {
+        return if (stageActive("cooling and runtime and stage3")) {
+            hsHaystackUtil.readPointValue("fan and cooling and stage3")
+        } else if (stageActive("cooling and runtime and stage2")) {
+            hsHaystackUtil.readPointValue("fan and cooling and stage2")
+        } else {
+            hsHaystackUtil.readPointValue("fan and cooling and stage1")
+        }
+    }
+
+
+    private fun getHeatingStateActivated (): Double {
+        return if (stageActive("heating and stage3")) {
+            hsHaystackUtil.readPointValue("fan and heating and stage3")
+        } else if (stageActive("heating and stage2")) {
+            hsHaystackUtil.readPointValue("fan and heating and stage2")
+        } else {
+            hsHaystackUtil.readPointValue("fan and heating and stage1")
+        }
+    }
+
+    private fun stageActive(fanStage: String): Boolean {
+        return hsHaystackUtil.readHisVal(fanStage) == 1.0
+    }
+
+    private fun getPercentageFromVoltageSelected(voltageSelected: Int): Int {
+        val minVoltage = 0
+        val maxVoltage = 10
+        return (((voltageSelected - minVoltage).toDouble() / (maxVoltage - minVoltage)) * 100).roundToInt()
     }
 }

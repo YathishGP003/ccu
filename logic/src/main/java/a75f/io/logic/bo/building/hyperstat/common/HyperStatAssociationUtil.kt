@@ -131,6 +131,11 @@ class HyperStatAssociationUtil {
             return (analogOut.association == CpuAnalogOutAssociation.DCV_DAMPER)
         }
 
+        //Function which checks the Analog out is Associated  to STAGED_FAN_SPEED
+        fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AnalogOutState): Boolean {
+            return (analogOut.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
+        }
+
         //Function which checks the Analog in is Associated  to CURRENT_TX_0_10
         fun isAnalogInAssociatedToCurrentTX10(analogIn: AnalogInState): Boolean {
             return (analogIn.association == AnalogInAssociation.CURRENT_TX_0_10)
@@ -341,7 +346,7 @@ class HyperStatAssociationUtil {
                 third = false   //  Fan High
             )
 
-            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration)) return 21 // All options are enabled due to
+            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration) || isAnyAnalogOutMappedToStagedFan(configuration)) return 21 // All options are enabled due to
             // analog fan speed
 
             if (isRelayEnabledAssociatedToFan(configuration.relay1State))
@@ -1345,11 +1350,17 @@ class HyperStatAssociationUtil {
         fun isAnyAnalogOutMappedToStagedFan(
             hyperStatConfig: HyperStatCpuConfiguration,
         ): Boolean {
-            return  (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut1State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) ||
-                    (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut2State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED) ||
-                    (hyperStatConfig.analogOut1State.enabled && hyperStatConfig.analogOut3State.association == CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED)
-        }
+            return when {
+                (hyperStatConfig.analogOut1State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State)) -> true
+                (hyperStatConfig.analogOut2State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2State)) -> true
+                (hyperStatConfig.analogOut3State.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3State)) -> true
+                else -> false
+            }
 
+        }
     }
 
 }

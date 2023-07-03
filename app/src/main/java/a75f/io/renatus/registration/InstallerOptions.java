@@ -94,6 +94,9 @@ public class InstallerOptions extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private static final int BACKFILL_DEFAULT_DURATION = 24;
+    private static final int BACKFILL_DEFAULT_DURATION_INDEX = 6;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -1025,9 +1028,9 @@ public class InstallerOptions extends Fragment {
     private int backfillTimeSelectedValue() {
         Double value = CCUHsApi.getInstance().readDefaultVal("backfill and duration");
         if (value != null && !Double.isNaN(value)) {
-            return value.intValue();
+            return BackFillDuration.getIndex(BackFillDuration.toIntArray(),BACKFILL_DEFAULT_DURATION);
         } else {
-            return 6;
+            return BACKFILL_DEFAULT_DURATION_INDEX;
         }
     }
 

@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
+import a75f.io.domain.api.Domain
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.TagsUtil
@@ -29,7 +30,7 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         return equipId
     }
 
-    private fun buildEquip(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration) : Equip{
+    fun buildEquip(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration) : Equip{
 
         val equipBuilder = Equip.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -69,7 +70,7 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
 
         }
     }
-    private fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
+    fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
 
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName(modelDef.name)
@@ -107,4 +108,24 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
             point.markers.contains("tuner") -> TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
         }
     }
+
+    fun getEquipDetailsByDomain(domainName: String): List<a75f.io.domain.api.Equip>{
+        DomainManager.buildDomain(hayStack)
+        val equips = mutableListOf<a75f.io.domain.api.Equip>()
+        assert(Domain.site?.floors?.size  == 1)
+        Domain.site?.floors?.entries?.forEach{
+            val floor = it.value
+            assert(floor.rooms.size == 1)
+            floor.rooms.entries.forEach { r ->
+                val room =  r.value
+                room.equips.forEach { (equipDomainName, equip) ->
+                    if (equip.domainName == domainName){
+                        equips.add(equip)
+                    }
+                }
+            }
+        }
+        return equips
+    }
+
 }

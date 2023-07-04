@@ -78,9 +78,15 @@ android {
 }
 
 
+configurations {
+    customImplementation.extendsFrom implementation
+}
 
 dependencies {
-
+    customImplementation fileTree(dir: 'libs', include: ['*.jar'])
+    customImplementation('io.seventyfivef:domain-modeler-lib:20230621.10-dev') {
+        transitive = true
+    }
     implementation 'com.google.android.material:material:1.8.0'
 
     implementation("androidx.room:room-runtime:2.5.0")
@@ -116,3 +122,25 @@ dependencies {
 repositories {
     mavenCentral()
 }
+
+task getExternalLibraryPaths {
+    doLast {
+        def parentFolder = file(projectDir.parent)
+        def domainAssets = file("${parentFolder}/domain/src/main/assets")
+        configurations.customImplementation.getFiles().each { file ->
+            if (file.getAbsolutePath().endsWith('domain-modeler-lib-20230621.10-dev.jar')) {
+                project.ext.myParam = file.getAbsolutePath()
+                project.copy {
+                    from zipTree(file)
+                    into domainAssets
+                    includeEmptyDirs = false
+                }
+                def folderIo = "${parentFolder}/domain/src/main/assets/io" // Replace with the actual path of the folder you want to delete
+                def folderMetaInf = "${parentFolder}/domain/src/main/assets/META-INF" // Replace with the actual path of the folder you want to delete
+                delete folderIo
+                delete folderMetaInf
+            }
+        }
+    }
+}
+preBuild.dependsOn getExternalLibraryPaths

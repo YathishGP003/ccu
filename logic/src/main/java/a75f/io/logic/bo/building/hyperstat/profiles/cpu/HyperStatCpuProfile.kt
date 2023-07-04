@@ -35,6 +35,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private val defaultFanLoopOutput = 0.0
+
     override lateinit var occupancyStatus: Occupancy
     private val hyperstatCPUAlgorithm = HyperstatLoopController()
 
@@ -494,7 +496,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed  analogSignal   $fanLoopForAnalog")
+            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed  analogSignal  $fanLoopForAnalog")
         }
 
     }
@@ -694,19 +696,23 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             hsHaystackUtil.readPointValue("fan and cooling and stage3")
         } else if (stageActive("cooling and runtime and stage2")) {
             hsHaystackUtil.readPointValue("fan and cooling and stage2")
-        } else {
+        } else if (stageActive("cooling and runtime and stage1")) {
             hsHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else {
+            defaultFanLoopOutput
         }
     }
 
 
     private fun getHeatingStateActivated (): Double {
-        return if (stageActive("heating and stage3")) {
+        return if (stageActive("heating adn runtime and stage3")) {
             hsHaystackUtil.readPointValue("fan and heating and stage3")
-        } else if (stageActive("heating and stage2")) {
+        } else if (stageActive("heating adn runtime and stage2")) {
             hsHaystackUtil.readPointValue("fan and heating and stage2")
-        } else {
+        } else if (stageActive("heating and runtime and stage1")){
             hsHaystackUtil.readPointValue("fan and heating and stage1")
+        } else {
+            defaultFanLoopOutput
         }
     }
 

@@ -75,7 +75,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
         //CcuLog.d(L.TAG_CCU_DEVICE, "Modbus SendSystemControl");
     }
 
-    public void writeRegister(String id) {
+    public void writeRegister(String id , int val) {
         HashMap<Object, Object> writablePoint = CCUHsApi.getInstance().readMapById(id);
         if (writablePoint.isEmpty()) {
             CcuLog.e(L.TAG_CCU_MODBUS, "Cant find the point to update "+id);
@@ -106,7 +106,7 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
                                 + register.getRegisterAddress() + " val " + priorityVal);
                         if (LSerial.getInstance().isModbusConnected()) {
-                            LModbus.writeRegister(groupId, register, priorityVal);
+                            LModbus.writeRegister(groupId, register, val);
                         }
                     }
                 }

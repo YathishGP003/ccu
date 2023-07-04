@@ -165,6 +165,15 @@ public class UpdatePointHandler implements MessageHandler
                 BackFillUtil.updateBackfillDuration(backFillVal.getAsDouble());
             }
         }
+
+        if (localPoint.getMarkers().contains("modbus")){
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(localPoint.getId(),msgObject.get("val").getAsInt());
+            }
+            if (localPoint.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
+                modbusWritableDataInterface.writeRegister(localPoint.getId(),msgObject.get("val").getAsInt());
+            }
+        }
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
@@ -286,15 +295,7 @@ public class UpdatePointHandler implements MessageHandler
             Log.i("PubNub","Zone Data Received Refresh "+p.getDisplayName());
             zoneDataInterface.refreshScreen(luid);
         }
-        
-        if (p.getMarkers().contains("modbus")){
-            if (modbusDataInterface != null) {
-                modbusDataInterface.refreshScreen(luid);
-            }
-            if (p.getMarkers().contains(Tags.WRITABLE) && modbusWritableDataInterface != null) {
-                modbusWritableDataInterface.writeRegister(p.getId());
-            }
-        }
+
         if(isScheduleType){
             UpdateScheduleHandler.refreshIntrinsicSchedulesScreen();
         }

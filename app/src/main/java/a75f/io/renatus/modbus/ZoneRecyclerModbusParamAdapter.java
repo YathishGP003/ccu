@@ -261,7 +261,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     }
 
     @Override
-    public void refreshScreen(String id) {
+    public void refreshScreen(String id , int val) {
         HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(id);
         Point point = new Point.Builder().setHashMap(pointMap).build();
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
@@ -280,7 +280,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(point.getShortDis())) {
                             if (LSerial.getInstance().isModbusConnected()) {
-                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) val);
                             }
                             break;
                         }

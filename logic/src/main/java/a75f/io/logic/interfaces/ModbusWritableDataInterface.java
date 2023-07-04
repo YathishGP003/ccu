@@ -5,5 +5,5 @@ package a75f.io.logic.interfaces;
  * received via messages.
  */
 public interface ModbusWritableDataInterface {
-    void writeRegister(String id);
+    void writeRegister(String id , int val);
 }

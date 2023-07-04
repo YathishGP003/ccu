@@ -662,7 +662,7 @@ public class Communication extends Fragment {
                     validateAndSetValue(etScheduleObjects, NUMBER_OF_SCHEDULE_OBJECTS, etScheduleObjects.getText().toString(), objectConf, 0, 10, 1, getString(R.string.error_schedule_objects));
                     break;
                 case R.id.etOffsetValues:
-                    validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 0, 100, 1, getString(R.string.error_offset_values));
+                    validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 1, 100, 1, getString(R.string.error_offset_values));
                     break;
             }
         }

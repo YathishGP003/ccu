@@ -184,9 +184,19 @@ class AlertsRepository(
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
          alertDef.alert.setmNotificationMsg(msg)
-         addAlert(AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null))
+         val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null)
+         if (isOtaAlert(title)){
+            alert.setFixed(true)
+            alert.setEndTime(DateTime().millis)
+         }
+         addAlert(alert)
       }
    }
+
+   private fun isOtaAlert(title: String): Boolean{
+      return (title.contentEquals(FIRMWARE_OTA_UPDATE_STARTED) || title.contentEquals(FIRMWARE_OTA_UPDATE_ENDED)  )
+   }
+
 
    fun generateCMDeadAlert(title: String, msg: String?) {
       if (dataStore.getActiveCMDeadAlerts().isNotEmpty()) {

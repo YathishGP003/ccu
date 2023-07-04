@@ -37,6 +37,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -144,8 +145,7 @@ public class OTAUpdateService extends IntentService {
         /* The service has been launched in response to OTA update timeout */
         else if(action.equals(Globals.IntentActions.OTA_UPDATE_TIMED_OUT)) {
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_TIMEOUT, mCurrentLwMeshAddress);
-            resetUpdateVariables();
-            completeUpdate();
+            moveUpdateToNextNode();
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
@@ -337,7 +337,7 @@ public class OTAUpdateService extends IntentService {
             HashMap ccu = CCUHsApi.getInstance().read("ccu");
             String ccuName = ccu.get("dis").toString();
             AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
-                    "ended for smart device"+" "+ msg.smartNodeAddress.get()+" "+"with version"+" "+versionMajor +
+                    "ended for smart device"+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
                     "." + versionMinor);
             Log.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);
@@ -374,6 +374,7 @@ public class OTAUpdateService extends IntentService {
     private void handleOtaUpdateStartRequest(Intent intent) {
         otaRequestProcessInProgress = true;
         Log.i(TAG, "handleOtaUpdateStartRequest: called started a request");
+        deleteFilesByDeviceType(DOWNLOAD_DIR);
         String id = intent.getStringExtra(ID);
         String firmwareVersion = intent.getStringExtra(FIRMWARE_VERSION);
         String cmdLevel = intent.getStringExtra(CMD_LEVEL);
@@ -1008,7 +1009,9 @@ public class OTAUpdateService extends IntentService {
                         otaRequests.forEach((msgId, request) -> {
                             if (Integer.parseInt(Objects.requireNonNull(request.get(RETRY_COUNT))) < NO_OF_RETRY) {
                                 Intent intent = cache.getIntentFromRequest(request);
-                                otaRequestsQueue.add(intent);
+                                if (!checkDuplicateRequest(intent)) {
+                                    otaRequestsQueue.add(intent);
+                                }
                             } else {
                                 cache.removeRequest(msgId);
                             }
@@ -1020,6 +1023,26 @@ public class OTAUpdateService extends IntentService {
                 }
             };
             retryHandler.schedule(otaTimeOutTask,   DELAY, RETRY_TIME);
+        }
+    }
+
+    boolean checkDuplicateRequest(Intent intentDetails){
+        AtomicBoolean isFound = new AtomicBoolean(false);
+        otaRequestsQueue.forEach( intent -> {
+            String currentOtaRequest = intent.getStringExtra(MESSAGE_ID);
+            if (currentOtaRequest.equalsIgnoreCase(intentDetails.getStringExtra(MESSAGE_ID))){
+                isFound.set(true);
+            }
+        });
+        return isFound.get();
+    }
+    private void deleteFilesByDeviceType(File dir){
+        try {
+            for (File file : dir.listFiles()) {
+                file.delete();
+            }
+        } catch(NullPointerException e) {
+            e.printStackTrace();
         }
     }
     void stopRetryHandler() {

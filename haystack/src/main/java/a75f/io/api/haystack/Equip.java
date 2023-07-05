@@ -22,6 +22,15 @@ public class Equip extends Entity
     private String ccuRef;
     private String equipRef;
     private String pipeRef;
+    private String equipType;
+
+    public String getEquipType() {
+        return equipType;
+    }
+
+    public void setEquipType(String equipType) {
+        this.equipType = equipType;
+    }
 
     public String getVendor() {
         return vendor;
@@ -156,6 +165,7 @@ public class Equip extends Entity
         this.equipRef = equipRef;
     }
 
+
     public static class Builder{
         private String            displayName;
         private HashSet<String> markers = new HashSet<>();
@@ -169,6 +179,7 @@ public class Equip extends Entity
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
         private String equipRef;
+        private String equipType;
         private String pipeRef;
         private String cell;
         private String capacity;
@@ -293,6 +304,11 @@ public class Equip extends Entity
             return this;
         }
 
+        public Builder setEquipType(String equipType){
+            this.equipType = equipType;
+            return this;
+        }
+
         public Builder setPipeRef(String pipeRef){
             this.pipeRef = pipeRef;
             return this;
@@ -321,6 +337,7 @@ public class Equip extends Entity
             q.setLastModifiedDateTime(lastModifiedDateTime);
             q.setLastModifiedBy(lastModifiedBy);
             q.equipRef = this.equipRef;
+            q.equipType = this.equipType;
             q.pipeRef = this.pipeRef;
             q.cell= this.cell;
             q.capacity = this.capacity;
@@ -414,6 +431,9 @@ public class Equip extends Entity
                 //it.remove();
                 else if(pair.getKey().equals("equipRef")){
                     this.equipRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("equipType")){
+                    this.equipType = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals(Tags.PIPEREF)){
                     this.pipeRef = pair.getValue().toString();

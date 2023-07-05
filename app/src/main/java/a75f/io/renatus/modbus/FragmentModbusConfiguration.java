@@ -191,26 +191,18 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 parameter.setDisplayInUI(isChecked);
             }
             if(modbusConfigurationAdapter != null){
-
-                ModbusConfigurationAdapter modbusConfigurationAdapter = (ModbusConfigurationAdapter)recyclerSubEquips.getAdapter();
-                List<EquipmentDevice> equipmentDeviceList = modbusConfigurationAdapter.getSubEquips();
-
-                for(EquipmentDevice equipmentDevice :equipmentDeviceList){
+                for(EquipmentDevice equipmentDevice :modbusConfigurationAdapter.getSubEquips()){
                     if (Objects.nonNull(equipmentDevice.getRegisters())) {
                         for (Register registerTemp : equipmentDevice.getRegisters()) {
                             if (registerTemp.getParameters() != null) {
                                 for (Parameter parameterTemp : registerTemp.getParameters()) {
-                                    parameterTemp.setRegisterNumber(registerTemp.getRegisterNumber());
-                                    parameterTemp.setRegisterAddress(registerTemp.getRegisterAddress());
-                                    parameterTemp.setRegisterType(registerTemp.getRegisterType());
                                     parameterTemp.setDisplayInUI(isChecked);
                                 }
                             }
                         }
                     }
                 }
-                recyclerSubEquips.setAdapter(null);
-                recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
+                modbusConfigurationAdapter.updateView();
             }
             recyclerModbusParamAdapter.notifyDataSetChanged();
         };
@@ -390,8 +382,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             }
             modbusConfigurationAdapter = new ModbusConfigurationAdapter(getActivity(), subEquipList, isNewConfig,
                     selectAllParameters);
-            recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
             recyclerSubEquips.setLayoutManager(new LinearLayoutManager(this.getContext()));
+            recyclerSubEquips.setAdapter(modbusConfigurationAdapter);
             recyclerSubEquips.invalidate();
         }
         if (subEquipList.size() > 0) {
@@ -399,7 +391,30 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         } else {
             recyclerSubEquips.setVisibility(View.GONE);
         }
+        if(enableSelectAllParameters(subEquipList)){
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(true);
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+        }
     }
+    private boolean enableSelectAllParameters(List<EquipmentDevice> subEquipList){
+        List<EquipmentDevice> equipmentDeviceList = new ArrayList<>();
+        equipmentDeviceList.add(equipmentDevice);
+        equipmentDeviceList.addAll(subEquipList);
+        boolean enable = true;
+        for(EquipmentDevice device : equipmentDeviceList){
+            if (Objects.nonNull(device.getRegisters())) {
+                for (Register registerTemp : device.getRegisters()) {
+                    if (registerTemp.getParameters() != null) {
+                        for (Parameter parameterTemp : registerTemp.getParameters()) {
+                            enable &= parameterTemp.isDisplayInUI();
+                        }
+                    }
+                }
+            }
+        }
+        return enable;
+        }
 
     private void saveConfig(EquipmentDevice equipmentDev, short selectedSlaveId, List<Parameter> modbusParam) {
 

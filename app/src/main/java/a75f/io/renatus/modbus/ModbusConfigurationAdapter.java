@@ -33,9 +33,16 @@ public class ModbusConfigurationAdapter extends RecyclerView.Adapter<ModbusConfi
     private short curSelectedSlaveId;
     private RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     private SelectAllParameters selectAllParameters;
+    private List<RecyclerModbusParamAdapter> recyclerModbusParamAdapterList;
 
     public List<EquipmentDevice> getSubEquips() {
         return subEquips;
+    }
+
+    public void updateView(){
+        for(RecyclerModbusParamAdapter recyclerModbusParamAdapter : recyclerModbusParamAdapterList){
+            recyclerModbusParamAdapter.notifyDataSetChanged();
+        }
     }
 
     public ModbusConfigurationAdapter(Context context, List<EquipmentDevice> subEquips, boolean isConfigured,
@@ -44,6 +51,7 @@ public class ModbusConfigurationAdapter extends RecyclerView.Adapter<ModbusConfi
         this.subEquips =  subEquips;
         this.isConfigured = isConfigured;
         this.selectAllParameters = selectAllParameters;
+        recyclerModbusParamAdapterList = new ArrayList<>();
     }
 
     @NonNull
@@ -97,7 +105,7 @@ public class ModbusConfigurationAdapter extends RecyclerView.Adapter<ModbusConfi
         }
         recyclerModbusParamAdapter = new RecyclerModbusParamAdapter(context, parameterList, isConfigured,
                 selectAllParameters);
-
+        recyclerModbusParamAdapterList.add(recyclerModbusParamAdapter);
         viewHolder.recyclerSubEquipParams.setLayoutManager(gridLayoutManager);
         viewHolder.recyclerSubEquipParams.setAdapter(recyclerModbusParamAdapter);
         viewHolder.recyclerSubEquipParams.invalidate();

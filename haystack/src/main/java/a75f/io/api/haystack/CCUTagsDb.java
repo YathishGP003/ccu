@@ -498,6 +498,10 @@ public class CCUTagsDb extends HServer {
             equip.add("equipRef",q.getEquipRef());
         }
 
+       if(q.getEquipType() != null){
+            equip.add("equipType", q.getEquipType());
+        }
+
         if (q.getCell() != null) {
             equip.add("cell", q.getCell());
         }
@@ -556,6 +560,9 @@ public class CCUTagsDb extends HServer {
         if(q.getEquipRef() != null){
             equip.add("equipRef", q.getEquipRef());
         }
+        if(q.getEquipType() != null){
+            equip.add("equipType", q.getEquipType());
+        }
         if(q.getPipeRef() != null){
            equip.add(Tags.PIPEREF, q.getPipeRef());
         }
@@ -600,6 +607,7 @@ public class CCUTagsDb extends HServer {
         if (p.getEnums() != null) b.add("enum", p.getEnums());
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+        if (p.getCell() != null) b.add("cell", p.getCell());
         if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());

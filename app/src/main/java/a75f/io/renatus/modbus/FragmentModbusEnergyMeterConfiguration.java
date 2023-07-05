@@ -264,7 +264,30 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
         recyclerParams.setLayoutManager(gridLayoutManager);
         recyclerParams.setAdapter(recyclerModbusParamAdapter);
         recyclerParams.invalidate();
+
+        if(enableSelectAllParameters()){
+            toggleSelectAllParams.setOnCheckedChangeListener(null);
+            toggleSelectAllParams.setChecked(true);
+            toggleSelectAllParams.setOnCheckedChangeListener(toggleButtonChangeListener);
+        }
     }
+
+    private boolean enableSelectAllParameters(){
+        boolean enable = true;
+        if(null != equipmentDevice){
+            if (Objects.nonNull(equipmentDevice.getRegisters())) {
+                for (Register registerTemp : equipmentDevice.getRegisters()) {
+                    if (registerTemp.getParameters() != null) {
+                        for (Parameter parameterTemp : registerTemp.getParameters()) {
+                            enable &= parameterTemp.isDisplayInUI();
+                        }
+                    }
+                }
+            }
+        }
+        return enable;
+    }
+
     private void saveConfig(){
 
         new AsyncTask<String, Void, Void>() {

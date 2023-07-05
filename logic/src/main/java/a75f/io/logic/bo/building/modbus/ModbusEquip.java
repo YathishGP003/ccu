@@ -85,6 +85,7 @@ public class ModbusEquip {
         if (parentEquipId != null) {
             mbEquip.setEquipRef(parentEquipId);
         }
+        mbEquip.setEquipType(equipmentInfo.getEquipType());
 
         for (String equip :
                 modbusEquipTypes) {
@@ -196,6 +197,9 @@ public class ModbusEquip {
                     if(marker.getTagName().contains("incrementVal")){
                         logicalParamPoint.setIncrementVal(String.valueOf(marker.getTagValue()));
                     }
+                    if(marker.getTagName().contains("cell")){
+                        logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
+                    }
 
                 }else{
                     logicalParamPoint.addMarker(marker.getTagName());
@@ -221,6 +225,9 @@ public class ModbusEquip {
                         }
                         if(marker.getTagName().contains("incrementVal")){
                             logicalParamPoint.setHisInterpolate(String.valueOf(marker.getTagValue()));
+                        }
+                        if(marker.getTagName().contains("cell")){
+                            logicalParamPoint.setCell(String.valueOf(marker.getTagValue()));
                         }
                         /*if (marker.getTagName().contains("kind")) { //TODO Recheck this if needed, what side effect it causes?
                             logicalParamPoint.setKind(marker.getTagValue());

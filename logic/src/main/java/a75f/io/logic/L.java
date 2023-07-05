@@ -27,6 +27,7 @@ import a75f.io.logic.util.RxTask;
 public class L
 {
     public static final String TAG_CCU = "CCU";
+    public static final String TAG_CCU_INIT = "CCU_INIT";
     public static final String TAG_CCU_UI = "CCU_UI";
     public static final String TAG_CCU_ZONE = "CCU_ZONE";
     public static final String TAG_CCU_SYSTEM = "CCU_SYSTEM";

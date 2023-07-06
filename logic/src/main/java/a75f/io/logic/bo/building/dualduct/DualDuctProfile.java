@@ -199,7 +199,7 @@ public class DualDuctProfile extends ZoneProfile {
             double damperCoolingMax = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "cooling", "max");
         
             dualDuctEquip.setDamperPos((damperCoolingMin + damperCoolingMax)/2 , "cooling");
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dualDuctEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + dualDuctEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
             
             dualDuctEquip.setDamperPos((damperCoolingMin + damperHeatingMin )/2, "composite");
         }

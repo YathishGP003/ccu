@@ -2,17 +2,26 @@ package a75f.io.device.mesh;
 
 import org.javolution.io.Struct;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.bo.util.UnitUtils;
 
 import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
 import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
 import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
+import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
 import android.util.Log;
+
+import java.util.HashMap;
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -81,9 +90,7 @@ public class MeshUtil
     
     public static boolean sendStructToCM(Struct struct)
     {
-        Log.i("amardebug","send struct");
         boolean retVal = LSerial.getInstance().sendSerialToCM(struct);
-        Log.i("amardebug","sretVal"+retVal);
 
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.
@@ -146,5 +153,28 @@ public class MeshUtil
                 return RELAY_BITMAP_POS_AUX;
         }
         return relayPos;
+    }
+
+    public static double getSetTemp(String equipRef)
+    {
+        Equip equip = HSUtil.getEquip(CCUHsApi.getInstance(), equipRef);
+        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                " == \"" + equip.getRoomRef() + "\"").intValue();
+        TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
+
+        HashMap<Object, Object> point = new HashMap<>();
+        if(temperatureMode == TemperatureMode.HEATING){
+            point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equipRef+"\"");
+        }else if(temperatureMode == TemperatureMode.COOLING){
+            point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equipRef+"\"");
+        }else {
+            point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and average and sp and equipRef == \""+equipRef+"\"");
+        }
+        if (point.isEmpty()) {
+            Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
+            return 0;
+        }
+
+        return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 }

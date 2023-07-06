@@ -297,7 +297,7 @@ public class CazEquip
                 .setSiteRef(siteRef).setFloorRef(floorRef)
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddr)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddr)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(tz)
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);
@@ -619,13 +619,13 @@ public class CazEquip
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
 
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status )
         {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
         }
 
         String message;

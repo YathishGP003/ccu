@@ -45,7 +45,7 @@ public class UpdatePointHandler implements MessageHandler
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
-    public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken) {
+    public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) {
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -98,8 +98,10 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isSSEConfig(pointUid, CCUHsApi.getInstance())) {
-            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, ccuHsApi);
             updatePoints(localPoint);
+            SSEConfigHandler.updateTemperatureMode(localPoint, ccuHsApi);
             return;
         }
 
@@ -166,7 +168,7 @@ public class UpdatePointHandler implements MessageHandler
         
         if (CCUHsApi.getInstance().isEntityExisting(pointUid))
         {
-            fetchRemotePoint(pointUid);
+            fetchRemotePoint(pointUid, isDataSync, msgObject);
 
             //TODO- Should be removed one pubnub is stable
             logPointArray(localPoint);
@@ -194,34 +196,54 @@ public class UpdatePointHandler implements MessageHandler
     /**
      * Replace local point array with point array values from server
      */
-    private static void fetchRemotePoint(String pointUid) {
-        HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
-        if (pointGrid == null) {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point : " + pointUid);
-            return;
-        }
-        //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
-        CCUHsApi.getInstance().deletePointArray(pointUid);
-        Iterator it = pointGrid.iterator();
-        while (it.hasNext()) {
-            HRow r = (HRow) it.next();
-            String who = r.get("who").toString();
-        
-            try {
-                double level = Double.parseDouble(r.get("level").toString());
-                double val = Double.parseDouble(r.get("val").toString());
-                HVal durHVal = r.get("duration", false);
-                HDateTime lastModifiedDateTime = (HDateTime)r.get("lastModifiedDateTime");
-                double duration = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
-                //If duration shows it has already expired, then just write 1ms to force-expire it locally.
-                double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
-                CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
-                        CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur), lastModifiedDateTime);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+    private static void fetchRemotePoint(String pointUid, Boolean isDataSync, JsonObject msgObject) {
+        double level = 0;
+        double val = 0;
+        double duration = 0;
+        HDateTime lastModifiedDateTime;
+        if (isDataSync) {
+            level = Double.parseDouble(msgObject.get("level").getAsString());
+            val = Double.parseDouble(msgObject.get("val").getAsString());
+            lastModifiedDateTime = HDateTime.make(msgObject.get("lastModifiedDateTime").getAsString());
+            duration = Double.parseDouble(msgObject.get("duration").getAsString());
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Read changes point "+"Level: "+level+"value: "+val+
+                    "lastModifiedDateTime: "+lastModifiedDateTime+"duration: "+duration);
+        } else {
+            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
+            if (pointGrid == null) {
+                CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point : " + pointUid);
+                return;
             }
+            //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
+            Iterator it = pointGrid.iterator();
+            lastModifiedDateTime = null;
+            while (it.hasNext()) {
+                HRow r = (HRow) it.next();
+                String who = r.get("who").toString();
+
+                try {
+                    level = Double.parseDouble(r.get("level").toString());
+                    val = Double.parseDouble(r.get("val").toString());
+                    HVal durHVal = r.get("duration", false);
+                    Object lastModifiedTimeTag = r.get("lastModifiedDateTime", false);
+                    if (lastModifiedTimeTag != null) {
+                        lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                    } else {
+                        lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                    }
+                    double durationRemote = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
+                    //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                    duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration " + durationRemote + " dur " + duration);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
+        CCUHsApi.getInstance().deletePointArray(pointUid);
+        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level,
+                CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
     }
 
     private static void logPointArray(Point localPoint) {
@@ -331,6 +353,6 @@ public class UpdatePointHandler implements MessageHandler
     @Override
     public void handleMessage(@NonNull JsonObject jsonObject, @NonNull Context context) {
         long timeToken = jsonObject.get("timeToken").getAsLong();
-        handlePointUpdateMessage(jsonObject, timeToken);
+        handlePointUpdateMessage(jsonObject, timeToken, false);
     }
 }

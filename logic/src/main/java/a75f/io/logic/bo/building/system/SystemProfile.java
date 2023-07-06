@@ -915,8 +915,8 @@ public abstract class SystemProfile
     private void addLockoutTempTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
                                       String profileTag, String tz) {
         HashMap<Object, Object> coolingLockoutTemp = CCUHsApi.getInstance()
-                                                             .readEntity("tuner and system and dab and " +
-                                                                         "outsideTemp and cooling and lockout");
+                                                             .readEntity("tuner and system and outsideTemp " +
+                                                                     "and cooling and lockout and equipRef == \""+equipref+"\"");
         
         if (coolingLockoutTemp.isEmpty()) {
             SystemTuners.createCoolingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
@@ -925,8 +925,8 @@ public abstract class SystemProfile
         }
         
         HashMap<Object, Object> heatingLockoutTemp = CCUHsApi.getInstance()
-                                                             .readEntity("tuner and system and dab and " +
-                                                                         "outsideTemp and heating and lockout");
+                                                             .readEntity("tuner and system and outsideTemp " +
+                                                                     "and heating and lockout and equipRef == \""+equipref+"\"");
         
         if (heatingLockoutTemp.isEmpty()) {
             SystemTuners.createHeatingTempLockoutPoint(hayStack, siteRef, equipref, equipDis,
@@ -1059,7 +1059,7 @@ public abstract class SystemProfile
     }
 
     public void writeSystemLoopOutputValue(String state, double value){
-        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS");
+        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 }

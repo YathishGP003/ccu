@@ -7,6 +7,9 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.device.BuildConfig;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
@@ -19,6 +22,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
+import a75f.io.logic.bo.util.TemperatureMode;
 
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_DATABASE_SEED_MESSAGE;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
@@ -35,9 +39,9 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendSeedMessage(String zone, int address, String equipRef,
-                                       boolean checkDuplicate) {
+                                       boolean checkDuplicate, TemperatureMode mode) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
-                                                                                                 equipRef);
+                                                                                                 equipRef, mode);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
@@ -68,9 +72,10 @@ public class HyperStatMessageSender {
      * @param address
      * @param equipRef
      */
-    public static void sendSettingsMessage(String zone, int address, String equipRef) {
-        HyperStatSettingsMessage_t settings = HyperStatMessageGenerator.getSettingsMessage(zone, address,
-                                                                                                     equipRef);
+    public static void sendSettingsMessage(Zone zone, int address, String equipRef) {
+        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zone.getId() + "\"").intValue();
+        HyperStatSettingsMessage_t settings = HyperStatMessageGenerator.getSettingsMessage(
+                zone.getDisplayName(), address, equipRef, TemperatureMode.values()[modeType]);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings.toString());
         }
@@ -102,7 +107,11 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address, equipRef).build();
+        Equip equip = HSUtil.getEquipInfo(equipRef);
+        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
+                " == \"" + equip.getRoomRef() + "\"").intValue();
+        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address,
+                equipRef, TemperatureMode.values()[modeType]).build();
         
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
@@ -183,8 +192,8 @@ public class HyperStatMessageSender {
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
 
-    public static void sendIduSeedSetting(String zone, int address, String equipRef, boolean checkDuplicate){
-        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatIduMessageHandler.getIduSeedMessage(zone, address, equipRef);
+    public static void sendIduSeedSetting(String zone, int address, String equipRef, boolean checkDuplicate, TemperatureMode temperatureMode){
+        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatIduMessageHandler.getIduSeedMessage(zone, address, equipRef, temperatureMode);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());

@@ -1099,13 +1099,13 @@ public class DabEquip
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == \""+nodeAddr+"\"");
     }
 
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status )
         {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + nodeAddr + "\"", status);
         }
 
         String message;

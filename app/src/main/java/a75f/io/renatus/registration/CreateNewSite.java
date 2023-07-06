@@ -503,7 +503,7 @@ public class CreateNewSite extends Fragment {
     }
 
     private void handleRegistrationAsync(String installerEmail) {
-        
+        Log.d(TAG, "Register Button Clicked");
         RxjavaUtil.executeBackgroundTask(
             () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
             () -> {
@@ -559,13 +559,13 @@ public class CreateNewSite extends Fragment {
 
     private void showUnregisterAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
+        Log.d(TAG, "Unregister Button Clicked");
         builder.setIcon(R.drawable.ic_warning);
         builder.setTitle("Unregister CCU");
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
-
+            Log.d(TAG, "Unregister Button Clicked and Confirmed");
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String ahuRef = ccu.get("ahuRef").toString();
             String managerEmail = mSiteEmailId.getText().toString();

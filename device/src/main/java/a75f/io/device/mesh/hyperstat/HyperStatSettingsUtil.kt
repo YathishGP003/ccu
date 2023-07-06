@@ -6,6 +6,7 @@ import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -339,8 +340,8 @@ class HyperStatSettingsUtil {
          */
         private fun getFcuTunerDetails(equipRef: String): HyperStat.HyperStatTunersFcu_t {
             val fcuTuners = HyperStat.HyperStatTunersFcu_t.newBuilder()
-            fcuTuners.twoPipeCoolingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.twoPipeHeatingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.twoPipeHeatingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.twoPipeCoolingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.waterValueSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"").toInt()
@@ -369,6 +370,21 @@ class HyperStatSettingsUtil {
             return field
 
         }
+        // Below method returns query based on DesiredTempMode
+        fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+            return if (mode == TemperatureMode.COOLING) {
+                "cooling and user and limit and $query"
+            } else {
+                "heating and user and limit and $query"
+            }
+        }
 
+        fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String) : String{
+            return if(mode == TemperatureMode.HEATING){
+                "heating and user and limit and $query"
+            }else{
+                "cooling and user and limit and $query"
+            }
+        }
     }
 }

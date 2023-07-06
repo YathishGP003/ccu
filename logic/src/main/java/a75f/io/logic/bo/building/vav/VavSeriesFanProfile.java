@@ -285,7 +285,7 @@ public class VavSeriesFanProfile extends VavProfile
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
             vavDevice.setFanOn("series", false);
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
             
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"",
                                                    "Zone Temp Dead"+vavDevice.getFanStatusMessage());

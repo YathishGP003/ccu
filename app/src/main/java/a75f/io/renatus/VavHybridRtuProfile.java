@@ -52,6 +52,7 @@ import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
 
 /**
  * Created by samjithsadasivan on 2/11/19.
@@ -176,6 +177,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                         systemProfile = new VavAdvancedHybridRtu();
                         systemProfile.addSystemEquip();
                         L.ccu().systemProfile = systemProfile;
+                        setSystemModeForVav(CCUHsApi.getInstance());
                         return null;
                     }
 

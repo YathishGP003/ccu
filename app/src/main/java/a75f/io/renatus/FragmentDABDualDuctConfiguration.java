@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctAnalogActuator;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -480,6 +481,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                         setupDualDuctZoneProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().setCcuReady();
+                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
                         return null;
                     }
                     

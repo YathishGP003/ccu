@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,7 +60,6 @@ import a75f.io.api.haystack.util.Migrations;
 import a75f.io.logger.CcuLog;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import io.objectbox.DebugFlags;
 import io.objectbox.query.QueryBuilder;
 
 /**
@@ -497,6 +495,21 @@ public class CCUTagsDb extends HServer {
             equip.add("lastModifiedBy", q.getLastModifiedBy());
         }
 
+        if(q.getEquipRef() != null){
+            equip.add("equipRef",q.getEquipRef());
+        }
+
+       if(q.getEquipType() != null){
+            equip.add("equipType", q.getEquipType());
+        }
+
+        if (q.getCell() != null) {
+            equip.add("cell", q.getCell());
+        }
+        if (q.getCapacity() != null) {
+            equip.add("capacity", q.getCapacity());
+        }
+
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -545,6 +558,21 @@ public class CCUTagsDb extends HServer {
         if(q.getModel() != null){
             equip.add("model",q.getModel());
         }
+        if(q.getEquipRef() != null){
+            equip.add("equipRef", q.getEquipRef());
+        }
+        if(q.getEquipType() != null){
+            equip.add("equipType", q.getEquipType());
+        }
+        if(q.getPipeRef() != null){
+           equip.add(Tags.PIPEREF, q.getPipeRef());
+        }
+        if (q.getCell() != null) {
+            equip.add("cell", q.getCell());
+        }
+        if (q.getCapacity() != null) {
+            equip.add("capacity", q.getCapacity());
+        }
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -580,6 +608,7 @@ public class CCUTagsDb extends HServer {
         if (p.getEnums() != null) b.add("enum", p.getEnums());
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+        if (p.getCell() != null) b.add("cell", p.getCell());
         if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
@@ -1047,7 +1076,7 @@ public class CCUTagsDb extends HServer {
         if(z.getLastModifiedBy() != null){
             b.add("lastModifiedBy", z.getLastModifiedBy());
         }
-        
+
         for (String m : z.getMarkers()) {
             b.add(m);
         }
@@ -1326,14 +1355,14 @@ public class CCUTagsDb extends HServer {
         return HGrid.EMPTY;
     }
 
-    public List<HisItem> getUnsyncedHisItemsBatch(String pointId) {
+    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId) {
         List<HisItem> validHisItems = new ArrayList<>();
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-        List<HisItem> hisItems = hisQuery.build().find(0,5);
+        List<HisItem> hisItems = hisQuery.build().find();
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
         for (HisItem hisItem : hisItems) {
             if  (hisItem != null) {
@@ -1429,16 +1458,9 @@ public class CCUTagsDb extends HServer {
     //Delete all the hisItem entries older than 24 hrs.
     public void removeExpiredHisItems(HRef id) {
         HDict entity = readById(id);
-        long backfillduration;
-        Double backfillDurationPoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and backfill and duration");
-        if (backfillDurationPoint == null) {
-            backfillduration = 24;
-        } else {
-            backfillduration = backfillDurationPoint.intValue();
-        }
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - backfillduration*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
                 .or()
                 .equal(HisItem_.syncStatus, true)
                 .order(HisItem_.date);

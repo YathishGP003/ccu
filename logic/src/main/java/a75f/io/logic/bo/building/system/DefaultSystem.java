@@ -4,6 +4,8 @@ package a75f.io.logic.bo.building.system;
  * Created by samjithsadasivan on 1/8/19.
  */
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDefaultSystemProfile;
+
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 
 import java.util.HashMap;
@@ -35,6 +37,7 @@ public class DefaultSystem extends SystemProfile
     
     public DefaultSystem() {
       addSystemEquip();
+      setSystemModeForDefaultSystemProfile(CCUHsApi.getInstance());
     }
     @Override
     public void doSystemControl() {

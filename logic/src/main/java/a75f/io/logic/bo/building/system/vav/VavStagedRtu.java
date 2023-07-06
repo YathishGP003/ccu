@@ -52,6 +52,8 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForVav;
+
 /**
  * Created by samjithsadasivan on 8/14/18.
  */
@@ -273,7 +275,7 @@ public class VavStagedRtu extends VavSystemProfile
             writeSystemLoopOutputValue(Tags.FAN, systemFanLoopOp);
             systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
         }
-        
+
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
         
@@ -831,7 +833,9 @@ public class VavStagedRtu extends VavSystemProfile
     }
     public void setConfigEnabled(String config, double val) {
         //sysEquip.setConfigEnabled(config, val);
-        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        ccuHsApi.writeDefaultVal("point and system and config and output and enabled and "+config, val);
+        setSystemModeForVav(ccuHsApi);
     }
     
     public double getConfigAssociation(String config) {
@@ -847,13 +851,13 @@ public class VavStagedRtu extends VavSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
-    
+
         double curConfigVal = getConfigAssociation(config);
         if (curConfigVal == val) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "setConfigAssociation not changed cur:"+curConfigVal+" new:"+val);
             return;
         }
-    
+
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
         Stage curstage = Stage.values()[(int)curConfigVal];
     
@@ -985,7 +989,7 @@ public class VavStagedRtu extends VavSystemProfile
             }
             CCUHsApi.getInstance().scheduleSync();
         }
-        
+        setSystemModeForVav(CCUHsApi.getInstance());
     }
     
     public void addTunerPoints(String equipref) {

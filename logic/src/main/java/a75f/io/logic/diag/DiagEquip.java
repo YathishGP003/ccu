@@ -95,11 +95,14 @@ public class DiagEquip
         Point autoCommission = new Point.Builder()
                 .setDisplayName(equipDis+"-autoCommissioning")
                 .setEquipRef(equipRef)
-                .setSiteRef(siteRef).setHisInterpolate("cov").addMarker("cur")
+                .setSiteRef(siteRef).setHisInterpolate("linear").addMarker("cur")
                 .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
                 .setTz(tz)
+                .setEnums(AutoCommissioningState.getEnum())
                 .build();
-        hsApi.addPoint(autoCommission);
+        String autoCommissionPintId = hsApi.addPoint(autoCommission);
+        CCUHsApi.getInstance().writeDefaultValById(autoCommissionPintId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(autoCommissionPintId, 0.0);
         AutoCommissioningUtil.setAutoCommissionState(AutoCommissioningState.NOT_STARTED);
     
         Point chargingStatus = new Point.Builder()

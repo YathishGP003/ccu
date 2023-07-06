@@ -46,11 +46,26 @@ public class EquipmentDevice {
     @Expose
     @Convert(converter = EncounterRegisterConverter.class, dbType = String.class)
     private List<Register> registers = null;
+    @SerializedName("equips")
+    @Expose
+    @Convert(converter = EncounterEquipmentDeviceConverter.class, dbType = String.class)
+    private List<EquipmentDevice> equips = null;
+    @SerializedName("equipRef")
+    @Expose
+    private String equipRef;
+
+    @SerializedName("cell")
+    @Expose
+    private String cell;
+    @SerializedName("capacity")
+    @Expose
+    private String capacity;
+
     private int slaveId;
 
     public String zoneRef = null;
     public String floorRef = null;
-    public String equipRef = null;
+    public String deviceEquipRef = null;
     public boolean isPaired;
 
     public EquipmentDevice(){
@@ -120,6 +135,30 @@ public class EquipmentDevice {
         this.registers = registers;
     }
 
+    public List<EquipmentDevice> getEquips() {
+        return equips;
+    }
+
+    public void setEquips(List<EquipmentDevice> equips) {
+        this.equips = equips;
+    }
+
+    public String getEquipRef() {
+        return equipRef;
+    }
+
+    public void setEquipRef(String equipRef) {
+        this.equipRef = equipRef;
+    }
+
+    public String getCell() { return this.cell; }
+
+    public String getCapacity() { return this.capacity; }
+
+    public void setCell(String cell) { this.cell = cell; }
+
+    public void setCapacity(String capacity) { this.capacity = capacity; }
+
     @Override
     public String toString() {
         return this.name;
@@ -176,6 +215,28 @@ public class EquipmentDevice {
         }
     }
 
+    public static class EncounterEquipmentDeviceConverter implements PropertyConverter<List<EquipmentDevice>, String> {
+
+        @Override
+        public List<EquipmentDevice> convertToEntityProperty(String databaseValue) {
+            if (databaseValue == null) {
+                return null;
+            }
+
+            return new Gson().fromJson(databaseValue, new TypeToken<List<EquipmentDevice>>() {
+            }.getType());
+        }
+
+        @Override
+        public String convertToDatabaseValue(List<EquipmentDevice> registerList) {
+            if (registerList == null) {
+                return null;
+            }
+
+            return new Gson().toJson(registerList);
+        }
+    }
+
 
     public String getZoneRef() {
         return zoneRef;
@@ -185,12 +246,12 @@ public class EquipmentDevice {
         this.zoneRef = zoneRef;
     }
 
-    public String getEquipRef() {
-        return equipRef;
+    public String getDeviceEquipRef() {
+        return deviceEquipRef;
     }
 
-    public void setEquipRef(String equipRef) {
-        this.equipRef = equipRef;
+    public void setDeviceEquipRef(String deviceEquipRef) {
+        this.deviceEquipRef = deviceEquipRef;
     }
 
     public boolean isPaired() {

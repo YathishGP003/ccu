@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
+import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
@@ -77,6 +79,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,6 +104,7 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.messaging.MessageHandlerSubscriber;
+import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
@@ -237,7 +241,7 @@ public abstract class UtilityApplication extends Application {
         initializeCrashReporting();
 
         Globals.getInstance().setApplicationContext(this);
-
+        isDataSyncRestartRequired();
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
@@ -276,6 +280,13 @@ public abstract class UtilityApplication extends Application {
 
     }
 
+    private void isDataSyncRestartRequired() {
+        if(getDataSyncProcessing()) {
+            CcuLog.i("CCU_READ_CHANGES", "Data Sync restarted " + new Date(getSyncStartTime()));
+            DataSyncHandler dataSyncHandler = new DataSyncHandler();
+            dataSyncHandler.syncCCUData(getSyncStartTime());
+        }
+    }
     private void initializeCrashReporting() {
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting");
 
@@ -324,6 +335,8 @@ public abstract class UtilityApplication extends Application {
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
             CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+        } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
+            RenatusApp.rebootTablet();
         }
     }
     private List<String> getCrashTimestampsWithinLastHour() {

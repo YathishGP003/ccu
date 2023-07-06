@@ -1059,7 +1059,7 @@ public abstract class SystemProfile
     }
 
     public void writeSystemLoopOutputValue(String state, double value){
-        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS");
+        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 }

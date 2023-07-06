@@ -1,5 +1,6 @@
 package a75f.io.logic.util;
 
+import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.createReheatType;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
@@ -39,8 +40,10 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.bo.building.BackFillUtil;
 import a75f.io.logic.bo.building.ConfigUtil;
+import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.DamperType;
@@ -61,6 +64,9 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.ccu.restore.CCU;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
+import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.otastatus.OtaStatusMigration;
@@ -270,6 +276,10 @@ public class MigrationUtil {
             PreferenceUtil.setFreeInternalDiskStorageMigration();
         }
 
+        if (!PreferenceUtil.isZonesMigratedForSingleAndDualTempSupport()) {
+            addSingleAndDualTempSupportForAllZones(CCUHsApi.getInstance());
+            PreferenceUtil.setZonesMigratedForSingleAndDualTempSupport();
+        }
         if(!PreferenceUtil.getCcuRefTagMigration()){
             Log.i(TAG, "ccuRef migration started");
             CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance());
@@ -302,6 +312,12 @@ public class MigrationUtil {
             PreferenceUtil.setStaticPressureSpTrimMigration();
         }
 
+        if (!PreferenceUtil.getOccupancyModePointMigration()) {
+            Log.i("CCU_MIGRATION","start migration for occupancy mode");
+            migrateOccupancyStatePoint(CCUHsApi.getInstance());
+            Log.i("CCU_MIGRATION","end migration for occupancy mode");
+            PreferenceUtil.setOccupancyModePointMigration();
+        }
         if (!PreferenceUtil.getMinorTagMigration()) {
             MinorTagMigration(CCUHsApi.getInstance());
             PreferenceUtil.setMinorTagMigration();
@@ -381,14 +397,31 @@ public class MigrationUtil {
         }
         removeWritableTagForFloor();
         migrateUserIntentMarker();
+        migrateTIProfileEnum(CCUHsApi.getInstance());
+
         L.saveCCUState();
+    }
+
+    private static void migrateTIProfileEnum(CCUHsApi ccuHsApi) {
+
+        ArrayList<HashMap<Object, Object>> tiEquips = ccuHsApi.readAllEntities("equip and ti");
+        if (!tiEquips.isEmpty()) {
+            for (HashMap<Object, Object> equipMap : tiEquips) {
+                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+                HashMap<Object, Object> roomTemperatureTypePoint = ccuHsApi.readEntity("point and " +
+                        "temp and ti and space and type and equipRef == \"" + equip.getId() + "\"");
+                if (!roomTemperatureTypePoint.get("enum").toString().contains("Sensor Bus Temperature")) {
+                    Point enumUpdatedRoomTempTypePoint = new Point.Builder().setHashMap(roomTemperatureTypePoint).build();
+                    enumUpdatedRoomTempTypePoint.setEnums(RoomTempSensor.getEnumStringDefinition());
+                    CCUHsApi.getInstance().updatePoint(enumUpdatedRoomTempTypePoint, enumUpdatedRoomTempTypePoint.getId());
+                }
+            }
+        }
     }
 
 
     private static void updateKind(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> hyperstatEquips = ccuHsApi.readAllEntities("equip and hyperstat");
-
-
         for (HashMap<Object, Object> hyperstatEquip :
                 hyperstatEquips) {
             String equipRef = hyperstatEquip.get(Tags.ID).toString();
@@ -399,16 +432,11 @@ public class MigrationUtil {
                     ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
                 }
             }
-
-
             ArrayList<HashMap<Object, Object>> scheduleTypes = ccuHsApi.readAllEntities("scheduleType and message and equipRef == \"" + equipRef + "\"");
             for (HashMap<Object, Object> scheduleType : scheduleTypes) {
                 Point updatedPoint = new Point.Builder().setHashMap(scheduleType).removeMarker(Tags.MESSAGE).build();
                 ccuHsApi.updatePoint(updatedPoint, updatedPoint.getId());
-
             }
-
-
         }
 
         ccuHsApi.scheduleSync();
@@ -536,7 +564,7 @@ public class MigrationUtil {
                 .setSiteRef(equip.getSiteRef()).setFloorRef(equip.getFloorRef())
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("space").addMarker("sp").addMarker("type").addMarker("temp")
-                .setGroup(String.valueOf(nodeAddress)).setEnums(SupplyTempSensor.getEnumStringDefinition())
+                .setGroup(String.valueOf(nodeAddress)).setEnums(RoomTempSensor.getEnumStringDefinition())
                 .setTz(CCUHsApi.getInstance().getTimeZone())
                 .build();
         String roomTempTypeId =CCUHsApi.getInstance().addPoint(roomTemperatureType);
@@ -1694,6 +1722,15 @@ public class MigrationUtil {
         }
     }
 
+    private static void addSingleAndDualTempSupportForAllZones(CCUHsApi ccuHsApi){
+        ArrayList<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");
+        rooms.forEach(room->{
+            Zone zone = new Zone.Builder().setHashMap(room).build();
+            ccuHsApi.addZoneTemperatureModePoint(zone.getId(), zone);
+            DesiredTempDisplayMode.setModeType(zone.getId(), ccuHsApi);
+        });
+    }
+
     private static void staticPressureSpTrimMigration(CCUHsApi ccuHsApi) {
 
         ArrayList<HashMap<Object, Object>> staticPressureSPTrimPoint = ccuHsApi.readAllEntities("point and tuner and staticPressure and sptrim and system");
@@ -1731,6 +1768,20 @@ public class MigrationUtil {
         hayStack.scheduleSync();
     }
 
+    private static void migrateOccupancyStatePoint(CCUHsApi hayStack){
+        Log.i("CCU_MIGRATION","started migration for occupancy mode");
+        ArrayList<HashMap<Object, Object>> occStatePoints = hayStack.readAllEntities("occupancy and state");
+        Log.i("CCU_MIGRATION","All Occupancy state points "+occStatePoints);
+        occStatePoints.forEach( occState -> {
+            Point occStatePoint = new Point.Builder().setHashMap(occState).build();
+            Log.i("CCU_MIGRATION","Occupancy state points "+occStatePoint.getDisplayName());
+            if(!occStatePoint.getDisplayName().equals(OCCUPANCY_STATE)) {
+                Log.i("CCU_MIGRATION","Migrate Occupancy point "+occStatePoint.getDisplayName());
+                occStatePoint.setDisplayName(OCCUPANCY_STATE);
+                hayStack.updatePoint(occStatePoint, occStatePoint.getId());
+            }
+        });
+    }
      /**
       * This is need to recover from few CCUs having a corrupted named scheduled with "building" tag.
       * The corrupted schedules were removed from backend. But some CCUs in the field are still
@@ -1937,11 +1988,13 @@ public class MigrationUtil {
             Point autoCommission = new Point.Builder()
                     .setDisplayName(diagEquip.get("dis")+"-autoCommissioning")
                     .setEquipRef(diagEquip.get("id")+"")
-                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("cov").addMarker("cur")
+                    .setSiteRef(diagEquip.get("siteRef")+"").setHisInterpolate("linear").addMarker("cur")
                     .addMarker("diag").addMarker("auto").addMarker("commissioning").addMarker("his").addMarker("writable")
                     .setTz(diagEquip.get("tz")+"")
+                    .setEnums(AutoCommissioningState.getEnum())
                     .build();
             String autoCommissioningId = instance.addPoint(autoCommission);
+            instance.writeDefaultValById(autoCommissioningId, 0.0);
             instance.writeHisValById(autoCommissioningId, 0.0);
 
             ArrayList<HashMap<Object, Object>> systemLoopOutputPoints = CCUHsApi.getInstance().readAllEntities("system and loop and output and point and not writable");

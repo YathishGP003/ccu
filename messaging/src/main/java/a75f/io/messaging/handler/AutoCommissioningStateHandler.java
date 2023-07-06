@@ -1,6 +1,8 @@
 package a75f.io.messaging.handler;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,10 +42,13 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
         int state = msgObject.get(STATE).getAsInt();
         long scheduledStopDatetimeInMillis = TimeUtil.getDateTimeInMillis(scheduledStopDatetime);
         long stopDateTimeInMillis = scheduledStopDatetimeInMillis - System.currentTimeMillis();
-
-        String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
-        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
-                HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) state), HNum.make(0));
+        CCUHsApi instance  = CCUHsApi.getInstance();
+        if(msgObject.get(STATE).getAsInt() == AutoCommissioningState.STARTED.ordinal()){
+            String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+            instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                    HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) state), HNum.make(0));
+            instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.STARTED.ordinal());
+        }
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning received properties - state : "+state+", stopDateTime : "+scheduledStopDatetime);
 
         if(checkAutoCommissioning(state, scheduledStopDatetimeInMillis, stopDateTimeInMillis)) {
@@ -55,25 +60,36 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
     public void handleAutoCommissioningState(long scheduledStopDatetimeInMillis) {
 
         long stopDateTimeInMillis = scheduledStopDatetimeInMillis - System.currentTimeMillis();
-        Log.d(L.TAG_CCU_AUTO_COMMISSIONING, " currentTimeMillis : " + new Date(System.currentTimeMillis()) + ", stopTimesInMillis : " + new Date(scheduledStopDatetimeInMillis) + ", (stopTimesInMillis - current time) in millis : " + stopDateTimeInMillis);
+        Log.d(L.TAG_CCU_AUTO_COMMISSIONING,
+                " currentTimeMillis : " + new Date(System.currentTimeMillis()) + "," +
+                " stopTimesInMillis : " + new Date(scheduledStopDatetimeInMillis) + "," +
+                " (stopTimesInMillis - current time) in millis : " + stopDateTimeInMillis);
 
         if (stopDateTimeInMillis > 0) {
             TimerTask timertask = new TimerTask() {
                 @Override
                 public void run() {
-                    Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning timer completed");
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning timer completed "+new Date(System.currentTimeMillis()));
+                            Toast.makeText(Globals.getInstance().getApplicationContext(),
+                                    "Auto-commissioning Test completed.",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    CCUHsApi instance  = CCUHsApi.getInstance();
                     String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
-                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));
-                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId), HayStackConstants.WEB_APP_WRITE_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(1));  //clearing the upper level value
+                    instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                            HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));
+                    instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                            HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.NOT_STARTED.ordinal()), HNum.make(0));
+                    instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.COMPLETED.ordinal());
+                    instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.NOT_STARTED.ordinal());
                 }
             };
             Timer timer = new Timer();
             timer.schedule(timertask, stopDateTimeInMillis);
-        }else {
-            Log.d(AutoCommissioningStateHandler.class.toString(), "Setting auto-commissioning to COMPLETED state");
-            String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
-            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));
-            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId), HayStackConstants.WEB_APP_WRITE_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(1)); //clearing the upper level value
         }
     }
 
@@ -91,6 +107,7 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
     @Override
     public void handleMessage(JsonObject msgObject, @NonNull Context context) {
         Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "auto-commissioning msgObject : "+msgObject.toString());
+        CCUHsApi instance  = CCUHsApi.getInstance();
         if(!msgObject.has(CCU_ID)){
             Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "ccuId property not found in msg object");
             return;
@@ -101,13 +118,16 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
             return;
         }
 
-        if(msgObject.get(STATE).getAsInt() != 1){
+        if(msgObject.get(STATE).getAsInt() != AutoCommissioningState.STARTED.ordinal() &&
+                msgObject.get(STATE).getAsInt() != AutoCommissioningState.COMPLETED.ordinal()){
             String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
-            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+            instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                     HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) msgObject.get(STATE).getAsInt()), HNum.make(0));
-            Toast.makeText(Globals.getInstance().getApplicationContext(),
-                    "Auto-commissioning Test Stopped.",Toast.LENGTH_SHORT).show();
-            Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning Test Stopped: State: "+msgObject.get(STATE).getAsInt());
+            instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
+                    HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.NOT_STARTED.ordinal()), HNum.make(0));
+            instance.writeHisValById(autoCommissioningPointId, (double) msgObject.get(STATE).getAsInt());
+            instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.NOT_STARTED.ordinal());
+            Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning State: "+msgObject.get(STATE).getAsInt());
             return;
         }
 

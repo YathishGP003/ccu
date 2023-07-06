@@ -478,7 +478,12 @@ public class HttpUtil {
     }
 
     private static HttpURLConnection openConnection(String urlParameters, URL url, String targetURL, String httpMethod) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse("text/zinc"), urlParameters);
+        RequestBody requestBody;
+        if (urlParameters != null) {
+            requestBody = RequestBody.create(MediaType.parse("text/zinc"), urlParameters);
+        } else {
+            requestBody = RequestBody.create(MediaType.parse("text/zinc"), "");
+        }
         SiloApiService siloApiService = getRetrofitForHaystackBaseUrl(url).create(SiloApiService.class);
         retrofit2.Call<ResponseBody> call = null;
 

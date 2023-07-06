@@ -37,8 +37,7 @@ public class RemoveEntityHandler implements MessageHandler
             Type listType = new TypeToken<List<HashMap<String, String>>>() {
             }.getType();
             List<HashMap<String, String>> idList = gsonBuilder.fromJson(m.get("ids").toString(), listType);
-            System.out.println(idList.toString());
-            Log.i(L.TAG_CCU_MESSAGING, "Received message to delete: "+idList);
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "Received message to delete: "+idList);
 
             for (HashMap id : idList) {
                 String uuid = "@" + id.get("val").toString();

@@ -1,5 +1,7 @@
 package a75f.io.renatus.util.Receiver;
 
+import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +22,7 @@ import a75f.io.messaging.handler.DataSyncHandler;
  * Created by mahesh on 05-11-2020.
  */
 public class ConnectionChangeReceiver extends BroadcastReceiver {
+
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Connection_Info", "Result Action: " + intent.getAction());
@@ -29,7 +32,8 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         if (info != null) {
             if (info.isConnected()) {
                 CcuLog.i("CCU_READ_CHANGES", " CONNECTION CHANGE RECEIVER");
-                if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime())) {
+                if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime()) &&
+                        !getDataSyncProcessing()) {
                     CcuLog.i("CCU_READ_CHANGES", " DATA SYNC NOT IN PROGRESS");
                     new Timer().schedule(new TimerTask() {
                         @Override

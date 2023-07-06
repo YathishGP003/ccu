@@ -297,6 +297,13 @@
         <item name="android:paddingTop">-10dp</item>
         <item name="android:fontFamily">@font/lato_regular</item>
     </style>
+    <style name="error_appearance_add_ccu" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#666666DE</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingTop">-10dp</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+    </style>
     <style name="text_values" parent="@android:style/TextAppearance">
         <item name="android:textSize">19sp</item>
         <item name="android:textColor">@color/hint_textcolor</item>
@@ -715,6 +722,13 @@
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/renatus_75F_accent</item>
         <item name="android:fontFamily">@font/lato_bold</item>
+    </style>
+
+    <style name="add_ccu_to_existing_site_lite" parent="@android:style/TextAppearance">
+        <item name="android:textSize">18px</item>
+        <item name="android:textColor">#666666DE</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">left|center_vertical</item>
     </style>
 
     <style name="font_style_hint" parent="@android:style/TextAppearance">

@@ -201,8 +201,6 @@ public class PreConfigCCU extends Fragment {
     }
 
     private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
-        ((FreshRegistration)getActivity()).selectItem(4);
+        ((FreshRegistration)getActivity()).selectItem(21);
     }
 }

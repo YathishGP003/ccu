@@ -59,9 +59,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BackfillPref;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.ccu.renatus.BackFillDuration;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -70,7 +68,6 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.tuners.TunerFragment;
-import a75f.io.renatus.util.BackFillViewModel;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
@@ -93,9 +90,6 @@ public class InstallerOptions extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    private static final int BACKFILL_DEFAULT_DURATION = 24;
-    private static final int BACKFILL_DEFAULT_DURATION_INDEX = 6;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -147,7 +141,6 @@ public class InstallerOptions extends Fragment {
     TextView textBacnetEnable;
     TextView textNetworkError;
     private BroadcastReceiver mNetworkReceiver;
-    View toastLayout;
 
     private ToggleButton toggleCoolingLockout;
     private ToggleButton toggleHeatingLockout;
@@ -155,7 +148,6 @@ public class InstallerOptions extends Fragment {
     private Spinner spinnerCoolingLockoutTemp;
     private TextView textHeatingLockoutTemp;
     private Spinner spinnerHeatingLockoutTemp;
-    private Spinner backFillTimeSpinner;
 
     private TextView textCoolingLockout;
     private TextView textUseCoolingLockoutDesc;
@@ -257,11 +249,8 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-        buttonApply = rootView.findViewById(R.id.buttonApply);
-        buttonCancel = rootView.findViewById(R.id.buttonCancel);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         LayoutInflater li = getLayoutInflater();
-        toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_backfill));
 
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
@@ -547,38 +536,6 @@ public class InstallerOptions extends Fragment {
         });
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
-
-        setBackFillTimeSpinner(rootView);
-        BackfillPref backfillPref = new BackfillPref();
-        buttonApply.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
-                int[] durations = BackFillDuration.toIntArray();
-                int index = selectedSpinnerItem > 0 ? Math.min(selectedSpinnerItem , durations.length - 1) : 0;
-                int backFillDurationSelected = durations[index];
-                CCUHsApi.getInstance().writeDefaultVal("backfill and duration", Double.valueOf(backFillDurationSelected));
-
-                backfillPref.saveBackfillConfig(backFillDurationSelected, backFillTimeSpinner.getSelectedItemPosition());
-
-                if (!isFreshRegister) {
-                    Toast toast = new Toast(Globals.getInstance().getApplicationContext());
-                    toast.setGravity(Gravity.BOTTOM, 50, 50);
-                    toast.setView(toastLayout);
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.show();
-                }
-                linearLayout.setVisibility(View.INVISIBLE);
-            }
-        });
-
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                backFillTimeSpinner.setSelection(backfillPref.getBackFillTimeSPSelected());
-            }
-        });
-
         getBACnetConfig();
 
         return rootView;
@@ -998,41 +955,4 @@ public class InstallerOptions extends Fragment {
             }
         }
     }
-
-    private void setBackFillTimeSpinner(View rootView) {
-
-        BackfillPref backfillPref = new BackfillPref();
-        this.backFillTimeSpinner = rootView.findViewById(R.id.spinnerBackfillTime);
-        this.backFillTimeSpinner.setAdapter(BackFillViewModel.getBackFillTimeArrayAdapter(getContext()));
-        this.backFillTimeSpinner.setSelection(backfillTimeSelectedValue());
-
-        this.backFillTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                if (backfillPref.getBackFillTimeSPSelected() == i) {
-                    linearLayout.setVisibility(View.INVISIBLE);
-                } else if (!isFreshRegister){
-                    linearLayout.setVisibility(View.VISIBLE);
-                }
-                adapterView.setSelection(i);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-    }
-
-    private int backfillTimeSelectedValue() {
-        Double value = CCUHsApi.getInstance().readDefaultVal("backfill and duration");
-        if (value != null && !Double.isNaN(value)) {
-            return BackFillDuration.getIndex(BackFillDuration.toIntArray(),BACKFILL_DEFAULT_DURATION);
-        } else {
-            return BACKFILL_DEFAULT_DURATION_INDEX;
-        }
-    }
-
-
 }

@@ -352,59 +352,7 @@ public class InstallerOptions extends Fragment {
                     return;
                 }
                 mNext.setEnabled(false);
-                String ccuId = ccu.get("id").toString();
-                ccuId = ccuId.replace("@", "");
-                String ccuName = ccu.get("dis").toString();
-                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
-                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-                SettingPoint snBand = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-smartNodeBand")
-                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-                CCUHsApi.getInstance().addPoint(snBand);
-
-                HashMap ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
-
-                OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                        Objects.requireNonNull(siteMap.get("dis")) +"-CCU",
-                        Objects.requireNonNull(ccu.get("equipRef")).toString(),
-                        Objects.requireNonNull(ccu.get("siteRef")).toString(),
-                        Objects.requireNonNull(siteMap.get(Tags.TZ)).toString(),
-                        CCUHsApi.getInstance()
-                );
-
-
-                SettingPoint useBacnet = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-useBacnet")
-                        .addMarker("bacnet").addMarker("enabled").addMarker("sp").setVal(toggleBACnet.isChecked() ? "true":"false").build();
-                CCUHsApi.getInstance().addPoint(useBacnet);
-                SettingPoint bacnetConfig = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetConfig")
-                        .addMarker("bacnet").addMarker("config").addMarker("sp")/*.setVal(radioGroup_config.getCheckedRadioButtonId() == R.id.rbAuto ? "0" :"1")*/.build();
-                CCUHsApi.getInstance().addPoint(bacnetConfig);
-                SettingPoint bacnetIp = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetIp")
-                        .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
-                CCUHsApi.getInstance().addPoint(bacnetIp);
-                SettingPoint bacnetSubnet = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetSubnet")
-                        .addMarker("bacnet").addMarker("ipsubnet").addMarker("sp").setVal(editSubnet.getText() != null ? editSubnet.getText().toString() : "").build();
-                CCUHsApi.getInstance().addPoint(bacnetSubnet);
-                SettingPoint bacnetGateway = new SettingPoint.Builder()
-                        .setDeviceRef(ccuId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-bacnetGateway")
-                        .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(editGateway.getText() != null ? editGateway.getText().toString() : "").build();
-                CCUHsApi.getInstance().addPoint(bacnetGateway);
+                createInstallerPoints(ccu, false);
                 // TODO Auto-generated method stub
                 goTonext();
             }
@@ -554,6 +502,71 @@ public class InstallerOptions extends Fragment {
                 }
             }
         });
+    }
+
+    public void createInstallerPoints(HashMap ccu, boolean initialise) {
+        String ccuId = ccu.get("id").toString();
+        ccuId = ccuId.replace("@", "");
+        String ccuName = ccu.get("dis").toString();
+        CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        SettingPoint snBand = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-smartNodeBand")
+                .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+        CCUHsApi.getInstance().addPoint(snBand);
+
+
+        OtaStatusDiagPoint.Companion.addOTAStatusPoint(
+                siteMap.get("dis").toString()+"-CCU",
+                ccu.get("equipRef").toString(),
+                ccu.get("siteRef").toString(),
+                siteMap.get(Tags.TZ).toString(),
+                CCUHsApi.getInstance()
+        );
+        SettingPoint useBacnet = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-useBacnet")
+                .addMarker("bacnet").addMarker("enabled").addMarker("sp").setVal(initialise? "false": getToggleForBacnet(toggleBACnet)).build();
+        CCUHsApi.getInstance().addPoint(useBacnet);
+        SettingPoint bacnetConfig = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetConfig")
+                .addMarker("bacnet").addMarker("config").addMarker("sp")/*.setVal(radioGroup_config.getCheckedRadioButtonId() == R.id.rbAuto ? "0" :"1")*/.build();
+        CCUHsApi.getInstance().addPoint(bacnetConfig);
+        SettingPoint bacnetIp = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetIp")
+                .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
+        CCUHsApi.getInstance().addPoint(bacnetIp);
+        SettingPoint bacnetSubnet = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetSubnet")
+                .addMarker("bacnet").addMarker("ipsubnet").addMarker("sp").setVal(initialise?"":getEditSubnet(editSubnet)).build();
+        CCUHsApi.getInstance().addPoint(bacnetSubnet);
+        SettingPoint bacnetGateway = new SettingPoint.Builder()
+                .setDeviceRef(ccuId)
+                .setSiteRef(siteMap.get("id").toString())
+                .setDisplayName(ccuName + "-bacnetGateway")
+                .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(initialise ? "":getEditGateWay(editGateway)).build();
+        CCUHsApi.getInstance().addPoint(bacnetGateway);
+    }
+
+    private String getEditGateWay(EditText editGateway) {
+        return editGateway.getText() != null ? editGateway.getText().toString() : "";
+    }
+
+    private String getEditSubnet(EditText editSubnet) {
+        return editSubnet.getText() != null ? editSubnet.getText().toString() : "";
+    }
+
+    private String getToggleForBacnet(ToggleButton toggleBACnet) {
+        return toggleBACnet.isChecked() ? "true":"false";
     }
 
     private void lockBACnetConfig(){

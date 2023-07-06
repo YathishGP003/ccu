@@ -135,8 +135,6 @@ public class InstallerOptions extends Fragment {
     TextInputLayout textInputIP;
     RadioGroup radioGroupConfig;
     Button buttonSendIAM;
-    Button buttonApply;
-    Button buttonCancel;
     LinearLayout linearLayout;
     TextView textBacnetEnable;
     TextView textNetworkError;
@@ -408,7 +406,6 @@ public class InstallerOptions extends Fragment {
                         .addMarker("bacnet").addMarker("ipgateway").addMarker("sp").setVal(editGateway.getText() != null ? editGateway.getText().toString() : "").build();
                 CCUHsApi.getInstance().addPoint(bacnetGateway);
                 // TODO Auto-generated method stub
-                buttonApply.callOnClick();
                 goTonext();
             }
         });

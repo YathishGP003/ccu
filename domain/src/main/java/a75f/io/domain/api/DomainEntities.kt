@@ -17,16 +17,12 @@ class Site(domainName : String, id : String) : Entity(domainName, id) {
     fun addFloor(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            floors[id] = Floor(domainName, id)
-        }
+        floors[id] = Floor(domainName, id)
     }
     fun addCcu(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            ccus[id] = CcuDevice(domainName, id)
-        }
+        ccus[id] = CcuDevice(domainName, id)
     }
 }
 class Floor(domainName : String, id : String) : Entity(domainName, id) {
@@ -34,9 +30,7 @@ class Floor(domainName : String, id : String) : Entity(domainName, id) {
     fun addRoom(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            rooms[id] = Room(domainName, id)
-        }
+        rooms[id] = Room(domainName, id)
     }
 }
 class Room(domainName : String, id : String) : Entity(domainName, id) {
@@ -46,17 +40,13 @@ class Room(domainName : String, id : String) : Entity(domainName, id) {
     fun addEquip(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            equips[id] = Equip(domainName, id)
-        }
+        equips[id] = Equip(domainName, id)
     }
 
     fun addDevice(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            devices[id] = Device(domainName, id)
-        }
+        devices[id] = Device(domainName, id)
     }
 }
 class Equip(domainName : String, id : String) : Entity(domainName, id) {
@@ -64,9 +54,7 @@ class Equip(domainName : String, id : String) : Entity(domainName, id) {
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            points[domainName] = Point(domainName, id)
-        }
+        points[domainName] = Point(domainName, id)
     }
 
     fun getPoint(domainName: String) : Point? {
@@ -78,9 +66,7 @@ class Device(domainName : String, id : String) : Entity(domainName, id) {
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            points[domainName] = RawPoint(domainName, id)
-        }
+        points[domainName] = RawPoint(domainName, id)
     }
     fun getPoint(domainName: String) : RawPoint? {
         return points[domainName]
@@ -92,9 +78,7 @@ class CcuDevice(domainName : String, id : String) : Entity(domainName, id) {
     fun addPoint(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
-        if (domainName != null && id != null) {
-            points[domainName] = SettingPoint(domainName, id)
-        }
+        points[domainName] = SettingPoint(domainName, id)
     }
     fun getPoint(domainName: String) : SettingPoint? {
         return points[domainName]
@@ -121,3 +105,5 @@ private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass
         else -> null
     }
 }
+
+fun Boolean.toInt() = if (this) 1 else 0

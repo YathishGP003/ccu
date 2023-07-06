@@ -1,5 +1,7 @@
 package a75f.io.domain.config
 
+import a75f.io.domain.api.EntityConfig
+
 
 /**
  * A profile configuration binds a particular UI element or item to its domain Name.
@@ -41,3 +43,12 @@ class AnalogInAssociationConfig(domainName: String, association: Int, var sensor
  */
 class AnalogOutAssociationConfig(domainName: String, association : Int, var minVoltage : Double, var maxVoltage : Double)
     : AssociationConfig (domainName, association)
+
+
+fun <T : BaseConfig> List<T>.containsConfig(domainName : String) : Boolean {
+    return this.find {it.domainName == domainName} != null
+}
+
+fun <T : BaseConfig> List<T>.getConfig(domainName : String) : T? {
+    return this.find {it.domainName == domainName}
+}

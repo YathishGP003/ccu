@@ -1,6 +1,7 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.renatus.R
+import a75f.io.renatus.UtilityApplication
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 
@@ -57,6 +59,10 @@ class FragmentReadPropertyMultiple : Fragment() {
         btnReadProperty = view.findViewById(R.id.btnReadProperty)
         btnReadProperty.setOnClickListener {
             Log.d(TAG, "total objects -> ${containerObject.childCount}")
+            if(!validateData()){
+                return@setOnClickListener
+            }
+
             val destination =
                 Destination(etDestinationIp.text.toString(), etPort.text.toString().toInt())
             val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
@@ -82,10 +88,26 @@ class FragmentReadPropertyMultiple : Fragment() {
         }
     }
 
-    private fun getDetailsFromObjectLayout(chileView: View, i: Int): ObjectIdentifierBacNet {
+    private fun validateData(): Boolean {
+        var isDataFilled = true
+        val totalObjectCount = containerObject.childCount - 1
+        for (i in 1..totalObjectCount) {
+            val childView = containerObject.getChildAt(i)
+            val etObjectId = childView.findViewById<EditText>(R.id.etObjectId)
+            if (etObjectId.text.toString().isEmpty()) {
+                etObjectId.error = getString(R.string.txt_error_object_id)
+                etObjectId.findFocus()
+                isDataFilled = false
+                break
+            }
+        }
+        return isDataFilled
+    }
+
+    private fun getDetailsFromObjectLayout(childView: View, i: Int): ObjectIdentifierBacNet {
         Log.d(TAG, "--------------------checking object-->$i<------------------------------- ->")
-        val spin = chileView.findViewById(R.id.sp_object_types) as Spinner
-        val objectId = chileView.findViewById<EditText>(R.id.etObjectId)
+        val spin = childView.findViewById(R.id.sp_object_types) as Spinner
+        val objectId = childView.findViewById<EditText>(R.id.etObjectId)
         Log.d(
             TAG,
             "selected object type->${spin.selectedItem} <----object id>--->${objectId.text.toString()}"

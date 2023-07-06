@@ -1396,4 +1396,6 @@
     <string name="txt_who_is">Who Is</string>
     <string name="txt_add_object">ADD OBJECT</string>
     <string name="txt_add_property">Add Property</string>
+    <string name="txt_time">Time To Live <font color="#e5561a">*</font></string>
+    <string name="txt_submit">Submit</string>
 </resources>

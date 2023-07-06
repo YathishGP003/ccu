@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
+    android:layout_height="wrap_content">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,8 +14,9 @@
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_marginStart="40dp">
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="30dp">
+
             <TextView
                 android:id="@+id/textTitleFragment"
                 android:layout_width="wrap_content"
@@ -35,8 +36,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="70dp"
-            android:layout_marginEnd="50dp"
-            android:layout_marginTop="11dp">
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="50dp">
+
             <TextView
                 android:id="@+id/textBaudRate"
                 android:layout_width="wrap_content"
@@ -51,22 +53,22 @@
                 style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="160dp"
                 android:layout_height="44dp"
-                android:layout_marginTop="12dp"
-                android:fontFamily="@font/lato_regular"
-                android:gravity="center_vertical"
                 android:layout_marginStart="80dp"
+                android:layout_marginTop="12dp"
                 android:layout_toEndOf="@+id/textBaudRate"
                 android:entries="@array/mb_config_baudrate_array"
+                android:fontFamily="@font/lato_regular"
+                android:gravity="center_vertical"
                 tools:listitem="@layout/spinner_dropdown_item" />
 
             <TextView
                 android:id="@+id/textParity"
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
+                android:layout_below="@+id/textBaudRate"
                 android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
                 android:text="@string/txt_mb_parity"
-                android:layout_below="@+id/textBaudRate"
                 android:textAppearance="@style/title_normal_22" />
 
             <Spinner
@@ -74,24 +76,24 @@
                 style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="160dp"
                 android:layout_height="44dp"
-                android:layout_marginTop="12dp"
-                android:fontFamily="@font/lato_regular"
-                android:gravity="center_vertical"
                 android:layout_below="@+id/spinnerBaudRate"
-                android:layout_toEndOf="@+id/textParity"
                 android:layout_alignStart="@id/spinnerBaudRate"
                 android:layout_alignEnd="@id/spinnerBaudRate"
+                android:layout_marginTop="12dp"
+                android:layout_toEndOf="@+id/textParity"
                 android:entries="@array/mb_config_parity_array"
+                android:fontFamily="@font/lato_regular"
+                android:gravity="center_vertical"
                 tools:listitem="@layout/spinner_dropdown_item" />
 
             <TextView
                 android:id="@+id/txtDataBits"
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
+                android:layout_below="@+id/textParity"
                 android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
                 android:text="@string/txt_mb_dataBits"
-                android:layout_below="@+id/textParity"
                 android:textAppearance="@style/title_normal_22" />
 
             <Spinner
@@ -99,39 +101,39 @@
                 style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="160dp"
                 android:layout_height="44dp"
-                android:layout_marginTop="12dp"
-                android:fontFamily="@font/lato_regular"
-                android:gravity="center_vertical"
                 android:layout_below="@+id/spinnerParity"
-                android:layout_toEndOf="@+id/txtDataBits"
                 android:layout_alignStart="@id/spinnerBaudRate"
                 android:layout_alignEnd="@id/spinnerBaudRate"
+                android:layout_marginTop="12dp"
+                android:layout_toEndOf="@+id/txtDataBits"
                 android:entries="@array/mb_config_databits_array"
+                android:fontFamily="@font/lato_regular"
+                android:gravity="center_vertical"
                 tools:listitem="@layout/spinner_dropdown_item" />
 
             <TextView
                 android:id="@+id/txtStopBits"
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
+                android:layout_below="@+id/txtDataBits"
                 android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
                 android:text="@string/txt_mb_stopBits"
-                android:layout_below="@+id/txtDataBits"
-                android:textAppearance="@style/title_normal_22"/>
+                android:textAppearance="@style/title_normal_22" />
 
             <Spinner
                 android:id="@+id/spinnerStopBits"
                 style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="160dp"
                 android:layout_height="44dp"
-                android:layout_marginTop="12dp"
-                android:fontFamily="@font/lato_regular"
-                android:gravity="center_vertical"
                 android:layout_below="@+id/spinnerDatabits"
-                android:layout_toEndOf="@+id/txtStopBits"
                 android:layout_alignStart="@id/spinnerBaudRate"
                 android:layout_alignEnd="@id/spinnerBaudRate"
+                android:layout_marginTop="12dp"
+                android:layout_toEndOf="@+id/txtStopBits"
                 android:entries="@array/mb_config_stopbits_array"
+                android:fontFamily="@font/lato_regular"
+                android:gravity="center_vertical"
                 tools:listitem="@layout/spinner_dropdown_item" />
 
         </RelativeLayout>
@@ -139,9 +141,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginStart="40dp"
             android:layout_marginTop="20dp"
-            android:layout_gravity="center_vertical"
             android:layout_marginEnd="50dp">
 
 
@@ -181,20 +183,20 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@drawable/dashed_line"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="30dp"
             android:layout_marginStart="40dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="120dp"
-            android:layerType="software"/>
+            android:layout_marginBottom="30dp"
+            android:background="@drawable/dashed_line"
+            android:layerType="software" />
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:outlineAmbientShadowColor="@color/dark_gray"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:orientation="horizontal"
+            android:outlineAmbientShadowColor="@color/dark_gray"
             android:src="?android:attr/listDivider" />
 
         <LinearLayout
@@ -206,8 +208,8 @@
             <LinearLayout
                 android:id="@+id/bacnetHeader"
                 android:layout_width="match_parent"
-                android:layout_marginStart="40dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp">
 
                 <TextView
                     android:id="@+id/textTitleBACnetFragment"
@@ -227,60 +229,59 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="70dp"
-                android:layout_marginEnd="50dp"
                 android:layout_marginTop="11dp"
+                android:layout_marginEnd="50dp"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:paddingBottom="5dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:paddingBottom="5dp">
+
                     <TextView
                         android:id="@+id/tv0IPDeviceObjectName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/txt_ipDeviceObjectName"
+                        android:layout_weight="1.2"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="1.2"
-                        android:textAppearance="@style/title_normal_22"
-                        />
+                        android:text="@string/txt_ipDeviceObjectName"
+                        android:textAppearance="@style/title_normal_22" />
+
                     <TextView
                         android:id="@+id/tv1IPDeviceObjectName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
                         android:text="site_1_ccu2"
-                        android:layout_weight="0.8"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    >
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/tvZoneToVirtualDeviceMapping"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1.2"
                         android:paddingTop="8dp"
                         android:paddingBottom="9dp"
-                        android:layout_weight="1.2"
                         android:text="@string/txt_zoneToVirtualDeviceMapping"
-                        android:textAppearance="@style/title_normal_22"
-                        />
+                        android:textAppearance="@style/title_normal_22" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.8"
-                        >
+                        android:layout_weight="0.8">
 
                         <ToggleButton
                             android:id="@+id/toggleZoneToVirtualDeviceMapping"
@@ -295,25 +296,26 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            >
+                            android:gravity="center_vertical">
+
                             <ImageView
                                 android:id="@+id/imZvdmHint"
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginStart="20dp"
                                 android:alpha="0.5"
-                                android:layout_gravity="center_vertical"
                                 android:src="@drawable/ic_error" />
+
                             <TextView
                                 android:id="@+id/tvZvdmHint"
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
-                                android:focusableInTouchMode="true"
-                                android:focusable="true"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginStart="15dp"
                                 android:background="@android:color/transparent"
-                                android:layout_gravity="center_vertical" />
+                                android:focusable="true"
+                                android:focusableInTouchMode="true" />
 
                         </RelativeLayout>
 
@@ -325,44 +327,42 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    >
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/tvDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1.2"
                         android:paddingTop="11.8dp"
                         android:paddingBottom="5.2dp"
-                        android:layout_weight="1.2"
                         android:text="@string/txt_description"
-                        android:textAppearance="@style/title_normal_22"
-                        />
+                        android:textAppearance="@style/title_normal_22" />
 
                     <EditText
                         android:id="@+id/etDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="70dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="5dp"
                         android:layout_weight="0.8"
                         android:inputType="text"
                         android:maxLines="1"
-                        android:textColor="@color/grey_select"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
+
                     <TextView
                         android:id="@+id/tvDescription1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="5dp"
-                        android:visibility="gone"
                         android:layout_weight="0.8"
                         android:maxLines="1"
-                        android:textColor="@color/grey_select"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
@@ -376,39 +376,36 @@
                         android:id="@+id/tvLocation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1.2"
                         android:paddingTop="11.8dp"
                         android:paddingBottom="5.2dp"
-                        android:layout_weight="1.2"
                         android:text="@string/txt_location"
-                        android:textAppearance="@style/title_normal_22"
-                        />
+                        android:textAppearance="@style/title_normal_22" />
 
                     <EditText
                         android:id="@+id/etLocation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="12dp"
                         android:layout_marginEnd="70dp"
-                        android:paddingBottom="5dp"
                         android:layout_weight="0.8"
                         android:inputType="text"
                         android:maxLines="1"
-                        android:textColor="@color/grey_select"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvLocation1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
-                        android:maxLines="1"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
@@ -421,10 +418,9 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/lato_regular"
                         android:layout_weight="1.2"
-                        android:orientation="vertical"
-                        >
+                        android:fontFamily="@font/lato_regular"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvPassword"
@@ -435,53 +431,52 @@
                             android:paddingBottom="4dp"
                             android:text="@string/txt_device_password"
                             android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvPasswordHit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_device_password_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
 
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutTextInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/layoutTextInput"
                         android:layout_marginEnd="70dp"
                         android:layout_weight="0.8"
+                        android:digits="255"
                         android:inputType="text"
                         android:maxLines="1"
-                        android:digits="255"
-                        app:passwordToggleEnabled="true"
-                        app:passwordToggleDrawable="@drawable/show_password_selector"
-                        app:passwordToggleTint="@color/renatus_75f_primary"
-                        android:textColorHint="@color/buttonTextColor"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey">
+                        android:textColorHint="@color/buttonTextColor"
+                        app:passwordToggleDrawable="@drawable/show_password_selector"
+                        app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="@color/renatus_75f_primary">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/grey_select"
-                            android:textAppearance="@style/title_normal_22_grey"
                             android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
                             android:inputType="textPassword"
-                            />
+                            android:textAppearance="@style/title_normal_22_grey"
+                            android:textColor="@color/grey_select" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:id="@+id/tvPassword1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
-                        android:maxLines="1"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
@@ -489,45 +484,47 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    >
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/tvIP"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1.2"
                         android:paddingTop="11.8dp"
                         android:paddingBottom="5.2dp"
-                        android:layout_weight="1.2"
                         android:text="@string/txt_IPAddress"
-                        android:textAppearance="@style/title_normal_22"
-                        />
+                        android:textAppearance="@style/title_normal_22" />
+
                     <EditText
                         android:id="@+id/etIP"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:digits="0123456789."
+                        android:inputType="number"
+                        android:maxLength="15"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:inputType="number"
-                        android:digits="0123456789."
-                        android:maxLength="15"
                         android:text="192.168.1.1"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey"/>
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
+
                     <TextView
                         android:id="@+id/tvIP1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey"/>
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
 
                 </LinearLayout>
 
@@ -540,9 +537,9 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvLocalNetworkNumber"
                             android:layout_width="match_parent"
@@ -550,46 +547,45 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_LocalNetworkAddress"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvLocalNetworkNumberHint"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/txt_localNetworkAddressHint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etlocalNetworkAddress"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvLocalNetworkAddress1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -597,12 +593,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvVirtualNetworkNumber"
                             android:layout_width="match_parent"
@@ -610,49 +607,47 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_virtualNetworkAddress"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvVirtualNetworkNumberHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_virtualNetworkAddressHint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
 
 
                     <EditText
                         android:id="@+id/etVirtualNetworkAddress"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="5dp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/grey_select"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="5dp"
                         android:textAppearance="@style/title_normal_22_grey"
-                        android:inputType="number" />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvVirtualNetworkAddress"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="0.8"
                         android:maxLines="1"
-                        android:layout_width="0dp"
-                        android:visibility="gone"
-                        android:layout_height="wrap_content"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -660,12 +655,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvPort"
                             android:layout_width="match_parent"
@@ -673,50 +669,46 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_port"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
 
                         <TextView
                             android:id="@+id/tvPortHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_port_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
 
                     <EditText
                         android:id="@+id/etPort"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
                         android:text="47808"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvPort1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
 
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -724,12 +716,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvIPDeviceInstanceNumber"
                             android:layout_width="match_parent"
@@ -737,50 +730,47 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_ip_device_instance_number"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvIPDeviceInstanceNumberHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_ip_device_instance_number_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
 
                     <EditText
                         android:id="@+id/etIPDeviceInstanceNumber"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="7"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="7"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvIPDeviceInstanceNumber1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="7"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:visibility="gone"
-                        android:maxLines="1"
-                        android:maxLength="7"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -788,12 +778,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvAPDU_Timeout"
@@ -802,48 +792,47 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_apdu_timeout"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvAPDU_Timeout_hint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_apdu_timeout_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etAPDU_Timeout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvAPDU_Timeout1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:visibility="gone"
-                        android:textColor="@color/grey_select"
                         android:textAppearance="@style/title_normal_22_grey"
-                        />
+                        android:textColor="@color/grey_select"
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -851,12 +840,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvNumberofAPDURetries"
                             android:layout_width="match_parent"
@@ -864,46 +854,46 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_number_of_apdu_retries"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvNumberofAPDURetriesHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_number_of_apdu_retries_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etNumberofAPDURetries"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="3"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvNumberofAPDURetries1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:maxLength="3"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="3"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -911,12 +901,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvAPDUSegmentTimeout"
@@ -925,46 +915,47 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_apdu_segment_timeout"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvAPDUSegmentTimeoutHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_apdu_segment_timeout_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etAPDUSegmentTimeout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvAPDUSegmentTimeout1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:maxLength="5"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="5"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -972,12 +963,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvNotificationClassObjects"
@@ -986,47 +977,47 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_notification_class_objects"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvNotificationClassObjectsHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_notification_class_objects_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etNotificationClassObjects"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvNotificationClassObjects1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:visibility="gone"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="2"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -1034,12 +1025,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvTrendLogObjects"
@@ -1048,48 +1039,48 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_trend_log_objects"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvTrendLogObjectsHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_trend_log_objects_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etTrendLogObjects"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:inputType="number"
-                        android:layout_weight="0.8"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvTrendLogObjects1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -1097,12 +1088,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvScheduleLogObjects"
@@ -1111,47 +1102,48 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_schedule_objects"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvScheduleObjectsHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_schedule_objects_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etScheduleObjects"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvScheduleObjects1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -1159,12 +1151,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_weight="1.2"
-                        >
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvOffsetValue"
@@ -1173,51 +1165,52 @@
                             android:paddingTop="11.5dp"
                             android:paddingBottom="4dp"
                             android:text="@string/txt_offset_values"
-                            android:textAppearance="@style/title_normal_22"
-                            />
+                            android:textAppearance="@style/title_normal_22" />
+
                         <TextView
                             android:id="@+id/tvOffsetValuesHint"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="@string/txt_offset_values_hint"
-                            android:textAppearance="@style/font_style_hint"
-                            />
+                            android:textAppearance="@style/font_style_hint" />
 
                     </LinearLayout>
+
                     <EditText
                         android:id="@+id/etOffsetValues"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:textAppearance="@style/title_normal_22_grey"
+                        android:textColor="@color/grey_select" />
 
                     <TextView
                         android:id="@+id/tvOffsetValue1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:layout_weight="0.8"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:maxLines="1"
                         android:paddingTop="12dp"
                         android:paddingBottom="5dp"
-                        android:maxLines="1"
-                        android:maxLength="2"
-                        android:visibility="gone"
+                        android:textAppearance="@style/title_normal_22_grey"
                         android:textColor="@color/grey_select"
-                        android:textAppearance="@style/title_normal_22_grey" />
+                        android:visibility="gone" />
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1" />
                 </LinearLayout>
 
             </LinearLayout>
+
             <RelativeLayout
                 android:id="@+id/bacnetInitialize"
                 android:layout_width="match_parent"
@@ -1231,88 +1224,232 @@
                     android:id="@+id/tvInitializeBACnet"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="50dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="center_vertical"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
                     android:paddingRight="20dp"
                     android:paddingBottom="10dp"
-                    android:layout_marginEnd="50dp"
-                    android:layout_alignParentEnd="true"
-                    android:fontFamily="@font/lato_regular"
-                    android:gravity="center_vertical"
                     android:text="@string/title_bacnet_initialize"
                     android:textAllCaps="true"
                     android:textColor="?orange_75f"
                     android:textSize="22sp" />
+
                 <TextView
                     android:id="@+id/tvDisableBACnet"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="50dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="center_vertical"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
                     android:paddingRight="20dp"
                     android:paddingBottom="10dp"
-                    android:layout_marginEnd="50dp"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="center_vertical"
-                    android:fontFamily="@font/lato_regular"
                     android:text="@string/title_disable_bacnet"
                     android:textAllCaps="true"
-                    android:visibility="gone"
                     android:textColor="?orange_75f"
-                    android:textSize="22sp" />
+                    android:textSize="22sp"
+                    android:visibility="gone" />
 
             </RelativeLayout>
+
             <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="70dp"
                 android:layout_marginTop="22dp"
                 android:layout_marginEnd="50dp"
-                android:layout_marginBottom="30dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_marginBottom="30dp">
+
                 <TextView
-                    android:textStyle="bold"
+                    android:id="@+id/label_configure_as"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/label_configure_as"
                     android:textColor="#212121"
                     android:textSize="24sp"
-                    android:fontFamily="@font/lato_bold"
-                    android:id="@+id/label_configure_as"
-                    android:text="@string/label_configure_as"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:textStyle="bold" />
 
                 <RadioGroup
                     android:id="@+id/rg_configuration_type"
-                    android:layout_marginTop="22dp"
-                    android:orientation="horizontal"
-                    android:layout_below="@+id/label_configure_as"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/label_configure_as"
+                    android:layout_marginTop="22dp"
+                    android:orientation="horizontal">
+
                     <RadioButton
                         android:id="@+id/rb_bbmd"
-                        android:fontFamily="@font/lato_regular"
-                        android:textSize="20sp"
-                        android:checked="false"
-                        android:text="@string/label_bbmd"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:fontFamily="@font/lato_regular"
+                        android:text="@string/label_bbmd"
+                        android:textSize="20sp" />
+
                     <RadioButton
                         android:id="@+id/rb_foreign_device"
-                        android:fontFamily="@font/lato_regular"
-                        android:layout_marginStart="30dp"
-                        android:textSize="20sp"
-                        android:checked="false"
-                        android:text="@string/label_foreign_device"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:checked="false"
+                        android:fontFamily="@font/lato_regular"
+                        android:text="@string/label_foreign_device"
+                        android:textSize="20sp" />
+
                     <RadioButton
                         android:id="@+id/rb_neither"
-                        android:fontFamily="@font/lato_regular"
-                        android:layout_marginStart="30dp"
-                        android:textSize="20sp"
-                        android:checked="true"
-                        android:text="@string/label_neither"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:checked="true"
+                        android:fontFamily="@font/lato_regular"
+                        android:text="@string/label_neither"
+                        android:textSize="20sp" />
                 </RadioGroup>
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/fdInputView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rg_configuration_type"
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+
+                        <TextView
+                            android:id="@+id/tvFdIP"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:paddingTop="11.8dp"
+                            android:paddingBottom="5.2dp"
+                            android:text="@string/txt_IPAddress"
+                            android:textAppearance="@style/title_normal_22" />
+
+                        <EditText
+                            android:id="@+id/etFdIP"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:digits="0123456789."
+                            android:inputType="number"
+                            android:maxLength="15"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="5dp"
+                            android:text="192.168.1.1"
+                            android:textAppearance="@style/title_normal_22_grey"
+                            android:textColor="@color/grey_select" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:weightSum="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvFdPort"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:paddingTop="11.5dp"
+                                android:paddingBottom="4dp"
+                                android:text="@string/txt_port"
+                                android:textAppearance="@style/title_normal_22" />
+
+                            <TextView
+                                android:id="@+id/tvFdPortHint"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="@string/txt_port_hint"
+                                android:textAppearance="@style/font_style_hint" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/etFdPort"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:inputType="number"
+                            android:maxLength="5"
+                            android:maxLines="1"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="5dp"
+                            android:text="47808"
+                            android:textAppearance="@style/title_normal_22_grey"
+                            android:textColor="@color/grey_select" />
+
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_marginTop="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+
+                        <TextView
+                            android:id="@+id/tvFdTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:paddingTop="11.8dp"
+                            android:paddingBottom="5.2dp"
+                            android:text="@string/txt_time"
+                            android:textAppearance="@style/title_normal_22" />
+
+                        <EditText
+                            android:id="@+id/etFdTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:digits="0123456789."
+                            android:inputType="number"
+                            android:maxLength="15"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="5dp"
+                            android:textAppearance="@style/title_normal_22_grey"
+                            android:textColor="@color/grey_select" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_marginTop="12dp"
+                        android:id="@+id/tvFdSubmit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="50dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="center_vertical"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:text="@string/txt_submit"
+                        android:textAllCaps="true"
+                        android:textColor="?orange_75f"
+                        android:textSize="22sp" />
+                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

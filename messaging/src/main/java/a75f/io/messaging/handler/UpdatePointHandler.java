@@ -117,6 +117,9 @@ public class UpdatePointHandler implements MessageHandler
                 && !localPoint.getMarkers().contains(Tags.TUNER)) {
             HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
+            if (localPoint.getMarkers().contains(Tags.VRV)) {
+                VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
+            }
             return;
         }
 

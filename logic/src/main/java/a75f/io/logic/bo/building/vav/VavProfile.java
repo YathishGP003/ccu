@@ -30,6 +30,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.schedules.Occupancy;
+import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
@@ -96,6 +98,7 @@ public abstract class VavProfile extends ZoneProfile {
             VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
             trSystem.updateSATRequest(getSATRequest(node));
             trSystem.updateCO2Request(getCO2Requests(node));
+            Log.i(L.TAG_CCU_ZONE, "Damper Position before T&R: " + damper.currentPosition);
             trSystem.updateSpRequest(getSpRequests(node));
             trSystem.updateHwstRequest(getHwstRequests(node));
         }
@@ -275,7 +278,7 @@ public abstract class VavProfile extends ZoneProfile {
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {
             spResetRequest.currentRequests = 3;
-        } else if (damperLoopOp > 85){
+        } else if (damperLoopOp > 85) {
             spResetRequest.currentRequests = 2;
         } else if (damperLoopOp > 75) {
             spResetRequest.currentRequests = 1;
@@ -493,18 +496,37 @@ public abstract class VavProfile extends ZoneProfile {
         
         return (int)(heatingLoop - REHEAT_THRESHOLD_HEATING_LOOP) * 2;
     }
-    
+
     private void updateDamperWhenSystemHeating(CCUHsApi hayStack, String equipId, double currentCfm) {
+
+        if (cfmLoopState != State.HEATING) {
+            cfmLoopState = State.HEATING;
+            cfmControlLoop.reset();
+        }
+
+        boolean isMinCfmRequiredInDeadband = getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.OCCUPIED)
+                || getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.FORCEDOCCUPIED)
+                || getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.AUTOFORCEOCCUPIED);
+
+        CcuLog.i(L.TAG_CCU_ZONE, "occupancyMode = " + getEquipOccupancyHandler().getCurrentOccupiedMode());
+        CcuLog.i(L.TAG_CCU_ZONE, "isMinCfmRequiredInDeadband = " + isMinCfmRequiredInDeadband);
+
         double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
         double cfmLoopOp = 0;
-        if (currentCfm < minCfmHeating) {
-            if (cfmLoopState != State.HEATING) {
-                cfmLoopState = State.HEATING;
-                cfmControlLoop.reset();
+
+        if (isMinCfmRequiredInDeadband) {
+            if (currentCfm < minCfmHeating) {
+                cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
+                updateDamperForMinCfm(cfmLoopOp);
             }
-            cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
-            updateDamperForMinCfm(cfmLoopOp);
+        } else {
+            if (state == HEATING || state == COOLING) {
+                cfmLoopOp = cfmControlLoop.getLoopOutput(minCfmHeating, currentCfm);
+            } else {
+                cfmLoopOp = 0;
+            }
         }
+
         CcuLog.i(L.TAG_CCU_ZONE,
                  " updateDamperSystemHeating cfmLoopOp "+cfmLoopOp+" CFM required:"+minCfmHeating);
     }
@@ -520,8 +542,9 @@ public abstract class VavProfile extends ZoneProfile {
             cfmLoopState = State.COOLING;
             cfmControlLoop.reset();
         }
-        
+
         double cfmSp;
+
         if (state == COOLING) {
             double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
             double minCfmCooling = TrueCFMUtil.getMinCFMCooling(hayStack, equipId);
@@ -535,10 +558,29 @@ public abstract class VavProfile extends ZoneProfile {
             CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling cfmSp "+cfmSp+" Reheat CFM required: "
                                                                    +minCfmHeating+"-"+maxCfmHeating);
         } else {
-            cfmSp = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
-            CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling Deadband cfmSp "+cfmSp);
+            if (!TrueCFMUtil.cfmControlNotRequired(hayStack, equipId)) {
+                cfmSp = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+                CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling Deadband cfmSp (Occupied) "+cfmSp);
+
+            } else {
+                cfmSp = 0;
+                CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling Deadband cfmSp (Unoccupied/Autoaway) "+cfmSp);
+
+            }
+
         }
         damper.currentPosition = (int)cfmControlLoop.getLoopOutput(cfmSp, currentCfm);
+    }
+
+    private void updateDamperWhenSystemOff(CCUHsApi hayStack, String equipId, double currentCfm) {
+        if (cfmLoopState != State.OFF) {
+            cfmLoopState = State.OFF;
+            cfmControlLoop.reset();
+        }
+        // Set dampers to 50% in SYSTEM=OFF so that they are not all closed when AHU starts up again.
+        // 50% is below the threshold needed to trigger static pressure T&R requests (75%).
+        damper.currentPosition = 50;
+
     }
     
     public void updateDamperPosForTrueCfm(CCUHsApi hayStack, SystemController.State systemState) {
@@ -555,6 +597,8 @@ public abstract class VavProfile extends ZoneProfile {
             updateDamperWhenSystemCooling(hayStack, equipId, currentCfm);
         } else if (systemState == SystemController.State.HEATING) {
             updateDamperWhenSystemHeating(hayStack, equipId, currentCfm);
+        } else {
+            updateDamperWhenSystemOff(hayStack, equipId, currentCfm);
         }
         
         damper.currentPosition = Math.max(damper.currentPosition, 0);

@@ -1,12 +1,15 @@
 package a75f.io.messaging.handler
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
+import a75f.io.logic.bo.building.ccu.CazEquipUtil
 import a75f.io.logic.bo.building.ccu.RoomTempSensor
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.haystack.device.ControlMote
 import com.google.gson.JsonObject
+import java.util.*
 
 class TIConfigHandler {
     companion object {
@@ -18,12 +21,17 @@ class TIConfigHandler {
                     "temp and equipRef == \"" + configPoint.equipRef + "\"")
             val nodeAddr = configPoint.group.toInt()
 
+            val equipHash = CCUHsApi.getInstance().readEntity(
+                "equip and group == \"$nodeAddr\""
+            )
+            val equip = Equip.Builder().setHashMap(equipHash).build()
+
             ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name, false)
             ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name, false)
             ControlMote.setPointEnabled(nodeAddr, Port.SENSOR_RT.name, false)
 
-            ControlMote.setCMPointEnabled(nodeAddr, Port.TH1_IN.name, false)
-            ControlMote.setCMPointEnabled(nodeAddr, Port.TH2_IN.name, false)
+            ControlMote.setCMPointEnabled(Port.TH1_IN.name, false)
+            ControlMote.setCMPointEnabled(Port.TH2_IN.name, false)
 
             if (configPoint.markers.contains("space")) {
                 val supplyTempSensorTypePoint = haystack.readDefaultVal("point and supply and " +
@@ -34,12 +42,12 @@ class TIConfigHandler {
 
                 if (value == SupplyTempSensor.THERMISTOR_1.ordinal || supplyTempSensorTypePoint == RoomTempSensor.THERMISTOR_1.ordinal) {
                     ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name, true)
-                    ControlMote.setCMPointEnabled(nodeAddr, Port.TH1_IN.name, true)
+                    ControlMote.setCMPointEnabled(Port.TH1_IN.name, true)
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name, roomTempSensorPoint?.get("id").toString())
                 }
                 if (value == SupplyTempSensor.THERMISTOR_2.ordinal || supplyTempSensorTypePoint == RoomTempSensor.THERMISTOR_2.ordinal) {
                     ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name, true)
-                    ControlMote.setCMPointEnabled(nodeAddr, Port.TH2_IN.name, true)
+                    ControlMote.setCMPointEnabled(Port.TH2_IN.name, true)
                     ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name, roomTempSensorPoint?.get("id").toString())
                 }
                 if (value == RoomTempSensor.SENSOR_BUS_TEMPERATURE.ordinal) {
@@ -55,14 +63,32 @@ class TIConfigHandler {
                     "point and supply and not type and temp and equipRef == \"" + configPoint.equipRef + "\"")
 
                 if (value == SupplyTempSensor.THERMISTOR_1.ordinal || roomTempSensorTypePoint == RoomTempSensor.THERMISTOR_1.ordinal) {
+                    if (supplyTempSensorPoint?.isEmpty() == true) {
+                        val supplyAirTempId = CazEquipUtil.createSupplyAirTempPoint(equip, nodeAddr)
+                        ControlMote.updatePhysicalPointRef(
+                            nodeAddr,
+                            Port.TH1_IN.name,
+                            Objects.requireNonNull(supplyAirTempId)
+                        )
+                    } else {
+                        ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name, supplyTempSensorPoint?.get("id").toString())
+                    }
                     ControlMote.setPointEnabled(nodeAddr, Port.TH1_IN.name, true)
-                    ControlMote.setCMPointEnabled(nodeAddr, Port.TH1_IN.name, true)
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name, supplyTempSensorPoint?.get("id").toString())
+                    ControlMote.setCMPointEnabled(Port.TH1_IN.name, true)
                 }
                 if (value == SupplyTempSensor.THERMISTOR_2.ordinal || roomTempSensorTypePoint == RoomTempSensor.THERMISTOR_2.ordinal) {
+                    if (supplyTempSensorPoint?.isEmpty() == true) {
+                        val supplyAirTempId = CazEquipUtil.createSupplyAirTempPoint(equip, nodeAddr)
+                        ControlMote.updatePhysicalPointRef(
+                            nodeAddr,
+                            Port.TH2_IN.name,
+                            Objects.requireNonNull(supplyAirTempId)
+                        )
+                    } else {
+                        ControlMote.updatePhysicalPointRef(nodeAddr, Port.TH2_IN.name, supplyTempSensorPoint?.get("id").toString())
+                    }
                     ControlMote.setPointEnabled(nodeAddr, Port.TH2_IN.name, true)
-                    ControlMote.setCMPointEnabled(nodeAddr, Port.TH2_IN.name, true)
-                    ControlMote.updatePhysicalPointRef(nodeAddr, Port.SENSOR_RT.name, supplyTempSensorPoint?.get("id").toString())
+                    ControlMote.setCMPointEnabled(Port.TH2_IN.name, true)
                 }
 
             }

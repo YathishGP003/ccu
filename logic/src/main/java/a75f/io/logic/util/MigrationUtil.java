@@ -512,7 +512,6 @@ public class MigrationUtil {
         SmartNode.updatePhysicalPointType(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), String.valueOf(8));
         SmartNode.updatePhysicalPointRef(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(), analogIn1Id);
 
-
     }
 
     private static void doTiProfileMigration(CCUHsApi instance) {
@@ -581,12 +580,12 @@ public class MigrationUtil {
         if (existingTh1ConfigVal == 1) {
             existingConfigVal = 1;
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
-            ControlMote.setCMPointEnabled(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), true);
+            ControlMote.setCMPointEnabled(Port.TH1_IN.name(), true);
             ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH1_IN.name(), roomTempTypeId);
         } else if (existingTh2ConfigVal == 1) {
             existingConfigVal = 2;
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
-            ControlMote.setCMPointEnabled(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), true);
+            ControlMote.setCMPointEnabled(Port.TH2_IN.name(), true);
             ControlMote.updatePhysicalPointRef(Integer.parseInt(nodeAddress), Port.TH2_IN.name(), roomTempTypeId);
         } else {
             ControlMote.setPointEnabled(Integer.parseInt(nodeAddress), Port.SENSOR_RT.name(), true);

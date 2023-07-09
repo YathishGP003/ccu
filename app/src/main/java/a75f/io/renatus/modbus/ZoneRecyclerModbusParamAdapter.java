@@ -267,7 +267,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         Point point = new Point.Builder().setHashMap(pointMap).build();
         HashMap<Object, Object> equipHashMap = CCUHsApi.getInstance().readMapById(point.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
-        double value = readVal(id);
         //write to modbus
         List<EquipmentDevice> modbusSubEquipList = new ArrayList<>();
         if (null != equip.getEquipRef()) {

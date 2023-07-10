@@ -142,4 +142,19 @@ public class CCUUiUtil {
         return !matcher.find();
     }
 
+    public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
+        String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
+        int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);
+        for (int i = 0; i < minLength; i++) {
+            int currentVersion = Integer.parseInt(currentVersionComponents[i]);
+            int recommendedVersion = Integer.parseInt(recommendedVersionComponents[i]);
+            if (recommendedVersion > currentVersion) {
+                return true;
+            } else if (currentVersion > recommendedVersion) {
+                return false;
+            }
+        }
+        return false;
+    }
 }

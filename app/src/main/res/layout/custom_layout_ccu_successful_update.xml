@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:id="@+id/custom_toast_layout_update_ccu"
+    android:background="@drawable/border_dialog"
+    android:padding="32dp"
+    android:gravity="center"
+    android:backgroundTint="@color/userlimit_outbound_color"
+    android:layout_marginHorizontal="16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+        android:id="@+id/custom_toast_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_lite_green_checkmark"
+        android:layout_marginRight="18dp"/>
+
+    <TextView
+        android:id="@+id/custom_toast_message_success"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/success"
+        android:gravity="center_vertical"
+        android:text="@string/success"
+        android:textColor="#83C72B"
+        android:textSize="25sp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/custom_toast_message_detail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="CCU successfully updated to the latest version"
+        android:textColor="#ffffff"
+        android:textSize="25sp"
+        android:layout_marginEnd="27dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

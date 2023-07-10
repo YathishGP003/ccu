@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -52,7 +53,6 @@ import a75f.io.renatus.util.Prefs;
 import static a75f.io.logic.L.ccu;
 
 public class RegisterGatherCCUDetails extends Activity {
-
 
     ProgressBar mProgressDialog;
     TextView    mOrTextView;
@@ -372,7 +372,7 @@ public class RegisterGatherCCUDetails extends Activity {
                                     // then app will close
                                     Intent i = new Intent(RegisterGatherCCUDetails.this,
                                             FreshRegistration.class);
-                                    i.putExtra("viewpager_position", 9);
+                                    i.putExtra("viewpager_position", 21);
                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     startActivity(i);
                                     finish();

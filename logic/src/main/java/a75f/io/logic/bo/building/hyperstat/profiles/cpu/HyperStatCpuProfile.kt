@@ -705,9 +705,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
 
     private fun getHeatingStateActivated (): Double {
-        return if (stageActive("heating adn runtime and stage3")) {
+        return if (stageActive("heating and runtime and stage3")) {
             hsHaystackUtil.readPointValue("fan and heating and stage3")
-        } else if (stageActive("heating adn runtime and stage2")) {
+        } else if (stageActive("heating and runtime and stage2")) {
             hsHaystackUtil.readPointValue("fan and heating and stage2")
         } else if (stageActive("heating and runtime and stage1")){
             hsHaystackUtil.readPointValue("fan and heating and stage1")

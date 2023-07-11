@@ -752,10 +752,4 @@
         <item name="android:gravity">left</item>
     </style>
 
-    <style name="add_ccu_to_existing_site_lite" parent="@android:style/TextAppearance">
-        <item name="android:textSize">18px</item>
-        <item name="android:textColor">#666666DE</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">left|center_vertical</item>
-    </style>
 </resources>

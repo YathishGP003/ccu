@@ -142,6 +142,21 @@ public class CCUUiUtil {
         return !matcher.find();
     }
 
+    public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
+        String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
+        int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);
+        for (int i = 0; i < minLength; i++) {
+            int currentVersion = Integer.parseInt(currentVersionComponents[i]);
+            int recommendedVersion = Integer.parseInt(recommendedVersionComponents[i]);
+            if (recommendedVersion > currentVersion) {
+                return true;
+            } else if (currentVersion > recommendedVersion) {
+                return false;
+            }
+        }
+        return false;
+    }
     public static boolean isValidIPAddress(String ip) {
         String zeroTo255 = "(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])";
         String regex = zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255;

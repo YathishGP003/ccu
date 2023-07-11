@@ -1,8 +1,8 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 import android.annotation.SuppressLint;

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -632,12 +633,20 @@ public class CCUTagsDb extends HServer {
         HRef ref = (HRef) b.get("id");
         if(p.getBacnetType() != null)
         {
+            //Added curStatus just for bacnet testing
+            String dis = p.getDisplayName().split("-")[p.getDisplayName().split("-").length-1];
+            if(dis.equals("temperatureOffset") ||
+                    dis.equals("zoneCO2Threshold") ||
+                    dis.equals("zoneCO2Target")) {
+                b.add(Tags.CUR_STATUS, "0");
+            }
+
             b.add(Tags.BACNET_ID, p.getBacnetId());
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
             CcuLog.d(TAG_CCU_BACNET,"addPoint:"+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
             CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_POINT_ADDED+", pointID: "+ref.val);
             Intent intent = new Intent(BROADCAST_BACNET_POINT_ADDED);
-            intent.putExtra("message", ref.val);
+            intent.putExtra("message", "@"+ref.val);
             appContext.sendBroadcast(intent);
         }
         tagsMap.put(ref.toVal(), b.toDict());
@@ -683,6 +692,13 @@ public class CCUTagsDb extends HServer {
 
         if(p.getBacnetType() != null)
         {
+            //Added curStatus just for bacnet testing
+            String dis = p.getDisplayName().split("-")[p.getDisplayName().split("-").length-1];
+            if(dis.equals("temperatureOffset") ||
+                    dis.equals("zoneCO2Threshold") ||
+                    dis.equals("zoneCO2Target")) {
+                b.add(Tags.CUR_STATUS, "0");
+            }
             b.add(Tags.BACNET_ID, p.getBacnetId());
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
             CcuLog.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
@@ -1073,7 +1089,7 @@ public class CCUTagsDb extends HServer {
             CcuLog.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
             CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
             Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
-            intent.putExtra("message", id.val);
+            intent.putExtra("message", "@"+id.val);
             appContext.sendBroadcast(intent);
         }
         /*        Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+

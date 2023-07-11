@@ -96,7 +96,7 @@ class HyperStatPointsUtil(
             .setFloorRef(floorRef)
             .setTz(tz)
             .setGroup(nodeAddress)
-
+            .setCurStatus("0")   //added just for bacnet testing
             .addMarker(profileName).addMarker(Tags.STANDALONE)
 
         // add specific markers
@@ -243,8 +243,14 @@ class HyperStatPointsUtil(
             .setTz(tz)
             .setGroup(nodeAddress)
             .setUnit(unit)
-
+            .setCurStatus("0")   //added just for bacnet testing
             .addMarker(profileName).addMarker(Tags.STANDALONE)
+
+            val tempDis =  displayName.split("-").last()
+            if (tempDis == "heatingLoopOutput" || tempDis == "coolingLoopOutput" || tempDis == "fanLoopOutput") {
+                point.setMinVal("0")
+                point.setMaxVal("100")
+            }
 
            if(!hisInterpolate.isNullOrEmpty())
                point.setHisInterpolate(hisInterpolate)

@@ -634,8 +634,8 @@ public class CCUTagsDb extends HServer {
         {
             b.add(Tags.BACNET_ID, p.getBacnetId());
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
-            Log.d(TAG_CCU_BACNET,"addPoint:"+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
-            Log.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_POINT_ADDED+", pointID: "+ref.val);
+            CcuLog.d(TAG_CCU_BACNET,"addPoint:"+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_POINT_ADDED+", pointID: "+ref.val);
             Intent intent = new Intent(BROADCAST_BACNET_POINT_ADDED);
             intent.putExtra("message", ref.val);
             appContext.sendBroadcast(intent);
@@ -685,7 +685,7 @@ public class CCUTagsDb extends HServer {
         {
             b.add(Tags.BACNET_ID, p.getBacnetId());
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
-            Log.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
+            CcuLog.d(TAG_CCU_BACNET,"updatePoint: "+p+" bacnetId: "+p.getBacnetId()+" bacnetType: "+p.getBacnetType());
         }
 
        /* Log.i("CDT_LMDT_LMB"," id>>> "+b.get("id") + " dis>>> "+b.get("dis") + " createdDateTime>>> "+
@@ -1070,8 +1070,8 @@ public class CCUTagsDb extends HServer {
         {
             b.add(Tags.BACNET_ID, z.getBacnetId());
             b.add(Tags.BACNET_TYPE, Tags.DEVICE);
-            Log.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
-            Log.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
+            CcuLog.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
+            CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
             Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
             intent.putExtra("message", id.val);
             appContext.sendBroadcast(intent);

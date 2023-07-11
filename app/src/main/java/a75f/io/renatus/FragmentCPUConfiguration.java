@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -305,6 +306,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                         setupCPUZoneProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().setCcuReady();
+                        DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
                         return null;
                     }
                 

@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
@@ -129,6 +130,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		if (checked)
 		{
 			seletedModules.add(smartNodeID);
+			seletedModules.addAll(HSUtil.getSubEquipPairingAddr(String.valueOf(smartNodeID)));
 			floorPlanActivity.mModuleListAdapter.addSelected(position);
 		}
 		else

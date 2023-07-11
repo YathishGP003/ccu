@@ -51,7 +51,7 @@ public class DeviceHSUtil {
     public static double getTempOffset(int nodeAddr) {
         try {
             return CCUHsApi.getInstance().readDefaultVal(
-                "point and zone and config and temp and offset and group == \"" + nodeAddr + "\"");
+                "point and zone and config and (temp or temperature) and offset and group == \"" + nodeAddr + "\"");
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_DEVICE," Temperature offset point does not exist for "+nodeAddr, e);
             return 0;

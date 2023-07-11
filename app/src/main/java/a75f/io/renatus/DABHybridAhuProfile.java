@@ -53,6 +53,7 @@ import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 
 /**
  * Created by samjithsadasivan on 11/8/18.
@@ -182,6 +183,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
                         systemProfile = new DabAdvancedHybridRtu();
                         systemProfile.addSystemEquip();
                         L.ccu().systemProfile = systemProfile;
+                        setSystemModeForDab(CCUHsApi.getInstance());
                         return null;
                     }
                 

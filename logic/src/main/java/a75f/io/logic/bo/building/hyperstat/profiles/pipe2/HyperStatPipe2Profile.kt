@@ -299,7 +299,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             )
         }
         equip.haystack.writeHisValByQuery(
-            "point and status and his and group == \"${equip.node}\"",
+            "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }

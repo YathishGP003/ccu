@@ -184,9 +184,19 @@ class AlertsRepository(
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
          alertDef.alert.setmNotificationMsg(msg)
-         addAlert(AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null))
+         val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack,equipRef,null)
+         if (isOtaAlert(title)){
+            alert.setFixed(true)
+            alert.setEndTime(DateTime().millis)
+         }
+         addAlert(alert)
       }
    }
+
+   private fun isOtaAlert(title: String): Boolean{
+      return (title.contentEquals(FIRMWARE_OTA_UPDATE_STARTED) || title.contentEquals(FIRMWARE_OTA_UPDATE_ENDED)  )
+   }
+
 
    fun generateCMDeadAlert(title: String, msg: String?) {
       if (dataStore.getActiveCMDeadAlerts().isNotEmpty()) {
@@ -334,5 +344,24 @@ class AlertsRepository(
 
    fun generateCrashAlertWithMessage(title: String, msg: String?) {
       generateAlert(title, msg ?: "","")
+   }
+
+   fun removeAlertDefinition(id: String) {
+      val titles = mutableListOf<String>()
+      for (alertDef in alertDefsMap.values) {
+         if (alertDef._id == id) {
+            alertDef.alert?.mTitle?.let {
+               titles.add(it)
+            }
+         }
+      }
+      CcuLog.w("CCU_ALERTS", "removing alert definitions from map - $titles")
+      for (alertTitle in titles) {
+         val alertDef = alertDefsMap.remove(alertTitle)
+         alertDef?.let {
+            alertDefsState.removeAll(alertDef)
+         }
+      }
+      saveDefs()
    }
 }

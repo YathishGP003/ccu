@@ -4,7 +4,6 @@ package a75f.io.renatus.util;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -21,7 +20,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import androidx.annotation.ColorInt;
@@ -37,7 +35,7 @@ import android.view.View;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
-import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.renatus.R;
 
 
@@ -231,7 +229,7 @@ public class SeekArc extends View
     private Paint mInbetweenPaint;
     private float mScaledSliderOffset = 0.0f;
     private boolean isSense = false;
-
+    private TemperatureMode ModeType;
     public void setSense(boolean val){
         isSense = val;
     }
@@ -365,13 +363,14 @@ public class SeekArc extends View
 
     public void setData(boolean detailedView, float buildingLowerLimit, float buildingUpperLimit, float heatingLowerLimit,
                         float heatingUpperLimit, float coolingLowerLimit, float coolingUpperLimit, float heatingDesiredTemp,
-                        float coolingDesiredTemp, float currentTemp, float heatingDeadBand, float coolingDeadBand)
+                        float coolingDesiredTemp, float currentTemp, float heatingDeadBand, float coolingDeadBand,
+                        int modeType)
     {
 
         CcuLog.i(L.TAG_CCU_UI,
                  "SeekArc setData heatingLowerLimit "+heatingLowerLimit+" heatingUpperLimit "+heatingUpperLimit
                             +" coolingLowerLimit "+coolingLowerLimit+" coolingUpperLimit "+coolingUpperLimit +" " +
-                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand);
+                               "heatingDeadBand "+heatingDeadBand+" coolingDeadBand "+coolingDeadBand+" TemperatreMode "+modeType);
         mHeatingDeadBand = heatingDeadBand;
         mCoolingDeadBand = coolingDeadBand;
         mBuildingLowerTempLimit = buildingLowerLimit;
@@ -392,9 +391,9 @@ public class SeekArc extends View
         mHeatingUpperLimit = heatingUpperLimit;
         mCoolingUpperLimit = coolingUpperLimit;
         isDataSet = true;
+        ModeType = TemperatureMode.values()[modeType];
         prepareAngle();
         invalidate();
-
     }
 
     boolean isDataSet = false;
@@ -433,11 +432,11 @@ public class SeekArc extends View
 
             if (!isSense) {
                 float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
-
-                if (!inCoolingSelectionMode) {
-                    drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                if(!(ModeType == TemperatureMode.HEATING)) {
+                    if (!inCoolingSelectionMode) {
+                        drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                    }
                 }
-
                 if (inCoolingSelectionMode) {
                     drawCoolingLimitBar(canvas);
                     drawCoolingSliderIcon(canvas, coolingModeTemp);
@@ -447,11 +446,11 @@ public class SeekArc extends View
 
 
                 float heatingModeTemp = inHeatingSelectionMode ? getHeatingModeTempTemperature() : getHeatingDesiredTemp();
-
-                if (!inHeatingSelectionMode) {
-                    drawHeatingDesiredIcon(canvas, heatingModeTemp);
+                if(!(ModeType == TemperatureMode.COOLING)) {
+                    if (!inHeatingSelectionMode) {
+                        drawHeatingDesiredIcon(canvas, heatingModeTemp);
+                    }
                 }
-
                 if (inHeatingSelectionMode) {
                     drawHeatingLimitBar(canvas);
                     drawHeatingSliderIcon(canvas, heatingModeTemp);
@@ -460,11 +459,15 @@ public class SeekArc extends View
                 }
             }
         } else {
-            if (!isSense) {
-                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
-                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
-                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+                if (!isSense) {
+                    if(!(ModeType == TemperatureMode.COOLING)) {
+                        drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
+                                mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+                    }
+                    if(!(ModeType == TemperatureMode.HEATING)) {
+                        drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
+                                mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+                    }
 
 
                 if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp())) {
@@ -625,8 +628,16 @@ public class SeekArc extends View
             canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
             canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
             canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
-            canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
-            canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+            if((ModeType == TemperatureMode.COOLING)) {
+                canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCurrentText, mDesiredHeatingSmallTextPaint);
+            }
+            if((ModeType == TemperatureMode.HEATING)) {
+                canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfCurrentText, mDesiredCoolingSmallTextPaint);
+            }
+            if((ModeType == TemperatureMode.DUAL)){
+                canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
+                canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+            }
         }
 
     }
@@ -638,7 +649,9 @@ public class SeekArc extends View
         float upperAngle = getAngle(heatingDesiredTemp) + 90;
         float lowerAngle = getAngle(coolingDesiredTemp) + 90;
 
-        canvas.drawArc(mArcRect, lowerAngle, upperAngle - lowerAngle, false, paint);
+        if((ModeType == TemperatureMode.DUAL)) {
+            canvas.drawArc(mArcRect, lowerAngle, upperAngle - lowerAngle, false, paint);
+        }
     }
 
 
@@ -1208,8 +1221,12 @@ public class SeekArc extends View
                 //mAngleProgress = 0.0f;
                 if (isDetailedView() && !inCoolingSelectionMode && !inHeatingSelectionMode)
                 {
-                    inCoolingSelectionMode = isCoolingPressed(event.getX(), event.getY());
-                    inHeatingSelectionMode = isHeatingPressed(event.getX(), event.getY());
+                    if(!(ModeType == TemperatureMode.HEATING)) {
+                        inCoolingSelectionMode = isCoolingPressed(event.getX(), event.getY());
+                    }
+                    if(!(ModeType == TemperatureMode.COOLING)) {
+                        inHeatingSelectionMode = isHeatingPressed(event.getX(), event.getY());
+                    }
                 }
                 if (inCoolingSelectionMode) {
                     inHeatingSelectionMode = false;

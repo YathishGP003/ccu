@@ -579,7 +579,7 @@ public class OTNEquip {
 
     public void setStatus(double status, boolean emergency) {
         if (getStatus() != status) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + mNodeAddr + "\"", status);
+            CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + mNodeAddr + "\"", status);
         }
 
         String message;
@@ -604,7 +604,7 @@ public class OTNEquip {
     }
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == " +
+        return CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and group == " +
                 "\"" + mNodeAddr + "\"");
     }
 

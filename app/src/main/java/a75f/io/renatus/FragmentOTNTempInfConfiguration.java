@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +15,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.otn.OTNConfiguration;
 import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -149,7 +150,8 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
                     setupOTNProfile();
                     L.saveCCUState();
                     LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, zoneRef,floorRef);
-                },
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
+                    },
                 ()->{
                     ProgressDialogUtils.hideProgressDialog();
                     FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();

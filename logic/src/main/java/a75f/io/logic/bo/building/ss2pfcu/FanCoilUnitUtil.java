@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.ss2pfcu;
 
+import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setModeType;
+
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
@@ -61,7 +63,10 @@ public class FanCoilUnitUtil {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : "+configPoint.getDisplayName()+" ; "+msgObject+" "+
                                                                                                          e.getMessage());
         }
-        
+        if(configPoint.getMarkers().contains("relay4") ||
+                configPoint.getMarkers().contains("relay6")){
+            setModeType(configPoint.getRoomRef(), CCUHsApi.getInstance());
+        }
     }
     private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         

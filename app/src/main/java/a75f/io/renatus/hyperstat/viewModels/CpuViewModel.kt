@@ -1,5 +1,6 @@
 package a75f.io.renatus.hyperstat.viewModels
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -8,9 +9,9 @@ import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.R
 import android.app.Application
-
 /**
  * Created by Manjunath K on 15-07-2022.
  */
@@ -74,7 +75,7 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application)  
         // Saving profile details
         L.ccu().zoneProfiles.add(hyperStatProfile)
         L.saveCCUState()
-
+        DesiredTempDisplayMode.setModeType(roomName, CCUHsApi.getInstance())
     }
 
 

@@ -133,6 +133,9 @@ android {
 
     configurations {
         compile.exclude group:'org.slf4j'
+        all {
+            exclude module: 'commons-logging'
+        }
     }
 
     packagingOptions {
@@ -144,6 +147,17 @@ android {
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
         exclude 'thirdpartynotice.txt'
         exclude 'simplelogger.properties'
+        exclude 'META-INF/spring.factories'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
+        exclude 'META-INF/spring.schemas'
+        exclude 'META-INF/spring.tooling'
+        exclude 'META-INF/spring.handlers'
+        exclude 'META-INF/spring-configuration-metadata.json'
+        exclude 'META-INF/additional-spring-configuration-metadata.json'
+        exclude 'META-INF/notice.txt'
     }
 
     dexOptions {
@@ -236,6 +250,7 @@ dependencies {
     kapt 'androidx.hilt:hilt-compiler:1.0.0'
     implementation "androidx.activity:activity-ktx:1.5.0"
     kapt 'com.jakewharton:butterknife-compiler:10.2.0'
+    implementation project(':domain')
 }
 
 

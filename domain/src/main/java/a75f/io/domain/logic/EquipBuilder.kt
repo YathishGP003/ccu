@@ -5,10 +5,8 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.domain.api.Domain
-import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.config.containsConfig
 import a75f.io.domain.config.getConfig
 import a75f.io.domain.util.TagsUtil
 import a75f.io.domain.util.TunerUtil
@@ -110,7 +108,6 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
 
         }
     }
-    fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
 
     private fun updatePoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                              entityConfiguration: EntityConfiguration, equipRef: String) {
@@ -140,7 +137,7 @@ class EquipBuilder(private val hayStack : CCUHsApi) {
         }
     }
 
-    private fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
+    fun buildPoint(modelDef: SeventyFiveFProfilePointDef, configuration: ProfileConfiguration, equipRef : String) : Point{
 
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName(modelDef.name)

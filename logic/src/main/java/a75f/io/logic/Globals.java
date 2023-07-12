@@ -4,6 +4,9 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
@@ -81,6 +84,7 @@ import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.RxjavaUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*

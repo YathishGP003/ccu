@@ -3,7 +3,7 @@ package a75f.io.domain
 import a75f.io.domain.config.*
 
 
-class HyperStat2pfcuTestConfiguration(nodeAddress: Int,
+open class HyperStat2pfcuTestConfiguration(nodeAddress: Int,
                                       nodeType: String, priority: Int, roomRef : String, floorRef : String
 ) : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef ) {
 

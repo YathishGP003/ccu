@@ -64,6 +64,12 @@
                     "kind": "MARKER",
                     "defaultValue": null,
                     "valueEnum": []
+                },
+                {
+                    "name": "config",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
                 }
             ],
             "tagNames": [
@@ -76,7 +82,8 @@
                 "id",
                 "point",
                 "dis",
-                "writable"
+                "writable",
+                "config"
             ],
             "rootTagNames": [
                 "relay",
@@ -260,6 +267,82 @@
             "associatedWithDevicePoint": null
         },
         {
+            "id": "646b09a9f712f76909e0ac8c",
+            "name": "Cooling Stage 2",
+            "domainName": "coolingStage2",
+            "tags": [
+                {
+                    "name": "cmd",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "cooling",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "hvac",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "stage",
+                    "kind": "NUMBER",
+                    "defaultValue": 2,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                }
+            ],
+            "tagNames": [
+                "cooling",
+                "hvac",
+                "stage",
+                "kind",
+                "tz",
+                "siteRef",
+                "cmd",
+                "id",
+                "point",
+                "dis",
+                "writable"
+            ],
+            "rootTagNames": [
+                "hvac",
+                "stage",
+                "cmd",
+                "writable"
+            ],
+            "kind": "BOOL",
+            "valueConstraint": {
+                "allowedValues": [
+                    {
+                        "index": 0,
+                        "value": "OFF"
+                    },
+                    {
+                        "index": 1,
+                        "value": "ON"
+                    }
+                ],
+                "constraintType": "MULTI_STATE"
+            },
+            "presentationData": {},
+            "defaultUnit": "",
+            "configuration": {
+                "configType": "ASSOCIATED"
+            },
+            "associatedWithDevicePoint": null
+        },
+        {
             "id": "646b09a9f712f76909e0ac7b",
             "name": "Heating Stage 1",
             "domainName": "heatingStage1",
@@ -354,6 +437,12 @@
                 },
                 {
                     "name": "sp",
+                    "kind": "MARKER",
+                    "defaultValue": null,
+                    "valueEnum": []
+                },
+                {
+                    "name": "writable",
                     "kind": "MARKER",
                     "defaultValue": null,
                     "valueEnum": []

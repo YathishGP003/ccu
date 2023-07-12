@@ -1,5 +1,7 @@
 package a75f.io.domain.config
 
+import a75f.io.domain.api.EntityConfig
+
 /**
  * A profile configuration is a sort of DTO object that stores all the configuration values required to
  * populate UI for a particular profile. When a configuration is saved , the UI shall update the
@@ -30,4 +32,5 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
      *
      */
     //abstract fun getDependencies() : List<ProfileConfig>
+
 }
